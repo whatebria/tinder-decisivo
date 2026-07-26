@@ -20,7 +20,7 @@ import Svg, {
   Text as SvgText,
 } from "react-native-svg";
 
-import { colors } from "../theme/colors";
+import { useThemeColors } from "../theme/useTheme";
 
 export interface RadarChartProps {
   data: Record<string, number>;
@@ -61,10 +61,12 @@ function polarToCartesian(
 export function RadarChart({
   data,
   size = 240,
-  color = colors.primary,
+  color,
   showLabels = true,
   levels = 4,
 }: RadarChartProps) {
+  const c = useThemeColors();
+  const strokeColor = color ?? c.primary;
   const ejes = useMemo(() => Object.keys(data), [data]);
   const cx = size / 2;
   const cy = size / 2;
@@ -81,7 +83,7 @@ export function RadarChart({
   // Grid: circulos concentricos + lineas radiales
   const gridCircles = Array.from({ length: levels }, (_, i) => {
     const r = ((i + 1) / levels) * radius;
-    return <Circle key={i} cx={cx} cy={cy} r={r} stroke={colors.border} strokeWidth={1} fill="none" />;
+    return <Circle key={i} cx={cx} cy={cy} r={r} stroke={c.border} strokeWidth={1} fill="none" />;
   });
 
   const gridLines = ejes.map((_, i) => {
@@ -94,7 +96,7 @@ export function RadarChart({
         y1={cy}
         x2={p.x}
         y2={p.y}
-        stroke={colors.border}
+        stroke={c.border}
         strokeWidth={1}
       />
     );
@@ -111,7 +113,7 @@ export function RadarChart({
 
   // Vertices marcados
   const vertexDots = dataPoints.map((p, i) => (
-    <Circle key={i} cx={p.x} cy={p.y} r={3} fill={color} />
+    <Circle key={i} cx={p.x} cy={p.y} r={3} fill={strokeColor} />
   ));
 
   // Labels de los ejes
@@ -126,7 +128,7 @@ export function RadarChart({
             x={labelPos.x}
             y={labelPos.y}
             fontSize={11}
-            fill={colors.textSecondary}
+            fill={c.textSecondary}
             textAnchor="middle"
             alignmentBaseline="middle"
           >
@@ -143,9 +145,9 @@ export function RadarChart({
         {gridLines}
         <Polygon
           points={polygonPoints}
-          fill={color}
+          fill={strokeColor}
           fillOpacity={0.25}
-          stroke={color}
+          stroke={strokeColor}
           strokeWidth={2}
         />
         {vertexDots}

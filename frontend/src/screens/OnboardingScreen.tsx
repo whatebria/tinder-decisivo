@@ -22,8 +22,7 @@ import { Button } from "../components/Button";
 import { TextButton } from "../components/TextButton";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useOnboardingStore } from "../store/onboarding";
-import { useThemeStore } from "../store/theme";
-import { colors, colorsDark } from "../theme/colors";
+import { useThemeColors } from "../theme/useTheme";
 
 interface Slide {
   title: string;
@@ -53,8 +52,7 @@ export function OnboardingScreen({
   navigation,
 }: RootStackScreenProps<"Onboarding">) {
   const markSeen = useOnboardingStore((s) => s.markSeen);
-  const effective = useThemeStore((s) => s.effective);
-  const palette = effective === "dark" ? colorsDark : colors;
+  const palette = useThemeColors();
   const [index, setIndex] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
   const width = Dimensions.get("window").width;

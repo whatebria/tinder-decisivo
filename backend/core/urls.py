@@ -8,6 +8,7 @@ from .views import (
     CandidatoFavoritoViewSet,
     CandidatoListView,
     CandidatoNoticiasView,
+    CandidatoPosturasView,
     CustomAuthToken,
     DecisionFinalViewSet,
     EditarRespuestaView,
@@ -59,6 +60,11 @@ urlpatterns = [
         "candidatos/<int:candidato_id>/noticias/",
         CandidatoNoticiasView.as_view(),
         name="candidato-noticias",
+    ),
+    path(
+        "candidatos/<int:candidato_id>/posturas/",
+        CandidatoPosturasView.as_view(),
+        name="candidato-posturas",
     ),
     # Preguntas / respuestas
     path("preguntas/", PreguntasPendientesView.as_view(), name="pregunta-list"),

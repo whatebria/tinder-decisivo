@@ -30,9 +30,10 @@ import { useToast } from "../components/Toast";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
 import { useThemeStore, type ThemeMode } from "../store/theme";
-import { colors } from "../theme/colors";
+import { useThemeColors } from "../theme/useTheme";
 
 export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
+  const c = useThemeColors();
   const logout = useAuthStore((s) => s.logout);
   const perfilQ = usePerfil();
   const cambiar = useCambiarPassword();
@@ -139,7 +140,7 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
             Cambiar mi contrasena
           </TextButton>
           <TextButton onPress={logout}>Cerrar sesion</TextButton>
-          <TextButton onPress={() => setDeleteOpen(true)} color={colors.danger}>
+          <TextButton onPress={() => setDeleteOpen(true)} color={c.danger}>
             Eliminar mi cuenta
           </TextButton>
         </YStack>

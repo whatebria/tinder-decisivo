@@ -25,6 +25,7 @@ import {
   listDescartados,
   listFavoritos,
   listMisRespuestas,
+  listPosturasCandidato,
   listTiposEleccion,
   matchAnonimo,
   matchCandidatos,
@@ -45,6 +46,7 @@ import {
   type Noticia,
   type PasswordResetRequestResponse,
   type Perfil,
+  type PosturaCandidatoDetalle,
   type Pregunta,
   type ReiniciarCuestionarioResponse,
   type SaveDecisionInput,
@@ -188,6 +190,20 @@ export function useUpdateRespuesta(tipoEleccionId: number | null | undefined) {
       // Los matches se invalidaron en el backend; forzamos refetch al pedirlos.
       qc.invalidateQueries({ queryKey: ["matches"] });
     },
+  });
+}
+
+// -- Posturas de candidato --------------------------------------------------
+
+export function usePosturasCandidato(
+  candidatoId: number | null | undefined,
+  tipoEleccionId?: number | null
+) {
+  return useQuery<PosturaCandidatoDetalle[]>({
+    queryKey: ["posturas", candidatoId, tipoEleccionId ?? null],
+    queryFn: () =>
+      listPosturasCandidato(candidatoId as number, tipoEleccionId),
+    enabled: !!candidatoId,
   });
 }
 

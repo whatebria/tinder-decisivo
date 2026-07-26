@@ -23,6 +23,7 @@ import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
 import { Button } from "../components/Button";
 import { TextButton } from "../components/TextButton";
+import { ThemeToggle } from "../components/ThemeToggle";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useThemeColors } from "../theme/useTheme";
 
@@ -165,7 +166,7 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
                     </TextButton>
                     <TextButton
                       onPress={() => setTipoAReiniciar(tipo)}
-                      color={colors.danger}
+                      color={c.danger}
                       accessibilityLabel={`Reiniciar cuestionario ${tipo.nombre}`}
                     >
                       Empezar de nuevo
@@ -207,6 +208,15 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
               </TextButton>
             </>
           )}
+
+          <Separator />
+
+          <YStack gap="$2" alignItems="flex-start">
+            <SizableText size="$3" color="$textSecondary" fontWeight="600">
+              Apariencia
+            </SizableText>
+            <ThemeToggle />
+          </YStack>
         </YStack>
       </YStack>
 

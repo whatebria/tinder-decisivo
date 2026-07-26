@@ -10,6 +10,7 @@ import { getErrorMessage } from "../api/client";
 import { FormInput } from "../components/FormInput";
 import { Button } from "../components/Button";
 import { TextButton } from "../components/TextButton";
+import { ThemeToggle } from "../components/ThemeToggle";
 import { useToast } from "../components/Toast";
 import { useAuthStore } from "../store/auth";
 import type { RootStackScreenProps } from "../navigation/types";
@@ -89,6 +90,10 @@ export function LoginScreen({ navigation }: RootStackScreenProps<"Login">) {
       >
         Probar sin cuenta →
       </TextButton>
+
+      <YStack alignItems="center" marginTop="$4">
+        <ThemeToggle />
+      </YStack>
     </YStack>
   );
 }

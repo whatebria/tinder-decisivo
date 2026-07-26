@@ -14,6 +14,13 @@ class PosturaCandidatoSerializer(serializers.ModelSerializer):
         source="opcion_respuesta.valor", read_only=True
     )
     pregunta_texto = serializers.CharField(source="pregunta.texto", read_only=True)
+    pregunta_orden = serializers.IntegerField(source="pregunta.orden", read_only=True)
+    eje_tematico = serializers.CharField(
+        source="pregunta.eje_tematico", read_only=True
+    )
+    eje_tematico_display = serializers.CharField(
+        source="pregunta.get_eje_tematico_display", read_only=True
+    )
     candidato_nombre_completo = serializers.SerializerMethodField()
 
     class Meta:
@@ -28,6 +35,9 @@ class PosturaCandidatoSerializer(serializers.ModelSerializer):
             "opcion_respuesta_valor",
             "candidato_nombre_completo",
             "pregunta_texto",
+            "pregunta_orden",
+            "eje_tematico",
+            "eje_tematico_display",
         ]
 
     def get_candidato_nombre_completo(self, obj) -> str:

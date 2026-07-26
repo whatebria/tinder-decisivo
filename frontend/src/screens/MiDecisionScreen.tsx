@@ -23,11 +23,12 @@ import { Button } from "../components/Button";
 import { TextButton } from "../components/TextButton";
 import { useToast } from "../components/Toast";
 import type { RootStackScreenProps } from "../navigation/types";
-import { colors } from "../theme/colors";
+import { useThemeColors } from "../theme/useTheme";
 
 export function MiDecisionScreen({
   navigation,
 }: RootStackScreenProps<"MiDecision">) {
+  const theme = useThemeColors();
   const decisionesQ = useDecisiones();
   const deleteDecision = useDeleteDecision();
   const toast = useToast();
@@ -76,7 +77,7 @@ export function MiDecisionScreen({
                   key={d.id}
                   padding="$4"
                   borderWidth={2}
-                  borderColor={colors.primary}
+                  borderColor={theme.primary}
                 >
                   <YStack gap="$3">
                     <YStack gap="$1">

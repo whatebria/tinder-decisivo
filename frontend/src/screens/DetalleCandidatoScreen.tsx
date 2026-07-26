@@ -26,12 +26,14 @@ import {
   useDescartados,
   useFavoritos,
   useNoticiasCandidato,
+  usePosturasCandidato,
   useSaveDecision,
   useToggleDescartado,
   useToggleFavorito,
 } from "../api/hooks";
 import { BookmarkActions } from "../components/BookmarkActions";
 import { Button } from "../components/Button";
+import { CandidatoPosturas } from "../components/CandidatoPosturas";
 import { RadarChart } from "../components/RadarChart";
 import { TextButton } from "../components/TextButton";
 import { useToast } from "../components/Toast";
@@ -39,12 +41,13 @@ import type { RootStackScreenProps } from "../navigation/types";
 import { formatMatchPercentage, getMatchColor } from "../services/matching";
 import { useCuestionarioStore } from "../store/cuestionario";
 import { useAuthStore } from "../store/auth";
-import { colors } from "../theme/colors";
+import { useThemeColors } from "../theme/useTheme";
 
 export function DetalleCandidatoScreen({
   route,
   navigation,
 }: RootStackScreenProps<"DetalleCandidato">) {
+  const c = useThemeColors();
   const { candidatoId, breakdown, matchPct, confianza } = route.params;
   const isGuest = useAuthStore((s) => s.isGuest);
   const tipoEleccionId = useCuestionarioStore((s) => s.tipoEleccionId);
@@ -52,6 +55,7 @@ export function DetalleCandidatoScreen({
 
   const candidatoQuery = useCandidato(candidatoId);
   const noticiasQuery = useNoticiasCandidato(candidatoId);
+  const posturasQuery = usePosturasCandidato(candidatoId, tipoEleccionId);
   const favoritosQ = useFavoritos();
   const descartadosQ = useDescartados();
   const decisionQ = useDecisionActual(tipoEleccionId);
@@ -110,7 +114,7 @@ export function DetalleCandidatoScreen({
   }
 
   const chartData = breakdownToChartData(breakdown);
-  const scoreCol = getMatchColor(matchPct);
+  const scoreCol = getMatchColor(matchPct, c);
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -138,7 +142,7 @@ export function DetalleCandidatoScreen({
         <Card
           padding="$4"
           borderWidth={isMyVote ? 2 : 1}
-          borderColor={isMyVote ? colors.primary : "$border"}
+          borderColor={isMyVote ? c.primary : "$border"}
         >
           <XStack alignItems="center" gap="$3">
             <SizableText size="$10" fontWeight="800" color={scoreCol as any}>
@@ -152,7 +156,7 @@ export function DetalleCandidatoScreen({
                 Confianza: {confianza}
               </SizableText>
               {isMyVote ? (
-                <SizableText size="$3" color={colors.primary} fontWeight="700" marginTop="$1">
+                <SizableText size="$3" color={c.primary} fontWeight="700" marginTop="$1">
                   * Este es tu voto final
                 </SizableText>
               ) : null}
@@ -199,13 +203,36 @@ export function DetalleCandidatoScreen({
           </YStack>
         ) : null}
 
-        {/* Bio */}
-        {candidato.bio ? (
+        {/* Resumen: bio + propuesta electoral */}
+        {candidato.bio || candidato.propuesta_electoral ? (
           <YStack gap="$2">
             <H3 color="$text">Sobre {candidato.nombre}</H3>
-            <Paragraph color="$textSecondary">{candidato.bio}</Paragraph>
+            {candidato.bio ? (
+              <Paragraph color="$textSecondary">{candidato.bio}</Paragraph>
+            ) : null}
+            {candidato.propuesta_electoral ? (
+              <YStack gap="$1" marginTop="$2">
+                <SizableText size="$3" color="$text" fontWeight="700">
+                  Propuesta electoral
+                </SizableText>
+                <Paragraph color="$textSecondary">
+                  {candidato.propuesta_electoral}
+                </Paragraph>
+              </YStack>
+            ) : null}
           </YStack>
         ) : null}
+
+        <Separator />
+
+        {/* Posturas por eje */}
+        <YStack gap="$3">
+          <H3 color="$text">Posturas por tema</H3>
+          <CandidatoPosturas
+            posturas={posturasQuery.data ?? []}
+            loading={posturasQuery.isLoading}
+          />
+        </YStack>
 
         <Separator />
 

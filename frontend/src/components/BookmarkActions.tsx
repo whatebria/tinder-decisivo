@@ -18,7 +18,7 @@ import {
   View,
 } from "react-native";
 
-import { colors } from "../theme/colors";
+import { useThemeColors } from "../theme/useTheme";
 
 export interface BookmarkActionsProps {
   isFavorito: boolean;
@@ -40,6 +40,7 @@ export function BookmarkActions({
   size = "sm",
   showDescartar = true,
 }: BookmarkActionsProps) {
+  const c = useThemeColors();
   const isLg = size === "lg";
 
   return (
@@ -48,7 +49,7 @@ export function BookmarkActions({
         active={isFavorito}
         onPress={onToggleFavorito}
         disabled={loading}
-        activeColor={colors.primary}
+        activeColor={c.primary}
         activeLabel={isLg ? "Es mi favorito" : "Favorito"}
         inactiveLabel={isLg ? "Marcar como favorito" : "Favorito"}
         icon={isFavorito ? "*" : "+"}
@@ -63,7 +64,7 @@ export function BookmarkActions({
           active={isDescartado}
           onPress={onToggleDescartado}
           disabled={loading}
-          activeColor={colors.danger}
+          activeColor={c.danger}
           activeLabel={isLg ? "Descartado" : "Descartado"}
           inactiveLabel={isLg ? "Descartar candidato" : "Descartar"}
           icon="x"
@@ -103,6 +104,7 @@ function ToggleButton({
   accessibilityLabel,
   size,
 }: ToggleButtonProps) {
+  const c = useThemeColors();
   const isLg = size === "lg";
   const label = active ? activeLabel : inactiveLabel;
 
@@ -118,20 +120,20 @@ function ToggleButton({
         isLg && styles.btnLg,
         active
           ? { backgroundColor: activeColor, borderColor: activeColor }
-          : { backgroundColor: colors.bg, borderColor: colors.border },
+          : { backgroundColor: c.card, borderColor: c.border },
         state.pressed && !disabled && styles.pressed,
         disabled && styles.disabled,
       ]}
     >
       {disabled ? (
-        <ActivityIndicator size="small" color={active ? "#FFFFFF" : activeColor} />
+        <ActivityIndicator size="small" color={active ? c.textOnPrimary : activeColor} />
       ) : (
         <>
           <Text
             style={[
               styles.icon,
               isLg && styles.iconLg,
-              { color: active ? "#FFFFFF" : activeColor },
+              { color: active ? c.textOnPrimary : activeColor },
             ]}
           >
             {icon}
@@ -140,7 +142,7 @@ function ToggleButton({
             style={[
               styles.text,
               isLg && styles.textLg,
-              { color: active ? "#FFFFFF" : colors.text },
+              { color: active ? c.textOnPrimary : c.text },
             ]}
             numberOfLines={1}
           >

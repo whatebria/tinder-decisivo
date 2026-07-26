@@ -18,6 +18,7 @@ from .bookmarking import (
 from .catalog import (
     CandidatoDetailView,
     CandidatoListView,
+    CandidatoPosturasView,
     TipoEleccionListView,
 )
 from .cuestionario import (
@@ -41,6 +42,7 @@ __all__ = [
     "CandidatoFavoritoViewSet",
     "CandidatoListView",
     "CandidatoNoticiasView",
+    "CandidatoPosturasView",
     "CambiarPasswordView",
     "CustomAuthToken",
     "DecisionFinalViewSet",

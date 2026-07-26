@@ -54,7 +54,7 @@ import {
 import { buildShareText, fromMatchResults } from "../services/share";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
-import { colors } from "../theme/colors";
+import { useThemeColors } from "../theme/useTheme";
 
 /** Mapea el nivel de confianza del backend a la variante de Badge correcta. */
 function confianzaToBadge(confianza: string | undefined): BadgeVariant {
@@ -67,6 +67,7 @@ function confianzaToBadge(confianza: string | undefined): BadgeVariant {
 export function ResultadosScreen({
   navigation,
 }: RootStackScreenProps<"Resultados">) {
+  const c = useThemeColors();
   const isGuest = useAuthStore((s) => s.isGuest);
   const exitGuestMode = useAuthStore((s) => s.exitGuestMode);
   const tipoEleccionId = useCuestionarioStore((s) => s.tipoEleccionId);
@@ -174,7 +175,7 @@ export function ResultadosScreen({
             <Card
               padding="$3"
               borderWidth={2}
-              borderColor={colors.primary as any}
+              borderColor={c.primary as any}
               backgroundColor="$backgroundHover"
             >
               <YStack gap="$2">
@@ -213,7 +214,7 @@ export function ResultadosScreen({
           <YStack gap="$3">
             {visibleResults.map((r, idx) => {
               const pct = Number(r.match_percentage);
-              const scoreCol = getMatchColor(pct);
+              const scoreCol = getMatchColor(pct, c);
               const conf = getConfianzaBadge(r.confianza);
               const chartData = breakdownToChartData(
                 r.breakdown_por_eje as BreakdownPorEje | null | undefined
@@ -228,7 +229,7 @@ export function ResultadosScreen({
                   key={r.id ?? candId}
                   padding="$4"
                   borderWidth={isDecision ? 2 : 1}
-                  borderColor={isDecision ? (colors.primary as any) : "$border"}
+                  borderColor={isDecision ? (c.primary as any) : "$border"}
                 >
                   <XStack gap="$4" alignItems="center">
                     <YStack
@@ -258,7 +259,7 @@ export function ResultadosScreen({
                         </YStack>
                       ) : null}
                       {isDecision ? (
-                        <SizableText size="$2" color={colors.primary} fontWeight="700">
+                        <SizableText size="$2" color={c.primary} fontWeight="700">
                           * Tu voto
                         </SizableText>
                       ) : null}

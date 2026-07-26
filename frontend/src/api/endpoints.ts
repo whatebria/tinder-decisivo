@@ -248,6 +248,35 @@ export async function eliminarCuenta(password: string): Promise<void> {
 }
 
 // ============================================================
+// Posturas de un candidato
+// ============================================================
+export interface PosturaCandidatoDetalle {
+  id: number;
+  candidato: number;
+  pregunta: number;
+  opcion_respuesta: number;
+  justificacion: string | null;
+  opcion_respuesta_texto: string;
+  opcion_respuesta_valor: number;
+  candidato_nombre_completo: string;
+  pregunta_texto: string;
+  pregunta_orden: number;
+  eje_tematico: string;
+  eje_tematico_display: string;
+}
+
+export async function listPosturasCandidato(
+  candidatoId: number,
+  tipoEleccionId?: number | null
+): Promise<PosturaCandidatoDetalle[]> {
+  const { data } = await apiClient.get<PosturaCandidatoDetalle[]>(
+    `/candidatos/${candidatoId}/posturas/`,
+    { params: tipoEleccionId ? { tipo_eleccion_id: tipoEleccionId } : {} }
+  );
+  return data;
+}
+
+// ============================================================
 // Mis respuestas (list + edit)
 // ============================================================
 export interface OpcionSimple {
