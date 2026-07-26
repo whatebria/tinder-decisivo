@@ -12,6 +12,7 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { CuestionarioScreen } from "../screens/CuestionarioScreen";
+import { DesignSystemScreen } from "../screens/design-system/DesignSystemScreen";
 import { DetalleCandidatoScreen } from "../screens/DetalleCandidatoScreen";
 import { HomeScreen } from "../screens/HomeScreen";
 import { LoginScreen } from "../screens/LoginScreen";
@@ -82,6 +83,11 @@ export function AppNavigator() {
           <Stack.Screen name="Perfil" component={PerfilScreen} />
           <Stack.Screen name="Configuracion" component={ConfiguracionScreen} />
             <Stack.Screen name="GestionElecciones" component={GestionEleccionesScreen} />
+          {/* Design System visualizador interno: solo en dev builds.
+              El __DEV__ flag lo remueve automaticamente en produccion. */}
+          {__DEV__ ? (
+            <Stack.Screen name="DesignSystem" component={DesignSystemScreen} />
+          ) : null}
         </>
       ) : (
         <>
