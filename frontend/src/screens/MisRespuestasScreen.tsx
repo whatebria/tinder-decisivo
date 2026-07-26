@@ -35,11 +35,11 @@ import {
 } from "../api/hooks";
 import {
   AppShell,
+  Button,
   Chip,
   ConfirmModal,
   EditarRespuestaModal,
   EmptyState,
-  NavRow,
   ScreenTopBar,
   SectionTitle,
   Spinner,
@@ -206,7 +206,7 @@ export function MisRespuestasScreen({
                 Toca cualquier pregunta para modificar tu respuesta.
               </Text>
 
-              {/* Secciones por tipo -> grupos por eje -> cards */}
+              {/* Secciones por tipo -> grupos por eje -> cards + reiniciar contextual */}
               <View style={styles.tipos}>
                 {tiposVisibles.map(({ tipo, respuestas }) => (
                   <TipoSeccion
@@ -214,25 +214,9 @@ export function MisRespuestasScreen({
                     tipoNombre={tipo.nombre}
                     respuestas={respuestas}
                     onEditar={setEditando}
+                    onReiniciar={() => setTipoAReiniciar(tipo)}
                   />
                 ))}
-              </View>
-
-              {/* Reiniciar cuestionario (destructivo) */}
-              <View style={styles.reiniciarSection}>
-                <SectionTitle title="Reiniciar cuestionario" />
-                {tipos.map((tipo) =>
-                  tipo.id != null ? (
-                    <NavRow
-                      key={`reset-${tipo.id}`}
-                      label={`Empezar de nuevo: ${tipo.nombre}`}
-                      subtitle="Borra tus respuestas y ranking calculado"
-                      variant="danger"
-                      onPress={() => setTipoAReiniciar(tipo)}
-                      accessibilityLabel={`Reiniciar cuestionario ${tipo.nombre}`}
-                    />
-                  ) : null,
-                )}
               </View>
             </>
           )}
@@ -272,13 +256,21 @@ interface TipoSeccionProps {
   tipoNombre: string;
   respuestas: MiRespuesta[];
   onEditar: (r: MiRespuesta) => void;
+  onReiniciar: () => void;
 }
 
 /**
  * Renderiza una seccion de un tipo de eleccion: cabecera con el nombre del
- * tipo + grupos internos por eje tematico + cards editables.
+ * tipo + grupos internos por eje tematico + cards editables + boton
+ * "Reiniciar este cuestionario" al pie (accion destructiva contextual, en
+ * vez de acumular todos los reiniciar al final de la pantalla).
  */
-function TipoSeccion({ tipoNombre, respuestas, onEditar }: TipoSeccionProps) {
+function TipoSeccion({
+  tipoNombre,
+  respuestas,
+  onEditar,
+  onReiniciar,
+}: TipoSeccionProps) {
   const c = useThemeColors();
 
   // Agrupamos por eje dentro del tipo.
@@ -314,6 +306,16 @@ function TipoSeccion({ tipoNombre, respuestas, onEditar }: TipoSeccionProps) {
             </View>
           </View>
         ))}
+      </View>
+      <View style={styles.reiniciarBtn}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onPress={onReiniciar}
+          accessibilityLabel={`Reiniciar cuestionario ${tipoNombre}`}
+        >
+          Reiniciar este cuestionario
+        </Button>
       </View>
     </View>
   );
@@ -424,8 +426,8 @@ const styles = StyleSheet.create({
   metaPeso: typography.small,
   hint: typography.overline,
 
-  reiniciarSection: {
-    gap: spacing.sp2,
-    marginTop: spacing.sp4,
+  reiniciarBtn: {
+    marginTop: spacing.sp2,
+    alignSelf: "flex-start",
   },
 });
