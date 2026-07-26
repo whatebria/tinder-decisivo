@@ -8,10 +8,14 @@
  * - Hydrata auth + onboarding + theme stores desde storage al arrancar.
  */
 
-import { NavigationContainer } from "@react-navigation/native";
+import {
+  DarkTheme as NavDarkTheme,
+  DefaultTheme as NavLightTheme,
+  NavigationContainer,
+} from "@react-navigation/native";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Platform } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Spinner, TamaguiProvider, Theme, YStack } from "tamagui";
@@ -51,6 +55,29 @@ export default function App() {
     doc.documentElement.style.backgroundColor = bg;
     doc.body.style.backgroundColor = bg;
     doc.documentElement.style.colorScheme = effective;
+    // Expo/RN Web envuelve la app en <div id="root">. Si no lo pintamos
+    // explicitamente, se ve el bg blanco por debajo cuando el contenido
+    // interno no llena el viewport (ej. modales, listas cortas).
+    const root = doc.getElementById("root");
+    if (root) root.style.backgroundColor = bg;
+  }, [effective]);
+
+  // Theme para NavigationContainer — sobrescribe el default blanco hardcodeado
+  // de React Navigation que causaba franjas blancas en modo dark.
+  const navTheme = useMemo(() => {
+    const base = effective === "dark" ? NavDarkTheme : NavLightTheme;
+    const palette = effective === "dark" ? colorsDark : colors;
+    return {
+      ...base,
+      colors: {
+        ...base.colors,
+        background: palette.bg,
+        card: palette.card,
+        text: palette.text,
+        border: palette.border,
+        primary: palette.primary,
+      },
+    };
   }, [effective]);
 
   const ready = authHydrated && onboardingHydrated && themeHydrated;
@@ -64,7 +91,7 @@ export default function App() {
               <ToastProvider>
                 <StatusBar style={effective === "dark" ? "light" : "dark"} />
                 {ready ? (
-                  <NavigationContainer>
+                  <NavigationContainer theme={navTheme}>
                     <AppNavigator />
                   </NavigationContainer>
                 ) : (
