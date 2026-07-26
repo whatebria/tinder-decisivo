@@ -188,8 +188,10 @@ export function MisGuardadosScreen({
               navigation.navigate("DetalleCandidato", {
                 candidatoId: cand.id,
                 breakdown: null,
-                matchPct: 0,
-                confianza: "TENTATIVA",
+                // Desde Mis guardados no traemos el match calculado; el detalle
+                // muestra el empty state (o dispara el calculo el mismo).
+                matchPct: null,
+                confianza: null,
               })
             }
             accessibilityRole="button"

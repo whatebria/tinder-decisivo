@@ -15,8 +15,10 @@ export type RootStackParamList = {
   DetalleCandidato: {
     candidatoId: number;
     breakdown: BreakdownPorEje | null;
-    matchPct: number;
-    confianza: string;
+    /** null cuando el user aun no tiene match calculado (guest sin cuestionario, o navegado desde una lista sin score). */
+    matchPct: number | null;
+    /** null cuando el user aun no tiene match calculado. */
+    confianza: string | null;
   };
   /**
    * @deprecated Ruta legacy que apunta al mismo screen que `MisGuardados`
