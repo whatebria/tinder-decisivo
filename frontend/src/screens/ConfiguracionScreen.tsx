@@ -8,7 +8,7 @@
  *   2. Mis datos    (auth)  — NavRow a MisRespuestas (hub) con reiniciar/editar dentro
  *   3. Elecciones           — NavRow a GestionElecciones
  *   4. Apariencia           — ThemeToggle
- *   5. Debug        (dev)   — NavRow al DesignSystem (solo __DEV__)
+ *   5. Debug        (dev)   — NavRow al DesignSystem + Django Admin (solo __DEV__)
  *   6. Cerrar sesion (auth) — Button secondary full-width
  *
  * Modo invitado: en vez de las secciones auth, muestra CTA para crear cuenta.
@@ -18,8 +18,9 @@
  */
 
 import React, { useMemo } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Linking, ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { ADMIN_URL } from "../api/config";
 import {
   AppShell,
   Avatar,
@@ -162,6 +163,17 @@ export function ConfiguracionScreen({
               label="Design System"
               subtitle="Catalogo interno de atoms, molecules y organisms"
               onPress={() => navigation.navigate("DesignSystem")}
+            />
+            <NavRow
+              label="Django Admin"
+              subtitle={ADMIN_URL}
+              onPress={() => {
+                Linking.openURL(ADMIN_URL).catch(() => {
+                  // Sin toast global aca — el error mas comun es que el
+                  // browser no pueda abrir la URL (ej. hostname invalido
+                  // desde el emulador). Fallamos en silencio.
+                });
+              }}
             />
           </View>
         ) : null}
