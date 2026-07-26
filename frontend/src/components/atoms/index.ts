@@ -29,3 +29,7 @@ export { Link, type LinkProps } from "./Link";
 export { Tooltip, type TooltipProps } from "./Tooltip";
 export { Timeline, type TimelineProps, type TimelineItem } from "./Timeline";
 export { Icon, type IconProps, type IconName } from "./Icon";
+
+// Nuevos (Fase 5 — Home template)
+export { HomeTile, type HomeTileProps } from "./HomeTile";
+export { RankCard, type RankCardProps } from "./RankCard";

@@ -20,6 +20,7 @@ import { MisDescartadosScreen } from "../screens/MisDescartadosScreen";
 import { MisFavoritosScreen } from "../screens/MisFavoritosScreen";
 import { MisRespuestasScreen } from "../screens/MisRespuestasScreen";
 import { CompararScreen } from "../screens/CompararScreen";
+import { ConfiguracionScreen } from "../screens/ConfiguracionScreen";
 import { NoticiasScreen } from "../screens/NoticiasScreen";
 import { SwipeScreen } from "../screens/SwipeScreen";
 import { OnboardingScreen } from "../screens/OnboardingScreen";
@@ -61,6 +62,7 @@ export function AppNavigator() {
             <Stack.Screen name="Swipe" component={SwipeScreen} />
           <Stack.Screen name="MiDecision" component={MiDecisionScreen} />
           <Stack.Screen name="Perfil" component={PerfilScreen} />
+          <Stack.Screen name="Configuracion" component={ConfiguracionScreen} />
         </>
       ) : (
         <>

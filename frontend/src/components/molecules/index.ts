@@ -23,3 +23,8 @@ export { MatchTier, type MatchTierProps, type MatchTierKind } from "./MatchTier"
 export { SwipeCard, type SwipeCardProps } from "./SwipeCard";
 export { NewsCard, type NewsCardProps } from "./NewsCard";
 export { PosturaItem, type PosturaItemProps, type PosturaMatch } from "./PosturaItem";
+
+// Nuevas (Fase 5 — Home template)
+export { HomeGreeting, type HomeGreetingProps } from "./HomeGreeting";
+export { SectionTitle, type SectionTitleProps } from "./SectionTitle";
+export { EjeBar, type EjeBarProps, type EjeBarTone } from "./EjeBar";

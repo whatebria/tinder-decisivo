@@ -19,6 +19,7 @@ import {
   deleteDescartado,
   deleteFavorito,
   eliminarCuenta,
+  getMatchDetalle,
   getPerfil,
   listCandidatos,
   listDecisiones,
@@ -43,6 +44,7 @@ import {
   type DecisionFinal,
   type EditarRespuestaResponse,
   type MatchResult,
+  type MatchDetalle,
   type MiRespuesta,
   type Noticia,
   type NoticiaFeedFilters,
@@ -116,6 +118,21 @@ export function useNoticiasCandidato(id: number) {
 export function useMatchCandidatos() {
   return useMutation<MatchResult[], Error, number>({
     mutationFn: matchCandidatos,
+  });
+}
+
+/**
+ * Version cacheada de matchCandidatos, para el Home donde queremos leer
+ * el ranking sin re-calcular a cada mount. Retry deshabilitado porque un
+ * 400 ("no respondiste preguntas") no se resuelve reintentando.
+ */
+export function useMatchesQuery(tipoEleccionId: number | null | undefined) {
+  return useQuery<MatchResult[]>({
+    queryKey: ["matches", tipoEleccionId ?? null],
+    queryFn: () => matchCandidatos(tipoEleccionId as number),
+    enabled: tipoEleccionId != null,
+    staleTime: 60_000,
+    retry: 0,
   });
 }
 
@@ -207,6 +224,17 @@ export function useNoticiasFeed(filters: NoticiaFeedFilters = {}) {
       filters.q ?? null,
     ],
     queryFn: () => listNoticias(filters),
+    staleTime: 60_000,
+  });
+}
+
+// -- Match detalle ----------------------------------------------------------
+
+export function useMatchDetalle(candidatoId: number | undefined) {
+  return useQuery<MatchDetalle>({
+    queryKey: ["match-detalle", candidatoId ?? null],
+    queryFn: () => getMatchDetalle(candidatoId!),
+    enabled: candidatoId != null,
     staleTime: 60_000,
   });
 }

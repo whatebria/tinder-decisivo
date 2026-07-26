@@ -33,7 +33,7 @@ import {
 } from "../api/hooks";
 import { BookmarkActions } from "../components";
 import { Button } from "../components";
-import { CandidatoPosturas } from "../components";
+import { CandidatoPosturas, MatchExplanation } from "../components";
 import { RadarChart } from "../components";
 import { Link } from "../components";
 import { useToast } from "../components";
@@ -224,6 +224,14 @@ export function DetalleCandidatoScreen({
         ) : null}
 
         <Separator />
+
+        {/* Explicacion del match (solo si el user esta auth) */}
+        {!isGuest && candidato.id != null && (
+          <>
+            <MatchExplanation candidatoId={candidato.id} />
+            <Separator />
+          </>
+        )}
 
         {/* Posturas por eje */}
         <YStack gap="$3">

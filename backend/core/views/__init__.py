@@ -28,7 +28,7 @@ from .cuestionario import (
     ReiniciarCuestionarioView,
     SubmitUserAnswersView,
 )
-from .matching import MatchCandidatoViewSet
+from .matching import CandidatoMatchDetalleView, MatchCandidatoViewSet
 from .noticias import (
     CandidatoNoticiasView,
     NoticiaDetailView,
@@ -41,6 +41,7 @@ __all__ = [
     "CandidatoDetailView",
     "CandidatoFavoritoViewSet",
     "CandidatoListView",
+    "CandidatoMatchDetalleView",
     "CandidatoNoticiasView",
     "CandidatoPosturasView",
     "CambiarPasswordView",

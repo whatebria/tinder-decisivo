@@ -30,3 +30,10 @@ export {
 } from "./ShareOptions";
 export { TopNav, type TopNavProps } from "./TopNav";
 export { EmptyState, type EmptyStateProps } from "./EmptyState";
+
+// Nuevos (Fase 5 — Home template)
+export { HomeHero, type HomeHeroProps, type HomeHeroFilledProps, type HomeHeroEmptyProps } from "./HomeHero";
+export { HomeTopBar, type HomeTopBarProps } from "./HomeTopBar";
+
+// Nuevos (Sprint post-swipe: explicacion del match)
+export { MatchExplanation } from "./MatchExplanation";

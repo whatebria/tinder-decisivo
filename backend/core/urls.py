@@ -7,6 +7,7 @@ from .views import (
     CandidatoDetailView,
     CandidatoFavoritoViewSet,
     CandidatoListView,
+    CandidatoMatchDetalleView,
     CandidatoNoticiasView,
     CandidatoPosturasView,
     CustomAuthToken,
@@ -65,6 +66,11 @@ urlpatterns = [
         "candidatos/<int:candidato_id>/posturas/",
         CandidatoPosturasView.as_view(),
         name="candidato-posturas",
+    ),
+    path(
+        "candidatos/<int:candidato_id>/match-detalle/",
+        CandidatoMatchDetalleView.as_view(),
+        name="candidato-match-detalle",
     ),
     # Preguntas / respuestas
     path("preguntas/", PreguntasPendientesView.as_view(), name="pregunta-list"),

@@ -297,6 +297,43 @@ export async function listPosturasCandidato(
 }
 
 // ============================================================
+// Match detalle: explicacion pregunta-a-pregunta
+// ============================================================
+export interface MatchDetalleItem {
+  pregunta_id: number;
+  pregunta_texto: string;
+  pregunta_orden: number;
+  eje_tematico: string;
+  eje_tematico_display: string;
+  user_valor: number;
+  user_texto: string;
+  user_peso: number;
+  user_peso_multiplicador: number;
+  candidato_valor: number;
+  candidato_texto: string;
+  diff: number;
+  score: number;
+  contribucion: number;
+  coincide: boolean;
+}
+
+export interface MatchDetalle {
+  candidato_id: number;
+  candidato_nombre: string;
+  match_percentage: number;
+  num_preguntas_consideradas: number;
+  confianza: string;
+  items: MatchDetalleItem[];
+}
+
+export async function getMatchDetalle(candidatoId: number): Promise<MatchDetalle> {
+  const { data } = await apiClient.get<MatchDetalle>(
+    `/candidatos/${candidatoId}/match-detalle/`
+  );
+  return data;
+}
+
+// ============================================================
 // Mis respuestas (list + edit)
 // ============================================================
 export interface OpcionSimple {

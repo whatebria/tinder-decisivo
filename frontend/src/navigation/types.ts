@@ -26,6 +26,7 @@ export type RootStackParamList = {
   Noticias: undefined;
   Swipe: undefined;
   Perfil: undefined;
+  Configuracion: undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> =

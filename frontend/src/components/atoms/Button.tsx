@@ -1,6 +1,5 @@
 /**
  * Button: 5 variantes x 3 tamanos. Reactivo al tema (light/dark).
- * Reemplaza a Button.
  */
 
 import React, { useMemo } from "react";

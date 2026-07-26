@@ -208,6 +208,89 @@ def calcular_match(user, tipo_eleccion) -> Optional[list[MatchCandidato]]:
     return resultados
 
 
+def calcular_match_detalle(user, candidato) -> Optional[dict]:
+    """Devuelve el desglose pregunta-a-pregunta del match user vs candidato.
+
+    Usado por la UI "por que X% de match". Incluye por cada pregunta donde ambos
+    respondieron: valor y texto de la respuesta de cada uno, diff, score parcial,
+    peso del usuario y su contribucion final al %.
+
+    Devuelve None si el user no respondio nada para el tipo de eleccion del candidato.
+    """
+    tipos = list(candidato.tipos_eleccion.all())
+    if not tipos:
+        return None
+
+    respuestas = (
+        RespuestaUsuario.objects
+        .filter(user=user, pregunta__tipo_eleccion__in=tipos)
+        .select_related("opcion_elegida", "pregunta")
+    )
+    respuestas_validas = [r for r in respuestas if not r.opcion_elegida.es_no_se]
+    if not respuestas_validas:
+        return None
+
+    posturas = (
+        PosturaCandidato.objects
+        .filter(candidato=candidato)
+        .select_related("pregunta", "opcion_respuesta")
+    )
+    posturas_por_pregunta = {p.pregunta_id: p for p in posturas}
+
+    items = []
+    score_total = Decimal("0")
+    peso_total = Decimal("0")
+
+    for r in respuestas_validas:
+        postura = posturas_por_pregunta.get(r.pregunta_id)
+        if postura is None:
+            continue  # candidato no tiene postura -> se ignora del calculo
+
+        peso_mult = PESO_MULTIPLIERS.get(r.peso, Decimal("1.0"))
+        diff = abs(r.opcion_elegida.valor - postura.opcion_respuesta.valor)
+        score = score_pregunta(diff)
+        contribucion = score * peso_mult
+
+        score_total += contribucion
+        peso_total += peso_mult
+
+        items.append({
+            "pregunta_id": r.pregunta_id,
+            "pregunta_texto": r.pregunta.texto,
+            "pregunta_orden": r.pregunta.orden,
+            "eje_tematico": r.pregunta.eje_tematico,
+            "eje_tematico_display": r.pregunta.get_eje_tematico_display(),
+            "user_valor": r.opcion_elegida.valor,
+            "user_texto": r.opcion_elegida.texto,
+            "user_peso": r.peso,
+            "user_peso_display": r.get_peso_display() if hasattr(r, "get_peso_display") else str(r.peso),
+            "user_peso_multiplicador": float(peso_mult),
+            "candidato_valor": postura.opcion_respuesta.valor,
+            "candidato_texto": postura.opcion_respuesta.texto,
+            "diff": diff,
+            "score": float(score.quantize(Decimal("0.0001"))),
+            "contribucion": float(contribucion.quantize(Decimal("0.0001"))),
+            "coincide": diff == 0,
+        })
+
+    # Sort por contribucion descendente (mas influyentes arriba)
+    items.sort(key=lambda x: (-x["contribucion"], x["pregunta_orden"]))
+
+    porcentaje = (
+        (score_total / peso_total * 100).quantize(Decimal("0.01"))
+        if peso_total > 0 else Decimal("0.00")
+    )
+
+    return {
+        "candidato_id": candidato.id,
+        "candidato_nombre": f"{candidato.nombre} {candidato.apellido}".strip(),
+        "match_percentage": float(porcentaje),
+        "num_preguntas_consideradas": len(items),
+        "confianza": confianza_por_n(len(items)),
+        "items": items,
+    }
+
+
 def calcular_match_anonimo(
     respuestas_raw: Iterable[dict], tipo_eleccion
 ) -> list[ScoreCandidato]:

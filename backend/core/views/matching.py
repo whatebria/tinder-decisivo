@@ -6,13 +6,17 @@ Hay dos variantes:
 """
 
 from drf_spectacular.utils import OpenApiResponse, extend_schema
-from rest_framework import permissions, status, viewsets
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from ..models import TipoEleccion
+from ..models import Candidato, TipoEleccion
 from ..serializers import AnonMatchResultSerializer, MatchCandidatoResultSerializer
-from ..services.matching import calcular_match, calcular_match_anonimo
+from ..services.matching import (
+    calcular_match,
+    calcular_match_anonimo,
+    calcular_match_detalle,
+)
 
 
 class MatchCandidatoViewSet(viewsets.GenericViewSet):
@@ -113,3 +117,27 @@ class MatchCandidatoViewSet(viewsets.GenericViewSet):
             )
 
         return Response(AnonMatchResultSerializer(scores, many=True).data)
+
+
+class CandidatoMatchDetalleView(generics.GenericAPIView):
+    """GET /api/v1/candidatos/<id>/match-detalle/ - explicacion del match del user."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, candidato_id):
+        try:
+            candidato = Candidato.objects.get(id=candidato_id)
+        except Candidato.DoesNotExist:
+            return Response(
+                {"detail": "Candidato no encontrado."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        detalle = calcular_match_detalle(request.user, candidato)
+        if detalle is None:
+            return Response(
+                {"detail": "El usuario aun no ha respondido preguntas para este candidato."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(detalle)

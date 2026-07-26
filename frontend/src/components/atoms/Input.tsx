@@ -1,8 +1,6 @@
 /**
  * Input / Textarea: TextInput con estilos WCAG-friendly, tema reactivo,
  * variante error y soporte multiline (usa multiline={true} para textarea).
- *
- * Reemplaza a _legacy/Input.
  */
 
 import React, { useMemo } from "react";
