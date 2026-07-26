@@ -7,10 +7,10 @@
  */
 
 import React, { useMemo } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useTiposEleccion } from "../api/hooks";
-import { AppShell, Icon, Spinner, Toggle } from "../components";
+import { AppShell, Icon, ScreenTopBar, Spinner, Toggle } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import {
   partitionTipos,
@@ -18,6 +18,7 @@ import {
 } from "../store/electionsPrefs";
 import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
+import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
 
 function daysUntil(dateIso?: string | null): string {
@@ -51,28 +52,26 @@ export function GestionEleccionesScreen({
     () =>
       StyleSheet.create({
         scroll: { flex: 1, backgroundColor: c.bg },
-        content: { padding: spacing.sp4, gap: spacing.sp4, paddingBottom: spacing.sp8 },
-        topBar: {
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          paddingVertical: spacing.sp2,
+        content: {
+          padding: spacing.sp4,
+          gap: spacing.sp4,
+          paddingBottom: spacing.sp8,
         },
-        topBarTitle: {
-          fontSize: 14,
-          fontWeight: "600",
+        heroCol: { gap: spacing.sp1 },
+        heroTitle: {
+          ...typography.h3,
+          fontWeight: "700",
           color: c.text,
         },
-        heroCol: { gap: 4 },
-        heroTitle: { fontSize: 20, fontWeight: "700", color: c.text },
-        heroSubtitle: { fontSize: 13, color: c.textSecondary },
+        heroSubtitle: {
+          ...typography.small,
+          color: c.textSecondary,
+        },
         section: { gap: spacing.sp2 },
         sectionLabel: {
-          fontSize: 10,
-          textTransform: "uppercase",
-          letterSpacing: 0.8,
-          color: c.textSecondary,
+          ...typography.overline,
           fontWeight: "600",
+          color: c.textSecondary,
         },
         card: {
           padding: spacing.sp3,
@@ -85,17 +84,21 @@ export function GestionEleccionesScreen({
           alignItems: "center",
           gap: spacing.sp3,
         },
-        cardCol: { flex: 1, gap: 2 },
-        cardName: { fontSize: 14, fontWeight: "600", color: c.text },
-        cardMeta: {
-          fontSize: 10,
-          textTransform: "uppercase",
-          letterSpacing: 0.6,
-          color: c.textSecondary,
+        cardCol: { flex: 1, gap: spacing.sp1 },
+        cardName: {
+          ...typography.small,
           fontWeight: "600",
+          color: c.text,
+        },
+        cardMeta: {
+          ...typography.overline,
+          fontWeight: "600",
+          color: c.textSecondary,
         },
         emptyText: {
-          fontSize: 12,
+          ...typography.overline,
+          textTransform: "none",
+          letterSpacing: 0,
           color: c.textSecondary,
           fontStyle: "italic",
         },
@@ -109,17 +112,19 @@ export function GestionEleccionesScreen({
           backgroundColor: c.card,
           alignItems: "flex-start",
         },
-        infoTextCol: { flex: 1, gap: 2 },
-        infoTitle: { fontSize: 12, fontWeight: "600", color: c.text },
-        infoBody: { fontSize: 11, color: c.textSecondary },
-        backBtn: {
-          width: 36,
-          height: 36,
-          borderRadius: radii.rSm,
-          borderWidth: 1,
-          borderColor: c.border2,
-          alignItems: "center",
-          justifyContent: "center",
+        infoTextCol: { flex: 1, gap: spacing.sp1 },
+        infoTitle: {
+          ...typography.overline,
+          textTransform: "none",
+          letterSpacing: 0,
+          fontWeight: "600",
+          color: c.text,
+        },
+        infoBody: {
+          ...typography.overline,
+          textTransform: "none",
+          letterSpacing: 0,
+          color: c.textSecondary,
         },
         loadingBox: { paddingTop: spacing.sp8, alignItems: "center" },
       }),
@@ -142,18 +147,10 @@ export function GestionEleccionesScreen({
     <AppShell active="home" navigation={navigation}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
       {/* TopBar breadcrumb */}
-      <View style={styles.topBar}>
-        <Pressable
-          style={styles.backBtn}
-          onPress={() => navigation.goBack()}
-          accessibilityRole="button"
-          accessibilityLabel="Volver"
-        >
-          <Icon name="chevron-left" size={18} color={c.text} />
-        </Pressable>
-        <Text style={styles.topBarTitle}>Tus elecciones</Text>
-        <View style={{ width: 36 }} />
-      </View>
+      <ScreenTopBar
+        title="Tus elecciones"
+        onBack={() => navigation.goBack()}
+      />
 
       {/* Hero */}
       <View style={styles.heroCol}>
