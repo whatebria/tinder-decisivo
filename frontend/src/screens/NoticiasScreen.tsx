@@ -30,6 +30,7 @@ import {
   useCandidatos,
   useNoticiasBookmarks,
   useNoticiasFeed,
+  useTiposEleccion,
   useToggleNoticiaBookmark,
 } from "../api/hooks";
 import {
@@ -121,6 +122,7 @@ export function NoticiasScreen({
   const rango = RANGOS_FECHA.find((r) => r.id === rangoId) ?? RANGOS_FECHA[0];
 
   const candidatosQ = useCandidatos();
+  const tiposEleccionQ = useTiposEleccion();
   const noticiasQ = useNoticiasFeed({
     candidatoId,
     fuente,
@@ -129,6 +131,7 @@ export function NoticiasScreen({
   });
 
   const candidatos = candidatosQ.data ?? [];
+  const tiposEleccion = tiposEleccionQ.data ?? [];
   const noticias = (noticiasQ.data ?? []) as unknown as NoticiaEnriquecida[];
 
   // -- Derivados -----------------------------------------------------------
@@ -322,6 +325,7 @@ export function NoticiasScreen({
         candidatoId={candidatoId}
         onCandidatoChange={setCandidatoId}
         candidatos={candidatos}
+        tiposEleccion={tiposEleccion}
         fuente={fuente}
         onFuenteChange={setFuente}
         fuentesDisponibles={fuentesDisponibles}
@@ -381,6 +385,7 @@ interface FiltrosSheetProps {
   candidatoId: number | null;
   onCandidatoChange: (id: number | null) => void;
   candidatos: ReturnType<typeof useCandidatos>["data"];
+  tiposEleccion: ReturnType<typeof useTiposEleccion>["data"];
   fuente: string | null;
   onFuenteChange: (f: string | null) => void;
   fuentesDisponibles: string[];
@@ -410,6 +415,7 @@ function FiltrosSheet({
   candidatoId,
   onCandidatoChange,
   candidatos,
+  tiposEleccion,
   fuente,
   onFuenteChange,
   fuentesDisponibles,
@@ -420,7 +426,6 @@ function FiltrosSheet({
   candidatoNombre,
 }: FiltrosSheetProps) {
   const c = useThemeColors();
-  const candidatosList = candidatos ?? [];
 
   const trailing =
     filtrosActivosCount > 0 ? (
@@ -493,25 +498,12 @@ function FiltrosSheet({
         summary={candidatoNombre ?? "Todos"}
         defaultExpanded={candidatoId !== null}
       >
-        <View style={styles.chipsGrid}>
-          <Chip
-            active={candidatoId === null}
-            onPress={() => onCandidatoChange(null)}
-          >
-            Todos
-          </Chip>
-          {candidatosList
-            .filter((cand) => cand.id != null)
-            .map((cand) => (
-              <Chip
-                key={cand.id}
-                active={candidatoId === cand.id}
-                onPress={() => onCandidatoChange(cand.id!)}
-              >
-                {`${cand.nombre} ${cand.apellido ?? ""}`.trim()}
-              </Chip>
-            ))}
-        </View>
+        <CandidatoPicker
+          candidatos={candidatos ?? []}
+          tiposEleccion={tiposEleccion ?? []}
+          selectedId={candidatoId}
+          onSelect={onCandidatoChange}
+        />
       </CollapsibleFilterSection>
 
       {fuentesDisponibles.length > 0 ? (
@@ -594,6 +586,143 @@ function CollapsibleFilterSection({
       {expanded ? (
         <View style={styles.collapsibleBody}>{children}</View>
       ) : null}
+    </View>
+  );
+}
+
+interface CandidatoPickerProps {
+  candidatos: NonNullable<ReturnType<typeof useCandidatos>["data"]>;
+  tiposEleccion: NonNullable<ReturnType<typeof useTiposEleccion>["data"]>;
+  selectedId: number | null;
+  onSelect: (id: number | null) => void;
+}
+
+/**
+ * Sub-picker de candidato con filtros propios: eleccion y partido.
+ *
+ * El schema de Candidato que llega al frontend NO incluye region/comuna
+ * (aunque el backend los tiene). Filtrar por territorio requiere extender
+ * el CandidatoSerializer y regenerar types — pendiente cuando Jenny lo
+ * confirme. Por ahora, solo elecccion + partido.
+ *
+ * Los sub-filtros son locales al picker (no afectan el feed principal).
+ * Solo reducen que chips de candidato son visibles.
+ */
+function CandidatoPicker({
+  candidatos,
+  tiposEleccion,
+  selectedId,
+  onSelect,
+}: CandidatoPickerProps) {
+  const c = useThemeColors();
+  const [tipoEleccionId, setTipoEleccionId] = useState<number | null>(null);
+  const [partido, setPartido] = useState<string | null>(null);
+
+  // Partidos derivados del data (evita sostener otra fuente de verdad).
+  const partidos = useMemo(() => {
+    const set = new Set<string>();
+    for (const cand of candidatos) if (cand.partido) set.add(cand.partido);
+    return Array.from(set).sort();
+  }, [candidatos]);
+
+  // Candidatos filtrados por eleccion + partido.
+  const filtrados = useMemo(() => {
+    return candidatos.filter((cand) => {
+      if (cand.id == null) return false;
+      if (
+        tipoEleccionId != null &&
+        !(cand.tipos_eleccion ?? []).includes(tipoEleccionId)
+      ) {
+        return false;
+      }
+      if (partido != null && cand.partido !== partido) return false;
+      return true;
+    });
+  }, [candidatos, tipoEleccionId, partido]);
+
+  return (
+    <View style={styles.pickerWrap}>
+      {/* Sub-filtro: Eleccion */}
+      <Text style={[styles.pickerSubLabel, { color: c.textSecondary }]}>
+        Eleccion
+      </Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.pickerSubRow}
+      >
+        <Chip
+          active={tipoEleccionId === null}
+          onPress={() => setTipoEleccionId(null)}
+        >
+          Todas
+        </Chip>
+        {tiposEleccion
+          .filter((t) => t.id != null)
+          .map((t) => (
+            <Chip
+              key={t.id}
+              active={tipoEleccionId === t.id}
+              onPress={() => setTipoEleccionId(t.id!)}
+            >
+              {t.nombre}
+            </Chip>
+          ))}
+      </ScrollView>
+
+      {/* Sub-filtro: Partido (solo si hay 2+) */}
+      {partidos.length > 1 ? (
+        <>
+          <Text style={[styles.pickerSubLabel, { color: c.textSecondary }]}>
+            Partido
+          </Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.pickerSubRow}
+          >
+            <Chip
+              active={partido === null}
+              onPress={() => setPartido(null)}
+            >
+              Todos
+            </Chip>
+            {partidos.map((p) => (
+              <Chip
+                key={p}
+                active={partido === p}
+                onPress={() => setPartido(p)}
+              >
+                {p}
+              </Chip>
+            ))}
+          </ScrollView>
+        </>
+      ) : null}
+
+      {/* Divider visual entre sub-filtros y la lista */}
+      <View style={[styles.pickerDivider, { backgroundColor: c.border }]} />
+
+      {/* Lista de candidatos filtrada */}
+      <Text style={[styles.pickerSubLabel, { color: c.textSecondary }]}>
+        {filtrados.length === candidatos.length
+          ? `Todos (${filtrados.length})`
+          : `${filtrados.length} de ${candidatos.length}`}
+      </Text>
+      <View style={styles.chipsGrid}>
+        <Chip active={selectedId === null} onPress={() => onSelect(null)}>
+          Todos
+        </Chip>
+        {filtrados.map((cand) => (
+          <Chip
+            key={cand.id}
+            active={selectedId === cand.id}
+            onPress={() => onSelect(cand.id!)}
+          >
+            {`${cand.nombre} ${cand.apellido ?? ""}`.trim()}
+          </Chip>
+        ))}
+      </View>
     </View>
   );
 }
@@ -725,4 +854,22 @@ const styles = StyleSheet.create({
 
   footerBtnLimpiar: { flex: 1 },
   footerBtnAplicar: { flex: 2 },
+
+  // CandidatoPicker
+  pickerWrap: {
+    gap: spacing.sp2,
+  },
+  pickerSubLabel: {
+    ...typography.overline,
+    fontWeight: "700",
+  },
+  pickerSubRow: {
+    gap: spacing.sp2,
+    alignItems: "center",
+    paddingVertical: spacing.sp1,
+  },
+  pickerDivider: {
+    height: StyleSheet.hairlineWidth,
+    marginVertical: spacing.sp2,
+  },
 });
