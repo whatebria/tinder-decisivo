@@ -12,18 +12,25 @@ Convenciones:
 from django.contrib import admin
 from django.db.models import Count
 
+# Importa el admin territorial (regiones, distritos, comunas) para que Django lo
+# autoregistre. Vive en modulo aparte por cohesion, no por tamano.
+from . import admin_territorio  # noqa: F401
+
 from .models import (
     OPCIONES_ACUERDO_DESACUERDO,
     Candidato,
     CandidatoDescartado,
     CandidatoFavorito,
+    Comuna,
     DecisionFinal,
+    Distrito,
     Noticia,
     NoticiaBookmark,
     OpcionRespuesta,
     PosturaBookmark,
     PosturaCandidato,
     Pregunta,
+    Region,
     RespuestaUsuario,
     TipoEleccion,
     crear_opciones_acuerdo_desacuerdo,
@@ -231,3 +238,4 @@ class PosturaBookmarkAdmin(admin.ModelAdmin):
     search_fields = ("user__username", "postura__candidato__apellido")
     autocomplete_fields = ("user", "postura")
     date_hierarchy = "fecha_agregado"
+
