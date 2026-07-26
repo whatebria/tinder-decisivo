@@ -15,6 +15,7 @@ import { getErrorMessage } from "../api/client";
 import { useReiniciarCuestionario, useTiposEleccion } from "../api/hooks";
 import type { TipoEleccion } from "../api/endpoints";
 import {
+  AppShell,
   ConfirmModal,
   Divider,
   HomeTopBar,
@@ -26,6 +27,7 @@ import {
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
 import { spacing } from "../theme/spacing";
+import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
 
 export function ConfiguracionScreen({ navigation }: RootStackScreenProps<"Configuracion">) {
@@ -49,9 +51,16 @@ export function ConfiguracionScreen({ navigation }: RootStackScreenProps<"Config
           paddingBottom: spacing.sp8,
           gap: spacing.sp5,
         },
-        emailWrap: { gap: 2 },
-        emailLabel: { fontSize: 12, color: c.textTertiary, textTransform: "uppercase", letterSpacing: 0.6 },
-        emailText: { fontSize: 14, fontWeight: "600", color: c.text },
+        emailWrap: { gap: spacing.sp1 },
+        emailLabel: {
+          ...typography.overline,
+          color: c.textTertiary,
+        },
+        emailText: {
+          ...typography.small,
+          fontWeight: "600",
+          color: c.text,
+        },
         block: { gap: spacing.sp2 },
       }),
     [c],
@@ -72,8 +81,9 @@ export function ConfiguracionScreen({ navigation }: RootStackScreenProps<"Config
   }
 
   return (
-    <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-      <HomeTopBar brand="Configuración" />
+    <AppShell active="config" navigation={navigation}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+        <HomeTopBar brand="Configuración" />
 
       {!isGuest && email ? (
         <View style={styles.emailWrap}>
@@ -172,6 +182,7 @@ export function ConfiguracionScreen({ navigation }: RootStackScreenProps<"Config
         onConfirm={handleConfirmReiniciar}
         onCancel={() => setTipoAReiniciar(null)}
       />
-    </ScrollView>
+      </ScrollView>
+    </AppShell>
   );
 }
