@@ -33,7 +33,7 @@ import {
   Badge,
   type BadgeVariant,
   BookmarkActions,
-  BottomNav,
+  AppShell,
   Button,
   Chip,
   Link,
@@ -190,7 +190,6 @@ export function ResultadosScreen({
     () =>
       StyleSheet.create({
         scroll: { flex: 1, backgroundColor: c.bg },
-        outer: { flex: 1, backgroundColor: c.bg },
         content: {
           padding: spacing.sp4,
           paddingBottom: spacing.sp8,
@@ -236,13 +235,12 @@ export function ResultadosScreen({
 
   if (loading) {
     return (
-      <View style={styles.outer}>
+      <AppShell active="home" navigation={navigation}>
         <View style={[styles.scroll, styles.loadingBox]}>
           <Spinner size="large" />
           <Text style={styles.loadingText}>Calculando tus matches…</Text>
         </View>
-        <BottomNav active="home" navigation={navigation} />
-      </View>
+      </AppShell>
     );
   }
 
@@ -251,7 +249,7 @@ export function ResultadosScreen({
 
   return (
     <>
-      <View style={styles.outer}>
+      <AppShell active="home" navigation={navigation}>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <ScreenTopBar
           title={tipoNombre}
@@ -412,8 +410,7 @@ export function ResultadosScreen({
           </Link>
         </View>
       </ScrollView>
-      <BottomNav active="home" navigation={navigation} />
-      </View>
+      </AppShell>
 
       <ShareModal
         visible={shareOpen}

@@ -10,7 +10,7 @@ import React, { useMemo } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useTiposEleccion } from "../api/hooks";
-import { BottomNav, Icon, Spinner, Toggle } from "../components";
+import { AppShell, Icon, Spinner, Toggle } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import {
   partitionTipos,
@@ -51,7 +51,6 @@ export function GestionEleccionesScreen({
     () =>
       StyleSheet.create({
         scroll: { flex: 1, backgroundColor: c.bg },
-        outer: { flex: 1, backgroundColor: c.bg },
         content: { padding: spacing.sp4, gap: spacing.sp4, paddingBottom: spacing.sp8 },
         topBar: {
           flexDirection: "row",
@@ -129,19 +128,18 @@ export function GestionEleccionesScreen({
 
   if (isLoading) {
     return (
-      <View style={styles.outer}>
+      <AppShell active="home" navigation={navigation}>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
           <View style={styles.loadingBox}>
             <Spinner size="large" />
           </View>
         </ScrollView>
-        <BottomNav active="home" navigation={navigation} />
-      </View>
+      </AppShell>
     );
   }
 
   return (
-    <View style={styles.outer}>
+    <AppShell active="home" navigation={navigation}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
       {/* TopBar breadcrumb */}
       <View style={styles.topBar}>
@@ -224,7 +222,6 @@ export function GestionEleccionesScreen({
         </View>
       </View>
     </ScrollView>
-    <BottomNav active="home" navigation={navigation} />
-  </View>
+    </AppShell>
   );
 }

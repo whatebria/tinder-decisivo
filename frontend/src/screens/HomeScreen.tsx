@@ -24,7 +24,7 @@ import {
   useTiposEleccion,
 } from "../api/hooks";
 import {
-  BottomNav,
+  AppShell,
   ConfirmModal,
   ElectionCard,
   ElectionCardAdd,
@@ -168,7 +168,6 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
     () =>
       StyleSheet.create({
         scroll: { flex: 1, backgroundColor: c.bg },
-        outer: { flex: 1, backgroundColor: c.bg },
         content: {
           padding: spacing.sp4,
           paddingBottom: spacing.sp8,
@@ -183,14 +182,13 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
 
   if (tiposLoading) {
     return (
-      <View style={styles.outer}>
+      <AppShell active="home" navigation={navigation}>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
           <View style={styles.loading}>
             <Spinner size="large" />
           </View>
         </ScrollView>
-        <BottomNav active="home" navigation={navigation} />
-      </View>
+      </AppShell>
     );
   }
 
@@ -225,7 +223,7 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
 
   return (
     <>
-      <View style={styles.outer}>
+      <AppShell active="home" navigation={navigation}>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
           <HomeTopBar
           brand="Tinder Decisivo"
@@ -287,8 +285,7 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
           </>
         ) : null}
         </ScrollView>
-        <BottomNav active="home" navigation={navigation} />
-      </View>
+      </AppShell>
 
       <ConfirmModal
         visible={!!tipoAReiniciar}
