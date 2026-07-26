@@ -1,0 +1,94 @@
+# ============ Python / Django ============
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Django
+*.sqlite3
+*.sqlite3-journal
+db.sqlite3
+media/
+staticfiles/
+!media/.gitkeep
+
+# OpenAPI schema (se genera on-demand)
+backend/schema.yml
+backend/schema.json
+frontend/schema.yml
+frontend/schema.json
+frontend/install_log.txt
+frontend/install2_log.txt
+
+# Logs runtime (metro, django dev server)
+*_log.txt
+
+# Environments
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+env/
+ENV/
+
+# uv
+.uv-cache/
+
+# ============ Flutter (legacy, se puede borrar cuando se limpie la carpeta android/) ============
+*.class
+*.log
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+*.iml
+*.ipr
+*.iws
+.idea/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+app.*.symbols
+app.*.map.json
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# ============ Node / Expo / React Native ============
+node_modules/
+.expo/
+.expo-shared/
+dist/
+web-build/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ============ IDE ============
+.vscode/
+*.iml
+
+# ============ OS ============
+Thumbs.db
+Desktop.ini
