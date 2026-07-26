@@ -70,9 +70,10 @@ class TestSeedTerritorio:
 
 class TestConstraintsTerritorio:
     def test_codigo_region_es_unico(self, db):
-        Region.objects.create(numero_romano="I", codigo="99", nombre="Test")
+        # Usamos valores que no colisionan con el seed session-scoped (16 regs).
+        Region.objects.create(numero_romano="XZY1", codigo="99", nombre="TestA")
         with pytest.raises(IntegrityError):
-            Region.objects.create(numero_romano="II", codigo="99", nombre="Otro")
+            Region.objects.create(numero_romano="XZY2", codigo="99", nombre="TestB")
 
     def test_seed_es_idempotente(self, db):
         """Correr el seed dos veces no duplica nada."""
