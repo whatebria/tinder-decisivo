@@ -13,10 +13,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addDescartado,
   addFavorito,
+  cambiarPassword,
   confirmPasswordReset,
   deleteDecision,
   deleteDescartado,
   deleteFavorito,
+  eliminarCuenta,
+  getPerfil,
   listCandidatos,
   listDecisiones,
   listDescartados,
@@ -37,6 +40,7 @@ import {
   type MatchResult,
   type Noticia,
   type PasswordResetRequestResponse,
+  type Perfil,
   type Pregunta,
   type ReiniciarCuestionarioResponse,
   type SaveDecisionInput,
@@ -152,6 +156,34 @@ export function useReiniciarCuestionario() {
       // matches se recalcularan proximo submit. Bookmarks NO se tocan.
       qc.invalidateQueries();
     },
+  });
+}
+
+// -- Perfil -----------------------------------------------------------------
+
+export function usePerfil() {
+  const isAuth = useAuthStore((s) => s.isAuthenticated);
+  return useQuery<Perfil>({
+    queryKey: ["perfil"],
+    queryFn: getPerfil,
+    enabled: isAuth,
+  });
+}
+
+export function useCambiarPassword() {
+  return useMutation<
+    { message: string },
+    Error,
+    { currentPassword: string; newPassword: string }
+  >({
+    mutationFn: ({ currentPassword, newPassword }) =>
+      cambiarPassword(currentPassword, newPassword),
+  });
+}
+
+export function useEliminarCuenta() {
+  return useMutation<void, Error, string>({
+    mutationFn: eliminarCuenta,
   });
 }
 

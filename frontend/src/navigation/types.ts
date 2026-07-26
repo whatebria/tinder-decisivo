@@ -20,6 +20,7 @@ export type RootStackParamList = {
   MisDescartados: undefined;
   MisFavoritos: undefined;
   MiDecision: undefined;
+  Perfil: undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> =

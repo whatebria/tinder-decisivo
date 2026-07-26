@@ -26,9 +26,9 @@ export function getMatchTier(pct: number): MatchTier {
 export function getMatchColor(pct: number): string {
   const tier = getMatchTier(pct);
   return {
-    alto: colors.matchHigh,
-    medio: colors.matchMedium,
-    bajo: colors.matchLow,
+    alto: colors.success,
+    medio: colors.warning,
+    bajo: colors.danger,
   }[tier];
 }
 

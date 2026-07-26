@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
   },
   unselected: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.bg,
     borderColor: colors.border,
   },
   pressed: {

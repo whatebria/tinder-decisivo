@@ -210,6 +210,44 @@ export async function deleteDecision(decisionId: number): Promise<void> {
 }
 
 // ============================================================
+// Perfil de usuario
+// ============================================================
+export interface PerfilContadores {
+  respuestas: number;
+  favoritos: number;
+  descartados: number;
+  decisiones: number;
+}
+
+export interface Perfil {
+  id: number;
+  username: string;
+  email: string;
+  fecha_registro: string;
+  contadores: PerfilContadores;
+}
+
+export async function getPerfil(): Promise<Perfil> {
+  const { data } = await apiClient.get<Perfil>("/perfil/");
+  return data;
+}
+
+export async function cambiarPassword(
+  currentPassword: string,
+  newPassword: string
+): Promise<{ message: string }> {
+  const { data } = await apiClient.post<{ message: string }>(
+    "/perfil/cambiar-password/",
+    { current_password: currentPassword, new_password: newPassword }
+  );
+  return data;
+}
+
+export async function eliminarCuenta(password: string): Promise<void> {
+  await apiClient.delete("/perfil/", { data: { password } });
+}
+
+// ============================================================
 // Reset de cuestionario
 // ============================================================
 export interface ReiniciarCuestionarioResponse {

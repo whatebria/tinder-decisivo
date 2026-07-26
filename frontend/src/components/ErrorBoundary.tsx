@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 24,
-    backgroundColor: colors.background,
+    backgroundColor: colors.bg,
   },
   emoji: {
     fontSize: 48,

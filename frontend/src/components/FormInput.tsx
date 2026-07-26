@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     color: colors.text,
-    backgroundColor: colors.background,
+    backgroundColor: colors.bg,
     minHeight: 48, // WCAG 2.2 target size
   },
   focused: {

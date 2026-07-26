@@ -31,6 +31,7 @@ from .noticias import (
     NoticiaDetailView,
     NoticiaListCreateView,
 )
+from .perfil import CambiarPasswordView, PerfilView
 
 __all__ = [
     "CandidatoDescartadoViewSet",
@@ -38,6 +39,7 @@ __all__ = [
     "CandidatoFavoritoViewSet",
     "CandidatoListView",
     "CandidatoNoticiasView",
+    "CambiarPasswordView",
     "CustomAuthToken",
     "DecisionFinalViewSet",
     "MatchCandidatoViewSet",
@@ -45,6 +47,7 @@ __all__ = [
     "NoticiaListCreateView",
     "PasswordResetConfirmView",
     "PasswordResetRequestView",
+    "PerfilView",
     "PreguntasPendientesView",
     "RegisterUserView",
     "ReiniciarCuestionarioView",

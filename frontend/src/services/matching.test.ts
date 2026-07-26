@@ -54,16 +54,16 @@ describe("getMatchTier", () => {
 });
 
 describe("getMatchColor", () => {
-  test("alto usa color matchHigh", () => {
-    expect(getMatchColor(90)).toBe(colors.matchHigh);
+  test("alto usa color success", () => {
+    expect(getMatchColor(90)).toBe(colors.success);
   });
 
-  test("medio usa color matchMedium", () => {
-    expect(getMatchColor(60)).toBe(colors.matchMedium);
+  test("medio usa color warning", () => {
+    expect(getMatchColor(60)).toBe(colors.warning);
   });
 
-  test("bajo usa color matchLow", () => {
-    expect(getMatchColor(30)).toBe(colors.matchLow);
+  test("bajo usa color danger", () => {
+    expect(getMatchColor(30)).toBe(colors.danger);
   });
 });
 

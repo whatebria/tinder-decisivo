@@ -118,7 +118,7 @@ function ToggleButton({
         isLg && styles.btnLg,
         active
           ? { backgroundColor: activeColor, borderColor: activeColor }
-          : { backgroundColor: colors.background, borderColor: colors.border },
+          : { backgroundColor: colors.bg, borderColor: colors.border },
         state.pressed && !disabled && styles.pressed,
         disabled && styles.disabled,
       ]}

@@ -180,6 +180,9 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
             </>
           ) : (
             <>
+              <TextButton onPress={() => navigation.navigate("Perfil")}>
+                Mi perfil
+              </TextButton>
               <TextButton onPress={() => navigation.navigate("MiDecision")}>
                 Ver mi voto final
               </TextButton>

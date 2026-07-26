@@ -2,6 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
+    CambiarPasswordView,
     CandidatoDescartadoViewSet,
     CandidatoDetailView,
     CandidatoFavoritoViewSet,
@@ -14,6 +15,7 @@ from .views import (
     NoticiaListCreateView,
     PasswordResetConfirmView,
     PasswordResetRequestView,
+    PerfilView,
     PreguntasPendientesView,
     RegisterUserView,
     ReiniciarCuestionarioView,
@@ -39,6 +41,13 @@ urlpatterns = [
         "password-reset/confirm/",
         PasswordResetConfirmView.as_view(),
         name="password-reset-confirm",
+    ),
+    # Perfil
+    path("perfil/", PerfilView.as_view(), name="perfil"),
+    path(
+        "perfil/cambiar-password/",
+        CambiarPasswordView.as_view(),
+        name="perfil-cambiar-password",
     ),
     # Catalogos
     path("tipos-eleccion/", TipoEleccionListView.as_view(), name="tipos-eleccion-list"),
