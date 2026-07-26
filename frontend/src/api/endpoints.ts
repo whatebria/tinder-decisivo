@@ -208,3 +208,56 @@ export async function saveDecision(input: SaveDecisionInput): Promise<DecisionFi
 export async function deleteDecision(decisionId: number): Promise<void> {
   await apiClient.delete(`/decision-final/${decisionId}/`);
 }
+
+// ============================================================
+// Password reset
+// ============================================================
+export interface PasswordResetRequestResponse {
+  email_sent: boolean;
+  reset_link?: string; // solo si backend en DEBUG=True
+}
+
+export async function requestPasswordReset(
+  email: string
+): Promise<PasswordResetRequestResponse> {
+  const { data } = await apiClient.post<PasswordResetRequestResponse>(
+    "/password-reset/request/",
+    { email }
+  );
+  return data;
+}
+
+export async function confirmPasswordReset(
+  token: string,
+  newPassword: string
+): Promise<{ message: string }> {
+  const { data } = await apiClient.post<{ message: string }>(
+    "/password-reset/confirm/",
+    { token, new_password: newPassword }
+  );
+  return data;
+}
+
+// ============================================================
+// Match anonimo (modo guest)
+// ============================================================
+export interface AnonRespuestaInput {
+  pregunta_id: number;
+  opcion_id: number;
+  peso: number;
+}
+
+/**
+ * Devuelve el mismo shape que matchCandidatos (MatchResult) para que las
+ * screens puedan trabajar con un solo tipo.
+ */
+export async function matchAnonimo(
+  tipoEleccionId: number,
+  respuestas: AnonRespuestaInput[]
+): Promise<MatchResult[]> {
+  const { data } = await apiClient.post<MatchResult[]>("/match-anonimo/", {
+    tipo_eleccion_id: tipoEleccionId,
+    respuestas,
+  });
+  return data;
+}

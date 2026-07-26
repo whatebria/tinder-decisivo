@@ -116,6 +116,30 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # ------------------------------------------------------------
+# Email (para password reset)
+# ------------------------------------------------------------
+# En dev: console backend (imprime al stdout).
+# En prod: setear EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend + SMTP config.
+EMAIL_BACKEND = config(
+    "EMAIL_BACKEND",
+    default="django.core.mail.backends.console.EmailBackend",
+)
+EMAIL_HOST = config("EMAIL_HOST", default="")
+EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+DEFAULT_FROM_EMAIL = config(
+    "DEFAULT_FROM_EMAIL", default="no-reply@tinder-decisivo.cl"
+)
+
+# URL base a la que apunta el link del email de reset (front-end web).
+PASSWORD_RESET_URL_BASE = config(
+    "PASSWORD_RESET_URL_BASE", default="http://localhost:8081/reset-password"
+)
+
+
+# ------------------------------------------------------------
 # DRF
 # ------------------------------------------------------------
 REST_FRAMEWORK = {

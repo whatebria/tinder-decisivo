@@ -1,4 +1,4 @@
-"""Serializers de autenticacion / registro."""
+"""Serializers de autenticacion / registro / password reset."""
 
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
@@ -19,3 +19,16 @@ class UserSerializer(serializers.ModelSerializer):
             email=validated_data.get("email", ""),
             password=validated_data["password"],
         )
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    """Payload: solo email."""
+
+    email = serializers.EmailField()
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """Payload: token + password nueva."""
+
+    token = serializers.CharField(max_length=200)
+    new_password = serializers.CharField(min_length=8, write_only=True)

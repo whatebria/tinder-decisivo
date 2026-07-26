@@ -8,7 +8,7 @@
 import { create } from "zustand";
 
 import { preguntasPendientes, submitRespuestas } from "../api/endpoints";
-import type { Pregunta, RespuestaInput } from "../api/endpoints";
+import type { AnonRespuestaInput, Pregunta, RespuestaInput } from "../api/endpoints";
 
 type Peso = 0 | 1 | 2 | 3;
 
@@ -32,7 +32,9 @@ interface CuestionarioState {
   next: () => void;
   prev: () => void;
   reset: () => void;
-  submit: () => Promise<void>;
+  submit: (options?: { skipServer?: boolean }) => Promise<void>;
+  /** Serializa las respuestas al shape que espera /match-anonimo/. */
+  getRespuestasParaAnonimo: () => AnonRespuestaInput[];
 }
 
 const DEFAULT_PESO: Peso = 1; // PESO_POCO
@@ -105,7 +107,7 @@ export const useCuestionarioStore = create<CuestionarioState>((set, get) => ({
     });
   },
 
-  submit: async () => {
+  submit: async (options) => {
     const { respuestas } = get();
     const payload: RespuestaInput[] = Object.values(respuestas).map((r) => ({
       pregunta: r.preguntaId,
@@ -113,11 +115,28 @@ export const useCuestionarioStore = create<CuestionarioState>((set, get) => ({
       peso: r.peso,
     }));
     if (payload.length === 0) return;
+
+    // Modo guest: no persistimos nada en el backend, solo marcamos UI state.
+    if (options?.skipServer) {
+      set({ submitting: true });
+      set({ submitting: false });
+      return;
+    }
+
     set({ submitting: true });
     try {
       await submitRespuestas(payload);
     } finally {
       set({ submitting: false });
     }
+  },
+
+  getRespuestasParaAnonimo: () => {
+    const { respuestas } = get();
+    return Object.values(respuestas).map((r) => ({
+      pregunta_id: r.preguntaId,
+      opcion_id: r.opcionElegidaId,
+      peso: r.peso,
+    }));
   },
 }));

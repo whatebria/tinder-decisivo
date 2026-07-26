@@ -4,7 +4,12 @@ Re-exportamos todos los nombres publicos aca para no romper `core/urls.py`
 ni imports externos. Cada submodulo maneja un area funcional distinta.
 """
 
-from .auth import CustomAuthToken, RegisterUserView
+from .auth import (
+    CustomAuthToken,
+    PasswordResetConfirmView,
+    PasswordResetRequestView,
+    RegisterUserView,
+)
 from .bookmarking import (
     CandidatoDescartadoViewSet,
     CandidatoFavoritoViewSet,
@@ -34,6 +39,8 @@ __all__ = [
     "MatchCandidatoViewSet",
     "NoticiaDetailView",
     "NoticiaListCreateView",
+    "PasswordResetConfirmView",
+    "PasswordResetRequestView",
     "PreguntasPendientesView",
     "RegisterUserView",
     "SubmitUserAnswersView",

@@ -13,6 +13,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addDescartado,
   addFavorito,
+  confirmPasswordReset,
   deleteDecision,
   deleteDescartado,
   deleteFavorito,
@@ -21,16 +22,20 @@ import {
   listDescartados,
   listFavoritos,
   listTiposEleccion,
+  matchAnonimo,
   matchCandidatos,
   noticiasPorCandidato,
   preguntasPendientes,
+  requestPasswordReset,
   saveDecision,
+  type AnonRespuestaInput,
   type Candidato,
   type CandidatoDescartado,
   type CandidatoFavorito,
   type DecisionFinal,
   type MatchResult,
   type Noticia,
+  type PasswordResetRequestResponse,
   type Pregunta,
   type SaveDecisionInput,
   type TipoEleccion,
@@ -96,6 +101,40 @@ export function useNoticiasCandidato(id: number) {
 export function useMatchCandidatos() {
   return useMutation<MatchResult[], Error, number>({
     mutationFn: matchCandidatos,
+  });
+}
+
+/**
+ * Match para guests: recibe respuestas in-memory y llama a /match-anonimo/.
+ * No persiste nada en el backend.
+ */
+export function useMatchAnonimo() {
+  return useMutation<
+    MatchResult[],
+    Error,
+    { tipoEleccionId: number; respuestas: AnonRespuestaInput[] }
+  >({
+    mutationFn: ({ tipoEleccionId, respuestas }) =>
+      matchAnonimo(tipoEleccionId, respuestas),
+  });
+}
+
+// -- Password reset ---------------------------------------------------------
+
+export function useRequestPasswordReset() {
+  return useMutation<PasswordResetRequestResponse, Error, string>({
+    mutationFn: requestPasswordReset,
+  });
+}
+
+export function useConfirmPasswordReset() {
+  return useMutation<
+    { message: string },
+    Error,
+    { token: string; newPassword: string }
+  >({
+    mutationFn: ({ token, newPassword }) =>
+      confirmPasswordReset(token, newPassword),
   });
 }
 

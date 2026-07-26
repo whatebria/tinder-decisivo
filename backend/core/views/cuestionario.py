@@ -9,6 +9,7 @@ from drf_spectacular.utils import (
     extend_schema,
 )
 from rest_framework import status
+from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -26,6 +27,14 @@ logger = logging.getLogger(__name__)
     },
 )
 class PreguntasPendientesView(APIView):
+    """Lista preguntas pendientes de responder.
+
+    - Autenticado: excluye las que ya respondio el user.
+    - Guest (anonymous): devuelve todas las preguntas del tipo de eleccion.
+    """
+
+    permission_classes = [permissions.AllowAny]
+
     def get(self, request):
         tipo_eleccion_id = request.query_params.get("tipo_eleccion_id")
         if not tipo_eleccion_id:
@@ -40,17 +49,20 @@ class PreguntasPendientesView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        answered_ids = RespuestaUsuario.objects.filter(
-            user=request.user,
-            pregunta__tipo_eleccion_id=tipo_eleccion_id,
-        ).values_list("pregunta_id", flat=True)
-
         pending = (
             Pregunta.objects.filter(tipo_eleccion_id=tipo_eleccion_id)
-            .exclude(id__in=answered_ids)
             .prefetch_related("opciones_respuesta")
             .order_by("orden")
         )
+
+        # Solo filtramos por respondidas si hay user autenticado.
+        if request.user and request.user.is_authenticated:
+            answered_ids = RespuestaUsuario.objects.filter(
+                user=request.user,
+                pregunta__tipo_eleccion_id=tipo_eleccion_id,
+            ).values_list("pregunta_id", flat=True)
+            pending = pending.exclude(id__in=answered_ids)
+
         return Response(PreguntaSerializer(pending, many=True).data)
 
 

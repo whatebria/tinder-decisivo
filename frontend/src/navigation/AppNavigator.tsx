@@ -1,5 +1,11 @@
 /**
- * Root navigator: swap dinamico entre auth stack y main stack segun isAuthenticated.
+ * Root navigator: swap dinamico entre auth stack y main stack.
+ *
+ * Muestra el main stack cuando:
+ * - isAuthenticated (usuario logueado)
+ * - isGuest (usuario en modo invitado)
+ *
+ * En caso contrario, muestra el auth stack (Login + Register + Password reset).
  */
 
 import React from "react";
@@ -11,6 +17,8 @@ import { HomeScreen } from "../screens/HomeScreen";
 import { LoginScreen } from "../screens/LoginScreen";
 import { MiDecisionScreen } from "../screens/MiDecisionScreen";
 import { MisDescartadosScreen } from "../screens/MisDescartadosScreen";
+import { PasswordResetConfirmScreen } from "../screens/PasswordResetConfirmScreen";
+import { PasswordResetRequestScreen } from "../screens/PasswordResetRequestScreen";
 import { RegisterScreen } from "../screens/RegisterScreen";
 import { ResultadosScreen } from "../screens/ResultadosScreen";
 import { SubmitDoneScreen } from "../screens/SubmitDoneScreen";
@@ -21,10 +29,12 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function AppNavigator() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isGuest = useAuthStore((s) => s.isGuest);
+  const showMainStack = isAuthenticated || isGuest;
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {isAuthenticated ? (
+      {showMainStack ? (
         <>
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Cuestionario" component={CuestionarioScreen} />
@@ -38,6 +48,14 @@ export function AppNavigator() {
         <>
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen
+            name="PasswordResetRequest"
+            component={PasswordResetRequestScreen}
+          />
+          <Stack.Screen
+            name="PasswordResetConfirm"
+            component={PasswordResetConfirmScreen}
+          />
         </>
       )}
     </Stack.Navigator>

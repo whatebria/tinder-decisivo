@@ -38,6 +38,7 @@ import { useToast } from "../components/Toast";
 import type { RootStackScreenProps } from "../navigation/types";
 import { formatMatchPercentage, getMatchColor } from "../services/matching";
 import { useCuestionarioStore } from "../store/cuestionario";
+import { useAuthStore } from "../store/auth";
 import { colors } from "../theme/colors";
 
 export function DetalleCandidatoScreen({
@@ -45,6 +46,7 @@ export function DetalleCandidatoScreen({
   navigation,
 }: RootStackScreenProps<"DetalleCandidato">) {
   const { candidatoId, breakdown, matchPct, confianza } = route.params;
+  const isGuest = useAuthStore((s) => s.isGuest);
   const tipoEleccionId = useCuestionarioStore((s) => s.tipoEleccionId);
   const toast = useToast();
 
@@ -158,34 +160,36 @@ export function DetalleCandidatoScreen({
           </XStack>
         </Card>
 
-        {/* Acciones */}
-        <YStack gap="$3">
-          <BookmarkActions
-            isFavorito={isFavorito}
-            isDescartado={isDescartado}
-            onToggleFavorito={() =>
-              toggleFav.mutate(candidatoId, {
-                onError: (e) => toast.error("Error", getErrorMessage(e)),
-              })
-            }
-            onToggleDescartado={() =>
-              toggleDesc.mutate(candidatoId, {
-                onError: (e) => toast.error("Error", getErrorMessage(e)),
-              })
-            }
-            loading={toggleFav.isPending || toggleDesc.isPending}
-            size="lg"
-          />
-          {!isMyVote && !isDescartado ? (
-            <PrimaryButton
-              variant="success"
-              onPress={handleSaveDecision}
-              loading={saveDecision.isPending}
-            >
-              Este es mi voto final
-            </PrimaryButton>
-          ) : null}
-        </YStack>
+        {/* Acciones (solo modo auth) */}
+        {!isGuest ? (
+          <YStack gap="$3">
+            <BookmarkActions
+              isFavorito={isFavorito}
+              isDescartado={isDescartado}
+              onToggleFavorito={() =>
+                toggleFav.mutate(candidatoId, {
+                  onError: (e) => toast.error("Error", getErrorMessage(e)),
+                })
+              }
+              onToggleDescartado={() =>
+                toggleDesc.mutate(candidatoId, {
+                  onError: (e) => toast.error("Error", getErrorMessage(e)),
+                })
+              }
+              loading={toggleFav.isPending || toggleDesc.isPending}
+              size="lg"
+            />
+            {!isMyVote && !isDescartado ? (
+              <PrimaryButton
+                variant="success"
+                onPress={handleSaveDecision}
+                loading={saveDecision.isPending}
+              >
+                Este es mi voto final
+              </PrimaryButton>
+            ) : null}
+          </YStack>
+        ) : null}
 
         {/* Radar grande */}
         {Object.keys(chartData).length >= 3 ? (

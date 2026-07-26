@@ -12,6 +12,8 @@ from .views import (
     MatchCandidatoViewSet,
     NoticiaDetailView,
     NoticiaListCreateView,
+    PasswordResetConfirmView,
+    PasswordResetRequestView,
     PreguntasPendientesView,
     RegisterUserView,
     SubmitUserAnswersView,
@@ -27,6 +29,16 @@ urlpatterns = [
     # Auth
     path("register/", RegisterUserView.as_view(), name="register"),
     path("login/", CustomAuthToken.as_view(), name="login"),
+    path(
+        "password-reset/request/",
+        PasswordResetRequestView.as_view(),
+        name="password-reset-request",
+    ),
+    path(
+        "password-reset/confirm/",
+        PasswordResetConfirmView.as_view(),
+        name="password-reset-confirm",
+    ),
     # Catalogos
     path("tipos-eleccion/", TipoEleccionListView.as_view(), name="tipos-eleccion-list"),
     path("candidatos/", CandidatoListView.as_view(), name="candidato-list"),
@@ -44,6 +56,11 @@ urlpatterns = [
         "match-candidatos/",
         MatchCandidatoViewSet.as_view({"post": "match_candidatos"}),
         name="match-candidatos",
+    ),
+    path(
+        "match-anonimo/",
+        MatchCandidatoViewSet.as_view({"post": "match_anonimo"}),
+        name="match-anonimo",
     ),
     # Noticias
     path("noticias/", NoticiaListCreateView.as_view(), name="noticia-list-create"),

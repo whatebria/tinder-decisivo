@@ -1,9 +1,11 @@
 /**
  * Ranking de candidatos post-submit.
- * Llama POST /match-candidatos/ y muestra cards ordenadas por match_percentage.
- * Filtra descartados (no aparecen en el ranking; se pueden recuperar desde
- * MisDescartadosScreen).
- * Marca con badge al candidato elegido como decision final.
+ *
+ * En modo auth:  llama POST /match-candidatos/ (persiste).
+ * En modo guest: llama POST /match-anonimo/ con respuestas locales (no persiste).
+ *
+ * Ademas filtra descartados y marca al candidato de la decision final.
+ * Guests no ven bookmarks (los reemplaza un CTA de registrarse).
  */
 
 import React, { useEffect, useMemo } from "react";
@@ -29,11 +31,13 @@ import {
   useDecisionActual,
   useDescartados,
   useFavoritos,
+  useMatchAnonimo,
   useMatchCandidatos,
   useToggleDescartado,
   useToggleFavorito,
 } from "../api/hooks";
 import { BookmarkActions } from "../components/BookmarkActions";
+import { PrimaryButton } from "../components/PrimaryButton";
 import { RadarChart } from "../components/RadarChart";
 import { TextButton } from "../components/TextButton";
 import { useToast } from "../components/Toast";
@@ -44,54 +48,79 @@ import {
   getMatchColor,
   sortByMatchDesc,
 } from "../services/matching";
+import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
 import { colors } from "../theme/colors";
 
 export function ResultadosScreen({
   navigation,
 }: RootStackScreenProps<"Resultados">) {
+  const isGuest = useAuthStore((s) => s.isGuest);
+  const exitGuestMode = useAuthStore((s) => s.exitGuestMode);
   const tipoEleccionId = useCuestionarioStore((s) => s.tipoEleccionId);
   const reset = useCuestionarioStore((s) => s.reset);
+  const getRespuestasParaAnonimo = useCuestionarioStore(
+    (s) => s.getRespuestasParaAnonimo
+  );
   const toast = useToast();
 
-  const matchMutation = useMatchCandidatos();
+  // Dos mutations distintas. Solo se ejecuta la que corresponde al modo.
+  const authMutation = useMatchCandidatos();
+  const guestMutation = useMatchAnonimo();
+  const activeMutation = isGuest ? guestMutation : authMutation;
+
+  // Bookmarking solo en modo auth. Los queries no se ejecutan si no hay token
+  // porque el backend devuelve 401 (los hooks van a mostrar error, pero el UI
+  // no los renderiza si isGuest).
   const favoritosQ = useFavoritos();
   const descartadosQ = useDescartados();
   const decisionQ = useDecisionActual(tipoEleccionId);
   const toggleFav = useToggleFavorito();
   const toggleDesc = useToggleDescartado();
 
-  const allResults = matchMutation.data ? sortByMatchDesc(matchMutation.data) : [];
-  const loading = matchMutation.isPending;
+  const allResults = activeMutation.data ? sortByMatchDesc(activeMutation.data) : [];
+  const loading = activeMutation.isPending;
 
-  // Filtra descartados del ranking (por decisión de UX)
+  // Filtra descartados del ranking (por decisión de UX). Solo en auth.
   const descartadoIds = useMemo(
-    () => new Set((descartadosQ.data ?? []).map((d) => d.candidato)),
-    [descartadosQ.data]
+    () =>
+      isGuest ? new Set<number>() : new Set((descartadosQ.data ?? []).map((d) => d.candidato)),
+    [descartadosQ.data, isGuest]
   );
   const visibleResults = useMemo(
     () =>
-      allResults.filter((r) => r.candidato_data.id != null && !descartadoIds.has(r.candidato_data.id)),
+      allResults.filter(
+        (r) => r.candidato_data.id != null && !descartadoIds.has(r.candidato_data.id)
+      ),
     [allResults, descartadoIds]
   );
   const hiddenCount = allResults.length - visibleResults.length;
 
   const favoritoIds = useMemo(
-    () => new Set((favoritosQ.data ?? []).map((f) => f.candidato)),
-    [favoritosQ.data]
+    () =>
+      isGuest ? new Set<number>() : new Set((favoritosQ.data ?? []).map((f) => f.candidato)),
+    [favoritosQ.data, isGuest]
   );
-  const decisionCandidatoId = decisionQ.data?.candidato_elegido;
+  const decisionCandidatoId = isGuest ? undefined : decisionQ.data?.candidato_elegido;
 
   useEffect(() => {
-    if (tipoEleccionId) matchMutation.mutate(tipoEleccionId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tipoEleccionId]);
-
-  useEffect(() => {
-    if (matchMutation.error) {
-      toast.error("No pudimos calcular tus matches", getErrorMessage(matchMutation.error));
+    if (!tipoEleccionId) return;
+    if (isGuest) {
+      guestMutation.mutate({
+        tipoEleccionId,
+        respuestas: getRespuestasParaAnonimo(),
+      });
+    } else {
+      authMutation.mutate(tipoEleccionId);
     }
-  }, [matchMutation.error, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tipoEleccionId, isGuest]);
+
+  useEffect(() => {
+    if (activeMutation.error) {
+      toast.error("No pudimos calcular tus matches", getErrorMessage(activeMutation.error));
+    }
+  }, [activeMutation.error, toast]);
 
   function handleVolver() {
     reset();
@@ -127,12 +156,33 @@ export function ResultadosScreen({
           <Paragraph color="$textSecondary">
             Ordenados de mayor a menor afinidad. Tap en el nombre para ver el detalle.
           </Paragraph>
+          {isGuest ? (
+            <Card
+              padding="$3"
+              borderWidth={2}
+              borderColor={colors.primary as any}
+              backgroundColor="$backgroundHover"
+            >
+              <YStack gap="$2">
+                <SizableText size="$3" color="$text" fontWeight="700">
+                  * Modo invitado
+                </SizableText>
+                <SizableText size="$2" color="$textSecondary">
+                  Tu match no se guardo. Crea una cuenta para conservarlo,
+                  marcar favoritos y elegir tu voto final.
+                </SizableText>
+                <PrimaryButton onPress={exitGuestMode}>
+                  Crear una cuenta
+                </PrimaryButton>
+              </YStack>
+            </Card>
+          ) : null}
           {hiddenCount > 0 ? (
             <TextButton onPress={() => navigation.navigate("MisDescartados")}>
               {`${hiddenCount} candidato(s) descartado(s). Ver lista`}
             </TextButton>
           ) : null}
-          {decisionQ.data ? (
+          {!isGuest && decisionQ.data ? (
             <TextButton onPress={() => navigation.navigate("MiDecision")}>
               Ya tienes una decision guardada. Ver mi voto
             </TextButton>
@@ -143,7 +193,7 @@ export function ResultadosScreen({
 
         {visibleResults.length === 0 ? (
           <Paragraph color="$textSecondary">
-            No hay candidatos para mostrar. Volve a intentarlo mas tarde.
+            No hay candidatos para mostrar. Intenta nuevamente mas tarde.
           </Paragraph>
         ) : (
           <YStack gap="$3">
@@ -161,13 +211,12 @@ export function ResultadosScreen({
 
               return (
                 <Card
-                  key={r.id}
+                  key={r.id ?? candId}
                   padding="$4"
                   borderWidth={isDecision ? 2 : 1}
                   borderColor={isDecision ? (colors.primary as any) : "$border"}
                 >
                   <XStack gap="$4" alignItems="center">
-                    {/* Info */}
                     <YStack
                       flex={1}
                       gap="$1"
@@ -208,23 +257,24 @@ export function ResultadosScreen({
                         </SizableText>
                       </XStack>
                     </YStack>
-                    {/* Mini radar */}
                     {Object.keys(chartData).length >= 3 ? (
                       <RadarChart data={chartData} size={110} showLabels={false} color={scoreCol} />
                     ) : null}
                   </XStack>
 
-                  {/* Acciones */}
-                  <YStack marginTop="$3">
-                    <BookmarkActions
-                      isFavorito={isFav}
-                      isDescartado={false}
-                      onToggleFavorito={() => handleToggleFav(candId)}
-                      onToggleDescartado={() => handleToggleDesc(candId)}
-                      loading={toggleFav.isPending || toggleDesc.isPending}
-                      size="sm"
-                    />
-                  </YStack>
+                  {/* Acciones solo en modo auth */}
+                  {!isGuest ? (
+                    <YStack marginTop="$3">
+                      <BookmarkActions
+                        isFavorito={isFav}
+                        isDescartado={false}
+                        onToggleFavorito={() => handleToggleFav(candId)}
+                        onToggleDescartado={() => handleToggleDesc(candId)}
+                        loading={toggleFav.isPending || toggleDesc.isPending}
+                        size="sm"
+                      />
+                    </YStack>
+                  ) : null}
                 </Card>
               );
             })}

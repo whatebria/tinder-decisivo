@@ -51,6 +51,18 @@ class TestVersionadoAPI:
         resp_vieja = anon_api.get("/api/tipos-eleccion/")
         assert resp_vieja.status_code == 404
 
-        # /api/v1/tipos-eleccion/ existe (pide auth, no 404)
+        # /api/v1/tipos-eleccion/ existe. Es publico (soporte modo guest)
+        # asi que devuelve 200 sin token.
         resp_nueva = anon_api.get("/api/v1/tipos-eleccion/")
-        assert resp_nueva.status_code in (401, 403)  # existe pero requiere token
+        assert resp_nueva.status_code == 200
+
+    def test_bookmarking_sigue_requiriendo_auth(self, anon_api, db):
+        """Los endpoints de datos del usuario NO pueden ser publicos."""
+        for path in [
+            "/api/v1/candidatos-favoritos/",
+            "/api/v1/descartados/",
+            "/api/v1/decision-final/",
+            "/api/v1/respuestas/",
+        ]:
+            resp = anon_api.get(path)
+            assert resp.status_code in (401, 403), f"{path} no protegido: {resp.status_code}"

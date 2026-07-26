@@ -37,12 +37,14 @@ import {
   separarOpciones,
 } from "../services/cuestionario";
 import { useCuestionarioStore, type RespuestaLocal } from "../store/cuestionario";
+import { useAuthStore } from "../store/auth";
 
 export function CuestionarioScreen({
   navigation,
 }: RootStackScreenProps<"Cuestionario">) {
   const toast = useToast();
   const [infoOpen, setInfoOpen] = useState(false);
+  const isGuest = useAuthStore((s) => s.isGuest);
   const {
     preguntas,
     currentIndex,
@@ -84,7 +86,8 @@ export function CuestionarioScreen({
 
   async function handleSubmit() {
     try {
-      await submit();
+      // Guest: no persiste en el server. Sus respuestas viven solo en el store.
+      await submit({ skipServer: isGuest });
       navigation.replace("SubmitDone");
     } catch (err) {
       toast.error("No pudimos guardar tus respuestas", getErrorMessage(err));

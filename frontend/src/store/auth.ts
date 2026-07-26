@@ -1,8 +1,13 @@
 /**
  * Auth store: token + user info persistido en SecureStore.
  *
- * Uso:
- *   const { token, isAuthenticated, login, logout } = useAuthStore();
+ * Soporta 3 estados:
+ * - unauthenticated: sin token, no es guest -> pantalla de login
+ * - guest:           sin token, isGuest=true -> puede navegar sin cuenta (read-only)
+ * - authenticated:   con token -> acceso completo
+ *
+ * `isGuest` NO se persiste: al reiniciar la app vuelve a login (feature intencional,
+ * el guest es efimero).
  */
 
 import { create } from "zustand";
@@ -17,18 +22,22 @@ interface AuthState {
   token: string | null;
   userId: number | null;
   email: string | null;
+  isGuest: boolean;
   isHydrated: boolean;
   isAuthenticated: boolean;
 
   hydrate: () => Promise<void>;
   setSession: (token: string, userId: number, email: string) => Promise<void>;
   logout: () => Promise<void>;
+  enterGuestMode: () => void;
+  exitGuestMode: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   token: null,
   userId: null,
   email: null,
+  isGuest: false,
   isHydrated: false,
   isAuthenticated: false,
 
@@ -53,7 +62,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       secureStorage.setItem(USER_ID_KEY, String(userId)),
       secureStorage.setItem(EMAIL_KEY, email),
     ]);
-    set({ token, userId, email, isAuthenticated: true });
+    // Al loguearse, salimos del modo guest automaticamente.
+    set({ token, userId, email, isAuthenticated: true, isGuest: false });
   },
 
   logout: async () => {
@@ -62,6 +72,15 @@ export const useAuthStore = create<AuthState>((set) => ({
       secureStorage.removeItem(USER_ID_KEY),
       secureStorage.removeItem(EMAIL_KEY),
     ]);
-    set({ token: null, userId: null, email: null, isAuthenticated: false });
+    set({
+      token: null,
+      userId: null,
+      email: null,
+      isAuthenticated: false,
+      isGuest: false,
+    });
   },
+
+  enterGuestMode: () => set({ isGuest: true }),
+  exitGuestMode: () => set({ isGuest: false }),
 }));

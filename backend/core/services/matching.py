@@ -2,19 +2,27 @@
 
 Toda la logica de calculo vive aca, aislada del transporte HTTP.
 Ver docs/algoritmo-tecnico.md para el diseno completo.
+
+Arquitectura:
+- score_pregunta / confianza_por_n         -> helpers puros
+- _calcular_scores(user_map, tipo_eleccion) -> core del algoritmo, in-memory
+- calcular_match(user, tipo_eleccion)       -> variante autenticada (persiste)
+- calcular_match_anonimo(respuestas, tipo)  -> variante guest (no persiste)
 """
 
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import Optional
+from typing import Iterable, Optional, TypedDict
 
 from django.db.models import Prefetch
 
 from ..models import (
     Candidato,
     MatchCandidato,
+    OpcionRespuesta,
     PosturaCandidato,
+    Pregunta,
     RespuestaUsuario,
 )
 
@@ -39,6 +47,19 @@ PESO_MULTIPLIERS = {
 # Umbrales para el nivel de confianza del match.
 CONFIANZA_UMBRAL_MEDIA = 5
 CONFIANZA_UMBRAL_ALTA = 10
+
+
+# ------------------------------------------------------------
+# Types
+# ------------------------------------------------------------
+class ScoreCandidato(TypedDict):
+    """Resultado in-memory del match contra un candidato (sin persistir)."""
+
+    candidato: Candidato
+    match_percentage: Decimal
+    num_preguntas_consideradas: int
+    breakdown_por_eje: dict
+    confianza: str
 
 
 # ------------------------------------------------------------
@@ -68,42 +89,15 @@ def confianza_por_n(n: int) -> str:
 
 
 # ------------------------------------------------------------
-# Servicio principal
+# Core del algoritmo (in-memory, sin DB writes)
 # ------------------------------------------------------------
-def calcular_match(user, tipo_eleccion) -> Optional[list[MatchCandidato]]:
-    """Calcula y persiste el match del usuario contra los candidatos.
+def _calcular_scores(user_map: dict, tipo_eleccion) -> list[ScoreCandidato]:
+    """Core del algoritmo. Recibe respuestas en memoria, devuelve scores.
 
-    Reglas:
-    - Solo se consideran preguntas donde el user *y* el candidato tienen postura.
-    - Se ignoran las respuestas del user marcadas como 'No se' (es_no_se=True).
-    - Score no-lineal (1 - (diff/4)^2) para penalizar diferencias grandes.
-    - Promedio ponderado por el peso declarado por el user (0..3 -> 0.5x..2x).
-    - Breakdown por eje tematico para radar chart en el frontend.
-    - Nivel de confianza segun N preguntas consideradas.
-
-    Devuelve lista ordenada desc de MatchCandidato, o None si el user no respondio nada.
+    user_map: {pregunta_id: (valor_usuario, peso_multiplier, eje_tematico)}
     """
-    respuestas = (
-        RespuestaUsuario.objects
-        .filter(user=user, pregunta__tipo_eleccion=tipo_eleccion)
-        .select_related("opcion_elegida", "pregunta")
-    )
-
-    # Excluir explicitamente las opciones "No se" del cache en memoria.
-    respuestas_validas = [r for r in respuestas if not r.opcion_elegida.es_no_se]
-
-    if not respuestas_validas:
-        return None
-
-    # {pregunta_id: (valor_usuario, peso_r, eje_tematico)}
-    user_map = {
-        r.pregunta_id: (
-            r.opcion_elegida.valor,
-            PESO_MULTIPLIERS.get(r.peso, Decimal("1.0")),
-            r.pregunta.eje_tematico,
-        )
-        for r in respuestas_validas
-    }
+    if not user_map:
+        return []
 
     candidatos = Candidato.objects.filter(tipos_eleccion=tipo_eleccion).prefetch_related(
         Prefetch(
@@ -112,7 +106,7 @@ def calcular_match(user, tipo_eleccion) -> Optional[list[MatchCandidato]]:
         )
     )
 
-    resultados = []
+    resultados: list[ScoreCandidato] = []
     for candidato in candidatos:
         score_total = Decimal("0")
         peso_total = Decimal("0")
@@ -155,17 +149,104 @@ def calcular_match(user, tipo_eleccion) -> Optional[list[MatchCandidato]]:
             for eje, (score_acc, peso_acc, count) in breakdown_acc.items()
         }
 
+        resultados.append({
+            "candidato": candidato,
+            "match_percentage": porcentaje,
+            "num_preguntas_consideradas": considered,
+            "breakdown_por_eje": breakdown,
+            "confianza": confianza_por_n(considered),
+        })
+
+    resultados.sort(key=lambda r: r["match_percentage"], reverse=True)
+    return resultados
+
+
+# ------------------------------------------------------------
+# Servicios publicos
+# ------------------------------------------------------------
+def calcular_match(user, tipo_eleccion) -> Optional[list[MatchCandidato]]:
+    """Calcula y persiste el match del usuario contra los candidatos.
+
+    Devuelve lista ordenada desc de MatchCandidato, o None si el user no respondio nada.
+    """
+    respuestas = (
+        RespuestaUsuario.objects
+        .filter(user=user, pregunta__tipo_eleccion=tipo_eleccion)
+        .select_related("opcion_elegida", "pregunta")
+    )
+
+    # Excluir explicitamente las opciones "No se" del cache en memoria.
+    respuestas_validas = [r for r in respuestas if not r.opcion_elegida.es_no_se]
+    if not respuestas_validas:
+        return None
+
+    user_map = {
+        r.pregunta_id: (
+            r.opcion_elegida.valor,
+            PESO_MULTIPLIERS.get(r.peso, Decimal("1.0")),
+            r.pregunta.eje_tematico,
+        )
+        for r in respuestas_validas
+    }
+
+    scores = _calcular_scores(user_map, tipo_eleccion)
+
+    # Persistir como MatchCandidato
+    resultados: list[MatchCandidato] = []
+    for s in scores:
         match_obj, _ = MatchCandidato.objects.update_or_create(
             user=user,
-            candidato=candidato,
+            candidato=s["candidato"],
             defaults={
-                "match_percentage_value": porcentaje,
-                "num_preguntas_consideradas": considered,
-                "breakdown_por_eje": breakdown,
-                "confianza": confianza_por_n(considered),
+                "match_percentage_value": s["match_percentage"],
+                "num_preguntas_consideradas": s["num_preguntas_consideradas"],
+                "breakdown_por_eje": s["breakdown_por_eje"],
+                "confianza": s["confianza"],
             },
         )
         resultados.append(match_obj)
-
-    resultados.sort(key=lambda m: m.match_percentage_value, reverse=True)
     return resultados
+
+
+def calcular_match_anonimo(
+    respuestas_raw: Iterable[dict], tipo_eleccion
+) -> list[ScoreCandidato]:
+    """Variante para usuarios guest. Recibe respuestas en el body, no persiste nada.
+
+    respuestas_raw: [{"pregunta_id": int, "opcion_id": int, "peso": int}]
+
+    Valida que las opciones/preguntas existan y pertenezcan al tipo de eleccion.
+    Ignora las respuestas con opciones "No se" (mismo criterio que el modo auth).
+    """
+    respuestas_list = list(respuestas_raw)
+    if not respuestas_list:
+        return []
+
+    pregunta_ids = {r["pregunta_id"] for r in respuestas_list}
+    opcion_ids = {r["opcion_id"] for r in respuestas_list}
+
+    preguntas = {
+        p.id: p
+        for p in Pregunta.objects.filter(
+            id__in=pregunta_ids, tipo_eleccion=tipo_eleccion
+        )
+    }
+    opciones = {o.id: o for o in OpcionRespuesta.objects.filter(id__in=opcion_ids)}
+
+    user_map: dict = {}
+    for r in respuestas_list:
+        pregunta = preguntas.get(r["pregunta_id"])
+        opcion = opciones.get(r["opcion_id"])
+        if pregunta is None or opcion is None:
+            # Silenciosamente ignoramos respuestas invalidas (fail-safe).
+            continue
+        if opcion.es_no_se:
+            continue
+        peso = int(r.get("peso", RespuestaUsuario.PESO_POCO))
+        user_map[pregunta.id] = (
+            opcion.valor,
+            PESO_MULTIPLIERS.get(peso, Decimal("1.0")),
+            pregunta.eje_tematico,
+        )
+
+    return _calcular_scores(user_map, tipo_eleccion)

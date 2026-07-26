@@ -5,7 +5,11 @@ funcional y re-exportamos aca para preservar el API
 `from core.serializers import X`.
 """
 
-from .auth import UserSerializer
+from .auth import (
+    PasswordResetConfirmSerializer,
+    PasswordResetRequestSerializer,
+    UserSerializer,
+)
 from .bookmarking import (
     CandidatoDescartadoSerializer,
     CandidatoFavoritoSerializer,
@@ -21,10 +25,15 @@ from .cuestionario import (
     RespuestaUsuarioCreateSerializer,
     RespuestaUsuarioReadSerializer,
 )
-from .matching import MatchCandidatoResultSerializer, PosturaCandidatoSerializer
+from .matching import (
+    AnonMatchResultSerializer,
+    MatchCandidatoResultSerializer,
+    PosturaCandidatoSerializer,
+)
 from .noticias import NoticiaSerializer
 
 __all__ = [
+    "AnonMatchResultSerializer",
     "CandidatoDescartadoSerializer",
     "CandidatoFavoritoSerializer",
     "CandidatoSerializer",
@@ -32,6 +41,8 @@ __all__ = [
     "MatchCandidatoResultSerializer",
     "NoticiaSerializer",
     "OpcionRespuestaSerializer",
+    "PasswordResetConfirmSerializer",
+    "PasswordResetRequestSerializer",
     "PosturaCandidatoSerializer",
     "PreguntaSerializer",
     "RespuestaUsuarioCreateSerializer",

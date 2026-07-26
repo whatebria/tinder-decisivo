@@ -5,6 +5,8 @@ import type { BreakdownPorEje } from "../api/endpoints";
 export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
+  PasswordResetRequest: undefined;
+  PasswordResetConfirm: { token: string } | undefined;
   Home: undefined;
   Cuestionario: undefined;
   SubmitDone: undefined;

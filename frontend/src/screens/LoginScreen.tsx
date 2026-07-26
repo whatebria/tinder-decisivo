@@ -16,6 +16,7 @@ import type { RootStackScreenProps } from "../navigation/types";
 
 export function LoginScreen({ navigation }: RootStackScreenProps<"Login">) {
   const setSession = useAuthStore((s) => s.setSession);
+  const enterGuestMode = useAuthStore((s) => s.enterGuestMode);
   const toast = useToast();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -73,6 +74,20 @@ export function LoginScreen({ navigation }: RootStackScreenProps<"Login">) {
         accessibilityLabel="Ir a registro"
       >
         No tengo cuenta — Registrarme
+      </TextButton>
+
+      <TextButton
+        onPress={() => navigation.navigate("PasswordResetRequest")}
+        accessibilityLabel="Recuperar contraseña"
+      >
+        Olvidé mi contraseña
+      </TextButton>
+
+      <TextButton
+        onPress={enterGuestMode}
+        accessibilityLabel="Probar sin cuenta"
+      >
+        Probar sin cuenta →
       </TextButton>
     </YStack>
   );

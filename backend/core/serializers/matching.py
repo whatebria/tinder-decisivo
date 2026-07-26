@@ -62,3 +62,25 @@ class MatchCandidatoResultSerializer(serializers.ModelSerializer):
             "confianza",
             "confianza_display",
         ]
+
+
+class AnonMatchResultSerializer(serializers.Serializer):
+    """Serializer para resultados de match anonimo (guest).
+
+    Trabaja con el dict ScoreCandidato del service, no con un modelo.
+    Mismo shape que MatchCandidatoResultSerializer para que el frontend
+    pueda usar un solo tipo Result.
+    """
+
+    candidato_data = serializers.SerializerMethodField()
+    match_percentage = serializers.DecimalField(
+        max_digits=5, decimal_places=2, read_only=True
+    )
+    preguntas_consideradas = serializers.IntegerField(
+        source="num_preguntas_consideradas", read_only=True
+    )
+    breakdown_por_eje = serializers.DictField(read_only=True)
+    confianza = serializers.CharField(read_only=True)
+
+    def get_candidato_data(self, obj) -> dict:
+        return CandidatoSerializer(obj["candidato"]).data

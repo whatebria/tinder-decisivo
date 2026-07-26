@@ -16,6 +16,7 @@ esten importados en el modulo `models` de la app. Esto lo cumple este
 __init__.py.
 """
 
+from .auth import PasswordResetToken
 from .content import Noticia
 from .cuestionario import (
     OPCION_DE_ACUERDO,
@@ -47,6 +48,7 @@ __all__ = [
     "MatchCandidato",
     "Noticia",
     "OpcionRespuesta",
+    "PasswordResetToken",
     "PosturaCandidato",
     "Pregunta",
     "RespuestaUsuario",

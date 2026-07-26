@@ -27,7 +27,9 @@ import { colors } from "../theme/colors";
 
 export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   const email = useAuthStore((s) => s.email);
+  const isGuest = useAuthStore((s) => s.isGuest);
   const logout = useAuthStore((s) => s.logout);
+  const exitGuestMode = useAuthStore((s) => s.exitGuestMode);
   const loadForTipoEleccion = useCuestionarioStore((s) => s.loadForTipoEleccion);
   const toast = useToast();
   const { data: tipos = [], isLoading, error } = useTiposEleccion();
@@ -56,10 +58,18 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
       <YStack flex={1} padding="$5" gap="$4" backgroundColor="$background">
         <YStack gap="$2" paddingTop="$8">
           <H1 color="$text">¡Hola!</H1>
-          <Paragraph color="$textSecondary">
-            Estás conectado como{" "}
-            <SizableText fontWeight="700" color="$text">{email}</SizableText>
-          </Paragraph>
+          {isGuest ? (
+            <Paragraph color="$textSecondary">
+              Estás navegando como{" "}
+              <SizableText fontWeight="700" color="$primary">invitado</SizableText>.
+              Puedes ver tus matches, pero no guardar favoritos ni tu voto.
+            </Paragraph>
+          ) : (
+            <Paragraph color="$textSecondary">
+              Estás conectado como{" "}
+              <SizableText fontWeight="700" color="$text">{email}</SizableText>
+            </Paragraph>
+          )}
         </YStack>
 
         <Separator />
@@ -108,15 +118,28 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
 
         <YStack flex={1} />
         <YStack gap="$2">
-          <TextButton onPress={() => navigation.navigate("MiDecision")}>
-            Ver mi voto final
-          </TextButton>
-          <TextButton onPress={() => navigation.navigate("MisDescartados")}>
-            Ver mis descartados
-          </TextButton>
-          <TextButton onPress={logout} color={colors.danger}>
-            Cerrar sesión
-          </TextButton>
+          {isGuest ? (
+            <>
+              <TextButton onPress={exitGuestMode} color={colors.primary}>
+                Crear una cuenta para guardar mi match
+              </TextButton>
+              <TextButton onPress={exitGuestMode} color={colors.danger}>
+                Salir del modo invitado
+              </TextButton>
+            </>
+          ) : (
+            <>
+              <TextButton onPress={() => navigation.navigate("MiDecision")}>
+                Ver mi voto final
+              </TextButton>
+              <TextButton onPress={() => navigation.navigate("MisDescartados")}>
+                Ver mis descartados
+              </TextButton>
+              <TextButton onPress={logout} color={colors.danger}>
+                Cerrar sesión
+              </TextButton>
+            </>
+          )}
         </YStack>
       </YStack>
     </ScrollView>
