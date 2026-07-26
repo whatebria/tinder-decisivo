@@ -26,8 +26,8 @@ import { PreguntaInfoModal } from "../components";
 import { Button } from "../components";
 import { IconButton } from "../components";
 import { RadioGroup } from "../components";
-import { SelectableButton } from "../components";
-import { TextButton } from "../components";
+import { Chip } from "../components";
+import { Link } from "../components";
 import { useToast } from "../components";
 import { useThemeColors } from "../theme/useTheme";
 import type { RootStackScreenProps } from "../navigation/types";
@@ -164,16 +164,14 @@ export function CuestionarioScreen({
             </SizableText>
             <XStack gap="$2" flexWrap="wrap">
               {PESOS.map((p) => (
-                <SelectableButton
+                <Chip
                   key={p.value}
-                  compact
-                  align="center"
-                  selected={respuesta.peso === p.value}
+                  active={respuesta.peso === p.value}
                   onPress={() => setPeso(pregunta.id, p.value)}
                   accessibilityLabel={`Peso: ${p.label}`}
                 >
                   {p.label}
-                </SelectableButton>
+                </Chip>
               ))}
             </XStack>
           </YStack>
@@ -183,9 +181,9 @@ export function CuestionarioScreen({
         <YStack flex={1} />
         <XStack gap="$3">
           <YStack flex={1}>
-            <TextButton onPress={prev} disabled={isFirst}>
+            <Link block onPress={prev} disabled={isFirst}>
               Anterior
-            </TextButton>
+            </Link>
           </YStack>
           {isLast ? (
             <YStack flex={1}>

@@ -9,9 +9,9 @@
 import React, { useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
-import { FormInput } from "../_legacy/FormInput";
+import { Input } from "../atoms/Input";
 import { Button } from "../atoms/Button";
-import { TextButton } from "../_legacy/TextButton";
+import { Link } from "../atoms/Link";
 
 const PALABRA_MAGICA = "ELIMINAR";
 
@@ -55,7 +55,7 @@ export function EliminarCuentaModal({
           </Text>
 
           <View style={styles.form}>
-            <FormInput
+            <Input
               placeholder="Tu contrasena"
               value={password}
               onChangeText={setPassword}
@@ -66,7 +66,7 @@ export function EliminarCuentaModal({
               Para confirmar, escribe la palabra{" "}
               <Text style={styles.palabraMagica}>{PALABRA_MAGICA}</Text>:
             </Text>
-            <FormInput
+            <Input
               placeholder={PALABRA_MAGICA}
               value={palabra}
               onChangeText={setPalabra}
@@ -85,9 +85,9 @@ export function EliminarCuentaModal({
             >
               Si, eliminar mi cuenta
             </Button>
-            <TextButton onPress={handleCancel} disabled={loading}>
+            <Link block onPress={handleCancel} disabled={loading}>
               Cancelar
-            </TextButton>
+            </Link>
           </View>
         </Pressable>
       </Pressable>

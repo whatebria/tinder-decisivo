@@ -8,9 +8,9 @@
 import React, { useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
-import { FormInput } from "../_legacy/FormInput";
+import { Input } from "../atoms/Input";
 import { Button } from "../atoms/Button";
-import { TextButton } from "../_legacy/TextButton";
+import { Link } from "../atoms/Link";
 
 interface Props {
   visible: boolean;
@@ -54,21 +54,21 @@ export function CambiarPasswordModal({
           </Text>
 
           <View style={styles.form}>
-            <FormInput
+            <Input
               placeholder="Contrasena actual"
               value={current}
               onChangeText={setCurrent}
               secureTextEntry
               accessibilityLabel="Contrasena actual"
             />
-            <FormInput
+            <Input
               placeholder="Nueva contrasena"
               value={next}
               onChangeText={setNext}
               secureTextEntry
               accessibilityLabel="Nueva contrasena"
             />
-            <FormInput
+            <Input
               placeholder="Confirmar nueva contrasena"
               value={confirm}
               onChangeText={setConfirm}
@@ -84,9 +84,9 @@ export function CambiarPasswordModal({
             <Button onPress={handleSubmit} loading={loading} disabled={!canSubmit}>
               Cambiar contrasena
             </Button>
-            <TextButton onPress={handleCancel} disabled={loading}>
+            <Link block onPress={handleCancel} disabled={loading}>
               Cancelar
-            </TextButton>
+            </Link>
           </View>
         </Pressable>
       </Pressable>

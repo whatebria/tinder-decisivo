@@ -35,7 +35,7 @@ import { BookmarkActions } from "../components";
 import { Button } from "../components";
 import { CandidatoPosturas } from "../components";
 import { RadarChart } from "../components";
-import { TextButton } from "../components";
+import { Link } from "../components";
 import { useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { formatMatchPercentage, getMatchColor } from "../services/matching";
@@ -108,7 +108,7 @@ export function DetalleCandidatoScreen({
     return (
       <YStack flex={1} padding="$5" justifyContent="center" alignItems="center" backgroundColor="$background" gap="$3">
         <Paragraph color="$textSecondary">Candidato no encontrado.</Paragraph>
-        <TextButton onPress={() => navigation.goBack()}>Volver</TextButton>
+        <Link block onPress={() => navigation.goBack()}>Volver</Link>
       </YStack>
     );
   }
@@ -282,9 +282,9 @@ export function DetalleCandidatoScreen({
         </YStack>
 
         <YStack flex={1} />
-        <TextButton onPress={() => navigation.goBack()}>
+        <Link block onPress={() => navigation.goBack()}>
           Volver al ranking
-        </TextButton>
+        </Link>
       </YStack>
     </ScrollView>
   );

@@ -9,9 +9,9 @@ import { H1, Paragraph, SizableText, YStack } from "tamagui";
 
 import { getErrorMessage } from "../api/client";
 import { useRequestPasswordReset } from "../api/hooks";
-import { FormInput } from "../components";
+import { Input } from "../components";
 import { Button } from "../components";
-import { TextButton } from "../components";
+import { Link } from "../components";
 import { useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 
@@ -82,14 +82,14 @@ export function PasswordResetRequestScreen({
             </YStack>
           ) : null}
 
-          <TextButton onPress={() => navigation.replace("Login")}>
+          <Link block onPress={() => navigation.replace("Login")}>
             Volver al login
-          </TextButton>
-          <TextButton
+          </Link>
+          <Link block
             onPress={() => navigation.navigate("PasswordResetConfirm", { token: "" })}
           >
             Ya tengo un token
-          </TextButton>
+          </Link>
         </YStack>
       </ScrollView>
     );
@@ -110,7 +110,7 @@ export function PasswordResetRequestScreen({
           crear una nueva.
         </Paragraph>
 
-        <FormInput
+        <Input
           placeholder="tu@email.com"
           value={email}
           onChangeText={setEmail}
@@ -128,9 +128,9 @@ export function PasswordResetRequestScreen({
           Enviar link
         </Button>
 
-        <TextButton onPress={() => navigation.replace("Login")}>
+        <Link block onPress={() => navigation.replace("Login")}>
           Volver al login
-        </TextButton>
+        </Link>
       </YStack>
     </ScrollView>
   );

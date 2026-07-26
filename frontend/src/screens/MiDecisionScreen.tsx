@@ -20,7 +20,7 @@ import {
 import { getErrorMessage } from "../api/client";
 import { useDecisiones, useDeleteDecision } from "../api/hooks";
 import { Button } from "../components";
-import { TextButton } from "../components";
+import { Link } from "../components";
 import { useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useThemeColors } from "../theme/useTheme";
@@ -111,7 +111,7 @@ export function MiDecisionScreen({
         )}
 
         <YStack flex={1} />
-        <TextButton onPress={() => navigation.goBack()}>Volver</TextButton>
+        <Link block onPress={() => navigation.goBack()}>Volver</Link>
       </YStack>
     </ScrollView>
   );

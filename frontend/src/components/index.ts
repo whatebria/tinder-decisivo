@@ -5,8 +5,7 @@
  *   - atoms/       -> bloques indivisibles (Button, Input, Badge, ...)
  *   - molecules/   -> composiciones simples (FormField, Modal, Toast, ...)
  *   - organisms/   -> piezas complejas (CandidateCard, TopNav, ...)
- *   - templates/   -> layouts reusables
- *   - _legacy/     -> componentes pendientes de migracion (se borran en Fase 4)
+ *   - templates/   -> layouts reusables (por ahora vacio)
  *
  * Uso recomendado (agnostico a la capa, ideal para consumidores):
  *   import { Button, Badge, ConfirmModal } from "@/components";
@@ -19,6 +18,3 @@
 export * from "./atoms";
 export * from "./molecules";
 export * from "./organisms";
-
-// Legacy re-exports (mantener funcional hasta Fase 4).
-export * from "./_legacy";

@@ -13,7 +13,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useCandidatos, usePosturasCandidato } from "../api/hooks";
 import type { Candidato } from "../api/endpoints";
-import { TextButton } from "../components";
+import { Link } from "../components";
 import { CandidatoPickerModal } from "../components/molecules/CandidatoPickerModal";
 import type { RootStackScreenProps } from "../navigation/types";
 import {
@@ -163,7 +163,7 @@ export function CompararScreen({ navigation }: RootStackScreenProps<"Comparar">)
         )}
 
         <View style={{ height: 8 }} />
-        <TextButton onPress={() => navigation.goBack()}>Volver</TextButton>
+        <Link block onPress={() => navigation.goBack()}>Volver</Link>
       </ScrollView>
 
       <CandidatoPickerModal

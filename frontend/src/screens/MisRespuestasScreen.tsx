@@ -23,8 +23,8 @@ import { getErrorMessage } from "../api/client";
 import type { MiRespuesta } from "../api/endpoints";
 import { useMisRespuestas, useUpdateRespuesta } from "../api/hooks";
 import { EditarRespuestaModal } from "../components";
-import { PrimaryButton } from "../components";
-import { TextButton } from "../components";
+import { Button } from "../components";
+import { Link } from "../components";
 import { useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 
@@ -99,9 +99,9 @@ export function MisRespuestasScreen({
 
         {total === 0 ? (
           <YStack gap="$3" marginTop="$4">
-            <PrimaryButton onPress={() => navigation.goBack()}>
+            <Button onPress={() => navigation.goBack()}>
               Volver al inicio
-            </PrimaryButton>
+            </Button>
           </YStack>
         ) : (
           <YStack gap="$4">
@@ -152,7 +152,7 @@ export function MisRespuestasScreen({
         )}
 
         <YStack flex={1} />
-        <TextButton onPress={() => navigation.goBack()}>Volver</TextButton>
+        <Link block onPress={() => navigation.goBack()}>Volver</Link>
       </YStack>
 
       <EditarRespuestaModal

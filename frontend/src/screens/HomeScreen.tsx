@@ -22,7 +22,7 @@ import { useToast } from "../components";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
 import { Button } from "../components";
-import { TextButton } from "../components";
+import { Link } from "../components";
 import { ThemeToggle } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useThemeColors } from "../theme/useTheme";
@@ -149,13 +149,13 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
                 </Button>
                 {!isGuest ? (
                   <>
-                    <TextButton
+                    <Link block
                       onPress={() => handleVerMatches(tipo)}
                       accessibilityLabel={`Ver mis matches de ${tipo.nombre}`}
                     >
                       Ver mis matches guardados
-                    </TextButton>
-                    <TextButton
+                    </Link>
+                    <Link block
                       onPress={() =>
                         tipo.id &&
                         navigation.navigate("MisRespuestas", { tipoEleccionId: tipo.id })
@@ -163,14 +163,14 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
                       accessibilityLabel={`Ver o editar mis respuestas de ${tipo.nombre}`}
                     >
                       Ver/editar mis respuestas
-                    </TextButton>
-                    <TextButton
+                    </Link>
+                    <Link block
                       onPress={() => setTipoAReiniciar(tipo)}
                       color={c.danger}
                       accessibilityLabel={`Reiniciar cuestionario ${tipo.nombre}`}
                     >
                       Empezar de nuevo
-                    </TextButton>
+                    </Link>
                   </>
                 ) : null}
               </YStack>
@@ -182,45 +182,45 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
         <YStack gap="$2">
           {isGuest ? (
             <>
-              <TextButton onPress={() => navigation.navigate("Comparar")}>
+              <Link block onPress={() => navigation.navigate("Comparar")}>
                 Comparar candidatos
-              </TextButton>
-              <TextButton onPress={() => navigation.navigate("Noticias")}>
+              </Link>
+              <Link block onPress={() => navigation.navigate("Noticias")}>
                 Noticias
-              </TextButton>
-              <TextButton onPress={exitGuestMode} color={c.primary}>
+              </Link>
+              <Link block onPress={exitGuestMode} color={c.primary}>
                 Crear una cuenta para guardar mi match
-              </TextButton>
-              <TextButton onPress={exitGuestMode} color={c.danger}>
+              </Link>
+              <Link block onPress={exitGuestMode} color={c.danger}>
                 Salir del modo invitado
-              </TextButton>
+              </Link>
             </>
           ) : (
             <>
-              <TextButton onPress={() => navigation.navigate("Perfil")}>
+              <Link block onPress={() => navigation.navigate("Perfil")}>
                 Mi perfil
-              </TextButton>
-              <TextButton onPress={() => navigation.navigate("MiDecision")}>
+              </Link>
+              <Link block onPress={() => navigation.navigate("MiDecision")}>
                 Ver mi voto final
-              </TextButton>
-              <TextButton onPress={() => navigation.navigate("MisFavoritos")}>
+              </Link>
+              <Link block onPress={() => navigation.navigate("MisFavoritos")}>
                 Ver mis favoritos
-              </TextButton>
-              <TextButton onPress={() => navigation.navigate("MisDescartados")}>
+              </Link>
+              <Link block onPress={() => navigation.navigate("MisDescartados")}>
                 Ver mis descartados
-              </TextButton>
-              <TextButton onPress={() => navigation.navigate("Noticias")}>
+              </Link>
+              <Link block onPress={() => navigation.navigate("Noticias")}>
                 Noticias
-              </TextButton>
-              <TextButton onPress={() => navigation.navigate("Comparar")}>
+              </Link>
+              <Link block onPress={() => navigation.navigate("Comparar")}>
                 Comparar candidatos
-              </TextButton>
-              <TextButton onPress={() => navigation.navigate("Swipe")}>
+              </Link>
+              <Link block onPress={() => navigation.navigate("Swipe")}>
                 Modo Swipe
-              </TextButton>
-              <TextButton onPress={logout} color={c.danger}>
+              </Link>
+              <Link block onPress={logout} color={c.danger}>
                 Cerrar sesión
-              </TextButton>
+              </Link>
             </>
           )}
 

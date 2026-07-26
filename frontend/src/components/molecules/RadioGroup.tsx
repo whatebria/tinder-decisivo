@@ -3,7 +3,6 @@
  * espaciadas, con hover suave y borde primary en la seleccionada.
  *
  * Ideal para el cuestionario ("Muy de acuerdo" ... "Muy en desacuerdo").
- * Reemplaza al uso repetido de _legacy/SelectableButton.
  */
 
 import React, { useMemo } from "react";

@@ -10,8 +10,8 @@ import React, { useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { canShareNative, copyToClipboard, shareNative } from "../../services/share";
-import { PrimaryButton } from "../_legacy/PrimaryButton";
-import { TextButton } from "../_legacy/TextButton";
+import { Button } from "../atoms/Button";
+import { Link } from "../atoms/Link";
 
 interface Props {
   visible: boolean;
@@ -59,17 +59,17 @@ export function ShareModal({ visible, text, onClose }: Props) {
 
           <View style={styles.actions}>
             {hasNative ? (
-              <PrimaryButton onPress={handleShare} loading={sharing}>
+              <Button onPress={handleShare} loading={sharing}>
                 Compartir
-              </PrimaryButton>
+              </Button>
             ) : null}
-            <PrimaryButton
+            <Button
               onPress={handleCopy}
               variant={hasNative ? "primary" : "primary"}
             >
               {copied ? "Copiado!" : "Copiar al portapapeles"}
-            </PrimaryButton>
-            <TextButton onPress={onClose}>Cerrar</TextButton>
+            </Button>
+            <Link block onPress={onClose}>Cerrar</Link>
           </View>
         </Pressable>
       </Pressable>

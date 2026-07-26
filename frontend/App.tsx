@@ -12,16 +12,18 @@ import { NavigationContainer } from "@react-navigation/native";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
+import { Platform } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Spinner, TamaguiProvider, Theme, YStack } from "tamagui";
 
 import { queryClient } from "./src/api/queryClient";
-import { ErrorBoundary } from "./src/components/ErrorBoundary";
-import { ToastProvider } from "./src/components/Toast";
+import { ErrorBoundary } from "./src/components";
+import { ToastProvider } from "./src/components";
 import { AppNavigator } from "./src/navigation/AppNavigator";
 import { useAuthStore } from "./src/store/auth";
 import { useOnboardingStore } from "./src/store/onboarding";
 import { useThemeStore } from "./src/store/theme";
+import { colors, colorsDark } from "./src/theme/colors";
 import tamaguiConfig from "./tamagui.config";
 
 export default function App() {
@@ -38,6 +40,18 @@ export default function App() {
     hydrateOnboarding();
     hydrateTheme();
   }, [hydrateAuth, hydrateOnboarding, hydrateTheme]);
+
+  // Web: sincroniza el bg del <body> y <html> con el tema activo para evitar
+  // que se vea blanco cuando el contenido es mas corto que el viewport.
+  useEffect(() => {
+    if (Platform.OS !== "web") return;
+    const bg = effective === "dark" ? colorsDark.bg : colors.bg;
+    const doc = typeof document !== "undefined" ? document : null;
+    if (!doc) return;
+    doc.documentElement.style.backgroundColor = bg;
+    doc.body.style.backgroundColor = bg;
+    doc.documentElement.style.colorScheme = effective;
+  }, [effective]);
 
   const ready = authHydrated && onboardingHydrated && themeHydrated;
 

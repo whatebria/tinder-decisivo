@@ -21,7 +21,7 @@ import React from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { Button } from "../atoms/Button";
-import { TextButton } from "../_legacy/TextButton";
+import { Link } from "../atoms/Link";
 
 interface Props {
   visible: boolean;
@@ -66,9 +66,9 @@ export function ConfirmModal({
             >
               {confirmLabel}
             </Button>
-            <TextButton onPress={onCancel} disabled={loading}>
+            <Link block onPress={onCancel} disabled={loading}>
               {cancelLabel}
-            </TextButton>
+            </Link>
           </View>
         </Pressable>
       </Pressable>

@@ -9,7 +9,7 @@ import { H1, Paragraph, Separator, Spinner, YStack } from "tamagui";
 
 import { getErrorMessage } from "../api/client";
 import { useFavoritos, useToggleFavorito } from "../api/hooks";
-import { EmptyState, FavoriteCard, TextButton, useToast } from "../components";
+import { EmptyState, FavoriteCard, Link, useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 
 function initialsOf(nombre?: string, apellido?: string): string {
@@ -88,7 +88,7 @@ export function MisFavoritosScreen({
         )}
 
         <YStack flex={1} />
-        <TextButton onPress={() => navigation.goBack()}>Volver</TextButton>
+        <Link block onPress={() => navigation.goBack()}>Volver</Link>
       </YStack>
     </ScrollView>
   );

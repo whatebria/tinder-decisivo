@@ -9,9 +9,9 @@ import { H1, Paragraph, YStack } from "tamagui";
 
 import { getErrorMessage } from "../api/client";
 import { useConfirmPasswordReset } from "../api/hooks";
-import { FormInput } from "../components";
+import { Input } from "../components";
 import { Button } from "../components";
-import { TextButton } from "../components";
+import { Link } from "../components";
 import { useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 
@@ -65,7 +65,7 @@ export function PasswordResetConfirmScreen({
           Pega el token del email y elige una nueva contrasena.
         </Paragraph>
 
-        <FormInput
+        <Input
           placeholder="Token"
           value={token}
           onChangeText={setToken}
@@ -73,14 +73,14 @@ export function PasswordResetConfirmScreen({
           autoCorrect={false}
           accessibilityLabel="Token"
         />
-        <FormInput
+        <Input
           placeholder="Nueva contrasena (min. 8 caracteres)"
           value={newPassword}
           onChangeText={setNewPassword}
           secureTextEntry
           accessibilityLabel="Nueva contrasena"
         />
-        <FormInput
+        <Input
           placeholder="Confirma tu nueva contrasena"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
@@ -101,9 +101,9 @@ export function PasswordResetConfirmScreen({
           Cambiar contrasena
         </Button>
 
-        <TextButton onPress={() => navigation.replace("Login")}>
+        <Link block onPress={() => navigation.replace("Login")}>
           Volver al login
-        </TextButton>
+        </Link>
       </YStack>
     </ScrollView>
   );

@@ -19,7 +19,7 @@ import {
 } from "react-native";
 
 import { Button } from "../components";
-import { TextButton } from "../components";
+import { Link } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useOnboardingStore } from "../store/onboarding";
 import { useThemeColors } from "../theme/useTheme";
@@ -82,7 +82,7 @@ export function OnboardingScreen({
     <View style={[styles.container, { backgroundColor: palette.bg }]}>
       {/* Skip button top-right */}
       <View style={styles.topBar}>
-        <TextButton onPress={finish}>Saltar</TextButton>
+        <Link block onPress={finish}>Saltar</Link>
       </View>
 
       {/* Pager */}

@@ -8,9 +8,9 @@ import { H1, Paragraph, YStack } from "tamagui";
 
 import { login, register } from "../api/endpoints";
 import { getErrorMessage } from "../api/client";
-import { FormInput } from "../components";
+import { Input } from "../components";
 import { Button } from "../components";
-import { TextButton } from "../components";
+import { Link } from "../components";
 import { useToast } from "../components";
 import { useAuthStore } from "../store/auth";
 import type { RootStackScreenProps } from "../navigation/types";
@@ -51,7 +51,7 @@ export function RegisterScreen({ navigation }: RootStackScreenProps<"Register">)
       </Paragraph>
 
       <YStack gap="$3">
-        <FormInput
+        <Input
           placeholder="Usuario (mínimo 3 caracteres)"
           value={username}
           onChangeText={setUsername}
@@ -59,7 +59,7 @@ export function RegisterScreen({ navigation }: RootStackScreenProps<"Register">)
           autoCorrect={false}
           accessibilityLabel="Usuario"
         />
-        <FormInput
+        <Input
           placeholder="Email"
           value={email}
           onChangeText={setEmail}
@@ -67,7 +67,7 @@ export function RegisterScreen({ navigation }: RootStackScreenProps<"Register">)
           keyboardType="email-address"
           accessibilityLabel="Email"
         />
-        <FormInput
+        <Input
           placeholder="Contraseña (mínimo 8 caracteres)"
           value={password}
           onChangeText={setPassword}
@@ -84,9 +84,9 @@ export function RegisterScreen({ navigation }: RootStackScreenProps<"Register">)
         {loading ? "Creando cuenta..." : "Registrarme"}
       </Button>
 
-      <TextButton onPress={() => navigation.goBack()}>
+      <Link block onPress={() => navigation.goBack()}>
         Ya tengo cuenta — Volver
-      </TextButton>
+      </Link>
     </YStack>
   );
 }

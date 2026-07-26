@@ -458,7 +458,16 @@
     padding: 6px 12px; border-radius: var(--r-full);
     background: var(--color-accent-2); color: var(--color-text);
     font-size: var(--fs-sm); font-weight: var(--fw-medium);
+    border: 1px solid transparent;
+    cursor: pointer; white-space: nowrap;
+    transition: background var(--dur-base), border-color var(--dur-base);
   }
+  .chip:hover { background: var(--color-accent); }
+  .chip.chip-active {
+    background: var(--color-primary); color: #fff;
+    border-color: var(--color-primary);
+  }
+  [data-theme="dark"] .chip.chip-active { color: var(--color-bg); }
 
   /* ===== ATOM: Progress / Spinner ===== */
   .progress { height: 8px; background: var(--color-border); border-radius: var(--r-full); overflow: hidden; }
@@ -809,6 +818,36 @@
   .timeline-item .desc { font-size: var(--fs-sm); color: var(--color-text); margin-top: 2px; }
 
   /* ===== MOLECULE: NewsCard ===== */
+  .news-card-type {
+    position: absolute; top: var(--sp-2); left: var(--sp-2);
+    padding: 2px 8px; border-radius: var(--r-full);
+    font-size: 10px; font-weight: var(--fw-semibold);
+    text-transform: uppercase; letter-spacing: .06em;
+    background: rgba(255,255,255,.92); color: var(--color-text-2);
+    border: 1px solid var(--color-border);
+    z-index: 1;
+  }
+  [data-theme="dark"] .news-card-type {
+    background: rgba(27,40,48,.92); color: var(--color-text-2);
+  }
+  .news-card .thumb-wrap { position: relative; flex-shrink: 0; }
+  .news-card .mentions {
+    display: flex; flex-wrap: wrap; gap: 4px; margin-top: var(--sp-2);
+  }
+  .news-card .mention {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: var(--r-full);
+    background: var(--color-bg); border: 1px solid var(--color-border);
+    font-size: 11px; color: var(--color-text-2); font-weight: var(--fw-medium);
+  }
+  .news-card .mention .avatar-mini {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--color-accent-2); color: var(--color-text);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: var(--fw-bold);
+  }
+  .news-card .mention.more { background: transparent; font-style: italic; }
+
   .news-card {
     background: var(--color-card); border: 1px solid var(--color-border);
     border-radius: var(--r-lg); overflow: hidden;
@@ -841,39 +880,60 @@
 
   /* ===== MOLECULE: PosturaItem ===== */
   .postura {
-    background: var(--color-card); border: 1px solid var(--color-border);
-    border-radius: var(--r-md); padding: var(--sp-4) var(--sp-5);
-    border-left: 4px solid var(--gray-300);
+    background: var(--color-card); border: 1px solid var(--color-border-2);
+    border-radius: var(--r-lg); padding: var(--sp-5);
+    transition: box-shadow 200ms ease, border-color 200ms ease;
   }
-  .postura.match    { border-left-color: var(--success-500); }
-  .postura.no-match { border-left-color: var(--danger-500); }
-  .postura.partial  { border-left-color: var(--warning-500); }
+  .postura:hover { border-color: var(--color-border); box-shadow: var(--sh-sm); }
 
+  .postura-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: var(--sp-3); margin-bottom: var(--sp-3);
+  }
   .postura .q {
-    font-size: var(--fs-sm); font-weight: var(--fw-medium);
-    color: var(--color-text); margin-bottom: var(--sp-3);
+    font-size: var(--fs-md); font-weight: var(--fw-semibold);
+    color: var(--color-text); margin: 0; flex: 1;
+    line-height: var(--lh-tight);
   }
-  .postura .votes {
-    display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3);
+
+  .postura-status {
+    display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
+    font-size: 11px; font-weight: var(--fw-semibold);
+    padding: 3px 9px; border-radius: var(--r-full);
+    letter-spacing: .02em;
   }
-  .postura .vote-cell { display: flex; flex-direction: column; gap: 2px; }
-  .postura .vote-cell .lbl {
-    font-size: 10px; text-transform: uppercase; letter-spacing: .06em;
-    color: var(--color-text-3); font-weight: var(--fw-semibold);
+  .postura.match .postura-status {
+    background: color-mix(in srgb, var(--color-success) 14%, transparent);
+    color: var(--success-700);
   }
-  .postura .vote-cell .val { font-size: var(--fs-sm); color: var(--color-text); font-weight: var(--fw-medium); }
-  .postura .match-indicator {
-    display: inline-flex; align-items: center; gap: 4px;
-    font-size: var(--fs-xs); font-weight: var(--fw-semibold);
-    margin-top: var(--sp-3); padding-top: var(--sp-3);
-    border-top: 1px solid var(--color-border-2);
+  .postura.partial .postura-status {
+    background: color-mix(in srgb, var(--color-warning) 14%, transparent);
+    color: var(--warning-700);
   }
-  .postura.match .match-indicator    { color: var(--success-700); }
-  .postura.no-match .match-indicator { color: var(--danger-700); }
-  .postura.partial .match-indicator  { color: var(--warning-700); }
-  [data-theme="dark"] .postura.match .match-indicator    { color: #B7D2C0; }
-  [data-theme="dark"] .postura.no-match .match-indicator { color: #E1A0A0; }
-  [data-theme="dark"] .postura.partial .match-indicator  { color: #EBD1A0; }
+  .postura.no-match .postura-status {
+    background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+    color: var(--danger-700);
+  }
+  [data-theme="dark"] .postura.match .postura-status    { color: #B7D2C0; }
+  [data-theme="dark"] .postura.partial .postura-status  { color: #EBD1A0; }
+  [data-theme="dark"] .postura.no-match .postura-status { color: #E1A0A0; }
+
+  .postura-compare {
+    display: flex; flex-wrap: wrap;
+    gap: var(--sp-1) var(--sp-3); align-items: baseline;
+    font-size: var(--fs-sm); line-height: 1.5;
+  }
+  .postura-compare .who {
+    color: var(--color-text-3); margin-right: 6px;
+    font-weight: var(--fw-medium);
+  }
+  .postura-compare .answer {
+    color: var(--color-text); font-weight: var(--fw-semibold);
+  }
+  .postura-compare .sep {
+    color: var(--color-border); font-weight: normal;
+    margin: 0 var(--sp-1);
+  }
 
   /* ===== ORGANISM: ProfileHero ===== */
   .profile-hero {
@@ -914,6 +974,65 @@
     font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
     color: var(--color-text-2); font-weight: var(--fw-semibold);
     padding: var(--sp-4) 0 var(--sp-2);
+  }
+
+  /* ===== ORGANISM: NewsFeed ===== */
+  .news-feed { display: flex; flex-direction: column; gap: var(--sp-5); }
+  .news-feed-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: var(--sp-3); padding-bottom: var(--sp-3);
+    border-bottom: 1px solid var(--color-border-2);
+  }
+  .news-feed-header h3 {
+    font-size: var(--fs-2xl); font-weight: var(--fw-bold);
+    color: var(--color-text); margin: 0;
+  }
+  .news-feed-header .count {
+    font-size: var(--fs-sm); color: var(--color-text-2);
+    font-weight: var(--fw-medium);
+  }
+  .news-feed-filters {
+    display: flex; flex-direction: column; gap: var(--sp-2);
+  }
+  .filter-row {
+    display: flex; gap: var(--sp-2); overflow-x: auto;
+    padding-bottom: 4px; scrollbar-width: thin;
+  }
+  .filter-row::-webkit-scrollbar { height: 4px; }
+  .filter-row::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
+  .filter-row .filter-lbl {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--color-text-3); font-weight: var(--fw-semibold);
+    align-self: center; margin-right: var(--sp-2); flex-shrink: 0;
+  }
+  .news-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-3); }
+  @media (min-width: 900px) {
+    .news-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  }
+  .news-feed-loadmore {
+    display: flex; justify-content: center; padding: var(--sp-4) 0 var(--sp-2);
+  }
+
+  /* ===== ATOM: NewsCard Skeleton ===== */
+  .news-skeleton {
+    display: flex; overflow: hidden;
+    background: var(--color-card); border: 1px solid var(--color-border);
+    border-radius: var(--r-lg);
+  }
+  .sk-thumb { width: 120px; height: 120px; flex-shrink: 0; background: var(--color-border-2); }
+  .sk-body { flex: 1; padding: var(--sp-4); display: flex; flex-direction: column; gap: 8px; }
+  .sk-line { height: 10px; border-radius: 4px; background: var(--color-border-2); }
+  .sk-line.w-90 { width: 90%; }
+  .sk-line.w-70 { width: 70%; }
+  .sk-line.w-50 { width: 50%; }
+  .sk-line.w-40 { width: 40%; }
+  @keyframes shimmer {
+    0%   { opacity: .5; }
+    50%  { opacity: 1; }
+    100% { opacity: .5; }
+  }
+  .news-skeleton .sk-thumb, .news-skeleton .sk-line {
+    animation: shimmer 1.4s ease-in-out infinite;
   }
 
   /* ===== ATOM: RadarChart wrapper ===== */
@@ -1285,6 +1404,7 @@
     <a href="#comparator">Comparator</a>
     <a href="#share-options">ShareOptions</a>
     <a href="#topnav">TopNav</a>
+    <a href="#news-feed">NewsFeed</a>
     <a href="#empty-state">EmptyState</a>
 
     <div class="group">Templates</div>
@@ -2131,11 +2251,14 @@
   <div class="sec-header">
     <div class="kicker">Molecula</div>
     <h2>NewsCard</h2>
-    <p>Item de noticia con thumbnail (gradient placeholder si no hay imagen), headline, snippet clipped a 2 lineas, fuente + fecha + sentimiento.</p>
+    <p>Item de noticia con thumbnail (gradient placeholder si no hay imagen), headline, snippet clipped a 2 lineas, fuente + fecha + sentimiento. Slots opcionales: tag de tipo (Opinion / Analisis / Hecho) sobre el thumb, y chips de candidatos mencionados debajo del snippet.</p>
   </div>
   <div class="demo stack-4" style="max-width:640px">
     <article class="news-card">
-      <div class="thumb"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="20" x2="9" y2="9"/></svg></div>
+      <div class="thumb-wrap">
+        <span class="news-card-type">Hecho</span>
+        <div class="thumb"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="20" x2="9" y2="9"/></svg></div>
+      </div>
       <div class="body">
         <h3 class="headline">Boric anuncia proyecto de reforma tributaria con foco en grandes fortunas</h3>
         <p class="snippet">El mandatario presento en La Moneda un nuevo paquete de medidas tributarias que apuntan a la recaudacion progresiva y al financiamiento de programas sociales.</p>
@@ -2146,10 +2269,15 @@
           <span>·</span>
           <span class="sentiment sentiment-positive">Positivo</span>
         </div>
+        <div class="mentions">
+          <span class="mention"><span class="avatar-mini">B</span>Boric</span>
+        </div>
       </div>
     </article>
     <article class="news-card">
-      <div class="thumb" style="background:linear-gradient(135deg, var(--warning-200), var(--warning-100))"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--warning-700)"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+      <div class="thumb-wrap">
+        <div class="thumb" style="background:linear-gradient(135deg, var(--warning-200), var(--warning-100))"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--warning-700)"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+      </div>
       <div class="body">
         <h3 class="headline">Camara aprueba en general la Ley de Presupuestos con votos divididos</h3>
         <p class="snippet">La votacion mostro fracturas dentro del oficialismo. Se esperan indicaciones en las proximas semanas antes del despacho al Senado.</p>
@@ -2160,10 +2288,19 @@
           <span>·</span>
           <span class="sentiment sentiment-neutral">Neutral</span>
         </div>
+        <div class="mentions">
+          <span class="mention"><span class="avatar-mini">B</span>Boric</span>
+          <span class="mention"><span class="avatar-mini">K</span>Kast</span>
+          <span class="mention"><span class="avatar-mini">P</span>Provoste</span>
+          <span class="mention more">+2</span>
+        </div>
       </div>
     </article>
     <article class="news-card">
-      <div class="thumb" style="background:linear-gradient(135deg, var(--danger-200), var(--danger-100))"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--danger-700)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+      <div class="thumb-wrap">
+        <span class="news-card-type">Opinion</span>
+        <div class="thumb" style="background:linear-gradient(135deg, var(--danger-200), var(--danger-100))"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--danger-700)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+      </div>
       <div class="body">
         <h3 class="headline">Oposicion critica manejo de la reforma previsional en comision</h3>
         <p class="snippet">Parlamentarios de oposicion acusaron falta de dialogo y transparencia en las ultimas sesiones de la comision de Trabajo.</p>
@@ -2174,6 +2311,10 @@
           <span>·</span>
           <span class="sentiment sentiment-negative">Negativo</span>
         </div>
+        <div class="mentions">
+          <span class="mention"><span class="avatar-mini">K</span>Kast</span>
+          <span class="mention"><span class="avatar-mini">S</span>Sichel</span>
+        </div>
       </div>
     </article>
   </div>
@@ -2183,40 +2324,42 @@
   <div class="sec-header">
     <div class="kicker">Molecula</div>
     <h2>PosturaItem</h2>
-    <p>Compara tu respuesta con la del candidato en una pregunta especifica. Border-left semantico: verde = match, amarillo = parcial, rojo = no coincide.</p>
+    <p>Compara tu respuesta con la del candidato en una pregunta especifica. Card minimalista: pregunta + micro-pill de status + linea de comparacion. Tres variantes semanticas: match, partial, no-match.</p>
   </div>
   <div class="demo stack-4" style="max-width:640px">
     <div class="postura match">
-      <div class="q">¿Deberia el Estado aumentar el gasto en educacion superior gratuita?</div>
-      <div class="votes">
-        <div class="vote-cell"><span class="lbl">Tu voto</span><span class="val">Muy de acuerdo</span></div>
-        <div class="vote-cell"><span class="lbl">Boric</span><span class="val">Muy de acuerdo</span></div>
+      <div class="postura-top">
+        <p class="q">Deberia el Estado aumentar el gasto en educacion superior gratuita?</p>
+        <span class="postura-status">Coinciden</span>
       </div>
-      <div class="match-indicator">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        Coinciden completamente
+      <div class="postura-compare">
+        <span><span class="who">Tu</span><span class="answer">Muy de acuerdo</span></span>
+        <span class="sep">·</span>
+        <span><span class="who">Boric</span><span class="answer">Muy de acuerdo</span></span>
       </div>
     </div>
+
     <div class="postura partial">
-      <div class="q">¿Deberia mantenerse el sistema de AFP con cambios?</div>
-      <div class="votes">
-        <div class="vote-cell"><span class="lbl">Tu voto</span><span class="val">De acuerdo</span></div>
-        <div class="vote-cell"><span class="lbl">Boric</span><span class="val">Neutral</span></div>
+      <div class="postura-top">
+        <p class="q">Deberia mantenerse el sistema de AFP con cambios?</p>
+        <span class="postura-status">Parcial</span>
       </div>
-      <div class="match-indicator">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-        Coinciden parcialmente
+      <div class="postura-compare">
+        <span><span class="who">Tu</span><span class="answer">De acuerdo</span></span>
+        <span class="sep">·</span>
+        <span><span class="who">Boric</span><span class="answer">Neutral</span></span>
       </div>
     </div>
+
     <div class="postura no-match">
-      <div class="q">¿Deberia eliminarse el impuesto especifico a los combustibles?</div>
-      <div class="votes">
-        <div class="vote-cell"><span class="lbl">Tu voto</span><span class="val">Muy de acuerdo</span></div>
-        <div class="vote-cell"><span class="lbl">Boric</span><span class="val">Muy en desacuerdo</span></div>
+      <div class="postura-top">
+        <p class="q">Deberia eliminarse el impuesto especifico a los combustibles?</p>
+        <span class="postura-status">No coinciden</span>
       </div>
-      <div class="match-indicator">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        No coinciden
+      <div class="postura-compare">
+        <span><span class="who">Tu</span><span class="answer">Muy de acuerdo</span></span>
+        <span class="sep">·</span>
+        <span><span class="who">Boric</span><span class="answer">Muy en desacuerdo</span></span>
       </div>
     </div>
   </div>
@@ -2540,6 +2683,168 @@
       <h4>Aun no has completado el cuestionario</h4>
       <p>Contesta 12 preguntas y descubre que candidato piensa parecido a ti.</p>
       <button class="btn btn-primary">Empezar cuestionario</button>
+    </div>
+  </div>
+</section>
+
+<section id="news-feed">
+  <div class="sec-header">
+    <div class="kicker">Organismo</div>
+    <h2>NewsFeed</h2>
+    <p>Feed completo de noticias con header (titulo + contador), 2 filas de filtros scrolleables (candidatos y sentimiento), grid responsive de NewsCards (1 col mobile, 2 col ≥900px), y boton "Cargar mas" al final. Ver tambien el estado skeleton para loading y el vacio para 0 resultados.</p>
+  </div>
+
+  <div class="demo">
+    <div class="news-feed">
+      <div class="news-feed-header">
+        <h3>Noticias</h3>
+        <span class="count">128 resultados</span>
+      </div>
+
+      <div class="news-feed-filters">
+        <div class="filter-row">
+          <span class="filter-lbl">Candidato</span>
+          <span class="chip chip-active">Todos</span>
+          <span class="chip">Boric</span>
+          <span class="chip">Kast</span>
+          <span class="chip">Bachelet</span>
+          <span class="chip">Provoste</span>
+          <span class="chip">Parisi</span>
+          <span class="chip">Sichel</span>
+        </div>
+        <div class="filter-row">
+          <span class="filter-lbl">Sentimiento</span>
+          <span class="chip chip-active">Todos</span>
+          <span class="chip">Positivas</span>
+          <span class="chip">Neutrales</span>
+          <span class="chip">Negativas</span>
+        </div>
+      </div>
+
+      <div class="news-grid cols-2">
+        <article class="news-card">
+          <div class="thumb-wrap">
+            <span class="news-card-type">Hecho</span>
+            <div class="thumb"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg></div>
+          </div>
+          <div class="body">
+            <h3 class="headline">Boric anuncia reforma tributaria progresiva</h3>
+            <p class="snippet">Paquete de medidas apunta a la recaudacion progresiva y programas sociales.</p>
+            <div class="newsmeta">
+              <span class="source">La Tercera</span><span>·</span><span>hace 3h</span><span>·</span>
+              <span class="sentiment sentiment-positive">Positivo</span>
+            </div>
+            <div class="mentions">
+              <span class="mention"><span class="avatar-mini">B</span>Boric</span>
+            </div>
+          </div>
+        </article>
+        <article class="news-card">
+          <div class="thumb-wrap">
+            <div class="thumb" style="background:linear-gradient(135deg, var(--info-200), var(--info-100))"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--info-700)"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          </div>
+          <div class="body">
+            <h3 class="headline">Provoste llama a pacto amplio de gobernabilidad 2026</h3>
+            <p class="snippet">Propuesta busca acuerdo transversal entre oficialismo y sectores moderados.</p>
+            <div class="newsmeta">
+              <span class="source">CNN Chile</span><span>·</span><span>hace 6h</span><span>·</span>
+              <span class="sentiment sentiment-neutral">Neutral</span>
+            </div>
+            <div class="mentions">
+              <span class="mention"><span class="avatar-mini">P</span>Provoste</span>
+            </div>
+          </div>
+        </article>
+        <article class="news-card">
+          <div class="thumb-wrap">
+            <span class="news-card-type">Opinion</span>
+            <div class="thumb" style="background:linear-gradient(135deg, var(--warning-200), var(--warning-100))"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--warning-700)"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+          </div>
+          <div class="body">
+            <h3 class="headline">Camara aprueba Ley de Presupuestos con votos divididos</h3>
+            <p class="snippet">La votacion mostro fracturas dentro del oficialismo antes del despacho al Senado.</p>
+            <div class="newsmeta">
+              <span class="source">Emol</span><span>·</span><span>ayer</span><span>·</span>
+              <span class="sentiment sentiment-neutral">Neutral</span>
+            </div>
+            <div class="mentions">
+              <span class="mention"><span class="avatar-mini">B</span>Boric</span>
+              <span class="mention"><span class="avatar-mini">K</span>Kast</span>
+              <span class="mention more">+3</span>
+            </div>
+          </div>
+        </article>
+        <article class="news-card">
+          <div class="thumb-wrap">
+            <div class="thumb" style="background:linear-gradient(135deg, var(--danger-200), var(--danger-100))"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--danger-700)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          </div>
+          <div class="body">
+            <h3 class="headline">Oposicion critica manejo de la reforma previsional</h3>
+            <p class="snippet">Parlamentarios acusaron falta de dialogo en la comision de Trabajo.</p>
+            <div class="newsmeta">
+              <span class="source">Biobiochile</span><span>·</span><span>hace 2 dias</span><span>·</span>
+              <span class="sentiment sentiment-negative">Negativo</span>
+            </div>
+            <div class="mentions">
+              <span class="mention"><span class="avatar-mini">K</span>Kast</span>
+              <span class="mention"><span class="avatar-mini">S</span>Sichel</span>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="news-feed-loadmore">
+        <button class="btn btn-secondary">Cargar mas noticias</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-header" style="margin-top:var(--sp-8)">
+    <div class="kicker">Variante</div>
+    <h2 style="font-size:var(--fs-xl)">Loading skeleton</h2>
+    <p>Mientras cargan las noticias, mostramos 3 cards fantasma con animacion shimmer.</p>
+  </div>
+  <div class="demo stack-4" style="max-width:640px">
+    <div class="news-skeleton">
+      <div class="sk-thumb"></div>
+      <div class="sk-body">
+        <div class="sk-line w-90"></div>
+        <div class="sk-line w-70"></div>
+        <div class="sk-line w-40"></div>
+        <div class="sk-line w-50"></div>
+      </div>
+    </div>
+    <div class="news-skeleton">
+      <div class="sk-thumb"></div>
+      <div class="sk-body">
+        <div class="sk-line w-90"></div>
+        <div class="sk-line w-70"></div>
+        <div class="sk-line w-40"></div>
+        <div class="sk-line w-50"></div>
+      </div>
+    </div>
+    <div class="news-skeleton">
+      <div class="sk-thumb"></div>
+      <div class="sk-body">
+        <div class="sk-line w-90"></div>
+        <div class="sk-line w-70"></div>
+        <div class="sk-line w-40"></div>
+        <div class="sk-line w-50"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-header" style="margin-top:var(--sp-8)">
+    <div class="kicker">Variante</div>
+    <h2 style="font-size:var(--fs-xl)">Empty state</h2>
+    <p>Cuando ningun resultado matchea los filtros, mostramos el EmptyState con un CTA para limpiar filtros.</p>
+  </div>
+  <div class="demo">
+    <div class="empty-state">
+      <div class="icon-bg"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+      <h4>Ninguna noticia coincide con tus filtros</h4>
+      <p>Prueba ampliar los filtros o mira todas las noticias sin filtrar.</p>
+      <button class="btn btn-primary">Limpiar filtros</button>
     </div>
   </div>
 </section>
@@ -3091,7 +3396,7 @@
   <div class="sec-header">
     <div class="kicker">Template</div>
     <h2>Noticias</h2>
-    <p>Lista de noticias con filtros arriba (candidato, sentimiento, fuente). Agrupada por fecha (hoy / esta semana / anterior).</p>
+    <p>Feed completo usando el organismo NewsFeed: header con contador, dos filas de filtros (candidato + sentimiento), grid responsive de NewsCards con chips de menciones, boton "Cargar mas" al final. En ≥900px pasa a 2 columnas.</p>
   </div>
   <div class="frame">
     <span class="frame-label">Template · Noticias</span>
@@ -3101,62 +3406,107 @@
         <button class="btn-icon" aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
       </div>
 
-      <div class="row" style="margin-bottom:16px; gap:8px">
-        <span class="chip">Todos los candidatos</span>
-        <span class="chip">Cualquier sentimiento</span>
-        <span class="chip">Todas las fuentes</span>
-      </div>
+      <div class="news-feed">
+        <div class="news-feed-header">
+          <h3>Ultimas noticias</h3>
+          <span class="count">128 resultados</span>
+        </div>
 
-      <div class="news-group-title">Hoy</div>
-      <div class="stack-4">
-        <article class="news-card">
-          <div class="thumb"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg></div>
-          <div class="body">
-            <h3 class="headline">Boric anuncia proyecto de reforma tributaria con foco en grandes fortunas</h3>
-            <p class="snippet">El mandatario presento en La Moneda un nuevo paquete de medidas tributarias progresivas.</p>
-            <div class="newsmeta">
-              <span class="source">La Tercera</span><span>·</span><span>hace 3h</span><span>·</span>
-              <span class="sentiment sentiment-positive">Positivo</span>
-            </div>
+        <div class="news-feed-filters">
+          <div class="filter-row">
+            <span class="filter-lbl">Candidato</span>
+            <span class="chip chip-active">Todos</span>
+            <span class="chip">Boric</span>
+            <span class="chip">Kast</span>
+            <span class="chip">Bachelet</span>
+            <span class="chip">Provoste</span>
+            <span class="chip">Parisi</span>
+            <span class="chip">Sichel</span>
           </div>
-        </article>
-        <article class="news-card">
-          <div class="thumb" style="background:linear-gradient(135deg, var(--info-200), var(--info-100))"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--info-700)"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-          <div class="body">
-            <h3 class="headline">Provoste llama a un pacto amplio de gobernabilidad para 2026</h3>
-            <p class="snippet">La senadora propuso un acuerdo transversal entre el oficialismo y sectores moderados de la oposicion.</p>
-            <div class="newsmeta">
-              <span class="source">CNN Chile</span><span>·</span><span>hace 6h</span><span>·</span>
-              <span class="sentiment sentiment-neutral">Neutral</span>
-            </div>
+          <div class="filter-row">
+            <span class="filter-lbl">Sentimiento</span>
+            <span class="chip chip-active">Todos</span>
+            <span class="chip">Positivas</span>
+            <span class="chip">Neutrales</span>
+            <span class="chip">Negativas</span>
           </div>
-        </article>
-      </div>
+        </div>
 
-      <div class="news-group-title">Esta semana</div>
-      <div class="stack-4">
-        <article class="news-card">
-          <div class="thumb" style="background:linear-gradient(135deg, var(--warning-200), var(--warning-100))"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--warning-700)"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-          <div class="body">
-            <h3 class="headline">Camara aprueba en general la Ley de Presupuestos con votos divididos</h3>
-            <p class="snippet">La votacion mostro fracturas dentro del oficialismo. Se esperan indicaciones en las proximas semanas.</p>
-            <div class="newsmeta">
-              <span class="source">Emol</span><span>·</span><span>ayer</span><span>·</span>
-              <span class="sentiment sentiment-neutral">Neutral</span>
+        <div class="news-grid">
+          <article class="news-card">
+            <div class="thumb-wrap">
+              <span class="news-card-type">Hecho</span>
+              <div class="thumb"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg></div>
             </div>
-          </div>
-        </article>
-        <article class="news-card">
-          <div class="thumb" style="background:linear-gradient(135deg, var(--danger-200), var(--danger-100))"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--danger-700)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-          <div class="body">
-            <h3 class="headline">Oposicion critica manejo de la reforma previsional en comision</h3>
-            <p class="snippet">Parlamentarios de oposicion acusaron falta de dialogo y transparencia en las ultimas sesiones.</p>
-            <div class="newsmeta">
-              <span class="source">Biobiochile</span><span>·</span><span>hace 2 dias</span><span>·</span>
-              <span class="sentiment sentiment-negative">Negativo</span>
+            <div class="body">
+              <h3 class="headline">Boric anuncia proyecto de reforma tributaria con foco en grandes fortunas</h3>
+              <p class="snippet">El mandatario presento en La Moneda un nuevo paquete de medidas tributarias progresivas.</p>
+              <div class="newsmeta">
+                <span class="source">La Tercera</span><span>·</span><span>hace 3h</span><span>·</span>
+                <span class="sentiment sentiment-positive">Positivo</span>
+              </div>
+              <div class="mentions">
+                <span class="mention"><span class="avatar-mini">B</span>Boric</span>
+              </div>
             </div>
-          </div>
-        </article>
+          </article>
+          <article class="news-card">
+            <div class="thumb-wrap">
+              <div class="thumb" style="background:linear-gradient(135deg, var(--info-200), var(--info-100))"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--info-700)"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            </div>
+            <div class="body">
+              <h3 class="headline">Provoste llama a un pacto amplio de gobernabilidad para 2026</h3>
+              <p class="snippet">La senadora propuso un acuerdo transversal entre el oficialismo y sectores moderados de la oposicion.</p>
+              <div class="newsmeta">
+                <span class="source">CNN Chile</span><span>·</span><span>hace 6h</span><span>·</span>
+                <span class="sentiment sentiment-neutral">Neutral</span>
+              </div>
+              <div class="mentions">
+                <span class="mention"><span class="avatar-mini">P</span>Provoste</span>
+              </div>
+            </div>
+          </article>
+          <article class="news-card">
+            <div class="thumb-wrap">
+              <span class="news-card-type">Opinion</span>
+              <div class="thumb" style="background:linear-gradient(135deg, var(--warning-200), var(--warning-100))"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--warning-700)"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            </div>
+            <div class="body">
+              <h3 class="headline">Camara aprueba en general la Ley de Presupuestos con votos divididos</h3>
+              <p class="snippet">La votacion mostro fracturas dentro del oficialismo. Se esperan indicaciones en las proximas semanas.</p>
+              <div class="newsmeta">
+                <span class="source">Emol</span><span>·</span><span>ayer</span><span>·</span>
+                <span class="sentiment sentiment-neutral">Neutral</span>
+              </div>
+              <div class="mentions">
+                <span class="mention"><span class="avatar-mini">B</span>Boric</span>
+                <span class="mention"><span class="avatar-mini">K</span>Kast</span>
+                <span class="mention more">+3</span>
+              </div>
+            </div>
+          </article>
+          <article class="news-card">
+            <div class="thumb-wrap">
+              <div class="thumb" style="background:linear-gradient(135deg, var(--danger-200), var(--danger-100))"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--danger-700)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+            </div>
+            <div class="body">
+              <h3 class="headline">Oposicion critica manejo de la reforma previsional en comision</h3>
+              <p class="snippet">Parlamentarios acusaron falta de dialogo y transparencia en las ultimas sesiones.</p>
+              <div class="newsmeta">
+                <span class="source">Biobiochile</span><span>·</span><span>hace 2 dias</span><span>·</span>
+                <span class="sentiment sentiment-negative">Negativo</span>
+              </div>
+              <div class="mentions">
+                <span class="mention"><span class="avatar-mini">K</span>Kast</span>
+                <span class="mention"><span class="avatar-mini">S</span>Sichel</span>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="news-feed-loadmore">
+          <button class="btn btn-secondary">Cargar mas noticias</button>
+        </div>
       </div>
     </div>
   </div>
@@ -3239,28 +3589,37 @@
       </div>
       <div class="stack-4" style="margin-bottom:24px">
         <div class="postura match">
-          <div class="q">¿Deberia el Estado aumentar el gasto en educacion superior gratuita?</div>
-          <div class="votes">
-            <div class="vote-cell"><span class="lbl">Tu voto</span><span class="val">Muy de acuerdo</span></div>
-            <div class="vote-cell"><span class="lbl">Boric</span><span class="val">Muy de acuerdo</span></div>
+          <div class="postura-top">
+            <p class="q">Deberia el Estado aumentar el gasto en educacion superior gratuita?</p>
+            <span class="postura-status">Coinciden</span>
           </div>
-          <div class="match-indicator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Coinciden completamente</div>
+          <div class="postura-compare">
+            <span><span class="who">Tu</span><span class="answer">Muy de acuerdo</span></span>
+            <span class="sep">·</span>
+            <span><span class="who">Boric</span><span class="answer">Muy de acuerdo</span></span>
+          </div>
         </div>
         <div class="postura partial">
-          <div class="q">¿Deberia mantenerse el sistema de AFP con cambios?</div>
-          <div class="votes">
-            <div class="vote-cell"><span class="lbl">Tu voto</span><span class="val">De acuerdo</span></div>
-            <div class="vote-cell"><span class="lbl">Boric</span><span class="val">Neutral</span></div>
+          <div class="postura-top">
+            <p class="q">Deberia mantenerse el sistema de AFP con cambios?</p>
+            <span class="postura-status">Parcial</span>
           </div>
-          <div class="match-indicator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg> Coinciden parcialmente</div>
+          <div class="postura-compare">
+            <span><span class="who">Tu</span><span class="answer">De acuerdo</span></span>
+            <span class="sep">·</span>
+            <span><span class="who">Boric</span><span class="answer">Neutral</span></span>
+          </div>
         </div>
         <div class="postura no-match">
-          <div class="q">¿Deberia eliminarse el impuesto especifico a los combustibles?</div>
-          <div class="votes">
-            <div class="vote-cell"><span class="lbl">Tu voto</span><span class="val">Muy de acuerdo</span></div>
-            <div class="vote-cell"><span class="lbl">Boric</span><span class="val">Muy en desacuerdo</span></div>
+          <div class="postura-top">
+            <p class="q">Deberia eliminarse el impuesto especifico a los combustibles?</p>
+            <span class="postura-status">No coinciden</span>
           </div>
-          <div class="match-indicator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> No coinciden</div>
+          <div class="postura-compare">
+            <span><span class="who">Tu</span><span class="answer">Muy de acuerdo</span></span>
+            <span class="sep">·</span>
+            <span><span class="who">Boric</span><span class="answer">Muy en desacuerdo</span></span>
+          </div>
         </div>
       </div>
 
@@ -3326,48 +3685,60 @@
       <div class="news-group-title">Educacion (3)</div>
       <div class="stack-4" style="margin-bottom:20px">
         <div class="postura match">
-          <div class="q">¿Deberia el Estado aumentar el gasto en educacion superior gratuita?</div>
-          <div class="votes">
-            <div class="vote-cell"><span class="lbl">Tu voto</span><span class="val">Muy de acuerdo</span></div>
-            <div class="vote-cell"><span class="lbl">Boric</span><span class="val">Muy de acuerdo</span></div>
+          <div class="postura-top">
+            <p class="q">Deberia el Estado aumentar el gasto en educacion superior gratuita?</p>
+            <span class="postura-status">Coinciden</span>
           </div>
-          <div class="match-indicator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Coinciden completamente</div>
+          <div class="postura-compare">
+            <span><span class="who">Tu</span><span class="answer">Muy de acuerdo</span></span>
+            <span class="sep">·</span>
+            <span><span class="who">Boric</span><span class="answer">Muy de acuerdo</span></span>
+          </div>
         </div>
       </div>
 
       <div class="news-group-title">Salud (2)</div>
       <div class="stack-4" style="margin-bottom:20px">
         <div class="postura match">
-          <div class="q">¿Deberia el sistema publico cubrir tratamientos de alto costo sin lista de espera?</div>
-          <div class="votes">
-            <div class="vote-cell"><span class="lbl">Tu voto</span><span class="val">De acuerdo</span></div>
-            <div class="vote-cell"><span class="lbl">Boric</span><span class="val">Muy de acuerdo</span></div>
+          <div class="postura-top">
+            <p class="q">Deberia el sistema publico cubrir tratamientos de alto costo sin lista de espera?</p>
+            <span class="postura-status">Coinciden</span>
           </div>
-          <div class="match-indicator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Coinciden completamente</div>
+          <div class="postura-compare">
+            <span><span class="who">Tu</span><span class="answer">De acuerdo</span></span>
+            <span class="sep">·</span>
+            <span><span class="who">Boric</span><span class="answer">Muy de acuerdo</span></span>
+          </div>
         </div>
       </div>
 
       <div class="news-group-title">Pensiones (1)</div>
       <div class="stack-4" style="margin-bottom:20px">
         <div class="postura partial">
-          <div class="q">¿Deberia mantenerse el sistema de AFP con cambios?</div>
-          <div class="votes">
-            <div class="vote-cell"><span class="lbl">Tu voto</span><span class="val">De acuerdo</span></div>
-            <div class="vote-cell"><span class="lbl">Boric</span><span class="val">Neutral</span></div>
+          <div class="postura-top">
+            <p class="q">Deberia mantenerse el sistema de AFP con cambios?</p>
+            <span class="postura-status">Parcial</span>
           </div>
-          <div class="match-indicator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg> Coinciden parcialmente</div>
+          <div class="postura-compare">
+            <span><span class="who">Tu</span><span class="answer">De acuerdo</span></span>
+            <span class="sep">·</span>
+            <span><span class="who">Boric</span><span class="answer">Neutral</span></span>
+          </div>
         </div>
       </div>
 
       <div class="news-group-title">Impuestos (1)</div>
       <div class="stack-4">
         <div class="postura no-match">
-          <div class="q">¿Deberia eliminarse el impuesto especifico a los combustibles?</div>
-          <div class="votes">
-            <div class="vote-cell"><span class="lbl">Tu voto</span><span class="val">Muy de acuerdo</span></div>
-            <div class="vote-cell"><span class="lbl">Boric</span><span class="val">Muy en desacuerdo</span></div>
+          <div class="postura-top">
+            <p class="q">Deberia eliminarse el impuesto especifico a los combustibles?</p>
+            <span class="postura-status">No coinciden</span>
           </div>
-          <div class="match-indicator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> No coinciden</div>
+          <div class="postura-compare">
+            <span><span class="who">Tu</span><span class="answer">Muy de acuerdo</span></span>
+            <span class="sep">·</span>
+            <span><span class="who">Boric</span><span class="answer">Muy en desacuerdo</span></span>
+          </div>
         </div>
       </div>
     </div>

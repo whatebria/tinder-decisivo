@@ -23,7 +23,7 @@ import {
 } from "react-native";
 
 import { useCandidatos, useNoticiasFeed } from "../api/hooks";
-import { TextButton } from "../components";
+import { Link } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useThemeColors } from "../theme/useTheme";
 
@@ -244,9 +244,9 @@ export function NoticiasScreen({ navigation }: RootStackScreenProps<"Noticias">)
       {/* Boton limpiar filtros */}
       {hayFiltroActivo ? (
         <View style={{ paddingHorizontal: 16, marginBottom: 4 }}>
-          <TextButton onPress={limpiarTodo} color={c.danger}>
+          <Link block onPress={limpiarTodo} color={c.danger}>
             Limpiar filtros
-          </TextButton>
+          </Link>
         </View>
       ) : null}
 
@@ -263,7 +263,7 @@ export function NoticiasScreen({ navigation }: RootStackScreenProps<"Noticias">)
               No hay noticias que coincidan con los filtros.
             </Text>
             {hayFiltroActivo ? (
-              <TextButton onPress={limpiarTodo}>Ver todas</TextButton>
+              <Link block onPress={limpiarTodo}>Ver todas</Link>
             ) : null}
           </View>
         ) : (
@@ -338,7 +338,7 @@ export function NoticiasScreen({ navigation }: RootStackScreenProps<"Noticias">)
         )}
 
         <View style={{ height: 12 }} />
-        <TextButton onPress={() => navigation.goBack()}>Volver</TextButton>
+        <Link block onPress={() => navigation.goBack()}>Volver</Link>
       </ScrollView>
     </View>
   );

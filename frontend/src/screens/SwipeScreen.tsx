@@ -27,7 +27,7 @@ import {
 } from "../api/hooks";
 import { SwipeCard } from "../components/organisms/SwipeCard";
 import { useToast } from "../components/molecules/Toast";
-import { TextButton } from "../components";
+import { Link } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { formatMatchPercentage, getMatchColor } from "../services/matching";
 import { useAuthStore } from "../store/auth";
@@ -86,6 +86,10 @@ export function SwipeScreen({ navigation }: RootStackScreenProps<"Swipe">) {
   }, [matchesQ.data]);
 
   const [index, setIndex] = useState(0);
+  const [ultimaAccion, setUltimaAccion] = useState<{
+    candidato: Candidato;
+    tipo: "like" | "nope";
+  } | null>(null);
 
   function advance() {
     setIndex((i) => i + 1);
@@ -96,6 +100,7 @@ export function SwipeScreen({ navigation }: RootStackScreenProps<"Swipe">) {
     toggleFav.mutate(cand.id, {
       onError: (e) => toast.error("No pudimos guardar el favorito", getErrorMessage(e)),
     });
+    setUltimaAccion({ candidato: cand, tipo: "like" });
     advance();
   }
 
@@ -104,7 +109,31 @@ export function SwipeScreen({ navigation }: RootStackScreenProps<"Swipe">) {
     toggleDesc.mutate(cand.id, {
       onError: (e) => toast.error("No pudimos descartar", getErrorMessage(e)),
     });
+    setUltimaAccion({ candidato: cand, tipo: "nope" });
     advance();
+  }
+
+  function handleUndo() {
+    if (!ultimaAccion) return;
+    const { candidato, tipo } = ultimaAccion;
+    if (candidato.id == null) return;
+    // Los toggles son idempotentes: llamarlos de nuevo revierte la accion.
+    if (tipo === "like") {
+      toggleFav.mutate(candidato.id, {
+        onError: (e) =>
+          toast.error("No pudimos deshacer el favorito", getErrorMessage(e)),
+      });
+    } else {
+      toggleDesc.mutate(candidato.id, {
+        onError: (e) =>
+          toast.error("No pudimos deshacer el descarte", getErrorMessage(e)),
+      });
+    }
+    setIndex((i) => Math.max(0, i - 1));
+    setUltimaAccion(null);
+    toast.success(
+      `Deshecho: ${candidato.nombre} ${candidato.apellido ?? ""}`.trim()
+    );
   }
 
   function handleTap(cand: Candidato) {
@@ -130,7 +159,7 @@ export function SwipeScreen({ navigation }: RootStackScreenProps<"Swipe">) {
           El swipe usa tus favoritos y descartados. Crea una cuenta para
           usarlo.
         </Text>
-        <TextButton onPress={() => navigation.goBack()}>Volver</TextButton>
+        <Link block onPress={() => navigation.goBack()}>Volver</Link>
       </View>
     );
   }
@@ -154,13 +183,13 @@ export function SwipeScreen({ navigation }: RootStackScreenProps<"Swipe">) {
           Ya evaluaste a todos los candidatos disponibles para esta eleccion.
         </Text>
         <View style={{ gap: 8, marginTop: 12 }}>
-          <TextButton onPress={() => navigation.navigate("MisFavoritos")}>
+          <Link block onPress={() => navigation.navigate("MisFavoritos")}>
             Ver mis favoritos
-          </TextButton>
-          <TextButton onPress={() => navigation.navigate("Resultados")}>
+          </Link>
+          <Link block onPress={() => navigation.navigate("Resultados")}>
             Ver mi ranking
-          </TextButton>
-          <TextButton onPress={() => navigation.goBack()}>Volver</TextButton>
+          </Link>
+          <Link block onPress={() => navigation.goBack()}>Volver</Link>
         </View>
       </View>
     );
@@ -173,9 +202,26 @@ export function SwipeScreen({ navigation }: RootStackScreenProps<"Swipe">) {
     <View style={[styles.container, { backgroundColor: c.bg }]}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: c.text }]}>Swipe</Text>
-        <Text style={[styles.counter, { color: c.textSecondary }]}>
-          {remaining.length} por evaluar
-        </Text>
+        <View style={styles.headerRight}>
+          {ultimaAccion ? (
+            <Pressable
+              onPress={handleUndo}
+              style={({ pressed }) => [
+                styles.undoBtn,
+                { borderColor: c.primary, opacity: pressed ? 0.6 : 1 },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Deshacer ultima accion"
+            >
+              <Text style={{ color: c.primary, fontWeight: "700", fontSize: 12 }}>
+                Deshacer
+              </Text>
+            </Pressable>
+          ) : null}
+          <Text style={[styles.counter, { color: c.textSecondary }]}>
+            {remaining.length} por evaluar
+          </Text>
+        </View>
       </View>
 
       <View style={styles.stackArea}>
@@ -223,7 +269,7 @@ export function SwipeScreen({ navigation }: RootStackScreenProps<"Swipe">) {
       </View>
 
       <View style={{ padding: 12, alignItems: "center" }}>
-        <TextButton onPress={() => navigation.goBack()}>Salir</TextButton>
+        <Link block onPress={() => navigation.goBack()}>Salir</Link>
       </View>
     </View>
   );
@@ -335,7 +381,14 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "baseline",
+    alignItems: "center",
+  },
+  headerRight: { flexDirection: "row", alignItems: "center", gap: 10 },
+  undoBtn: {
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
   },
   title: { fontSize: 24, fontWeight: "800" },
   counter: { fontSize: 12, fontWeight: "600" },

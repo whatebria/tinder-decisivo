@@ -25,7 +25,7 @@ import {
 } from "../api/hooks";
 import { CambiarPasswordModal } from "../components";
 import { EliminarCuentaModal } from "../components";
-import { TextButton } from "../components";
+import { Link } from "../components";
 import { useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
@@ -136,17 +136,17 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
         {/* Acciones */}
         <H3 color="$text">Cuenta</H3>
         <YStack gap="$2">
-          <TextButton onPress={() => setPassOpen(true)}>
+          <Link block onPress={() => setPassOpen(true)}>
             Cambiar mi contrasena
-          </TextButton>
-          <TextButton onPress={logout}>Cerrar sesion</TextButton>
-          <TextButton onPress={() => setDeleteOpen(true)} color={c.danger}>
+          </Link>
+          <Link block onPress={logout}>Cerrar sesion</Link>
+          <Link block onPress={() => setDeleteOpen(true)} color={c.danger}>
             Eliminar mi cuenta
-          </TextButton>
+          </Link>
         </YStack>
 
         <YStack flex={1} />
-        <TextButton onPress={() => navigation.goBack()}>Volver</TextButton>
+        <Link block onPress={() => navigation.goBack()}>Volver</Link>
       </YStack>
 
       <CambiarPasswordModal

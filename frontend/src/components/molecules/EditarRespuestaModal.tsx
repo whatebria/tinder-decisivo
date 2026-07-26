@@ -13,9 +13,9 @@ import React, { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import type { MiRespuesta } from "../../api/endpoints";
-import { PrimaryButton } from "../_legacy/PrimaryButton";
-import { SelectableButton } from "../_legacy/SelectableButton";
-import { TextButton } from "../_legacy/TextButton";
+import { Button } from "../atoms/Button";
+import { Link } from "../atoms/Link";
+import { RadioGroup } from "./RadioGroup";
 
 const PESOS: Array<{ value: number; label: string }> = [
   { value: 0, label: "No me importa" },
@@ -78,35 +78,23 @@ export function EditarRespuestaModal({
             contentContainerStyle={{ paddingBottom: 12 }}
           >
             <Text style={styles.sectionTitle}>Tu respuesta</Text>
-            <View style={styles.chipsColumn}>
-              {respuesta.opciones
+            <RadioGroup<number>
+              options={respuesta.opciones
                 .slice()
                 .sort((a, b) => b.valor - a.valor)
-                .map((op) => (
-                  <SelectableButton
-                    key={op.id}
-                    selected={opcionId === op.id}
-                    onPress={() => setOpcionId(op.id)}
-                    accessibilityLabel={`Opcion ${op.texto}`}
-                  >
-                    {op.texto}
-                  </SelectableButton>
-                ))}
-            </View>
+                .map((op) => ({ value: op.id, label: op.texto }))}
+              value={opcionId}
+              onChange={setOpcionId}
+              accessibilityLabel="Opciones de respuesta"
+            />
 
             <Text style={styles.sectionTitle}>Que tan importante es para ti</Text>
-            <View style={styles.chipsColumn}>
-              {PESOS.map((p) => (
-                <SelectableButton
-                  key={p.value}
-                  selected={peso === p.value}
-                  onPress={() => setPeso(p.value)}
-                  accessibilityLabel={`Peso ${p.label}`}
-                >
-                  {p.label}
-                </SelectableButton>
-              ))}
-            </View>
+            <RadioGroup<number>
+              options={PESOS.map((p) => ({ value: p.value, label: p.label }))}
+              value={peso}
+              onChange={setPeso}
+              accessibilityLabel="Peso de la respuesta"
+            />
 
             <View style={styles.warning}>
               <Text style={styles.warningText}>
@@ -117,16 +105,16 @@ export function EditarRespuestaModal({
           </ScrollView>
 
           <View style={styles.actions}>
-            <PrimaryButton
+            <Button
               onPress={handleSubmit}
               loading={loading}
               disabled={!changed || opcionId == null}
             >
               Guardar cambios
-            </PrimaryButton>
-            <TextButton onPress={onCancel} disabled={loading}>
+            </Button>
+            <Link block onPress={onCancel} disabled={loading}>
               Cancelar
-            </TextButton>
+            </Link>
           </View>
         </Pressable>
       </Pressable>

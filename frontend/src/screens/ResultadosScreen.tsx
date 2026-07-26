@@ -42,7 +42,7 @@ import { Badge, type BadgeVariant } from "../components";
 import { Button } from "../components";
 import { RadarChart } from "../components";
 import { ShareModal } from "../components";
-import { TextButton } from "../components";
+import { Link } from "../components";
 import { useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import {
@@ -193,14 +193,14 @@ export function ResultadosScreen({
             </Card>
           ) : null}
           {hiddenCount > 0 ? (
-            <TextButton onPress={() => navigation.navigate("MisDescartados")}>
+            <Link block onPress={() => navigation.navigate("MisDescartados")}>
               {`${hiddenCount} candidato(s) descartado(s). Ver lista`}
-            </TextButton>
+            </Link>
           ) : null}
           {!isGuest && decisionQ.data ? (
-            <TextButton onPress={() => navigation.navigate("MiDecision")}>
+            <Link block onPress={() => navigation.navigate("MiDecision")}>
               Ya tienes una decision guardada. Ver mi voto
-            </TextButton>
+            </Link>
           ) : null}
         </YStack>
 
@@ -302,10 +302,10 @@ export function ResultadosScreen({
             Compartir mi ranking
           </Button>
         ) : null}
-        <TextButton onPress={() => navigation.navigate("Comparar")}>
+        <Link block onPress={() => navigation.navigate("Comparar")}>
           Comparar candidatos
-        </TextButton>
-        <TextButton onPress={handleVolver}>Volver al inicio</TextButton>
+        </Link>
+        <Link block onPress={handleVolver}>Volver al inicio</Link>
       </YStack>
 
       <ShareModal

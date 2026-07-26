@@ -7,7 +7,7 @@ import { H1, Paragraph, YStack } from "tamagui";
 
 import { useCuestionarioStore } from "../store/cuestionario";
 import { Button } from "../components";
-import { TextButton } from "../components";
+import { Link } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 
 export function SubmitDoneScreen({
@@ -42,7 +42,7 @@ export function SubmitDoneScreen({
       <Button onPress={handleVerResultados}>
         Ver mis matches
       </Button>
-      <TextButton onPress={handleVolver}>Volver al inicio</TextButton>
+      <Link block onPress={handleVolver}>Volver al inicio</Link>
     </YStack>
   );
 }

@@ -9,7 +9,7 @@ import { H1, Paragraph, Separator, Spinner, YStack } from "tamagui";
 
 import { getErrorMessage } from "../api/client";
 import { useDescartados, useToggleDescartado } from "../api/hooks";
-import { DiscardedCard, EmptyState, TextButton, useToast } from "../components";
+import { DiscardedCard, EmptyState, Link, useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 
 export function MisDescartadosScreen({
@@ -69,7 +69,7 @@ export function MisDescartadosScreen({
         )}
 
         <YStack flex={1} />
-        <TextButton onPress={() => navigation.goBack()}>Volver</TextButton>
+        <Link block onPress={() => navigation.goBack()}>Volver</Link>
       </YStack>
     </ScrollView>
   );
