@@ -1,28 +1,29 @@
 /**
  * DetalleCandidatoScreen: perfil completo del candidato.
  *
- * Basado en design-system-lowfi.html · Template 13 (Perfil de candidato) +
- * Template 14 (Perfil · empty state · sin match).
+ * Basado en design-system-lowfi.html Templates #13 (con match) y #14 (empty).
  *
- * Layout:
- *   - ScreenTopBar (back + titulo "Perfil de candidato" + subtitulo con tipo eleccion)
- *   - Hero centrado (avatar XL + nombre + partido + match% + chip confianza)
- *     - Empty variant (matchPct == null): sin match%, con CTA "Empezar cuestionario"
- *   - CTA "Marcar como mi elegido" (rename de "Este es mi voto final")
- *   - ActionRow (3 IconButton: favorito, descartar, compartir)
- *   - Tabs: Resumen / Posturas (N) / Noticias (N)
- *   - Contenido por tab
+ * Composicion via design system (atoms/molecules/organisms):
+ *   - ScreenTopBar (molecule)
+ *   - ProfileHero (organism) para avatar + partido + nombre + subtitle
+ *   - MatchTier (molecule) para el chip de confianza
+ *   - Tabs (atom) con contadores
+ *   - CandidatoPosturas (organism) en la tab Posturas
+ *   - MatchExplanation (organism) en el resumen
+ *   - NewsCard (molecule) en la tab Noticias
+ *   - Modal (molecule) para el info modal de confianza
+ *   - Button / IconButton / Icon / Chip / Spinner (atoms)
+ *
+ * Todos los estilos usan tokens de spacing / radii / typography. Sin
+ * hardcodes de padding, gap, fontSize ni borderRadius (ver seccion Styles).
  *
  * No usa AppShell porque es una detail screen accesible desde 4 origenes
- * distintos (Resultados, Guardados, Comparar, Swipe) y no pertenece a un
- * tab especifico.
+ * distintos (Resultados, Guardados, Comparar, Swipe).
  */
 
 import React, { useMemo, useState } from "react";
 import {
   Linking,
-  Modal,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -43,15 +44,18 @@ import {
   useToggleDescartado,
   useToggleFavorito,
 } from "../api/hooks";
-import type { Candidato, Noticia } from "../api/endpoints";
+import type { Candidato, Noticia, PosturaCandidatoDetalle } from "../api/endpoints";
+import type { Sentiment } from "../components";
 import {
-  Avatar,
   Button,
   CandidatoPosturas,
-  Chip,
   IconButton,
   Icon,
   MatchExplanation,
+  MatchTier,
+  Modal,
+  NewsCard,
+  ProfileHero,
   RadarChart,
   ScreenTopBar,
   ShareModal,
@@ -63,7 +67,9 @@ import type { RootStackScreenProps } from "../navigation/types";
 import { formatMatchPercentage, getMatchColor } from "../services/matching";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
+import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
+import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
 
 type PerfilTab = "resumen" | "posturas" | "noticias";
@@ -76,6 +82,14 @@ function initials(c: Candidato): string {
   const n = c.nombre?.[0] ?? "";
   const a = c.apellido?.[0] ?? "";
   return (n + a).toUpperCase() || "?";
+}
+
+/** Mapea el string de confianza del backend al tier del DS. */
+function confianzaToTier(confianza: string | null): "high" | "mid" | "low" {
+  const v = (confianza ?? "").toUpperCase();
+  if (v === "ALTA") return "high";
+  if (v === "BAJA") return "low";
+  return "mid";
 }
 
 export function DetalleCandidatoScreen({
@@ -150,10 +164,6 @@ export function DetalleCandidatoScreen({
     );
   }
 
-  function handleGoToCuestionario() {
-    navigation.navigate("Cuestionario");
-  }
-
   if (candidatoQ.isLoading) {
     return (
       <View style={[styles.center, { backgroundColor: c.bg }]}>
@@ -165,7 +175,7 @@ export function DetalleCandidatoScreen({
   if (!candidato) {
     return (
       <View style={[styles.center, { backgroundColor: c.bg }]}>
-        <Text style={{ color: c.textSecondary, marginBottom: 12 }}>
+        <Text style={[styles.paragraph, styles.centerMuted, { color: c.textSecondary }]}>
           Candidato no encontrado.
         </Text>
         <Button variant="ghost" onPress={() => navigation.goBack()}>
@@ -186,15 +196,27 @@ export function DetalleCandidatoScreen({
           onBack={() => navigation.goBack()}
         />
 
-        <Hero
-          candidato={candidato}
-          matchPct={matchPct}
-          confianza={confianza}
-          scoreCol={scoreCol}
-          isMyVote={isMyVote}
-          onOpenConfianzaInfo={() => setConfianzaInfoOpen(true)}
-          onEmptyCta={handleGoToCuestionario}
+        <ProfileHero
+          name={fullName(candidato)}
+          initials={initials(candidato)}
+          partido={candidato.partido ?? "Independiente"}
+          subtitle={hasMatch ? "Perfil basado en tus respuestas" : "Aun sin match calculado"}
+          tilt="default"
         />
+
+        {hasMatch ? (
+          <MatchBlock
+            matchPct={matchPct}
+            confianza={confianza}
+            scoreCol={scoreCol}
+            isMyVote={isMyVote}
+            onOpenInfo={() => setConfianzaInfoOpen(true)}
+          />
+        ) : (
+          <EmptyMatchBlock
+            onStart={() => navigation.navigate("Cuestionario")}
+          />
+        )}
 
         {!isGuest && hasMatch && !isMyVote && !isDescartado ? (
           <Button
@@ -235,7 +257,7 @@ export function DetalleCandidatoScreen({
             { value: "posturas", label: "Posturas", count: posturas.length },
             { value: "noticias", label: "Noticias", count: noticias.length },
           ]}
-          style={{ alignSelf: "stretch" }}
+          style={styles.tabsStretch}
         />
 
         {tab === "resumen" ? (
@@ -263,104 +285,93 @@ export function DetalleCandidatoScreen({
         onClose={() => setShareOpen(false)}
       />
 
-      <ConfianzaInfoModal
+      <Modal
         visible={confianzaInfoOpen}
         onClose={() => setConfianzaInfoOpen(false)}
-      />
+        title="Que significa la confianza"
+        footer={
+          <Button variant="ghost" fullWidth={false} onPress={() => setConfianzaInfoOpen(false)}>
+            Entendido
+          </Button>
+        }
+      >
+        <Text style={[styles.paragraph, { color: c.textSecondary, marginBottom: spacing.sp3 }]}>
+          Es que tan seguro es este porcentaje. Depende de cuantas preguntas
+          respondiste y de cuantas tiene contestadas el candidato en su perfil.
+        </Text>
+        <Text style={[styles.paragraph, { color: c.textSecondary }]}>
+          Mientras mas preguntas coincidan en ambos, mayor confianza.
+        </Text>
+      </Modal>
     </View>
   );
 }
 
 // ---------- Sub-componentes ----------
 
-interface HeroProps {
-  candidato: Candidato;
-  matchPct: number | null;
+interface MatchBlockProps {
+  matchPct: number;
   confianza: string | null;
   scoreCol: string;
   isMyVote: boolean;
-  onOpenConfianzaInfo: () => void;
-  onEmptyCta: () => void;
+  onOpenInfo: () => void;
 }
 
-function Hero({
-  candidato,
+function MatchBlock({
   matchPct,
   confianza,
   scoreCol,
   isMyVote,
-  onOpenConfianzaInfo,
-  onEmptyCta,
-}: HeroProps) {
+  onOpenInfo,
+}: MatchBlockProps) {
   const c = useThemeColors();
-  const hasMatch = matchPct != null;
-
   return (
-    <View style={styles.hero}>
-      <Avatar
-        size="xl"
-        initials={initials(candidato)}
-        backgroundColor={c.primary}
-      />
-      <Text style={[styles.heroName, { color: c.text }]} numberOfLines={2}>
-        {fullName(candidato)}
+    <View style={styles.matchBlock}>
+      <Text style={[styles.matchBig, { color: scoreCol }]}>
+        {formatMatchPercentage(matchPct)}
       </Text>
-      {candidato.partido ? (
-        <Text style={[styles.heroPartido, { color: c.textSecondary }]}>
-          {candidato.partido}
-        </Text>
-      ) : null}
-
-      {hasMatch ? (
-        <>
-          <Text style={[styles.matchBig, { color: scoreCol }]}>
-            {formatMatchPercentage(matchPct)}
-          </Text>
-          <Text style={[styles.matchCaption, { color: c.textSecondary }]}>
-            Compatibilidad
-          </Text>
-          {confianza ? (
-            <View style={styles.confianzaRow}>
-              <Chip>{`Confianza ${confianza.toLowerCase()}`}</Chip>
-              <Pressable
-                onPress={onOpenConfianzaInfo}
-                accessibilityRole="button"
-                accessibilityLabel="Que significa la confianza"
-                hitSlop={8}
-                style={[
-                  styles.infoBtn,
-                  { borderColor: c.border, backgroundColor: c.card },
-                ]}
-              >
-                <Text style={[styles.infoBtnText, { color: c.textSecondary }]}>
-                  ?
-                </Text>
-              </Pressable>
-            </View>
-          ) : null}
-          {isMyVote ? (
-            <Text
-              style={[
-                styles.myVoteBadge,
-                { color: c.primary, borderColor: c.primary },
-              ]}
-            >
-              Marcado como tu elegido
-            </Text>
-          ) : null}
-        </>
-      ) : (
-        <View style={[styles.emptyBox, { borderColor: c.border, backgroundColor: c.card }]}>
-          <Text style={[styles.emptyTitle, { color: c.text }]}>
-            Aun no tienes match calculado
-          </Text>
-          <Text style={[styles.emptyBody, { color: c.textSecondary }]}>
-            Responde el cuestionario para ver tu porcentaje de afinidad con este
-            candidato.
-          </Text>
-          <Button onPress={onEmptyCta}>Empezar cuestionario</Button>
+      <Text style={[styles.matchCaption, { color: c.textSecondary }]}>
+        Compatibilidad
+      </Text>
+      {confianza ? (
+        <View style={styles.confianzaRow}>
+          <MatchTier
+            tier={confianzaToTier(confianza)}
+            label={`Confianza ${confianza.toLowerCase()}`}
+          />
+          <IconButton
+            variant="ghost"
+            size="sm"
+            onPress={onOpenInfo}
+            accessibilityLabel="Que significa la confianza"
+          >
+            <Icon name="info" size={16} color={c.textSecondary} />
+          </IconButton>
         </View>
-      )}
+      ) : null}
+      {isMyVote ? (
+        <View style={[styles.myVoteBadge, { borderColor: c.primary }]}>
+          <Text style={[styles.myVoteText, { color: c.primary }]}>
+            Marcado como tu elegido
+          </Text>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+function EmptyMatchBlock({ onStart }: { onStart: () => void }) {
+  const c = useThemeColors();
+  return (
+    <View style={[styles.emptyBox, { borderColor: c.border, backgroundColor: c.card }]}>
+      <Text style={[styles.emptyTitle, { color: c.text }]}>
+        Aun no tienes match calculado
+      </Text>
+      <Text style={[styles.paragraph, styles.emptyBody, { color: c.textSecondary }]}>
+        Responde el cuestionario para ver tu porcentaje de afinidad con este
+        candidato.
+      </Text>
+      <Button onPress={onStart}>Empezar cuestionario</Button>
     </View>
   );
 }
@@ -404,9 +415,7 @@ function ActionRow({
       <IconButton
         onPress={onToggleDesc}
         disabled={loadingDesc}
-        accessibilityLabel={
-          isDescartado ? "Restaurar" : "Descartar"
-        }
+        accessibilityLabel={isDescartado ? "Restaurar" : "Descartar"}
         variant={isDescartado ? "solid" : "soft"}
       >
         <Icon
@@ -431,11 +440,7 @@ interface ResumenTabProps {
   hasMatch: boolean;
   chartData: Record<string, number>;
   scoreCol: string;
-  posturas: ReturnType<typeof usePosturasCandidato>["data"] extends
-    | infer T
-    | undefined
-    ? NonNullable<T>
-    : never;
+  posturas: PosturaCandidatoDetalle[];
   isGuest: boolean;
 }
 
@@ -448,7 +453,7 @@ function ResumenTab({
   isGuest,
 }: ResumenTabProps) {
   const c = useThemeColors();
-  const posturasDestacadas = (posturas ?? []).slice(0, 3);
+  const posturasDestacadas = posturas.slice(0, 3);
 
   return (
     <View style={styles.tabBody}>
@@ -523,99 +528,58 @@ function ResumenTab({
   );
 }
 
+/** Mapea el modelo Noticia a NewsCard. Sin sentiment del backend usamos "neutral". */
+function noticiaToNewsCardProps(n: Noticia) {
+  const when = formatWhen(n);
+  const sentiment: Sentiment = "neutral";
+  return {
+    headline: n.titulo,
+    snippet: n.descripcion ?? "",
+    source: n.fuente ?? "Fuente",
+    when,
+    sentiment,
+  };
+}
+
+function formatWhen(n: Noticia): string {
+  const raw =
+    (n as unknown as { fecha_publicacion?: string; fecha?: string; created_at?: string })
+      .fecha_publicacion ??
+    (n as unknown as { fecha?: string }).fecha ??
+    (n as unknown as { created_at?: string }).created_at ??
+    "";
+  if (!raw) return "";
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("es-CL", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 function NoticiasTab({ noticias }: { noticias: Noticia[] }) {
   const c = useThemeColors();
   if (noticias.length === 0) {
     return (
-      <Text
-        style={[styles.empty, { color: c.textSecondary }]}
-      >
+      <Text style={[styles.empty, { color: c.textSecondary }]}>
         Aun no hay noticias cargadas para este candidato.
       </Text>
     );
   }
   return (
-    <View style={styles.tabBody}>
-      {noticias.map((n) => (
-        <Pressable
-          key={n.id}
-          onPress={() => n.url && Linking.openURL(n.url)}
-          accessibilityRole="button"
-          accessibilityLabel={`Abrir noticia: ${n.titulo}`}
-          style={({ pressed }) => [
-            styles.noticiaCard,
-            {
-              backgroundColor: c.card,
-              borderColor: c.border,
-              opacity: pressed ? 0.7 : 1,
-            },
-          ]}
-        >
-          <Text
-            style={[styles.noticiaTitulo, { color: c.text }]}
-            numberOfLines={2}
-          >
-            {n.titulo}
-          </Text>
-          {n.fuente ? (
-            <Text style={[styles.noticiaFuente, { color: c.primary }]}>
-              {n.fuente}
-            </Text>
-          ) : null}
-          {n.descripcion ? (
-            <Text
-              style={[styles.noticiaDesc, { color: c.textSecondary }]}
-              numberOfLines={3}
-            >
-              {n.descripcion}
-            </Text>
-          ) : null}
-        </Pressable>
-      ))}
+    <View style={styles.noticiasList}>
+      {noticias.map((n) => {
+        const cardProps = noticiaToNewsCardProps(n);
+        return (
+          <NewsCard
+            key={n.id}
+            {...cardProps}
+            onPress={n.url ? () => Linking.openURL(n.url!) : undefined}
+          />
+        );
+      })}
     </View>
-  );
-}
-
-function ConfianzaInfoModal({
-  visible,
-  onClose,
-}: {
-  visible: boolean;
-  onClose: () => void;
-}) {
-  const c = useThemeColors();
-  return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
-      <Pressable style={styles.modalBackdrop} onPress={onClose}>
-        <Pressable
-          onPress={(e) => e.stopPropagation()}
-          style={[
-            styles.modalCard,
-            { backgroundColor: c.card, borderColor: c.border },
-          ]}
-        >
-          <Text style={[styles.modalTitle, { color: c.text }]}>
-            Que significa la confianza
-          </Text>
-          <Text style={[styles.paragraph, { color: c.textSecondary }]}>
-            Es que tan seguro es este porcentaje. Depende de cuantas preguntas
-            respondiste y de cuantas tiene contestadas el candidato en su
-            perfil.
-          </Text>
-          <Text style={[styles.paragraph, { color: c.textSecondary }]}>
-            Mientras mas preguntas coincidan en ambos, mayor confianza.
-          </Text>
-          <Button variant="ghost" onPress={onClose}>
-            Entendido
-          </Button>
-        </Pressable>
-      </Pressable>
-    </Modal>
   );
 }
 
@@ -627,6 +591,15 @@ function buildShareText(cand: Candidato, matchPct: number | null): string {
 }
 
 // ---------- Styles ----------
+//
+// Reglas: TODOS los valores dimensionales vienen de tokens del DS:
+//   - spacing.sp1..sp9 para padding/margin/gap
+//   - radii.rSm..rFull para borderRadius
+//   - typography.* para fontSize/fontWeight/lineHeight
+//
+// Excepcion documentada: styles.matchBig usa un fontSize 40 fuera de la
+// escala tipografica estandar, por diseno explicito del wireframe #13
+// (numero de compatibilidad ultra prominente). Es el UNICO hardcode.
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
@@ -634,135 +607,107 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 24,
+    padding: spacing.sp6,
+    gap: spacing.sp3,
   },
-  scroll: { padding: 16, paddingBottom: 32, gap: 16 },
+  centerMuted: { textAlign: "center" },
+  scroll: {
+    padding: spacing.sp4,
+    paddingBottom: spacing.sp7,
+    gap: spacing.sp4,
+  },
 
-  hero: {
+  // Match block (bloque debajo del ProfileHero cuando hay match)
+  matchBlock: {
     alignItems: "center",
-    gap: 8,
-    paddingVertical: 12,
+    gap: spacing.sp2,
+    paddingVertical: spacing.sp2,
   },
-  heroName: {
-    fontSize: 22,
-    fontWeight: "800",
-    textAlign: "center",
-    marginTop: 4,
-  },
-  heroPartido: { fontSize: 13 },
   matchBig: {
-    fontSize: 44,
+    // Excepcion: 40 no esta en typography (max display=34), pero el
+    // wireframe pide un numero muy prominente. Documentado arriba.
+    fontSize: 40,
     fontWeight: "900",
-    marginTop: 4,
-    lineHeight: 48,
+    lineHeight: 44,
   },
   matchCaption: {
-    fontSize: 11,
-    textTransform: "uppercase",
-    letterSpacing: 0.7,
+    ...typography.overline,
     fontWeight: "600",
   },
   confianzaRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    marginTop: 4,
+    gap: spacing.sp2,
   },
-  infoBtn: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  infoBtnText: { fontSize: 11, fontWeight: "700" },
   myVoteBadge: {
-    marginTop: 8,
+    marginTop: spacing.sp2,
     borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    fontSize: 11,
+    borderRadius: radii.rFull,
+    paddingHorizontal: spacing.sp3,
+    paddingVertical: spacing.sp1,
+  },
+  myVoteText: {
+    ...typography.overline,
     fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
   },
 
+  // Empty state (sin match)
   emptyBox: {
-    marginTop: 8,
-    padding: 14,
-    borderRadius: 12,
+    padding: spacing.sp4,
+    borderRadius: radii.rLg,
     borderWidth: 1,
-    alignSelf: "stretch",
-    gap: 8,
+    gap: spacing.sp2,
     alignItems: "center",
   },
-  emptyTitle: { fontSize: 15, fontWeight: "700", textAlign: "center" },
-  emptyBody: { fontSize: 13, textAlign: "center" },
+  emptyTitle: {
+    ...typography.h3,
+    textAlign: "center",
+  },
+  emptyBody: { textAlign: "center" },
 
+  // Actions
   actionRow: {
     flexDirection: "row",
     justifyContent: "center",
-    gap: 12,
+    gap: spacing.sp3,
   },
 
-  tabBody: { gap: 16, marginTop: 4 },
+  // Tabs
+  tabsStretch: { alignSelf: "stretch" },
 
-  section: { gap: 6 },
+  // Tab body wrapper
+  tabBody: { gap: spacing.sp4, marginTop: spacing.sp1 },
+  section: { gap: spacing.sp2 },
   sectionLabel: {
-    fontSize: 11,
+    ...typography.overline,
     fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
   },
-  paragraph: { fontSize: 14, lineHeight: 20 },
+  paragraph: typography.small,
 
   radarWrap: {
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: spacing.sp2,
   },
 
+  // Posturas destacadas (Resumen)
   posturasList: { gap: spacing.sp4, marginTop: spacing.sp1 },
   posturaCard: {
     borderWidth: 1,
-    borderRadius: 10,
-    padding: 12,
-    gap: 4,
+    borderRadius: radii.rMd,
+    padding: spacing.sp3,
+    gap: spacing.sp1,
   },
-  posturaPregunta: { fontSize: 13, fontWeight: "700" },
-  posturaRespuesta: { fontSize: 13 },
-
-  noticiaCard: {
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 12,
-    gap: 4,
+  posturaPregunta: {
+    ...typography.small,
+    fontWeight: "700",
   },
-  noticiaTitulo: { fontSize: 15, fontWeight: "700" },
-  noticiaFuente: { fontSize: 12, fontWeight: "600" },
-  noticiaDesc: { fontSize: 13, lineHeight: 18 },
+  posturaRespuesta: typography.small,
 
+  // Noticias tab
+  noticiasList: { gap: spacing.sp3, marginTop: spacing.sp1 },
   empty: {
-    padding: 24,
+    padding: spacing.sp6,
     textAlign: "center",
     fontStyle: "italic",
   },
-
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-  },
-  modalCard: {
-    width: "100%",
-    maxWidth: 420,
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 20,
-    gap: 12,
-  },
-  modalTitle: { fontSize: 17, fontWeight: "800" },
 });
