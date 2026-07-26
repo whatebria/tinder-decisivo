@@ -90,8 +90,11 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   }
 
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <YStack flex={1} padding="$5" gap="$4" backgroundColor="$background">
+    <ScrollView
+      contentContainerStyle={{ flexGrow: 1, backgroundColor: c.bg }}
+      style={{ backgroundColor: c.bg }}
+    >
+      <YStack flex={1} padding="$5" gap="$4" backgroundColor="$background" minHeight="100%">
         <YStack gap="$2" paddingTop="$8">
           <H1 color="$text">¡Hola!</H1>
           {isGuest ? (

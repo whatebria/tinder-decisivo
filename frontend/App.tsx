@@ -60,6 +60,23 @@ export default function App() {
     // interno no llena el viewport (ej. modales, listas cortas).
     const root = doc.getElementById("root");
     if (root) root.style.backgroundColor = bg;
+
+    // Inyecta CSS global que fuerza el bg del tema en TODOS los contenedores
+    // que RN Web genera al bundlear. Sin esto, un ScrollView cuyo contenido
+    // excede el viewport deja ver el color del contenedor padre (blanco por
+    // default) al scrollear porque el YStack interno con `flex:1` se colapsa
+    // al viewport y no pinta mas alla.
+    const STYLE_ID = "__servel_theme_bg__";
+    let styleEl = doc.getElementById(STYLE_ID) as HTMLStyleElement | null;
+    if (!styleEl) {
+      styleEl = doc.createElement("style");
+      styleEl.id = STYLE_ID;
+      doc.head.appendChild(styleEl);
+    }
+    styleEl.textContent = `
+      html, body, #root { background-color: ${bg} !important; min-height: 100vh; }
+      #root > div { background-color: ${bg}; min-height: 100vh; }
+    `;
   }, [effective]);
 
   // Theme para NavigationContainer — sobrescribe el default blanco hardcodeado
