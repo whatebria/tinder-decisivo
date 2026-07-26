@@ -269,7 +269,7 @@ export function ResultadosScreen({
         ) : null}
 
         {hiddenCount > 0 ? (
-          <Link block onPress={() => navigation.navigate("MisDescartados")}>
+          <Link block onPress={() => navigation.navigate("MisGuardados")}>
             {`${hiddenCount} candidato(s) descartado(s). Ver lista`}
           </Link>
         ) : null}

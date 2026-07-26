@@ -1,157 +1,429 @@
 /**
- * MisGuardadosScreen: lista noticias y posturas guardadas del user.
+ * MisGuardadosScreen: vista consolidada de TODO lo que el usuario guardo.
  *
- * Dos secciones (no tabs por simplicidad). Cada item con boton para desguardar.
+ * Basado en wireframe #11 (design-system-lowfi.html tpl-guardados) + decision
+ * de producto: incluye Noticias como 4to tab (el wireframe original solo
+ * mencionaba 3, pero mantenemos noticias descubribles aca).
+ *
+ * Tabs:
+ *   - Favoritos: candidatos marcados como interesantes
+ *   - Descartados: candidatos ocultos del ranking (con opcion restaurar)
+ *   - Posturas: posturas puntuales de candidatos que guardaste
+ *   - Noticias: articulos guardados del feed
+ *
+ * Filtro por eleccion (chips) encima de los tabs. Por ahora solo "Todas"
+ * tiene efecto; el filtrado por tipo de eleccion queda como TODO cuando el
+ * backend exponga el field consistentemente en todas las shapes.
  */
+
 import React, { useMemo, useState } from "react";
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { getErrorMessage } from "../api/client";
 import {
+  useDescartados,
+  useFavoritos,
   useNoticiasBookmarks,
   usePosturasBookmarks,
+  useToggleDescartado,
+  useToggleFavorito,
   useToggleNoticiaBookmark,
   useTogglePosturaBookmark,
+  useTiposEleccion,
 } from "../api/hooks";
-import { BookmarkButton, Link, Tabs } from "../components";
+import {
+  AppShell,
+  BookmarkButton,
+  Chip,
+  EmptyState,
+  ScreenTopBar,
+  Spinner,
+  Tabs,
+  useToast,
+} from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
+import { radii } from "../theme/radii";
+import { spacing } from "../theme/spacing";
 import { useThemeColors } from "../theme/useTheme";
 
-type Tab = "noticias" | "posturas";
+type GuardadoTab = "favoritos" | "descartados" | "posturas" | "noticias";
 
-export function MisGuardadosScreen({ navigation }: RootStackScreenProps<"MisGuardados">) {
+/** Filtro por eleccion. `null` = "Todas". */
+type EleccionFilter = number | null;
+
+interface CandidatoLike {
+  id?: number;
+  nombre?: string;
+  apellido?: string;
+  partido?: string | null;
+}
+
+function fullName(c: CandidatoLike): string {
+  return `${c.nombre ?? ""} ${c.apellido ?? ""}`.trim() || "Candidato";
+}
+
+export function MisGuardadosScreen({
+  navigation,
+}: RootStackScreenProps<"MisGuardados">) {
   const c = useThemeColors();
-  const [tab, setTab] = useState<Tab>("noticias");
+  const toast = useToast();
 
-  const noticiasQ = useNoticiasBookmarks();
+  const [tab, setTab] = useState<GuardadoTab>("favoritos");
+  const [eleccionFilter, setEleccionFilter] = useState<EleccionFilter>(null);
+
+  const tiposQ = useTiposEleccion();
+  const favoritosQ = useFavoritos();
+  const descartadosQ = useDescartados();
   const posturasQ = usePosturasBookmarks();
-  const toggleNoticia = useToggleNoticiaBookmark();
-  const togglePostura = useTogglePosturaBookmark();
+  const noticiasQ = useNoticiasBookmarks();
+
+  const toggleFav = useToggleFavorito();
+  const toggleDesc = useToggleDescartado();
+  const togglePos = useTogglePosturaBookmark();
+  const toggleNot = useToggleNoticiaBookmark();
+
+  const favoritos = favoritosQ.data ?? [];
+  const descartados = descartadosQ.data ?? [];
+  const posturas = posturasQ.data ?? [];
+  const noticias = noticiasQ.data ?? [];
+
+  // Elecciones para el filtro (chips). "Todas" siempre visible.
+  const eleccionesChips = useMemo(
+    () => tiposQ.data ?? [],
+    [tiposQ.data],
+  );
 
   const styles = useMemo(
     () =>
       StyleSheet.create({
-        container: { flex: 1, paddingTop: 48, backgroundColor: c.bg },
-        header: { paddingHorizontal: 20, gap: 4, marginBottom: 12 },
-        title: { fontSize: 28, fontWeight: "800", color: c.text },
-        subtitle: { fontSize: 13, color: c.textSecondary },
-        content: { paddingHorizontal: 16, paddingBottom: 40, gap: 12 },
+        scroll: { flex: 1, backgroundColor: c.bg },
+        content: {
+          paddingHorizontal: spacing.sp4,
+          paddingBottom: spacing.sp7,
+          gap: spacing.sp3,
+        },
+        filterRow: {
+          flexDirection: "row",
+          alignItems: "center",
+          gap: spacing.sp2,
+          paddingVertical: spacing.sp2,
+        },
+        filterLabel: { fontSize: 12, color: c.textSecondary },
+        filterChips: {
+          flexDirection: "row",
+          gap: spacing.sp1,
+          flex: 1,
+        },
         card: {
           backgroundColor: c.card,
-          borderRadius: 12,
-          padding: 12,
+          borderRadius: radii.rMd,
+          padding: spacing.sp3,
           borderWidth: 1,
           borderColor: c.border,
-          gap: 8,
+          gap: spacing.sp2,
         },
+        candidatoRow: {
+          flexDirection: "row",
+          alignItems: "center",
+          gap: spacing.sp3,
+        },
+        avatar: {
+          width: 44,
+          height: 44,
+          borderRadius: radii.rFull,
+          backgroundColor: c.border,
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        avatarText: { fontSize: 14, fontWeight: "700", color: c.textSecondary },
+        candidatoCol: { flex: 1, gap: 4 },
+        candidatoName: { fontSize: 15, fontWeight: "700", color: c.text },
+        candidatoMeta: {
+          flexDirection: "row",
+          alignItems: "center",
+          gap: spacing.sp1,
+        },
+        candidatoMetaText: { fontSize: 12, color: c.textSecondary },
         cardTitle: { fontSize: 15, fontWeight: "700", color: c.text },
         cardMeta: { fontSize: 12, color: c.textSecondary },
         cardBody: { fontSize: 13, color: c.textSecondary, lineHeight: 18 },
-        empty: { padding: 24, alignItems: "center" },
-        emptyText: { fontSize: 14, color: c.textSecondary, textAlign: "center" },
-        row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 8 },
+        row: {
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: spacing.sp2,
+        },
+        loadingBox: { alignItems: "center", padding: spacing.sp5 },
+        restoreBtn: {
+          borderWidth: 1,
+          borderColor: c.border,
+          borderRadius: radii.rSm,
+          paddingHorizontal: spacing.sp3,
+          paddingVertical: spacing.sp1,
+        },
+        restoreText: { fontSize: 12, fontWeight: "600", color: c.text },
       }),
-    [c]
+    [c],
   );
 
-  const noticias = noticiasQ.data ?? [];
-  const posturas = posturasQ.data ?? [];
+  function initials(nombre?: string, apellido?: string): string {
+    return `${(nombre ?? "?")[0] ?? "?"}${(apellido ?? "")[0] ?? ""}`.toUpperCase();
+  }
+
+  function renderCandidatoCard(
+    key: string,
+    cand: CandidatoLike,
+    trailing: React.ReactNode,
+  ) {
+    return (
+      <View key={key} style={styles.card}>
+        <View style={styles.candidatoRow}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{initials(cand.nombre, cand.apellido)}</Text>
+          </View>
+          <Pressable
+            style={styles.candidatoCol}
+            onPress={() =>
+              cand.id != null &&
+              navigation.navigate("DetalleCandidato", {
+                candidatoId: cand.id,
+                breakdown: null,
+                matchPct: 0,
+                confianza: "TENTATIVA",
+              })
+            }
+            accessibilityRole="button"
+            accessibilityLabel={`Ver detalle de ${fullName(cand)}`}
+          >
+            <Text style={styles.candidatoName} numberOfLines={1}>
+              {fullName(cand)}
+            </Text>
+            {cand.partido ? (
+              <View style={styles.candidatoMeta}>
+                <Text style={styles.candidatoMetaText}>{cand.partido}</Text>
+              </View>
+            ) : null}
+          </Pressable>
+          {trailing}
+        </View>
+      </View>
+    );
+  }
+
+  function renderFavoritos() {
+    if (favoritosQ.isLoading) return <Spinner size="large" />;
+    if (favoritos.length === 0) {
+      return (
+        <EmptyState
+          icon="heart"
+          title="Aun no tienes favoritos"
+          description="Toca Favorito en el ranking para guardar candidatos aca."
+          actionLabel="Ver ranking"
+          onAction={() => navigation.goBack()}
+        />
+      );
+    }
+    return favoritos.map((f) => {
+      const cand = f.candidato_data ?? {};
+      if (cand.id == null) return null;
+      return renderCandidatoCard(
+        `fav-${f.id}`,
+        cand,
+        <BookmarkButton
+          saved
+          onPress={() => cand.id != null && handleQuitarFav(cand.id)}
+          loading={toggleFav.isPending}
+          accessibilityLabel={`Quitar de favoritos: ${fullName(cand)}`}
+        />,
+      );
+    });
+  }
+
+  function renderDescartados() {
+    if (descartadosQ.isLoading) return <Spinner size="large" />;
+    if (descartados.length === 0) {
+      return (
+        <EmptyState
+          icon="close"
+          title="No hay descartados"
+          description="Aca aparecen los candidatos que ocultaste del ranking."
+        />
+      );
+    }
+    return descartados.map((d) => {
+      const cand = d.candidato_data ?? {};
+      if (cand.id == null) return null;
+      return renderCandidatoCard(
+        `desc-${d.id}`,
+        cand,
+        <Pressable
+          style={styles.restoreBtn}
+          onPress={() => cand.id != null && handleRestoreDesc(cand.id)}
+          accessibilityRole="button"
+          accessibilityLabel={`Restaurar ${fullName(cand)} al ranking`}
+        >
+          <Text style={styles.restoreText}>Restaurar</Text>
+        </Pressable>,
+      );
+    });
+  }
+
+  function renderPosturas() {
+    if (posturasQ.isLoading) return <Spinner size="large" />;
+    if (posturas.length === 0) {
+      return (
+        <EmptyState
+          icon="bookmark"
+          title="Sin posturas guardadas"
+          description="Entra a un candidato y toca Guardar en una postura para verla aca."
+        />
+      );
+    }
+    return posturas.map((b) => (
+      <View key={`pos-${b.id}`} style={styles.card}>
+        <Text style={styles.cardMeta}>
+          {b.postura_data.candidato_nombre_completo ?? "Candidato"}
+          {b.postura_data.eje_tematico_display
+            ? ` \u00b7 ${b.postura_data.eje_tematico_display}`
+            : ""}
+        </Text>
+        <Text style={styles.cardTitle}>{b.postura_data.pregunta_texto}</Text>
+        <Text style={styles.cardBody}>
+          Respondio:{" "}
+          <Text style={{ color: c.text, fontWeight: "600" }}>
+            {b.postura_data.opcion_respuesta_texto}
+          </Text>
+        </Text>
+        <View style={styles.row}>
+          <View />
+          <BookmarkButton
+            saved
+            onPress={() => togglePos.mutate(b.postura)}
+            loading={togglePos.isPending}
+            accessibilityLabel="Quitar postura guardada"
+          />
+        </View>
+      </View>
+    ));
+  }
+
+  function renderNoticias() {
+    if (noticiasQ.isLoading) return <Spinner size="large" />;
+    if (noticias.length === 0) {
+      return (
+        <EmptyState
+          icon="news"
+          title="Sin noticias guardadas"
+          description="Toca Guardar en el feed de noticias para leerlas despues."
+          actionLabel="Ir a noticias"
+          onAction={() => navigation.navigate("Noticias")}
+        />
+      );
+    }
+    return noticias.map((b) => (
+      <Pressable
+        key={`not-${b.id}`}
+        onPress={() => b.noticia_data.url && Linking.openURL(b.noticia_data.url)}
+        style={styles.card}
+        accessibilityRole="link"
+        accessibilityLabel={`Abrir noticia: ${b.noticia_data.titulo}`}
+      >
+        <Text style={styles.cardTitle} numberOfLines={2}>
+          {b.noticia_data.titulo}
+        </Text>
+        {b.noticia_data.descripcion ? (
+          <Text style={styles.cardBody} numberOfLines={2}>
+            {b.noticia_data.descripcion}
+          </Text>
+        ) : null}
+        <View style={styles.row}>
+          <Text style={styles.cardMeta}>{b.noticia_data.fuente ?? ""}</Text>
+          <BookmarkButton
+            saved
+            onPress={() => toggleNot.mutate(b.noticia)}
+            loading={toggleNot.isPending}
+            accessibilityLabel={`Quitar noticia guardada: ${b.noticia_data.titulo}`}
+          />
+        </View>
+      </Pressable>
+    ));
+  }
+
+  function handleQuitarFav(candidatoId: number) {
+    toggleFav.mutate(candidatoId, {
+      onSuccess: () => toast.success("Quitado de favoritos"),
+      onError: (e) => toast.error("Error", getErrorMessage(e)),
+    });
+  }
+
+  function handleRestoreDesc(candidatoId: number) {
+    toggleDesc.mutate(candidatoId, {
+      onSuccess: () => toast.success("Restaurado", "El candidato vuelve al ranking."),
+      onError: (e) => toast.error("Error", getErrorMessage(e)),
+    });
+  }
+
+  const currentBody = (() => {
+    switch (tab) {
+      case "favoritos":
+        return renderFavoritos();
+      case "descartados":
+        return renderDescartados();
+      case "posturas":
+        return renderPosturas();
+      case "noticias":
+        return renderNoticias();
+    }
+  })();
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Mis guardados</Text>
-        <Text style={styles.subtitle}>Noticias y posturas que marcaste para leer despues.</Text>
-      </View>
+    <AppShell active="guardados" navigation={navigation}>
+      <ScreenTopBar
+        title="Mis guardados"
+        subtitle="Todo lo que guardaste en un solo lugar."
+        onBack={() => navigation.goBack()}
+      />
 
-      <View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
-        <Tabs<Tab>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+        {/* Filtro por eleccion (chips). Por ahora "Todas" es la unica funcional. */}
+        <View style={styles.filterRow}>
+          <Text style={styles.filterLabel}>Elecci\u00f3n</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterChips}
+          >
+            <Chip
+              active={eleccionFilter === null}
+              onPress={() => setEleccionFilter(null)}
+            >
+              Todas
+            </Chip>
+            {eleccionesChips.map((t) => (
+              <Chip
+                key={t.id}
+                active={eleccionFilter === t.id}
+                onPress={() => t.id != null && setEleccionFilter(t.id)}
+              >
+                {t.nombre ?? "Elecci\u00f3n"}
+              </Chip>
+            ))}
+          </ScrollView>
+        </View>
+
+        <Tabs<GuardadoTab>
           items={[
-            { value: "noticias", label: "Noticias", count: noticias.length },
+            { value: "favoritos", label: "Favoritos", count: favoritos.length },
+            { value: "descartados", label: "Descartados", count: descartados.length },
             { value: "posturas", label: "Posturas", count: posturas.length },
+            { value: "noticias", label: "Noticias", count: noticias.length },
           ]}
           value={tab}
           onChange={(v) => setTab(v)}
         />
-      </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
-        {tab === "noticias" ? (
-          noticiasQ.isLoading ? (
-            <Text style={{ color: c.textSecondary }}>Cargando...</Text>
-          ) : noticias.length === 0 ? (
-            <View style={styles.empty}>
-              <Text style={styles.emptyText}>
-                Aun no guardaste noticias. Toca "Guardar" en el feed de noticias.
-              </Text>
-            </View>
-          ) : (
-            noticias.map((b) => (
-              <Pressable
-                key={b.id}
-                onPress={() => b.noticia_data.url && Linking.openURL(b.noticia_data.url)}
-                style={styles.card}
-                accessibilityRole="link"
-                accessibilityLabel={`Abrir noticia: ${b.noticia_data.titulo}`}
-              >
-                <Text style={styles.cardTitle} numberOfLines={2}>
-                  {b.noticia_data.titulo}
-                </Text>
-                {b.noticia_data.descripcion ? (
-                  <Text style={styles.cardBody} numberOfLines={2}>
-                    {b.noticia_data.descripcion}
-                  </Text>
-                ) : null}
-                <View style={styles.row}>
-                  <Text style={styles.cardMeta}>{b.noticia_data.fuente ?? ""}</Text>
-                  <BookmarkButton
-                    saved
-                    onPress={() => toggleNoticia.mutate(b.noticia)}
-                    loading={toggleNoticia.isPending}
-                    accessibilityLabel={`Quitar noticia guardada: ${b.noticia_data.titulo}`}
-                  />
-                </View>
-              </Pressable>
-            ))
-          )
-        ) : posturasQ.isLoading ? (
-          <Text style={{ color: c.textSecondary }}>Cargando...</Text>
-        ) : posturas.length === 0 ? (
-          <View style={styles.empty}>
-            <Text style={styles.emptyText}>
-              Aun no guardaste posturas. Entra a un candidato y toca "Guardar" en una postura.
-            </Text>
-          </View>
-        ) : (
-          posturas.map((b) => (
-            <View key={b.id} style={styles.card}>
-              <Text style={styles.cardMeta}>
-                {b.postura_data.candidato_nombre_completo ?? "Candidato"}
-                {b.postura_data.eje_tematico_display
-                  ? ` \u00b7 ${b.postura_data.eje_tematico_display}`
-                  : ""}
-              </Text>
-              <Text style={styles.cardTitle}>{b.postura_data.pregunta_texto}</Text>
-              <Text style={styles.cardBody}>
-                Respondio: <Text style={{ color: c.text, fontWeight: "600" }}>
-                  {b.postura_data.opcion_respuesta_texto}
-                </Text>
-              </Text>
-              <View style={styles.row}>
-                <View />
-                <BookmarkButton
-                  saved
-                  onPress={() => togglePostura.mutate(b.postura)}
-                  loading={togglePostura.isPending}
-                  accessibilityLabel="Quitar postura guardada"
-                />
-              </View>
-            </View>
-          ))
-        )}
-
-        <View style={{ height: 12 }} />
-        <Link block onPress={() => navigation.goBack()}>Volver</Link>
+        {currentBody}
       </ScrollView>
-    </View>
+    </AppShell>
   );
 }

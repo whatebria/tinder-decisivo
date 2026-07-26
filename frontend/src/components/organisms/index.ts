@@ -10,8 +10,6 @@ export { ErrorBoundary } from "./ErrorBoundary";
 // Nuevos (Fase 3a)
 export { QuestionCard, type QuestionCardProps } from "./QuestionCard";
 export { CandidateCard, type CandidateCardProps } from "./CandidateCard";
-export { FavoriteCard, type FavoriteCardProps } from "./FavoriteCard";
-export { DiscardedCard, type DiscardedCardProps } from "./DiscardedCard";
 export {
   ProfileHero,
   type ProfileHeroProps,
