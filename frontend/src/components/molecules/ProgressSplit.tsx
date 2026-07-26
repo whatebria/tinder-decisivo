@@ -1,8 +1,8 @@
 /**
- * ProgressSplit: dos barras de progreso lado a lado con proporci\u00f3n configurable.
+ * ProgressSplit: dos barras de progreso lado a lado con proporción configurable.
  *
- * Basado en design-system-lowfi.html \u00b7 Cuestionario > progress split.
- * Usada para mostrar "base" (compartida entre elecciones) vs "extras" (por elecci\u00f3n).
+ * Basado en design-system-lowfi.html · Cuestionario > progress split.
+ * Usada para mostrar "base" (compartida entre elecciones) vs "extras" (por elección).
  * Si `extrasTotal` es 0, la barra de extras queda opaca (visualmente muda).
  */
 
@@ -36,7 +36,7 @@ export function ProgressSplit({
   const baseFrac = baseTotal > 0 ? Math.min(1, baseDone / baseTotal) : 0;
   const extrasFrac = extrasTotal > 0 ? Math.min(1, extrasDone / extrasTotal) : 0;
 
-  // Flex proporcional al peso relativo de cada segmento (m\u00ednimo 1 para no colapsar).
+  // Flex proporcional al peso relativo de cada segmento (mínimo 1 para no colapsar).
   const baseFlex = Math.max(1, baseTotal);
   const extrasFlex = Math.max(1, extrasTotal);
 

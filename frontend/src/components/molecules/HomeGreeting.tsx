@@ -1,7 +1,7 @@
 /**
- * HomeGreeting: H1 saludo + subtitulo con posible \u00e9nfasis en un valor.
+ * HomeGreeting: H1 saludo + subtitulo con posible énfasis en un valor.
  *
- * Ref: design-exploration/design-system.html \u00b7 .home-greeting
+ * Ref: design-exploration/design-system.html · .home-greeting
  */
 
 import React, { useMemo } from "react";
@@ -11,14 +11,14 @@ import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
 
 export interface HomeGreetingProps {
-  /** Ejemplo: "Buenos d\u00edas, Jenny". */
+  /** Ejemplo: "Buenos días, Jenny". */
   title: string;
-  /** Ejemplo: "Faltan 42 d\u00edas para las elecciones presidenciales." */
+  /** Ejemplo: "Faltan 42 días para las elecciones presidenciales." */
   subtitleBefore?: string;
-  /** Segmento con \u00e9nfasis (color primary). Ejemplo: "42 d\u00edas". */
+  /** Segmento con énfasis (color primary). Ejemplo: "42 días". */
   emphasized?: string;
   subtitleAfter?: string;
-  /** Subtitle sin \u00e9nfasis (usar si no hay valor destacado). */
+  /** Subtitle sin énfasis (usar si no hay valor destacado). */
   subtitle?: string;
   style?: StyleProp<ViewStyle>;
 }

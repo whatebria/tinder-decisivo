@@ -1,6 +1,6 @@
 /**
- * Avatar: c\u00edrculo con iniciales o imagen. Cuatro tama\u00f1os + color customizable.
- * Si `imageUrl` est\u00e1 presente, muestra la foto; si no, cae a `initials`.
+ * Avatar: círculo con iniciales o imagen. Cuatro tamaños + color customizable.
+ * Si `imageUrl` está presente, muestra la foto; si no, cae a `initials`.
  */
 
 import React, { useMemo, useState } from "react";

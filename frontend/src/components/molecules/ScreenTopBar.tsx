@@ -1,9 +1,9 @@
 /**
- * ScreenTopBar: back + t\u00edtulo centrado (bold) + subt\u00edtulo + info.
+ * ScreenTopBar: back + título centrado (bold) + subtítulo + info.
  *
- * Pattern gen\u00e9rico del wireframe (Cuestionario, Resultados, Perfil, Comparador,
+ * Pattern genérico del wireframe (Cuestionario, Resultados, Perfil, Comparador,
  * Mis Listas, Noticias, etc.). Layout: [<-]  Titulo   [i]
- *                                            Subt\u00edtulo
+ *                                            Subtítulo
  */
 
 import React, { useMemo } from "react";
@@ -97,7 +97,7 @@ export function ScreenTopBar({
           style={styles.btn}
           onPress={onInfo}
           accessibilityRole="button"
-          accessibilityLabel="M\u00e1s informaci\u00f3n"
+          accessibilityLabel="Más información"
         >
           <Icon name="info" size={18} color={c.text} />
         </Pressable>

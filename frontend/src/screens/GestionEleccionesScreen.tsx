@@ -1,9 +1,9 @@
 /**
- * Gesti\u00f3n de elecciones: cat\u00e1logo con toggle activar/desactivar por tipo.
+ * Gestión de elecciones: catálogo con toggle activar/desactivar por tipo.
  *
- * Basado en design-system-lowfi.html \u00b7 Gesti\u00f3n de elecciones.
- * El backend a\u00fan no expone "activo por usuario"; persistimos preferencia
- * client-side v\u00eda `useElectionsPrefsStore` (secureStorage).
+ * Basado en design-system-lowfi.html · Gestión de elecciones.
+ * El backend aún no expone "activo por usuario"; persistimos preferencia
+ * client-side vía `useElectionsPrefsStore` (secureStorage).
  */
 
 import React, { useMemo } from "react";

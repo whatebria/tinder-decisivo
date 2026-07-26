@@ -1,7 +1,7 @@
 /**
  * ElectionCardAdd: card dashed "+ Activar {tipo}" en el Home HUB.
  *
- * Basado en design-system-lowfi.html \u00b7 Home HUB.
+ * Basado en design-system-lowfi.html · Home HUB.
  * Aparece al final del strip para invitar a activar una eleccion nueva.
  */
 

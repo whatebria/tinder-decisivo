@@ -1,9 +1,9 @@
 /**
  * NovedadItem: item del feed "Novedades" en el Home HUB.
  *
- * Basado en design-system-lowfi.html \u00b7 Home HUB > Novedades.
+ * Basado en design-system-lowfi.html · Home HUB > Novedades.
  * 3 kinds:
- *   - action: acci\u00f3n sugerida (icon + title + sub + button "Ir")
+ *   - action: acción sugerida (icon + title + sub + button "Ir")
  *   - noticia: thumb + title + snippet + chip categoria + when
  *   - update: avatar + title + subtitle (sin CTA)
  */

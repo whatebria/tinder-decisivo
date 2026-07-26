@@ -1,6 +1,6 @@
 /**
  * ElectionsStrip: scroll horizontal de ElectionCards + card "+ Activar" al final.
- * Basado en design-system-lowfi.html \u00b7 Home HUB > Tus elecciones.
+ * Basado en design-system-lowfi.html · Home HUB > Tus elecciones.
  */
 
 import React, { useMemo } from "react";

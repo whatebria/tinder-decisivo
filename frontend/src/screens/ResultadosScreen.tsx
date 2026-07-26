@@ -1,7 +1,7 @@
 /**
  * Resultados: ranking de candidatos post-cuestionario.
  *
- * Basado en design-system-lowfi.html \u00b7 Resultados.
+ * Basado en design-system-lowfi.html · Resultados.
  * Estructura:
  *   1. ScreenTopBar (back + eleccion + "Tus resultados")
  *   2. Guest CTA (si corresponde) + shortcuts (descartados, decision)
@@ -135,7 +135,7 @@ export function ResultadosScreen({
 
   const tipoNombre = useMemo(
     () =>
-      (tiposQ.data ?? []).find((t) => t.id === tipoEleccionId)?.nombre ?? "Elecci\u00f3n",
+      (tiposQ.data ?? []).find((t) => t.id === tipoEleccionId)?.nombre ?? "Elección",
     [tiposQ.data, tipoEleccionId],
   );
 
@@ -262,7 +262,7 @@ export function ResultadosScreen({
           <View style={styles.guestCard}>
             <Text style={styles.guestTitle}>Modo invitado</Text>
             <Text style={styles.guestBody}>
-              Tu match no se guard\u00f3. Crea una cuenta para conservarlo, marcar favoritos y elegir tu voto final.
+              Tu match no se guardó. Crea una cuenta para conservarlo, marcar favoritos y elegir tu voto final.
             </Text>
             <Button onPress={exitGuestMode}>Crear una cuenta</Button>
           </View>
@@ -275,7 +275,7 @@ export function ResultadosScreen({
         ) : null}
         {!isGuest && decisionQ.data ? (
           <Link block onPress={() => navigation.navigate("MiDecision")}>
-            Ya tienes una decisi\u00f3n guardada. Ver mi voto
+            Ya tienes una decisión guardada. Ver mi voto
           </Link>
         ) : null}
 
@@ -326,7 +326,7 @@ export function ResultadosScreen({
                   matchPct={pct}
                   matchColor={scoreCol}
                   ejeScores={chartData}
-                  confianzaLabel={`${conf.label} \u00b7 ${top.preguntas_consideradas}p`}
+                  confianzaLabel={`${conf.label} · ${top.preguntas_consideradas}p`}
                   confianzaVariant={confianzaToBadge(top.confianza)}
                   onCta={() => goToDetalle(top)}
                   isDecision={isDecision}
@@ -346,7 +346,7 @@ export function ResultadosScreen({
           })()
         ) : (
           <Text style={styles.emptyText}>
-            No hay candidatos para mostrar. Intenta nuevamente m\u00e1s tarde.
+            No hay candidatos para mostrar. Intenta nuevamente más tarde.
           </Text>
         )}
 

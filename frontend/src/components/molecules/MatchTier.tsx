@@ -70,7 +70,7 @@ export function MatchTier({ percent, tier, label, showPercent, style }: MatchTie
   const finalLabel =
     label ??
     (displayPercent && percent !== undefined
-      ? `${TIER_LABEL[resolvedTier]} \u00b7 ${Math.round(percent)}%`
+      ? `${TIER_LABEL[resolvedTier]} · ${Math.round(percent)}%`
       : TIER_LABEL[resolvedTier]);
 
   return (

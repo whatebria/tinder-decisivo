@@ -1,11 +1,11 @@
 /**
  * ElectionCard: card de una eleccion activa en el Home HUB.
  *
- * Basado en design-system-lowfi.html \u00b7 Home HUB.
+ * Basado en design-system-lowfi.html · Home HUB.
  * 3 variantes:
  *   - active: eleccion actualmente seleccionada (border-2 primary)
  *   - secondary: otra eleccion activa (border-1 gris)
- *   - pending: sin cuestionario respondido a\u00fan (progress 0%)
+ *   - pending: sin cuestionario respondido aún (progress 0%)
  */
 
 import React, { useMemo } from "react";
@@ -22,11 +22,11 @@ export type ElectionCardVariant = "active" | "secondary" | "pending";
 export interface ElectionCardProps {
   name: string;
   scope?: string;
-  /** Ej: "42d", "180d" \u2014 corto para el chip. */
+  /** Ej: "42d", "180d" — corto para el chip. */
   daysLabel: string;
-  /** 0\u2013100. `null` \u2192 sin cuestionario respondido. */
+  /** 0–100. `null` → sin cuestionario respondido. */
   matchPercent?: number | null;
-  /** 0\u2013100 (progreso del cuestionario). */
+  /** 0–100 (progreso del cuestionario). */
   progressPercent: number;
   /** Texto alternativo cuando no hay matchPercent (ej: "6 preguntas extras pendientes"). */
   pendingLabel?: string;

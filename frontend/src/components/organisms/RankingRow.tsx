@@ -1,7 +1,7 @@
 /**
  * RankingRow: fila de un candidato en el ranking (posiciones 2+).
  *
- * Basado en design-system-lowfi.html \u00b7 Resultados > ranking completo.
+ * Basado en design-system-lowfi.html · Resultados > ranking completo.
  * Layout horizontal:
  *   #N  [avatar sm]  [nombre / partido]  [mini radar 60]  [pct]
  */

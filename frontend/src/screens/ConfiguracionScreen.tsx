@@ -63,7 +63,7 @@ export function ConfiguracionScreen({ navigation }: RootStackScreenProps<"Config
       const result = await reiniciar.mutateAsync(tipoAReiniciar.id);
       toast.success(
         "Cuestionario reiniciado",
-        `Se borraron ${result.respuestas_borradas} respuestas. Tus favoritos y voto siguen ah\u00ed.`,
+        `Se borraron ${result.respuestas_borradas} respuestas. Tus favoritos y voto siguen ahí.`,
       );
       setTipoAReiniciar(null);
     } catch (err) {
@@ -73,7 +73,7 @@ export function ConfiguracionScreen({ navigation }: RootStackScreenProps<"Config
 
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-      <HomeTopBar brand="Configuraci\u00f3n" />
+      <HomeTopBar brand="Configuración" />
 
       {!isGuest && email ? (
         <View style={styles.emailWrap}>
@@ -159,13 +159,13 @@ export function ConfiguracionScreen({ navigation }: RootStackScreenProps<"Config
 
       <ConfirmModal
         visible={tipoAReiniciar !== null}
-        title="\u00bfEmpezar de nuevo?"
+        title="¿Empezar de nuevo?"
         message={
           tipoAReiniciar
             ? `Esto borra tus respuestas y tu ranking calculado para "${tipoAReiniciar.nombre}". Tus favoritos, descartados y voto final se mantienen.`
             : ""
         }
-        confirmLabel="S\u00ed, borrar y empezar de nuevo"
+        confirmLabel="Sí, borrar y empezar de nuevo"
         cancelLabel="Cancelar"
         variant="danger"
         loading={reiniciar.isPending}

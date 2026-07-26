@@ -1,17 +1,17 @@
 /**
  * Cuestionario: una pregunta por vez, con topnav breadcrumb + progress split.
  *
- * Basado en design-system-lowfi.html \u00b7 Cuestionario.
+ * Basado en design-system-lowfi.html · Cuestionario.
  * Estructura:
- *   1. CuestionarioTopBar (back + eleccion + "N de M \u00b7 base" + info)
+ *   1. CuestionarioTopBar (back + eleccion + "N de M · base" + info)
  *   2. ProgressSplit (base / extras)
- *   3. Eje tem\u00e1tico label + enunciado
+ *   3. Eje temático label + enunciado
  *   4. Opciones (RadioGroup)
  *   5. Selector de peso (chips)
- *   6. Footer: Atr\u00e1s / Siguiente (o Enviar en la \u00faltima)
+ *   6. Footer: Atrás / Siguiente (o Enviar en la última)
  *
  * Nota: el backend no distingue preguntas base/extras. Modelamos todo como
- * "base" hasta que exista el flag. Cuando llegue, cambiamos la partici\u00f3n aqu\u00ed.
+ * "base" hasta que exista el flag. Cuando llegue, cambiamos la partición aquí.
  */
 
 import React, { useMemo, useState } from "react";
@@ -144,7 +144,7 @@ export function CuestionarioScreen({
       .filter((op) => op.id != null)
       .map((op) => ({ value: op.id as number, label: op.texto ?? "" })),
     ...(opcionNoSe && opcionNoSe.id != null
-      ? [{ value: opcionNoSe.id, label: opcionNoSe.texto ?? "No s\u00e9" }]
+      ? [{ value: opcionNoSe.id, label: opcionNoSe.texto ?? "No sé" }]
       : []),
   ];
 
@@ -162,7 +162,7 @@ export function CuestionarioScreen({
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <ScreenTopBar
           title={pregunta.tipo_eleccion_nombre ?? "Cuestionario"}
-          subtitle={`${currentIndex + 1} de ${totalPreguntas} \u00b7 base`}
+          subtitle={`${currentIndex + 1} de ${totalPreguntas} · base`}
           onBack={() => navigation.goBack()}
           onInfo={() => setInfoOpen(true)}
         />
@@ -173,7 +173,7 @@ export function CuestionarioScreen({
           extrasDone={0}
           extrasTotal={0}
           baseLabel={`Base (${totalPreguntas} preguntas)`}
-          extrasLabel="Extras (pr\u00f3ximamente)"
+          extrasLabel="Extras (próximamente)"
         />
 
         <View style={{ gap: spacing.sp2 }}>
@@ -195,7 +195,7 @@ export function CuestionarioScreen({
 
         {mostrarPeso && respuesta ? (
           <View style={{ gap: spacing.sp2 }}>
-            <Text style={styles.sectionLabel}>\u00bfQu\u00e9 tan importante?</Text>
+            <Text style={styles.sectionLabel}>¿Qué tan importante?</Text>
             <View style={styles.weightRow}>
               {PESOS.map((p) => (
                 <Chip
@@ -216,7 +216,7 @@ export function CuestionarioScreen({
         <View style={styles.footerRow}>
           <View style={styles.backSlot}>
             <Button variant="secondary" onPress={prev} disabled={isFirst}>
-              Atr\u00e1s
+              Atrás
             </Button>
           </View>
           <View style={styles.primarySlot}>
@@ -227,7 +227,7 @@ export function CuestionarioScreen({
                 disabled={!canAdvance || submitting}
                 loading={submitting}
               >
-                {submitting ? "Enviando\u2026" : "Enviar"}
+                {submitting ? "Enviando…" : "Enviar"}
               </Button>
             ) : (
               <Button onPress={next} disabled={!canAdvance}>

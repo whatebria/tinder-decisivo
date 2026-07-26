@@ -99,9 +99,9 @@ export function NewsCard({
         </Text>
         <View style={styles.meta}>
           <Text style={styles.source}>{source}</Text>
-          <Text style={styles.dot}>{"\u00b7"}</Text>
+          <Text style={styles.dot}>{"·"}</Text>
           <Text style={styles.when}>{when}</Text>
-          <Text style={styles.dot}>{"\u00b7"}</Text>
+          <Text style={styles.dot}>{"·"}</Text>
           <SentimentBadge sentiment={sentiment} />
         </View>
         {onToggleBookmark != null && bookmarked != null ? (

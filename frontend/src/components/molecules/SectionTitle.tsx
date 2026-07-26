@@ -1,7 +1,7 @@
 /**
- * SectionTitle: header de secci\u00f3n del Home. H2/H3 + link "Ver todos \u203a" opcional.
+ * SectionTitle: header de sección del Home. H2/H3 + link "Ver todos ›" opcional.
  *
- * Ref: design-exploration/design-system.html \u00b7 .home-section-title
+ * Ref: design-exploration/design-system.html · .home-section-title
  */
 
 import React, { useMemo } from "react";
@@ -12,7 +12,7 @@ import { useThemeColors } from "../../theme/useTheme";
 
 export interface SectionTitleProps {
   title: string;
-  /** Tama\u00f1o del t\u00edtulo. Default h2 (18px). */
+  /** Tamaño del título. Default h2 (18px). */
   level?: "h2" | "h3";
   /** Label del link a la derecha. Si se omite, no se renderiza. */
   actionLabel?: string;

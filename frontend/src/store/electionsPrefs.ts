@@ -1,9 +1,9 @@
 /**
- * Elections preferences store: qu\u00e9 tipos de elecci\u00f3n tiene "activados" el usuario.
+ * Elections preferences store: qué tipos de elección tiene "activados" el usuario.
  *
- * Como el backend a\u00fan no tiene concepto de "activo por usuario", modelamos
+ * Como el backend aún no tiene concepto de "activo por usuario", modelamos
  * la preferencia client-side y persistimos en secureStorage. Por default:
- * `null` = todav\u00eda no elegi\u00f3 \u2192 la UI trata todos como activos hasta que
+ * `null` = todavía no elegió → la UI trata todos como activos hasta que
  * el usuario abra "Gestionar elecciones" y decida.
  */
 
@@ -14,7 +14,7 @@ import { secureStorage } from "./secureStorage";
 const STORAGE_KEY = "tinder_decisivo_active_elections";
 
 interface ElectionsPrefsState {
-  /** Set de tipoIds activados. `null` = no configurado a\u00fan (todos activos). */
+  /** Set de tipoIds activados. `null` = no configurado aún (todos activos). */
   activeIds: number[] | null;
   isHydrated: boolean;
 
@@ -48,7 +48,7 @@ export const useElectionsPrefsStore = create<ElectionsPrefsState>((set, get) => 
   },
 
   toggle: async (tipoId, allTipoIds) => {
-    const current = get().activeIds ?? allTipoIds; // primera edici\u00f3n: parte desde "todos"
+    const current = get().activeIds ?? allTipoIds; // primera edición: parte desde "todos"
     const next = current.includes(tipoId)
       ? current.filter((id) => id !== tipoId)
       : [...current, tipoId];
@@ -78,7 +78,7 @@ export const useElectionsPrefsStore = create<ElectionsPrefsState>((set, get) => 
 }));
 
 /**
- * Helper: separa la lista de tipos en activas / disponibles seg\u00fan el store.
+ * Helper: separa la lista de tipos en activas / disponibles según el store.
  * Si `activeIds` es null, asume que todos son activos (primera visita).
  */
 export function partitionTipos<T extends { id?: number | null }>(

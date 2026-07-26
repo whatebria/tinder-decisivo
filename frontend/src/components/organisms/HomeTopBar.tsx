@@ -1,8 +1,8 @@
 /**
- * HomeTopBar: barra superior del Home. Brand con \u00edcono heart + notif button.
+ * HomeTopBar: barra superior del Home. Brand con ícono heart + notif button.
  * Distinta a TopNav (que es para flujos multi-paso con progress).
  *
- * Ref: design-exploration/design-system.html \u00b7 .topnav (dentro de Template Home)
+ * Ref: design-exploration/design-system.html · .topnav (dentro de Template Home)
  */
 
 import React, { useMemo } from "react";
@@ -15,7 +15,7 @@ import { useThemeColors, useThemeShadows } from "../../theme/useTheme";
 
 export interface HomeTopBarProps {
   brand: string;
-  /** Handler del bot\u00f3n de notificaciones. Si se omite, no se renderiza. */
+  /** Handler del botón de notificaciones. Si se omite, no se renderiza. */
   onNotifications?: () => void;
   style?: StyleProp<ViewStyle>;
 }

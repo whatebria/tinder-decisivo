@@ -284,7 +284,7 @@ export function MisGuardadosScreen({
         <Text style={styles.cardMeta}>
           {b.postura_data.candidato_nombre_completo ?? "Candidato"}
           {b.postura_data.eje_tematico_display
-            ? ` \u00b7 ${b.postura_data.eje_tematico_display}`
+            ? ` · ${b.postura_data.eje_tematico_display}`
             : ""}
         </Text>
         <Text style={styles.cardTitle}>{b.postura_data.pregunta_texto}</Text>
@@ -387,7 +387,7 @@ export function MisGuardadosScreen({
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         {/* Filtro por eleccion (chips). Por ahora "Todas" es la unica funcional. */}
         <View style={styles.filterRow}>
-          <Text style={styles.filterLabel}>Elecci\u00f3n</Text>
+          <Text style={styles.filterLabel}>Elección</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -405,7 +405,7 @@ export function MisGuardadosScreen({
                 active={eleccionFilter === t.id}
                 onPress={() => t.id != null && setEleccionFilter(t.id)}
               >
-                {t.nombre ?? "Elecci\u00f3n"}
+                {t.nombre ?? "Elección"}
               </Chip>
             ))}
           </ScrollView>

@@ -1,6 +1,6 @@
 /**
  * NovedadesFeed: lista vertical de NovedadItems (feed mixto del HUB).
- * Basado en design-system-lowfi.html \u00b7 Home HUB > Novedades.
+ * Basado en design-system-lowfi.html · Home HUB > Novedades.
  */
 
 import React, { useMemo } from "react";

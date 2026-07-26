@@ -1,7 +1,7 @@
 /**
  * ResultadoHero: card hero centrada para el top match del ranking.
  *
- * Basado en design-system-lowfi.html \u00b7 Resultados > hero card.
+ * Basado en design-system-lowfi.html · Resultados > hero card.
  * Estructura vertical centrada:
  *   [Tu match label]
  *   [Avatar XL]

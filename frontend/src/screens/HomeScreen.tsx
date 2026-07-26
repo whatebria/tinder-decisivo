@@ -126,7 +126,7 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
     if (error) toast.error("Error cargando elecciones", getErrorMessage(error));
   }, [error, toast]);
 
-  // "activo" = el que est\u00e1 en el store, o el primero si no hay ninguno.
+  // "activo" = el que está en el store, o el primero si no hay ninguno.
   // Solo elecciones activadas por el user (client-side pref).
   const { activas: tiposActivos } = useMemo(
     () => partitionTipos(tipos, electionsActiveIds),
