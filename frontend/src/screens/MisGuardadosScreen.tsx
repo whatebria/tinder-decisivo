@@ -33,7 +33,9 @@ import {
 } from "../api/hooks";
 import {
   AppShell,
+  Avatar,
   BookmarkButton,
+  Button,
   Chip,
   EmptyState,
   ScreenTopBar,
@@ -44,6 +46,7 @@ import {
 import type { RootStackScreenProps } from "../navigation/types";
 import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
+import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
 
 type GuardadoTab = "favoritos" | "descartados" | "posturas" | "noticias";
@@ -108,7 +111,7 @@ export function MisGuardadosScreen({
           gap: spacing.sp2,
           paddingVertical: spacing.sp2,
         },
-        filterLabel: { fontSize: 12, color: c.textSecondary },
+        filterLabel: { ...typography.overline, textTransform: "none", letterSpacing: 0, color: c.textSecondary },
         filterChips: {
           flexDirection: "row",
           gap: spacing.sp1,
@@ -127,26 +130,17 @@ export function MisGuardadosScreen({
           alignItems: "center",
           gap: spacing.sp3,
         },
-        avatar: {
-          width: 44,
-          height: 44,
-          borderRadius: radii.rFull,
-          backgroundColor: c.border,
-          alignItems: "center",
-          justifyContent: "center",
-        },
-        avatarText: { fontSize: 14, fontWeight: "700", color: c.textSecondary },
-        candidatoCol: { flex: 1, gap: 4 },
-        candidatoName: { fontSize: 15, fontWeight: "700", color: c.text },
+        candidatoCol: { flex: 1, gap: spacing.sp1 },
+        candidatoName: { ...typography.body, fontWeight: "700", color: c.text },
         candidatoMeta: {
           flexDirection: "row",
           alignItems: "center",
           gap: spacing.sp1,
         },
-        candidatoMetaText: { fontSize: 12, color: c.textSecondary },
-        cardTitle: { fontSize: 15, fontWeight: "700", color: c.text },
-        cardMeta: { fontSize: 12, color: c.textSecondary },
-        cardBody: { fontSize: 13, color: c.textSecondary, lineHeight: 18 },
+        candidatoMetaText: { ...typography.overline, textTransform: "none", letterSpacing: 0, color: c.textSecondary },
+        cardTitle: { ...typography.body, fontWeight: "700", color: c.text },
+        cardMeta: { ...typography.overline, textTransform: "none", letterSpacing: 0, color: c.textSecondary },
+        cardBody: { ...typography.small, color: c.textSecondary },
         row: {
           flexDirection: "row",
           justifyContent: "space-between",
@@ -154,14 +148,6 @@ export function MisGuardadosScreen({
           gap: spacing.sp2,
         },
         loadingBox: { alignItems: "center", padding: spacing.sp5 },
-        restoreBtn: {
-          borderWidth: 1,
-          borderColor: c.border,
-          borderRadius: radii.rSm,
-          paddingHorizontal: spacing.sp3,
-          paddingVertical: spacing.sp1,
-        },
-        restoreText: { fontSize: 12, fontWeight: "600", color: c.text },
       }),
     [c],
   );
@@ -178,9 +164,7 @@ export function MisGuardadosScreen({
     return (
       <View key={key} style={styles.card}>
         <View style={styles.candidatoRow}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{initials(cand.nombre, cand.apellido)}</Text>
-          </View>
+          <Avatar size="md" initials={initials(cand.nombre, cand.apellido)} />
           <Pressable
             style={styles.candidatoCol}
             onPress={() =>
@@ -258,14 +242,14 @@ export function MisGuardadosScreen({
       return renderCandidatoCard(
         `desc-${d.id}`,
         cand,
-        <Pressable
-          style={styles.restoreBtn}
+        <Button
+          variant="secondary"
+          size="sm"
           onPress={() => cand.id != null && handleRestoreDesc(cand.id)}
-          accessibilityRole="button"
           accessibilityLabel={`Restaurar ${fullName(cand)} al ranking`}
         >
-          <Text style={styles.restoreText}>Restaurar</Text>
-        </Pressable>,
+          Restaurar
+        </Button>,
       );
     });
   }

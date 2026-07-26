@@ -38,6 +38,7 @@ import {
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore, type RespuestaLocal } from "../store/cuestionario";
 import { spacing } from "../theme/spacing";
+import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
 
 export function CuestionarioScreen({
@@ -82,20 +83,19 @@ export function CuestionarioScreen({
         },
         emptyText: { color: c.textSecondary, textAlign: "center" },
         ejeLabel: {
-          fontSize: 10,
-          textTransform: "uppercase",
-          letterSpacing: 0.8,
+          ...typography.overline,
           fontWeight: "700",
           color: c.primary,
         },
         enunciado: {
-          fontSize: 22,
+          ...typography.h2,
           fontWeight: "700",
-          lineHeight: 28,
           color: c.text,
         },
         sectionLabel: {
-          fontSize: 12,
+          ...typography.overline,
+          textTransform: "none",
+          letterSpacing: 0,
           color: c.textSecondary,
           fontWeight: "500",
         },
