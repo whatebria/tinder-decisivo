@@ -3,29 +3,36 @@
  *
  * Filtros disponibles:
  * - Busqueda de texto (client-side + backend con debounce implicito via query key)
- * - Candidato mencionado (chips)
- * - Fuente / medio (chips, dinamico segun data)
- * - Rango de fecha (chips: Todo / 7d / 30d / 90d)
+ * - Candidato mencionado (Chip atoms)
+ * - Fuente / medio (Chip atoms, dinamico segun data)
+ * - Rango de fecha (Chip atoms: Todo / 7d / 30d / 90d)
  *
  * Publica — no requiere auth.
+ *
+ * Nota: este screen aun no esta migrado a la Fase 5 (no usa AppShell ni
+ * ScreenTopBar). Este refactor solo consolida:
+ *   - Cards inline -> NewsCard (molecule)
+ *   - ChipRow custom -> Chip (atom)
+ *   - MiniChip inline -> Badge (atom)
+ *   - TextInput custom -> Input (atom)
+ *   - Todos los styles a tokens spacing/radii/typography.
+ * La migracion a Fase 5 (topbar + shell + wireframe) va en un commit aparte.
  */
 
 import React, { useMemo, useState } from "react";
-import {
-  Image,
-  Linking,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Linking, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { useCandidatos, useNoticiasBookmarks, useNoticiasFeed, useToggleNoticiaBookmark } from "../api/hooks";
-import { BookmarkButton, Link } from "../components";
+import {
+  useCandidatos,
+  useNoticiasBookmarks,
+  useNoticiasFeed,
+  useToggleNoticiaBookmark,
+} from "../api/hooks";
+import { Badge, Chip, Input, Link, NewsCard, type Sentiment } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
+import { spacing } from "../theme/spacing";
+import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
 
 interface NoticiaEnriquecida {
@@ -71,14 +78,17 @@ function formatearFecha(iso?: string): string {
   }
 }
 
-interface ChipRowProps {
-  items: Array<{ id: string | number | null; label: string }>;
-  selectedId: string | number | null;
-  onSelect: (id: string | number | null) => void;
-  colors: ReturnType<typeof useThemeColors>;
+interface ChipRowProps<T extends string | number | null> {
+  items: Array<{ id: T; label: string }>;
+  selectedId: T;
+  onSelect: (id: T) => void;
 }
 
-function ChipRow({ items, selectedId, onSelect, colors: c }: ChipRowProps) {
+function ChipRow<T extends string | number | null>({
+  items,
+  selectedId,
+  onSelect,
+}: ChipRowProps<T>) {
   return (
     <View style={styles.chipsWrap}>
       <ScrollView
@@ -86,34 +96,15 @@ function ChipRow({ items, selectedId, onSelect, colors: c }: ChipRowProps) {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.chipsRow}
       >
-        {items.map((item) => {
-          const selected = item.id === selectedId;
-          return (
-            <Pressable
-              key={String(item.id)}
-              onPress={() => onSelect(item.id)}
-              style={[
-                styles.chip,
-                {
-                  backgroundColor: selected ? c.primary : c.card,
-                  borderColor: selected ? c.primary : c.border,
-                },
-              ]}
-              accessibilityRole="button"
-              accessibilityState={{ selected }}
-            >
-              <Text
-                style={{
-                  color: selected ? "#FFFFFF" : c.text,
-                  fontWeight: selected ? "700" : "500",
-                  fontSize: 13,
-                }}
-              >
-                {item.label}
-              </Text>
-            </Pressable>
-          );
-        })}
+        {items.map((item) => (
+          <Chip
+            key={String(item.id)}
+            active={item.id === selectedId}
+            onPress={() => onSelect(item.id)}
+          >
+            {item.label}
+          </Chip>
+        ))}
       </ScrollView>
     </View>
   );
@@ -126,7 +117,7 @@ export function NoticiasScreen({ navigation }: RootStackScreenProps<"Noticias">)
   const toggleBookmark = useToggleNoticiaBookmark();
   const bookmarkedIds = useMemo(
     () => new Set((bookmarksQ.data ?? []).map((b) => b.noticia)),
-    [bookmarksQ.data]
+    [bookmarksQ.data],
   );
 
   const [candidatoId, setCandidatoId] = useState<number | null>(null);
@@ -151,13 +142,13 @@ export function NoticiasScreen({ navigation }: RootStackScreenProps<"Noticias">)
     () => [
       { id: null as number | null, label: "Todos" },
       ...candidatos
-        .filter((c) => c.id != null)
-        .map((c) => ({
-          id: c.id!,
-          label: `${c.nombre} ${c.apellido ?? ""}`.trim(),
+        .filter((cand) => cand.id != null)
+        .map((cand) => ({
+          id: cand.id!,
+          label: `${cand.nombre} ${cand.apellido ?? ""}`.trim(),
         })),
     ],
-    [candidatos]
+    [candidatos],
   );
 
   // Fuentes dinamicas: extraidas del data que ya tenemos.
@@ -178,7 +169,10 @@ export function NoticiasScreen({ navigation }: RootStackScreenProps<"Noticias">)
   }, [noticias]);
 
   const hayFiltroActivo =
-    candidatoId != null || fuente != null || rangoId !== "todo" || query.length > 0;
+    candidatoId != null ||
+    fuente != null ||
+    rangoId !== "todo" ||
+    query.length > 0;
 
   function limpiarTodo() {
     setCandidatoId(null);
@@ -186,6 +180,8 @@ export function NoticiasScreen({ navigation }: RootStackScreenProps<"Noticias">)
     setRangoId("todo");
     setQuery("");
   }
+
+  const rangosItems = RANGOS_FECHA.map((r) => ({ id: r.id, label: r.label }));
 
   return (
     <View style={[styles.container, { backgroundColor: c.bg }]}>
@@ -198,15 +194,10 @@ export function NoticiasScreen({ navigation }: RootStackScreenProps<"Noticias">)
 
       {/* Busqueda */}
       <View style={styles.searchWrap}>
-        <TextInput
+        <Input
           value={query}
           onChangeText={setQuery}
           placeholder="Buscar en titulo o descripcion..."
-          placeholderTextColor={c.textSecondary}
-          style={[
-            styles.searchInput,
-            { backgroundColor: c.card, borderColor: c.border, color: c.text },
-          ]}
           accessibilityLabel="Buscar noticias"
           returnKeyType="search"
         />
@@ -216,22 +207,20 @@ export function NoticiasScreen({ navigation }: RootStackScreenProps<"Noticias">)
       <Text style={[styles.filtroLabel, { color: c.textSecondary }]}>
         Fecha
       </Text>
-      <ChipRow
-        items={RANGOS_FECHA.map((r) => ({ id: r.id, label: r.label }))}
+      <ChipRow<string>
+        items={rangosItems}
         selectedId={rangoId}
-        onSelect={(id) => setRangoId(String(id))}
-        colors={c}
+        onSelect={setRangoId}
       />
 
       {/* Filtros: Candidato */}
       <Text style={[styles.filtroLabel, { color: c.textSecondary }]}>
         Candidato
       </Text>
-      <ChipRow
+      <ChipRow<number | null>
         items={chipsCandidatos}
         selectedId={candidatoId}
-        onSelect={(id) => setCandidatoId(id as number | null)}
-        colors={c}
+        onSelect={setCandidatoId}
       />
 
       {/* Filtros: Fuente */}
@@ -240,38 +229,37 @@ export function NoticiasScreen({ navigation }: RootStackScreenProps<"Noticias">)
           <Text style={[styles.filtroLabel, { color: c.textSecondary }]}>
             Fuente
           </Text>
-          <ChipRow
+          <ChipRow<string | null>
             items={chipsFuentes}
             selectedId={fuente}
-            onSelect={(id) => setFuente(id as string | null)}
-            colors={c}
+            onSelect={setFuente}
           />
         </>
       ) : null}
 
       {/* Boton limpiar filtros */}
       {hayFiltroActivo ? (
-        <View style={{ paddingHorizontal: 16, marginBottom: 4 }}>
+        <View style={styles.clearWrap}>
           <Link block onPress={limpiarTodo} color={c.danger}>
             Limpiar filtros
           </Link>
         </View>
       ) : null}
 
-      <ScrollView
-        contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 60 }}
-      >
+      <ScrollView contentContainerStyle={styles.listWrap}>
         {noticiasQ.isLoading ? (
-          <Text style={{ color: c.textSecondary }}>Cargando noticias...</Text>
+          <Text style={[styles.loadingText, { color: c.textSecondary }]}>
+            Cargando noticias...
+          </Text>
         ) : noticias.length === 0 ? (
-          <View style={{ alignItems: "center", gap: 12, padding: 24 }}>
-            <Text
-              style={{ color: c.textSecondary, textAlign: "center" }}
-            >
+          <View style={styles.emptyBlock}>
+            <Text style={[styles.emptyText, { color: c.textSecondary }]}>
               No hay noticias que coincidan con los filtros.
             </Text>
             {hayFiltroActivo ? (
-              <Link block onPress={limpiarTodo}>Ver todas</Link>
+              <Link block onPress={limpiarTodo}>
+                Ver todas
+              </Link>
             ) : null}
           </View>
         ) : (
@@ -279,152 +267,128 @@ export function NoticiasScreen({ navigation }: RootStackScreenProps<"Noticias">)
             <Text style={[styles.contador, { color: c.textSecondary }]}>
               {noticias.length} noticia(s)
             </Text>
-            {noticias.map((n) => (
-              <Pressable
-                key={n.id}
-                onPress={() => n.url && Linking.openURL(n.url)}
-                style={[
-                  styles.card,
-                  { backgroundColor: c.card, borderColor: c.border },
-                ]}
-                accessibilityLabel={`Abrir noticia: ${n.titulo}`}
-              >
-                {n.imagen_url ? (
-                  <Image
-                    source={{ uri: n.imagen_url }}
-                    style={styles.thumb}
-                    accessibilityIgnoresInvertColors
+            {noticias.map((n) => {
+              const id = n.id;
+              if (id == null) return null;
+              const isBookmarked = bookmarkedIds.has(id);
+              const source = n.fuente ?? "Fuente";
+              const when = formatearFecha(n.fecha_publicacion);
+              const sentiment: Sentiment = "neutral";
+              return (
+                <View key={id} style={styles.newsCardWrap}>
+                  <NewsCard
+                    headline={n.titulo ?? ""}
+                    snippet={n.descripcion ?? ""}
+                    source={source}
+                    when={when}
+                    sentiment={sentiment}
+                    onPress={n.url ? () => Linking.openURL(n.url!) : undefined}
+                    bookmarked={!isGuest ? isBookmarked : undefined}
+                    onToggleBookmark={
+                      !isGuest ? () => toggleBookmark.mutate(id) : undefined
+                    }
+                    bookmarkLoading={toggleBookmark.isPending}
                   />
-                ) : null}
-                <View style={{ flex: 1, gap: 4 }}>
-                  <Text
-                    style={[styles.titulo, { color: c.text }]}
-                    numberOfLines={2}
-                  >
-                    {n.titulo}
-                  </Text>
-                  <View style={styles.metaRow}>
-                    {n.fuente ? (
-                      <Text style={[styles.fuente, { color: c.primary }]}>
-                        {n.fuente}
-                      </Text>
-                    ) : null}
-                    <Text style={[styles.fecha, { color: c.textSecondary }]}>
-                      {formatearFecha(n.fecha_publicacion)}
-                    </Text>
-                  </View>
-                  {n.descripcion ? (
-                    <Text
-                      style={[styles.desc, { color: c.textSecondary }]}
-                      numberOfLines={2}
-                    >
-                      {n.descripcion}
-                    </Text>
-                  ) : null}
                   {n.candidatos_mencionados_data &&
                   n.candidatos_mencionados_data.length > 0 ? (
                     <View style={styles.mencionRow}>
                       {n.candidatos_mencionados_data.map((cand) => (
-                        <View
-                          key={cand.id}
-                          style={[
-                            styles.miniChip,
-                            { borderColor: c.border, backgroundColor: c.bg },
-                          ]}
-                        >
-                          <Text style={{ fontSize: 11, color: c.textSecondary }}>
-                            {cand.nombre} {cand.apellido ?? ""}
-                          </Text>
-                        </View>
+                        <Badge key={cand.id} variant="neutral">
+                          {`${cand.nombre} ${cand.apellido ?? ""}`.trim()}
+                        </Badge>
                       ))}
                     </View>
                   ) : null}
-                  {!isGuest ? (
-                    <BookmarkButton
-                      saved={bookmarkedIds.has(n.id!)}
-                      onPress={() => n.id != null && toggleBookmark.mutate(n.id)}
-                      loading={toggleBookmark.isPending}
-                      accessibilityLabel={
-                        bookmarkedIds.has(n.id!)
-                          ? `Quitar de guardadas: ${n.titulo}`
-                          : `Guardar noticia: ${n.titulo}`
-                      }
-                    />
-                  ) : null}
                 </View>
-              </Pressable>
-            ))}
+              );
+            })}
           </>
         )}
 
-        <View style={{ height: 12 }} />
-        <Link block onPress={() => navigation.goBack()}>Volver</Link>
+        <View style={styles.footerSpacer} />
+        <Link block onPress={() => navigation.goBack()}>
+          Volver
+        </Link>
       </ScrollView>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 48 },
-  header: { paddingHorizontal: 20, gap: 4, marginBottom: 8 },
-  title: { fontSize: 28, fontWeight: "800" },
-  subtitle: { fontSize: 13 },
+// ---------- Styles ----------
+//
+// Todos los valores dimensionales vienen de tokens del DS.
+// El paddingTop 48 del container es una excepcion pragmatica: reemplaza
+// una SafeAreaView faltante en este screen aun no migrado a Fase 5. Se
+// va cuando se agregue ScreenTopBar (que ya tiene safe-area logic).
 
-  searchWrap: { paddingHorizontal: 16, marginBottom: 8 },
-  searchInput: {
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    fontSize: 14,
+const styles = StyleSheet.create({
+  container: { flex: 1, paddingTop: spacing.sp8 + spacing.sp2 }, // ~48
+  header: {
+    paddingHorizontal: spacing.sp5,
+    gap: spacing.sp1,
+    marginBottom: spacing.sp2,
+  },
+  title: {
+    ...typography.h1,
+    fontWeight: "800",
+  },
+  subtitle: typography.small,
+
+  searchWrap: {
+    paddingHorizontal: spacing.sp4,
+    marginBottom: spacing.sp2,
   },
 
   filtroLabel: {
-    fontSize: 11,
+    ...typography.overline,
     fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-    paddingHorizontal: 20,
-    marginTop: 6,
+    paddingHorizontal: spacing.sp5,
+    marginTop: spacing.sp2,
   },
-  chipsWrap: { height: 44 },
+  chipsWrap: { height: spacing.sp9 - spacing.sp3 }, // ~44
   chipsRow: {
-    paddingHorizontal: 16,
-    gap: 8,
+    paddingHorizontal: spacing.sp4,
+    gap: spacing.sp2,
     alignItems: "center",
-    paddingVertical: 6,
-  },
-  chip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    borderWidth: 1,
+    paddingVertical: spacing.sp2,
   },
 
-  contador: { fontSize: 11, fontStyle: "italic", marginBottom: 4 },
-  card: {
+  clearWrap: {
+    paddingHorizontal: spacing.sp4,
+    marginBottom: spacing.sp1,
+  },
+
+  listWrap: {
+    padding: spacing.sp4,
+    gap: spacing.sp3,
+    paddingBottom: spacing.sp9,
+  },
+  loadingText: typography.small,
+  emptyBlock: {
+    alignItems: "center",
+    gap: spacing.sp3,
+    padding: spacing.sp6,
+  },
+  emptyText: {
+    ...typography.small,
+    textAlign: "center",
+  },
+
+  contador: {
+    ...typography.overline,
+    fontStyle: "italic",
+    marginBottom: spacing.sp1,
+    textTransform: "none",
+    letterSpacing: 0,
+  },
+
+  newsCardWrap: { gap: spacing.sp2 },
+  mencionRow: {
     flexDirection: "row",
-    padding: 12,
-    borderRadius: 10,
-    borderWidth: 1,
-    gap: 12,
+    flexWrap: "wrap",
+    gap: spacing.sp1,
+    paddingHorizontal: spacing.sp2,
   },
-  thumb: {
-    width: 88,
-    height: 88,
-    borderRadius: 6,
-    backgroundColor: "#00000010",
-  },
-  titulo: { fontSize: 15, fontWeight: "700" },
-  metaRow: { flexDirection: "row", gap: 8, alignItems: "center" },
-  fuente: { fontSize: 12, fontWeight: "600" },
-  fecha: { fontSize: 11 },
-  desc: { fontSize: 12, lineHeight: 16 },
-  mencionRow: { flexDirection: "row", flexWrap: "wrap", gap: 4, marginTop: 4 },
-  miniChip: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
+
+  footerSpacer: { height: spacing.sp3 },
 });
