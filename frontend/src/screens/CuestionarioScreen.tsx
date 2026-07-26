@@ -21,7 +21,7 @@ import { getErrorMessage } from "../api/client";
 import {
   Button,
   Chip,
-  CuestionarioTopBar,
+  ScreenTopBar,
   PreguntaInfoModal,
   ProgressSplit,
   RadioGroup,
@@ -160,7 +160,7 @@ export function CuestionarioScreen({
   return (
     <>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-        <CuestionarioTopBar
+        <ScreenTopBar
           title={pregunta.tipo_eleccion_nombre ?? "Cuestionario"}
           subtitle={`${currentIndex + 1} de ${totalPreguntas} \u00b7 base`}
           onBack={() => navigation.goBack()}

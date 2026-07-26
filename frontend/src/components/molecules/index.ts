@@ -30,5 +30,5 @@ export { SectionTitle, type SectionTitleProps } from "./SectionTitle";
 export { NovedadItem, type NovedadItemProps, type NovedadKind } from "./NovedadItem";
 
 // Nuevas (Fase 5 — Cuestionario wireframe)
-export { CuestionarioTopBar, type CuestionarioTopBarProps } from "./CuestionarioTopBar";
+export { ScreenTopBar, type ScreenTopBarProps } from "./ScreenTopBar";
 export { ProgressSplit, type ProgressSplitProps } from "./ProgressSplit";

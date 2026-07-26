@@ -1,10 +1,9 @@
 /**
- * CuestionarioTopBar: back + t\u00edtulo centrado (bold) + subt\u00edtulo + info.
+ * ScreenTopBar: back + t\u00edtulo centrado (bold) + subt\u00edtulo + info.
  *
- * Basado en design-system-lowfi.html \u00b7 Cuestionario > topnav.
- * Estructura:
- *   [<-]  ElecciNombre        [i]
- *         3 de 12 \u00b7 base
+ * Pattern gen\u00e9rico del wireframe (Cuestionario, Resultados, Perfil, Comparador,
+ * Mis Listas, Noticias, etc.). Layout: [<-]  Titulo   [i]
+ *                                            Subt\u00edtulo
  */
 
 import React, { useMemo } from "react";
@@ -15,19 +14,19 @@ import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
 import { Icon } from "../atoms/Icon";
 
-export interface CuestionarioTopBarProps {
+export interface ScreenTopBarProps {
   title: string;
   subtitle?: string;
   onBack?: () => void;
   onInfo?: () => void;
 }
 
-export function CuestionarioTopBar({
+export function ScreenTopBar({
   title,
   subtitle,
   onBack,
   onInfo,
-}: CuestionarioTopBarProps) {
+}: ScreenTopBarProps) {
   const c = useThemeColors();
 
   const styles = useMemo(
@@ -98,7 +97,7 @@ export function CuestionarioTopBar({
           style={styles.btn}
           onPress={onInfo}
           accessibilityRole="button"
-          accessibilityLabel="Contexto de la pregunta"
+          accessibilityLabel="M\u00e1s informaci\u00f3n"
         >
           <Icon name="info" size={18} color={c.text} />
         </Pressable>
