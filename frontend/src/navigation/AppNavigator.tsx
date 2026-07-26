@@ -18,6 +18,7 @@ import { LoginScreen } from "../screens/LoginScreen";
 import { MiDecisionScreen } from "../screens/MiDecisionScreen";
 import { MisDescartadosScreen } from "../screens/MisDescartadosScreen";
 import { MisFavoritosScreen } from "../screens/MisFavoritosScreen";
+import { OnboardingScreen } from "../screens/OnboardingScreen";
 import { PasswordResetConfirmScreen } from "../screens/PasswordResetConfirmScreen";
 import { PasswordResetRequestScreen } from "../screens/PasswordResetRequestScreen";
 import { PerfilScreen } from "../screens/PerfilScreen";
@@ -25,6 +26,7 @@ import { RegisterScreen } from "../screens/RegisterScreen";
 import { ResultadosScreen } from "../screens/ResultadosScreen";
 import { SubmitDoneScreen } from "../screens/SubmitDoneScreen";
 import { useAuthStore } from "../store/auth";
+import { useOnboardingStore } from "../store/onboarding";
 import type { RootStackParamList } from "./types";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -32,11 +34,15 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export function AppNavigator() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const isGuest = useAuthStore((s) => s.isGuest);
+  const hasSeenOnboarding = useOnboardingStore((s) => s.hasSeen);
   const showMainStack = isAuthenticated || isGuest;
+  const showOnboarding = !hasSeenOnboarding && !showMainStack;
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {showMainStack ? (
+      {showOnboarding ? (
+        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+      ) : showMainStack ? (
         <>
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Cuestionario" component={CuestionarioScreen} />

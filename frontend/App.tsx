@@ -3,9 +3,9 @@
  *
  * Wraps:
  * - SafeAreaProvider (necesario para react-navigation)
- * - TamaguiProvider (theme system)
+ * - TamaguiProvider (theme system dinamico segun store)
  * - NavigationContainer (react-navigation)
- * - Hydrata el auth store desde SecureStore al arrancar (splash mientras carga).
+ * - Hydrata auth + onboarding + theme stores desde storage al arrancar.
  */
 
 import { NavigationContainer } from "@react-navigation/native";
@@ -20,24 +20,36 @@ import { ErrorBoundary } from "./src/components/ErrorBoundary";
 import { ToastProvider } from "./src/components/Toast";
 import { AppNavigator } from "./src/navigation/AppNavigator";
 import { useAuthStore } from "./src/store/auth";
+import { useOnboardingStore } from "./src/store/onboarding";
+import { useThemeStore } from "./src/store/theme";
 import tamaguiConfig from "./tamagui.config";
 
 export default function App() {
-  const { hydrate, isHydrated } = useAuthStore();
+  const hydrateAuth = useAuthStore((s) => s.hydrate);
+  const authHydrated = useAuthStore((s) => s.isHydrated);
+  const hydrateOnboarding = useOnboardingStore((s) => s.hydrate);
+  const onboardingHydrated = useOnboardingStore((s) => s.isHydrated);
+  const hydrateTheme = useThemeStore((s) => s.hydrate);
+  const themeHydrated = useThemeStore((s) => s.isHydrated);
+  const effective = useThemeStore((s) => s.effective);
 
   useEffect(() => {
-    hydrate();
-  }, [hydrate]);
+    hydrateAuth();
+    hydrateOnboarding();
+    hydrateTheme();
+  }, [hydrateAuth, hydrateOnboarding, hydrateTheme]);
+
+  const ready = authHydrated && onboardingHydrated && themeHydrated;
 
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
-          <Theme name="light">
+        <TamaguiProvider config={tamaguiConfig} defaultTheme={effective}>
+          <Theme name={effective}>
             <SafeAreaProvider>
               <ToastProvider>
-                <StatusBar style="dark" />
-                {isHydrated ? (
+                <StatusBar style={effective === "dark" ? "light" : "dark"} />
+                {ready ? (
                   <NavigationContainer>
                     <AppNavigator />
                   </NavigationContainer>

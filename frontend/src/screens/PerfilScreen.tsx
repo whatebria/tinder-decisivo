@@ -29,6 +29,7 @@ import { TextButton } from "../components/TextButton";
 import { useToast } from "../components/Toast";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
+import { useThemeStore, type ThemeMode } from "../store/theme";
 import { colors } from "../theme/colors";
 
 export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
@@ -125,6 +126,12 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
 
         <Separator />
 
+        {/* Apariencia */}
+        <H3 color="$text">Apariencia</H3>
+        <ThemeSelector />
+
+        <Separator />
+
         {/* Acciones */}
         <H3 color="$text">Cuenta</H3>
         <YStack gap="$2">
@@ -167,5 +174,47 @@ function StatBadge({ label, value }: { label: string; value: number }) {
         {label}
       </SizableText>
     </Card>
+  );
+}
+
+function ThemeSelector() {
+  const mode = useThemeStore((s) => s.mode);
+  const setMode = useThemeStore((s) => s.setMode);
+
+  const options: Array<{ value: ThemeMode; label: string }> = [
+    { value: "light", label: "Claro" },
+    { value: "dark", label: "Oscuro" },
+    { value: "system", label: "Sistema" },
+  ];
+
+  return (
+    <XStack gap="$2" flexWrap="wrap">
+      {options.map((opt) => {
+        const selected = mode === opt.value;
+        return (
+          <Card
+            key={opt.value}
+            padding="$3"
+            borderWidth={selected ? 2 : 1}
+            borderColor={selected ? "$primary" : "$border"}
+            backgroundColor={selected ? "$primary" : "$background"}
+            pressStyle={{ opacity: 0.7 }}
+            onPress={() => setMode(opt.value)}
+            flex={1}
+            minWidth={90}
+            alignItems="center"
+            accessibilityLabel={`Modo ${opt.label}`}
+          >
+            <SizableText
+              size="$3"
+              fontWeight="700"
+              color={selected ? "$textOnPrimary" : "$text"}
+            >
+              {opt.label}
+            </SizableText>
+          </Card>
+        );
+      })}
+    </XStack>
   );
 }
