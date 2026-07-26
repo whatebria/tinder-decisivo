@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tinder Decisivo · Wireframes (lowfi)</title>
+<style>
+  :root {
+    --g-0: #FFFFFF;
+    --g-1: #FAFAFA;
+    --g-2: #F0F0F0;
+    --g-3: #E0E0E0;
+    --g-4: #BDBDBD;
+    --g-5: #9E9E9E;
+    --g-6: #616161;
+    --g-7: #212121;
+    --sp: 8px;
+    --r: 4px;
+    --r-lg: 8px;
+    --r-full: 999px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--g-1); color: var(--g-7);
+    font-size: 14px; line-height: 1.4;
+    display: grid; grid-template-columns: 240px 1fr; min-height: 100vh;
+  }
+
+  /* Sidebar */
+  aside {
+    background: var(--g-7); color: var(--g-0);
+    padding: 24px 16px; position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  aside h1 {
+    font-size: 13px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .1em; margin: 0 0 4px; color: var(--g-0);
+  }
+  aside p {
+    font-size: 11px; color: var(--g-4); margin: 0 0 20px;
+  }
+  aside .group {
+    font-size: 10px; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--g-5); margin: 20px 0 8px; font-weight: 600;
+  }
+  aside a {
+    display: block; color: var(--g-3); text-decoration: none;
+    font-size: 13px; padding: 6px 8px; border-radius: var(--r);
+    transition: background 120ms;
+  }
+  aside a:hover { background: rgba(255,255,255,.08); color: var(--g-0); }
+
+  /* Main */
+  main { padding: 32px 40px; }
+  .wf-section { margin-bottom: 48px; scroll-margin-top: 24px; }
+  .wf-section-head {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--g-3);
+  }
+  .wf-section-head .kicker {
+    font-size: 10px; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--g-5); font-weight: 600;
+  }
+  .wf-section-head h2 {
+    font-size: 20px; font-weight: 700; margin: 4px 0 6px;
+  }
+  .wf-section-head p {
+    font-size: 13px; color: var(--g-6); margin: 0; max-width: 640px;
+  }
+
+  /* Frame: device mock */
+  .wf-frames { display: flex; flex-wrap: wrap; gap: 24px; }
+  .wf-frame {
+    background: var(--g-0); border: 2px solid var(--g-4); border-radius: 20px;
+    padding: 20px; width: 360px; min-height: 640px;
+    display: flex; flex-direction: column; gap: 16px;
+    position: relative;
+  }
+  .wf-frame.wide { width: 720px; }
+  .wf-frame-label {
+    position: absolute; top: -10px; left: 16px;
+    background: var(--g-7); color: var(--g-0);
+    padding: 2px 10px; border-radius: var(--r);
+    font-size: 10px; text-transform: uppercase; letter-spacing: .08em; font-weight: 600;
+  }
+
+  /* ===== Wireframe primitives ===== */
+
+  /* Text placeholder lines */
+  .wf-line {
+    display: block; height: 8px; background: var(--g-2);
+    border-radius: 2px; margin: 4px 0;
+  }
+  .wf-line.title { height: 14px; background: var(--g-3); }
+  .wf-line.long { width: 100%; }
+  .wf-line.med { width: 70%; }
+  .wf-line.short { width: 40%; }
+  .wf-line.tiny { width: 20%; }
+  .wf-line.c { margin-left: auto; margin-right: auto; }
+
+  /* Text label (small caption) */
+  .wf-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--g-5); font-weight: 600;
+  }
+  .wf-text {
+    font-size: 13px; color: var(--g-6);
+  }
+
+  /* Generic box (rect with border) */
+  .wf-box {
+    border: 1px solid var(--g-4); border-radius: var(--r);
+    padding: 12px; background: var(--g-1);
+  }
+  .wf-box.solid { background: var(--g-2); }
+
+  /* Image placeholder (rect with X) */
+  .wf-img {
+    border: 1px solid var(--g-4); background: var(--g-2);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; border-radius: var(--r);
+    color: var(--g-5); font-size: 24px; font-weight: 300;
+    aspect-ratio: 16/9;
+  }
+  .wf-img::before, .wf-img::after {
+    content: ""; position: absolute; top: 0; bottom: 0; left: 50%;
+    width: 1px; background: var(--g-4);
+  }
+  .wf-img::before { transform: skewX(45deg); transform-origin: bottom; }
+  .wf-img::after  { transform: skewX(-45deg); transform-origin: bottom; }
+  .wf-img.thumb { aspect-ratio: 1; width: 60px; flex-shrink: 0; }
+  .wf-img.tall { aspect-ratio: 3/4; }
+  .wf-img.full-bleed { aspect-ratio: 4/3; }
+
+  /* Avatar circle */
+  .wf-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 1px solid var(--g-4); background: var(--g-2);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--g-5); font-size: 14px; flex-shrink: 0;
+    position: relative; overflow: hidden;
+  }
+  .wf-avatar::before, .wf-avatar::after {
+    content: ""; position: absolute; top: 50%; left: 50%;
+    width: 60%; height: 1px; background: var(--g-4);
+    transform-origin: center;
+  }
+  .wf-avatar::before { transform: translate(-50%, -50%) rotate(45deg); }
+  .wf-avatar::after  { transform: translate(-50%, -50%) rotate(-45deg); }
+  .wf-avatar.lg { width: 72px; height: 72px; }
+  .wf-avatar.xl { width: 96px; height: 96px; }
+  .wf-avatar.sm { width: 28px; height: 28px; }
+
+  /* Icon placeholder (small square with X) */
+  .wf-icon {
+    width: 20px; height: 20px;
+    border: 1px solid var(--g-4); background: var(--g-1);
+    position: relative; flex-shrink: 0; border-radius: 2px;
+  }
+  .wf-icon::before, .wf-icon::after {
+    content: ""; position: absolute; top: 50%; left: 50%;
+    width: 70%; height: 1px; background: var(--g-4);
+  }
+  .wf-icon::before { transform: translate(-50%, -50%) rotate(45deg); }
+  .wf-icon::after  { transform: translate(-50%, -50%) rotate(-45deg); }
+  .wf-icon.lg { width: 32px; height: 32px; }
+
+  /* Button */
+  .wf-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 10px 18px; border: 1px solid var(--g-4);
+    border-radius: var(--r); background: var(--g-1);
+    font-size: 13px; color: var(--g-6); text-align: center;
+    min-width: 80px;
+  }
+  .wf-btn.primary {
+    background: var(--g-6); color: var(--g-0); border-color: var(--g-6);
+    font-weight: 600;
+  }
+  .wf-btn.ghost { border-color: transparent; background: transparent; color: var(--g-6); }
+  .wf-btn.icon {
+    width: 36px; height: 36px; padding: 0; min-width: 0; border-radius: var(--r);
+  }
+  .wf-btn.wide { width: 100%; }
+
+  /* Input */
+  .wf-input {
+    display: flex; align-items: center; gap: 8px;
+    border: 1px solid var(--g-4); border-radius: var(--r);
+    padding: 10px 12px; background: var(--g-0);
+    font-size: 12px; color: var(--g-5);
+  }
+
+  /* Chip */
+  .wf-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border: 1px solid var(--g-4);
+    border-radius: var(--r-full); font-size: 11px; color: var(--g-6);
+    background: var(--g-0);
+  }
+  .wf-chip.active { background: var(--g-6); color: var(--g-0); border-color: var(--g-6); }
+
+  /* Layout helpers */
+  .wf-row { display: flex; gap: 8px; align-items: center; }
+  .wf-row.between { justify-content: space-between; }
+  .wf-row.wrap { flex-wrap: wrap; }
+  .wf-col { display: flex; flex-direction: column; gap: 8px; }
+  .wf-col.grow { flex: 1; }
+  .wf-spacer { flex: 1; }
+  .wf-divider { height: 1px; background: var(--g-3); margin: 8px 0; }
+  .wf-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .wf-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .wf-grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+
+  /* TopNav */
+  .wf-topnav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 12px; border: 1px solid var(--g-4); border-radius: var(--r);
+    background: var(--g-1);
+  }
+  .wf-topnav .brand { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--g-6); }
+
+  /* TopNav breadcrumb variant (para dentro de una eleccion) */
+  .wf-topnav.breadcrumb .crumb {
+    display: flex; align-items: center; gap: 8px; flex: 1;
+    color: var(--g-6); font-size: 12px; overflow: hidden;
+  }
+  .wf-topnav.breadcrumb .crumb .ctx {
+    display: flex; flex-direction: column; gap: 2px; min-width: 0;
+  }
+  .wf-topnav.breadcrumb .crumb .ctx .lbl { font-weight: 600; color: var(--g-7); font-size: 13px; }
+  .wf-topnav.breadcrumb .crumb .ctx .sub { font-size: 10px; color: var(--g-5); }
+
+  /* Election card (hub) */
+  .wf-election-card {
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 12px; border: 1px solid var(--g-4); border-radius: var(--r-lg);
+    background: var(--g-0); min-width: 200px;
+  }
+  .wf-election-card.active {
+    border: 2px solid var(--g-7);
+    background: var(--g-1);
+  }
+  .wf-election-card .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .wf-election-card .head .type { display: flex; flex-direction: column; gap: 2px; }
+  .wf-election-card .head .type .name { font-weight: 600; font-size: 13px; color: var(--g-7); }
+  .wf-election-card .head .type .scope { font-size: 10px; color: var(--g-5); text-transform: uppercase; letter-spacing: .06em; }
+  .wf-election-card .head .days {
+    font-size: 10px; color: var(--g-6);
+    padding: 2px 8px; border: 1px solid var(--g-4); border-radius: var(--r-full);
+  }
+  .wf-election-card .match-row { display: flex; align-items: baseline; gap: 6px; }
+  .wf-election-card .match-row .n { font-size: 20px; font-weight: 700; color: var(--g-7); }
+  .wf-election-card .add {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 20px; border: 2px dashed var(--g-4);
+    border-radius: var(--r-lg); color: var(--g-5); font-size: 12px;
+    min-width: 200px; min-height: 100px;
+  }
+
+  /* Progress bar */
+  .wf-bottomnav {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px;
+    padding: 8px; border-top: 1px solid var(--g-3);
+    margin-top: auto; background: var(--g-1);
+  }
+  .wf-bottomnav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 4px; border-radius: var(--r);
+    font-size: 9px; color: var(--g-5); text-transform: uppercase; letter-spacing: .04em;
+  }
+
+  /* Card */
+  .wf-card {
+    border: 1px solid var(--g-4); border-radius: var(--r-lg);
+    padding: 16px; background: var(--g-0);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+
+  /* Progress bar */
+  .wf-progress {
+    height: 6px; background: var(--g-2); border-radius: var(--r-full); overflow: hidden;
+  }
+  .wf-progress > div {
+    height: 100%; background: var(--g-5); border-radius: var(--r-full);
+  }
+
+  /* Tabs */
+  .wf-tabs {
+    display: flex; gap: 4px; border-bottom: 1px solid var(--g-3);
+  }
+  .wf-tab {
+    padding: 8px 14px; font-size: 12px; color: var(--g-5);
+    border-bottom: 2px solid transparent;
+  }
+  .wf-tab.active { color: var(--g-7); border-color: var(--g-7); font-weight: 600; }
+
+  /* News card wireframe */
+  .wf-news { display: flex; gap: 12px; border: 1px solid var(--g-4); border-radius: var(--r); padding: 10px; }
+  .wf-news .wf-img { flex-shrink: 0; }
+  .wf-news .body { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+
+  /* Modal overlay */
+  .wf-modal-scrim {
+    background: rgba(0,0,0,.15); border-radius: 20px;
+    padding: 40px 20px 20px;
+    display: flex; align-items: flex-end; justify-content: center;
+  }
+  .wf-modal {
+    background: var(--g-0); border: 2px solid var(--g-4);
+    border-radius: 12px; padding: 20px;
+    width: 100%; display: flex; flex-direction: column; gap: 12px;
+  }
+
+  /* Utility */
+  .mt-auto { margin-top: auto; }
+  .center { text-align: center; }
+  .flex-center { display: flex; align-items: center; justify-content: center; flex: 1; }
+</style>
+</head>
+<body>
+
+<aside>
+  <h1>Tinder Decisivo</h1>
+  <p>Wireframes lowfi · v1</p>
+
+  <div class="group">Onboarding</div>
+  <a href="#tpl-splash">Splash</a>
+  <a href="#tpl-onboarding">Onboarding</a>
+  <a href="#tpl-ubicacion">Ubicacion</a>
+  <a href="#tpl-login">Login</a>
+  <a href="#tpl-signup">Signup</a>
+
+  <div class="group">Core</div>
+  <a href="#tpl-home">Home HUB (2 var)</a>
+  <a href="#tpl-elecciones">Gestion elecciones</a>
+  <a href="#tpl-cuestionario">Cuestionario</a>
+  <a href="#tpl-resultados">Resultados</a>
+  <a href="#tpl-swipe">Swipe</a>
+
+  <div class="group">Contenido</div>
+  <a href="#tpl-mislistas">Mis Listas</a>
+  <a href="#tpl-respuestas">Mis Respuestas</a>
+  <a href="#tpl-guardados">Mis Guardados</a>
+  <a href="#tpl-noticias">Noticias</a>
+  <a href="#tpl-perfil">Perfil candidato</a>
+  <a href="#tpl-perfil-empty">Perfil empty</a>
+  <a href="#tpl-comparador">Comparador</a>
+
+  <div class="group">Sistema</div>
+  <a href="#tpl-config">Configuración</a>
+
+  <div class="group">Modales</div>
+  <a href="#tpl-share">Share modal</a>
+</aside>
+
+<main>
+
+<!-- 1. SPLASH -->
+<section class="wf-section" id="tpl-splash">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 1</div>
+    <h2>Splash</h2>
+    <p>Pantalla de carga inicial. Logo centrado + tagline + spinner. Se muestra 1-2s mientras la app inicializa.</p>
+  </div>
+  <div class="wf-frames">
+    <div class="wf-frame">
+      <span class="wf-frame-label">Splash</span>
+      <div class="flex-center wf-col" style="align-items:center; gap:16px">
+        <div class="wf-avatar xl"></div>
+        <div class="wf-line title" style="width:140px"></div>
+        <div class="wf-line" style="width:180px"></div>
+        <div class="wf-spacer"></div>
+        <div class="wf-icon"></div>
+        <span class="wf-label">Cargando...</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. ONBOARDING -->
+<section class="wf-section" id="tpl-onboarding">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 2</div>
+    <h2>Onboarding</h2>
+    <p>Carrusel de 3 pantallas explicativas + CTA final. Dots inferiores indican progreso.</p>
+  </div>
+  <div class="wf-frames">
+    <div class="wf-frame">
+      <span class="wf-frame-label">Onboarding · 1/3</span>
+      <div class="wf-row between">
+        <span></span>
+        <span class="wf-text">Saltar</span>
+      </div>
+      <div class="wf-img full-bleed"></div>
+      <div class="wf-col" style="align-items:center; text-align:center; gap:12px">
+        <div class="wf-line title" style="width:60%"></div>
+        <div class="wf-line long"></div>
+        <div class="wf-line med"></div>
+      </div>
+      <div class="wf-spacer"></div>
+      <div class="wf-row" style="justify-content:center; gap:6px">
+        <span class="wf-icon" style="width:8px; height:8px; background:var(--g-6); border-color:var(--g-6)"></span>
+        <span class="wf-icon" style="width:8px; height:8px"></span>
+        <span class="wf-icon" style="width:8px; height:8px"></span>
+      </div>
+      <div class="wf-btn primary wide">Siguiente</div>
+    </div>
+
+    <div class="wf-frame">
+      <span class="wf-frame-label">Onboarding · 3/3</span>
+      <div class="wf-row between">
+        <span></span>
+        <span></span>
+      </div>
+      <div class="wf-img full-bleed"></div>
+      <div class="wf-col" style="align-items:center; text-align:center; gap:12px">
+        <div class="wf-line title" style="width:60%"></div>
+        <div class="wf-line long"></div>
+        <div class="wf-line med"></div>
+      </div>
+      <div class="wf-spacer"></div>
+      <div class="wf-btn primary wide">Empezar</div>
+      <div class="wf-btn ghost wide">Ya tengo cuenta</div>
+    </div>
+  </div>
+</section>
+
+<!-- 2b. UBICACION (paso extra onboarding) -->
+<section class="wf-section" id="tpl-ubicacion">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 2b (nuevo)</div>
+    <h2>Onboarding · Ubicación</h2>
+    <p>Paso opcional después del signup. Pedimos región + comuna para poder mostrar candidatos locales (municipal/regional). El usuario puede saltarlo y elegir después al activar una elección local. Aunque tenga una comuna guardada, siempre puede explorar otra desde el switcher del hub.</p>
+  </div>
+  <div class="wf-frames">
+    <div class="wf-frame">
+      <span class="wf-frame-label">Ubicacion</span>
+      <div class="wf-row between">
+        <div class="wf-btn icon"></div>
+        <span class="wf-text">Saltar</span>
+      </div>
+      <div class="wf-col" style="gap:6px; margin-top:16px">
+        <div class="wf-icon lg"></div>
+        <div class="wf-line title" style="width:60%"></div>
+        <div class="wf-line long"></div>
+        <div class="wf-line med"></div>
+      </div>
+      <div class="wf-col" style="gap:12px; margin-top:16px">
+        <div>
+          <span class="wf-label">Región</span>
+          <div class="wf-input" style="margin-top:4px; justify-content:space-between">Metropolitana <div class="wf-icon"></div></div>
+        </div>
+        <div>
+          <span class="wf-label">Comuna</span>
+          <div class="wf-input" style="margin-top:4px; justify-content:space-between">Ñuñoa <div class="wf-icon"></div></div>
+        </div>
+      </div>
+      <div class="wf-box" style="margin-top:8px; padding:10px">
+        <div class="wf-row" style="gap:8px">
+          <div class="wf-icon"></div>
+          <div class="wf-col grow" style="gap:2px">
+            <div class="wf-line short"></div>
+            <div class="wf-line med"></div>
+          </div>
+        </div>
+      </div>
+      <div class="wf-spacer"></div>
+      <div class="wf-btn primary wide">Confirmar ubicación</div>
+      <div class="wf-btn ghost wide">Ahora no</div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. LOGIN -->
+<section class="wf-section" id="tpl-login">  <div class="wf-section-head">
+    <div class="kicker">Template · 3</div>
+    <h2>Login</h2>
+    <p>Email + password + botón. Link a signup y a recuperar contraseña. Sociales opcionales.</p>
+  </div>
+  <div class="wf-frames">
+    <div class="wf-frame">
+      <span class="wf-frame-label">Login</span>
+      <div class="wf-row"><div class="wf-btn icon"></div></div>
+      <div class="wf-col" style="gap:6px; margin-top:16px">
+        <div class="wf-line title" style="width:50%"></div>
+        <div class="wf-line med"></div>
+      </div>
+      <div class="wf-col" style="gap:12px; margin-top:16px">
+        <div>
+          <span class="wf-label">Email</span>
+          <div class="wf-input" style="margin-top:4px">tu@email.com</div>
+        </div>
+        <div>
+          <span class="wf-label">Contraseña</span>
+          <div class="wf-input" style="margin-top:4px">••••••••</div>
+        </div>
+        <div class="wf-row between">
+          <span class="wf-text">Recordarme</span>
+          <span class="wf-text">¿Olvidaste?</span>
+        </div>
+      </div>
+      <div class="wf-btn primary wide" style="margin-top:8px">Iniciar sesión</div>
+      <div class="wf-row" style="gap:12px; align-items:center">
+        <div class="wf-divider" style="flex:1"></div>
+        <span class="wf-label">o</span>
+        <div class="wf-divider" style="flex:1"></div>
+      </div>
+      <div class="wf-grid-2">
+        <div class="wf-btn"><span class="wf-icon" style="margin-right:6px"></span>Google</div>
+        <div class="wf-btn"><span class="wf-icon" style="margin-right:6px"></span>Apple</div>
+      </div>
+      <div class="wf-spacer"></div>
+      <div class="center wf-text">¿No tienes cuenta? <strong>Regístrate</strong></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. SIGNUP -->
+<section class="wf-section" id="tpl-signup">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 4</div>
+    <h2>Signup</h2>
+    <p>Nombre + email + password + confirmar. Checkbox de términos. CTA principal.</p>
+  </div>
+  <div class="wf-frames">
+    <div class="wf-frame">
+      <span class="wf-frame-label">Signup</span>
+      <div class="wf-row"><div class="wf-btn icon"></div></div>
+      <div class="wf-col" style="gap:6px; margin-top:16px">
+        <div class="wf-line title" style="width:60%"></div>
+        <div class="wf-line med"></div>
+      </div>
+      <div class="wf-col" style="gap:12px; margin-top:16px">
+        <div><span class="wf-label">Nombre</span><div class="wf-input" style="margin-top:4px">Jenny</div></div>
+        <div><span class="wf-label">Email</span><div class="wf-input" style="margin-top:4px">jenny@email.com</div></div>
+        <div><span class="wf-label">Contraseña</span><div class="wf-input" style="margin-top:4px">••••••••</div></div>
+        <div><span class="wf-label">Confirmar</span><div class="wf-input" style="margin-top:4px">••••••••</div></div>
+        <div class="wf-row" style="gap:8px; align-items:flex-start">
+          <div class="wf-icon" style="margin-top:2px"></div>
+          <span class="wf-text" style="font-size:11px">Acepto los términos y la política de privacidad.</span>
+        </div>
+      </div>
+      <div class="wf-btn primary wide" style="margin-top:8px">Crear cuenta</div>
+      <div class="wf-spacer"></div>
+      <div class="center wf-text">¿Ya tienes cuenta? <strong>Inicia sesión</strong></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. HOME HUB -->
+<section class="wf-section" id="tpl-home">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 5 (rehecho)</div>
+    <h2>Home HUB</h2>
+    <p>El home es el HUB central de la app: muestra <strong>todas las elecciones activas</strong> como cards scrolleables. Debajo, un feed de <strong>Novedades</strong> unificado con noticias + acciones sugeridas de todas las elecciones (no privilegia una sola). Al tocar una card, entras al detalle específico de esa elección.</p>
+  </div>
+  <div class="wf-frames">
+    <!-- Home HUB · 1 eleccion activa (default post-signup) -->
+    <div class="wf-frame">
+      <span class="wf-frame-label">Home HUB · 1 eleccion (default)</span>
+      <div class="wf-topnav">
+        <div class="brand"><span class="wf-icon"></span>Tinder Decisivo</div>
+        <div class="wf-btn icon"></div>
+      </div>
+      <div class="wf-col" style="gap:4px">
+        <div class="wf-line title" style="width:55%"></div>
+        <div class="wf-line short"></div>
+      </div>
+
+      <div class="wf-col" style="gap:8px">
+        <div class="wf-row between">
+          <span class="wf-label">Tus elecciones</span>
+          <span class="wf-text">Gestionar</span>
+        </div>
+        <div class="wf-row" style="overflow-x:auto; gap:8px">
+          <!-- election-card ACTIVE (única) -->
+          <div class="wf-col" style="width:180px; padding:12px; border:2px solid var(--g-7); border-radius:var(--r-lg); flex-shrink:0; gap:6px">
+            <div class="wf-row between">
+              <div class="wf-col" style="gap:2px">
+                <div class="wf-line title" style="width:100px"></div>
+                <span class="wf-label">Nacional</span>
+              </div>
+              <span class="wf-chip">42d</span>
+            </div>
+            <div class="wf-line title" style="width:48px; height:22px"></div>
+            <div class="wf-progress"><div style="width:100%"></div></div>
+          </div>
+          <!-- + activar -->
+          <div class="wf-col" style="align-items:center; justify-content:center; gap:6px; width:140px; padding:12px; border:2px dashed var(--g-4); border-radius:var(--r-lg); flex-shrink:0; color:var(--g-5)">
+            <div class="wf-icon lg"></div>
+            <span class="wf-text" style="font-size:11px">+ Activar Municipal</span>
+          </div>
+          <div class="wf-col" style="align-items:center; justify-content:center; gap:6px; width:140px; padding:12px; border:2px dashed var(--g-4); border-radius:var(--r-lg); flex-shrink:0; color:var(--g-5)">
+            <div class="wf-icon lg"></div>
+            <span class="wf-text" style="font-size:11px">+ Activar Regional</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="wf-divider"></div>
+
+      <!-- Novedades: feed mixto (noticias + acciones) de todas las elecciones -->
+      <div class="wf-col" style="gap:8px">
+        <div class="wf-row between">
+          <span class="wf-label">Novedades</span>
+          <span class="wf-text">Ver todas ›</span>
+        </div>
+        <!-- Accion sugerida -->
+        <div class="wf-box" style="padding:10px; border-color:var(--g-6)">
+          <div class="wf-row" style="gap:8px">
+            <div class="wf-icon"></div>
+            <div class="wf-col grow" style="gap:2px">
+              <div class="wf-line title" style="width:75%"></div>
+              <span class="wf-text" style="font-size:11px">Presidencial · 6 preguntas extras</span>
+            </div>
+            <div class="wf-btn" style="padding:6px 10px; font-size:11px">Ir</div>
+          </div>
+        </div>
+        <!-- Noticia -->
+        <div class="wf-news">
+          <div class="wf-img thumb"></div>
+          <div class="body">
+            <div class="wf-line title long"></div>
+            <div class="wf-line med"></div>
+            <div class="wf-row" style="gap:6px">
+              <span class="wf-chip" style="padding:2px 6px; font-size:9px">Presidencial</span>
+              <span class="wf-text" style="font-size:10px">hace 3h</span>
+            </div>
+          </div>
+        </div>
+        <!-- Update de match -->
+        <div class="wf-box" style="padding:10px">
+          <div class="wf-row" style="gap:8px">
+            <div class="wf-avatar sm"></div>
+            <div class="wf-col grow" style="gap:2px">
+              <div class="wf-line title" style="width:70%"></div>
+              <span class="wf-text" style="font-size:11px">3 nuevas posturas registradas</span>
+            </div>
+          </div>
+        </div>
+        <!-- Noticia otra eleccion -->
+        <div class="wf-news">
+          <div class="wf-img thumb"></div>
+          <div class="body">
+            <div class="wf-line title long"></div>
+            <div class="wf-line med"></div>
+            <div class="wf-row" style="gap:6px">
+              <span class="wf-chip" style="padding:2px 6px; font-size:9px">Municipal</span>
+              <span class="wf-text" style="font-size:10px">ayer</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Home HUB · 3 elecciones activas (usuario power) -->
+    <div class="wf-frame">
+      <span class="wf-frame-label">Home HUB · 3 elecciones activas</span>
+      <div class="wf-topnav">
+        <div class="brand"><span class="wf-icon"></span>Tinder Decisivo</div>
+        <div class="wf-btn icon"></div>
+      </div>
+      <div class="wf-col" style="gap:4px">
+        <div class="wf-line title" style="width:55%"></div>
+        <div class="wf-line short"></div>
+      </div>
+
+      <div class="wf-col" style="gap:8px">
+        <div class="wf-row between">
+          <span class="wf-label">Tus elecciones (3)</span>
+          <span class="wf-text">Gestionar</span>
+        </div>
+        <div class="wf-row" style="overflow-x:auto; gap:8px">
+          <!-- active -->
+          <div class="wf-col" style="width:180px; padding:12px; border:2px solid var(--g-7); border-radius:var(--r-lg); flex-shrink:0; gap:6px">
+            <div class="wf-row between">
+              <div class="wf-col" style="gap:2px">
+                <div class="wf-line title" style="width:100px"></div>
+                <span class="wf-label">Nacional</span>
+              </div>
+              <span class="wf-chip">42d</span>
+            </div>
+            <div class="wf-line title" style="width:48px; height:22px"></div>
+            <div class="wf-progress"><div style="width:100%"></div></div>
+          </div>
+          <!-- otras activas -->
+          <div class="wf-col" style="width:180px; padding:12px; border:1px solid var(--g-4); border-radius:var(--r-lg); flex-shrink:0; gap:6px">
+            <div class="wf-row between">
+              <div class="wf-col" style="gap:2px">
+                <div class="wf-line title" style="width:100px"></div>
+                <span class="wf-label">Ñuñoa</span>
+              </div>
+              <span class="wf-chip">180d</span>
+            </div>
+            <div class="wf-line title" style="width:40px; height:22px"></div>
+            <div class="wf-progress"><div style="width:50%"></div></div>
+          </div>
+          <div class="wf-col" style="width:180px; padding:12px; border:1px solid var(--g-4); border-radius:var(--r-lg); flex-shrink:0; gap:6px">
+            <div class="wf-row between">
+              <div class="wf-col" style="gap:2px">
+                <div class="wf-line title" style="width:100px"></div>
+                <span class="wf-label">Distrito 10</span>
+              </div>
+              <span class="wf-chip">42d</span>
+            </div>
+            <span class="wf-text" style="font-size:10px">6 preguntas extras pendientes</span>
+            <div class="wf-progress"><div style="width:0%"></div></div>
+          </div>
+          <div class="wf-col" style="align-items:center; justify-content:center; gap:6px; width:140px; padding:12px; border:2px dashed var(--g-4); border-radius:var(--r-lg); flex-shrink:0; color:var(--g-5)">
+            <div class="wf-icon lg"></div>
+            <span class="wf-text" style="font-size:11px">+ Activar Regional</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="wf-divider"></div>
+
+      <!-- Novedades: feed mixto de todas las elecciones -->
+      <div class="wf-col" style="gap:8px">
+        <div class="wf-row between">
+          <span class="wf-label">Novedades</span>
+          <span class="wf-text">Ver todas ›</span>
+        </div>
+        <!-- Accion sugerida Parlamentaria -->
+        <div class="wf-box" style="padding:10px; border-color:var(--g-6)">
+          <div class="wf-row" style="gap:8px">
+            <div class="wf-icon"></div>
+            <div class="wf-col grow" style="gap:2px">
+              <div class="wf-line title" style="width:75%"></div>
+              <span class="wf-text" style="font-size:11px">Parlamentaria · 6 extras pendientes</span>
+            </div>
+            <div class="wf-btn" style="padding:6px 10px; font-size:11px">Ir</div>
+          </div>
+        </div>
+        <div class="wf-news">
+          <div class="wf-img thumb"></div>
+          <div class="body">
+            <div class="wf-line title long"></div>
+            <div class="wf-line med"></div>
+            <div class="wf-row" style="gap:6px">
+              <span class="wf-chip" style="padding:2px 6px; font-size:9px">Presidencial</span>
+              <span class="wf-text" style="font-size:10px">hace 2h</span>
+            </div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding:10px">
+          <div class="wf-row" style="gap:8px">
+            <div class="wf-avatar sm"></div>
+            <div class="wf-col grow" style="gap:2px">
+              <div class="wf-line title" style="width:70%"></div>
+              <span class="wf-text" style="font-size:11px">Nuevo candidato en Municipal Ñuñoa</span>
+            </div>
+          </div>
+        </div>
+        <div class="wf-news">
+          <div class="wf-img thumb"></div>
+          <div class="body">
+            <div class="wf-line title long"></div>
+            <div class="wf-line med"></div>
+            <div class="wf-row" style="gap:6px">
+              <span class="wf-chip" style="padding:2px 6px; font-size:9px">Municipal</span>
+              <span class="wf-text" style="font-size:10px">ayer</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Home HUB · sin novedades aún (empty state) -->
+    <div class="wf-frame">
+      <span class="wf-frame-label">Home HUB · sin novedades</span>
+      <div class="wf-topnav">
+        <div class="brand"><span class="wf-icon"></span>Tinder Decisivo</div>
+        <div class="wf-btn icon"></div>
+      </div>
+      <div class="wf-col" style="gap:4px">
+        <div class="wf-line title" style="width:55%"></div>
+        <div class="wf-line short"></div>
+      </div>
+
+      <div class="wf-col" style="gap:8px">
+        <div class="wf-row between">
+          <span class="wf-label">Tus elecciones (1)</span>
+          <span class="wf-text">Gestionar</span>
+        </div>
+        <div class="wf-row" style="overflow-x:auto; gap:8px">
+          <div class="wf-col" style="width:180px; padding:12px; border:2px solid var(--g-7); border-radius:var(--r-lg); flex-shrink:0; gap:6px">
+            <div class="wf-row between">
+              <div class="wf-col" style="gap:2px">
+                <div class="wf-line title" style="width:100px"></div>
+                <span class="wf-label">Nacional</span>
+              </div>
+              <span class="wf-chip">42d</span>
+            </div>
+            <div class="wf-text" style="font-size:10px">Completa el cuestionario</div>
+            <div class="wf-progress"><div style="width:0%"></div></div>
+          </div>
+          <div class="wf-col" style="align-items:center; justify-content:center; gap:6px; width:140px; padding:12px; border:2px dashed var(--g-4); border-radius:var(--r-lg); flex-shrink:0; color:var(--g-5)">
+            <div class="wf-icon lg"></div>
+            <span class="wf-text" style="font-size:11px">+ Activar Municipal</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="wf-divider"></div>
+
+      <!-- Empty state del feed Novedades -->
+      <div class="wf-col" style="gap:12px; align-items:center; text-align:center; padding:24px 12px; border:1px dashed var(--g-4); border-radius:var(--r-lg)">
+        <div class="wf-icon lg"></div>
+        <div class="wf-col" style="gap:4px; align-items:center">
+          <div class="wf-line title c" style="width:60%"></div>
+          <div class="wf-line long c"></div>
+          <div class="wf-line med c"></div>
+        </div>
+        <div class="wf-btn primary">Empezar cuestionario</div>
+        <span class="wf-text" style="font-size:10px">Cuando haya movimiento aparecerá aquí</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5b. GESTION DE ELECCIONES (nuevo) -->
+<section class="wf-section" id="tpl-elecciones">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 5b (nuevo)</div>
+    <h2>Gestión de elecciones</h2>
+    <p>Se abre desde el link "Gestionar" del HUB o desde una card "+ Activar". Muestra el catálogo completo de tipos de elección disponibles, con su scope geográfico y toggle para activar/desactivar. Para elecciones locales, deja elegir la comuna/región específica.</p>
+  </div>
+  <div class="wf-frames">
+    <div class="wf-frame">
+      <span class="wf-frame-label">Gestion · catalogo</span>
+      <div class="wf-topnav">
+        <div class="wf-btn icon"></div>
+        <span class="wf-text">Tus elecciones</span>
+        <span></span>
+      </div>
+      <div class="wf-col" style="gap:4px; margin-top:8px">
+        <div class="wf-line title" style="width:60%"></div>
+        <div class="wf-line med"></div>
+      </div>
+      <div class="wf-col" style="gap:8px; margin-top:12px">
+        <span class="wf-label">Activas</span>
+        <div class="wf-card" style="padding:12px; gap:6px">
+          <div class="wf-row between">
+            <div class="wf-col" style="gap:2px">
+              <div class="wf-line title" style="width:120px"></div>
+              <span class="wf-label">Nacional · 42 dias</span>
+            </div>
+            <div class="wf-box" style="width:36px; height:20px; padding:0; border-radius:10px; background:var(--g-7); border-color:var(--g-7)"></div>
+          </div>
+        </div>
+        <div class="wf-card" style="padding:12px; gap:6px">
+          <div class="wf-row between">
+            <div class="wf-col" style="gap:2px">
+              <div class="wf-line title" style="width:120px"></div>
+              <span class="wf-label">Ñuñoa · 180 dias</span>
+            </div>
+            <div class="wf-box" style="width:36px; height:20px; padding:0; border-radius:10px; background:var(--g-7); border-color:var(--g-7)"></div>
+          </div>
+        </div>
+      </div>
+      <div class="wf-col" style="gap:8px; margin-top:12px">
+        <span class="wf-label">Disponibles</span>
+        <div class="wf-card" style="padding:12px; gap:6px">
+          <div class="wf-row between">
+            <div class="wf-col" style="gap:2px">
+              <div class="wf-line title" style="width:120px"></div>
+              <span class="wf-label">Metropolitana · 180 dias</span>
+            </div>
+            <div class="wf-box" style="width:36px; height:20px; padding:0; border-radius:10px"></div>
+          </div>
+        </div>
+        <div class="wf-card" style="padding:12px; gap:6px">
+          <div class="wf-row between">
+            <div class="wf-col" style="gap:2px">
+              <div class="wf-line title" style="width:120px"></div>
+              <span class="wf-label">Distrito 10 · 42 dias</span>
+            </div>
+            <div class="wf-box" style="width:36px; height:20px; padding:0; border-radius:10px"></div>
+          </div>
+        </div>
+        <div class="wf-card" style="padding:12px; gap:6px">
+          <div class="wf-row between">
+            <div class="wf-col" style="gap:2px">
+              <div class="wf-line title" style="width:120px"></div>
+              <span class="wf-label">Nacional · próxima 2027</span>
+            </div>
+            <div class="wf-box" style="width:36px; height:20px; padding:0; border-radius:10px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="wf-spacer"></div>
+      <div class="wf-box" style="padding:10px">
+        <div class="wf-row" style="gap:8px">
+          <div class="wf-icon"></div>
+          <div class="wf-col grow" style="gap:2px">
+            <div class="wf-line short"></div>
+            <div class="wf-line med"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. CUESTIONARIO -->
+<section class="wf-section" id="tpl-cuestionario">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 6</div>
+    <h2>Cuestionario</h2>
+    <p>Pregunta 3/12. Topnav muestra la elección en foco. Progress dividido en <strong>base</strong> (compartido entre todas las elecciones) y <strong>extras</strong> (específicas de esta elección). El usuario contesta la base una sola vez y solo repite extras al activar una elección nueva.</p>
+  </div>
+  <div class="wf-frames">
+    <div class="wf-frame">
+      <span class="wf-frame-label">Pregunta 3/12</span>
+      <div class="wf-topnav">
+        <div class="wf-btn icon"></div>
+        <div class="wf-col" style="align-items:center; gap:2px; flex:1">
+          <span class="wf-text" style="font-size:12px; font-weight:600">Presidencial 2026</span>
+          <span class="wf-label">3 de 12 · base</span>
+        </div>
+        <div class="wf-btn icon"></div>
+      </div>
+      <div class="wf-row" style="gap:4px">
+        <div class="wf-progress" style="flex:3"><div style="width:33%"></div></div>
+        <div class="wf-progress" style="flex:1; opacity:.5"><div style="width:0%"></div></div>
+      </div>
+      <div class="wf-row" style="justify-content:space-between; font-size:9px; color:var(--g-5); text-transform:uppercase; letter-spacing:.06em">
+        <span>Base (12 preguntas)</span>
+        <span>Extras presidencial (4)</span>
+      </div>
+      <div class="wf-col" style="gap:8px; margin-top:16px">
+        <span class="wf-label">Educación</span>
+        <div class="wf-line title long"></div>
+        <div class="wf-line title long"></div>
+        <div class="wf-line title med"></div>
+      </div>
+      <div class="wf-col" style="gap:8px; margin-top:8px">
+        <div class="wf-box"><div class="wf-line med"></div></div>
+        <div class="wf-box"><div class="wf-line med"></div></div>
+        <div class="wf-box solid"><div class="wf-line med" style="background:var(--g-4)"></div></div>
+        <div class="wf-box"><div class="wf-line med"></div></div>
+        <div class="wf-box"><div class="wf-line med"></div></div>
+      </div>
+      <div class="wf-col" style="gap:6px; margin-top:8px">
+        <span class="wf-label">¿Qué tan importante?</span>
+        <div class="wf-row" style="gap:4px">
+          <div class="wf-chip">Nada</div>
+          <div class="wf-chip">Poco</div>
+          <div class="wf-chip active">Importante</div>
+          <div class="wf-chip">Mucho</div>
+        </div>
+      </div>
+      <div class="wf-spacer"></div>
+      <div class="wf-row" style="gap:8px">
+        <div class="wf-btn" style="flex:1">Atrás</div>
+        <div class="wf-btn primary" style="flex:2">Siguiente</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. RESULTADOS -->
+<section class="wf-section" id="tpl-resultados">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 7</div>
+    <h2>Resultados</h2>
+    <p>Post-cuestionario, para la elección en foco. Card hero con top match + %, radar chart grande al lado. Debajo, lista de ranking donde cada candidato lleva su propio mini radar (60x60) para comparar patrones de un vistazo.</p>
+  </div>
+  <div class="wf-frames">
+    <div class="wf-frame">
+      <span class="wf-frame-label">Resultados</span>
+      <div class="wf-topnav">
+        <div class="wf-btn icon"></div>
+        <div class="wf-col" style="align-items:center; gap:2px; flex:1">
+          <span class="wf-text" style="font-size:12px; font-weight:600">Presidencial 2026</span>
+          <span class="wf-label">Tus resultados</span>
+        </div>
+        <div class="wf-btn icon"></div>
+      </div>
+      <div class="wf-card" style="align-items:center; text-align:center">
+        <span class="wf-label">Tu match</span>
+        <div class="wf-avatar xl"></div>
+        <div class="wf-line title" style="width:50%"></div>
+        <div class="wf-line short"></div>
+        <div class="wf-line title" style="width:80px; height:32px; margin:8px 0"></div>
+        <span class="wf-label">Compatibilidad</span>
+        <div class="wf-img" style="aspect-ratio:1; max-height:180px; margin-top:8px; width:180px">Radar</div>
+        <div class="wf-btn primary wide" style="margin-top:12px">Ver perfil completo</div>
+      </div>
+      <div class="wf-col" style="gap:8px">
+        <span class="wf-label">Ranking completo</span>
+        <div class="wf-row" style="gap:8px; padding:8px; border:1px solid var(--g-4); border-radius:var(--r)">
+          <span class="wf-text">#2</span>
+          <div class="wf-avatar sm"></div>
+          <div class="wf-col grow" style="gap:2px">
+            <div class="wf-line short"></div>
+            <div class="wf-line tiny"></div>
+          </div>
+          <div class="wf-img" style="aspect-ratio:1; width:60px; height:60px; font-size:10px">radar</div>
+          <div class="wf-line title" style="width:32px; height:18px"></div>
+        </div>
+        <div class="wf-row" style="gap:8px; padding:8px; border:1px solid var(--g-4); border-radius:var(--r)">
+          <span class="wf-text">#3</span>
+          <div class="wf-avatar sm"></div>
+          <div class="wf-col grow" style="gap:2px">
+            <div class="wf-line short"></div>
+            <div class="wf-line tiny"></div>
+          </div>
+          <div class="wf-img" style="aspect-ratio:1; width:60px; height:60px; font-size:10px">radar</div>
+          <div class="wf-line title" style="width:32px; height:18px"></div>
+        </div>
+        <div class="wf-row" style="gap:8px; padding:8px; border:1px solid var(--g-4); border-radius:var(--r)">
+          <span class="wf-text">#4</span>
+          <div class="wf-avatar sm"></div>
+          <div class="wf-col grow" style="gap:2px">
+            <div class="wf-line short"></div>
+            <div class="wf-line tiny"></div>
+          </div>
+          <div class="wf-img" style="aspect-ratio:1; width:60px; height:60px; font-size:10px">radar</div>
+          <div class="wf-line title" style="width:32px; height:18px"></div>
+        </div>
+        <div class="wf-row" style="gap:8px; padding:8px; border:1px solid var(--g-4); border-radius:var(--r)">
+          <span class="wf-text">#5</span>
+          <div class="wf-avatar sm"></div>
+          <div class="wf-col grow" style="gap:2px">
+            <div class="wf-line short"></div>
+            <div class="wf-line tiny"></div>
+          </div>
+          <div class="wf-img" style="aspect-ratio:1; width:60px; height:60px; font-size:10px">radar</div>
+          <div class="wf-line title" style="width:32px; height:18px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. SWIPE -->
+<section class="wf-section" id="tpl-swipe">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 8</div>
+    <h2>Swipe</h2>
+    <p>Modo tinder: card grande con candidato, swipe izq (descartar) o der (favorito). Contador de pendientes.</p>
+  </div>
+  <div class="wf-frames">
+    <div class="wf-frame">
+      <span class="wf-frame-label">Swipe</span>
+      <div class="wf-topnav">
+        <div class="wf-btn icon"></div>
+        <span class="wf-text">3 de 6</span>
+        <div class="wf-btn icon"></div>
+      </div>
+      <div class="wf-card" style="flex:1; padding:0; overflow:hidden">
+        <div class="wf-img tall" style="aspect-ratio:auto; flex:1; border:none; border-bottom:1px solid var(--g-4); border-radius:0"></div>
+        <div class="wf-col" style="padding:16px; gap:6px">
+          <div class="wf-line title" style="width:60%"></div>
+          <div class="wf-line med"></div>
+          <div class="wf-line short"></div>
+        </div>
+      </div>
+      <div class="wf-row" style="justify-content:center; gap:24px; padding:8px">
+        <div class="wf-btn icon" style="width:56px; height:56px; border-radius:50%"></div>
+        <div class="wf-btn icon" style="width:56px; height:56px; border-radius:50%"></div>
+        <div class="wf-btn icon" style="width:56px; height:56px; border-radius:50%"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9. MIS LISTAS -->
+<section class="wf-section" id="tpl-mislistas">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 9</div>
+    <h2>Mis Listas</h2>
+    <p>Tabs Favoritos / Descartados. Grid de cards con avatar, nombre, match %, acción rápida.</p>
+  </div>
+  <div class="wf-frames">
+    <div class="wf-frame">
+      <span class="wf-frame-label">Mis Listas · Favoritos</span>
+      <div class="wf-topnav">
+        <div class="wf-btn icon"></div>
+        <span class="wf-text">Mis listas</span>
+        <div class="wf-btn icon"></div>
+      </div>
+      <div class="wf-tabs">
+        <div class="wf-tab active">Favoritos <span class="wf-text">(3)</span></div>
+        <div class="wf-tab">Descartados <span class="wf-text">(2)</span></div>
+      </div>
+      <div class="wf-col" style="gap:8px; margin-top:8px">
+        <div class="wf-card" style="padding:10px">
+          <div class="wf-row" style="gap:12px">
+            <div class="wf-avatar"></div>
+            <div class="wf-col grow" style="gap:4px">
+              <div class="wf-line title" style="width:60%"></div>
+              <div class="wf-line short"></div>
+            </div>
+            <div class="wf-line title" style="width:40px"></div>
+            <div class="wf-btn icon"></div>
+          </div>
+        </div>
+        <div class="wf-card" style="padding:10px">
+          <div class="wf-row" style="gap:12px">
+            <div class="wf-avatar"></div>
+            <div class="wf-col grow" style="gap:4px">
+              <div class="wf-line title" style="width:60%"></div>
+              <div class="wf-line short"></div>
+            </div>
+            <div class="wf-line title" style="width:40px"></div>
+            <div class="wf-btn icon"></div>
+          </div>
+        </div>
+        <div class="wf-card" style="padding:10px">
+          <div class="wf-row" style="gap:12px">
+            <div class="wf-avatar"></div>
+            <div class="wf-col grow" style="gap:4px">
+              <div class="wf-line title" style="width:60%"></div>
+              <div class="wf-line short"></div>
+            </div>
+            <div class="wf-line title" style="width:40px"></div>
+            <div class="wf-btn icon"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9b. MIS RESPUESTAS DEL CUESTIONARIO (nuevo, multi-eleccion) -->
+<section class="wf-section" id="tpl-respuestas">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 9b (nuevo)</div>
+    <h2>Mis respuestas del cuestionario</h2>
+    <p>Vista para revisar y editar tus respuestas del cuestionario. Con múltiples elecciones, se agrupan por bloque: <strong>Base</strong> (compartido, contestas una vez) y <strong>Extras</strong> (por elección específica). Cada respuesta es editable inline. Al final, opción de rehacer todo (destructivo).</p>
+  </div>
+  <div class="wf-frames">
+    <div class="wf-frame">
+      <span class="wf-frame-label">Mis respuestas</span>
+      <div class="wf-topnav">
+        <div class="wf-btn icon"></div>
+        <span class="wf-text">Mis respuestas</span>
+        <span></span>
+      </div>
+
+      <!-- Resumen de progreso por bloque -->
+      <div class="wf-box solid" style="padding:10px; gap:6px">
+        <div class="wf-row between">
+          <span class="wf-label">Base compartida</span>
+          <span class="wf-text" style="font-size:11px">12 / 12</span>
+        </div>
+        <div class="wf-progress"><div style="width:100%"></div></div>
+        <div class="wf-row between" style="margin-top:4px">
+          <span class="wf-label">Extras Presidencial</span>
+          <span class="wf-text" style="font-size:11px">4 / 4</span>
+        </div>
+        <div class="wf-progress"><div style="width:100%"></div></div>
+        <div class="wf-row between" style="margin-top:4px">
+          <span class="wf-label">Extras Municipal Ñuñoa</span>
+          <span class="wf-text" style="font-size:11px">3 / 6</span>
+        </div>
+        <div class="wf-progress"><div style="width:50%"></div></div>
+      </div>
+
+      <!-- Chips filtro por bloque -->
+      <div class="wf-row" style="gap:6px; overflow-x:auto">
+        <span class="wf-chip active">Todas</span>
+        <span class="wf-chip">Base</span>
+        <span class="wf-chip">Presidencial</span>
+        <span class="wf-chip">Municipal</span>
+      </div>
+
+      <!-- Grupo: Base -->
+      <div class="wf-col" style="gap:6px">
+        <span class="wf-label">Base compartida</span>
+        <div class="wf-card" style="padding:10px; gap:6px">
+          <div class="wf-line title long"></div>
+          <div class="wf-line med"></div>
+          <div class="wf-row between" style="margin-top:4px">
+            <div class="wf-row" style="gap:6px">
+              <span class="wf-chip" style="padding:2px 8px; font-size:10px">De acuerdo</span>
+              <span class="wf-chip" style="padding:2px 8px; font-size:10px">Importante</span>
+            </div>
+            <div class="wf-btn" style="padding:4px 10px; font-size:11px">Editar</div>
+          </div>
+        </div>
+        <div class="wf-card" style="padding:10px; gap:6px">
+          <div class="wf-line title long"></div>
+          <div class="wf-line short"></div>
+          <div class="wf-row between" style="margin-top:4px">
+            <div class="wf-row" style="gap:6px">
+              <span class="wf-chip" style="padding:2px 8px; font-size:10px">Muy de acuerdo</span>
+              <span class="wf-chip" style="padding:2px 8px; font-size:10px">Muy importante</span>
+            </div>
+            <div class="wf-btn" style="padding:4px 10px; font-size:11px">Editar</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grupo: Extras Presidencial -->
+      <div class="wf-col" style="gap:6px">
+        <span class="wf-label">Extras Presidencial</span>
+        <div class="wf-card" style="padding:10px; gap:6px">
+          <div class="wf-line title long"></div>
+          <div class="wf-line med"></div>
+          <div class="wf-row between" style="margin-top:4px">
+            <div class="wf-row" style="gap:6px">
+              <span class="wf-chip" style="padding:2px 8px; font-size:10px">Neutral</span>
+            </div>
+            <div class="wf-btn" style="padding:4px 10px; font-size:11px">Editar</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grupo: Extras Municipal (incompleto) -->
+      <div class="wf-col" style="gap:6px">
+        <span class="wf-label">Extras Municipal Ñuñoa · 3 pendientes</span>
+        <div class="wf-box" style="padding:10px; border-color:var(--g-6)">
+          <div class="wf-row" style="gap:8px">
+            <div class="wf-icon"></div>
+            <div class="wf-col grow" style="gap:2px">
+              <div class="wf-line short"></div>
+              <span class="wf-text" style="font-size:11px">Contesta 3 preguntas para completar tu match</span>
+            </div>
+            <div class="wf-btn" style="padding:6px 10px; font-size:11px">Ir</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wf-spacer"></div>
+      <div class="wf-btn ghost wide">Rehacer todo el cuestionario</div>
+    </div>
+  </div>
+</section>
+
+<!-- 9c. MIS GUARDADOS (nuevo) -->
+<section class="wf-section" id="tpl-guardados">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 9c (nuevo)</div>
+    <h2>Mis guardados</h2>
+    <p>Vista consolidada de todo lo que el usuario ha guardado. Tabs: <strong>Favoritos</strong> (candidatos marcados como interesantes), <strong>Descartados</strong> (con opción restaurar) y <strong>Posturas</strong> (posturas específicas de candidatos que quisiste guardar). Filtro por elección encima de tabs.</p>
+  </div>
+  <div class="wf-frames">
+    <div class="wf-frame">
+      <span class="wf-frame-label">Guardados · Favoritos</span>
+      <div class="wf-topnav">
+        <div class="wf-btn icon"></div>
+        <span class="wf-text">Mis guardados</span>
+        <div class="wf-btn icon"></div>
+      </div>
+
+      <!-- Filtro por eleccion -->
+      <div class="wf-row" style="gap:6px; overflow-x:auto">
+        <span class="wf-label" style="align-self:center">Elección</span>
+        <span class="wf-chip active">Todas</span>
+        <span class="wf-chip">Presidencial</span>
+        <span class="wf-chip">Municipal</span>
+      </div>
+
+      <!-- Tabs -->
+      <div class="wf-tabs">
+        <div class="wf-tab active">Favoritos <span class="wf-text">(3)</span></div>
+        <div class="wf-tab">Descartados <span class="wf-text">(2)</span></div>
+        <div class="wf-tab">Posturas <span class="wf-text">(5)</span></div>
+      </div>
+
+      <div class="wf-col" style="gap:8px; margin-top:8px">
+        <div class="wf-card" style="padding:10px">
+          <div class="wf-row" style="gap:10px">
+            <div class="wf-avatar"></div>
+            <div class="wf-col grow" style="gap:4px">
+              <div class="wf-line title" style="width:60%"></div>
+              <div class="wf-row" style="gap:6px">
+                <span class="wf-chip" style="padding:2px 6px; font-size:9px">Presidencial</span>
+                <span class="wf-text" style="font-size:10px">87% match</span>
+              </div>
+            </div>
+            <div class="wf-btn icon"></div>
+          </div>
+        </div>
+        <div class="wf-card" style="padding:10px">
+          <div class="wf-row" style="gap:10px">
+            <div class="wf-avatar"></div>
+            <div class="wf-col grow" style="gap:4px">
+              <div class="wf-line title" style="width:60%"></div>
+              <div class="wf-row" style="gap:6px">
+                <span class="wf-chip" style="padding:2px 6px; font-size:9px">Municipal</span>
+                <span class="wf-text" style="font-size:10px">72% match</span>
+              </div>
+            </div>
+            <div class="wf-btn icon"></div>
+          </div>
+        </div>
+        <div class="wf-card" style="padding:10px">
+          <div class="wf-row" style="gap:10px">
+            <div class="wf-avatar"></div>
+            <div class="wf-col grow" style="gap:4px">
+              <div class="wf-line title" style="width:60%"></div>
+              <div class="wf-row" style="gap:6px">
+                <span class="wf-chip" style="padding:2px 6px; font-size:9px">Presidencial</span>
+                <span class="wf-text" style="font-size:10px">64% match</span>
+              </div>
+            </div>
+            <div class="wf-btn icon"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wf-frame">
+      <span class="wf-frame-label">Guardados · Posturas</span>
+      <div class="wf-topnav">
+        <div class="wf-btn icon"></div>
+        <span class="wf-text">Mis guardados</span>
+        <div class="wf-btn icon"></div>
+      </div>
+
+      <div class="wf-row" style="gap:6px; overflow-x:auto">
+        <span class="wf-label" style="align-self:center">Elección</span>
+        <span class="wf-chip active">Todas</span>
+        <span class="wf-chip">Presidencial</span>
+        <span class="wf-chip">Municipal</span>
+      </div>
+
+      <div class="wf-tabs">
+        <div class="wf-tab">Favoritos <span class="wf-text">(3)</span></div>
+        <div class="wf-tab">Descartados <span class="wf-text">(2)</span></div>
+        <div class="wf-tab active">Posturas <span class="wf-text">(5)</span></div>
+      </div>
+
+      <div class="wf-col" style="gap:8px; margin-top:8px">
+        <div class="wf-card" style="padding:10px; gap:6px">
+          <div class="wf-row between">
+            <div class="wf-row" style="gap:6px">
+              <div class="wf-avatar sm"></div>
+              <div class="wf-col" style="gap:2px">
+                <div class="wf-line short"></div>
+                <span class="wf-text" style="font-size:10px">Educación · hace 2 dias</span>
+              </div>
+            </div>
+            <div class="wf-btn icon"></div>
+          </div>
+          <div class="wf-line title long"></div>
+          <div class="wf-line med"></div>
+        </div>
+        <div class="wf-card" style="padding:10px; gap:6px">
+          <div class="wf-row between">
+            <div class="wf-row" style="gap:6px">
+              <div class="wf-avatar sm"></div>
+              <div class="wf-col" style="gap:2px">
+                <div class="wf-line short"></div>
+                <span class="wf-text" style="font-size:10px">Salud · ayer</span>
+              </div>
+            </div>
+            <div class="wf-btn icon"></div>
+          </div>
+          <div class="wf-line title long"></div>
+          <div class="wf-line med"></div>
+        </div>
+        <div class="wf-card" style="padding:10px; gap:6px">
+          <div class="wf-row between">
+            <div class="wf-row" style="gap:6px">
+              <div class="wf-avatar sm"></div>
+              <div class="wf-col" style="gap:2px">
+                <div class="wf-line short"></div>
+                <span class="wf-text" style="font-size:10px">Pensiones · hoy</span>
+              </div>
+            </div>
+            <div class="wf-btn icon"></div>
+          </div>
+          <div class="wf-line title long"></div>
+          <div class="wf-line med"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10. NOTICIAS -->
+<section class="wf-section" id="tpl-noticias">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 10</div>
+    <h2>Noticias</h2>
+    <p>Feed con topnav breadcrumb + filtros scrolleables (elección, candidato, sentimiento) + lista de news cards en 1 columna + botón cargar más.</p>
+  </div>
+  <div class="wf-frames">
+    <div class="wf-frame">
+      <span class="wf-frame-label">Noticias</span>
+      <div class="wf-topnav">
+        <div class="wf-btn icon"></div>
+        <div class="wf-col" style="align-items:center; gap:2px; flex:1">
+          <span class="wf-text" style="font-size:12px; font-weight:600">Presidencial 2026</span>
+          <span class="wf-label">Noticias</span>
+        </div>
+        <div class="wf-btn icon"></div>
+      </div>
+      <div class="wf-row between" style="align-items:baseline">
+        <div class="wf-line title" style="width:180px"></div>
+        <span class="wf-text">128 resultados</span>
+      </div>
+      <div class="wf-col" style="gap:6px">
+        <div class="wf-row" style="gap:6px; overflow-x:auto">
+          <span class="wf-label" style="align-self:center">Elección</span>
+          <span class="wf-chip active">Presidencial</span>
+          <span class="wf-chip">Municipal</span>
+          <span class="wf-chip">Todas</span>
+        </div>
+        <div class="wf-row" style="gap:6px; overflow-x:auto">
+          <span class="wf-label" style="align-self:center">Candidato</span>
+          <span class="wf-chip active">Todos</span>
+          <span class="wf-chip">Chip</span>
+          <span class="wf-chip">Chip</span>
+          <span class="wf-chip">Chip</span>
+          <span class="wf-chip">Chip</span>
+        </div>
+        <div class="wf-row" style="gap:6px">
+          <span class="wf-label" style="align-self:center">Sentimiento</span>
+          <span class="wf-chip active">Todos</span>
+          <span class="wf-chip">Positivas</span>
+          <span class="wf-chip">Neutrales</span>
+          <span class="wf-chip">Negativas</span>
+        </div>
+      </div>
+      <div class="wf-col" style="gap:8px">
+        <div class="wf-news">
+          <div class="wf-img thumb"></div>
+          <div class="body">
+            <div class="wf-line title long"></div>
+            <div class="wf-line long"></div>
+            <div class="wf-row" style="gap:6px"><div class="wf-line tiny"></div><div class="wf-line tiny"></div></div>
+          </div>
+        </div>
+        <div class="wf-news">
+          <div class="wf-img thumb"></div>
+          <div class="body">
+            <div class="wf-line title long"></div>
+            <div class="wf-line long"></div>
+            <div class="wf-row" style="gap:6px"><div class="wf-line tiny"></div><div class="wf-line tiny"></div></div>
+          </div>
+        </div>
+        <div class="wf-news">
+          <div class="wf-img thumb"></div>
+          <div class="body">
+            <div class="wf-line title long"></div>
+            <div class="wf-line long"></div>
+            <div class="wf-row" style="gap:6px"><div class="wf-line tiny"></div><div class="wf-line tiny"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="wf-row" style="justify-content:center">
+        <div class="wf-btn">Cargar más</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 11. PERFIL CANDIDATO -->
+<section class="wf-section" id="tpl-perfil">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 11</div>
+    <h2>Perfil de candidato</h2>
+    <p>Hero con avatar + nombre + partido + match %. Botón discreto "Marcar como mi elegido" (opcional, uno por elección — reemplaza la idea de "voto final" con algo más liviano). Tabs Resumen / Posturas / Noticias. Sección de posturas destacadas + últimas noticias.</p>
+  </div>
+  <div class="wf-frames">
+    <div class="wf-frame">
+      <span class="wf-frame-label">Perfil · Resumen</span>
+      <div class="wf-topnav">
+        <div class="wf-btn icon"></div>
+        <div class="wf-col" style="align-items:center; gap:2px; flex:1">
+          <span class="wf-text" style="font-size:12px; font-weight:600">Presidencial 2026</span>
+          <span class="wf-label">Perfil de candidato</span>
+        </div>
+        <div class="wf-btn icon"></div>
+      </div>
+      <div class="wf-col" style="align-items:center; gap:8px; padding:12px 0">
+        <div class="wf-avatar xl"></div>
+        <div class="wf-line title c" style="width:50%"></div>
+        <div class="wf-line short c"></div>
+        <div class="wf-line title c" style="width:64px; height:28px"></div>
+        <span class="wf-label">Compatibilidad</span>
+        <!-- Marcar como mi elegido: toggle discreto -->
+        <div class="wf-btn wide" style="margin-top:8px; gap:6px">
+          <div class="wf-icon"></div>
+          <span>Marcar como mi elegido</span>
+        </div>
+        <div class="wf-row" style="gap:8px; margin-top:4px">
+          <div class="wf-btn icon"></div>
+          <div class="wf-btn icon"></div>
+          <div class="wf-btn icon"></div>
+        </div>
+      </div>
+      <div class="wf-tabs">
+        <div class="wf-tab active">Resumen</div>
+        <div class="wf-tab">Posturas <span class="wf-text">(12)</span></div>
+        <div class="wf-tab">Noticias <span class="wf-text">(42)</span></div>
+      </div>
+      <div class="wf-col" style="gap:8px">
+        <span class="wf-label">Posturas destacadas</span>
+        <div class="wf-card" style="padding:12px; gap:6px">
+          <div class="wf-row between" style="align-items:flex-start">
+            <div class="wf-line title" style="width:70%"></div>
+            <div class="wf-chip" style="flex-shrink:0">Match</div>
+          </div>
+          <div class="wf-row" style="gap:8px">
+            <div class="wf-line short"></div>
+            <div class="wf-line short"></div>
+          </div>
+        </div>
+        <div class="wf-card" style="padding:12px; gap:6px">
+          <div class="wf-row between" style="align-items:flex-start">
+            <div class="wf-line title" style="width:70%"></div>
+            <div class="wf-chip" style="flex-shrink:0">Parcial</div>
+          </div>
+          <div class="wf-row" style="gap:8px">
+            <div class="wf-line short"></div>
+            <div class="wf-line short"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 12. PERFIL EMPTY -->
+<section class="wf-section" id="tpl-perfil-empty">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 12</div>
+    <h2>Perfil · empty state</h2>
+    <p>Cuando el usuario aún no completó el cuestionario, oculta el % de match y muestra CTA para completarlo.</p>
+  </div>
+  <div class="wf-frames">
+    <div class="wf-frame">
+      <span class="wf-frame-label">Perfil · sin match</span>
+      <div class="wf-topnav">
+        <div class="wf-btn icon"></div>
+        <div class="wf-col" style="align-items:center; gap:2px; flex:1">
+          <span class="wf-text" style="font-size:12px; font-weight:600">Municipal 2028</span>
+          <span class="wf-label">Perfil de candidato</span>
+        </div>
+        <div class="wf-btn icon"></div>
+      </div>
+      <div class="wf-col" style="align-items:center; gap:8px; padding:12px 0">
+        <div class="wf-avatar xl"></div>
+        <div class="wf-line title" style="width:50%"></div>
+        <div class="wf-line short"></div>
+        <div class="wf-box" style="padding:12px; text-align:center; margin-top:8px; width:100%">
+          <div class="wf-line med" style="margin:0 auto"></div>
+          <div class="wf-line short" style="margin:6px auto"></div>
+          <div class="wf-btn primary" style="margin-top:8px">Empezar cuestionario</div>
+        </div>
+      </div>
+      <div class="wf-tabs">
+        <div class="wf-tab active">Resumen</div>
+        <div class="wf-tab">Posturas</div>
+        <div class="wf-tab">Noticias</div>
+      </div>
+      <div class="wf-col" style="gap:8px">
+        <span class="wf-label">Sobre el candidato</span>
+        <div class="wf-line long"></div>
+        <div class="wf-line long"></div>
+        <div class="wf-line med"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 13. COMPARADOR -->
+<section class="wf-section" id="tpl-comparador">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 13</div>
+    <h2>Comparador</h2>
+    <p>Hasta 3 candidatos en 360px móvil. Header compacto con avatares fijos y match% de cada uno. Debajo, filas por eje mostrando la posición de cada candidato (barra o valor) alineada bajo su avatar. Sticky header al hacer scroll.</p>
+  </div>
+  <div class="wf-frames">
+    <div class="wf-frame">
+      <span class="wf-frame-label">Comparador · 2 candidatos</span>
+      <div class="wf-topnav">
+        <div class="wf-btn icon"></div>
+        <div class="wf-col" style="align-items:center; gap:2px; flex:1">
+          <span class="wf-text" style="font-size:12px; font-weight:600">Presidencial 2026</span>
+          <span class="wf-label">Comparar candidatos</span>
+        </div>
+        <div class="wf-btn icon"></div>
+      </div>
+
+      <!-- Header sticky con avatares fijos y match -->
+      <div class="wf-box" style="padding:12px 8px; background:var(--g-1)">
+        <div class="wf-row" style="gap:8px">
+          <div style="width:80px"></div>
+          <div class="wf-col" style="flex:1; align-items:center; gap:4px">
+            <div class="wf-avatar"></div>
+            <div class="wf-line tiny c"></div>
+            <div class="wf-line title c" style="width:36px; height:16px"></div>
+          </div>
+          <div class="wf-col" style="flex:1; align-items:center; gap:4px">
+            <div class="wf-avatar"></div>
+            <div class="wf-line tiny c"></div>
+            <div class="wf-line title c" style="width:36px; height:16px"></div>
+          </div>
+          <div class="wf-col" style="width:32px; align-items:center; justify-content:center">
+            <div class="wf-icon"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toggle: solo diferencias -->
+      <div class="wf-row between" style="padding:0 4px">
+        <span class="wf-text" style="font-size:11px">Solo mostrar diferencias</span>
+        <div class="wf-box" style="width:32px; height:18px; padding:0; border-radius:10px"></div>
+      </div>
+
+      <!-- Filas por eje -->
+      <div class="wf-col" style="gap:0">
+        <div class="wf-row" style="gap:8px; padding:10px 4px; border-bottom:1px solid var(--g-3)">
+          <div style="width:80px"><span class="wf-label" style="font-size:10px">Educacion</span></div>
+          <div class="wf-col" style="flex:1; align-items:center; gap:2px">
+            <div class="wf-line med c"></div>
+            <div class="wf-line tiny c"></div>
+          </div>
+          <div class="wf-col" style="flex:1; align-items:center; gap:2px">
+            <div class="wf-line med c"></div>
+            <div class="wf-line tiny c"></div>
+          </div>
+          <div style="width:32px"></div>
+        </div>
+        <div class="wf-row" style="gap:8px; padding:10px 4px; border-bottom:1px solid var(--g-3)">
+          <div style="width:80px"><span class="wf-label" style="font-size:10px">Salud</span></div>
+          <div class="wf-col" style="flex:1; align-items:center; gap:2px">
+            <div class="wf-line med c"></div>
+            <div class="wf-line tiny c"></div>
+          </div>
+          <div class="wf-col" style="flex:1; align-items:center; gap:2px">
+            <div class="wf-line med c"></div>
+            <div class="wf-line tiny c"></div>
+          </div>
+          <div style="width:32px"></div>
+        </div>
+        <div class="wf-row" style="gap:8px; padding:10px 4px; border-bottom:1px solid var(--g-3)">
+          <div style="width:80px"><span class="wf-label" style="font-size:10px">Pensiones</span></div>
+          <div class="wf-col" style="flex:1; align-items:center; gap:2px">
+            <div class="wf-line med c"></div>
+            <div class="wf-line tiny c"></div>
+          </div>
+          <div class="wf-col" style="flex:1; align-items:center; gap:2px">
+            <div class="wf-line med c"></div>
+            <div class="wf-line tiny c"></div>
+          </div>
+          <div style="width:32px"></div>
+        </div>
+        <div class="wf-row" style="gap:8px; padding:10px 4px; border-bottom:1px solid var(--g-3)">
+          <div style="width:80px"><span class="wf-label" style="font-size:10px">Impuestos</span></div>
+          <div class="wf-col" style="flex:1; align-items:center; gap:2px">
+            <div class="wf-line med c"></div>
+            <div class="wf-line tiny c"></div>
+          </div>
+          <div class="wf-col" style="flex:1; align-items:center; gap:2px">
+            <div class="wf-line med c"></div>
+            <div class="wf-line tiny c"></div>
+          </div>
+          <div style="width:32px"></div>
+        </div>
+        <div class="wf-row" style="gap:8px; padding:10px 4px">
+          <div style="width:80px"><span class="wf-label" style="font-size:10px">Medio amb.</span></div>
+          <div class="wf-col" style="flex:1; align-items:center; gap:2px">
+            <div class="wf-line med c"></div>
+            <div class="wf-line tiny c"></div>
+          </div>
+          <div class="wf-col" style="flex:1; align-items:center; gap:2px">
+            <div class="wf-line med c"></div>
+            <div class="wf-line tiny c"></div>
+          </div>
+          <div style="width:32px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 14. SHARE MODAL -->
+<section class="wf-section" id="tpl-share">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 14</div>
+    <h2>Share modal</h2>
+    <p>Bottom sheet modal para compartir tus resultados. Preview + opciones de canal (WhatsApp, IG, Twitter, copiar link).</p>
+  </div>
+  <div class="wf-frames">
+    <div class="wf-frame" style="padding:0">
+      <span class="wf-frame-label">Share modal</span>
+      <div class="wf-modal-scrim" style="flex:1; padding-top:120px">
+        <div class="wf-modal">
+          <div class="wf-row" style="justify-content:center">
+            <div class="wf-line" style="width:40px; height:4px; background:var(--g-4)"></div>
+          </div>
+          <div class="wf-line title" style="width:60%"></div>
+          <div class="wf-line med"></div>
+          <div class="wf-box" style="padding:12px; align-items:center">
+            <div class="wf-line long"></div>
+            <div class="wf-line med"></div>
+            <div class="wf-row" style="justify-content:center; margin-top:6px; gap:6px">
+              <div class="wf-avatar sm"></div>
+              <div class="wf-avatar sm"></div>
+              <div class="wf-avatar sm"></div>
+            </div>
+          </div>
+          <div class="wf-grid-4" style="gap:6px">
+            <div class="wf-col" style="align-items:center; gap:4px"><div class="wf-icon lg"></div><span class="wf-text" style="font-size:10px">WhatsApp</span></div>
+            <div class="wf-col" style="align-items:center; gap:4px"><div class="wf-icon lg"></div><span class="wf-text" style="font-size:10px">Instagram</span></div>
+            <div class="wf-col" style="align-items:center; gap:4px"><div class="wf-icon lg"></div><span class="wf-text" style="font-size:10px">Twitter</span></div>
+            <div class="wf-col" style="align-items:center; gap:4px"><div class="wf-icon lg"></div><span class="wf-text" style="font-size:10px">Copiar link</span></div>
+          </div>
+          <div class="wf-btn wide">Cancelar</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 15. CONFIGURACION -->
+<section class="wf-section" id="tpl-config">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 15 (nuevo)</div>
+    <h2>Configuración</h2>
+    <p>Ajustes de la app. Agrupado en secciones: Cuenta, Ubicación, Elecciones (link a la gestión), Notificaciones, Tema, Privacidad y Sobre la app. Cada item es tap-able (arrow ›) o toggle.</p>
+  </div>
+  <div class="wf-frames">
+    <div class="wf-frame">
+      <span class="wf-frame-label">Configuracion</span>
+      <div class="wf-topnav">
+        <div class="wf-btn icon"></div>
+        <span class="wf-text">Configuración</span>
+        <span></span>
+      </div>
+
+      <!-- Cuenta -->
+      <div class="wf-col" style="gap:6px">
+        <span class="wf-label">Cuenta</span>
+        <div class="wf-card" style="padding:12px; gap:2px; align-items:center; text-align:center">
+          <div class="wf-avatar lg"></div>
+          <div class="wf-line title c" style="width:60%"></div>
+          <div class="wf-line short c"></div>
+          <div class="wf-btn" style="margin-top:8px">Editar perfil</div>
+        </div>
+      </div>
+
+      <!-- Mis datos (nuevas 3 secciones) -->
+      <div class="wf-col" style="gap:6px">
+        <span class="wf-label">Mis datos</span>
+        <div class="wf-box" style="padding:10px">
+          <div class="wf-row between">
+            <div class="wf-col" style="gap:2px">
+              <span class="wf-text" style="font-size:12px">Mis respuestas del cuestionario</span>
+              <span class="wf-text" style="font-size:10px; color:var(--g-5)">12 base · 4 extras · editable</span>
+            </div>
+            <div class="wf-icon"></div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding:10px">
+          <div class="wf-row between">
+            <div class="wf-col" style="gap:2px">
+              <span class="wf-text" style="font-size:12px">Mis guardados</span>
+              <span class="wf-text" style="font-size:10px; color:var(--g-5)">3 favoritos · 2 descartados · 5 posturas</span>
+            </div>
+            <div class="wf-icon"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ubicacion -->
+      <div class="wf-col" style="gap:6px">
+        <span class="wf-label">Ubicación</span>
+        <div class="wf-box" style="padding:10px">
+          <div class="wf-row between">
+            <div class="wf-col" style="gap:2px">
+              <span class="wf-text" style="font-size:12px">Comuna</span>
+              <div class="wf-line title" style="width:80px"></div>
+            </div>
+            <div class="wf-icon"></div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding:10px">
+          <div class="wf-row between">
+            <div class="wf-col" style="gap:2px">
+              <span class="wf-text" style="font-size:12px">Región</span>
+              <div class="wf-line title" style="width:120px"></div>
+            </div>
+            <div class="wf-icon"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Elecciones -->
+      <div class="wf-col" style="gap:6px">
+        <span class="wf-label">Elecciones</span>
+        <div class="wf-box" style="padding:10px">
+          <div class="wf-row between">
+            <div class="wf-col" style="gap:2px">
+              <div class="wf-line title" style="width:120px"></div>
+              <span class="wf-text" style="font-size:11px">2 activas · 3 disponibles</span>
+            </div>
+            <div class="wf-icon"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notificaciones -->
+      <div class="wf-col" style="gap:6px">
+        <span class="wf-label">Notificaciones</span>
+        <div class="wf-box" style="padding:10px">
+          <div class="wf-row between">
+            <span class="wf-text" style="font-size:12px">Nuevas noticias</span>
+            <div class="wf-box" style="width:36px; height:20px; padding:0; border-radius:10px; background:var(--g-7); border-color:var(--g-7)"></div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding:10px">
+          <div class="wf-row between">
+            <span class="wf-text" style="font-size:12px">Cambios en tu match</span>
+            <div class="wf-box" style="width:36px; height:20px; padding:0; border-radius:10px; background:var(--g-7); border-color:var(--g-7)"></div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding:10px">
+          <div class="wf-row between">
+            <span class="wf-text" style="font-size:12px">Recordatorios de elección</span>
+            <div class="wf-box" style="width:36px; height:20px; padding:0; border-radius:10px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tema -->
+      <div class="wf-col" style="gap:6px">
+        <span class="wf-label">Tema</span>
+        <div class="wf-row" style="gap:6px">
+          <div class="wf-chip active" style="flex:1; justify-content:center">Auto</div>
+          <div class="wf-chip" style="flex:1; justify-content:center">Claro</div>
+          <div class="wf-chip" style="flex:1; justify-content:center">Oscuro</div>
+        </div>
+      </div>
+
+      <!-- Privacidad y sobre -->
+      <div class="wf-col" style="gap:6px">
+        <span class="wf-label">Privacidad</span>
+        <div class="wf-box" style="padding:10px">
+          <div class="wf-row between">
+            <span class="wf-text" style="font-size:12px">Exportar mis datos</span>
+            <div class="wf-icon"></div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding:10px">
+          <div class="wf-row between">
+            <span class="wf-text" style="font-size:12px">Borrar mi cuenta</span>
+            <div class="wf-icon"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wf-col" style="gap:6px">
+        <span class="wf-label">Sobre la app</span>
+        <div class="wf-box" style="padding:10px">
+          <div class="wf-row between">
+            <span class="wf-text" style="font-size:12px">Términos y privacidad</span>
+            <div class="wf-icon"></div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding:10px">
+          <div class="wf-row between">
+            <span class="wf-text" style="font-size:12px">Créditos</span>
+            <div class="wf-icon"></div>
+          </div>
+        </div>
+        <div class="center wf-text" style="font-size:10px; padding:8px">Version 1.0.0</div>
+      </div>
+
+      <div class="wf-btn wide" style="margin-top:8px">Cerrar sesión</div>
+    </div>
+  </div>
+</section>
+
+</main>
+</body>
+</html>

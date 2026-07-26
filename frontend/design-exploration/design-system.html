@@ -608,6 +608,116 @@
   }
   .topnav .brand { font-weight: var(--fw-bold); font-size: var(--fs-lg); color: var(--color-primary); }
 
+  /* TopNav breadcrumb: variante con back + contexto de eleccion */
+  .topnav .crumb {
+    display: flex; align-items: center; gap: var(--sp-3); flex: 1; min-width: 0;
+  }
+  .topnav .crumb .ctx { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .topnav .crumb .ctx .name {
+    font-size: var(--fs-md); font-weight: var(--fw-semibold);
+    color: var(--color-text); line-height: 1.2;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .topnav .crumb .ctx .sub {
+    font-size: 11px; color: var(--color-text-3);
+    text-transform: uppercase; letter-spacing: .06em; font-weight: var(--fw-semibold);
+  }
+  .topnav .crumb .ctx .sub .days { color: var(--color-primary); }
+
+  /* ===== MOLECULE: ElectionCard =====
+     Card horizontal usada en el Home HUB para representar cada tipo de eleccion activa.
+     Muestra tipo + scope geografico + progreso del cuestionario + dias restantes.
+     Variante .active resalta la eleccion en foco.
+     Variante .empty (dashed) invita a activar una nueva eleccion. */
+  .election-card {
+    display: flex; flex-direction: column; gap: var(--sp-3);
+    padding: var(--sp-4);
+    background: var(--color-card);
+    border: 1px solid var(--color-border-2);
+    border-radius: var(--r-lg);
+    min-width: 240px; max-width: 280px;
+    transition: border-color 200ms, box-shadow 200ms, transform 200ms;
+    cursor: pointer;
+  }
+  .election-card:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--sh-sm);
+    transform: translateY(-1px);
+  }
+  .election-card.active {
+    border: 2px solid var(--color-primary);
+    background: color-mix(in srgb, var(--color-primary) 4%, var(--color-card));
+    padding: calc(var(--sp-4) - 1px);
+  }
+
+  .election-card .head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--sp-2); }
+  .election-card .type { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .election-card .type .name {
+    font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--color-text);
+    line-height: 1.2;
+  }
+  .election-card .type .scope {
+    font-size: 10px; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--color-text-3); font-weight: var(--fw-semibold);
+  }
+
+  .election-card .days-badge {
+    display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
+    font-size: 11px; font-weight: var(--fw-semibold);
+    padding: 3px 9px; border-radius: var(--r-full);
+    background: color-mix(in srgb, var(--color-warning) 14%, transparent);
+    color: var(--warning-700);
+  }
+  .election-card .days-badge.far {
+    background: var(--color-bg); color: var(--color-text-3);
+  }
+  [data-theme="dark"] .election-card .days-badge { color: #EBD1A0; }
+
+  .election-card .match-block { display: flex; align-items: baseline; gap: 6px; }
+  .election-card .match-block .n {
+    font-size: 28px; font-weight: var(--fw-bold); color: var(--color-primary);
+    line-height: 1;
+  }
+  .election-card .match-block .lbl {
+    font-size: var(--fs-xs); color: var(--color-text-2); font-weight: var(--fw-medium);
+  }
+  .election-card .cta-pending {
+    font-size: var(--fs-xs); color: var(--color-text-2);
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  .election-card .progress {
+    background: var(--color-border-2);
+  }
+
+  .election-card.empty {
+    border: 2px dashed var(--color-border);
+    background: transparent;
+    align-items: center; justify-content: center;
+    padding: var(--sp-5);
+    text-align: center; gap: var(--sp-2);
+    min-height: 140px;
+  }
+  .election-card.empty:hover { border-color: var(--color-primary); }
+  .election-card.empty .plus-icon {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--color-accent-2); color: var(--color-primary);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .election-card.empty .lbl {
+    font-size: var(--fs-sm); color: var(--color-text-2); font-weight: var(--fw-medium);
+  }
+
+  /* Grid horizontal scrolleable para el hub */
+  .election-hub {
+    display: flex; gap: var(--sp-3); overflow-x: auto;
+    padding-bottom: 6px; scrollbar-width: thin;
+    scroll-snap-type: x mandatory;
+  }
+  .election-hub::-webkit-scrollbar { height: 5px; }
+  .election-hub::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+  .election-hub > .election-card { scroll-snap-align: start; flex-shrink: 0; }
+
   /* ===== ORGANISM: EmptyState ===== */
   .empty-state { text-align: center; padding: var(--sp-9) var(--sp-6); color: var(--color-text-2); }
   .empty-state .icon-bg {
@@ -1601,6 +1711,7 @@
     <a href="#swipecard-mol">SwipeCard</a>
     <a href="#news-card">NewsCard</a>
     <a href="#postura">PosturaItem</a>
+    <a href="#election-card">ElectionCard</a>
     <a href="#modal">Modal</a>
 
     <div class="group">Organismos</div>
@@ -2869,13 +2980,84 @@
   <div class="sec-header">
     <div class="kicker">Organismo</div>
     <h2>TopNav</h2>
-    <p>Header minimalista. Brand + progreso opcional + accion.</p>
+    <p>Header minimalista. Dos variantes: <strong>brand</strong> (para pantallas raíz como Home) y <strong>breadcrumb</strong> (para dentro de una elección, con back + contexto).</p>
   </div>
-  <div class="demo" style="padding:0">
+  <div class="demo stack-4" style="padding:0">
     <div class="topnav">
       <div class="brand">Tinder Decisivo</div>
       <div style="flex:1; max-width:200px; margin:0 24px"><div class="progress"><div style="width:66%"></div></div></div>
       <button class="btn btn-ghost btn-sm">Guardar y salir</button>
+    </div>
+
+    <div class="topnav">
+      <div class="crumb">
+        <button class="btn-icon btn-icon-ghost" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <div class="ctx">
+          <span class="name">Presidencial 2026</span>
+          <span class="sub">Ñuñoa · <span class="days">42 dias</span></span>
+        </div>
+      </div>
+      <button class="btn-icon btn-icon-ghost" aria-label="Compartir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
+    </div>
+  </div>
+</section>
+
+<section id="election-card">
+  <div class="sec-header">
+    <div class="kicker">Molécula</div>
+    <h2>ElectionCard</h2>
+    <p>Card horizontal que representa una elección activa en el Home HUB. Tipo + scope geográfico + progreso del cuestionario + días restantes. 3 estados: default, active (elección en foco), empty (activar nueva).</p>
+  </div>
+  <div class="demo">
+    <div class="election-hub">
+      <div class="election-card active">
+        <div class="head">
+          <div class="type">
+            <span class="name">Presidencial 2026</span>
+            <span class="scope">Nacional</span>
+          </div>
+          <span class="days-badge">42d</span>
+        </div>
+        <div class="match-block">
+          <span class="n">87%</span>
+          <span class="lbl">match con Boric</span>
+        </div>
+        <div class="progress"><div style="width:100%"></div></div>
+      </div>
+
+      <div class="election-card">
+        <div class="head">
+          <div class="type">
+            <span class="name">Municipal 2028</span>
+            <span class="scope">Ñuñoa</span>
+          </div>
+          <span class="days-badge far">180d</span>
+        </div>
+        <div class="match-block">
+          <span class="n">60%</span>
+          <span class="lbl">match parcial</span>
+        </div>
+        <div class="progress"><div style="width:50%"></div></div>
+      </div>
+
+      <div class="election-card">
+        <div class="head">
+          <div class="type">
+            <span class="name">Parlamentaria 2026</span>
+            <span class="scope">Distrito 10</span>
+          </div>
+          <span class="days-badge">42d</span>
+        </div>
+        <div class="cta-pending">Contesta 6 preguntas extras para tu distrito</div>
+        <div class="progress"><div style="width:0%"></div></div>
+      </div>
+
+      <div class="election-card empty">
+        <div class="plus-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <span class="lbl">Activar Regional</span>
+      </div>
     </div>
   </div>
 </section>
