@@ -1,0 +1,110 @@
+/**
+ * NavRow: box tap-able con label + subtitulo opcional y chevron a la derecha.
+ *
+ * Es el patron visual dominante del wireframe `tpl-config` (design-system-lowfi.html):
+ *   [label + subtitle?]  ------>  [chevron-right]
+ *
+ * Se usa para navegar a sub-screens desde una lista de settings. Tambien util
+ * para cualquier lista de "items navegables" (Ubicacion, Notificaciones,
+ * Privacidad, etc.).
+ *
+ * Variantes:
+ *   - default: color de texto normal, borde de tarjeta
+ *   - danger:  color de texto/chevron danger, borde subtle (para acciones
+ *              destructivas como "Reiniciar cuestionario" o "Borrar cuenta")
+ *
+ * NO renderiza avatar ni contenido a la izquierda mas alla del texto — para
+ * eso conviene un molecule especifico (ej. AccountRow).
+ */
+
+import React, { useMemo } from "react";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type PressableProps,
+} from "react-native";
+
+import { radii } from "../../theme/radii";
+import { spacing } from "../../theme/spacing";
+import { typography } from "../../theme/typography";
+import { useThemeColors } from "../../theme/useTheme";
+import { Icon } from "../atoms/Icon";
+
+export type NavRowVariant = "default" | "danger";
+
+export interface NavRowProps
+  extends Omit<PressableProps, "children" | "style"> {
+  label: string;
+  /** Texto secundario debajo del label. Ej: "12 base · 4 extras · editable". */
+  subtitle?: string;
+  variant?: NavRowVariant;
+  /** Sobrescribe el label como accessibilityLabel si necesitas mas contexto. */
+  accessibilityLabel?: string;
+}
+
+export function NavRow({
+  label,
+  subtitle,
+  variant = "default",
+  accessibilityLabel,
+  ...pressable
+}: NavRowProps) {
+  const c = useThemeColors();
+
+  const styles = useMemo(() => {
+    const isDanger = variant === "danger";
+    const labelColor = isDanger ? c.danger : c.text;
+    const chevronColor = isDanger ? c.danger : c.textSecondary;
+
+    return StyleSheet.create({
+      row: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: spacing.sp3,
+        borderRadius: radii.rMd,
+        borderWidth: 1,
+        borderColor: c.border,
+        backgroundColor: c.card,
+        gap: spacing.sp3,
+      },
+      textCol: {
+        flex: 1,
+        gap: spacing.sp1,
+      },
+      label: {
+        ...typography.body,
+        fontWeight: "600",
+        color: labelColor,
+      },
+      subtitle: {
+        ...typography.overline,
+        textTransform: "none",
+        letterSpacing: 0,
+        color: c.textSecondary,
+      },
+      chevronBox: { color: chevronColor },
+    });
+  }, [c, variant]);
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? label}
+      style={({ pressed }) => [styles.row, { opacity: pressed ? 0.7 : 1 }]}
+      {...pressable}
+    >
+      <View style={styles.textCol}>
+        <Text style={styles.label}>{label}</Text>
+        {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+      </View>
+      <Icon
+        name="chevron-right"
+        size={20}
+        color={styles.chevronBox.color as string}
+      />
+    </Pressable>
+  );
+}

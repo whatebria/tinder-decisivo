@@ -32,3 +32,6 @@ export { NovedadItem, type NovedadItemProps, type NovedadKind } from "./NovedadI
 // Nuevas (Fase 5 — Cuestionario wireframe)
 export { ScreenTopBar, type ScreenTopBarProps } from "./ScreenTopBar";
 export { ProgressSplit, type ProgressSplitProps } from "./ProgressSplit";
+
+// Nuevas (Fase 5 — Config wireframe)
+export { NavRow, type NavRowProps, type NavRowVariant } from "./NavRow";
