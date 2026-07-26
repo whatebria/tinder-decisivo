@@ -9,7 +9,7 @@ Se crea automaticamente via signal cuando se registra un User nuevo.
 
 from django.conf import settings
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 from .territorio import Comuna
@@ -31,6 +31,18 @@ class UserProfile(models.Model):
             "diputados le corresponden en el matching."
         ),
     )
+    # Nueva FK polimorfica. Auto-sincroniza con comuna via signal.
+    unidad_territorial = models.ForeignKey(
+        "UnidadTerritorial",
+        on_delete=models.SET_NULL,
+        related_name="votantes",
+        null=True, blank=True,
+        help_text=(
+            "Unidad territorial polimorfica del votante. Permite matchear "
+            "contra candidatos de cualquier nivel (nacional/regional/"
+            "distrital/comunal) via jerarquia."
+        ),
+    )
     fecha_actualizacion = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -47,3 +59,24 @@ def crear_profile_al_registrar_user(sender, instance, created, **kwargs):
     """Auto-crea UserProfile cuando se crea un User."""
     if created:
         UserProfile.objects.get_or_create(user=instance)
+
+
+@receiver(pre_save, sender=UserProfile)
+def _sincronizar_perfil_ut(sender, instance, **kwargs):
+    """Sincronizacion unidireccional: comuna -> unidad_territorial.
+
+    Cuando el usuario setea/limpia su comuna, la UT se sigue.
+    NO hacemos el reverso (UT -> comuna) porque genera problemas al "limpiar":
+    si un PATCH manda comuna=null, no queremos que UT-vieja backpropague
+    y restaure la comuna.
+    """
+    from .unidad_territorial import UnidadTerritorial
+
+    if instance.comuna_id:
+        ut = UnidadTerritorial.objects.filter(
+            codigo=f"COM-{instance.comuna.codigo}",
+        ).first()
+        instance.unidad_territorial = ut
+    else:
+        # Comuna vaciada -> UT tambien vaciada (consistencia).
+        instance.unidad_territorial = None

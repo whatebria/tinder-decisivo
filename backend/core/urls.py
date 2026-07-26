@@ -16,6 +16,7 @@ from .views import (
     DecisionFinalViewSet,
     EditarRespuestaView,
     EjeListView,
+    UnidadTerritorialListView,
     MatchCandidatoViewSet,
     MisRespuestasListView,
     NoticiaBookmarkViewSet,
@@ -71,6 +72,9 @@ urlpatterns = [
     path("comunas/", ComunaListView.as_view(), name="comuna-list"),
     # Ejes tematicos (publico, para radar chart y filtros)
     path("ejes/", EjeListView.as_view(), name="eje-list"),
+    # Unidad territorial polimorfica (publico, para browse jerarquico)
+    path("unidades-territoriales/", UnidadTerritorialListView.as_view(),
+         name="unidad-territorial-list"),
     # Catalogos
     path("tipos-eleccion/", TipoEleccionListView.as_view(), name="tipos-eleccion-list"),
     path("candidatos/", CandidatoListView.as_view(), name="candidato-list"),

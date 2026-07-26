@@ -63,23 +63,41 @@ def _tipo_ids_con_base(tipo_eleccion) -> list[int]:
 
 
 def _filtrar_candidatos_por_territorio(qs, comuna: Optional[Comuna]):
-    """Aplica filtro territorial al queryset de candidatos segun la comuna del user.
+    """Aplica filtro territorial polimorfico al queryset de candidatos.
 
-    - Si `comuna` es None (user sin comuna o guest): NO filtra, devuelve todos.
-    - Si `comuna` es dada: devuelve solo candidatos que:
-      * son nacionales (comuna=None y distrito=None), O
-      * son de esa comuna especifica (alcaldes), O
-      * son del distrito de esa comuna (diputados).
+    Ahora usa UnidadTerritorial (jerarquia). Un votante en Nunoa matchea con:
+    - Candidatos con unidad_territorial=None (nacional puro, ej. presidenciales), O
+    - Candidatos con unidad_territorial de la comuna Nunoa (alcaldes), O
+    - Candidatos con unidad_territorial de cualquier ANCESTRO de Nunoa
+      (distrito D10, region metropolitana, nacional).
 
-    Asi un mismo call de matching devuelve solo los candidatos aplicables
-    territorialmente al usuario, sin importar el tipo de eleccion.
+    Este approach es plug-and-play: para agregar senadores por region, basta
+    crear candidatos con unidad_territorial=<UT-regional>. El filtro los incluye
+    automaticamente porque la region es ancestro de la comuna del votante.
+
+    Retrocompat: sigue soportando el filtro viejo (comuna/distrito) para
+    candidatos que aun no tienen unidad_territorial asignada.
     """
     if comuna is None:
         return qs
+    # Buscar la UT correspondiente a la comuna del votante.
+    from ..models import UnidadTerritorial
+    ut_votante = UnidadTerritorial.objects.filter(
+        codigo=f"COM-{comuna.codigo}",
+    ).first()
+    if ut_votante is None:
+        # Fallback al filtro viejo si no hay UT.
+        return qs.filter(
+            Q(comuna__isnull=True, distrito__isnull=True)
+            | Q(comuna_id=comuna.id)
+            | Q(distrito_id=comuna.distrito_id)
+        )
+    # Cadena de ancestros del votante: [distrito, region, nacional].
+    ids_permitidos = {ut_votante.id} | {a.id for a in ut_votante.ancestros()}
     return qs.filter(
-        Q(comuna__isnull=True, distrito__isnull=True)  # nacionales
-        | Q(comuna_id=comuna.id)                         # alcaldes de esa comuna
-        | Q(distrito_id=comuna.distrito_id)              # diputados de ese distrito
+        # Nuevo modelo: unidad_territorial es propia, ancestro o null (nacional).
+        Q(unidad_territorial__isnull=True)
+        | Q(unidad_territorial_id__in=ids_permitidos)
     )
 
 

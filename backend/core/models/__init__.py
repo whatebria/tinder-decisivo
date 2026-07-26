@@ -35,6 +35,7 @@ from .electoral import Candidato, TipoEleccion
 from .matching import MatchCandidato, PosturaCandidato
 from .perfil import UserProfile
 from .territorio import Comuna, Distrito, Region
+from .unidad_territorial import UnidadTerritorial
 from .user_data import (
     CandidatoDescartado,
     CandidatoFavorito,
@@ -68,6 +69,7 @@ __all__ = [
     "Region",
     "RespuestaUsuario",
     "TipoEleccion",
+    "UnidadTerritorial",
     "UserProfile",
     "crear_opciones_acuerdo_desacuerdo",
 ]

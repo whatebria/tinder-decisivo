@@ -26,6 +26,7 @@ from core.models import (
     PosturaCandidato,
     Pregunta,
     TipoEleccion,
+    UnidadTerritorial,
 )
 
 from ._data_candidatos_ficticios import (
@@ -101,7 +102,14 @@ class Command(BaseCommand):
 
         creados = 0
         posturas_creadas = 0
+        # Indice UT por numero de distrito (para asignar en cada candidato).
+        ut_por_distrito = {
+            ut.metadata.get("numero_distrito"): ut
+            for ut in UnidadTerritorial.objects.filter(nivel="distrital")
+            if ut.metadata.get("numero_distrito")
+        }
         for distrito in distritos:
+            ut = ut_por_distrito.get(distrito.numero)
             partidos = elegir_partidos(
                 distrito.numero, CANDIDATOS_POR_DISTRITO, DISTRIBUCION_DIPUTADOS,
             )
@@ -118,6 +126,7 @@ class Command(BaseCommand):
                             f"Representar los intereses del {distrito.nombre} "
                             f"desde los valores del {data['partido']}."
                         ),
+                        "unidad_territorial": ut,
                     },
                 )
                 candidato.tipos_eleccion.add(tipo)

@@ -23,6 +23,7 @@ from core.models import (
     PosturaCandidato,
     Pregunta,
     TipoEleccion,
+    UnidadTerritorial,
 )
 
 from ._data_candidatos_ficticios import (
@@ -106,6 +107,19 @@ class Command(BaseCommand):
             for c in Candidato.objects.filter(comuna__in=comunas)
         }
 
+        # 2.5. Indice de UnidadTerritorial por comuna (para asignar en bulk_create).
+        #      bulk_create NO dispara signals, entonces hay que setear el FK aca.
+        ut_por_comuna = {
+            int(ut.metadata.get("codigo_ine", 0)): ut
+            for ut in UnidadTerritorial.objects.filter(nivel="comunal")
+            if ut.metadata.get("codigo_ine")
+        }
+        # Backup: buscar por codigo si el metadata no tiene codigo_ine.
+        ut_por_codigo_ine = {}
+        for ut in UnidadTerritorial.objects.filter(nivel="comunal"):
+            codigo_ine = ut.metadata.get("codigo_ine") or ut.codigo.replace("COM-", "")
+            ut_por_codigo_ine[codigo_ine] = ut
+
         # 3. Preparar lote de candidatos nuevos y datos de posturas.
         candidatos_nuevos = []
         # Lista de tuplas (idx_en_nuevos_o_existente, posturas_valores)
@@ -121,10 +135,12 @@ class Command(BaseCommand):
                 data = generar_candidato(seed_int, idx, partido)
                 key = (data["nombre"], data["apellido"], comuna.id)
                 if key not in existentes:
+                    ut = ut_por_codigo_ine.get(comuna.codigo)
                     candidatos_nuevos.append(Candidato(
                         nombre=data["nombre"],
                         apellido=data["apellido"],
                         comuna=comuna,
+                        unidad_territorial=ut,  # bulk_create no dispara signal
                         partido=data["partido"],
                         bio=f"Candidato/a a alcalde/sa de {comuna.nombre}.",
                         propuesta_electoral=(

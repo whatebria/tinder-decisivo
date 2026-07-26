@@ -67,6 +67,18 @@ class Candidato(models.Model):
         null=True, blank=True,
         help_text="Distrito en el que compite (diputados). Null si es nacional o comunal.",
     )
+    # Nuevo modelo polimorfico. Reemplaza el uso directo de comuna/distrito.
+    # Se auto-sincroniza via signal desde comuna/distrito hasta que migremos
+    # todo el codigo a usar unidad_territorial.
+    unidad_territorial = models.ForeignKey(
+        "UnidadTerritorial", on_delete=models.PROTECT,
+        related_name="candidatos",
+        null=True, blank=True,
+        help_text=(
+            "Unidad territorial polimorfica. Permite escalar a senadores "
+            "(regional), CORE (provincial), etc. sin agregar FKs nuevos."
+        ),
+    )
 
     class Meta:
         app_label = "core"
@@ -102,3 +114,8 @@ class Candidato(models.Model):
 
     def __str__(self):
         return f"{self.nombre} {self.apellido}"
+
+
+# NOTA: no hay signal Candidato.pre_save para sincronizar unidad_territorial.
+# Los seeds setean el FK explicitamente. Si creas un Candidato manualmente
+# con solo comuna/distrito, corre `sync_candidatos_ut` para actualizar UT.

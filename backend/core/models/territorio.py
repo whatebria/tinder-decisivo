@@ -12,6 +12,8 @@ Fuente de datos:
 """
 
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Region(models.Model):
@@ -106,3 +108,68 @@ class Comuna(models.Model):
 
     def __str__(self):
         return f"{self.nombre} ({self.region.nombre_corto or self.region.numero_romano})"
+
+
+# ----------------------------------------------------------------------------
+# Signals: mantener UnidadTerritorial sincronizada con Region/Distrito/Comuna.
+# ----------------------------------------------------------------------------
+# Cuando el seed_territorio_chile crea las 16+28+346 filas, estos signals
+# crean automaticamente la UT correspondiente con jerarquia. Idempotente.
+@receiver(post_save, sender=Region)
+def _upsert_ut_region(sender, instance, created, **kwargs):
+    # Solo crear/actualizar UT si es una fila nueva. Para updates de metadata
+    # del Region, correr el mgmt command 'sync_unidades_territoriales'.
+    if not created:
+        return
+    from .unidad_territorial import UnidadTerritorial
+    nacional, _ = UnidadTerritorial.objects.get_or_create(
+        codigo="NACIONAL",
+        defaults={"nombre": "Chile", "nivel": "nacional"},
+    )
+    UnidadTerritorial.objects.get_or_create(
+        codigo=f"REG-{instance.numero_romano}",
+        defaults={
+            "nombre": instance.nombre,
+            "nivel": "regional",
+            "padre": nacional,
+            "metadata": {"codigo_region": instance.codigo},
+        },
+    )
+
+
+@receiver(post_save, sender=Distrito)
+def _upsert_ut_distrito(sender, instance, created, **kwargs):
+    if not created:
+        return
+    from .unidad_territorial import UnidadTerritorial
+    padre_ut = UnidadTerritorial.objects.filter(
+        codigo=f"REG-{instance.region.numero_romano}",
+    ).first()
+    UnidadTerritorial.objects.get_or_create(
+        codigo=f"D-{instance.numero}",
+        defaults={
+            "nombre": instance.nombre,
+            "nivel": "distrital",
+            "padre": padre_ut,
+            "metadata": {"numero_distrito": instance.numero},
+        },
+    )
+
+
+@receiver(post_save, sender=Comuna)
+def _upsert_ut_comuna(sender, instance, created, **kwargs):
+    if not created:
+        return
+    from .unidad_territorial import UnidadTerritorial
+    padre_ut = UnidadTerritorial.objects.filter(
+        codigo=f"D-{instance.distrito.numero}",
+    ).first()
+    UnidadTerritorial.objects.get_or_create(
+        codigo=f"COM-{instance.codigo}",
+        defaults={
+            "nombre": instance.nombre,
+            "nivel": "comunal",
+            "padre": padre_ut,
+            "metadata": {"codigo_ine": instance.codigo},
+        },
+    )

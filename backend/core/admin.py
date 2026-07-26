@@ -16,6 +16,7 @@ from django.db.models import Count
 # autoregistre. Vive en modulo aparte por cohesion, no por tamano.
 from . import admin_eje  # noqa: F401
 from . import admin_territorio  # noqa: F401
+from . import admin_unidad_territorial  # noqa: F401
 
 from .models import (
     OPCIONES_ACUERDO_DESACUERDO,
