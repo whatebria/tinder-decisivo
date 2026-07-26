@@ -289,6 +289,16 @@ function TipoSeccion({
   return (
     <View style={styles.tipoBlock}>
       <SectionTitle title={tipoNombre} />
+      <View style={styles.reiniciarBtn}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onPress={onReiniciar}
+          accessibilityLabel={`Reiniciar cuestionario ${tipoNombre}`}
+        >
+          Reiniciar este cuestionario
+        </Button>
+      </View>
       <View style={styles.gruposEje}>
         {grupos.map((grupo) => (
           <View key={grupo.display} style={styles.grupoEje}>
@@ -306,16 +316,6 @@ function TipoSeccion({
             </View>
           </View>
         ))}
-      </View>
-      <View style={styles.reiniciarBtn}>
-        <Button
-          variant="ghost"
-          size="sm"
-          onPress={onReiniciar}
-          accessibilityLabel={`Reiniciar cuestionario ${tipoNombre}`}
-        >
-          Reiniciar este cuestionario
-        </Button>
       </View>
     </View>
   );
@@ -427,7 +427,7 @@ const styles = StyleSheet.create({
   hint: typography.overline,
 
   reiniciarBtn: {
-    marginTop: spacing.sp2,
     alignSelf: "flex-start",
+    marginBottom: spacing.sp1,
   },
 });
