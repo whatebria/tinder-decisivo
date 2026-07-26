@@ -24,6 +24,7 @@ from ..models import (
     PosturaCandidato,
     Pregunta,
     RespuestaUsuario,
+    TipoEleccion,
 )
 
 # ------------------------------------------------------------
@@ -47,6 +48,17 @@ PESO_MULTIPLIERS = {
 # Umbrales para el nivel de confianza del match.
 CONFIANZA_UMBRAL_MEDIA = 5
 CONFIANZA_UMBRAL_ALTA = 10
+
+
+def _tipo_ids_con_base(tipo_eleccion) -> list[int]:
+    """Devuelve [tipo_eleccion.id, ...ids_de_tipos_base].
+
+    Preguntas de tipos con `es_base=True` son transversales y aplican a TODAS
+    las elecciones (valores/ideologia que se responden una sola vez).
+    """
+    base_ids = list(TipoEleccion.objects.filter(es_base=True).values_list("id", flat=True))
+    tipo_id = tipo_eleccion.id if hasattr(tipo_eleccion, "id") else int(tipo_eleccion)
+    return list({tipo_id, *base_ids})
 
 
 # ------------------------------------------------------------
@@ -169,9 +181,10 @@ def calcular_match(user, tipo_eleccion) -> Optional[list[MatchCandidato]]:
 
     Devuelve lista ordenada desc de MatchCandidato, o None si el user no respondio nada.
     """
+    tipo_ids = _tipo_ids_con_base(tipo_eleccion)
     respuestas = (
         RespuestaUsuario.objects
-        .filter(user=user, pregunta__tipo_eleccion=tipo_eleccion)
+        .filter(user=user, pregunta__tipo_eleccion_id__in=tipo_ids)
         .select_related("opcion_elegida", "pregunta")
     )
 
@@ -221,9 +234,14 @@ def calcular_match_detalle(user, candidato) -> Optional[dict]:
     if not tipos:
         return None
 
+    # Incluir tipos base: preguntas transversales aplican a candidatos de
+    # cualquier eleccion (si el candidato tiene postura en ellas).
+    base_tipos = list(TipoEleccion.objects.filter(es_base=True))
+    tipos_con_base = list({t.id: t for t in tipos + base_tipos}.values())
+
     respuestas = (
         RespuestaUsuario.objects
-        .filter(user=user, pregunta__tipo_eleccion__in=tipos)
+        .filter(user=user, pregunta__tipo_eleccion__in=tipos_con_base)
         .select_related("opcion_elegida", "pregunta")
     )
     respuestas_validas = [r for r in respuestas if not r.opcion_elegida.es_no_se]
@@ -308,10 +326,11 @@ def calcular_match_anonimo(
     pregunta_ids = {r["pregunta_id"] for r in respuestas_list}
     opcion_ids = {r["opcion_id"] for r in respuestas_list}
 
+    tipo_ids = _tipo_ids_con_base(tipo_eleccion)
     preguntas = {
         p.id: p
         for p in Pregunta.objects.filter(
-            id__in=pregunta_ids, tipo_eleccion=tipo_eleccion
+            id__in=pregunta_ids, tipo_eleccion_id__in=tipo_ids
         )
     }
     opciones = {o.id: o for o in OpcionRespuesta.objects.filter(id__in=opcion_ids)}

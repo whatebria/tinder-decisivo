@@ -16,6 +16,13 @@ class TipoEleccion(models.Model):
         null=True, blank=True,
         help_text="Fecha oficial de la eleccion",
     )
+    es_base = models.BooleanField(
+        default=False,
+        help_text=(
+            "Si es True, las preguntas de este tipo se agregan a TODAS las elecciones. "
+            "Usado para preguntas transversales de valores/ideologia que se responden una sola vez."
+        ),
+    )
 
     class Meta:
         app_label = "core"

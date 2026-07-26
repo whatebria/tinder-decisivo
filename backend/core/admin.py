@@ -58,9 +58,10 @@ class PreguntaInline(admin.TabularInline):
 
 @admin.register(TipoEleccion)
 class TipoEleccionAdmin(admin.ModelAdmin):
-    list_display = ("nombre", "fecha_eleccion", "num_preguntas", "num_candidatos")
+    list_display = ("nombre", "fecha_eleccion", "es_base", "num_preguntas", "num_candidatos")
+    list_filter = ("es_base",)
     search_fields = ("nombre", "descripcion")
-    ordering = ("-fecha_eleccion", "nombre")
+    ordering = ("-es_base", "-fecha_eleccion", "nombre")
     inlines = [PreguntaInline]
 
     def get_queryset(self, request):

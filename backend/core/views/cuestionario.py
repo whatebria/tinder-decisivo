@@ -59,8 +59,16 @@ class PreguntasPendientesView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        # Combinar el tipo pedido + todos los tipos base (preguntas transversales
+        # compartidas por todas las elecciones). Asi el user responde el base
+        # una sola vez y cuenta para el match de cualquier eleccion.
+        base_ids = list(
+            TipoEleccion.objects.filter(es_base=True).values_list("id", flat=True)
+        )
+        tipo_ids = {int(tipo_eleccion_id), *base_ids}
+
         pending = (
-            Pregunta.objects.filter(tipo_eleccion_id=tipo_eleccion_id)
+            Pregunta.objects.filter(tipo_eleccion_id__in=tipo_ids)
             .prefetch_related("opciones_respuesta")
             .order_by("orden")
         )
@@ -69,7 +77,7 @@ class PreguntasPendientesView(APIView):
         if request.user and request.user.is_authenticated:
             answered_ids = RespuestaUsuario.objects.filter(
                 user=request.user,
-                pregunta__tipo_eleccion_id=tipo_eleccion_id,
+                pregunta__tipo_eleccion_id__in=tipo_ids,
             ).values_list("pregunta_id", flat=True)
             pending = pending.exclude(id__in=answered_ids)
 
