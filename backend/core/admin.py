@@ -94,15 +94,26 @@ class TipoEleccionAdmin(admin.ModelAdmin):
 
 @admin.register(Candidato)
 class CandidatoAdmin(admin.ModelAdmin):
-    list_display = ("nombre", "apellido", "partido", "ciudad", "get_tipos_eleccion")
-    list_filter = ("tipos_eleccion", "partido")
-    search_fields = ("nombre", "apellido", "partido", "ciudad")
+    list_display = (
+        "nombre", "apellido", "partido", "alcance_territorial",
+        "comuna", "distrito", "get_tipos_eleccion",
+    )
+    list_filter = ("tipos_eleccion", "partido", "distrito", "comuna__region")
+    search_fields = (
+        "nombre", "apellido", "partido", "ciudad",
+        "comuna__nombre", "distrito__nombre",
+    )
     filter_horizontal = ("tipos_eleccion",)
+    autocomplete_fields = ("comuna", "distrito")
     ordering = ("apellido", "nombre")
 
     @admin.display(description="Tipos de Eleccion")
     def get_tipos_eleccion(self, obj):
         return ", ".join(t.nombre for t in obj.tipos_eleccion.all())
+
+    @admin.display(description="Alcance", ordering="comuna")
+    def alcance_territorial(self, obj):
+        return obj.alcance_territorial
 
 
 # ---------------------------------------------------------------------------
