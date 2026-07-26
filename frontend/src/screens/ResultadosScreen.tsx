@@ -56,6 +56,7 @@ import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
 import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
+import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
 
 function confianzaToBadge(confianza: string | undefined): BadgeVariant {
@@ -211,20 +212,18 @@ export function ResultadosScreen({
           backgroundColor: c.card,
           gap: spacing.sp2,
         },
-        guestTitle: { fontSize: 14, fontWeight: "700", color: c.text },
-        guestBody: { fontSize: 12, color: c.textSecondary },
+        guestTitle: { ...typography.small, fontWeight: "700", color: c.text },
+        guestBody: { ...typography.overline, textTransform: "none", letterSpacing: 0, color: c.textSecondary },
         sectionLabel: {
-          fontSize: 10,
-          textTransform: "uppercase",
-          letterSpacing: 0.8,
+          ...typography.overline,
           color: c.textSecondary,
           fontWeight: "600",
         },
         chipRow: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sp1 },
         rankList: { gap: spacing.sp2 },
         emptyText: {
+          ...typography.small,
           color: c.textSecondary,
-          fontSize: 13,
           textAlign: "center",
           paddingVertical: spacing.sp5,
         },
