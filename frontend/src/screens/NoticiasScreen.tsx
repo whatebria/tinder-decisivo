@@ -1,23 +1,30 @@
 /**
  * Feed global de noticias con filtros.
  *
- * Filtros disponibles:
- * - Busqueda de texto (client-side + backend con debounce implicito via query key)
- * - Candidato mencionado (Chip atoms)
- * - Fuente / medio (Chip atoms, dinamico segun data)
- * - Rango de fecha (Chip atoms: Todo / 7d / 30d / 90d)
+ * Layout basado en design-system-lowfi.html `tpl-noticias` (Template 12):
+ *   - Header con titulo "Noticias" + contador "N resultados" a la derecha
+ *   - Filter bar compacto en 1 sola row scroll horizontal:
+ *       [Button Filtros (N)] [ChipActivo X] [ChipActivo X] ... [Limpiar]
+ *   - Lista de NewsCards en 1 columna
+ *   - Modal "Filtros" con secciones expandidas (Search, Fecha, Candidato, Fuente)
  *
- * Publica — no requiere auth.
+ * Publica — no requiere auth. Los bookmarks solo aparecen si hay sesion.
  *
- * Migrado a Fase 5:
- *   - AppShell con active='noticias' (es tab del BottomNav)
- *   - HomeTopBar reemplaza el header custom (title + subtitle)
- *   - Elimina paddingTop 48 (ahora hay shell con safe area)
- *   - Elimina Link 'Volver' final (es tab, no detail)
+ * Fuera de scope del wireframe (no invento):
+ *   - "Cargar mas": backend no pagina hoy
+ *   - TopNav con "Presidencial 2026": no hay estado global de eleccion activa
+ *   - Icono derecho del topnav sin accion definida
  */
 
 import React, { useMemo, useState } from "react";
-import { Linking, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 import {
   useCandidatos,
@@ -28,18 +35,25 @@ import {
 import {
   AppShell,
   Badge,
+  Button,
   Chip,
+  EmptyState,
   HomeTopBar,
+  Icon,
   Input,
-  Link,
+  Modal,
   NewsCard,
+  Spinner,
   type Sentiment,
 } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
+import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
+
+// -- Tipos y constantes ------------------------------------------------------
 
 interface NoticiaEnriquecida {
   id?: number;
@@ -84,39 +98,11 @@ function formatearFecha(iso?: string): string {
   }
 }
 
-interface ChipRowProps<T extends string | number | null> {
-  items: Array<{ id: T; label: string }>;
-  selectedId: T;
-  onSelect: (id: T) => void;
-}
+// -- Screen -----------------------------------------------------------------
 
-function ChipRow<T extends string | number | null>({
-  items,
-  selectedId,
-  onSelect,
-}: ChipRowProps<T>) {
-  return (
-    <View style={styles.chipsWrap}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.chipsRow}
-      >
-        {items.map((item) => (
-          <Chip
-            key={String(item.id)}
-            active={item.id === selectedId}
-            onPress={() => onSelect(item.id)}
-          >
-            {item.label}
-          </Chip>
-        ))}
-      </ScrollView>
-    </View>
-  );
-}
-
-export function NoticiasScreen({ navigation }: RootStackScreenProps<"Noticias">) {
+export function NoticiasScreen({
+  navigation,
+}: RootStackScreenProps<"Noticias">) {
   const c = useThemeColors();
   const isGuest = useAuthStore((s) => s.isGuest);
   const bookmarksQ = useNoticiasBookmarks();
@@ -130,6 +116,7 @@ export function NoticiasScreen({ navigation }: RootStackScreenProps<"Noticias">)
   const [fuente, setFuente] = useState<string | null>(null);
   const [rangoId, setRangoId] = useState<string>("todo");
   const [query, setQuery] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const rango = RANGOS_FECHA.find((r) => r.id === rangoId) ?? RANGOS_FECHA[0];
 
@@ -144,41 +131,59 @@ export function NoticiasScreen({ navigation }: RootStackScreenProps<"Noticias">)
   const candidatos = candidatosQ.data ?? [];
   const noticias = (noticiasQ.data ?? []) as unknown as NoticiaEnriquecida[];
 
-  const chipsCandidatos = useMemo(
-    () => [
-      { id: null as number | null, label: "Todos" },
-      ...candidatos
-        .filter((cand) => cand.id != null)
-        .map((cand) => ({
-          id: cand.id!,
-          label: `${cand.nombre} ${cand.apellido ?? ""}`.trim(),
-        })),
-    ],
-    [candidatos],
-  );
+  // -- Derivados -----------------------------------------------------------
+
+  const candidatoNombre = useMemo(() => {
+    if (candidatoId == null) return null;
+    const cand = candidatos.find((c) => c.id === candidatoId);
+    return cand ? `${cand.nombre} ${cand.apellido ?? ""}`.trim() : null;
+  }, [candidatoId, candidatos]);
 
   // Fuentes dinamicas: extraidas del data que ya tenemos.
   // Nota: si aplico filtro de fuente, la lista se colapsa a esa sola
-  // (efecto secundario natural). Se puede mejorar cacheando la lista completa
-  // pero YAGNI por ahora.
-  const chipsFuentes = useMemo(() => {
+  // (efecto secundario natural). YAGNI cachear la lista completa.
+  const fuentesDisponibles = useMemo(() => {
     const set = new Set<string>();
-    for (const n of noticias) {
-      if (n.fuente) set.add(n.fuente);
-    }
-    return [
-      { id: null as string | null, label: "Todas" },
-      ...Array.from(set)
-        .sort()
-        .map((f) => ({ id: f, label: f })),
-    ];
+    for (const n of noticias) if (n.fuente) set.add(n.fuente);
+    return Array.from(set).sort();
   }, [noticias]);
 
-  const hayFiltroActivo =
-    candidatoId != null ||
-    fuente != null ||
-    rangoId !== "todo" ||
-    query.length > 0;
+  const rangoActivo = rangoId !== "todo" ? rango : null;
+
+  // Chips activos que se muestran en el filter bar (removibles). El search no
+  // se cuenta como chip porque no tiene una representacion corta razonable;
+  // vive dentro del modal.
+  const chipsActivos = useMemo(() => {
+    const items: Array<{ id: string; label: string; onRemove: () => void }> =
+      [];
+    if (candidatoNombre) {
+      items.push({
+        id: "candidato",
+        label: candidatoNombre,
+        onRemove: () => setCandidatoId(null),
+      });
+    }
+    if (fuente) {
+      items.push({
+        id: "fuente",
+        label: fuente,
+        onRemove: () => setFuente(null),
+      });
+    }
+    if (rangoActivo) {
+      items.push({
+        id: "rango",
+        label: rangoActivo.label,
+        onRemove: () => setRangoId("todo"),
+      });
+    }
+    return items;
+  }, [candidatoNombre, fuente, rangoActivo]);
+
+  // Contador de filtros activos (incluye el search si tiene texto).
+  const filtrosActivosCount =
+    chipsActivos.length + (query.trim().length > 0 ? 1 : 0);
+  const hayFiltroActivo = filtrosActivosCount > 0;
 
   function limpiarTodo() {
     setCandidatoId(null);
@@ -187,92 +192,87 @@ export function NoticiasScreen({ navigation }: RootStackScreenProps<"Noticias">)
     setQuery("");
   }
 
-  const rangosItems = RANGOS_FECHA.map((r) => ({ id: r.id, label: r.label }));
+  // -- Render --------------------------------------------------------------
+
+  const totalNoticias = noticias.length;
+  const contadorLabel = noticiasQ.isLoading
+    ? "Cargando..."
+    : `${totalNoticias} resultado${totalNoticias === 1 ? "" : "s"}`;
 
   return (
     <AppShell active="noticias" navigation={navigation}>
       <View style={[styles.container, { backgroundColor: c.bg }]}>
         <HomeTopBar brand="Noticias" />
-        <Text style={[styles.subtitle, { color: c.textSecondary }]}>
-          Ultimas noticias sobre los candidatos.
-        </Text>
 
-      {/* Busqueda */}
-      <View style={styles.searchWrap}>
-        <Input
-          value={query}
-          onChangeText={setQuery}
-          placeholder="Buscar en titulo o descripcion..."
-          accessibilityLabel="Buscar noticias"
-          returnKeyType="search"
-        />
-      </View>
-
-      {/* Filtros: Fecha */}
-      <Text style={[styles.filtroLabel, { color: c.textSecondary }]}>
-        Fecha
-      </Text>
-      <ChipRow<string>
-        items={rangosItems}
-        selectedId={rangoId}
-        onSelect={setRangoId}
-      />
-
-      {/* Filtros: Candidato */}
-      <Text style={[styles.filtroLabel, { color: c.textSecondary }]}>
-        Candidato
-      </Text>
-      <ChipRow<number | null>
-        items={chipsCandidatos}
-        selectedId={candidatoId}
-        onSelect={setCandidatoId}
-      />
-
-      {/* Filtros: Fuente */}
-      {chipsFuentes.length > 1 ? (
-        <>
-          <Text style={[styles.filtroLabel, { color: c.textSecondary }]}>
-            Fuente
+        {/* Header con contador */}
+        <View style={styles.headerRow}>
+          <Text style={[styles.h1, { color: c.text }]}>Noticias</Text>
+          <Text style={[styles.contador, { color: c.textSecondary }]}>
+            {contadorLabel}
           </Text>
-          <ChipRow<string | null>
-            items={chipsFuentes}
-            selectedId={fuente}
-            onSelect={setFuente}
-          />
-        </>
-      ) : null}
-
-      {/* Boton limpiar filtros */}
-      {hayFiltroActivo ? (
-        <View style={styles.clearWrap}>
-          <Link block onPress={limpiarTodo} color={c.danger}>
-            Limpiar filtros
-          </Link>
         </View>
-      ) : null}
 
-      <ScrollView contentContainerStyle={styles.listWrap}>
-        {noticiasQ.isLoading ? (
-          <Text style={[styles.loadingText, { color: c.textSecondary }]}>
-            Cargando noticias...
-          </Text>
-        ) : noticias.length === 0 ? (
-          <View style={styles.emptyBlock}>
-            <Text style={[styles.emptyText, { color: c.textSecondary }]}>
-              No hay noticias que coincidan con los filtros.
-            </Text>
+        {/* Filter bar compacto */}
+        <View style={styles.filterBarWrap}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterBarRow}
+          >
+            <Button
+              variant="secondary"
+              size="sm"
+              fullWidth={false}
+              onPress={() => setFiltersOpen(true)}
+            >
+              {filtrosActivosCount > 0
+                ? `Filtros (${filtrosActivosCount})`
+                : "Filtros"}
+            </Button>
+
+            {chipsActivos.map((item) => (
+              <ChipActivo
+                key={item.id}
+                label={item.label}
+                onRemove={item.onRemove}
+              />
+            ))}
+
             {hayFiltroActivo ? (
-              <Link block onPress={limpiarTodo}>
-                Ver todas
-              </Link>
+              <View style={styles.limpiarBtn}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  fullWidth={false}
+                  onPress={limpiarTodo}
+                >
+                  Limpiar
+                </Button>
+              </View>
             ) : null}
-          </View>
-        ) : (
-          <>
-            <Text style={[styles.contador, { color: c.textSecondary }]}>
-              {noticias.length} noticia(s)
-            </Text>
-            {noticias.map((n) => {
+          </ScrollView>
+        </View>
+
+        {/* Lista */}
+        <ScrollView contentContainerStyle={styles.listWrap}>
+          {noticiasQ.isLoading ? (
+            <View style={styles.loadingBox}>
+              <Spinner size="large" />
+            </View>
+          ) : noticias.length === 0 ? (
+            <EmptyState
+              icon="info"
+              title="No hay noticias que coincidan"
+              description={
+                hayFiltroActivo
+                  ? "Prueba ajustando los filtros o limpiando la busqueda."
+                  : "Aun no hay noticias disponibles."
+              }
+              actionLabel={hayFiltroActivo ? "Limpiar filtros" : undefined}
+              onAction={hayFiltroActivo ? limpiarTodo : undefined}
+            />
+          ) : (
+            noticias.map((n) => {
               const id = n.id;
               if (id == null) return null;
               const isBookmarked = bookmarkedIds.has(id);
@@ -306,51 +306,254 @@ export function NoticiasScreen({ navigation }: RootStackScreenProps<"Noticias">)
                   ) : null}
                 </View>
               );
-            })}
-          </>
-        )}
-
-        <View style={styles.footerSpacer} />
-      </ScrollView>
+            })
+          )}
+        </ScrollView>
       </View>
+
+      {/* Modal de filtros expandidos */}
+      <FiltrosModal
+        visible={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        query={query}
+        onQueryChange={setQuery}
+        rangoId={rangoId}
+        onRangoChange={setRangoId}
+        candidatoId={candidatoId}
+        onCandidatoChange={setCandidatoId}
+        candidatos={candidatos}
+        fuente={fuente}
+        onFuenteChange={setFuente}
+        fuentesDisponibles={fuentesDisponibles}
+        onLimpiar={limpiarTodo}
+      />
     </AppShell>
   );
 }
 
-// ---------- Styles ----------
-//
-// Todos los valores dimensionales vienen de tokens del DS.
+// -- Sub-componentes locales ------------------------------------------------
+
+interface ChipActivoProps {
+  label: string;
+  onRemove: () => void;
+}
+
+/**
+ * Chip "activo" removible del filter bar. Muestra el valor del filtro con un
+ * icono X a la derecha. Al presionar, quita el filtro sin abrir el modal.
+ *
+ * Patron unico de este screen — no promuevo a molecule sin un segundo uso.
+ */
+function ChipActivo({ label, onRemove }: ChipActivoProps) {
+  const c = useThemeColors();
+  return (
+    <Pressable
+      onPress={onRemove}
+      accessibilityRole="button"
+      accessibilityLabel={`Quitar filtro ${label}`}
+      style={({ pressed }) => [
+        styles.chipActivo,
+        {
+          backgroundColor: c.primary,
+          opacity: pressed ? 0.7 : 1,
+        },
+      ]}
+    >
+      <Text style={[styles.chipActivoText, { color: c.textOnPrimary }]}>
+        {label}
+      </Text>
+      <Icon name="close" size={14} color={c.textOnPrimary} />
+    </Pressable>
+  );
+}
+
+interface FiltrosModalProps {
+  visible: boolean;
+  onClose: () => void;
+  query: string;
+  onQueryChange: (v: string) => void;
+  rangoId: string;
+  onRangoChange: (id: string) => void;
+  candidatoId: number | null;
+  onCandidatoChange: (id: number | null) => void;
+  candidatos: ReturnType<typeof useCandidatos>["data"];
+  fuente: string | null;
+  onFuenteChange: (f: string | null) => void;
+  fuentesDisponibles: string[];
+  onLimpiar: () => void;
+}
+
+/**
+ * Modal con las secciones de filtros expandidas. Cambios se aplican en vivo
+ * (no hay draft/committed): tap en un chip afecta el fetch inmediatamente.
+ * El boton "Aplicar" solo cierra el modal (feedback explicito de la accion).
+ */
+function FiltrosModal({
+  visible,
+  onClose,
+  query,
+  onQueryChange,
+  rangoId,
+  onRangoChange,
+  candidatoId,
+  onCandidatoChange,
+  candidatos,
+  fuente,
+  onFuenteChange,
+  fuentesDisponibles,
+  onLimpiar,
+}: FiltrosModalProps) {
+  const c = useThemeColors();
+  const candidatosList = candidatos ?? [];
+
+  return (
+    <Modal visible={visible} onClose={onClose} title="Filtros">
+      <ScrollView contentContainerStyle={styles.modalContent}>
+        {/* Busqueda */}
+        <Text style={[styles.filtroLabel, { color: c.textSecondary }]}>
+          Buscar
+        </Text>
+        <Input
+          value={query}
+          onChangeText={onQueryChange}
+          placeholder="Buscar en titulo o descripcion..."
+          accessibilityLabel="Buscar noticias"
+          returnKeyType="search"
+        />
+
+        {/* Fecha */}
+        <Text style={[styles.filtroLabel, { color: c.textSecondary }]}>
+          Fecha
+        </Text>
+        <View style={styles.chipsGrid}>
+          {RANGOS_FECHA.map((r) => (
+            <Chip
+              key={r.id}
+              active={r.id === rangoId}
+              onPress={() => onRangoChange(r.id)}
+            >
+              {r.label}
+            </Chip>
+          ))}
+        </View>
+
+        {/* Candidato */}
+        <Text style={[styles.filtroLabel, { color: c.textSecondary }]}>
+          Candidato
+        </Text>
+        <View style={styles.chipsGrid}>
+          <Chip
+            active={candidatoId === null}
+            onPress={() => onCandidatoChange(null)}
+          >
+            Todos
+          </Chip>
+          {candidatosList
+            .filter((cand) => cand.id != null)
+            .map((cand) => (
+              <Chip
+                key={cand.id}
+                active={candidatoId === cand.id}
+                onPress={() => onCandidatoChange(cand.id!)}
+              >
+                {`${cand.nombre} ${cand.apellido ?? ""}`.trim()}
+              </Chip>
+            ))}
+        </View>
+
+        {/* Fuente */}
+        {fuentesDisponibles.length > 0 ? (
+          <>
+            <Text style={[styles.filtroLabel, { color: c.textSecondary }]}>
+              Fuente
+            </Text>
+            <View style={styles.chipsGrid}>
+              <Chip
+                active={fuente === null}
+                onPress={() => onFuenteChange(null)}
+              >
+                Todas
+              </Chip>
+              {fuentesDisponibles.map((f) => (
+                <Chip
+                  key={f}
+                  active={fuente === f}
+                  onPress={() => onFuenteChange(f)}
+                >
+                  {f}
+                </Chip>
+              ))}
+            </View>
+          </>
+        ) : null}
+
+        {/* Acciones */}
+        <View style={styles.modalActions}>
+          <View style={styles.modalActionBtn}>
+            <Button variant="ghost" onPress={onLimpiar}>
+              Limpiar todo
+            </Button>
+          </View>
+          <View style={styles.modalActionBtn}>
+            <Button variant="primary" onPress={onClose}>
+              Aplicar
+            </Button>
+          </View>
+        </View>
+      </ScrollView>
+    </Modal>
+  );
+}
+
+// -- Styles -----------------------------------------------------------------
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  subtitle: {
-    ...typography.small,
-    paddingHorizontal: spacing.sp5,
-    marginBottom: spacing.sp2,
-  },
 
-  searchWrap: {
-    paddingHorizontal: spacing.sp4,
-    marginBottom: spacing.sp2,
-  },
-
-  filtroLabel: {
-    ...typography.overline,
-    fontWeight: "700",
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    justifyContent: "space-between",
     paddingHorizontal: spacing.sp5,
     marginTop: spacing.sp2,
+    marginBottom: spacing.sp2,
+    gap: spacing.sp3,
   },
-  chipsWrap: { height: spacing.sp9 - spacing.sp3 }, // ~44
-  chipsRow: {
+  h1: {
+    ...typography.h2,
+    fontWeight: "800",
+  },
+  contador: {
+    ...typography.small,
+    fontWeight: "600",
+  },
+
+  filterBarWrap: {
+    marginBottom: spacing.sp2,
+  },
+  filterBarRow: {
     paddingHorizontal: spacing.sp4,
     gap: spacing.sp2,
     alignItems: "center",
-    paddingVertical: spacing.sp2,
   },
 
-  clearWrap: {
-    paddingHorizontal: spacing.sp4,
-    marginBottom: spacing.sp1,
+  chipActivo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sp1,
+    paddingHorizontal: spacing.sp3,
+    paddingVertical: spacing.sp1,
+    borderRadius: radii.rFull,
+  },
+  chipActivoText: {
+    ...typography.overline,
+    fontWeight: "600",
+    textTransform: "none",
+    letterSpacing: 0,
+  },
+
+  limpiarBtn: {
+    marginLeft: spacing.sp2,
   },
 
   listWrap: {
@@ -358,23 +561,10 @@ const styles = StyleSheet.create({
     gap: spacing.sp3,
     paddingBottom: spacing.sp9,
   },
-  loadingText: typography.small,
-  emptyBlock: {
-    alignItems: "center",
-    gap: spacing.sp3,
-    padding: spacing.sp6,
-  },
-  emptyText: {
-    ...typography.small,
-    textAlign: "center",
-  },
 
-  contador: {
-    ...typography.overline,
-    fontStyle: "italic",
-    marginBottom: spacing.sp1,
-    textTransform: "none",
-    letterSpacing: 0,
+  loadingBox: {
+    alignItems: "center",
+    padding: spacing.sp6,
   },
 
   newsCardWrap: { gap: spacing.sp2 },
@@ -385,5 +575,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sp2,
   },
 
-  footerSpacer: { height: spacing.sp3 },
+  // Modal
+  modalContent: {
+    gap: spacing.sp3,
+    paddingBottom: spacing.sp4,
+  },
+  filtroLabel: {
+    ...typography.overline,
+    fontWeight: "700",
+    marginTop: spacing.sp2,
+  },
+  chipsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sp2,
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: spacing.sp2,
+    marginTop: spacing.sp4,
+  },
+  modalActionBtn: { flex: 1 },
 });
