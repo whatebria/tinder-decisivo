@@ -10,7 +10,7 @@ import React, { useMemo } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useTiposEleccion } from "../api/hooks";
-import { Icon, Spinner, Toggle } from "../components";
+import { BottomNav, Icon, Spinner, Toggle } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import {
   partitionTipos,
@@ -26,7 +26,7 @@ function daysUntil(dateIso?: string | null): string {
     0,
     Math.ceil((new Date(dateIso).getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
   );
-  return `${days} d\u00edas`;
+  return `${days} días`;
 }
 
 export function GestionEleccionesScreen({
@@ -51,6 +51,7 @@ export function GestionEleccionesScreen({
     () =>
       StyleSheet.create({
         scroll: { flex: 1, backgroundColor: c.bg },
+        outer: { flex: 1, backgroundColor: c.bg },
         content: { padding: spacing.sp4, gap: spacing.sp4, paddingBottom: spacing.sp8 },
         topBar: {
           flexDirection: "row",
@@ -128,16 +129,20 @@ export function GestionEleccionesScreen({
 
   if (isLoading) {
     return (
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-        <View style={styles.loadingBox}>
-          <Spinner size="large" />
-        </View>
-      </ScrollView>
+      <View style={styles.outer}>
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+          <View style={styles.loadingBox}>
+            <Spinner size="large" />
+          </View>
+        </ScrollView>
+        <BottomNav active="home" navigation={navigation} />
+      </View>
     );
   }
 
   return (
-    <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+    <View style={styles.outer}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
       {/* TopBar breadcrumb */}
       <View style={styles.topBar}>
         <Pressable
@@ -154,7 +159,7 @@ export function GestionEleccionesScreen({
 
       {/* Hero */}
       <View style={styles.heroCol}>
-        <Text style={styles.heroTitle}>Cat\u00e1logo</Text>
+        <Text style={styles.heroTitle}>Catálogo</Text>
         <Text style={styles.heroSubtitle}>
           Activa las elecciones que te interesan. Puedes cambiarlas cuando quieras.
         </Text>
@@ -212,12 +217,14 @@ export function GestionEleccionesScreen({
       <View style={styles.infoBox}>
         <Icon name="info" size={16} color={c.primary} />
         <View style={styles.infoTextCol}>
-          <Text style={styles.infoTitle}>\u00bfC\u00f3mo funciona?</Text>
+          <Text style={styles.infoTitle}>¿Cómo funciona?</Text>
           <Text style={styles.infoBody}>
             Las elecciones activas aparecen en tu Home. Puedes tener varias al mismo tiempo.
           </Text>
         </View>
       </View>
     </ScrollView>
+    <BottomNav active="home" navigation={navigation} />
+  </View>
   );
 }

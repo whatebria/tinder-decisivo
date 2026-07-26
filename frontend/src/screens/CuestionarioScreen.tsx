@@ -19,6 +19,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getErrorMessage } from "../api/client";
 import {
+  BottomNav,
   Button,
   Chip,
   ScreenTopBar,
@@ -67,6 +68,7 @@ export function CuestionarioScreen({
     () =>
       StyleSheet.create({
         scroll: { flex: 1, backgroundColor: c.bg },
+        outer: { flex: 1, backgroundColor: c.bg },
         content: {
           padding: spacing.sp4,
           paddingBottom: spacing.sp6,
@@ -117,10 +119,13 @@ export function CuestionarioScreen({
 
   if (!pregunta) {
     return (
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.emptyBox}>
-        <Text style={styles.emptyText}>No hay preguntas cargadas.</Text>
-        <Button onPress={() => navigation.goBack()}>Volver</Button>
-      </ScrollView>
+      <View style={styles.outer}>
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.emptyBox}>
+          <Text style={styles.emptyText}>No hay preguntas cargadas.</Text>
+          <Button onPress={() => navigation.goBack()}>Volver</Button>
+        </ScrollView>
+        <BottomNav active="home" navigation={navigation} />
+      </View>
     );
   }
 
@@ -159,7 +164,8 @@ export function CuestionarioScreen({
 
   return (
     <>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+      <View style={styles.outer}>
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <ScreenTopBar
           title={pregunta.tipo_eleccion_nombre ?? "Cuestionario"}
           subtitle={`${currentIndex + 1} de ${totalPreguntas} \u00b7 base`}
@@ -237,6 +243,8 @@ export function CuestionarioScreen({
           </View>
         </View>
       </ScrollView>
+      <BottomNav active="home" navigation={navigation} />
+      </View>
 
       <PreguntaInfoModal
         visible={infoOpen}

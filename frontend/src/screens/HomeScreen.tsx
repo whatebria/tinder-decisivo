@@ -1,7 +1,7 @@
 /**
  * Home HUB: dashboard central de la app.
  *
- * Basado en design-system-lowfi.html \u00b7 Home HUB.
+ * Basado en design-system-lowfi.html · Home HUB.
  * Estructura:
  *   1. TopBar (brand + notif)
  *   2. Greeting (title + subtitle)
@@ -24,6 +24,7 @@ import {
   useTiposEleccion,
 } from "../api/hooks";
 import {
+  BottomNav,
   ConfirmModal,
   ElectionCard,
   ElectionCardAdd,
@@ -39,8 +40,6 @@ import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
 import { partitionTipos, useElectionsPrefsStore } from "../store/electionsPrefs";
-import { radii } from "../theme/radii";
-import { shadows } from "../theme/shadows";
 import { spacing } from "../theme/spacing";
 import { useThemeColors } from "../theme/useTheme";
 
@@ -48,13 +47,13 @@ import { useThemeColors } from "../theme/useTheme";
 
 function greetingByHour(): string {
   const h = new Date().getHours();
-  if (h < 12) return "Buenos d\u00edas";
+  if (h < 12) return "Buenos días";
   if (h < 20) return "Buenas tardes";
   return "Buenas noches";
 }
 
 function daysUntil(dateIso?: string | null): string {
-  if (!dateIso) return "\u2014";
+  if (!dateIso) return "—";
   const target = new Date(dateIso).getTime();
   const now = Date.now();
   const days = Math.max(0, Math.ceil((target - now) / (1000 * 60 * 60 * 24)));
@@ -92,7 +91,7 @@ function ElectionCardConnected({ tipo, isActive, onPress }: ConnectedCardProps) 
       daysLabel={daysUntil(tipo.fecha_eleccion)}
       matchPercent={isLoading ? null : matchPct}
       progressPercent={progress}
-      pendingLabel={isLoading ? "Cargando\u2026" : "Cuestionario pendiente"}
+      pendingLabel={isLoading ? "Cargando…" : "Cuestionario pendiente"}
       variant={isActive ? "active" : progress === 0 ? "pending" : "secondary"}
       onPress={onPress}
     />
@@ -114,7 +113,6 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   const { data: noticias = [] } = useNoticiasFeed();
   const reiniciar = useReiniciarCuestionario();
 
-  const [startingId, setStartingId] = useState<number | null>(null);
   const [tipoAReiniciar, setTipoAReiniciar] = useState<TipoEleccion | null>(null);
 
   const saludo = useMemo(() => {
@@ -137,9 +135,11 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
 
   const activeId = activeTipoId ?? tiposActivos[0]?.id ?? null;
 
+  // Al tocar una card: carga las preguntas y decide destino.
+  //   - Si el user ya respondio todas (preguntas.length === 0 en auth), va a Resultados.
+  //   - Si faltan preguntas (o es guest), va a Cuestionario.
   async function iniciarCuestionario(tipo: TipoEleccion) {
     if (!tipo.id) return;
-    setStartingId(tipo.id);
     try {
       await loadForTipoEleccion(tipo.id);
       const preguntas = useCuestionarioStore.getState().preguntas;
@@ -150,17 +150,7 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
       }
     } catch (err) {
       toast.error("No pudimos cargar las preguntas", getErrorMessage(err));
-    } finally {
-      setStartingId(null);
     }
-  }
-
-  function abrirEleccion(tipo: TipoEleccion) {
-    if (!tipo.id) return;
-    // Delego en iniciarCuestionario: si el user ya respondio todas, entra al
-    // store con preguntas.length === 0 y navega a Resultados. Si faltan,
-    // navega a Cuestionario. Asi la card hace lo correcto sin importar el estado.
-    iniciarCuestionario(tipo);
   }
 
   async function handleConfirmReiniciar() {
@@ -178,6 +168,7 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
     () =>
       StyleSheet.create({
         scroll: { flex: 1, backgroundColor: c.bg },
+        outer: { flex: 1, backgroundColor: c.bg },
         content: {
           padding: spacing.sp4,
           paddingBottom: spacing.sp8,
@@ -192,15 +183,18 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
 
   if (tiposLoading) {
     return (
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-        <View style={styles.loading}>
-          <Spinner size="large" />
-        </View>
-      </ScrollView>
+      <View style={styles.outer}>
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+          <View style={styles.loading}>
+            <Spinner size="large" />
+          </View>
+        </ScrollView>
+        <BottomNav active="home" navigation={navigation} />
+      </View>
     );
   }
 
-  // Construyo Novedades: por ahora acci\u00f3n sugerida (si hay tipo sin cuestionario) + noticias reales.
+  // Construyo Novedades: por ahora accion sugerida (si hay tipo sin cuestionario) + noticias reales.
   const tipoSinCuestionario = tiposActivos.find((t) => t.id && t.id !== activeId);
   const novedades: NovedadFeedItem[] = [];
 
@@ -231,8 +225,9 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
 
   return (
     <>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-        <HomeTopBar
+      <View style={styles.outer}>
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+          <HomeTopBar
           brand="Tinder Decisivo"
           onNotifications={() => navigation.navigate("Noticias")}
         />
@@ -242,9 +237,10 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
           subtitle="Explora las elecciones activas."
         />
 
-        {tiposActivos.length === 0 ? (          <HomeGreeting
+        {tiposActivos.length === 0 ? (
+          <HomeGreeting
             title=""
-            subtitle="A\u00fan no hay elecciones disponibles."
+            subtitle="Aún no hay elecciones disponibles."
           />
         ) : (
           <View>
@@ -264,7 +260,7 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
                   key={tipo.id}
                   tipo={tipo}
                   isActive={tipo.id === activeId}
-                  onPress={() => abrirEleccion(tipo)}
+                  onPress={() => iniciarCuestionario(tipo)}
                 />
               ))}
               <ElectionCardAdd
@@ -290,13 +286,15 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
             </View>
           </>
         ) : null}
-      </ScrollView>
+        </ScrollView>
+        <BottomNav active="home" navigation={navigation} />
+      </View>
 
       <ConfirmModal
         visible={!!tipoAReiniciar}
-        title="\u00bfReiniciar cuestionario?"
+        title="¿Reiniciar cuestionario?"
         message={`Vas a borrar tus respuestas de ${tipoAReiniciar?.nombre ?? ""}. No se puede deshacer.`}
-        confirmLabel="S\u00ed, reiniciar"
+        confirmLabel="Sí, reiniciar"
         cancelLabel="Cancelar"
         onConfirm={handleConfirmReiniciar}
         onCancel={() => setTipoAReiniciar(null)}
