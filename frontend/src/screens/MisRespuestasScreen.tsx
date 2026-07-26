@@ -4,29 +4,40 @@
  *
  * Recibe { tipoEleccionId } por route params. Si no hay respuestas todavia,
  * muestra empty state con CTA a completar el cuestionario.
+ *
+ * Migrado a Fase 5:
+ *   - Fuera Tamagui, todo con React Native + DS + tokens
+ *   - AppShell con active=null (screen polimorfica accedida desde Config)
+ *   - ScreenTopBar con back button + subtitle dinamico con conteo
+ *   - EmptyState (organism) para caso sin respuestas
+ *   - Cards inline (patron unico de "respuesta editable", no reusable)
  */
 
 import React, { useMemo, useState } from "react";
-import { ScrollView } from "react-native";
 import {
-  Card,
-  H1,
-  H3,
-  Paragraph,
-  SizableText,
-  Spinner,
-  XStack,
-  YStack,
-} from "tamagui";
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 import { getErrorMessage } from "../api/client";
 import type { MiRespuesta } from "../api/endpoints";
 import { useMisRespuestas, useUpdateRespuesta } from "../api/hooks";
-import { EditarRespuestaModal } from "../components";
-import { Button } from "../components";
-import { Link } from "../components";
-import { useToast } from "../components";
+import {
+  AppShell,
+  EditarRespuestaModal,
+  EmptyState,
+  ScreenTopBar,
+  Spinner,
+  useToast,
+} from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
+import { radii } from "../theme/radii";
+import { spacing } from "../theme/spacing";
+import { typography } from "../theme/typography";
+import { useThemeColors } from "../theme/useTheme";
 
 const PESO_LABELS: Record<number, string> = {
   0: "No me importa",
@@ -40,6 +51,7 @@ export function MisRespuestasScreen({
   route,
 }: RootStackScreenProps<"MisRespuestas">) {
   const { tipoEleccionId } = route.params;
+  const c = useThemeColors();
   const respuestasQ = useMisRespuestas(tipoEleccionId);
   const update = useUpdateRespuesta(tipoEleccionId);
   const toast = useToast();
@@ -69,7 +81,7 @@ export function MisRespuestasScreen({
       });
       toast.success(
         "Respuesta actualizada",
-        "Tu ranking se va a recalcular la proxima vez que veas tus matches."
+        "Tu ranking se va a recalcular la proxima vez que veas tus matches.",
       );
       setEditando(null);
     } catch (err) {
@@ -77,91 +89,163 @@ export function MisRespuestasScreen({
     }
   }
 
-  if (respuestasQ.isLoading) {
-    return (
-      <YStack flex={1} justifyContent="center" alignItems="center" backgroundColor="$background">
-        <Spinner size="large" />
-      </YStack>
-    );
-  }
-
   const total = respuestasQ.data?.length ?? 0;
+  const subtitle =
+    total > 0
+      ? `${total} pregunta${total === 1 ? "" : "s"} respondida${total === 1 ? "" : "s"}`
+      : "Sin respuestas todavia";
 
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <YStack flex={1} padding="$5" gap="$4" backgroundColor="$background" paddingTop="$8">
-        <H1 color="$text">Mis respuestas</H1>
-        <Paragraph color="$textSecondary">
-          {total > 0
-            ? `Respondiste ${total} pregunta${total === 1 ? "" : "s"}. Toca cualquiera para modificarla.`
-            : "Todavia no respondiste ninguna pregunta de esta eleccion."}
-        </Paragraph>
+    <AppShell active={null} navigation={navigation}>
+      <View style={[styles.root, { backgroundColor: c.bg }]}>
+        <ScrollView contentContainerStyle={styles.scroll}>
+          <ScreenTopBar
+            title="Mis respuestas"
+            subtitle={subtitle}
+            onBack={() => navigation.goBack()}
+          />
 
-        {total === 0 ? (
-          <YStack gap="$3" marginTop="$4">
-            <Button onPress={() => navigation.goBack()}>
-              Volver al inicio
-            </Button>
-          </YStack>
-        ) : (
-          <YStack gap="$4">
-            {agrupadas.map((grupo) => (
-              <YStack key={grupo.display} gap="$2">
-                <H3 color="$textSecondary" fontSize="$3" textTransform="uppercase">
-                  {grupo.display}
-                </H3>
-                <YStack gap="$2">
-                  {grupo.items.map((r) => {
-                    const opActual = r.opciones.find((o) => o.id === r.opcion_elegida);
-                    return (
-                      <Card
-                        key={r.id}
-                        padding="$4"
-                        borderWidth={1}
-                        borderColor="$border"
-                        pressStyle={{ opacity: 0.7 }}
-                        onPress={() => setEditando(r)}
-                        accessibilityLabel={`Editar respuesta: ${r.pregunta_texto}`}
-                      >
-                        <YStack gap="$2">
-                          <SizableText size="$3" color="$text" fontWeight="600">
-                            {r.pregunta_texto}
-                          </SizableText>
-                          <XStack gap="$2" alignItems="center" flexWrap="wrap">
-                            <SizableText size="$2" color="$primary" fontWeight="700">
-                              {opActual?.texto ?? "(opcion desconocida)"}
-                            </SizableText>
-                            <SizableText size="$2" color="$textTertiary">
-                              -
-                            </SizableText>
-                            <SizableText size="$2" color="$textSecondary">
-                              {PESO_LABELS[r.peso] ?? `peso ${r.peso}`}
-                            </SizableText>
-                          </XStack>
-                          <SizableText size="$1" color="$textTertiary">
-                            Toca para editar
-                          </SizableText>
-                        </YStack>
-                      </Card>
-                    );
-                  })}
-                </YStack>
-              </YStack>
-            ))}
-          </YStack>
-        )}
+          {respuestasQ.isLoading ? (
+            <View style={styles.loadingBox}>
+              <Spinner size="large" />
+            </View>
+          ) : total === 0 ? (
+            <EmptyState
+              icon="info"
+              title="Todavia no respondiste esta eleccion"
+              description="Completa el cuestionario para ver y editar tus respuestas aqui."
+              actionLabel="Volver al inicio"
+              onAction={() => navigation.goBack()}
+            />
+          ) : (
+            <>
+              <Text style={[styles.intro, { color: c.textSecondary }]}>
+                Toca cualquier pregunta para modificar tu respuesta.
+              </Text>
 
-        <YStack flex={1} />
-        <Link block onPress={() => navigation.goBack()}>Volver</Link>
-      </YStack>
+              <View style={styles.groups}>
+                {agrupadas.map((grupo) => (
+                  <View key={grupo.display} style={styles.group}>
+                    <Text
+                      style={[styles.groupTitle, { color: c.textSecondary }]}
+                    >
+                      {grupo.display}
+                    </Text>
+                    <View style={styles.groupItems}>
+                      {grupo.items.map((r) => {
+                        const opActual = r.opciones.find(
+                          (o) => o.id === r.opcion_elegida,
+                        );
+                        return (
+                          <Pressable
+                            key={r.id}
+                            style={({ pressed }) => [
+                              styles.card,
+                              {
+                                backgroundColor: c.card,
+                                borderColor: c.border,
+                                opacity: pressed ? 0.7 : 1,
+                              },
+                            ]}
+                            onPress={() => setEditando(r)}
+                            accessibilityLabel={`Editar respuesta: ${r.pregunta_texto}`}
+                            accessibilityRole="button"
+                          >
+                            <Text
+                              style={[styles.pregunta, { color: c.text }]}
+                            >
+                              {r.pregunta_texto}
+                            </Text>
+                            <View style={styles.metaRow}>
+                              <Text
+                                style={[styles.opActual, { color: c.primary }]}
+                              >
+                                {opActual?.texto ?? "(opcion desconocida)"}
+                              </Text>
+                              <Text
+                                style={[styles.metaSep, { color: c.textTertiary }]}
+                              >
+                                ·
+                              </Text>
+                              <Text
+                                style={[styles.metaPeso, { color: c.textSecondary }]}
+                              >
+                                {PESO_LABELS[r.peso] ?? `peso ${r.peso}`}
+                              </Text>
+                            </View>
+                            <Text
+                              style={[styles.hint, { color: c.textTertiary }]}
+                            >
+                              Toca para editar
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </>
+          )}
+        </ScrollView>
 
-      <EditarRespuestaModal
-        visible={editando !== null}
-        respuesta={editando}
-        loading={update.isPending}
-        onCancel={() => setEditando(null)}
-        onSubmit={handleSave}
-      />
-    </ScrollView>
+        <EditarRespuestaModal
+          visible={editando !== null}
+          respuesta={editando}
+          loading={update.isPending}
+          onCancel={() => setEditando(null)}
+          onSubmit={handleSave}
+        />
+      </View>
+    </AppShell>
   );
 }
+
+// ---------- Styles ----------
+
+const styles = StyleSheet.create({
+  root: { flex: 1 },
+  scroll: {
+    padding: spacing.sp4,
+    paddingBottom: spacing.sp7,
+    gap: spacing.sp4,
+  },
+  intro: typography.small,
+
+  loadingBox: {
+    alignItems: "center",
+    padding: spacing.sp5,
+  },
+
+  groups: { gap: spacing.sp5 },
+  group: { gap: spacing.sp2 },
+  groupTitle: {
+    ...typography.overline,
+    fontWeight: "600",
+  },
+  groupItems: { gap: spacing.sp2 },
+
+  card: {
+    padding: spacing.sp4,
+    borderRadius: radii.rMd,
+    borderWidth: 1,
+    gap: spacing.sp2,
+  },
+  pregunta: {
+    ...typography.body,
+    fontWeight: "600",
+  },
+  metaRow: {
+    flexDirection: "row",
+    gap: spacing.sp2,
+    alignItems: "center",
+    flexWrap: "wrap",
+  },
+  opActual: {
+    ...typography.small,
+    fontWeight: "700",
+  },
+  metaSep: typography.small,
+  metaPeso: typography.small,
+  hint: typography.overline,
+});
