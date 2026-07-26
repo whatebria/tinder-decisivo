@@ -31,6 +31,7 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   const logout = useAuthStore((s) => s.logout);
   const exitGuestMode = useAuthStore((s) => s.exitGuestMode);
   const loadForTipoEleccion = useCuestionarioStore((s) => s.loadForTipoEleccion);
+  const setTipoEleccion = useCuestionarioStore((s) => s.setTipoEleccion);
   const toast = useToast();
   const { data: tipos = [], isLoading, error } = useTiposEleccion();
   const [startingId, setStartingId] = useState<number | null>(null);
@@ -45,12 +46,28 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
     setStartingId(tipo.id);
     try {
       await loadForTipoEleccion(tipo.id);
-      navigation.navigate("Cuestionario");
+      // Si ya no hay preguntas pendientes (respondio todas), saltar directo a Resultados
+      // en modo auth. En guest siempre hay preguntas (no filtra por respondidas).
+      const preguntas = useCuestionarioStore.getState().preguntas;
+      if (!isGuest && preguntas.length === 0) {
+        navigation.navigate("Resultados");
+      } else {
+        navigation.navigate("Cuestionario");
+      }
     } catch (err) {
       toast.error("No pudimos cargar las preguntas", getErrorMessage(err));
     } finally {
       setStartingId(null);
     }
+  }
+
+  function handleVerMatches(tipo: TipoEleccion) {
+    if (!tipo.id) return;
+    // Setea el tipoEleccionId sin traer preguntas y navega directo a Resultados.
+    // Si el user no respondio nada aun, el backend devolvera 400 y ResultadosScreen
+    // muestra un toast amigable.
+    setTipoEleccion(tipo.id);
+    navigation.navigate("Resultados");
   }
 
   return (
@@ -111,6 +128,14 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
                 >
                   {startingId === tipo.id ? "Cargando..." : "Comenzar"}
                 </PrimaryButton>
+                {!isGuest ? (
+                  <TextButton
+                    onPress={() => handleVerMatches(tipo)}
+                    accessibilityLabel={`Ver mis matches de ${tipo.nombre}`}
+                  >
+                    Ver mis matches guardados
+                  </TextButton>
+                ) : null}
               </YStack>
             ))}
           </YStack>

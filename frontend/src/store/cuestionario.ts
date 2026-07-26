@@ -27,6 +27,8 @@ interface CuestionarioState {
   submitting: boolean;
 
   loadForTipoEleccion: (tipoEleccionId: number) => Promise<void>;
+  /** Setea solo el tipoEleccionId sin cargar preguntas (para ir directo a Resultados). */
+  setTipoEleccion: (tipoEleccionId: number) => void;
   setRespuesta: (preguntaId: number, opcionElegidaId: number, peso?: Peso) => void;
   setPeso: (preguntaId: number, peso: Peso) => void;
   next: () => void;
@@ -56,6 +58,10 @@ export const useCuestionarioStore = create<CuestionarioState>((set, get) => ({
       set({ loading: false });
       throw err;
     }
+  },
+
+  setTipoEleccion: (tipoEleccionId) => {
+    set({ tipoEleccionId });
   },
 
   setRespuesta: (preguntaId, opcionElegidaId, peso) => {
