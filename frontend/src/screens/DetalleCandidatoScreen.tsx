@@ -489,25 +489,27 @@ function ResumenTab({
           <Text style={[styles.sectionLabel, { color: c.textSecondary }]}>
             Posturas destacadas
           </Text>
-          {posturasDestacadas.map((p) => (
-            <View
-              key={p.id}
-              style={[
-                styles.posturaCard,
-                { backgroundColor: c.card, borderColor: c.border },
-              ]}
-            >
-              <Text
-                style={[styles.posturaPregunta, { color: c.text }]}
-                numberOfLines={2}
+          <View style={styles.posturasList}>
+            {posturasDestacadas.map((p) => (
+              <View
+                key={p.id}
+                style={[
+                  styles.posturaCard,
+                  { backgroundColor: c.card, borderColor: c.border },
+                ]}
               >
-                {p.pregunta_texto ?? "Pregunta"}
-              </Text>
-              <Text style={[styles.posturaRespuesta, { color: c.textSecondary }]}>
-                {p.opcion_respuesta_texto ?? ""}
-              </Text>
-            </View>
-          ))}
+                <Text
+                  style={[styles.posturaPregunta, { color: c.text }]}
+                  numberOfLines={2}
+                >
+                  {p.pregunta_texto ?? "Pregunta"}
+                </Text>
+                <Text style={[styles.posturaRespuesta, { color: c.textSecondary }]}>
+                  {p.opcion_respuesta_texto ?? ""}
+                </Text>
+              </View>
+            ))}
+          </View>
         </View>
       ) : null}
 
@@ -720,6 +722,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
 
+  posturasList: { gap: 14, marginTop: 4 },
   posturaCard: {
     borderWidth: 1,
     borderRadius: 10,

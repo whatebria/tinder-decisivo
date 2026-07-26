@@ -77,9 +77,9 @@ export function CandidatoPosturas({ posturas, loading }: Props) {
   }
 
   return (
-    <View style={{ gap: 16 }}>
+    <View style={{ gap: 24 }}>
       {grupos.map((g) => (
-        <View key={g.key} style={{ gap: 8 }}>
+        <View key={g.key} style={{ gap: 14 }}>
           <Text style={[styles.ejeTitulo, { color: c.text }]}>{g.display}</Text>
           {g.items.map((p) => {
             const isOpen = expanded.has(p.id);
