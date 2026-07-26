@@ -5,23 +5,11 @@
 
 import React from "react";
 import { ScrollView } from "react-native";
-import {
-  Card,
-  H1,
-  Paragraph,
-  Separator,
-  SizableText,
-  Spinner,
-  XStack,
-  YStack,
-} from "tamagui";
+import { H1, Paragraph, Separator, Spinner, YStack } from "tamagui";
 
 import { getErrorMessage } from "../api/client";
 import { useDescartados, useToggleDescartado } from "../api/hooks";
-import { Badge } from "../components";
-import { Button } from "../components";
-import { TextButton } from "../components";
-import { useToast } from "../components";
+import { DiscardedCard, EmptyState, TextButton, useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 
 export function MisDescartadosScreen({
@@ -57,33 +45,24 @@ export function MisDescartadosScreen({
             <Spinner size="large" />
           </YStack>
         ) : items.length === 0 ? (
-          <Paragraph color="$textSecondary">
-            No has descartado ningun candidato aun.
-          </Paragraph>
+          <EmptyState
+            icon="close"
+            title="No hay descartados"
+            description="Aun no has descartado ningun candidato."
+          />
         ) : (
           <YStack gap="$3">
             {items.map((d) => {
               const c = d.candidato_data;
-              if (!c) return null;
+              if (!c || c.id == null) return null;
               return (
-                <Card key={d.id} padding="$4" borderWidth={1} borderColor="$border">
-                  <XStack gap="$3" alignItems="center">
-                    <YStack flex={1} gap="$1" alignItems="flex-start">
-                      <SizableText size="$5" fontWeight="700" color="$text" numberOfLines={2}>
-                        {c.nombre} {c.apellido}
-                      </SizableText>
-                      {c.partido ? <Badge variant="neutral">{c.partido}</Badge> : null}
-                    </YStack>
-                    <Button
-                      variant="primary"
-                      fullWidth={false}
-                      onPress={() => c.id != null && handleRestore(c.id)}
-                      loading={toggleDesc.isPending}
-                    >
-                      Restaurar
-                    </Button>
-                  </XStack>
-                </Card>
+                <DiscardedCard
+                  key={d.id}
+                  name={`${c.nombre ?? ""} ${c.apellido ?? ""}`.trim()}
+                  partido={c.partido ?? ""}
+                  matchPercent={0}
+                  onRestore={() => handleRestore(c.id!)}
+                />
               );
             })}
           </YStack>

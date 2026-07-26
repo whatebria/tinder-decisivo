@@ -188,9 +188,6 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
               <TextButton onPress={() => navigation.navigate("Noticias")}>
                 Noticias
               </TextButton>
-              <TextButton onPress={() => navigation.navigate("Comparar")}>
-                Comparar candidatos
-              </TextButton>
               <TextButton onPress={exitGuestMode} color={c.primary}>
                 Crear una cuenta para guardar mi match
               </TextButton>
@@ -214,6 +211,12 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
               </TextButton>
               <TextButton onPress={() => navigation.navigate("Noticias")}>
                 Noticias
+              </TextButton>
+              <TextButton onPress={() => navigation.navigate("Comparar")}>
+                Comparar candidatos
+              </TextButton>
+              <TextButton onPress={() => navigation.navigate("Swipe")}>
+                Modo Swipe
               </TextButton>
               <TextButton onPress={logout} color={c.danger}>
                 Cerrar sesión

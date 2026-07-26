@@ -25,6 +25,7 @@ import { getErrorMessage } from "../api/client";
 import { PreguntaInfoModal } from "../components";
 import { Button } from "../components";
 import { IconButton } from "../components";
+import { RadioGroup } from "../components";
 import { SelectableButton } from "../components";
 import { TextButton } from "../components";
 import { useToast } from "../components";
@@ -140,30 +141,19 @@ export function CuestionarioScreen({
           <SizableText color="$textSecondary" size="$3">
             Tu postura:
           </SizableText>
-          <YStack gap="$2">
-            {opcionesRegulares.map((op) => {
-              const selected = respuesta?.opcionElegidaId === op.id;
-              return (
-                <SelectableButton
-                  key={op.id}
-                  selected={selected}
-                  onPress={() => op.id && setRespuesta(pregunta.id, op.id)}
-                  accessibilityLabel={`Opción: ${op.texto}`}
-                >
-                  {op.texto ?? ""}
-                </SelectableButton>
-              );
-            })}
-            {opcionNoSe && (
-              <SelectableButton
-                selected={respuesta?.opcionElegidaId === opcionNoSe.id}
-                onPress={() => opcionNoSe.id && setRespuesta(pregunta.id, opcionNoSe.id)}
-                accessibilityLabel="No sé, prefiero no responder"
-              >
-                {opcionNoSe.texto ?? "No sé"}
-              </SelectableButton>
-            )}
-          </YStack>
+          <RadioGroup<number>
+            options={[
+              ...opcionesRegulares
+                .filter((op) => op.id != null)
+                .map((op) => ({ value: op.id as number, label: op.texto ?? "" })),
+              ...(opcionNoSe && opcionNoSe.id != null
+                ? [{ value: opcionNoSe.id, label: opcionNoSe.texto ?? "No se" }]
+                : []),
+            ]}
+            value={respuesta?.opcionElegidaId ?? null}
+            onChange={(v) => setRespuesta(pregunta.id, v)}
+            accessibilityLabel="Opciones de respuesta"
+          />
         </YStack>
 
         {/* Peso (solo si ya hay opcion elegida y no es "No sé") */}

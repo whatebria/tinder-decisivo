@@ -4,25 +4,17 @@
  */
 
 import React from "react";
-import { ScrollView } from "react-native";
-import {
-  Card,
-  H1,
-  Paragraph,
-  Separator,
-  SizableText,
-  Spinner,
-  XStack,
-  YStack,
-} from "tamagui";
+import { Pressable, ScrollView } from "react-native";
+import { H1, Paragraph, Separator, Spinner, YStack } from "tamagui";
 
 import { getErrorMessage } from "../api/client";
 import { useFavoritos, useToggleFavorito } from "../api/hooks";
-import { Badge } from "../components";
-import { Button } from "../components";
-import { TextButton } from "../components";
-import { useToast } from "../components";
+import { EmptyState, FavoriteCard, TextButton, useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
+
+function initialsOf(nombre?: string, apellido?: string): string {
+  return `${(nombre ?? "?")[0] ?? "?"}${(apellido ?? "")[0] ?? ""}`.toUpperCase();
+}
 
 export function MisFavoritosScreen({
   navigation,
@@ -58,22 +50,21 @@ export function MisFavoritosScreen({
             <Spinner size="large" />
           </YStack>
         ) : items.length === 0 ? (
-          <Paragraph color="$textSecondary">
-            Todavia no marcaste ningun candidato como favorito. Vuelve al
-            ranking y toca "Favorito" en las cards que te interesen.
-          </Paragraph>
+          <EmptyState
+            icon="heart"
+            title="Aun no tienes favoritos"
+            description="Vuelve al ranking y toca Favorito en las cards que te interesen."
+            actionLabel="Ver ranking"
+            onAction={() => navigation.goBack()}
+          />
         ) : (
           <YStack gap="$3">
             {items.map((f) => {
               const c = f.candidato_data;
               if (!c || c.id == null) return null;
               return (
-                <Card
+                <Pressable
                   key={f.id}
-                  padding="$4"
-                  borderWidth={1}
-                  borderColor="$border"
-                  pressStyle={{ opacity: 0.7 }}
                   onPress={() =>
                     navigation.navigate("DetalleCandidato", {
                       candidatoId: c.id!,
@@ -83,23 +74,14 @@ export function MisFavoritosScreen({
                     })
                   }
                 >
-                  <XStack gap="$3" alignItems="center">
-                    <YStack flex={1} gap="$1" alignItems="flex-start">
-                      <SizableText size="$5" fontWeight="700" color="$text" numberOfLines={2}>
-                        {c.nombre} {c.apellido}
-                      </SizableText>
-                      {c.partido ? <Badge variant="neutral">{c.partido}</Badge> : null}
-                    </YStack>
-                    <Button
-                      variant="danger"
-                      fullWidth={false}
-                      onPress={() => handleQuitar(c.id!)}
-                      loading={toggleFav.isPending}
-                    >
-                      Quitar
-                    </Button>
-                  </XStack>
-                </Card>
+                  <FavoriteCard
+                    name={`${c.nombre ?? ""} ${c.apellido ?? ""}`.trim()}
+                    partido={c.partido ?? ""}
+                    matchPercent={0}
+                    addedAt=""
+                    onRemove={() => handleQuitar(c.id!)}
+                  />
+                </Pressable>
               );
             })}
           </YStack>
