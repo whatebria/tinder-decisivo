@@ -27,11 +27,12 @@ export type IconName =
   | "mail"
   | "link"
   | "bell"
-  | "settings"
-  | "newspaper"
-  | "compare"
+  | "gear"
+  | "news"
+  | "columns"
   | "swipe"
-  | "home";
+  | "home"
+  | "bookmark";
 
 export interface IconProps {
   name: IconName;
@@ -175,7 +176,8 @@ function renderIcon(name: IconName, p: object) {
           <Path d="M13.73 21a2 2 0 0 1-3.46 0" {...p} />
         </>
       );
-    case "settings":
+    case "gear":
+      // Rueda dentada (config) - SVG oficial DS seccion Iconos > Navegacion
       return (
         <>
           <Circle cx="12" cy="12" r="3" {...p} />
@@ -185,24 +187,18 @@ function renderIcon(name: IconName, p: object) {
           />
         </>
       );
-    case "newspaper":
+    case "news":
+      // Documento con lineas de texto (noticias) - SVG oficial DS
       return (
         <>
-          <Path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" {...p} />
-          <Path d="M18 14h-8" {...p} />
-          <Path d="M15 18h-5" {...p} />
-          <Path d="M10 6h8v4h-8V6Z" {...p} />
+          <Path d="M4 22V4a2 2 0 0 1 2-2h10l4 4v16a2 2 0 0 1-2 2z" {...p} />
+          <Path d="M8 8h8M8 12h8M8 16h5" {...p} />
         </>
       );
-    case "compare":
-      // 4 corners frame — para "Comparador"
+    case "columns":
+      // Dos columnas verticales con marcadores (comparador) - SVG oficial DS
       return (
-        <>
-          <Path d="M8 3H5a2 2 0 0 0-2 2v3" {...p} />
-          <Path d="M21 8V5a2 2 0 0 0-2-2h-3" {...p} />
-          <Path d="M3 16v3a2 2 0 0 0 2 2h3" {...p} />
-          <Path d="M16 21h3a2 2 0 0 0 2-2v-3" {...p} />
-        </>
+        <Path d="M8 3v18M16 3v18M4 8h4M4 16h4M16 8h4M16 16h4" {...p} />
       );
     case "swipe":
       // Card con flechita up — para "Modo swipe"
@@ -213,13 +209,15 @@ function renderIcon(name: IconName, p: object) {
         </>
       );
     case "home":
-      // Casita simple — para tab Home
+      // Casita con puerta integrada (nav Home) - SVG oficial DS
       return (
         <>
-          <Path d="M3 12 12 3l9 9" {...p} />
-          <Path d="M5 10v10h14V10" {...p} />
-          <Path d="M10 20v-6h4v6" {...p} />
+          <Path d="M3 12l9-9 9 9" {...p} />
+          <Path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10" {...p} />
         </>
       );
+    case "bookmark":
+      // Marcador clasico (nav Guardados) - SVG oficial DS
+      return <Path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" {...p} />;
   }
 }

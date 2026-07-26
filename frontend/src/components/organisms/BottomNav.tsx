@@ -1,62 +1,47 @@
 /**
- * BottomNav: barra de navegacion inferior fija con 5 tabs.
+ * BottomNav: barra de navegacion inferior fija con 5 tabs (variante movil).
  *
- * Basado en design-system-lowfi.html \u00b7 wf-bottomnav (pattern estandar).
- * Tabs: Home / Guardados / Comparar / Noticias / Config.
+ * Basado en design-system.html "ORGANISM: BottomNav / Sidebar" + wireframe
+ * `.wf-bottomnav`. Se usa como parte del template AppShell cuando el ancho
+ * de ventana es <900px.
  *
- * Screens que SI lo usan (segun el wireframe):
+ * Screens que S1 usan AppShell (y por tanto tienen bottomnav):
  *   Home HUB, Gestion Elecciones, Resultados, Mis Guardados, Mis Respuestas,
  *   Noticias, Perfil candidato, Perfil empty, Comparador, Config, Editar perfil.
  *
- * Screens que NO lo usan (full-focus o pre-app):
+ * Screens que NO (full-focus o pre-app, renderizan sin AppShell):
  *   Splash, Onboarding, Ubicacion, Login, Signup, Cuestionario, Share modal.
  *
- * Encapsula toda la logica de navegacion: solo recibe la key `active` y el
- * prop `navigation`. Los iconos vienen del Icon atom (Feather-style).
+ * Estilos oficiales del DS:
+ *   .app-nav.bottom { grid, 5 col, bg card, border-top, padding 6px 4px 8px,
+ *                     radius bottom lg }
  */
 
 import React, { useMemo } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 
+import {
+  APP_TABS,
+  type AppTab,
+  type AppTabDef,
+  type AppTabNavigator,
+} from "../../navigation/tabs";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
 import { TabBarItem } from "../atoms/TabBarItem";
 
-export type BottomNavTab =
-  | "home"
-  | "guardados"
-  | "comparar"
-  | "noticias"
-  | "config";
-
-/** Handler minimo para navegar sin acoplar al tipo especifico de RN Navigation. */
-export interface BottomNavNavigator {
-  navigate: (routeName: string) => void;
-}
+/** Re-export para no romper imports existentes. */
+export type BottomNavTab = AppTab;
+export type BottomNavNavigator = AppTabNavigator;
 
 export interface BottomNavProps {
   /**
-   * Tab actualmente activa. Usa `null` para screens "polimórficas"
-   * (ej. Perfil de candidato) que pueden accederse desde cualquier tab.
+   * Tab actualmente activa. Usa `null` para screens "polimorficas"
+   * (ej. Perfil de candidato) que se acceden desde cualquier tab.
    */
-  active: BottomNavTab | null;
-  navigation: BottomNavNavigator;
+  active: AppTab | null;
+  navigation: AppTabNavigator;
 }
-
-interface TabDef {
-  key: BottomNavTab;
-  route: string;
-  icon: "home" | "heart" | "compare" | "newspaper" | "settings";
-  label: string;
-}
-
-const TABS: readonly TabDef[] = [
-  { key: "home", route: "Home", icon: "home", label: "Home" },
-  { key: "guardados", route: "MisGuardados", icon: "heart", label: "Guardados" },
-  { key: "comparar", route: "Comparar", icon: "compare", label: "Comparar" },
-  { key: "noticias", route: "Noticias", icon: "newspaper", label: "Noticias" },
-  { key: "config", route: "Configuracion", icon: "settings", label: "Config" },
-];
 
 export function BottomNav({ active, navigation }: BottomNavProps) {
   const c = useThemeColors();
@@ -70,27 +55,30 @@ export function BottomNav({ active, navigation }: BottomNavProps) {
           backgroundColor: c.card,
           borderTopWidth: 1,
           borderTopColor: c.border2,
-          paddingBottom: Platform.OS === "ios" ? spacing.sp3 : 0,
+          // DS: padding 6px 4px 8px. En iOS agregamos safe-area inset abajo.
+          paddingTop: 6,
+          paddingBottom: Platform.OS === "ios" ? spacing.sp3 : 8,
           paddingHorizontal: spacing.sp1,
         },
       }),
     [c],
   );
 
-  function handlePress(tab: TabDef) {
+  function handlePress(tab: AppTabDef) {
     if (tab.key === active) return;
     navigation.navigate(tab.route);
   }
 
   return (
     <View style={styles.bar} accessibilityRole="tablist">
-      {TABS.map((t) => (
+      {APP_TABS.map((t) => (
         <TabBarItem
           key={t.key}
           icon={t.icon}
           label={t.label}
           active={t.key === active}
           onPress={() => handlePress(t)}
+          variant="bottom"
         />
       ))}
     </View>
