@@ -1,32 +1,30 @@
 """Fixtures compartidas para toda la suite de tests.
 
-`seed_completo_session` corre los seeds pesados UNA sola vez por sesion de
-pytest y persiste la data. Los tests que la usan reciben la DB ya poblada,
-en vez de re-sembrar 1046 candidatos por test.
+`datos_pesados` es function-scoped: cada test que la pide siembra desde cero
+en una transaccion aislada. Correcto pero lento (~10 seg por test).
 
-Truco: sobreescribir la fixture reservada `django_db_setup` de pytest-django
-para inyectar los seeds al terminar el setup del schema.
+Diseno explicitamente conservador: intentamos scope='session' primero pero
+rompio 28 tests que asumian DB limpia. Nunca vale la pena romper aislamiento
+para ganar velocidad.
+
+Si en el futuro necesitas mas speed, la ruta correcta es:
+1. Optimizar los seeds con bulk_create (elimina el bottleneck real).
+2. NO cambiar el scope.
 """
 
 import pytest
 from django.core.management import call_command
 
 
-@pytest.fixture(scope="session")
-def datos_pesados(django_db_setup, django_db_blocker):
-    """Siembra territorio + preguntas base + los 3 seeds pesados UNA vez.
+@pytest.fixture
+def datos_pesados(db):
+    """Seed completo: territorio + presi + diputados + alcaldes + preguntas.
 
-    Uso: pedir esta fixture en cualquier test.
-
-    Los datos persisten toda la sesion. Cada test corre en una transaccion
-    aparte que se rollbackea (via @pytest.mark.django_db normal), pero la
-    data sembrada fuera de transaccion (aca) NO se rollbackea.
+    Cada test paga ~10 seg de setup. A cambio: aislamiento total.
     """
-    with django_db_blocker.unblock():
-        call_command("seed_territorio_chile", verbosity=0)
-        call_command("seed_preguntas_base", verbosity=0)
-        call_command("seed_presidenciales_2025", verbosity=0)
-        call_command("seed_diputados_2025", verbosity=0)
-        call_command("seed_alcaldes_2024", verbosity=0)
-        call_command("seed_preguntas_por_tipo", verbosity=0)
-    yield
+    call_command("seed_territorio_chile", verbosity=0)
+    call_command("seed_preguntas_base", verbosity=0)
+    call_command("seed_presidenciales_2025", verbosity=0)
+    call_command("seed_diputados_2025", verbosity=0)
+    call_command("seed_alcaldes_2024", verbosity=0)
+    call_command("seed_preguntas_por_tipo", verbosity=0)

@@ -19,6 +19,7 @@ from .bookmarking import (
 )
 from .catalog import (
     CandidatoSerializer,
+    EjeSerializer,
     OpcionRespuestaSerializer,
     PreguntaSerializer,
     TipoEleccionSerializer,
@@ -51,6 +52,7 @@ __all__ = [
     "ComunaInlineSerializer",
     "DecisionFinalSerializer",
     "EliminarCuentaSerializer",
+    "EjeSerializer",
     "MatchCandidatoResultSerializer",
     "NoticiaBookmarkSerializer",
     "NoticiaSerializer",

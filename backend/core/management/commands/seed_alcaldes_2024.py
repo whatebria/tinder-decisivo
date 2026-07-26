@@ -92,46 +92,93 @@ class Command(BaseCommand):
         ))
         self.stdout.write(f"Generando {len(comunas)} x {CANDIDATOS_POR_COMUNA} candidatos...")
 
-        creados = 0
-        posturas_creadas = 0
-        for i, comuna in enumerate(comunas, 1):
-            # Semilla int a partir del codigo de comuna (unica).
+        # ---- OPTIMIZACION: cargar todo en memoria y hacer bulk ops ----
+        # 1. Indice de opciones por (pregunta_id, valor) para O(1) lookup.
+        opciones_por_pregunta = {}
+        for op in OpcionRespuesta.objects.filter(
+            pregunta__in=preguntas_base, es_no_se=False,
+        ):
+            opciones_por_pregunta[(op.pregunta_id, op.valor)] = op
+
+        # 2. Indice de candidatos existentes (para idempotencia).
+        existentes = {
+            (c.nombre, c.apellido, c.comuna_id): c
+            for c in Candidato.objects.filter(comuna__in=comunas)
+        }
+
+        # 3. Preparar lote de candidatos nuevos y datos de posturas.
+        candidatos_nuevos = []
+        # Lista de tuplas (idx_en_nuevos_o_existente, posturas_valores)
+        # donde el indice es negativo si es existente (para diferenciar).
+        plan_posturas = []  # list of (candidato_key, posturas_valores)
+
+        for comuna in comunas:
             seed_int = int(comuna.codigo)
             partidos = elegir_partidos(
                 seed_int, CANDIDATOS_POR_COMUNA, DISTRIBUCION_ALCALDES,
             )
             for idx, partido in enumerate(partidos):
                 data = generar_candidato(seed_int, idx, partido)
-                candidato, cand_created = Candidato.objects.update_or_create(
-                    nombre=data["nombre"], apellido=data["apellido"],
-                    comuna=comuna,
-                    defaults={
-                        "partido": data["partido"],
-                        "bio": f"Candidato/a a alcalde/sa de {comuna.nombre}.",
-                        "propuesta_electoral": (
+                key = (data["nombre"], data["apellido"], comuna.id)
+                if key not in existentes:
+                    candidatos_nuevos.append(Candidato(
+                        nombre=data["nombre"],
+                        apellido=data["apellido"],
+                        comuna=comuna,
+                        partido=data["partido"],
+                        bio=f"Candidato/a a alcalde/sa de {comuna.nombre}.",
+                        propuesta_electoral=(
                             f"Trabajar por los vecinos y vecinas de "
                             f"{comuna.nombre} desde el {data['partido']}."
                         ),
-                    },
-                )
-                candidato.tipos_eleccion.add(tipo)
-                if cand_created:
-                    creados += 1
+                    ))
+                plan_posturas.append((key, data["posturas"]))
 
-                for pregunta, valor in zip(preguntas_base, data["posturas"]):
-                    opcion = OpcionRespuesta.objects.get(
-                        pregunta=pregunta, valor=valor, es_no_se=False,
-                    )
-                    _, p_created = PosturaCandidato.objects.update_or_create(
-                        candidato=candidato, pregunta=pregunta,
-                        defaults={"opcion_respuesta": opcion},
-                    )
-                    if p_created:
-                        posturas_creadas += 1
+        # 4. Bulk create candidatos nuevos (1 query en vez de N).
+        Candidato.objects.bulk_create(candidatos_nuevos)
+        creados = len(candidatos_nuevos)
 
-            # Progreso cada 50 comunas.
-            if i % 50 == 0:
-                self.stdout.write(f"  {i}/{len(comunas)} comunas procesadas...")
+        # 5. Refrescar indice con los recien creados.
+        todos = {
+            (c.nombre, c.apellido, c.comuna_id): c
+            for c in Candidato.objects.filter(comuna__in=comunas)
+        }
+
+        # 6. Bulk M2M add tipo_eleccion. Usamos through directamente para
+        #    evitar N queries de .add().
+        Through = Candidato.tipos_eleccion.through
+        m2m_existentes = set(
+            Through.objects.filter(
+                candidato__comuna__in=comunas, tipoeleccion=tipo,
+            ).values_list("candidato_id", flat=True)
+        )
+        m2m_nuevos = [
+            Through(candidato_id=c.id, tipoeleccion_id=tipo.id)
+            for c in todos.values() if c.id not in m2m_existentes
+        ]
+        Through.objects.bulk_create(m2m_nuevos, ignore_conflicts=True)
+
+        # 7. Bulk crear posturas nuevas. Primero indexar posturas existentes.
+        posturas_existentes = {
+            (p.candidato_id, p.pregunta_id)
+            for p in PosturaCandidato.objects.filter(
+                candidato__comuna__in=comunas,
+                pregunta__in=preguntas_base,
+            )
+        }
+        posturas_a_crear = []
+        for key, posturas_valores in plan_posturas:
+            candidato = todos[key]
+            for pregunta, valor in zip(preguntas_base, posturas_valores):
+                if (candidato.id, pregunta.id) in posturas_existentes:
+                    continue
+                opcion = opciones_por_pregunta[(pregunta.id, valor)]
+                posturas_a_crear.append(PosturaCandidato(
+                    candidato=candidato, pregunta=pregunta,
+                    opcion_respuesta=opcion,
+                ))
+        PosturaCandidato.objects.bulk_create(posturas_a_crear, ignore_conflicts=True)
+        posturas_creadas = len(posturas_a_crear)
 
         total = tipo.candidatos.count()
         self.stdout.write(self.style.SUCCESS(

@@ -36,6 +36,7 @@ from .noticias import (
     NoticiaDetailView,
     NoticiaListCreateView,
 )
+from .eje import EjeListView
 from .perfil import ActualizarComunaView, CambiarPasswordView, PerfilView
 from .territorio import ComunaListView, RegionListView
 
@@ -51,6 +52,7 @@ __all__ = [
     "CambiarPasswordView",
     "ComunaListView",
     "CustomAuthToken",
+    "EjeListView",
     "DecisionFinalViewSet",
     "EditarRespuestaView",
     "MatchCandidatoViewSet",

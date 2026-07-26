@@ -14,6 +14,7 @@ from django.db.models import Count
 
 # Importa el admin territorial (regiones, distritos, comunas) para que Django lo
 # autoregistre. Vive en modulo aparte por cohesion, no por tamano.
+from . import admin_eje  # noqa: F401
 from . import admin_territorio  # noqa: F401
 
 from .models import (

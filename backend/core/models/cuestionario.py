@@ -2,7 +2,10 @@
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 
+from .eje import Eje
 from .electoral import TipoEleccion
 
 
@@ -35,6 +38,17 @@ class Pregunta(models.Model):
     eje_tematico = models.CharField(
         max_length=20, choices=EJES_CHOICES, default=EJE_OTRO,
         help_text="Categoria tematica de la pregunta. Sirve para el match por eje.",
+    )
+    # FK opcional al catalogo Eje. Se auto-popula desde eje_tematico via signal
+    # (o al reves si se setea manualmente). Permite metadata rica: color, orden, icono.
+    eje = models.ForeignKey(
+        Eje, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="preguntas",
+        help_text=(
+            "Referencia al catalogo Eje. Se sincroniza automaticamente con "
+            "eje_tematico. Setealo aca si querés override o dejalo vacio y el "
+            "signal lo resuelve por codigo."
+        ),
     )
     explicacion = models.TextField(
         blank=True, default="",
@@ -141,3 +155,32 @@ class RespuestaUsuario(models.Model):
             f"{self.user.username} respondió '{self.opcion_elegida.texto}' "
             f"a '{self.pregunta.texto[:30]}...'"
         )
+
+
+# ----------------------------------------------------------------------------
+# Signal: mantener Pregunta.eje (FK) sincronizado con Pregunta.eje_tematico (str).
+# ----------------------------------------------------------------------------
+# Estrategia bi-direccional:
+#   - Si se setea `eje` (FK): copiar eje.codigo -> eje_tematico.
+#   - Si se setea solo `eje_tematico` y `eje` es None: buscar/crear Eje por codigo
+#     y setear el FK. Case-insensitive.
+# Asi el matching (que usa eje_tematico string) sigue funcionando, y los nuevos
+# clients (frontend) pueden usar el FK con metadata rica.
+@receiver(pre_save, sender=Pregunta)
+def _sincronizar_pregunta_eje(sender, instance, **kwargs):
+    if instance.eje_id is not None:
+        # FK setea el string.
+        if instance.eje.codigo.upper() != (instance.eje_tematico or "").upper():
+            instance.eje_tematico = instance.eje.codigo
+    elif instance.eje_tematico:
+        # String busca/crea el FK.
+        eje_obj = Eje.objects.filter(
+            codigo__iexact=instance.eje_tematico,
+        ).first()
+        if eje_obj is None:
+            # Auto-crear con nombre = codigo capitalizado.
+            eje_obj = Eje.objects.create(
+                codigo=instance.eje_tematico.upper(),
+                nombre=instance.eje_tematico.capitalize(),
+            )
+        instance.eje = eje_obj

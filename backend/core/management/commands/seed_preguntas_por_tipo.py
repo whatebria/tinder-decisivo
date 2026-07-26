@@ -100,6 +100,11 @@ class Command(BaseCommand):
 
             fallback = POSTURAS_ESPECIFICAS["Independiente"][clave_postura]
 
+            # OPTIMIZACION: precargar candidatos del tipo una sola vez.
+            candidatos_del_tipo = list(tipo.candidatos.all())
+
+            # Pre-crear preguntas + opciones (rapido, poca cantidad).
+            preguntas_creadas = []  # list of (pregunta, idx_pregunta)
             for orden_idx, p_data in enumerate(preguntas_data, start=100):
                 pregunta, p_created = Pregunta.objects.update_or_create(
                     tipo_eleccion=tipo, texto=p_data["texto"],
@@ -107,13 +112,11 @@ class Command(BaseCommand):
                         "eje_tematico": p_data["eje"],
                         "explicacion": p_data.get("explicacion", ""),
                         "repercusiones": p_data.get("repercusiones", {}),
-                        "orden": orden_idx,  # a partir de 100 para no chocar con base
+                        "orden": orden_idx,
                     },
                 )
                 if p_created:
                     total_preg += 1
-
-                # Crear las 6 opciones
                 for texto_op, valor, es_no_se in OPCIONES:
                     _, op_created = OpcionRespuesta.objects.update_or_create(
                         pregunta=pregunta, valor=valor,
@@ -121,28 +124,45 @@ class Command(BaseCommand):
                     )
                     if op_created:
                         total_op += 1
+                preguntas_creadas.append((pregunta, orden_idx - 100))
+                self.stdout.write(f"  = {p_data['texto'][:60]}...")
 
-                # Generar postura para cada candidato del tipo
-                # segun su partido. La pregunta es indice = orden_idx - 100.
-                idx_pregunta = orden_idx - 100
-                for candidato in tipo.candidatos.all():
+            # Indexar opciones por (pregunta_id, valor) para lookup O(1).
+            opciones_idx = {}
+            for op in OpcionRespuesta.objects.filter(
+                pregunta__in=[p for p, _ in preguntas_creadas], es_no_se=False,
+            ):
+                opciones_idx[(op.pregunta_id, op.valor)] = op
+
+            # Indexar posturas existentes para skip.
+            posturas_existentes = {
+                (p.candidato_id, p.pregunta_id)
+                for p in PosturaCandidato.objects.filter(
+                    candidato__in=candidatos_del_tipo,
+                    pregunta__in=[p for p, _ in preguntas_creadas],
+                )
+            }
+
+            # Bulk build de posturas nuevas.
+            posturas_a_crear = []
+            for pregunta, idx_pregunta in preguntas_creadas:
+                for candidato in candidatos_del_tipo:
+                    if (candidato.id, pregunta.id) in posturas_existentes:
+                        continue
                     posturas_partido = _match_partido(candidato.partido)
                     if posturas_partido is None:
                         valor = fallback[idx_pregunta]
                     else:
                         valor = posturas_partido[clave_postura][idx_pregunta]
-
-                    opcion = OpcionRespuesta.objects.get(
-                        pregunta=pregunta, valor=valor, es_no_se=False,
-                    )
-                    _, post_created = PosturaCandidato.objects.update_or_create(
+                    opcion = opciones_idx[(pregunta.id, valor)]
+                    posturas_a_crear.append(PosturaCandidato(
                         candidato=candidato, pregunta=pregunta,
-                        defaults={"opcion_respuesta": opcion},
-                    )
-                    if post_created:
-                        total_post += 1
-
-                self.stdout.write(f"  = {p_data['texto'][:60]}...")
+                        opcion_respuesta=opcion,
+                    ))
+            PosturaCandidato.objects.bulk_create(
+                posturas_a_crear, ignore_conflicts=True,
+            )
+            total_post += len(posturas_a_crear)
 
         self.stdout.write(self.style.SUCCESS(
             f"\nListo. {total_preg} preguntas nuevas, {total_op} opciones, "

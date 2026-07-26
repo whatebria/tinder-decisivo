@@ -15,6 +15,7 @@ from .views import (
     CustomAuthToken,
     DecisionFinalViewSet,
     EditarRespuestaView,
+    EjeListView,
     MatchCandidatoViewSet,
     MisRespuestasListView,
     NoticiaBookmarkViewSet,
@@ -68,6 +69,8 @@ urlpatterns = [
     # Territorio (publico, para autocomplete)
     path("regiones/", RegionListView.as_view(), name="region-list"),
     path("comunas/", ComunaListView.as_view(), name="comuna-list"),
+    # Ejes tematicos (publico, para radar chart y filtros)
+    path("ejes/", EjeListView.as_view(), name="eje-list"),
     # Catalogos
     path("tipos-eleccion/", TipoEleccionListView.as_view(), name="tipos-eleccion-list"),
     path("candidatos/", CandidatoListView.as_view(), name="candidato-list"),

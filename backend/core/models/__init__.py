@@ -30,6 +30,7 @@ from .cuestionario import (
     RespuestaUsuario,
     crear_opciones_acuerdo_desacuerdo,
 )
+from .eje import Eje
 from .electoral import Candidato, TipoEleccion
 from .matching import MatchCandidato, PosturaCandidato
 from .perfil import UserProfile
@@ -55,6 +56,7 @@ __all__ = [
     "Comuna",
     "DecisionFinal",
     "Distrito",
+    "Eje",
     "MatchCandidato",
     "Noticia",
     "NoticiaBookmark",

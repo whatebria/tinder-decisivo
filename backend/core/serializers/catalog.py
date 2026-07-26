@@ -2,7 +2,13 @@
 
 from rest_framework import serializers
 
-from ..models import Candidato, OpcionRespuesta, Pregunta, TipoEleccion
+from ..models import Candidato, Eje, OpcionRespuesta, Pregunta, TipoEleccion
+
+
+class EjeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Eje
+        fields = ["id", "codigo", "nombre", "color", "icono", "orden", "activo", "descripcion"]
 
 
 class TipoEleccionSerializer(serializers.ModelSerializer):
@@ -25,6 +31,10 @@ class PreguntaSerializer(serializers.ModelSerializer):
     eje_tematico_display = serializers.CharField(
         source="get_eje_tematico_display", read_only=True
     )
+    # Info del catalogo Eje (color/icono para UI). Nullable si el FK aun no se sincronizó.
+    eje_nombre = serializers.CharField(source="eje.nombre", read_only=True, default=None)
+    eje_color = serializers.CharField(source="eje.color", read_only=True, default=None)
+    eje_icono = serializers.CharField(source="eje.icono", read_only=True, default=None)
 
     class Meta:
         model = Pregunta
@@ -36,6 +46,10 @@ class PreguntaSerializer(serializers.ModelSerializer):
             "tipo_eleccion_nombre",
             "eje_tematico",
             "eje_tematico_display",
+            "eje",
+            "eje_nombre",
+            "eje_color",
+            "eje_icono",
             "explicacion",
             "repercusiones",
             "opciones_respuesta",
