@@ -22,6 +22,7 @@ import { MisGuardadosScreen } from "../screens/MisGuardadosScreen";
 import { MisRespuestasScreen } from "../screens/MisRespuestasScreen";
 import { CompararScreen } from "../screens/CompararScreen";
 import { ConfiguracionScreen } from "../screens/ConfiguracionScreen";
+import { GestionEleccionesScreen } from "../screens/GestionEleccionesScreen";
 import { NoticiasScreen } from "../screens/NoticiasScreen";
 import { SwipeScreen } from "../screens/SwipeScreen";
 import { OnboardingScreen } from "../screens/OnboardingScreen";
@@ -65,6 +66,7 @@ export function AppNavigator() {
           <Stack.Screen name="MiDecision" component={MiDecisionScreen} />
           <Stack.Screen name="Perfil" component={PerfilScreen} />
           <Stack.Screen name="Configuracion" component={ConfiguracionScreen} />
+            <Stack.Screen name="GestionElecciones" component={GestionEleccionesScreen} />
         </>
       ) : (
         <>

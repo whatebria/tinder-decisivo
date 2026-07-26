@@ -31,9 +31,10 @@ export {
 export { TopNav, type TopNavProps } from "./TopNav";
 export { EmptyState, type EmptyStateProps } from "./EmptyState";
 
-// Nuevos (Fase 5 — Home template)
-export { HomeHero, type HomeHeroProps, type HomeHeroFilledProps, type HomeHeroEmptyProps } from "./HomeHero";
+// Nuevos (Fase 5 — Home HUB wireframe)
 export { HomeTopBar, type HomeTopBarProps } from "./HomeTopBar";
+export { ElectionsStrip, type ElectionsStripProps } from "./ElectionsStrip";
+export { NovedadesFeed, type NovedadesFeedProps, type NovedadFeedItem } from "./NovedadesFeed";
 
 // Nuevos (Sprint post-swipe: explicacion del match)
 export { MatchExplanation } from "./MatchExplanation";

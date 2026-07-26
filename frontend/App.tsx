@@ -25,6 +25,7 @@ import { ErrorBoundary } from "./src/components";
 import { ToastProvider } from "./src/components";
 import { AppNavigator } from "./src/navigation/AppNavigator";
 import { useAuthStore } from "./src/store/auth";
+import { useElectionsPrefsStore } from "./src/store/electionsPrefs";
 import { useOnboardingStore } from "./src/store/onboarding";
 import { useThemeStore } from "./src/store/theme";
 import { colors, colorsDark } from "./src/theme/colors";
@@ -35,6 +36,7 @@ export default function App() {
   const authHydrated = useAuthStore((s) => s.isHydrated);
   const hydrateOnboarding = useOnboardingStore((s) => s.hydrate);
   const onboardingHydrated = useOnboardingStore((s) => s.isHydrated);
+  const hydrateElections = useElectionsPrefsStore((s) => s.hydrate);
   const hydrateTheme = useThemeStore((s) => s.hydrate);
   const themeHydrated = useThemeStore((s) => s.isHydrated);
   const effective = useThemeStore((s) => s.effective);
@@ -42,8 +44,9 @@ export default function App() {
   useEffect(() => {
     hydrateAuth();
     hydrateOnboarding();
+    hydrateElections();
     hydrateTheme();
-  }, [hydrateAuth, hydrateOnboarding, hydrateTheme]);
+  }, [hydrateAuth, hydrateOnboarding, hydrateElections, hydrateTheme]);
 
   // Web: sincroniza el bg del <body> y <html> con el tema activo para evitar
   // que se vea blanco cuando el contenido es mas corto que el viewport.

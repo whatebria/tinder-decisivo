@@ -30,7 +30,7 @@ export { Tooltip, type TooltipProps } from "./Tooltip";
 export { Timeline, type TimelineProps, type TimelineItem } from "./Timeline";
 export { Icon, type IconProps, type IconName } from "./Icon";
 
-// Nuevos (Fase 5 — Home template)
-export { HomeTile, type HomeTileProps } from "./HomeTile";
-export { RankCard, type RankCardProps } from "./RankCard";
+// Nuevos (Fase 5 — Home HUB wireframe)
+export { ElectionCard, type ElectionCardProps, type ElectionCardVariant } from "./ElectionCard";
+export { ElectionCardAdd, type ElectionCardAddProps } from "./ElectionCardAdd";
 export { BookmarkButton, type BookmarkButtonProps } from "./BookmarkButton";

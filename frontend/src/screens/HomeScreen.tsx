@@ -1,58 +1,148 @@
 /**
- * Home: elige el tipo de eleccion sobre el que queres hacer el cuestionario.
+ * Home HUB: dashboard central de la app.
+ *
+ * Basado en design-system-lowfi.html \u00b7 Home HUB.
+ * Estructura:
+ *   1. TopBar (brand + notif)
+ *   2. Greeting (title + subtitle)
+ *   3. Section "Tus elecciones" + strip horizontal + link "Gestionar"
+ *   4. Divider
+ *   5. Section "Novedades" (feed mixto: noticias + acciones sugeridas)
+ *
+ * Multi-eleccion first-class: cada tipo activo es una card con match% + progreso.
  */
 
-import React, { useState } from "react";
-import { ScrollView } from "react-native";
-import {
-  H1,
-  H3,
-  Paragraph,
-  Separator,
-  SizableText,
-  Spinner,
-  YStack,
-} from "tamagui";
+import React, { useMemo, useState } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 import type { TipoEleccion } from "../api/endpoints";
 import { getErrorMessage } from "../api/client";
-import { useReiniciarCuestionario, useTiposEleccion } from "../api/hooks";
-import { ConfirmModal } from "../components";
-import { useToast } from "../components";
+import {
+  useMatchesQuery,
+  useNoticiasFeed,
+  useReiniciarCuestionario,
+  useTiposEleccion,
+} from "../api/hooks";
+import {
+  ConfirmModal,
+  ElectionCard,
+  ElectionCardAdd,
+  HomeGreeting,
+  HomeTopBar,
+  NovedadesFeed,
+  SectionTitle,
+  Spinner,
+  useToast,
+  type NovedadFeedItem,
+} from "../components";
+import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
-import { Button } from "../components";
-import { Link } from "../components";
-import { ThemeToggle } from "../components";
-import type { RootStackScreenProps } from "../navigation/types";
+import { partitionTipos, useElectionsPrefsStore } from "../store/electionsPrefs";
+import { radii } from "../theme/radii";
+import { shadows } from "../theme/shadows";
+import { spacing } from "../theme/spacing";
 import { useThemeColors } from "../theme/useTheme";
+
+// -- Helpers --------------------------------------------------------------
+
+function greetingByHour(): string {
+  const h = new Date().getHours();
+  if (h < 12) return "Buenos d\u00edas";
+  if (h < 20) return "Buenas tardes";
+  return "Buenas noches";
+}
+
+function daysUntil(dateIso?: string | null): string {
+  if (!dateIso) return "\u2014";
+  const target = new Date(dateIso).getTime();
+  const now = Date.now();
+  const days = Math.max(0, Math.ceil((target - now) / (1000 * 60 * 60 * 24)));
+  return `${days}d`;
+}
+
+function whenLabel(dateIso?: string): string {
+  if (!dateIso) return "";
+  const diffMs = Date.now() - new Date(dateIso).getTime();
+  const h = Math.floor(diffMs / (1000 * 60 * 60));
+  if (h < 1) return "hace un momento";
+  if (h < 24) return `hace ${h}h`;
+  const d = Math.floor(h / 24);
+  if (d === 1) return "ayer";
+  return `hace ${d}d`;
+}
+
+// -- Election card conectado (hace el query de matches por tipo) -----------
+
+interface ConnectedCardProps {
+  tipo: TipoEleccion;
+  isActive: boolean;
+  onPress: () => void;
+}
+
+function ElectionCardConnected({ tipo, isActive, onPress }: ConnectedCardProps) {
+  const { data: matches = [], isLoading } = useMatchesQuery(tipo.id);
+  const topMatch = matches[0];
+  const matchPct = topMatch ? Number(topMatch.match_percentage) : null;
+  const progress = matches.length > 0 ? 100 : 0;
+
+  return (
+    <ElectionCard
+      name={tipo.nombre}
+      daysLabel={daysUntil(tipo.fecha_eleccion)}
+      matchPercent={isLoading ? null : matchPct}
+      progressPercent={progress}
+      pendingLabel={isLoading ? "Cargando\u2026" : "Cuestionario pendiente"}
+      variant={isActive ? "active" : progress === 0 ? "pending" : "secondary"}
+      onPress={onPress}
+    />
+  );
+}
+
+// -- Screen ----------------------------------------------------------------
 
 export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   const c = useThemeColors();
   const email = useAuthStore((s) => s.email);
   const isGuest = useAuthStore((s) => s.isGuest);
-  const logout = useAuthStore((s) => s.logout);
-  const exitGuestMode = useAuthStore((s) => s.exitGuestMode);
-  const loadForTipoEleccion = useCuestionarioStore((s) => s.loadForTipoEleccion);
+  const activeTipoId = useCuestionarioStore((s) => s.tipoEleccionId);
   const setTipoEleccion = useCuestionarioStore((s) => s.setTipoEleccion);
+  const loadForTipoEleccion = useCuestionarioStore((s) => s.loadForTipoEleccion);
+  const electionsActiveIds = useElectionsPrefsStore((s) => s.activeIds);
   const toast = useToast();
-  const { data: tipos = [], isLoading, error } = useTiposEleccion();
-  const [startingId, setStartingId] = useState<number | null>(null);
-  const [tipoAReiniciar, setTipoAReiniciar] = useState<TipoEleccion | null>(null);
+
+  const { data: tipos = [], isLoading: tiposLoading, error } = useTiposEleccion();
+  const { data: noticias = [] } = useNoticiasFeed();
   const reiniciar = useReiniciarCuestionario();
 
-  // Muestro el error como toast una sola vez
+  const [startingId, setStartingId] = useState<number | null>(null);
+  const [tipoAReiniciar, setTipoAReiniciar] = useState<TipoEleccion | null>(null);
+
+  const saludo = useMemo(() => {
+    const base = greetingByHour();
+    if (isGuest) return `${base}, invitado`;
+    if (email) return `${base}, ${email.split("@")[0]}`;
+    return base;
+  }, [email, isGuest]);
+
   React.useEffect(() => {
     if (error) toast.error("Error cargando elecciones", getErrorMessage(error));
   }, [error, toast]);
 
-  async function handleStart(tipo: TipoEleccion) {
+  // "activo" = el que est\u00e1 en el store, o el primero si no hay ninguno.
+  // Solo elecciones activadas por el user (client-side pref).
+  const { activas: tiposActivos } = useMemo(
+    () => partitionTipos(tipos, electionsActiveIds),
+    [tipos, electionsActiveIds],
+  );
+
+  const activeId = activeTipoId ?? tiposActivos[0]?.id ?? null;
+
+  async function iniciarCuestionario(tipo: TipoEleccion) {
     if (!tipo.id) return;
     setStartingId(tipo.id);
     try {
       await loadForTipoEleccion(tipo.id);
-      // Si ya no hay preguntas pendientes (respondio todas), saltar directo a Resultados
-      // en modo auth. En guest siempre hay preguntas (no filtra por respondidas).
       const preguntas = useCuestionarioStore.getState().preguntas;
       if (!isGuest && preguntas.length === 0) {
         navigation.navigate("Resultados");
@@ -66,196 +156,152 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
     }
   }
 
-  function handleVerMatches(tipo: TipoEleccion) {
+  function abrirEleccion(tipo: TipoEleccion) {
     if (!tipo.id) return;
-    // Setea el tipoEleccionId sin traer preguntas y navega directo a Resultados.
-    // Si el user no respondio nada aun, el backend devolvera 400 y ResultadosScreen
-    // muestra un toast amigable.
     setTipoEleccion(tipo.id);
+    // Por ahora vamos directo a Resultados; si no hay respuestas, muestra el CTA de cuestionario.
     navigation.navigate("Resultados");
   }
 
   async function handleConfirmReiniciar() {
     if (!tipoAReiniciar?.id) return;
     try {
-      const result = await reiniciar.mutateAsync(tipoAReiniciar.id);
-      toast.success(
-        "Cuestionario reiniciado",
-        `Se borraron ${result.respuestas_borradas} respuestas. Tus favoritos y voto siguen ahí.`
-      );
+      await reiniciar.mutateAsync(tipoAReiniciar.id);
+      toast.success("Cuestionario reiniciado");
       setTipoAReiniciar(null);
     } catch (err) {
-      toast.error("No pudimos reiniciar el cuestionario", getErrorMessage(err));
+      toast.error("No pudimos reiniciar", getErrorMessage(err));
     }
   }
 
-  return (
-    <ScrollView
-      contentContainerStyle={{ flexGrow: 1, backgroundColor: c.bg }}
-      style={{ backgroundColor: c.bg }}
-    >
-      <YStack flex={1} padding="$5" gap="$4" backgroundColor="$background" minHeight="100%">
-        <YStack gap="$2" paddingTop="$8">
-          <H1 color="$text">¡Hola!</H1>
-          {isGuest ? (
-            <Paragraph color="$textSecondary">
-              Estás navegando como{" "}
-              <SizableText fontWeight="700" color="$primary">invitado</SizableText>.
-              Puedes ver tus matches, pero no guardar favoritos ni tu voto.
-            </Paragraph>
-          ) : (
-            <Paragraph color="$textSecondary">
-              Estás conectado como{" "}
-              <SizableText fontWeight="700" color="$text">{email}</SizableText>
-            </Paragraph>
-          )}
-        </YStack>
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        scroll: { flex: 1, backgroundColor: c.bg },
+        content: {
+          padding: spacing.sp4,
+          paddingBottom: spacing.sp8,
+          gap: spacing.sp5,
+        },
+        loading: { paddingTop: spacing.sp8, alignItems: "center" },
+        strip: { flexDirection: "row", gap: spacing.sp3, paddingBottom: 4 },
+        divider: { height: 1, backgroundColor: c.border2, marginVertical: spacing.sp2 },
+      }),
+    [c],
+  );
 
-        <Separator />
-
-        <H3 color="$text">Elige una elección</H3>
-        <Paragraph color="$textSecondary">
-          Responde algunas preguntas y encuentra a los candidatos más parecidos a ti.
-        </Paragraph>
-
-        {isLoading ? (
+  if (tiposLoading) {
+    return (
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+        <View style={styles.loading}>
           <Spinner size="large" />
+        </View>
+      </ScrollView>
+    );
+  }
+
+  // Construyo Novedades: por ahora acci\u00f3n sugerida (si hay tipo sin cuestionario) + noticias reales.
+  const tipoSinCuestionario = tiposActivos.find((t) => t.id && t.id !== activeId);
+  const novedades: NovedadFeedItem[] = [];
+
+  if (tipoSinCuestionario) {
+    novedades.push({
+      key: `action-${tipoSinCuestionario.id}`,
+      kind: "action",
+      icon: "bell",
+      title: `Responde el cuestionario de ${tipoSinCuestionario.nombre}`,
+      subtitle: "Descubre tu top match",
+      ctaLabel: "Ir",
+      onCta: () => iniciarCuestionario(tipoSinCuestionario),
+    });
+  }
+
+  noticias.slice(0, 4).forEach((n) => {
+    novedades.push({
+      key: `noticia-${n.id}`,
+      kind: "noticia",
+      imageUrl: n.imagen_url,
+      title: n.titulo,
+      snippet: n.descripcion,
+      category: n.fuente,
+      when: whenLabel(n.fecha_publicacion),
+      onPress: () => navigation.navigate("Noticias"),
+    });
+  });
+
+  return (
+    <>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+        <HomeTopBar
+          brand="Tinder Decisivo"
+          onNotifications={() => navigation.navigate("Noticias")}
+        />
+
+        <HomeGreeting
+          title={saludo}
+          subtitle="Explora las elecciones activas."
+        />
+
+        {tiposActivos.length === 0 ? (          <HomeGreeting
+            title=""
+            subtitle="A\u00fan no hay elecciones disponibles."
+          />
         ) : (
-          <YStack gap="$3">
-            {tipos.length === 0 && (
-              <Paragraph color="$textSecondary">
-                Aún no hay elecciones cargadas. Pídele al administrador que ejecute
-                `manage.py import_preguntas`.
-              </Paragraph>
-            )}
-            {tipos.map((tipo) => (
-              <YStack
-                key={tipo.id}
-                padding="$4"
-                borderWidth={1}
-                borderColor="$border"
-                borderRadius="$4"
-                backgroundColor="$background"
-                gap="$3"
-              >
-                <H3 color="$text">{tipo.nombre}</H3>
-                {tipo.descripcion ? (
-                  <Paragraph color="$textSecondary">{tipo.descripcion}</Paragraph>
-                ) : null}
-                <Button
-                  onPress={() => handleStart(tipo)}
-                  disabled={startingId !== null}
-                  loading={startingId === tipo.id}
-                  accessibilityLabel={`Comenzar cuestionario ${tipo.nombre}`}
-                >
-                  {startingId === tipo.id ? "Cargando..." : "Comenzar"}
-                </Button>
-                {!isGuest ? (
-                  <>
-                    <Link block
-                      onPress={() => handleVerMatches(tipo)}
-                      accessibilityLabel={`Ver mis matches de ${tipo.nombre}`}
-                    >
-                      Ver mis matches guardados
-                    </Link>
-                    <Link block
-                      onPress={() =>
-                        tipo.id &&
-                        navigation.navigate("MisRespuestas", { tipoEleccionId: tipo.id })
-                      }
-                      accessibilityLabel={`Ver o editar mis respuestas de ${tipo.nombre}`}
-                    >
-                      Ver/editar mis respuestas
-                    </Link>
-                    <Link block
-                      onPress={() => setTipoAReiniciar(tipo)}
-                      color={c.danger}
-                      accessibilityLabel={`Reiniciar cuestionario ${tipo.nombre}`}
-                    >
-                      Empezar de nuevo
-                    </Link>
-                  </>
-                ) : null}
-              </YStack>
-            ))}
-          </YStack>
+          <View>
+            <SectionTitle
+              title={`Tus elecciones (${tiposActivos.length})`}
+              actionLabel="Gestionar"
+              onAction={() => navigation.navigate("GestionElecciones")}
+            />
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.strip}
+              style={{ marginTop: spacing.sp3 }}
+            >
+              {tiposActivos.map((tipo) => (
+                <ElectionCardConnected
+                  key={tipo.id}
+                  tipo={tipo}
+                  isActive={tipo.id === activeId}
+                  onPress={() => abrirEleccion(tipo)}
+                />
+              ))}
+              <ElectionCardAdd
+                label="+ Activar otra elección"
+                onPress={() => navigation.navigate("GestionElecciones")}
+              />
+            </ScrollView>
+          </View>
         )}
 
-        <YStack flex={1} />
-        <YStack gap="$2">
-          {isGuest ? (
-            <>
-              <Link block onPress={() => navigation.navigate("Comparar")}>
-                Comparar candidatos
-              </Link>
-              <Link block onPress={() => navigation.navigate("Noticias")}>
-                Noticias
-              </Link>
-              <Link block onPress={exitGuestMode} color={c.primary}>
-                Crear una cuenta para guardar mi match
-              </Link>
-              <Link block onPress={exitGuestMode} color={c.danger}>
-                Salir del modo invitado
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link block onPress={() => navigation.navigate("Perfil")}>
-                Mi perfil
-              </Link>
-              <Link block onPress={() => navigation.navigate("MiDecision")}>
-                Ver mi voto final
-              </Link>
-              <Link block onPress={() => navigation.navigate("MisFavoritos")}>
-                Ver mis favoritos
-              </Link>
-              <Link block onPress={() => navigation.navigate("MisDescartados")}>
-                Ver mis descartados
-              </Link>
-              <Link block onPress={() => navigation.navigate("MisGuardados")}>
-                Mis guardados
-              </Link>
-              <Link block onPress={() => navigation.navigate("Noticias")}>
-                Noticias
-              </Link>
-              <Link block onPress={() => navigation.navigate("Comparar")}>
-                Comparar candidatos
-              </Link>
-              <Link block onPress={() => navigation.navigate("Swipe")}>
-                Modo Swipe
-              </Link>
-              <Link block onPress={logout} color={c.danger}>
-                Cerrar sesión
-              </Link>
-            </>
-          )}
-
-          <Separator />
-
-          <YStack gap="$2" alignItems="flex-start">
-            <SizableText size="$3" color="$textSecondary" fontWeight="600">
-              Apariencia
-            </SizableText>
-            <ThemeToggle />
-          </YStack>
-        </YStack>
-      </YStack>
+        {novedades.length > 0 ? (
+          <>
+            <View style={styles.divider} />
+            <View>
+              <SectionTitle
+                title="Novedades"
+                actionLabel="Ver todas"
+                onAction={() => navigation.navigate("Noticias")}
+              />
+              <View style={{ marginTop: spacing.sp3 }}>
+                <NovedadesFeed items={novedades} />
+              </View>
+            </View>
+          </>
+        ) : null}
+      </ScrollView>
 
       <ConfirmModal
-        visible={tipoAReiniciar !== null}
-        title="¿Empezar de nuevo?"
-        message={
-          tipoAReiniciar
-            ? `Esto borra tus respuestas y tu ranking calculado para "${tipoAReiniciar.nombre}". Tus favoritos, descartados y voto final se mantienen.`
-            : ""
-        }
-        confirmLabel="Si, borrar y empezar de nuevo"
+        visible={!!tipoAReiniciar}
+        title="\u00bfReiniciar cuestionario?"
+        message={`Vas a borrar tus respuestas de ${tipoAReiniciar?.nombre ?? ""}. No se puede deshacer.`}
+        confirmLabel="S\u00ed, reiniciar"
         cancelLabel="Cancelar"
-        variant="danger"
-        loading={reiniciar.isPending}
         onConfirm={handleConfirmReiniciar}
         onCancel={() => setTipoAReiniciar(null)}
+        variant="danger"
       />
-    </ScrollView>
+    </>
   );
 }
