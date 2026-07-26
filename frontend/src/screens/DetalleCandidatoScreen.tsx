@@ -63,6 +63,7 @@ import type { RootStackScreenProps } from "../navigation/types";
 import { formatMatchPercentage, getMatchColor } from "../services/matching";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
+import { spacing } from "../theme/spacing";
 import { useThemeColors } from "../theme/useTheme";
 
 type PerfilTab = "resumen" | "posturas" | "noticias";
@@ -722,7 +723,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
 
-  posturasList: { gap: 14, marginTop: 4 },
+  posturasList: { gap: spacing.sp4, marginTop: spacing.sp1 },
   posturaCard: {
     borderWidth: 1,
     borderRadius: 10,

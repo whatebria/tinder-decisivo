@@ -11,6 +11,7 @@ import React, { useMemo, useState } from "react";
 import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { PosturaCandidatoDetalle } from "../../api/endpoints";
+import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
 
 interface Props {
@@ -77,9 +78,9 @@ export function CandidatoPosturas({ posturas, loading }: Props) {
   }
 
   return (
-    <View style={{ gap: 24 }}>
+    <View style={{ gap: spacing.sp6 }}>
       {grupos.map((g) => (
-        <View key={g.key} style={{ gap: 14 }}>
+        <View key={g.key} style={{ gap: spacing.sp4 }}>
           <Text style={[styles.ejeTitulo, { color: c.text }]}>{g.display}</Text>
           {g.items.map((p) => {
             const isOpen = expanded.has(p.id);
