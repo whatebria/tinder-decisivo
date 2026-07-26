@@ -1,14 +1,11 @@
 /**
- * ActionButton: circulos grandes tipo Tinder para acciones destructivas/constructivas.
+ * ActionButton: circulos grandes tipo Tinder. Reactivo al tema.
  *
- * Variantes semanticas: like | dislike | undo | info
- * Los primeros dos son de 64px, los secundarios (undo, info) son de 48px.
- *
- * Cada uno viene con su color pre-configurado, el consumidor solo pasa el icono
- * (SVG) via children.
+ * IMPORTANTE: ACTION_COLORS es un hook porque los colores dependen del tema.
+ * Uso: const actionColors = useActionColors(); <Icon color={actionColors.like} />
  */
 
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -17,9 +14,8 @@ import {
   type ViewStyle,
 } from "react-native";
 
-import { colors } from "../theme/colors";
 import { radii } from "../theme/radii";
-import { shadows } from "../theme/shadows";
+import { useThemeColors, useThemeShadows } from "../theme/useTheme";
 
 export type ActionButtonVariant = "like" | "dislike" | "undo" | "info";
 
@@ -30,6 +26,13 @@ export interface ActionButtonProps extends Omit<PressableProps, "children" | "st
   style?: StyleProp<ViewStyle>;
 }
 
+const SIZES = {
+  like: 64,
+  dislike: 64,
+  undo: 48,
+  info: 48,
+} as const;
+
 export function ActionButton({
   children,
   variant,
@@ -37,7 +40,26 @@ export function ActionButton({
   style,
   ...rest
 }: ActionButtonProps) {
-  const config = VARIANTS[variant];
+  const c = useThemeColors();
+  const sh = useThemeShadows();
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        base: {
+          backgroundColor: c.card,
+          borderRadius: radii.rFull,
+          alignItems: "center",
+          justifyContent: "center",
+          ...sh.shMd,
+        },
+        pressed: { transform: [{ scale: 0.94 }], opacity: 0.9 },
+        disabled: { opacity: 0.4 },
+      }),
+    [c, sh]
+  );
+
+  const size = SIZES[variant];
 
   return (
     <Pressable
@@ -46,7 +68,7 @@ export function ActionButton({
       accessibilityRole="button"
       style={(state) => [
         styles.base,
-        { width: config.size, height: config.size },
+        { width: size, height: size },
         state.pressed && !disabled && styles.pressed,
         disabled && styles.disabled,
         style,
@@ -57,29 +79,13 @@ export function ActionButton({
   );
 }
 
-/** Colores expuestos para que el consumidor coloree su icono con el color correcto. */
-export const ACTION_COLORS: Record<ActionButtonVariant, string> = {
-  like: colors.success600,
-  dislike: colors.danger500,
-  undo: colors.textSecondary,
-  info: colors.info500,
-};
-
-const VARIANTS = {
-  like: { size: 64 },
-  dislike: { size: 64 },
-  undo: { size: 48 },
-  info: { size: 48 },
-} as const;
-
-const styles = StyleSheet.create({
-  base: {
-    backgroundColor: colors.card,
-    borderRadius: radii.rFull,
-    alignItems: "center",
-    justifyContent: "center",
-    ...shadows.shMd,
-  },
-  pressed: { transform: [{ scale: 0.94 }], opacity: 0.9 },
-  disabled: { opacity: 0.4 },
-});
+/** Hook para obtener los colores de icono correctos por variante segun el tema. */
+export function useActionColors(): Record<ActionButtonVariant, string> {
+  const c = useThemeColors();
+  return {
+    like: c.success600,
+    dislike: c.danger500,
+    undo: c.textSecondary,
+    info: c.info500,
+  };
+}

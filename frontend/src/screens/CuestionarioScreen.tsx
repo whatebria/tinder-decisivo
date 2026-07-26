@@ -28,7 +28,7 @@ import { IconButton } from "../components/IconButton";
 import { SelectableButton } from "../components/SelectableButton";
 import { TextButton } from "../components/TextButton";
 import { useToast } from "../components/Toast";
-import { colors } from "../theme/colors";
+import { useThemeColors } from "../theme/useTheme";
 import type { RootStackScreenProps } from "../navigation/types";
 import {
   calcularProgreso,
@@ -44,6 +44,7 @@ import { useAuthStore } from "../store/auth";
 export function CuestionarioScreen({
   navigation,
 }: RootStackScreenProps<"Cuestionario">) {
+  const c = useThemeColors();
   const toast = useToast();
   const [infoOpen, setInfoOpen] = useState(false);
   const isGuest = useAuthStore((s) => s.isGuest);
@@ -128,7 +129,7 @@ export function CuestionarioScreen({
             accessibilityLabel="Ver contexto y repercusiones de la pregunta"
             style={{ marginTop: 6 }}
           >
-            <Text style={{ fontSize: 18, fontWeight: "700", color: colors.primary700 }}>?</Text>
+            <Text style={{ fontSize: 18, fontWeight: "700", color: c.primary700 }}>?</Text>
           </IconButton>
         </XStack>
 

@@ -1,14 +1,14 @@
 /**
- * TextButton: boton link-style (transparente, solo texto).
+ * TextButton: boton link-style (transparente, solo texto). Reactivo al tema.
  *
  * Existe porque <Button chromeless> de Tamagui v2.5 crashea en web.
  * Usa Pressable de RN, 100% portable.
  */
 
-import React from "react";
+import React, { useMemo } from "react";
 import { Pressable, StyleSheet, Text, type PressableProps } from "react-native";
 
-import { colors } from "../theme/colors";
+import { useThemeColors } from "../theme/useTheme";
 
 export interface TextButtonProps extends Omit<PressableProps, "children"> {
   children: string;
@@ -16,6 +16,22 @@ export interface TextButtonProps extends Omit<PressableProps, "children"> {
 }
 
 export function TextButton({ children, color, style, ...props }: TextButtonProps) {
+  const c = useThemeColors();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        base: {
+          paddingVertical: 12,
+          paddingHorizontal: 16,
+          minHeight: 44,
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        text: { fontSize: 15, color: c.primary, fontWeight: "600" },
+      }),
+    [c]
+  );
+
   return (
     <Pressable
       {...props}
@@ -29,18 +45,3 @@ export function TextButton({ children, color, style, ...props }: TextButtonProps
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    minHeight: 44, // WCAG 2.2 touch target
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  text: {
-    fontSize: 15,
-    color: colors.primary,
-    fontWeight: "600",
-  },
-});

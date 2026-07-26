@@ -1,9 +1,9 @@
 /**
- * Lógica pura del sistema de matching.
+ * Logica pura del sistema de matching.
  *
  * Aca vive todo lo que NO depende de React ni de la UI:
  * - clasificacion de matches en tiers (alto/medio/bajo)
- * - mapeo de tier a color/label
+ * - mapeo de tier a color/label (acepta paleta como parametro, theme-agnostic)
  * - ordenamiento defensivo de resultados
  *
  * Se testea sin necesidad de renderizar componentes.
@@ -17,18 +17,31 @@ export type MatchTier = "alto" | "medio" | "bajo";
 
 const TIER_THRESHOLDS = { alto: 75, medio: 50 } as const;
 
+/** Sub-set de la paleta que necesitamos para colorear matches. */
+export interface MatchPalette {
+  success: string;
+  warning: string;
+  danger: string;
+}
+
 export function getMatchTier(pct: number): MatchTier {
   if (pct >= TIER_THRESHOLDS.alto) return "alto";
   if (pct >= TIER_THRESHOLDS.medio) return "medio";
   return "bajo";
 }
 
-export function getMatchColor(pct: number): string {
+/**
+ * Devuelve el color hex correspondiente al tier del match.
+ * @param pct porcentaje del match (0-100)
+ * @param palette paleta a usar. Default: `colors` (light theme). En componentes
+ *   reactivos al tema, pasar `useThemeColors()`.
+ */
+export function getMatchColor(pct: number, palette: MatchPalette = colors): string {
   const tier = getMatchTier(pct);
   return {
-    alto: colors.success,
-    medio: colors.warning,
-    bajo: colors.danger,
+    alto: palette.success,
+    medio: palette.warning,
+    bajo: palette.danger,
   }[tier];
 }
 
@@ -44,15 +57,21 @@ export interface ConfianzaBadge {
   color: string;
 }
 
-const CONFIANZA_BADGES: Record<ConfianzaLevel, ConfianzaBadge> = {
-  ALTA: { label: "Alta confianza", color: colors.success },
-  MEDIA: { label: "Confianza media", color: colors.warning },
-  TENTATIVA: { label: "Confianza tentativa", color: colors.danger },
-};
-
-export function getConfianzaBadge(confianza: string | undefined): ConfianzaBadge {
+/**
+ * Badge con label + color segun nivel de confianza.
+ * @param palette default light theme; pasar `useThemeColors()` en UI reactiva.
+ */
+export function getConfianzaBadge(
+  confianza: string | undefined,
+  palette: MatchPalette = colors
+): ConfianzaBadge {
   const key = (confianza ?? "TENTATIVA").toUpperCase() as ConfianzaLevel;
-  return CONFIANZA_BADGES[key] ?? CONFIANZA_BADGES.TENTATIVA;
+  const badges: Record<ConfianzaLevel, ConfianzaBadge> = {
+    ALTA: { label: "Alta confianza", color: palette.success },
+    MEDIA: { label: "Confianza media", color: palette.warning },
+    TENTATIVA: { label: "Confianza tentativa", color: palette.danger },
+  };
+  return badges[key] ?? badges.TENTATIVA;
 }
 
 // -- Ordenamiento defensivo --------------------------------------------------

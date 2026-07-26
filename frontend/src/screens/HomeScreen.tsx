@@ -24,9 +24,10 @@ import { useCuestionarioStore } from "../store/cuestionario";
 import { Button } from "../components/Button";
 import { TextButton } from "../components/TextButton";
 import type { RootStackScreenProps } from "../navigation/types";
-import { colors } from "../theme/colors";
+import { useThemeColors } from "../theme/useTheme";
 
 export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
+  const c = useThemeColors();
   const email = useAuthStore((s) => s.email);
   const isGuest = useAuthStore((s) => s.isGuest);
   const logout = useAuthStore((s) => s.logout);
@@ -180,10 +181,10 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
         <YStack gap="$2">
           {isGuest ? (
             <>
-              <TextButton onPress={exitGuestMode} color={colors.primary}>
+              <TextButton onPress={exitGuestMode} color={c.primary}>
                 Crear una cuenta para guardar mi match
               </TextButton>
-              <TextButton onPress={exitGuestMode} color={colors.danger}>
+              <TextButton onPress={exitGuestMode} color={c.danger}>
                 Salir del modo invitado
               </TextButton>
             </>
@@ -201,7 +202,7 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
               <TextButton onPress={() => navigation.navigate("MisDescartados")}>
                 Ver mis descartados
               </TextButton>
-              <TextButton onPress={logout} color={colors.danger}>
+              <TextButton onPress={logout} color={c.danger}>
                 Cerrar sesión
               </TextButton>
             </>

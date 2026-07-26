@@ -1,10 +1,8 @@
 /**
- * IconButton: pastilla circular con icono. 3 variantes + 3 tamanos.
- * El icono viene como children (SVG del consumidor).
- * Siempre requiere accessibilityLabel para lectores de pantalla.
+ * IconButton: pastilla circular con icono. 3 variantes + 3 tamanos. Reactivo al tema.
  */
 
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -13,8 +11,8 @@ import {
   type ViewStyle,
 } from "react-native";
 
-import { colors } from "../theme/colors";
 import { radii } from "../theme/radii";
+import { useThemeColors } from "../theme/useTheme";
 
 export type IconButtonVariant = "soft" | "ghost" | "solid";
 export type IconButtonSize = "sm" | "md" | "lg";
@@ -27,6 +25,12 @@ export interface IconButtonProps extends Omit<PressableProps, "children" | "styl
   style?: StyleProp<ViewStyle>;
 }
 
+const SIZES = {
+  sm: { width: 32, height: 32 },
+  md: { width: 40, height: 40 },
+  lg: { width: 48, height: 48 },
+} as const;
+
 export function IconButton({
   children,
   variant = "soft",
@@ -35,7 +39,26 @@ export function IconButton({
   style,
   ...rest
 }: IconButtonProps) {
-  const variantStyle = VARIANTS[variant];
+  const c = useThemeColors();
+
+  const styles = useMemo(() => {
+    const VARIANTS = {
+      soft: { backgroundColor: c.accent2 },
+      ghost: { backgroundColor: "transparent" },
+      solid: { backgroundColor: c.primary },
+    } as const;
+    return StyleSheet.create({
+      base: {
+        borderRadius: radii.rFull,
+        alignItems: "center",
+        justifyContent: "center",
+        ...VARIANTS[variant],
+      },
+      pressed: { opacity: 0.75, transform: [{ scale: 0.96 }] },
+      disabled: { opacity: 0.4 },
+    });
+  }, [c, variant]);
+
   const sizeStyle = SIZES[size];
 
   return (
@@ -45,7 +68,6 @@ export function IconButton({
       accessibilityRole="button"
       style={(state) => [
         styles.base,
-        variantStyle,
         sizeStyle,
         state.pressed && !disabled && styles.pressed,
         disabled && styles.disabled,
@@ -56,25 +78,3 @@ export function IconButton({
     </Pressable>
   );
 }
-
-const VARIANTS = {
-  soft: { backgroundColor: colors.accent2 },
-  ghost: { backgroundColor: "transparent" },
-  solid: { backgroundColor: colors.primary },
-} as const;
-
-const SIZES = {
-  sm: { width: 32, height: 32 },
-  md: { width: 40, height: 40 },
-  lg: { width: 48, height: 48 },
-} as const;
-
-const styles = StyleSheet.create({
-  base: {
-    borderRadius: radii.rFull,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  pressed: { opacity: 0.75, transform: [{ scale: 0.96 }] },
-  disabled: { opacity: 0.4 },
-});

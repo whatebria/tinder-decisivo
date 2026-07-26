@@ -1,22 +1,43 @@
 /**
- * FormInput: TextInput de React Native puro con estilos WCAG-friendly.
+ * FormInput: TextInput de RN puro con estilos WCAG-friendly. Reactivo al tema.
  *
- * Existe porque el <Input> de Tamagui v2.5 tiene issues de renderizado en web.
  * Envolver TextInput de RN es 100% portable (iOS/Android/web) y suficiente
  * para los formularios del MVP.
  */
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { StyleSheet, TextInput, type TextInputProps } from "react-native";
 
-import { colors } from "../theme/colors";
+import { useThemeColors } from "../theme/useTheme";
 
 export interface FormInputProps extends TextInputProps {
   hasError?: boolean;
 }
 
 export function FormInput({ hasError, style, ...props }: FormInputProps) {
+  const c = useThemeColors();
   const [focused, setFocused] = useState(false);
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        base: {
+          borderWidth: 1,
+          borderColor: c.border,
+          borderRadius: 8,
+          paddingHorizontal: 14,
+          paddingVertical: 12,
+          fontSize: 16,
+          color: c.text,
+          backgroundColor: c.card,
+          minHeight: 48,
+        },
+        focused: { borderColor: c.primary, borderWidth: 2 },
+        error: { borderColor: c.danger },
+      }),
+    [c]
+  );
+
   return (
     <TextInput
       {...props}
@@ -28,34 +49,8 @@ export function FormInput({ hasError, style, ...props }: FormInputProps) {
         setFocused(false);
         props.onBlur?.(e);
       }}
-      placeholderTextColor={colors.textSecondary}
-      style={[
-        styles.base,
-        focused && styles.focused,
-        hasError && styles.error,
-        style,
-      ]}
+      placeholderTextColor={c.textTertiary}
+      style={[styles.base, focused && styles.focused, hasError && styles.error, style]}
     />
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: colors.text,
-    backgroundColor: colors.bg,
-    minHeight: 48, // WCAG 2.2 target size
-  },
-  focused: {
-    borderColor: colors.primary,
-    borderWidth: 2,
-  },
-  error: {
-    borderColor: colors.danger,
-  },
-});

@@ -8,7 +8,7 @@
  * Guests no ven bookmarks (los reemplaza un CTA de registrarse).
  */
 
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ScrollView } from "react-native";
 import {
   Card,
@@ -33,6 +33,7 @@ import {
   useFavoritos,
   useMatchAnonimo,
   useMatchCandidatos,
+  useTiposEleccion,
   useToggleDescartado,
   useToggleFavorito,
 } from "../api/hooks";
@@ -40,6 +41,7 @@ import { BookmarkActions } from "../components/BookmarkActions";
 import { Badge, type BadgeVariant } from "../components/Badge";
 import { Button } from "../components/Button";
 import { RadarChart } from "../components/RadarChart";
+import { ShareModal } from "../components/ShareModal";
 import { TextButton } from "../components/TextButton";
 import { useToast } from "../components/Toast";
 import type { RootStackScreenProps } from "../navigation/types";
@@ -49,6 +51,7 @@ import {
   getMatchColor,
   sortByMatchDesc,
 } from "../services/matching";
+import { buildShareText, fromMatchResults } from "../services/share";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
 import { colors } from "../theme/colors";
@@ -77,6 +80,8 @@ export function ResultadosScreen({
   const authMutation = useMatchCandidatos();
   const guestMutation = useMatchAnonimo();
   const activeMutation = isGuest ? guestMutation : authMutation;
+  const tiposQ = useTiposEleccion();
+  const [shareOpen, setShareOpen] = useState(false);
 
   // Bookmarking solo en modo auth. Los queries no se ejecutan si no hay token
   // porque el backend devuelve 401 (los hooks van a mostrar error, pero el UI
@@ -291,8 +296,24 @@ export function ResultadosScreen({
         )}
 
         <YStack flex={1} />
+        {visibleResults.length > 0 ? (
+          <Button onPress={() => setShareOpen(true)} variant="secondary">
+            Compartir mi ranking
+          </Button>
+        ) : null}
         <TextButton onPress={handleVolver}>Volver al inicio</TextButton>
       </YStack>
+
+      <ShareModal
+        visible={shareOpen}
+        text={buildShareText({
+          tipoNombre:
+            (tiposQ.data ?? []).find((t) => t.id === tipoEleccionId)?.nombre ??
+            "Eleccion",
+          matches: fromMatchResults(visibleResults),
+        })}
+        onClose={() => setShareOpen(false)}
+      />
     </ScrollView>
   );
 }

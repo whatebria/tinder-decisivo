@@ -23,7 +23,7 @@ import React, {
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { colors } from "../theme/colors";
+import { useThemeColors } from "../theme/useTheme";
 
 export type ToastVariant = "success" | "error" | "info";
 
@@ -45,16 +45,20 @@ const ToastContext = createContext<ToastContextValue | null>(null);
 
 const AUTO_DISMISS_MS = 4000;
 
-const VARIANT_STYLES: Record<ToastVariant, { bg: string; fg: string }> = {
-  success: { bg: colors.success, fg: "#FFFFFF" },
-  error: { bg: colors.danger, fg: "#FFFFFF" },
-  info: { bg: colors.primary, fg: "#FFFFFF" },
-};
-
 export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const c = useThemeColors();
   const [toasts, setToasts] = useState<Toast[]>([]);
   const nextId = useRef(1);
   const insets = useSafeAreaInsets();
+
+  const VARIANT_STYLES: Record<ToastVariant, { bg: string; fg: string }> = useMemo(
+    () => ({
+      success: { bg: c.success, fg: c.textOnPrimary },
+      error: { bg: c.danger, fg: c.textOnPrimary },
+      info: { bg: c.primary, fg: c.textOnPrimary },
+    }),
+    [c]
+  );
 
   const dismiss = useCallback((id: number) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));

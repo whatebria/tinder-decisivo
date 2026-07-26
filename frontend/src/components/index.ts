@@ -14,7 +14,7 @@ export { IconButton, type IconButtonProps, type IconButtonVariant, type IconButt
 export { Badge, type BadgeProps, type BadgeVariant } from "./Badge";
 export { Chip, type ChipProps } from "./Chip";
 export { Tabs, type TabsProps, type TabItem } from "./Tabs";
-export { ActionButton, ACTION_COLORS, type ActionButtonProps, type ActionButtonVariant } from "./ActionButton";
+export { ActionButton, useActionColors, type ActionButtonProps, type ActionButtonVariant } from "./ActionButton";
 export { PageDots, type PageDotsProps } from "./PageDots";
 export { SentimentBadge, type SentimentBadgeProps, type Sentiment } from "./SentimentBadge";
 export { StatBlock, type StatBlockProps, type StatVariant } from "./StatBlock";
