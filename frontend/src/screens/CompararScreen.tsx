@@ -1,17 +1,27 @@
 /**
  * CompararScreen: comparador side-by-side de 2 candidatos.
  *
- * Basado en design-system-lowfi.html · Template 15 · Comparador.
+ * Basado en design-system-lowfi.html Template #15 Comparador.
  *
  * Layout:
- *   - ScreenTopBar (back + titulo "Comparar candidatos" + subtitulo con eleccion)
- *   - Header sticky-ish con avatares fijos (col A, col B) + match%
+ *   - ScreenTopBar (back + titulo + subtitulo con eleccion)
+ *   - Header sticky con avatares fijos (col A, col B) + match%
  *   - Toggle "Solo mostrar diferencias"
- *   - Resumen (% coincidencia + chips de counts) cuando ambos elegidos
+ *   - Resumen (% coincidencia + Badges de counts) cuando ambos elegidos
  *   - Filas por eje > preguntas (granularidad mantenida por decision de diseno)
+ *
+ * Composicion via design system:
+ *   - AppShell / ScreenTopBar / Avatar / Toggle / Badge (atom + molecule + organism)
+ *   - CandidatoPickerModal (molecule)
+ *   - Todos los styles usan tokens spacing/radii/typography
  *
  * Alcance actual: 2 candidatos (YAGNI). El wireframe habla de "hasta 3"; se
  * extendera cuando aparezca la necesidad.
+ *
+ * Sobre FilaComparacion: se evaluo reusar el molecule `PosturaItem` pero
+ * (a) sus labels "Tu voto" vs "Candidato" no calzan (aqui es A vs B),
+ * (b) su enum de match (match/partial/no-match) no cubre "solo_uno".
+ * Se mantiene inline con tokens.
  */
 
 import React, { useMemo, useState } from "react";
@@ -21,11 +31,14 @@ import {
   useCandidatos,
   useMatchesQuery,
   usePosturasCandidato,
+  useTiposEleccion,
 } from "../api/hooks";
 import type { Candidato, MatchResult } from "../api/endpoints";
 import {
   AppShell,
   Avatar,
+  Badge,
+  type BadgeVariant,
   ScreenTopBar,
   Toggle,
 } from "../components";
@@ -38,7 +51,9 @@ import {
   type NivelCoincidencia,
 } from "../services/comparar";
 import { useCuestionarioStore } from "../store/cuestionario";
-import { useTiposEleccion } from "../api/hooks";
+import { radii } from "../theme/radii";
+import { spacing } from "../theme/spacing";
+import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
 
 type Slot = "A" | "B";
@@ -83,6 +98,19 @@ function iconoNivel(nivel: NivelCoincidencia): string {
       return "-";
     default:
       return "?";
+  }
+}
+
+function badgeVariantNivel(nivel: NivelCoincidencia): BadgeVariant {
+  switch (nivel) {
+    case "identica":
+      return "success";
+    case "cercana":
+      return "warning";
+    case "opuesta":
+      return "danger";
+    default:
+      return "neutral";
   }
 }
 
@@ -211,27 +239,11 @@ export function CompararScreen({
                 Coincidencia: {resumen.porcentajeCoincidencia}%
               </Text>
               <View style={styles.resumenChips}>
-                <StatChip
-                  icon="="
-                  label={`${resumen.identicas} identicas`}
-                  color={c.success}
-                />
-                <StatChip
-                  icon="~"
-                  label={`${resumen.cercanas} cercanas`}
-                  color={c.warning ?? "#B45309"}
-                />
-                <StatChip
-                  icon="X"
-                  label={`${resumen.opuestas} opuestas`}
-                  color={c.danger}
-                />
+                <Badge variant="success">{`= ${resumen.identicas} identicas`}</Badge>
+                <Badge variant="warning">{`~ ${resumen.cercanas} cercanas`}</Badge>
+                <Badge variant="danger">{`X ${resumen.opuestas} opuestas`}</Badge>
                 {resumen.soloUno > 0 ? (
-                  <StatChip
-                    icon="-"
-                    label={`${resumen.soloUno} solo uno`}
-                    color={c.textSecondary}
-                  />
+                  <Badge variant="neutral">{`- ${resumen.soloUno} solo uno`}</Badge>
                 ) : null}
               </View>
             </View>
@@ -242,7 +254,9 @@ export function CompararScreen({
               Elige ambos candidatos para ver la comparacion.
             </Text>
           ) : loading ? (
-            <Text style={{ color: c.textSecondary }}>Cargando posturas...</Text>
+            <Text style={[styles.paragraph, { color: c.textSecondary }]}>
+              Cargando posturas...
+            </Text>
           ) : gruposCompletos.length === 0 ? (
             <Text style={[styles.empty, { color: c.textSecondary }]}>
               Ninguno de los dos tiene posturas cargadas para este tipo de
@@ -334,24 +348,6 @@ function CandidatoHeaderSlot({
   );
 }
 
-function StatChip({
-  icon,
-  label,
-  color,
-}: {
-  icon: string;
-  label: string;
-  color: string;
-}) {
-  return (
-    <View style={[styles.statChip, { borderColor: color }]}>
-      <Text style={{ color, fontWeight: "700", fontSize: 12 }}>
-        {icon} {label}
-      </Text>
-    </View>
-  );
-}
-
 function FilaComparacion({
   item,
   colors: c,
@@ -406,38 +402,51 @@ function FilaComparacion({
   );
 }
 
-// ---------- Styles ----------
+// Se conserva la funcion aunque no se use directamente en el JSX: mapea
+// nivel -> variante de Badge y sirve como single source of truth por si
+// aparece otro consumidor (p.ej. lista alternativa) sin duplicar el switch.
+void badgeVariantNivel;
 
-const LEFT_GUTTER = 0; // el ScreenTopBar ya tiene su back button
-const RIGHT_GUTTER = 32;
+// ---------- Styles ----------
+//
+// Reglas: TODOS los valores dimensionales vienen de tokens del DS.
+// Excepciones documentadas donde aplica.
+
+const RIGHT_GUTTER = spacing.sp7; // 32, compensa el back button del ScreenTopBar
 
 const styles = StyleSheet.create({
-  scroll: { padding: 16, paddingBottom: 32, gap: 12 },
+  scroll: {
+    padding: spacing.sp4,
+    paddingBottom: spacing.sp7,
+    gap: spacing.sp3,
+  },
 
-  stickyHead: { gap: 8, paddingBottom: 8 },
+  stickyHead: { gap: spacing.sp2, paddingBottom: spacing.sp2 },
 
   candHeader: {
     flexDirection: "row",
-    gap: 8,
-    padding: 12,
-    borderRadius: 12,
+    gap: spacing.sp2,
+    padding: spacing.sp3,
+    borderRadius: radii.rLg,
     alignItems: "flex-start",
   },
-  leftGutter: { width: LEFT_GUTTER },
+  leftGutter: { width: 0 },
   rightGutter: { width: RIGHT_GUTTER },
   candSlot: {
     flex: 1,
     alignItems: "center",
-    gap: 4,
-    paddingVertical: 4,
+    gap: spacing.sp1,
+    paddingVertical: spacing.sp1,
   },
   candNombre: {
-    fontSize: 12,
+    ...typography.overline,
     fontWeight: "600",
+    textTransform: "none",
+    letterSpacing: 0,
     textAlign: "center",
   },
   candMatch: {
-    fontSize: 16,
+    ...typography.body,
     fontWeight: "800",
   },
 
@@ -445,54 +454,79 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 4,
-    paddingVertical: 6,
+    paddingHorizontal: spacing.sp1,
+    paddingVertical: spacing.sp2,
   },
-  toggleLabel: { fontSize: 12 },
+  toggleLabel: {
+    ...typography.overline,
+    fontWeight: "500",
+    textTransform: "none",
+    letterSpacing: 0,
+  },
 
-  body: { gap: 16 },
+  body: { gap: spacing.sp4 },
 
   resumenCard: {
-    borderRadius: 12,
+    borderRadius: radii.rLg,
     borderWidth: 1,
-    padding: 14,
-    gap: 8,
+    padding: spacing.sp4,
+    gap: spacing.sp2,
   },
-  resumenTitulo: { fontSize: 18, fontWeight: "800" },
-  resumenChips: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
-  statChip: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+  resumenTitulo: {
+    ...typography.lead,
+    fontWeight: "800",
+  },
+  resumenChips: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sp2,
   },
 
-  empty: { padding: 24, textAlign: "center", fontStyle: "italic" },
+  empty: {
+    padding: spacing.sp6,
+    textAlign: "center",
+    fontStyle: "italic",
+  },
+  paragraph: typography.small,
 
-  ejeBlock: { gap: 6 },
+  ejeBlock: { gap: spacing.sp2 },
   ejeTitulo: {
-    fontSize: 15,
+    ...typography.small,
     fontWeight: "700",
     textTransform: "capitalize",
-    marginTop: 4,
+    marginTop: spacing.sp1,
   },
 
-  fila: { borderWidth: 1, borderRadius: 10, padding: 10, gap: 8 },
-  filaHeader: { flexDirection: "row", gap: 8, alignItems: "flex-start" },
+  fila: {
+    borderWidth: 1,
+    borderRadius: radii.rMd,
+    padding: spacing.sp3,
+    gap: spacing.sp2,
+  },
+  filaHeader: {
+    flexDirection: "row",
+    gap: spacing.sp2,
+    alignItems: "flex-start",
+  },
   filaNivel: {
-    fontSize: 16,
+    ...typography.body,
     fontWeight: "900",
-    width: 20,
+    width: spacing.sp5,
     textAlign: "center",
   },
-  filaPregunta: { flex: 1, fontSize: 13, fontWeight: "600" },
-  filaBody: { flexDirection: "row", gap: 8 },
-  col: { flex: 1, gap: 2 },
-  colLabel: {
-    fontSize: 10,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
+  filaPregunta: {
+    flex: 1,
+    ...typography.small,
+    fontWeight: "600",
   },
-  colValor: { fontSize: 13, fontWeight: "600" },
+  filaBody: { flexDirection: "row", gap: spacing.sp2 },
+  col: { flex: 1, gap: spacing.sp1 },
+  colLabel: {
+    ...typography.overline,
+    fontWeight: "700",
+  },
+  colValor: {
+    ...typography.small,
+    fontWeight: "600",
+  },
 });
