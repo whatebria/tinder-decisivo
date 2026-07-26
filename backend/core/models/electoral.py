@@ -19,6 +19,13 @@ class TipoEleccion(models.Model):
         null=True, blank=True,
         help_text="Fecha oficial de la eleccion",
     )
+    anio = models.IntegerField(
+        null=True, blank=True,
+        help_text=(
+            "Ano electoral (ej. 2021, 2025). Permite tener multiples versiones "
+            "del mismo tipo (Presidencial 2021 vs Presidencial 2025) y filtrar."
+        ),
+    )
     es_base = models.BooleanField(
         default=False,
         help_text=(
