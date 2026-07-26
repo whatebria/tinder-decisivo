@@ -14,6 +14,8 @@ from .bookmarking import (
     CandidatoDescartadoViewSet,
     CandidatoFavoritoViewSet,
     DecisionFinalViewSet,
+    NoticiaBookmarkViewSet,
+    PosturaBookmarkViewSet,
 )
 from .catalog import (
     CandidatoDetailView,
@@ -50,11 +52,13 @@ __all__ = [
     "EditarRespuestaView",
     "MatchCandidatoViewSet",
     "MisRespuestasListView",
+    "NoticiaBookmarkViewSet",
     "NoticiaDetailView",
     "NoticiaListCreateView",
     "PasswordResetConfirmView",
     "PasswordResetRequestView",
     "PerfilView",
+    "PosturaBookmarkViewSet",
     "PreguntasPendientesView",
     "RegisterUserView",
     "ReiniciarCuestionarioView",

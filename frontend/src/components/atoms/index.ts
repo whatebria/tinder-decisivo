@@ -33,3 +33,4 @@ export { Icon, type IconProps, type IconName } from "./Icon";
 // Nuevos (Fase 5 — Home template)
 export { HomeTile, type HomeTileProps } from "./HomeTile";
 export { RankCard, type RankCardProps } from "./RankCard";
+export { BookmarkButton, type BookmarkButtonProps } from "./BookmarkButton";

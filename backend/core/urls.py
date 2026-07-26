@@ -15,11 +15,13 @@ from .views import (
     EditarRespuestaView,
     MatchCandidatoViewSet,
     MisRespuestasListView,
+    NoticiaBookmarkViewSet,
     NoticiaDetailView,
     NoticiaListCreateView,
     PasswordResetConfirmView,
     PasswordResetRequestView,
     PerfilView,
+    PosturaBookmarkViewSet,
     PreguntasPendientesView,
     RegisterUserView,
     ReiniciarCuestionarioView,
@@ -31,6 +33,8 @@ router = DefaultRouter()
 router.register(r"candidatos-favoritos", CandidatoFavoritoViewSet, basename="candidato-favorito")
 router.register(r"descartados", CandidatoDescartadoViewSet, basename="descartado")
 router.register(r"decision-final", DecisionFinalViewSet, basename="decision-final")
+router.register(r"noticias-guardadas", NoticiaBookmarkViewSet, basename="noticia-bookmark")
+router.register(r"posturas-guardadas", PosturaBookmarkViewSet, basename="postura-bookmark")
 
 urlpatterns = [
     # Auth

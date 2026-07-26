@@ -22,9 +22,10 @@ import {
   View,
 } from "react-native";
 
-import { useCandidatos, useNoticiasFeed } from "../api/hooks";
-import { Link } from "../components";
+import { useCandidatos, useNoticiasBookmarks, useNoticiasFeed, useToggleNoticiaBookmark } from "../api/hooks";
+import { BookmarkButton, Link } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
+import { useAuthStore } from "../store/auth";
 import { useThemeColors } from "../theme/useTheme";
 
 interface NoticiaEnriquecida {
@@ -120,6 +121,13 @@ function ChipRow({ items, selectedId, onSelect, colors: c }: ChipRowProps) {
 
 export function NoticiasScreen({ navigation }: RootStackScreenProps<"Noticias">) {
   const c = useThemeColors();
+  const isGuest = useAuthStore((s) => s.isGuest);
+  const bookmarksQ = useNoticiasBookmarks();
+  const toggleBookmark = useToggleNoticiaBookmark();
+  const bookmarkedIds = useMemo(
+    () => new Set((bookmarksQ.data ?? []).map((b) => b.noticia)),
+    [bookmarksQ.data]
+  );
 
   const [candidatoId, setCandidatoId] = useState<number | null>(null);
   const [fuente, setFuente] = useState<string | null>(null);
@@ -330,6 +338,18 @@ export function NoticiasScreen({ navigation }: RootStackScreenProps<"Noticias">)
                         </View>
                       ))}
                     </View>
+                  ) : null}
+                  {!isGuest ? (
+                    <BookmarkButton
+                      saved={bookmarkedIds.has(n.id!)}
+                      onPress={() => n.id != null && toggleBookmark.mutate(n.id)}
+                      loading={toggleBookmark.isPending}
+                      accessibilityLabel={
+                        bookmarkedIds.has(n.id!)
+                          ? `Quitar de guardadas: ${n.titulo}`
+                          : `Guardar noticia: ${n.titulo}`
+                      }
+                    />
                   ) : null}
                 </View>
               </Pressable>

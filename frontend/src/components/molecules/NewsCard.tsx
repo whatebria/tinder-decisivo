@@ -9,6 +9,7 @@ import React, { useMemo } from "react";
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { SentimentBadge, type Sentiment } from "../atoms/SentimentBadge";
+import { BookmarkButton } from "../atoms/BookmarkButton";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors, useThemeShadows } from "../../theme/useTheme";
@@ -21,6 +22,10 @@ export interface NewsCardProps {
   when: string;
   sentiment: Sentiment;
   onPress?: () => void;
+  /** Si esta definido, se muestra el chip de bookmark. */
+  bookmarked?: boolean;
+  onToggleBookmark?: () => void;
+  bookmarkLoading?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -31,6 +36,9 @@ export function NewsCard({
   when,
   sentiment,
   onPress,
+  bookmarked,
+  onToggleBookmark,
+  bookmarkLoading = false,
   style,
 }: NewsCardProps) {
   const c = useThemeColors();
@@ -96,6 +104,19 @@ export function NewsCard({
           <Text style={styles.dot}>{"\u00b7"}</Text>
           <SentimentBadge sentiment={sentiment} />
         </View>
+        {onToggleBookmark != null && bookmarked != null ? (
+          <BookmarkButton
+            saved={bookmarked}
+            onPress={onToggleBookmark}
+            loading={bookmarkLoading}
+            accessibilityLabel={
+              bookmarked
+                ? `Quitar de guardadas: ${headline}`
+                : `Guardar noticia: ${headline}`
+            }
+            style={{ marginTop: spacing.sp2 }}
+          />
+        ) : null}
       </View>
     </>
   );

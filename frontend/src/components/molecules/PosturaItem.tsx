@@ -9,6 +9,7 @@ import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-na
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
+import { BookmarkButton } from "../atoms/BookmarkButton";
 
 export type PosturaMatch = "match" | "partial" | "no-match";
 
@@ -24,6 +25,10 @@ export interface PosturaItemProps {
   match: PosturaMatch;
   /** Texto custom debajo. Default segun match. */
   matchLabel?: string;
+  /** Si esta definido, se muestra el chip de bookmark. */
+  bookmarked?: boolean;
+  onToggleBookmark?: () => void;
+  bookmarkLoading?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -40,6 +45,9 @@ export function PosturaItem({
   candidateName = "Candidato",
   match,
   matchLabel,
+  bookmarked,
+  onToggleBookmark,
+  bookmarkLoading = false,
   style,
 }: PosturaItemProps) {
   const c = useThemeColors();
@@ -97,6 +105,18 @@ export function PosturaItem({
         <View style={styles.dot} />
         <Text style={styles.indicatorText}>{matchLabel ?? DEFAULT_LABEL[match]}</Text>
       </View>
+      {onToggleBookmark != null && bookmarked != null ? (
+        <BookmarkButton
+          saved={bookmarked}
+          onPress={onToggleBookmark}
+          loading={bookmarkLoading}
+          accessibilityLabel={
+            bookmarked
+              ? `Quitar postura guardada: ${question}`
+              : `Guardar postura: ${question}`
+          }
+        />
+      ) : null}
     </View>
   );
 }

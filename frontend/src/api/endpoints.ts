@@ -229,6 +229,55 @@ export async function deleteDecision(decisionId: number): Promise<void> {
   await apiClient.delete(`/decision-final/${decisionId}/`);
 }
 
+// -- Bookmarks de contenido: noticias y posturas guardadas -----------------
+export interface NoticiaBookmark {
+  id: number;
+  noticia: number;
+  fecha_agregado: string;
+  noticia_data: Noticia;
+}
+
+export interface PosturaBookmark {
+  id: number;
+  postura: number;
+  fecha_agregado: string;
+  postura_data: PosturaCandidatoDetalle;
+}
+
+export async function listNoticiasBookmarks(): Promise<NoticiaBookmark[]> {
+  const { data } = await apiClient.get<NoticiaBookmark[]>("/noticias-guardadas/");
+  return data;
+}
+
+export async function addNoticiaBookmark(noticiaId: number): Promise<NoticiaBookmark> {
+  const { data } = await apiClient.post<NoticiaBookmark>(
+    "/noticias-guardadas/",
+    { noticia: noticiaId }
+  );
+  return data;
+}
+
+export async function deleteNoticiaBookmark(bookmarkId: number): Promise<void> {
+  await apiClient.delete(`/noticias-guardadas/${bookmarkId}/`);
+}
+
+export async function listPosturasBookmarks(): Promise<PosturaBookmark[]> {
+  const { data } = await apiClient.get<PosturaBookmark[]>("/posturas-guardadas/");
+  return data;
+}
+
+export async function addPosturaBookmark(posturaId: number): Promise<PosturaBookmark> {
+  const { data } = await apiClient.post<PosturaBookmark>(
+    "/posturas-guardadas/",
+    { postura: posturaId }
+  );
+  return data;
+}
+
+export async function deletePosturaBookmark(bookmarkId: number): Promise<void> {
+  await apiClient.delete(`/posturas-guardadas/${bookmarkId}/`);
+}
+
 // ============================================================
 // Perfil de usuario
 // ============================================================

@@ -1,4 +1,4 @@
-"""Serializers de bookmarking: favoritos, descartados, decision final."""
+"""Serializers de bookmarking: favoritos, descartados, decision final, bookmarks de contenido."""
 
 from rest_framework import serializers
 
@@ -6,8 +6,12 @@ from ..models import (
     CandidatoDescartado,
     CandidatoFavorito,
     DecisionFinal,
+    NoticiaBookmark,
+    PosturaBookmark,
 )
 from .catalog import CandidatoSerializer
+from .matching import PosturaCandidatoSerializer
+from .noticias import NoticiaSerializer
 
 
 class CandidatoFavoritoSerializer(serializers.ModelSerializer):
@@ -57,3 +61,34 @@ class DecisionFinalSerializer(serializers.ModelSerializer):
             "tipo_eleccion_nombre",
         ]
         read_only_fields = ["fecha_decision", "candidato_data", "tipo_eleccion_nombre"]
+
+
+class NoticiaBookmarkSerializer(serializers.ModelSerializer):
+    noticia_data = NoticiaSerializer(source='noticia', read_only=True)
+
+    class Meta:
+        model = NoticiaBookmark
+        fields = ['id', 'noticia', 'fecha_agregado', 'noticia_data']
+        read_only_fields = ['fecha_agregado', 'noticia_data']
+
+    def validate(self, data):
+        user = self.context['request'].user
+        if NoticiaBookmark.objects.filter(user=user, noticia=data['noticia']).exists():
+            raise serializers.ValidationError('Esta noticia ya esta guardada.')
+        return data
+
+
+class PosturaBookmarkSerializer(serializers.ModelSerializer):
+    postura_data = PosturaCandidatoSerializer(source='postura', read_only=True)
+
+    class Meta:
+        model = PosturaBookmark
+        fields = ['id', 'postura', 'fecha_agregado', 'postura_data']
+        read_only_fields = ['fecha_agregado', 'postura_data']
+
+    def validate(self, data):
+        user = self.context['request'].user
+        if PosturaBookmark.objects.filter(user=user, postura=data['postura']).exists():
+            raise serializers.ValidationError('Esta postura ya esta guardada.')
+        return data
+

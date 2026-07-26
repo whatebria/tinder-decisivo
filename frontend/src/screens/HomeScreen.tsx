@@ -212,6 +212,9 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
               <Link block onPress={() => navigation.navigate("MisDescartados")}>
                 Ver mis descartados
               </Link>
+              <Link block onPress={() => navigation.navigate("MisGuardados")}>
+                Mis guardados
+              </Link>
               <Link block onPress={() => navigation.navigate("Noticias")}>
                 Noticias
               </Link>

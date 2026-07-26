@@ -32,7 +32,13 @@ from .cuestionario import (
 )
 from .electoral import Candidato, TipoEleccion
 from .matching import MatchCandidato, PosturaCandidato
-from .user_data import CandidatoDescartado, CandidatoFavorito, DecisionFinal
+from .user_data import (
+    CandidatoDescartado,
+    CandidatoFavorito,
+    DecisionFinal,
+    NoticiaBookmark,
+    PosturaBookmark,
+)
 
 __all__ = [
     "OPCIONES_ACUERDO_DESACUERDO",
@@ -47,8 +53,10 @@ __all__ = [
     "DecisionFinal",
     "MatchCandidato",
     "Noticia",
+    "NoticiaBookmark",
     "OpcionRespuesta",
     "PasswordResetToken",
+    "PosturaBookmark",
     "PosturaCandidato",
     "Pregunta",
     "RespuestaUsuario",

@@ -14,6 +14,8 @@ from .bookmarking import (
     CandidatoDescartadoSerializer,
     CandidatoFavoritoSerializer,
     DecisionFinalSerializer,
+    NoticiaBookmarkSerializer,
+    PosturaBookmarkSerializer,
 )
 from .catalog import (
     CandidatoSerializer,
@@ -46,11 +48,13 @@ __all__ = [
     "DecisionFinalSerializer",
     "EliminarCuentaSerializer",
     "MatchCandidatoResultSerializer",
+    "NoticiaBookmarkSerializer",
     "NoticiaSerializer",
     "OpcionRespuestaSerializer",
     "PasswordResetConfirmSerializer",
     "PasswordResetRequestSerializer",
     "PerfilSerializer",
+    "PosturaBookmarkSerializer",
     "PosturaCandidatoSerializer",
     "PreguntaSerializer",
     "RespuestaUsuarioCreateSerializer",

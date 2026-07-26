@@ -13,11 +13,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addDescartado,
   addFavorito,
+  addNoticiaBookmark,
+  addPosturaBookmark,
   cambiarPassword,
   confirmPasswordReset,
   deleteDecision,
   deleteDescartado,
   deleteFavorito,
+  deleteNoticiaBookmark,
+  deletePosturaBookmark,
   eliminarCuenta,
   getMatchDetalle,
   getPerfil,
@@ -27,6 +31,8 @@ import {
   listFavoritos,
   listMisRespuestas,
   listNoticias,
+  listNoticiasBookmarks,
+  listPosturasBookmarks,
   listPosturasCandidato,
   listTiposEleccion,
   matchAnonimo,
@@ -47,9 +53,11 @@ import {
   type MatchDetalle,
   type MiRespuesta,
   type Noticia,
+  type NoticiaBookmark,
   type NoticiaFeedFilters,
   type PasswordResetRequestResponse,
   type Perfil,
+  type PosturaBookmark,
   type PosturaCandidatoDetalle,
   type Pregunta,
   type ReiniciarCuestionarioResponse,
@@ -383,6 +391,61 @@ export function useDeleteDecision() {
     mutationFn: deleteDecision,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.decisiones });
+    },
+  });
+}
+
+// -- Bookmarks de contenido: noticias y posturas guardadas -----------------
+export function useNoticiasBookmarks() {
+  const isAuth = useAuthStore((s) => s.isAuthenticated);
+  return useQuery<NoticiaBookmark[]>({
+    queryKey: queryKeys.noticiasBookmarks,
+    queryFn: listNoticiasBookmarks,
+    enabled: isAuth,
+  });
+}
+
+export function useToggleNoticiaBookmark() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, number>({
+    mutationFn: async (noticiaId: number) => {
+      const list = qc.getQueryData<NoticiaBookmark[]>(queryKeys.noticiasBookmarks) ?? [];
+      const existing = list.find((b) => b.noticia === noticiaId);
+      if (existing) {
+        await deleteNoticiaBookmark(existing.id);
+      } else {
+        await addNoticiaBookmark(noticiaId);
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.noticiasBookmarks });
+    },
+  });
+}
+
+export function usePosturasBookmarks() {
+  const isAuth = useAuthStore((s) => s.isAuthenticated);
+  return useQuery<PosturaBookmark[]>({
+    queryKey: queryKeys.posturasBookmarks,
+    queryFn: listPosturasBookmarks,
+    enabled: isAuth,
+  });
+}
+
+export function useTogglePosturaBookmark() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, number>({
+    mutationFn: async (posturaId: number) => {
+      const list = qc.getQueryData<PosturaBookmark[]>(queryKeys.posturasBookmarks) ?? [];
+      const existing = list.find((b) => b.postura === posturaId);
+      if (existing) {
+        await deletePosturaBookmark(existing.id);
+      } else {
+        await addPosturaBookmark(posturaId);
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.posturasBookmarks });
     },
   });
 }
