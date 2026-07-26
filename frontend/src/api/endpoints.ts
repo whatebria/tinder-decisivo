@@ -129,12 +129,28 @@ export async function matchCandidatos(
 // ============================================================
 // Noticias
 // ============================================================
+export interface NoticiaFeedFilters {
+  candidatoId?: number | null;
+  fuente?: string | null;
+}
+
 export async function noticiasPorCandidato(
   candidatoId: number
 ): Promise<Noticia[]> {
   const { data } = await apiClient.get<Noticia[]>(
     `/candidatos/${candidatoId}/noticias/`
   );
+  return data;
+}
+
+/** Feed global de noticias con filtros opcionales. */
+export async function listNoticias(
+  filters: NoticiaFeedFilters = {}
+): Promise<Noticia[]> {
+  const params: Record<string, string | number> = {};
+  if (filters.candidatoId) params.candidato_id = filters.candidatoId;
+  if (filters.fuente) params.fuente = filters.fuente;
+  const { data } = await apiClient.get<Noticia[]>("/noticias/", { params });
   return data;
 }
 

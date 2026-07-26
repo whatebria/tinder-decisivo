@@ -182,6 +182,9 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
         <YStack gap="$2">
           {isGuest ? (
             <>
+              <TextButton onPress={() => navigation.navigate("Noticias")}>
+                Noticias
+              </TextButton>
               <TextButton onPress={exitGuestMode} color={c.primary}>
                 Crear una cuenta para guardar mi match
               </TextButton>
@@ -202,6 +205,9 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
               </TextButton>
               <TextButton onPress={() => navigation.navigate("MisDescartados")}>
                 Ver mis descartados
+              </TextButton>
+              <TextButton onPress={() => navigation.navigate("Noticias")}>
+                Noticias
               </TextButton>
               <TextButton onPress={logout} color={c.danger}>
                 Cerrar sesión

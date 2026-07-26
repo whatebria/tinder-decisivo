@@ -25,6 +25,7 @@ import {
   listDescartados,
   listFavoritos,
   listMisRespuestas,
+  listNoticias,
   listPosturasCandidato,
   listTiposEleccion,
   matchAnonimo,
@@ -44,6 +45,7 @@ import {
   type MatchResult,
   type MiRespuesta,
   type Noticia,
+  type NoticiaFeedFilters,
   type PasswordResetRequestResponse,
   type Perfil,
   type PosturaCandidatoDetalle,
@@ -190,6 +192,16 @@ export function useUpdateRespuesta(tipoEleccionId: number | null | undefined) {
       // Los matches se invalidaron en el backend; forzamos refetch al pedirlos.
       qc.invalidateQueries({ queryKey: ["matches"] });
     },
+  });
+}
+
+// -- Noticias feed global ---------------------------------------------------
+
+export function useNoticiasFeed(filters: NoticiaFeedFilters = {}) {
+  return useQuery<Noticia[]>({
+    queryKey: ["noticias", filters.candidatoId ?? null, filters.fuente ?? null],
+    queryFn: () => listNoticias(filters),
+    staleTime: 60_000,
   });
 }
 
