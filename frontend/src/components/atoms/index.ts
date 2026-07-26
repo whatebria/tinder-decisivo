@@ -34,3 +34,6 @@ export { Icon, type IconProps, type IconName } from "./Icon";
 export { ElectionCard, type ElectionCardProps, type ElectionCardVariant } from "./ElectionCard";
 export { ElectionCardAdd, type ElectionCardAddProps } from "./ElectionCardAdd";
 export { BookmarkButton, type BookmarkButtonProps } from "./BookmarkButton";
+
+// Nuevos (Fase 5 — BottomNav wireframe)
+export { TabBarItem, type TabBarItemProps } from "./TabBarItem";

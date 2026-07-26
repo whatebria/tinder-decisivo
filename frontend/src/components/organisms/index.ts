@@ -40,5 +40,8 @@ export { NovedadesFeed, type NovedadesFeedProps, type NovedadFeedItem } from "./
 export { ResultadoHero, type ResultadoHeroProps } from "./ResultadoHero";
 export { RankingRow, type RankingRowProps } from "./RankingRow";
 
+// Nuevos (Fase 5 — BottomNav wireframe)
+export { BottomNav, type BottomNavProps, type BottomNavTab } from "./BottomNav";
+
 // Nuevos (Sprint post-swipe: explicacion del match)
 export { MatchExplanation } from "./MatchExplanation";

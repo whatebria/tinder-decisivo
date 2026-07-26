@@ -30,7 +30,9 @@ export type IconName =
   | "settings"
   | "newspaper"
   | "compare"
-  | "swipe";
+  | "swipe"
+  | "home"
+  | "bookmark";
 
 export interface IconProps {
   name: IconName;
@@ -211,5 +213,17 @@ function renderIcon(name: IconName, p: object) {
           <Polyline points="8 12 12 8 16 12" {...p} />
         </>
       );
+    case "home":
+      // Casita simple — para tab Home
+      return (
+        <>
+          <Path d="M3 12 12 3l9 9" {...p} />
+          <Path d="M5 10v10h14V10" {...p} />
+          <Path d="M10 20v-6h4v6" {...p} />
+        </>
+      );
+    case "bookmark":
+      // Marcador clasico — para tab Guardados
+      return <Path d="M6 3h12v18l-6-4-6 4V3Z" {...p} />;
   }
 }
