@@ -21,7 +21,7 @@ import { ConfirmModal } from "../components/ConfirmModal";
 import { useToast } from "../components/Toast";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
-import { PrimaryButton } from "../components/PrimaryButton";
+import { Button } from "../components/Button";
 import { TextButton } from "../components/TextButton";
 import type { RootStackScreenProps } from "../navigation/types";
 import { colors } from "../theme/colors";
@@ -137,14 +137,14 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
                 {tipo.descripcion ? (
                   <Paragraph color="$textSecondary">{tipo.descripcion}</Paragraph>
                 ) : null}
-                <PrimaryButton
+                <Button
                   onPress={() => handleStart(tipo)}
                   disabled={startingId !== null}
                   loading={startingId === tipo.id}
                   accessibilityLabel={`Comenzar cuestionario ${tipo.nombre}`}
                 >
                   {startingId === tipo.id ? "Cargando..." : "Comenzar"}
-                </PrimaryButton>
+                </Button>
                 {!isGuest ? (
                   <>
                     <TextButton
@@ -152,6 +152,15 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
                       accessibilityLabel={`Ver mis matches de ${tipo.nombre}`}
                     >
                       Ver mis matches guardados
+                    </TextButton>
+                    <TextButton
+                      onPress={() =>
+                        tipo.id &&
+                        navigation.navigate("MisRespuestas", { tipoEleccionId: tipo.id })
+                      }
+                      accessibilityLabel={`Ver o editar mis respuestas de ${tipo.nombre}`}
+                    >
+                      Ver/editar mis respuestas
                     </TextButton>
                     <TextButton
                       onPress={() => setTipoAReiniciar(tipo)}

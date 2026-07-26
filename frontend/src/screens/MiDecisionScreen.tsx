@@ -19,7 +19,7 @@ import {
 
 import { getErrorMessage } from "../api/client";
 import { useDecisiones, useDeleteDecision } from "../api/hooks";
-import { PrimaryButton } from "../components/PrimaryButton";
+import { Button } from "../components/Button";
 import { TextButton } from "../components/TextButton";
 import { useToast } from "../components/Toast";
 import type { RootStackScreenProps } from "../navigation/types";
@@ -93,14 +93,14 @@ export function MiDecisionScreen({
                       ) : null}
                     </YStack>
                     <XStack gap="$2">
-                      <PrimaryButton
+                      <Button
                         variant="danger"
                         fullWidth={false}
                         onPress={() => d.id != null && handleDelete(d.id)}
                         loading={deleteDecision.isPending}
                       >
                         Cambiar mi voto
-                      </PrimaryButton>
+                      </Button>
                     </XStack>
                   </YStack>
                 </Card>

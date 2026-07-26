@@ -24,6 +24,7 @@ import {
   listDecisiones,
   listDescartados,
   listFavoritos,
+  listMisRespuestas,
   listTiposEleccion,
   matchAnonimo,
   matchCandidatos,
@@ -32,12 +33,15 @@ import {
   reiniciarCuestionario,
   requestPasswordReset,
   saveDecision,
+  updateRespuesta,
   type AnonRespuestaInput,
   type Candidato,
   type CandidatoDescartado,
   type CandidatoFavorito,
   type DecisionFinal,
+  type EditarRespuestaResponse,
   type MatchResult,
+  type MiRespuesta,
   type Noticia,
   type PasswordResetRequestResponse,
   type Perfil,
@@ -155,6 +159,34 @@ export function useReiniciarCuestionario() {
       // Invalida todo lo que puede haber cambiado: respuestas ya no existen,
       // matches se recalcularan proximo submit. Bookmarks NO se tocan.
       qc.invalidateQueries();
+    },
+  });
+}
+
+// -- Mis respuestas (list + edit) -------------------------------------------
+
+export function useMisRespuestas(tipoEleccionId: number | null | undefined) {
+  const isAuth = useAuthStore((s) => s.isAuthenticated);
+  return useQuery<MiRespuesta[]>({
+    queryKey: ["misRespuestas", tipoEleccionId],
+    queryFn: () => listMisRespuestas(tipoEleccionId as number),
+    enabled: isAuth && !!tipoEleccionId,
+  });
+}
+
+export function useUpdateRespuesta(tipoEleccionId: number | null | undefined) {
+  const qc = useQueryClient();
+  return useMutation<
+    EditarRespuestaResponse,
+    Error,
+    { respuestaId: number; opcionId: number; peso: number }
+  >({
+    mutationFn: ({ respuestaId, opcionId, peso }) =>
+      updateRespuesta(respuestaId, opcionId, peso),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["misRespuestas", tipoEleccionId] });
+      // Los matches se invalidaron en el backend; forzamos refetch al pedirlos.
+      qc.invalidateQueries({ queryKey: ["matches"] });
     },
   });
 }

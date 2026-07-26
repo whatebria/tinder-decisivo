@@ -8,7 +8,7 @@ import { H1, Paragraph, YStack } from "tamagui";
 import { login } from "../api/endpoints";
 import { getErrorMessage } from "../api/client";
 import { FormInput } from "../components/FormInput";
-import { PrimaryButton } from "../components/PrimaryButton";
+import { Button } from "../components/Button";
 import { TextButton } from "../components/TextButton";
 import { useToast } from "../components/Toast";
 import { useAuthStore } from "../store/auth";
@@ -61,13 +61,13 @@ export function LoginScreen({ navigation }: RootStackScreenProps<"Login">) {
         />
       </YStack>
 
-      <PrimaryButton
+      <Button
         onPress={handleLogin}
         disabled={!canSubmit}
         loading={loading}
       >
         {loading ? "Entrando..." : "Iniciar sesión"}
-      </PrimaryButton>
+      </Button>
 
       <TextButton
         onPress={() => navigation.navigate("Register")}

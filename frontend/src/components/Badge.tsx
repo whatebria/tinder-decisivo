@@ -1,12 +1,13 @@
 /**
  * Badge: chip compacto para status. 5 variantes semanticas.
+ * Reactivo al tema (light/dark).
  */
 
-import React from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, Text, View, type ViewStyle } from "react-native";
 
-import { colors } from "../theme/colors";
 import { radii } from "../theme/radii";
+import { useThemeColors } from "../theme/useTheme";
 
 export type BadgeVariant = "neutral" | "success" | "warning" | "info" | "danger";
 
@@ -17,43 +18,32 @@ export interface BadgeProps {
 }
 
 export function Badge({ children, variant = "neutral", style }: BadgeProps) {
-  const s = VARIANTS[variant];
+  const c = useThemeColors();
+
+  const s = useMemo(() => {
+    const VARIANTS = {
+      neutral: { bg: c.border2, fg: c.textSecondary },
+      success: { bg: c.success100, fg: c.success700 },
+      warning: { bg: c.warning100, fg: c.warning700 },
+      info: { bg: c.info100, fg: c.info700 },
+      danger: { bg: c.danger100, fg: c.danger700 },
+    } as const;
+    const v = VARIANTS[variant];
+    return StyleSheet.create({
+      container: {
+        backgroundColor: v.bg,
+        paddingVertical: 2,
+        paddingHorizontal: 8,
+        borderRadius: radii.rFull,
+        alignSelf: "flex-start",
+      },
+      text: { color: v.fg, fontSize: 12, fontWeight: "500", lineHeight: 16 },
+    });
+  }, [c, variant]);
+
   return (
-    <View style={[styles.base, s.container, style]}>
-      <Text style={[styles.text, s.text]}>{children}</Text>
+    <View style={[s.container, style]}>
+      <Text style={s.text}>{children}</Text>
     </View>
   );
 }
-
-const VARIANTS = {
-  neutral: {
-    container: { backgroundColor: colors.border2 },
-    text: { color: colors.textSecondary },
-  },
-  success: {
-    container: { backgroundColor: colors.success100 },
-    text: { color: colors.success700 },
-  },
-  warning: {
-    container: { backgroundColor: colors.warning100 },
-    text: { color: colors.warning700 },
-  },
-  info: {
-    container: { backgroundColor: colors.info100 },
-    text: { color: colors.info700 },
-  },
-  danger: {
-    container: { backgroundColor: colors.danger100 },
-    text: { color: colors.danger700 },
-  },
-} as const;
-
-const styles = StyleSheet.create({
-  base: {
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-    borderRadius: radii.rFull,
-    alignSelf: "flex-start",
-  },
-  text: { fontSize: 12, fontWeight: "500", lineHeight: 16 },
-});

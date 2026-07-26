@@ -9,7 +9,7 @@ import { H1, Paragraph, YStack } from "tamagui";
 import { login, register } from "../api/endpoints";
 import { getErrorMessage } from "../api/client";
 import { FormInput } from "../components/FormInput";
-import { PrimaryButton } from "../components/PrimaryButton";
+import { Button } from "../components/Button";
 import { TextButton } from "../components/TextButton";
 import { useToast } from "../components/Toast";
 import { useAuthStore } from "../store/auth";
@@ -76,13 +76,13 @@ export function RegisterScreen({ navigation }: RootStackScreenProps<"Register">)
         />
       </YStack>
 
-      <PrimaryButton
+      <Button
         onPress={handleRegister}
         disabled={!canSubmit}
         loading={loading}
       >
         {loading ? "Creando cuenta..." : "Registrarme"}
-      </PrimaryButton>
+      </Button>
 
       <TextButton onPress={() => navigation.goBack()}>
         Ya tengo cuenta — Volver

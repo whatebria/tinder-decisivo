@@ -9,7 +9,7 @@ import React, { useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { FormInput } from "./FormInput";
-import { PrimaryButton } from "./PrimaryButton";
+import { Button } from "./Button";
 import { TextButton } from "./TextButton";
 
 interface Props {
@@ -81,9 +81,9 @@ export function CambiarPasswordModal({
           </View>
 
           <View style={styles.actions}>
-            <PrimaryButton onPress={handleSubmit} loading={loading} disabled={!canSubmit}>
+            <Button onPress={handleSubmit} loading={loading} disabled={!canSubmit}>
               Cambiar contrasena
-            </PrimaryButton>
+            </Button>
             <TextButton onPress={handleCancel} disabled={loading}>
               Cancelar
             </TextButton>

@@ -10,7 +10,7 @@ import { H1, Paragraph, SizableText, YStack } from "tamagui";
 import { getErrorMessage } from "../api/client";
 import { useRequestPasswordReset } from "../api/hooks";
 import { FormInput } from "../components/FormInput";
-import { PrimaryButton } from "../components/PrimaryButton";
+import { Button } from "../components/Button";
 import { TextButton } from "../components/TextButton";
 import { useToast } from "../components/Toast";
 import type { RootStackScreenProps } from "../navigation/types";
@@ -69,7 +69,7 @@ export function PasswordResetRequestScreen({
               <SizableText size="$2" fontFamily="$mono" color="$primary">
                 {devLink}
               </SizableText>
-              <PrimaryButton
+              <Button
                 fullWidth
                 onPress={() => {
                   const url = new URL(devLink);
@@ -78,7 +78,7 @@ export function PasswordResetRequestScreen({
                 }}
               >
                 Continuar con este link
-              </PrimaryButton>
+              </Button>
             </YStack>
           ) : null}
 
@@ -120,13 +120,13 @@ export function PasswordResetRequestScreen({
           accessibilityLabel="Email"
         />
 
-        <PrimaryButton
+        <Button
           onPress={handleSubmit}
           disabled={!canSubmit}
           loading={requestReset.isPending}
         >
           Enviar link
-        </PrimaryButton>
+        </Button>
 
         <TextButton onPress={() => navigation.replace("Login")}>
           Volver al login

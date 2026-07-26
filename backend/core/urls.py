@@ -10,7 +10,9 @@ from .views import (
     CandidatoNoticiasView,
     CustomAuthToken,
     DecisionFinalViewSet,
+    EditarRespuestaView,
     MatchCandidatoViewSet,
+    MisRespuestasListView,
     NoticiaDetailView,
     NoticiaListCreateView,
     PasswordResetConfirmView,
@@ -65,6 +67,16 @@ urlpatterns = [
         "respuestas/reiniciar/",
         ReiniciarCuestionarioView.as_view(),
         name="respuestas-reiniciar",
+    ),
+    path(
+        "respuestas/mias/",
+        MisRespuestasListView.as_view(),
+        name="respuestas-mias-list",
+    ),
+    path(
+        "respuestas/mias/<int:pk>/",
+        EditarRespuestaView.as_view(),
+        name="respuestas-mias-detail",
     ),
     # Match
     path(

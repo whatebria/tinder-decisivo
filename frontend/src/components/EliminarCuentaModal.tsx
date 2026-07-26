@@ -10,7 +10,7 @@ import React, { useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { FormInput } from "./FormInput";
-import { PrimaryButton } from "./PrimaryButton";
+import { Button } from "./Button";
 import { TextButton } from "./TextButton";
 
 const PALABRA_MAGICA = "ELIMINAR";
@@ -77,14 +77,14 @@ export function EliminarCuentaModal({
           </View>
 
           <View style={styles.actions}>
-            <PrimaryButton
+            <Button
               onPress={handleSubmit}
               loading={loading}
               disabled={!canSubmit}
               variant="danger"
             >
               Si, eliminar mi cuenta
-            </PrimaryButton>
+            </Button>
             <TextButton onPress={handleCancel} disabled={loading}>
               Cancelar
             </TextButton>

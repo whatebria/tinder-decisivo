@@ -24,7 +24,7 @@ import { colors } from "../theme/colors";
 import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "success";
 export type ButtonSize = "sm" | "md" | "lg";
 
 export interface ButtonProps extends Omit<PressableProps, "children" | "style"> {
@@ -43,7 +43,7 @@ export function Button({
   variant = "primary",
   size = "md",
   loading,
-  fullWidth,
+  fullWidth = true,
   leftIcon,
   rightIcon,
   disabled,
@@ -103,6 +103,10 @@ const VARIANTS = {
   },
   danger: {
     container: { backgroundColor: colors.danger, borderColor: colors.danger, borderWidth: 1.5 },
+    text: { color: "#FFFFFF" as const },
+  },
+  success: {
+    container: { backgroundColor: colors.success, borderColor: colors.success, borderWidth: 1.5 },
     text: { color: "#FFFFFF" as const },
   },
 } as const;

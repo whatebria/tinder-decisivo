@@ -1,4 +1,7 @@
 /**
+ * @deprecated Usar `Button` de `./Button` en su lugar. Este componente se mantiene
+ * solo por compatibilidad con imports antiguos. Sera removido en una version futura.
+ *
  * PrimaryButton: boton solido con Pressable de RN puro.
  *
  * Existe porque <Button> de Tamagui v2.5 tiene issues de rendering + eventos

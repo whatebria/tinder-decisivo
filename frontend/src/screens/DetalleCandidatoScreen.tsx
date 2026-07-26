@@ -31,7 +31,7 @@ import {
   useToggleFavorito,
 } from "../api/hooks";
 import { BookmarkActions } from "../components/BookmarkActions";
-import { PrimaryButton } from "../components/PrimaryButton";
+import { Button } from "../components/Button";
 import { RadarChart } from "../components/RadarChart";
 import { TextButton } from "../components/TextButton";
 import { useToast } from "../components/Toast";
@@ -180,13 +180,13 @@ export function DetalleCandidatoScreen({
               size="lg"
             />
             {!isMyVote && !isDescartado ? (
-              <PrimaryButton
+              <Button
                 variant="success"
                 onPress={handleSaveDecision}
                 loading={saveDecision.isPending}
               >
                 Este es mi voto final
-              </PrimaryButton>
+              </Button>
             ) : null}
           </YStack>
         ) : null}

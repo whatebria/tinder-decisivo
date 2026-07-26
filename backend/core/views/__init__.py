@@ -21,6 +21,8 @@ from .catalog import (
     TipoEleccionListView,
 )
 from .cuestionario import (
+    EditarRespuestaView,
+    MisRespuestasListView,
     PreguntasPendientesView,
     ReiniciarCuestionarioView,
     SubmitUserAnswersView,
@@ -42,7 +44,9 @@ __all__ = [
     "CambiarPasswordView",
     "CustomAuthToken",
     "DecisionFinalViewSet",
+    "EditarRespuestaView",
     "MatchCandidatoViewSet",
+    "MisRespuestasListView",
     "NoticiaDetailView",
     "NoticiaListCreateView",
     "PasswordResetConfirmView",

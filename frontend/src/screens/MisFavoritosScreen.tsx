@@ -18,7 +18,8 @@ import {
 
 import { getErrorMessage } from "../api/client";
 import { useFavoritos, useToggleFavorito } from "../api/hooks";
-import { PrimaryButton } from "../components/PrimaryButton";
+import { Badge } from "../components/Badge";
+import { Button } from "../components/Button";
 import { TextButton } from "../components/TextButton";
 import { useToast } from "../components/Toast";
 import type { RootStackScreenProps } from "../navigation/types";
@@ -83,24 +84,20 @@ export function MisFavoritosScreen({
                   }
                 >
                   <XStack gap="$3" alignItems="center">
-                    <YStack flex={1} gap="$1">
+                    <YStack flex={1} gap="$1" alignItems="flex-start">
                       <SizableText size="$5" fontWeight="700" color="$text" numberOfLines={2}>
                         {c.nombre} {c.apellido}
                       </SizableText>
-                      {c.partido ? (
-                        <SizableText size="$3" color="$textSecondary">
-                          {c.partido}
-                        </SizableText>
-                      ) : null}
+                      {c.partido ? <Badge variant="neutral">{c.partido}</Badge> : null}
                     </YStack>
-                    <PrimaryButton
+                    <Button
                       variant="danger"
                       fullWidth={false}
                       onPress={() => handleQuitar(c.id!)}
                       loading={toggleFav.isPending}
                     >
                       Quitar
-                    </PrimaryButton>
+                    </Button>
                   </XStack>
                 </Card>
               );

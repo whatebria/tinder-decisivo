@@ -6,7 +6,7 @@ import React from "react";
 import { H1, Paragraph, YStack } from "tamagui";
 
 import { useCuestionarioStore } from "../store/cuestionario";
-import { PrimaryButton } from "../components/PrimaryButton";
+import { Button } from "../components/Button";
 import { TextButton } from "../components/TextButton";
 import type { RootStackScreenProps } from "../navigation/types";
 
@@ -39,9 +39,9 @@ export function SubmitDoneScreen({
       <Paragraph color="$textSecondary">
         Ahora podes ver que candidatos coinciden mas con tu forma de pensar.
       </Paragraph>
-      <PrimaryButton onPress={handleVerResultados}>
+      <Button onPress={handleVerResultados}>
         Ver mis matches
-      </PrimaryButton>
+      </Button>
       <TextButton onPress={handleVolver}>Volver al inicio</TextButton>
     </YStack>
   );

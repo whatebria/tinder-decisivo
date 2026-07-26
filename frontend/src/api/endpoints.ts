@@ -248,6 +248,52 @@ export async function eliminarCuenta(password: string): Promise<void> {
 }
 
 // ============================================================
+// Mis respuestas (list + edit)
+// ============================================================
+export interface OpcionSimple {
+  id: number;
+  texto: string;
+  valor: number;
+}
+
+export interface MiRespuesta {
+  id: number;
+  pregunta: number;
+  pregunta_texto: string;
+  eje_tematico: string;
+  eje_tematico_display: string;
+  opcion_elegida: number;
+  peso: number;
+  opciones: OpcionSimple[];
+  fecha_respuesta: string;
+}
+
+export interface EditarRespuestaResponse extends MiRespuesta {
+  matches_invalidados: number;
+}
+
+export async function listMisRespuestas(
+  tipoEleccionId: number
+): Promise<MiRespuesta[]> {
+  const { data } = await apiClient.get<MiRespuesta[]>("/respuestas/mias/", {
+    params: { tipo_eleccion_id: tipoEleccionId },
+  });
+  return data;
+}
+
+export async function updateRespuesta(
+  respuestaId: number,
+  opcionId: number,
+  peso: number
+): Promise<EditarRespuestaResponse> {
+  const { data } = await apiClient.patch<EditarRespuestaResponse>(
+    `/respuestas/mias/${respuestaId}/`,
+    { opcion_elegida: opcionId, peso }
+  );
+  return data;
+}
+
+// ============================================================
 // Reset de cuestionario
 // ============================================================
 export interface ReiniciarCuestionarioResponse {

@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from django.contrib.auth.models import User
 from django.db import transaction
 
-from ..models import MatchCandidato, RespuestaUsuario, TipoEleccion
+from ..models import MatchCandidato, OpcionRespuesta, RespuestaUsuario, TipoEleccion
 
 
 @dataclass(frozen=True)
@@ -24,6 +24,76 @@ class ReiniciarResult:
 class ReiniciarError(Exception):
     """Errores de dominio al reiniciar el cuestionario."""
 
+
+class EditarRespuestaError(Exception):
+    """Errores de dominio al editar una respuesta individual."""
+
+
+@dataclass(frozen=True)
+class EditarRespuestaResult:
+    respuesta: RespuestaUsuario
+    matches_invalidados: int
+
+
+def editar_respuesta(
+    user: User,
+    respuesta_id: int,
+    opcion_id: int,
+    peso: int,
+) -> EditarRespuestaResult:
+    """Actualiza opcion_elegida + peso de una respuesta del user.
+
+    Al mutar la respuesta, invalidamos los MatchCandidato del user contra
+    candidatos del mismo tipo de eleccion. Se recalculan la proxima vez que
+    el user visite Resultados (patron lazy: no pagamos costo si no lo pide).
+
+    Args:
+        user: usuario autenticado (owner de la respuesta).
+        respuesta_id: pk de la RespuestaUsuario a editar.
+        opcion_id: pk de la nueva OpcionRespuesta.
+        peso: nuevo peso (0-3).
+
+    Raises:
+        EditarRespuestaError: si la respuesta no existe, no es del user,
+            la opcion no pertenece a la pregunta de la respuesta, o el peso
+            esta fuera de rango.
+    """
+    if peso < 0 or peso > 3:
+        raise EditarRespuestaError("Peso fuera de rango (0-3).")
+
+    try:
+        respuesta = RespuestaUsuario.objects.select_related(
+            "pregunta", "pregunta__tipo_eleccion"
+        ).get(id=respuesta_id, user=user)
+    except RespuestaUsuario.DoesNotExist as e:
+        raise EditarRespuestaError("Respuesta no encontrada.") from e
+
+    try:
+        opcion = OpcionRespuesta.objects.select_related("pregunta").get(id=opcion_id)
+    except OpcionRespuesta.DoesNotExist as e:
+        raise EditarRespuestaError("Opcion no encontrada.") from e
+
+    if opcion.pregunta_id != respuesta.pregunta_id:
+        raise EditarRespuestaError(
+            "La opcion no pertenece a la pregunta de la respuesta."
+        )
+
+    tipo_id = respuesta.pregunta.tipo_eleccion_id
+
+    with transaction.atomic():
+        respuesta.opcion_elegida = opcion
+        respuesta.peso = peso
+        respuesta.save(update_fields=["opcion_elegida", "peso", "fecha_respuesta"])
+
+        matches_invalidados, _ = MatchCandidato.objects.filter(
+            user=user,
+            candidato__tipos_eleccion__id=tipo_id,
+        ).delete()
+
+    return EditarRespuestaResult(
+        respuesta=respuesta,
+        matches_invalidados=matches_invalidados,
+    )
 
 def reiniciar_cuestionario(user: User, tipo_eleccion_id: int) -> ReiniciarResult:
     """Borra respuestas + matches del user para un tipo de eleccion.

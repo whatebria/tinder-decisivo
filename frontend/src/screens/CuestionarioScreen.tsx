@@ -10,7 +10,7 @@
  */
 
 import React, { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, Text } from "react-native";
 import {
   H2,
   Paragraph,
@@ -23,10 +23,12 @@ import {
 
 import { getErrorMessage } from "../api/client";
 import { PreguntaInfoModal } from "../components/PreguntaInfoModal";
-import { PrimaryButton } from "../components/PrimaryButton";
+import { Button } from "../components/Button";
+import { IconButton } from "../components/IconButton";
 import { SelectableButton } from "../components/SelectableButton";
 import { TextButton } from "../components/TextButton";
 import { useToast } from "../components/Toast";
+import { colors } from "../theme/colors";
 import type { RootStackScreenProps } from "../navigation/types";
 import {
   calcularProgreso,
@@ -66,7 +68,7 @@ export function CuestionarioScreen({
       <YStack flex={1} justifyContent="center" alignItems="center" backgroundColor="$background" padding="$5">
         <Paragraph color="$textSecondary">No hay preguntas cargadas.</Paragraph>
         <YStack marginTop="$4" width="100%" maxWidth={280}>
-          <PrimaryButton onPress={() => navigation.goBack()}>Volver</PrimaryButton>
+          <Button onPress={() => navigation.goBack()}>Volver</Button>
         </YStack>
       </YStack>
     );
@@ -119,14 +121,15 @@ export function CuestionarioScreen({
           <YStack flex={1}>
             <H2 color="$text">{pregunta.texto}</H2>
           </YStack>
-          <Pressable
+          <IconButton
             onPress={() => setInfoOpen(true)}
-            style={styles.infoBtn}
+            variant="soft"
+            size="md"
             accessibilityLabel="Ver contexto y repercusiones de la pregunta"
-            hitSlop={8}
+            style={{ marginTop: 6 }}
           >
-            <Text style={styles.infoBtnText}>?</Text>
-          </Pressable>
+            <Text style={{ fontSize: 18, fontWeight: "700", color: colors.primary700 }}>?</Text>
+          </IconButton>
         </XStack>
 
         <Separator />
@@ -195,20 +198,20 @@ export function CuestionarioScreen({
           </YStack>
           {isLast ? (
             <YStack flex={1}>
-              <PrimaryButton
+              <Button
                 variant="success"
                 onPress={handleSubmit}
                 disabled={!canAdvance || submitting}
                 loading={submitting}
               >
                 {submitting ? "Enviando..." : "Enviar"}
-              </PrimaryButton>
+              </Button>
             </YStack>
           ) : (
             <YStack flex={1}>
-              <PrimaryButton onPress={next} disabled={!canAdvance}>
+              <Button onPress={next} disabled={!canAdvance}>
                 Siguiente
-              </PrimaryButton>
+              </Button>
             </YStack>
           )}
         </XStack>
@@ -222,22 +225,3 @@ export function CuestionarioScreen({
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  infoBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#EEF2FF",
-    borderWidth: 1,
-    borderColor: "#C7D2FE",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 6,
-  },
-  infoBtnText: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#4338CA",
-  },
-});

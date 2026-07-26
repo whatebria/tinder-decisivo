@@ -10,7 +10,7 @@ import { H1, Paragraph, YStack } from "tamagui";
 import { getErrorMessage } from "../api/client";
 import { useConfirmPasswordReset } from "../api/hooks";
 import { FormInput } from "../components/FormInput";
-import { PrimaryButton } from "../components/PrimaryButton";
+import { Button } from "../components/Button";
 import { TextButton } from "../components/TextButton";
 import { useToast } from "../components/Toast";
 import type { RootStackScreenProps } from "../navigation/types";
@@ -93,13 +93,13 @@ export function PasswordResetConfirmScreen({
           </Paragraph>
         ) : null}
 
-        <PrimaryButton
+        <Button
           onPress={handleSubmit}
           disabled={!canSubmit}
           loading={confirmReset.isPending}
         >
           Cambiar contrasena
-        </PrimaryButton>
+        </Button>
 
         <TextButton onPress={() => navigation.replace("Login")}>
           Volver al login

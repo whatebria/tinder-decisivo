@@ -37,7 +37,8 @@ import {
   useToggleFavorito,
 } from "../api/hooks";
 import { BookmarkActions } from "../components/BookmarkActions";
-import { PrimaryButton } from "../components/PrimaryButton";
+import { Badge, type BadgeVariant } from "../components/Badge";
+import { Button } from "../components/Button";
 import { RadarChart } from "../components/RadarChart";
 import { TextButton } from "../components/TextButton";
 import { useToast } from "../components/Toast";
@@ -51,6 +52,14 @@ import {
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
 import { colors } from "../theme/colors";
+
+/** Mapea el nivel de confianza del backend a la variante de Badge correcta. */
+function confianzaToBadge(confianza: string | undefined): BadgeVariant {
+  const key = (confianza ?? "TENTATIVA").toUpperCase();
+  if (key === "ALTA") return "success";
+  if (key === "MEDIA") return "warning";
+  return "danger";
+}
 
 export function ResultadosScreen({
   navigation,
@@ -171,9 +180,9 @@ export function ResultadosScreen({
                   Tu match no se guardo. Crea una cuenta para conservarlo,
                   marcar favoritos y elegir tu voto final.
                 </SizableText>
-                <PrimaryButton onPress={exitGuestMode}>
+                <Button onPress={exitGuestMode}>
                   Crear una cuenta
-                </PrimaryButton>
+                </Button>
               </YStack>
             </Card>
           ) : null}
@@ -239,9 +248,9 @@ export function ResultadosScreen({
                         </H3>
                       </XStack>
                       {candidato.partido ? (
-                        <SizableText size="$3" color="$textSecondary">
-                          {candidato.partido}
-                        </SizableText>
+                        <YStack alignItems="flex-start">
+                          <Badge variant="neutral">{candidato.partido}</Badge>
+                        </YStack>
                       ) : null}
                       {isDecision ? (
                         <SizableText size="$2" color={colors.primary} fontWeight="700">
@@ -252,9 +261,9 @@ export function ResultadosScreen({
                         <SizableText size="$8" fontWeight="800" color={scoreCol as any}>
                           {formatMatchPercentage(pct)}
                         </SizableText>
-                        <SizableText size="$2" color={conf.color as any}>
-                          {conf.label} ({r.preguntas_consideradas}p)
-                        </SizableText>
+                        <Badge variant={confianzaToBadge(r.confianza)}>
+                          {`${conf.label} (${r.preguntas_consideradas}p)`}
+                        </Badge>
                       </XStack>
                     </YStack>
                     {Object.keys(chartData).length >= 3 ? (

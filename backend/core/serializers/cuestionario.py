@@ -52,3 +52,52 @@ class RespuestaUsuarioReadSerializer(serializers.ModelSerializer):
             "fecha_respuesta",
         ]
         read_only_fields = ["id", "fecha_respuesta"]
+
+
+class OpcionSimpleSerializer(serializers.ModelSerializer):
+    """Opcion minima para poblar el editor de respuestas."""
+
+    class Meta:
+        model = OpcionRespuesta
+        fields = ["id", "texto", "valor"]
+
+
+class MisRespuestasItemSerializer(serializers.ModelSerializer):
+    """Respuesta del user con pregunta + eje + opciones disponibles.
+
+    Diseñado para el editor: el cliente muestra la pregunta, la opcion
+    actual (con peso), y las alternativas para elegir otra.
+    """
+
+    pregunta_texto = serializers.CharField(source="pregunta.texto", read_only=True)
+    eje_tematico = serializers.CharField(
+        source="pregunta.eje_tematico", read_only=True
+    )
+    eje_tematico_display = serializers.CharField(
+        source="pregunta.get_eje_tematico_display", read_only=True
+    )
+    opciones = OpcionSimpleSerializer(
+        source="pregunta.opciones_respuesta", many=True, read_only=True
+    )
+
+    class Meta:
+        model = RespuestaUsuario
+        fields = [
+            "id",
+            "pregunta",
+            "pregunta_texto",
+            "eje_tematico",
+            "eje_tematico_display",
+            "opcion_elegida",
+            "peso",
+            "opciones",
+            "fecha_respuesta",
+        ]
+        read_only_fields = fields
+
+
+class EditarRespuestaSerializer(serializers.Serializer):
+    """Input para PATCH /respuestas/mias/{id}/."""
+
+    opcion_elegida = serializers.IntegerField()
+    peso = serializers.IntegerField(min_value=0, max_value=3)

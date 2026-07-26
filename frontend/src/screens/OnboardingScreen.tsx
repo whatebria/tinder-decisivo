@@ -18,7 +18,7 @@ import {
   View,
 } from "react-native";
 
-import { PrimaryButton } from "../components/PrimaryButton";
+import { Button } from "../components/Button";
 import { TextButton } from "../components/TextButton";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useOnboardingStore } from "../store/onboarding";
@@ -130,9 +130,9 @@ export function OnboardingScreen({
 
       {/* CTA */}
       <View style={styles.cta}>
-        <PrimaryButton onPress={handleNext}>
+        <Button onPress={handleNext}>
           {index === SLIDES.length - 1 ? "Empezar" : "Siguiente"}
-        </PrimaryButton>
+        </Button>
       </View>
     </View>
   );

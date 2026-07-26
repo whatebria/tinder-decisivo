@@ -15,7 +15,16 @@ from rest_framework.views import APIView
 
 from ..models import Pregunta, RespuestaUsuario, TipoEleccion
 from ..serializers import PreguntaSerializer, RespuestaUsuarioCreateSerializer
-from ..services.respuestas import ReiniciarError, reiniciar_cuestionario
+from ..serializers.cuestionario import (
+    EditarRespuestaSerializer,
+    MisRespuestasItemSerializer,
+)
+from ..services.respuestas import (
+    EditarRespuestaError,
+    ReiniciarError,
+    editar_respuesta,
+    reiniciar_cuestionario,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -146,6 +155,85 @@ class ReiniciarCuestionarioView(APIView):
             {
                 "respuestas_borradas": result.respuestas_borradas,
                 "matches_borrados": result.matches_borrados,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+@extend_schema(
+    parameters=[OpenApiParameter("tipo_eleccion_id", int, required=True)],
+    responses={
+        200: MisRespuestasItemSerializer(many=True),
+        400: OpenApiResponse(description="tipo_eleccion_id faltante"),
+    },
+)
+class MisRespuestasListView(APIView):
+    """GET /respuestas/mias/?tipo_eleccion_id=X: lista respuestas del user auth.
+
+    Incluye la pregunta, el eje tematico, la opcion elegida, el peso y
+    todas las opciones disponibles (para poblar el editor).
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        tipo_eleccion_id = request.query_params.get("tipo_eleccion_id")
+        if not tipo_eleccion_id:
+            return Response(
+                {"detail": "Se requiere 'tipo_eleccion_id'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        qs = (
+            RespuestaUsuario.objects.filter(
+                user=request.user,
+                pregunta__tipo_eleccion_id=tipo_eleccion_id,
+            )
+            .select_related("pregunta", "opcion_elegida")
+            .prefetch_related("pregunta__opciones_respuesta")
+            .order_by("pregunta__orden")
+        )
+        return Response(MisRespuestasItemSerializer(qs, many=True).data)
+
+
+@extend_schema(
+    request=EditarRespuestaSerializer,
+    responses={
+        200: MisRespuestasItemSerializer,
+        400: OpenApiResponse(description="Payload invalido"),
+        404: OpenApiResponse(description="Respuesta no encontrada"),
+    },
+)
+class EditarRespuestaView(APIView):
+    """PATCH /respuestas/mias/{pk}/: actualiza opcion + peso de UNA respuesta.
+
+    Efecto colateral: s MatchCandidato del user para el tipo
+    de eleccion afectado (se recalculan lazy al pedir Resultados).
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, pk: int):
+        serializer = EditarRespuestaSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            result = editar_respuesta(
+                user=request.user,
+                respuesta_id=int(pk),
+                opcion_id=serializer.validated_data["opcion_elegida"],
+                peso=serializer.validated_data["peso"],
+            )
+        except EditarRespuestaError as e:
+            msg = str(e)
+            code = status.HTTP_404_NOT_FOUND if "no encontrada" in msg else status.HTTP_400_BAD_REQUEST
+            return Response({"detail": msg}, status=code)
+
+        return Response(
+            {
+                **MisRespuestasItemSerializer(result.respuesta).data,
+                "matches_invalidados": result.matches_invalidados,
             },
             status=status.HTTP_200_OK,
         )

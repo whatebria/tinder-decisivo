@@ -20,7 +20,7 @@
 import React from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
-import { PrimaryButton } from "./PrimaryButton";
+import { Button } from "./Button";
 import { TextButton } from "./TextButton";
 
 interface Props {
@@ -59,13 +59,13 @@ export function ConfirmModal({
           <Text style={styles.message}>{message}</Text>
 
           <View style={styles.actions}>
-            <PrimaryButton
+            <Button
               onPress={onConfirm}
               loading={loading}
               variant={variant === "danger" ? "danger" : "primary"}
             >
               {confirmLabel}
-            </PrimaryButton>
+            </Button>
             <TextButton onPress={onCancel} disabled={loading}>
               {cancelLabel}
             </TextButton>
