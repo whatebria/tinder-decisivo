@@ -19,6 +19,7 @@ import { MiDecisionScreen } from "../screens/MiDecisionScreen";
 import { MisDescartadosScreen } from "../screens/MisDescartadosScreen";
 import { MisFavoritosScreen } from "../screens/MisFavoritosScreen";
 import { MisRespuestasScreen } from "../screens/MisRespuestasScreen";
+import { CompararScreen } from "../screens/CompararScreen";
 import { NoticiasScreen } from "../screens/NoticiasScreen";
 import { OnboardingScreen } from "../screens/OnboardingScreen";
 import { PasswordResetConfirmScreen } from "../screens/PasswordResetConfirmScreen";
@@ -55,6 +56,7 @@ export function AppNavigator() {
           <Stack.Screen name="MisFavoritos" component={MisFavoritosScreen} />
           <Stack.Screen name="MisRespuestas" component={MisRespuestasScreen} />
             <Stack.Screen name="Noticias" component={NoticiasScreen} />
+            <Stack.Screen name="Comparar" component={CompararScreen} />
           <Stack.Screen name="MiDecision" component={MiDecisionScreen} />
           <Stack.Screen name="Perfil" component={PerfilScreen} />
         </>

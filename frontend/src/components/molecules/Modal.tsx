@@ -19,6 +19,7 @@ import {
   type ViewStyle,
 } from "react-native";
 
+import { Icon } from "../atoms/Icon";
 import { IconButton } from "../atoms/IconButton";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
@@ -39,34 +40,6 @@ export interface ModalProps {
   dismissOnBackdrop?: boolean;
   /** Estilo custom para el card. */
   cardStyle?: StyleProp<ViewStyle>;
-}
-
-/** Cross vectorial (dos rectangulos rotados). Evita dependencias de font/emoji. */
-function CloseGlyph({ color }: { color: string }) {
-  return (
-    <View style={{ width: 14, height: 14, justifyContent: "center", alignItems: "center" }}>
-      <View
-        style={{
-          position: "absolute",
-          width: 16,
-          height: 2,
-          backgroundColor: color,
-          borderRadius: 1,
-          transform: [{ rotate: "45deg" }],
-        }}
-      />
-      <View
-        style={{
-          position: "absolute",
-          width: 16,
-          height: 2,
-          backgroundColor: color,
-          borderRadius: 1,
-          transform: [{ rotate: "-45deg" }],
-        }}
-      />
-    </View>
-  );
 }
 
 export function Modal({
@@ -147,7 +120,7 @@ export function Modal({
                 variant="ghost"
                 size="sm"
               >
-                <CloseGlyph color={c.textSecondary} />
+                <Icon name="close" color={c.textSecondary} size={18} />
               </IconButton>
             </View>
           ) : null}

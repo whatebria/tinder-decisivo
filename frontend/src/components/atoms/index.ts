@@ -28,3 +28,4 @@ export { Avatar, type AvatarProps, type AvatarSize } from "./Avatar";
 export { Link, type LinkProps } from "./Link";
 export { Tooltip, type TooltipProps } from "./Tooltip";
 export { Timeline, type TimelineProps, type TimelineItem } from "./Timeline";
+export { Icon, type IconProps, type IconName } from "./Icon";

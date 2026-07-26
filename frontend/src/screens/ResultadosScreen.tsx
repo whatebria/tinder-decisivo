@@ -302,6 +302,9 @@ export function ResultadosScreen({
             Compartir mi ranking
           </Button>
         ) : null}
+        <TextButton onPress={() => navigation.navigate("Comparar")}>
+          Comparar candidatos
+        </TextButton>
         <TextButton onPress={handleVolver}>Volver al inicio</TextButton>
       </YStack>
 

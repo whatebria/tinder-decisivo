@@ -22,6 +22,7 @@ export type RootStackParamList = {
   MisFavoritos: undefined;
   MisRespuestas: { tipoEleccionId: number };
   MiDecision: undefined;
+  Comparar: undefined;
   Noticias: undefined;
   Perfil: undefined;
 };
