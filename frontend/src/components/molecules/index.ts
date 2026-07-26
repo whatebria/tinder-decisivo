@@ -28,3 +28,7 @@ export { PosturaItem, type PosturaItemProps, type PosturaMatch } from "./Postura
 export { HomeGreeting, type HomeGreetingProps } from "./HomeGreeting";
 export { SectionTitle, type SectionTitleProps } from "./SectionTitle";
 export { NovedadItem, type NovedadItemProps, type NovedadKind } from "./NovedadItem";
+
+// Nuevas (Fase 5 — Cuestionario wireframe)
+export { CuestionarioTopBar, type CuestionarioTopBarProps } from "./CuestionarioTopBar";
+export { ProgressSplit, type ProgressSplitProps } from "./ProgressSplit";
