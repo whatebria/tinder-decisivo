@@ -9,8 +9,8 @@
  * - Footer: Anterior / Siguiente (o Enviar en la ultima)
  */
 
-import React from "react";
-import { ScrollView } from "react-native";
+import React, { useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import {
   H2,
   Paragraph,
@@ -22,6 +22,7 @@ import {
 } from "tamagui";
 
 import { getErrorMessage } from "../api/client";
+import { PreguntaInfoModal } from "../components/PreguntaInfoModal";
 import { PrimaryButton } from "../components/PrimaryButton";
 import { SelectableButton } from "../components/SelectableButton";
 import { TextButton } from "../components/TextButton";
@@ -41,6 +42,7 @@ export function CuestionarioScreen({
   navigation,
 }: RootStackScreenProps<"Cuestionario">) {
   const toast = useToast();
+  const [infoOpen, setInfoOpen] = useState(false);
   const {
     preguntas,
     currentIndex,
@@ -109,8 +111,20 @@ export function CuestionarioScreen({
           </Progress>
         </YStack>
 
-        {/* Enunciado */}
-        <H2 color="$text">{pregunta.texto}</H2>
+        {/* Enunciado con boton de contexto */}
+        <XStack alignItems="flex-start" gap="$2">
+          <YStack flex={1}>
+            <H2 color="$text">{pregunta.texto}</H2>
+          </YStack>
+          <Pressable
+            onPress={() => setInfoOpen(true)}
+            style={styles.infoBtn}
+            accessibilityLabel="Ver contexto y repercusiones de la pregunta"
+            hitSlop={8}
+          >
+            <Text style={styles.infoBtnText}>?</Text>
+          </Pressable>
+        </XStack>
 
         <Separator />
 
@@ -196,6 +210,31 @@ export function CuestionarioScreen({
           )}
         </XStack>
       </YStack>
+
+      <PreguntaInfoModal
+        visible={infoOpen}
+        onClose={() => setInfoOpen(false)}
+        pregunta={pregunta as any}
+      />
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  infoBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#EEF2FF",
+    borderWidth: 1,
+    borderColor: "#C7D2FE",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 6,
+  },
+  infoBtnText: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#4338CA",
+  },
+});

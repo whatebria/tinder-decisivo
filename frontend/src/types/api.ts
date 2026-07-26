@@ -497,6 +497,10 @@ export interface components {
              */
             eje_tematico?: components["schemas"]["EjeTematicoEnum"];
             readonly eje_tematico_display: string;
+            /** @description Contexto educativo neutro sobre que trata la pregunta (2-3 lineas). */
+            explicacion?: string;
+            /** @description Dict con keys: economico, social, cultural, ambiental, institucional. Cada valor es un texto breve explicando el impacto en esa dimension. */
+            repercusiones?: unknown;
             readonly opciones_respuesta: components["schemas"]["OpcionRespuesta"][];
         };
         RespuestaUsuarioCreateRequest: {

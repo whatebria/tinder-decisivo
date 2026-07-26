@@ -72,6 +72,8 @@ class PreguntaSerializer(serializers.ModelSerializer):
             "tipo_eleccion_nombre",
             "eje_tematico",
             "eje_tematico_display",
+            "explicacion",
+            "repercusiones",
             "opciones_respuesta",
         ]
 

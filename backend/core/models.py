@@ -41,6 +41,17 @@ class Pregunta(models.Model):
         max_length=20, choices=EJES_CHOICES, default=EJE_OTRO,
         help_text="Categoria tematica de la pregunta. Sirve para el match por eje."
     )
+    explicacion = models.TextField(
+        blank=True, default="",
+        help_text="Contexto educativo neutro sobre que trata la pregunta (2-3 lineas)."
+    )
+    repercusiones = models.JSONField(
+        default=dict, blank=True,
+        help_text=(
+            "Dict con keys: economico, social, cultural, ambiental, institucional. "
+            "Cada valor es un texto breve explicando el impacto en esa dimension."
+        )
+    )
 
     class Meta: 
         verbose_name_plural = "Preguntas"
