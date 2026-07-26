@@ -189,6 +189,7 @@ Por favor abrir un issue primero para cambios grandes. Ver la carpeta [`docs/`](
 - [`algoritmo-simple.md`](docs/algoritmo-simple.md) — el mismo algoritmo sin matematica, para publico no tecnico
 - [`comparacion-vaas.md`](docs/comparacion-vaas.md) — analisis comparativo vs Wahl-O-Mat, StemWijzer, Smartvote y 6 otros VAAs
 - [`buenas-practicas.md`](docs/buenas-practicas.md) — SOLID, DRY, Clean Architecture, 12-Factor, testing pyramid y otros principios aplicados
+- [`estado-actual.md`](docs/estado-actual.md) — foto honesta: features listas, gaps para publicar, evaluacion de modularidad + escalabilidad
 - [`doc-tecnica.md`](docs/doc-tecnica.md) — doc legacy con arquitectura del sistema completo (pre-refactor)
 
 ## Estado
