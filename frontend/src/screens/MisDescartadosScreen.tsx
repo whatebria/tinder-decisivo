@@ -18,10 +18,10 @@ import {
 
 import { getErrorMessage } from "../api/client";
 import { useDescartados, useToggleDescartado } from "../api/hooks";
-import { Badge } from "../components/Badge";
-import { Button } from "../components/Button";
-import { TextButton } from "../components/TextButton";
-import { useToast } from "../components/Toast";
+import { Badge } from "../components";
+import { Button } from "../components";
+import { TextButton } from "../components";
+import { useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 
 export function MisDescartadosScreen({

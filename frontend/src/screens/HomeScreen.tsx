@@ -17,13 +17,13 @@ import {
 import type { TipoEleccion } from "../api/endpoints";
 import { getErrorMessage } from "../api/client";
 import { useReiniciarCuestionario, useTiposEleccion } from "../api/hooks";
-import { ConfirmModal } from "../components/ConfirmModal";
-import { useToast } from "../components/Toast";
+import { ConfirmModal } from "../components";
+import { useToast } from "../components";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
-import { Button } from "../components/Button";
-import { TextButton } from "../components/TextButton";
-import { ThemeToggle } from "../components/ThemeToggle";
+import { Button } from "../components";
+import { TextButton } from "../components";
+import { ThemeToggle } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useThemeColors } from "../theme/useTheme";
 

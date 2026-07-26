@@ -37,13 +37,13 @@ import {
   useToggleDescartado,
   useToggleFavorito,
 } from "../api/hooks";
-import { BookmarkActions } from "../components/BookmarkActions";
-import { Badge, type BadgeVariant } from "../components/Badge";
-import { Button } from "../components/Button";
-import { RadarChart } from "../components/RadarChart";
-import { ShareModal } from "../components/ShareModal";
-import { TextButton } from "../components/TextButton";
-import { useToast } from "../components/Toast";
+import { BookmarkActions } from "../components";
+import { Badge, type BadgeVariant } from "../components";
+import { Button } from "../components";
+import { RadarChart } from "../components";
+import { ShareModal } from "../components";
+import { TextButton } from "../components";
+import { useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import {
   formatMatchPercentage,

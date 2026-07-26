@@ -23,10 +23,10 @@ import {
   useEliminarCuenta,
   usePerfil,
 } from "../api/hooks";
-import { CambiarPasswordModal } from "../components/CambiarPasswordModal";
-import { EliminarCuentaModal } from "../components/EliminarCuentaModal";
-import { TextButton } from "../components/TextButton";
-import { useToast } from "../components/Toast";
+import { CambiarPasswordModal } from "../components";
+import { EliminarCuentaModal } from "../components";
+import { TextButton } from "../components";
+import { useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
 import { useThemeStore, type ThemeMode } from "../store/theme";

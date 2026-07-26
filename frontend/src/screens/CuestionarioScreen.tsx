@@ -22,12 +22,12 @@ import {
 } from "tamagui";
 
 import { getErrorMessage } from "../api/client";
-import { PreguntaInfoModal } from "../components/PreguntaInfoModal";
-import { Button } from "../components/Button";
-import { IconButton } from "../components/IconButton";
-import { SelectableButton } from "../components/SelectableButton";
-import { TextButton } from "../components/TextButton";
-import { useToast } from "../components/Toast";
+import { PreguntaInfoModal } from "../components";
+import { Button } from "../components";
+import { IconButton } from "../components";
+import { SelectableButton } from "../components";
+import { TextButton } from "../components";
+import { useToast } from "../components";
 import { useThemeColors } from "../theme/useTheme";
 import type { RootStackScreenProps } from "../navigation/types";
 import {

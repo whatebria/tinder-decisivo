@@ -1,5 +1,8 @@
 """Views de noticias. Lectura publica, escritura solo admin."""
 
+from datetime import timedelta
+
+from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import generics, permissions
 
@@ -24,6 +27,14 @@ class _NoticiaPermMixin:
             "fuente", str, required=False,
             description="Filtra por medio de origen (match parcial, case-insensitive).",
         ),
+        OpenApiParameter(
+            "dias", int, required=False,
+            description="Solo noticias de los ultimos N dias (ej. 7, 30, 90).",
+        ),
+        OpenApiParameter(
+            "q", str, required=False,
+            description="Busqueda de texto libre en titulo y descripcion.",
+        ),
     ],
     responses={200: NoticiaSerializer(many=True)},
 )
@@ -38,12 +49,33 @@ class NoticiaListCreateView(_NoticiaPermMixin, generics.ListCreateAPIView):
             .prefetch_related("candidatos_mencionados")
             .order_by("-fecha_publicacion")
         )
-        candidato_id = self.request.query_params.get("candidato_id")
+        params = self.request.query_params
+
+        candidato_id = params.get("candidato_id")
         if candidato_id:
             qs = qs.filter(candidatos_mencionados__id=candidato_id).distinct()
-        fuente = self.request.query_params.get("fuente")
+
+        fuente = params.get("fuente")
         if fuente:
             qs = qs.filter(fuente__icontains=fuente)
+
+        dias = params.get("dias")
+        if dias:
+            try:
+                dias_int = int(dias)
+                if dias_int > 0:
+                    desde = timezone.now() - timedelta(days=dias_int)
+                    qs = qs.filter(fecha_publicacion__gte=desde)
+            except (ValueError, TypeError):
+                pass  # ignoro dias invalido, no rompo el request
+
+        q = params.get("q")
+        if q and q.strip():
+            from django.db.models import Q
+            qs = qs.filter(
+                Q(titulo__icontains=q) | Q(descripcion__icontains=q)
+            )
+
         return qs
 
 

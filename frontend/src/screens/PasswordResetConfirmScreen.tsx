@@ -9,10 +9,10 @@ import { H1, Paragraph, YStack } from "tamagui";
 
 import { getErrorMessage } from "../api/client";
 import { useConfirmPasswordReset } from "../api/hooks";
-import { FormInput } from "../components/FormInput";
-import { Button } from "../components/Button";
-import { TextButton } from "../components/TextButton";
-import { useToast } from "../components/Toast";
+import { FormInput } from "../components";
+import { Button } from "../components";
+import { TextButton } from "../components";
+import { useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 
 export function PasswordResetConfirmScreen({

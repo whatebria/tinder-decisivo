@@ -7,11 +7,11 @@ import { H1, Paragraph, YStack } from "tamagui";
 
 import { login } from "../api/endpoints";
 import { getErrorMessage } from "../api/client";
-import { FormInput } from "../components/FormInput";
-import { Button } from "../components/Button";
-import { TextButton } from "../components/TextButton";
-import { ThemeToggle } from "../components/ThemeToggle";
-import { useToast } from "../components/Toast";
+import { FormInput } from "../components";
+import { Button } from "../components";
+import { TextButton } from "../components";
+import { ThemeToggle } from "../components";
+import { useToast } from "../components";
 import { useAuthStore } from "../store/auth";
 import type { RootStackScreenProps } from "../navigation/types";
 

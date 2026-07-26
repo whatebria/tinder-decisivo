@@ -199,7 +199,13 @@ export function useUpdateRespuesta(tipoEleccionId: number | null | undefined) {
 
 export function useNoticiasFeed(filters: NoticiaFeedFilters = {}) {
   return useQuery<Noticia[]>({
-    queryKey: ["noticias", filters.candidatoId ?? null, filters.fuente ?? null],
+    queryKey: [
+      "noticias",
+      filters.candidatoId ?? null,
+      filters.fuente ?? null,
+      filters.dias ?? null,
+      filters.q ?? null,
+    ],
     queryFn: () => listNoticias(filters),
     staleTime: 60_000,
   });

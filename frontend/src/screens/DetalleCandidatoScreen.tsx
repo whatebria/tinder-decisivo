@@ -31,12 +31,12 @@ import {
   useToggleDescartado,
   useToggleFavorito,
 } from "../api/hooks";
-import { BookmarkActions } from "../components/BookmarkActions";
-import { Button } from "../components/Button";
-import { CandidatoPosturas } from "../components/CandidatoPosturas";
-import { RadarChart } from "../components/RadarChart";
-import { TextButton } from "../components/TextButton";
-import { useToast } from "../components/Toast";
+import { BookmarkActions } from "../components";
+import { Button } from "../components";
+import { CandidatoPosturas } from "../components";
+import { RadarChart } from "../components";
+import { TextButton } from "../components";
+import { useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { formatMatchPercentage, getMatchColor } from "../services/matching";
 import { useCuestionarioStore } from "../store/cuestionario";

@@ -22,10 +22,10 @@ import {
 import { getErrorMessage } from "../api/client";
 import type { MiRespuesta } from "../api/endpoints";
 import { useMisRespuestas, useUpdateRespuesta } from "../api/hooks";
-import { EditarRespuestaModal } from "../components/EditarRespuestaModal";
-import { PrimaryButton } from "../components/PrimaryButton";
-import { TextButton } from "../components/TextButton";
-import { useToast } from "../components/Toast";
+import { EditarRespuestaModal } from "../components";
+import { PrimaryButton } from "../components";
+import { TextButton } from "../components";
+import { useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 
 const PESO_LABELS: Record<number, string> = {

@@ -6,8 +6,8 @@ import React from "react";
 import { H1, Paragraph, YStack } from "tamagui";
 
 import { useCuestionarioStore } from "../store/cuestionario";
-import { Button } from "../components/Button";
-import { TextButton } from "../components/TextButton";
+import { Button } from "../components";
+import { TextButton } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 
 export function SubmitDoneScreen({

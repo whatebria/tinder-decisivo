@@ -19,9 +19,9 @@ import {
 
 import { getErrorMessage } from "../api/client";
 import { useDecisiones, useDeleteDecision } from "../api/hooks";
-import { Button } from "../components/Button";
-import { TextButton } from "../components/TextButton";
-import { useToast } from "../components/Toast";
+import { Button } from "../components";
+import { TextButton } from "../components";
+import { useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useThemeColors } from "../theme/useTheme";
 

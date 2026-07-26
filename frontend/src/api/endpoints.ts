@@ -132,6 +132,8 @@ export async function matchCandidatos(
 export interface NoticiaFeedFilters {
   candidatoId?: number | null;
   fuente?: string | null;
+  dias?: number | null;
+  q?: string | null;
 }
 
 export async function noticiasPorCandidato(
@@ -150,6 +152,8 @@ export async function listNoticias(
   const params: Record<string, string | number> = {};
   if (filters.candidatoId) params.candidato_id = filters.candidatoId;
   if (filters.fuente) params.fuente = filters.fuente;
+  if (filters.dias) params.dias = filters.dias;
+  if (filters.q && filters.q.trim()) params.q = filters.q.trim();
   const { data } = await apiClient.get<Noticia[]>("/noticias/", { params });
   return data;
 }

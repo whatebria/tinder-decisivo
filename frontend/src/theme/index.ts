@@ -7,6 +7,7 @@
 
 export { colors, colorsDark, type ColorKey } from "./colors";
 export { spacing, type SpacingKey } from "./spacing";
+export { typography, type TypographyKey } from "./typography";
 export { radii, type RadiusKey } from "./radii";
 export { shadows, shadowsDark, type ShadowKey } from "./shadows";
 export { motion, easeBezier, type MotionKey } from "./motion";
