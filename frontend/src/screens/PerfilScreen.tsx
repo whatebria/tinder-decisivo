@@ -1,21 +1,18 @@
 /**
  * PerfilScreen: info del usuario + contadores + acciones (cambiar password,
  * eliminar cuenta, cerrar sesion).
+ *
+ * Migrado a Fase 5:
+ *   - Fuera Tamagui, todo con RN + design system nativo
+ *   - AppShell con active=null (accedido desde Config)
+ *   - ScreenTopBar con back button
+ *   - Elimina ThemeSelector local (DRY: usa ThemeToggle atom que ya hace lo mismo con Tabs)
+ *   - StatBadge queda inline (patron chico y unico de este screen)
+ *   - Cero hardcodes: todo via tokens
  */
 
-import React, { useState } from "react";
-import { ScrollView } from "react-native";
-import {
-  Card,
-  H1,
-  H3,
-  Paragraph,
-  Separator,
-  SizableText,
-  Spinner,
-  XStack,
-  YStack,
-} from "tamagui";
+import React, { useMemo, useState } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getErrorMessage } from "../api/client";
 import {
@@ -23,13 +20,23 @@ import {
   useEliminarCuenta,
   usePerfil,
 } from "../api/hooks";
-import { CambiarPasswordModal } from "../components";
-import { EliminarCuentaModal } from "../components";
-import { Link } from "../components";
-import { useToast } from "../components";
+import {
+  AppShell,
+  CambiarPasswordModal,
+  Divider,
+  EliminarCuentaModal,
+  Link,
+  ScreenTopBar,
+  SectionTitle,
+  Spinner,
+  ThemeToggle,
+  useToast,
+} from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
-import { useThemeStore, type ThemeMode } from "../store/theme";
+import { radii } from "../theme/radii";
+import { spacing } from "../theme/spacing";
+import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
 
 export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
@@ -44,8 +51,14 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
 
   async function handleCambiarPass(current: string, next: string) {
     try {
-      await cambiar.mutateAsync({ currentPassword: current, newPassword: next });
-      toast.success("Contrasena actualizada", "Tu nueva contrasena ya esta activa.");
+      await cambiar.mutateAsync({
+        currentPassword: current,
+        newPassword: next,
+      });
+      toast.success(
+        "Contrasena actualizada",
+        "Tu nueva contrasena ya esta activa.",
+      );
       setPassOpen(false);
     } catch (err) {
       toast.error("No pudimos cambiar la contrasena", getErrorMessage(err));
@@ -63,159 +76,218 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
     }
   }
 
-  if (perfilQ.isLoading) {
-    return (
-      <YStack flex={1} justifyContent="center" alignItems="center" backgroundColor="$background">
-        <Spinner size="large" />
-      </YStack>
-    );
-  }
-
   const perfil = perfilQ.data;
 
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <YStack flex={1} padding="$5" gap="$4" backgroundColor="$background" paddingTop="$8">
-        <H1 color="$text">Mi perfil</H1>
+    <AppShell active={null} navigation={navigation}>
+      <View style={[styles.root, { backgroundColor: c.bg }]}>
+        <ScrollView contentContainerStyle={styles.scroll}>
+          <ScreenTopBar
+            title="Mi perfil"
+            subtitle={perfil?.username}
+            onBack={() => navigation.goBack()}
+          />
 
-        {perfil ? (
-          <>
-            {/* Info basica */}
-            <Card padding="$4" gap="$2" borderWidth={1} borderColor="$border">
-              <YStack gap="$1">
-                <SizableText size="$2" color="$textSecondary" fontWeight="700">
-                  USUARIO
-                </SizableText>
-                <SizableText size="$5" color="$text">
-                  {perfil.username}
-                </SizableText>
-              </YStack>
-              <YStack gap="$1">
-                <SizableText size="$2" color="$textSecondary" fontWeight="700">
-                  EMAIL
-                </SizableText>
-                <SizableText size="$4" color="$text">
-                  {perfil.email || "(sin email registrado)"}
-                </SizableText>
-              </YStack>
-              <YStack gap="$1">
-                <SizableText size="$2" color="$textSecondary" fontWeight="700">
-                  MIEMBRO DESDE
-                </SizableText>
-                <SizableText size="$3" color="$textSecondary">
-                  {new Date(perfil.fecha_registro).toLocaleDateString("es-CL", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </SizableText>
-              </YStack>
-            </Card>
+          {perfilQ.isLoading ? (
+            <View style={styles.loadingBox}>
+              <Spinner size="large" />
+            </View>
+          ) : perfil ? (
+            <>
+              {/* Info basica */}
+              <View
+                style={[
+                  styles.infoCard,
+                  { backgroundColor: c.card, borderColor: c.border },
+                ]}
+              >
+                <InfoRow
+                  label="Usuario"
+                  value={perfil.username}
+                  valueStyle={typography.h3}
+                />
+                <InfoRow
+                  label="Email"
+                  value={perfil.email || "(sin email registrado)"}
+                  valueStyle={typography.body}
+                />
+                <InfoRow
+                  label="Miembro desde"
+                  value={new Date(perfil.fecha_registro).toLocaleDateString(
+                    "es-CL",
+                    { year: "numeric", month: "long", day: "numeric" },
+                  )}
+                  valueStyle={typography.small}
+                  valueMuted
+                />
+              </View>
 
-            {/* Contadores */}
-            <H3 color="$text">Mi actividad</H3>
-            <XStack gap="$3" flexWrap="wrap">
-              <StatBadge label="Respuestas" value={perfil.contadores.respuestas} />
-              <StatBadge label="Favoritos" value={perfil.contadores.favoritos} />
-              <StatBadge label="Descartados" value={perfil.contadores.descartados} />
-              <StatBadge label="Votos guardados" value={perfil.contadores.decisiones} />
-            </XStack>
-          </>
-        ) : (
-          <Paragraph color="$textSecondary">No pudimos cargar tu perfil.</Paragraph>
-        )}
+              {/* Contadores */}
+              <SectionTitle title="Mi actividad" />
+              <View style={styles.statsRow}>
+                <StatBadge
+                  label="Respuestas"
+                  value={perfil.contadores.respuestas}
+                />
+                <StatBadge
+                  label="Favoritos"
+                  value={perfil.contadores.favoritos}
+                />
+                <StatBadge
+                  label="Descartados"
+                  value={perfil.contadores.descartados}
+                />
+                <StatBadge
+                  label="Votos guardados"
+                  value={perfil.contadores.decisiones}
+                />
+              </View>
+            </>
+          ) : (
+            <Text style={[styles.errorText, { color: c.textSecondary }]}>
+              No pudimos cargar tu perfil.
+            </Text>
+          )}
 
-        <Separator />
+          <Divider />
 
-        {/* Apariencia */}
-        <H3 color="$text">Apariencia</H3>
-        <ThemeSelector />
+          {/* Apariencia */}
+          <SectionTitle title="Apariencia" />
+          <ThemeToggle />
 
-        <Separator />
+          <Divider />
 
-        {/* Acciones */}
-        <H3 color="$text">Cuenta</H3>
-        <YStack gap="$2">
-          <Link block onPress={() => setPassOpen(true)}>
-            Cambiar mi contrasena
-          </Link>
-          <Link block onPress={logout}>Cerrar sesion</Link>
-          <Link block onPress={() => setDeleteOpen(true)} color={c.danger}>
-            Eliminar mi cuenta
-          </Link>
-        </YStack>
+          {/* Acciones */}
+          <SectionTitle title="Cuenta" />
+          <View style={styles.actions}>
+            <Link block onPress={() => setPassOpen(true)}>
+              Cambiar mi contrasena
+            </Link>
+            <Link block onPress={logout}>
+              Cerrar sesion
+            </Link>
+            <Link
+              block
+              onPress={() => setDeleteOpen(true)}
+              color={c.danger}
+            >
+              Eliminar mi cuenta
+            </Link>
+          </View>
+        </ScrollView>
 
-        <YStack flex={1} />
-        <Link block onPress={() => navigation.goBack()}>Volver</Link>
-      </YStack>
+        <CambiarPasswordModal
+          visible={passOpen}
+          onCancel={() => setPassOpen(false)}
+          onSubmit={handleCambiarPass}
+          loading={cambiar.isPending}
+        />
+        <EliminarCuentaModal
+          visible={deleteOpen}
+          onCancel={() => setDeleteOpen(false)}
+          onSubmit={handleEliminar}
+          loading={eliminar.isPending}
+        />
+      </View>
+    </AppShell>
+  );
+}
 
-      <CambiarPasswordModal
-        visible={passOpen}
-        onCancel={() => setPassOpen(false)}
-        onSubmit={handleCambiarPass}
-        loading={cambiar.isPending}
-      />
-      <EliminarCuentaModal
-        visible={deleteOpen}
-        onCancel={() => setDeleteOpen(false)}
-        onSubmit={handleEliminar}
-        loading={eliminar.isPending}
-      />
-    </ScrollView>
+// ---------- Sub-componentes locales ----------
+// InfoRow y StatBadge quedan aca porque son patrones especificos de este
+// screen. Si aparecen en 3+ lugares, promover a molecule.
+
+interface InfoRowProps {
+  label: string;
+  value: string;
+  valueStyle?: object;
+  valueMuted?: boolean;
+}
+
+function InfoRow({ label, value, valueStyle, valueMuted }: InfoRowProps) {
+  const c = useThemeColors();
+  return (
+    <View style={styles.infoRow}>
+      <Text style={[styles.infoLabel, { color: c.textSecondary }]}>
+        {label}
+      </Text>
+      <Text
+        style={[
+          valueStyle,
+          { color: valueMuted ? c.textSecondary : c.text },
+        ]}
+      >
+        {value}
+      </Text>
+    </View>
   );
 }
 
 function StatBadge({ label, value }: { label: string; value: number }) {
+  const c = useThemeColors();
   return (
-    <Card padding="$3" borderWidth={1} borderColor="$border" minWidth={110} alignItems="center">
-      <SizableText size="$8" fontWeight="800" color="$primary">
-        {value}
-      </SizableText>
-      <SizableText size="$2" color="$textSecondary">
+    <View
+      style={[
+        styles.statBadge,
+        { backgroundColor: c.card, borderColor: c.border },
+      ]}
+    >
+      <Text style={[styles.statValue, { color: c.primary }]}>{value}</Text>
+      <Text style={[styles.statLabel, { color: c.textSecondary }]}>
         {label}
-      </SizableText>
-    </Card>
+      </Text>
+    </View>
   );
 }
 
-function ThemeSelector() {
-  const mode = useThemeStore((s) => s.mode);
-  const setMode = useThemeStore((s) => s.setMode);
+// ---------- Styles ----------
 
-  const options: Array<{ value: ThemeMode; label: string }> = [
-    { value: "light", label: "Claro" },
-    { value: "dark", label: "Oscuro" },
-    { value: "system", label: "Sistema" },
-  ];
+const styles = StyleSheet.create({
+  root: { flex: 1 },
+  scroll: {
+    padding: spacing.sp4,
+    paddingBottom: spacing.sp7,
+    gap: spacing.sp4,
+  },
 
-  return (
-    <XStack gap="$2" flexWrap="wrap">
-      {options.map((opt) => {
-        const selected = mode === opt.value;
-        return (
-          <Card
-            key={opt.value}
-            padding="$3"
-            borderWidth={selected ? 2 : 1}
-            borderColor={selected ? "$primary" : "$border"}
-            backgroundColor={selected ? "$primary" : "$background"}
-            pressStyle={{ opacity: 0.7 }}
-            onPress={() => setMode(opt.value)}
-            flex={1}
-            minWidth={90}
-            alignItems="center"
-            accessibilityLabel={`Modo ${opt.label}`}
-          >
-            <SizableText
-              size="$3"
-              fontWeight="700"
-              color={selected ? "$textOnPrimary" : "$text"}
-            >
-              {opt.label}
-            </SizableText>
-          </Card>
-        );
-      })}
-    </XStack>
-  );
-}
+  loadingBox: {
+    alignItems: "center",
+    padding: spacing.sp5,
+  },
+
+  errorText: typography.body,
+
+  infoCard: {
+    padding: spacing.sp4,
+    borderRadius: radii.rMd,
+    borderWidth: 1,
+    gap: spacing.sp3,
+  },
+  infoRow: { gap: spacing.sp1 },
+  infoLabel: {
+    ...typography.overline,
+    fontWeight: "700",
+  },
+
+  statsRow: {
+    flexDirection: "row",
+    gap: spacing.sp3,
+    flexWrap: "wrap",
+  },
+  statBadge: {
+    padding: spacing.sp3,
+    borderRadius: radii.rMd,
+    borderWidth: 1,
+    minWidth: 110,
+    alignItems: "center",
+    flexGrow: 1,
+    flexBasis: 110,
+  },
+  statValue: {
+    ...typography.display,
+    fontWeight: "800",
+  },
+  statLabel: typography.overline,
+
+  actions: { gap: spacing.sp2 },
+});
