@@ -9,14 +9,11 @@
  *
  * Publica — no requiere auth.
  *
- * Nota: este screen aun no esta migrado a la Fase 5 (no usa AppShell ni
- * ScreenTopBar). Este refactor solo consolida:
- *   - Cards inline -> NewsCard (molecule)
- *   - ChipRow custom -> Chip (atom)
- *   - MiniChip inline -> Badge (atom)
- *   - TextInput custom -> Input (atom)
- *   - Todos los styles a tokens spacing/radii/typography.
- * La migracion a Fase 5 (topbar + shell + wireframe) va en un commit aparte.
+ * Migrado a Fase 5:
+ *   - AppShell con active='noticias' (es tab del BottomNav)
+ *   - HomeTopBar reemplaza el header custom (title + subtitle)
+ *   - Elimina paddingTop 48 (ahora hay shell con safe area)
+ *   - Elimina Link 'Volver' final (es tab, no detail)
  */
 
 import React, { useMemo, useState } from "react";
@@ -28,7 +25,16 @@ import {
   useNoticiasFeed,
   useToggleNoticiaBookmark,
 } from "../api/hooks";
-import { Badge, Chip, Input, Link, NewsCard, type Sentiment } from "../components";
+import {
+  AppShell,
+  Badge,
+  Chip,
+  HomeTopBar,
+  Input,
+  Link,
+  NewsCard,
+  type Sentiment,
+} from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
 import { spacing } from "../theme/spacing";
@@ -184,13 +190,12 @@ export function NoticiasScreen({ navigation }: RootStackScreenProps<"Noticias">)
   const rangosItems = RANGOS_FECHA.map((r) => ({ id: r.id, label: r.label }));
 
   return (
-    <View style={[styles.container, { backgroundColor: c.bg }]}>
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: c.text }]}>Noticias</Text>
+    <AppShell active="noticias" navigation={navigation}>
+      <View style={[styles.container, { backgroundColor: c.bg }]}>
+        <HomeTopBar brand="Noticias" />
         <Text style={[styles.subtitle, { color: c.textSecondary }]}>
           Ultimas noticias sobre los candidatos.
         </Text>
-      </View>
 
       {/* Busqueda */}
       <View style={styles.searchWrap}>
@@ -306,33 +311,23 @@ export function NoticiasScreen({ navigation }: RootStackScreenProps<"Noticias">)
         )}
 
         <View style={styles.footerSpacer} />
-        <Link block onPress={() => navigation.goBack()}>
-          Volver
-        </Link>
       </ScrollView>
-    </View>
+      </View>
+    </AppShell>
   );
 }
 
 // ---------- Styles ----------
 //
 // Todos los valores dimensionales vienen de tokens del DS.
-// El paddingTop 48 del container es una excepcion pragmatica: reemplaza
-// una SafeAreaView faltante en este screen aun no migrado a Fase 5. Se
-// va cuando se agregue ScreenTopBar (que ya tiene safe-area logic).
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: spacing.sp8 + spacing.sp2 }, // ~48
-  header: {
+  container: { flex: 1 },
+  subtitle: {
+    ...typography.small,
     paddingHorizontal: spacing.sp5,
-    gap: spacing.sp1,
     marginBottom: spacing.sp2,
   },
-  title: {
-    ...typography.h1,
-    fontWeight: "800",
-  },
-  subtitle: typography.small,
 
   searchWrap: {
     paddingHorizontal: spacing.sp4,
