@@ -106,7 +106,6 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   const email = useAuthStore((s) => s.email);
   const isGuest = useAuthStore((s) => s.isGuest);
   const activeTipoId = useCuestionarioStore((s) => s.tipoEleccionId);
-  const setTipoEleccion = useCuestionarioStore((s) => s.setTipoEleccion);
   const loadForTipoEleccion = useCuestionarioStore((s) => s.loadForTipoEleccion);
   const electionsActiveIds = useElectionsPrefsStore((s) => s.activeIds);
   const toast = useToast();
@@ -158,9 +157,10 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
 
   function abrirEleccion(tipo: TipoEleccion) {
     if (!tipo.id) return;
-    setTipoEleccion(tipo.id);
-    // Por ahora vamos directo a Resultados; si no hay respuestas, muestra el CTA de cuestionario.
-    navigation.navigate("Resultados");
+    // Delego en iniciarCuestionario: si el user ya respondio todas, entra al
+    // store con preguntas.length === 0 y navega a Resultados. Si faltan,
+    // navega a Cuestionario. Asi la card hace lo correcto sin importar el estado.
+    iniciarCuestionario(tipo);
   }
 
   async function handleConfirmReiniciar() {
