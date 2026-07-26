@@ -8,7 +8,8 @@
  *   2. Mis datos    (auth)  — NavRow a MisRespuestas (hub) con reiniciar/editar dentro
  *   3. Elecciones           — NavRow a GestionElecciones
  *   4. Apariencia           — ThemeToggle
- *   5. Cerrar sesion (auth) — Button secondary full-width
+ *   5. Debug        (dev)   — NavRow al DesignSystem (solo __DEV__)
+ *   6. Cerrar sesion (auth) — Button secondary full-width
  *
  * Modo invitado: en vez de las secciones auth, muestra CTA para crear cuenta.
  *
@@ -152,6 +153,18 @@ export function ConfiguracionScreen({
           <SectionTitle title="Apariencia" />
           <ThemeToggle />
         </View>
+
+        {/* 5. Debug (solo dev builds) */}
+        {__DEV__ ? (
+          <View style={styles.section}>
+            <SectionTitle title="Debug" />
+            <NavRow
+              label="Design System"
+              subtitle="Catalogo interno de atoms, molecules y organisms"
+              onPress={() => navigation.navigate("DesignSystem")}
+            />
+          </View>
+        ) : null}
 
         {/* Bloque modo invitado */}
         {isGuest ? (
