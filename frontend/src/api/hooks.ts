@@ -8,18 +8,31 @@
  * Para POSTs (submit, login) seguimos usando los stores (Zustand)
  * porque involucran side-effects mas complejos (navegar, resetear form).
  */
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
+  addDescartado,
+  addFavorito,
+  deleteDecision,
+  deleteDescartado,
+  deleteFavorito,
   listCandidatos,
+  listDecisiones,
+  listDescartados,
+  listFavoritos,
   listTiposEleccion,
   matchCandidatos,
   noticiasPorCandidato,
   preguntasPendientes,
+  saveDecision,
   type Candidato,
+  type CandidatoDescartado,
+  type CandidatoFavorito,
+  type DecisionFinal,
   type MatchResult,
   type Noticia,
   type Pregunta,
+  type SaveDecisionInput,
   type TipoEleccion,
 } from "./endpoints";
 import { queryKeys } from "./queryClient";
@@ -83,5 +96,105 @@ export function useNoticiasCandidato(id: number) {
 export function useMatchCandidatos() {
   return useMutation<MatchResult[], Error, number>({
     mutationFn: matchCandidatos,
+  });
+}
+
+// ============================================================
+// Bookmarking: favoritos, descartados, decision final
+// ============================================================
+
+// -- Favoritos --------------------------------------------------------------
+export function useFavoritos() {
+  return useQuery<CandidatoFavorito[]>({
+    queryKey: queryKeys.favoritos,
+    queryFn: listFavoritos,
+  });
+}
+
+/**
+ * Toggle idempotente: si el candidato ya es favorito, lo saca. Sino, lo agrega.
+ * Consulta el cache actual para decidir el side de la mutation.
+ * Invalida el cache al final para que las UIs se actualicen.
+ */
+export function useToggleFavorito() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, number>({
+    mutationFn: async (candidatoId: number) => {
+      const favoritos = qc.getQueryData<CandidatoFavorito[]>(queryKeys.favoritos) ?? [];
+      const existing = favoritos.find((f) => f.candidato === candidatoId);
+      if (existing) {
+        await deleteFavorito(existing.id!);
+      } else {
+        await addFavorito(candidatoId);
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.favoritos });
+    },
+  });
+}
+
+// -- Descartados ------------------------------------------------------------
+export function useDescartados() {
+  return useQuery<CandidatoDescartado[]>({
+    queryKey: queryKeys.descartados,
+    queryFn: listDescartados,
+  });
+}
+
+export function useToggleDescartado() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, number>({
+    mutationFn: async (candidatoId: number) => {
+      const descartados =
+        qc.getQueryData<CandidatoDescartado[]>(queryKeys.descartados) ?? [];
+      const existing = descartados.find((d) => d.candidato === candidatoId);
+      if (existing) {
+        await deleteDescartado(existing.id!);
+      } else {
+        await addDescartado(candidatoId);
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.descartados });
+    },
+  });
+}
+
+// -- Decision final ---------------------------------------------------------
+export function useDecisiones() {
+  return useQuery<DecisionFinal[]>({
+    queryKey: queryKeys.decisiones,
+    queryFn: listDecisiones,
+  });
+}
+
+/**
+ * Devuelve la decision guardada para un tipo de eleccion, o undefined.
+ * Usa el mismo cache que useDecisiones para evitar N requests.
+ */
+export function useDecisionActual(tipoEleccionId: number | null | undefined) {
+  const { data, ...rest } = useDecisiones();
+  const decision = data?.find((d) => d.tipo_eleccion === tipoEleccionId);
+  return { data: decision, ...rest };
+}
+
+export function useSaveDecision() {
+  const qc = useQueryClient();
+  return useMutation<DecisionFinal, Error, SaveDecisionInput>({
+    mutationFn: saveDecision,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.decisiones });
+    },
+  });
+}
+
+export function useDeleteDecision() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, number>({
+    mutationFn: deleteDecision,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.decisiones });
+    },
   });
 }

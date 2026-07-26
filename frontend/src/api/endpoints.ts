@@ -137,3 +137,74 @@ export async function noticiasPorCandidato(
   );
   return data;
 }
+
+// ============================================================
+// Bookmarking: favoritos, descartados, decision final
+// ============================================================
+export type CandidatoFavorito = Schemas["CandidatoFavorito"];
+export type CandidatoDescartado = Schemas["CandidatoDescartado"];
+export type DecisionFinal = Schemas["DecisionFinal"];
+
+// -- Favoritos --------------------------------------------------------------
+export async function listFavoritos(): Promise<CandidatoFavorito[]> {
+  const { data } = await apiClient.get<CandidatoFavorito[]>(
+    "/candidatos-favoritos/"
+  );
+  return data;
+}
+
+export async function addFavorito(candidatoId: number): Promise<CandidatoFavorito> {
+  const { data } = await apiClient.post<CandidatoFavorito>(
+    "/candidatos-favoritos/",
+    { candidato: candidatoId }
+  );
+  return data;
+}
+
+export async function deleteFavorito(favoritoId: number): Promise<void> {
+  await apiClient.delete(`/candidatos-favoritos/${favoritoId}/`);
+}
+
+// -- Descartados ------------------------------------------------------------
+export async function listDescartados(): Promise<CandidatoDescartado[]> {
+  const { data } = await apiClient.get<CandidatoDescartado[]>("/descartados/");
+  return data;
+}
+
+export async function addDescartado(
+  candidatoId: number
+): Promise<CandidatoDescartado> {
+  const { data } = await apiClient.post<CandidatoDescartado>("/descartados/", {
+    candidato: candidatoId,
+  });
+  return data;
+}
+
+export async function deleteDescartado(descartadoId: number): Promise<void> {
+  await apiClient.delete(`/descartados/${descartadoId}/`);
+}
+
+// -- Decision final ---------------------------------------------------------
+export async function listDecisiones(): Promise<DecisionFinal[]> {
+  const { data } = await apiClient.get<DecisionFinal[]>("/decision-final/");
+  return data;
+}
+
+export interface SaveDecisionInput {
+  candidatoId: number;
+  tipoEleccionId: number;
+}
+
+export async function saveDecision(input: SaveDecisionInput): Promise<DecisionFinal> {
+  // El backend usa update_or_create sobre (user, tipo_eleccion), asi que
+  // POST es idempotente para cambiar de opinion.
+  const { data } = await apiClient.post<DecisionFinal>("/decision-final/", {
+    candidato_elegido: input.candidatoId,
+    tipo_eleccion: input.tipoEleccionId,
+  });
+  return data;
+}
+
+export async function deleteDecision(decisionId: number): Promise<void> {
+  await apiClient.delete(`/decision-final/${decisionId}/`);
+}

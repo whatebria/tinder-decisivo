@@ -1,12 +1,14 @@
 /**
  * Ranking de candidatos post-submit.
  * Llama POST /match-candidatos/ y muestra cards ordenadas por match_percentage.
+ * Filtra descartados (no aparecen en el ranking; se pueden recuperar desde
+ * MisDescartadosScreen).
+ * Marca con badge al candidato elegido como decision final.
  */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { ScrollView } from "react-native";
 import {
-  Button,
   Card,
   H1,
   H3,
@@ -23,7 +25,15 @@ import {
   breakdownToChartData,
   type BreakdownPorEje,
 } from "../api/endpoints";
-import { useMatchCandidatos } from "../api/hooks";
+import {
+  useDecisionActual,
+  useDescartados,
+  useFavoritos,
+  useMatchCandidatos,
+  useToggleDescartado,
+  useToggleFavorito,
+} from "../api/hooks";
+import { BookmarkActions } from "../components/BookmarkActions";
 import { RadarChart } from "../components/RadarChart";
 import { TextButton } from "../components/TextButton";
 import { useToast } from "../components/Toast";
@@ -35,6 +45,7 @@ import {
   sortByMatchDesc,
 } from "../services/matching";
 import { useCuestionarioStore } from "../store/cuestionario";
+import { colors } from "../theme/colors";
 
 export function ResultadosScreen({
   navigation,
@@ -42,9 +53,34 @@ export function ResultadosScreen({
   const tipoEleccionId = useCuestionarioStore((s) => s.tipoEleccionId);
   const reset = useCuestionarioStore((s) => s.reset);
   const toast = useToast();
+
   const matchMutation = useMatchCandidatos();
-  const results = matchMutation.data ? sortByMatchDesc(matchMutation.data) : [];
+  const favoritosQ = useFavoritos();
+  const descartadosQ = useDescartados();
+  const decisionQ = useDecisionActual(tipoEleccionId);
+  const toggleFav = useToggleFavorito();
+  const toggleDesc = useToggleDescartado();
+
+  const allResults = matchMutation.data ? sortByMatchDesc(matchMutation.data) : [];
   const loading = matchMutation.isPending;
+
+  // Filtra descartados del ranking (por decisión de UX)
+  const descartadoIds = useMemo(
+    () => new Set((descartadosQ.data ?? []).map((d) => d.candidato)),
+    [descartadosQ.data]
+  );
+  const visibleResults = useMemo(
+    () =>
+      allResults.filter((r) => r.candidato_data.id != null && !descartadoIds.has(r.candidato_data.id)),
+    [allResults, descartadoIds]
+  );
+  const hiddenCount = allResults.length - visibleResults.length;
+
+  const favoritoIds = useMemo(
+    () => new Set((favoritosQ.data ?? []).map((f) => f.candidato)),
+    [favoritosQ.data]
+  );
+  const decisionCandidatoId = decisionQ.data?.candidato_elegido;
 
   useEffect(() => {
     if (tipoEleccionId) matchMutation.mutate(tipoEleccionId);
@@ -62,6 +98,18 @@ export function ResultadosScreen({
     navigation.reset({ index: 0, routes: [{ name: "Home" }] });
   }
 
+  function handleToggleFav(candidatoId: number) {
+    toggleFav.mutate(candidatoId, {
+      onError: (e) => toast.error("No pudimos actualizar favoritos", getErrorMessage(e)),
+    });
+  }
+
+  function handleToggleDesc(candidatoId: number) {
+    toggleDesc.mutate(candidatoId, {
+      onError: (e) => toast.error("No pudimos actualizar descartados", getErrorMessage(e)),
+    });
+  }
+
   if (loading) {
     return (
       <YStack flex={1} justifyContent="center" alignItems="center" backgroundColor="$background" gap="$3">
@@ -77,19 +125,29 @@ export function ResultadosScreen({
         <YStack gap="$2">
           <H1 color="$text">Tus matches</H1>
           <Paragraph color="$textSecondary">
-            Ordenados de mayor a menor afinidad. Tap para ver el detalle.
+            Ordenados de mayor a menor afinidad. Tap en el nombre para ver el detalle.
           </Paragraph>
+          {hiddenCount > 0 ? (
+            <TextButton onPress={() => navigation.navigate("MisDescartados")}>
+              {`${hiddenCount} candidato(s) descartado(s). Ver lista`}
+            </TextButton>
+          ) : null}
+          {decisionQ.data ? (
+            <TextButton onPress={() => navigation.navigate("MiDecision")}>
+              Ya tienes una decision guardada. Ver mi voto
+            </TextButton>
+          ) : null}
         </YStack>
 
         <Separator />
 
-        {results.length === 0 ? (
+        {visibleResults.length === 0 ? (
           <Paragraph color="$textSecondary">
-            No pudimos calcular matches. Volve a intentarlo mas tarde.
+            No hay candidatos para mostrar. Volve a intentarlo mas tarde.
           </Paragraph>
         ) : (
           <YStack gap="$3">
-            {results.map((r, idx) => {
+            {visibleResults.map((r, idx) => {
               const pct = Number(r.match_percentage);
               const scoreCol = getMatchColor(pct);
               const conf = getConfianzaBadge(r.confianza);
@@ -97,26 +155,32 @@ export function ResultadosScreen({
                 r.breakdown_por_eje as BreakdownPorEje | null | undefined
               );
               const candidato = r.candidato_data;
+              const candId = candidato.id!;
+              const isFav = favoritoIds.has(candId);
+              const isDecision = decisionCandidatoId === candId;
+
               return (
                 <Card
                   key={r.id}
                   padding="$4"
-                  borderWidth={1}
-                  borderColor="$border"
-                  pressStyle={{ scale: 0.98 }}
-                  onPress={() =>
-                    candidato.id &&
-                    navigation.navigate("DetalleCandidato", {
-                      candidatoId: candidato.id,
-                      breakdown: r.breakdown_por_eje as BreakdownPorEje | null,
-                      matchPct: pct,
-                      confianza: r.confianza ?? "TENTATIVA",
-                    })
-                  }
+                  borderWidth={isDecision ? 2 : 1}
+                  borderColor={isDecision ? (colors.primary as any) : "$border"}
                 >
                   <XStack gap="$4" alignItems="center">
                     {/* Info */}
-                    <YStack flex={1} gap="$1">
+                    <YStack
+                      flex={1}
+                      gap="$1"
+                      pressStyle={{ opacity: 0.7 }}
+                      onPress={() =>
+                        navigation.navigate("DetalleCandidato", {
+                          candidatoId: candId,
+                          breakdown: r.breakdown_por_eje as BreakdownPorEje | null,
+                          matchPct: pct,
+                          confianza: r.confianza ?? "TENTATIVA",
+                        })
+                      }
+                    >
                       <XStack alignItems="baseline" gap="$2">
                         <SizableText size="$2" color="$textSecondary">
                           #{idx + 1}
@@ -128,6 +192,11 @@ export function ResultadosScreen({
                       {candidato.partido ? (
                         <SizableText size="$3" color="$textSecondary">
                           {candidato.partido}
+                        </SizableText>
+                      ) : null}
+                      {isDecision ? (
+                        <SizableText size="$2" color={colors.primary} fontWeight="700">
+                          * Tu voto
                         </SizableText>
                       ) : null}
                       <XStack gap="$2" marginTop="$2" alignItems="center">
@@ -144,6 +213,18 @@ export function ResultadosScreen({
                       <RadarChart data={chartData} size={110} showLabels={false} color={scoreCol} />
                     ) : null}
                   </XStack>
+
+                  {/* Acciones */}
+                  <YStack marginTop="$3">
+                    <BookmarkActions
+                      isFavorito={isFav}
+                      isDescartado={false}
+                      onToggleFavorito={() => handleToggleFav(candId)}
+                      onToggleDescartado={() => handleToggleDesc(candId)}
+                      loading={toggleFav.isPending || toggleDesc.isPending}
+                      size="sm"
+                    />
+                  </YStack>
                 </Card>
               );
             })}

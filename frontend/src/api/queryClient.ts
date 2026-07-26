@@ -30,4 +30,7 @@ export const queryKeys = {
   candidatos: ["candidatos"] as const,
   candidato: (id: number) => ["candidato", id] as const,
   noticiasCandidato: (id: number) => ["noticias", id] as const,
+  favoritos: ["favoritos"] as const,
+  descartados: ["descartados"] as const,
+  decisiones: ["decisiones"] as const,
 };

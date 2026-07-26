@@ -107,9 +107,17 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
         )}
 
         <YStack flex={1} />
-        <TextButton onPress={logout} color={colors.danger}>
-          Cerrar sesión
-        </TextButton>
+        <YStack gap="$2">
+          <TextButton onPress={() => navigation.navigate("MiDecision")}>
+            Ver mi voto final
+          </TextButton>
+          <TextButton onPress={() => navigation.navigate("MisDescartados")}>
+            Ver mis descartados
+          </TextButton>
+          <TextButton onPress={logout} color={colors.danger}>
+            Cerrar sesión
+          </TextButton>
+        </YStack>
       </YStack>
     </ScrollView>
   );

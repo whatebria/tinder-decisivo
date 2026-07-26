@@ -1,12 +1,12 @@
 /**
- * Detalle del candidato: info + radar grande + noticias recientes.
+ * Detalle del candidato: info + radar grande + acciones (favorito, descartar,
+ * marcar como voto final) + noticias recientes.
  * Recibe candidatoId y breakdown por route params.
  */
 
 import React, { useEffect } from "react";
 import { Image, Linking, ScrollView } from "react-native";
 import {
-  Button,
   Card,
   H1,
   H3,
@@ -19,33 +19,76 @@ import {
 } from "tamagui";
 
 import { getErrorMessage } from "../api/client";
+import { breakdownToChartData } from "../api/endpoints";
 import {
-  breakdownToChartData,
-} from "../api/endpoints";
-import { useCandidato, useNoticiasCandidato } from "../api/hooks";
+  useCandidato,
+  useDecisionActual,
+  useDescartados,
+  useFavoritos,
+  useNoticiasCandidato,
+  useSaveDecision,
+  useToggleDescartado,
+  useToggleFavorito,
+} from "../api/hooks";
+import { BookmarkActions } from "../components/BookmarkActions";
+import { PrimaryButton } from "../components/PrimaryButton";
 import { RadarChart } from "../components/RadarChart";
 import { TextButton } from "../components/TextButton";
 import { useToast } from "../components/Toast";
 import type { RootStackScreenProps } from "../navigation/types";
 import { formatMatchPercentage, getMatchColor } from "../services/matching";
+import { useCuestionarioStore } from "../store/cuestionario";
+import { colors } from "../theme/colors";
 
 export function DetalleCandidatoScreen({
   route,
   navigation,
 }: RootStackScreenProps<"DetalleCandidato">) {
   const { candidatoId, breakdown, matchPct, confianza } = route.params;
+  const tipoEleccionId = useCuestionarioStore((s) => s.tipoEleccionId);
   const toast = useToast();
+
   const candidatoQuery = useCandidato(candidatoId);
   const noticiasQuery = useNoticiasCandidato(candidatoId);
+  const favoritosQ = useFavoritos();
+  const descartadosQ = useDescartados();
+  const decisionQ = useDecisionActual(tipoEleccionId);
+  const toggleFav = useToggleFavorito();
+  const toggleDesc = useToggleDescartado();
+  const saveDecision = useSaveDecision();
+
   const candidato = candidatoQuery.data ?? null;
   const noticias = noticiasQuery.data ?? [];
   const loading = candidatoQuery.isLoading;
+
+  const isFavorito = (favoritosQ.data ?? []).some(
+    (f) => f.candidato === candidatoId
+  );
+  const isDescartado = (descartadosQ.data ?? []).some(
+    (d) => d.candidato === candidatoId
+  );
+  const isMyVote = decisionQ.data?.candidato_elegido === candidatoId;
 
   useEffect(() => {
     if (candidatoQuery.error) {
       toast.error("Error cargando candidato", getErrorMessage(candidatoQuery.error));
     }
   }, [candidatoQuery.error, toast]);
+
+  function handleSaveDecision() {
+    if (!tipoEleccionId) {
+      toast.error("Falta el tipo de eleccion", "Vuelve al inicio y elige un cuestionario.");
+      return;
+    }
+    saveDecision.mutate(
+      { candidatoId, tipoEleccionId },
+      {
+        onSuccess: () => toast.success("Voto guardado", "Guardamos tu decision final."),
+        onError: (e) =>
+          toast.error("No pudimos guardar tu voto", getErrorMessage(e)),
+      }
+    );
+  }
 
   if (loading) {
     return (
@@ -59,7 +102,7 @@ export function DetalleCandidatoScreen({
     return (
       <YStack flex={1} padding="$5" justifyContent="center" alignItems="center" backgroundColor="$background" gap="$3">
         <Paragraph color="$textSecondary">Candidato no encontrado.</Paragraph>
-        <Button onPress={() => navigation.goBack()}>Volver</Button>
+        <TextButton onPress={() => navigation.goBack()}>Volver</TextButton>
       </YStack>
     );
   }
@@ -90,7 +133,11 @@ export function DetalleCandidatoScreen({
         </XStack>
 
         {/* Score */}
-        <Card padding="$4" borderWidth={1} borderColor="$border">
+        <Card
+          padding="$4"
+          borderWidth={isMyVote ? 2 : 1}
+          borderColor={isMyVote ? colors.primary : "$border"}
+        >
           <XStack alignItems="center" gap="$3">
             <SizableText size="$10" fontWeight="800" color={scoreCol as any}>
               {formatMatchPercentage(matchPct)}
@@ -102,9 +149,43 @@ export function DetalleCandidatoScreen({
               <SizableText size="$2" color="$textSecondary">
                 Confianza: {confianza}
               </SizableText>
+              {isMyVote ? (
+                <SizableText size="$3" color={colors.primary} fontWeight="700" marginTop="$1">
+                  * Este es tu voto final
+                </SizableText>
+              ) : null}
             </YStack>
           </XStack>
         </Card>
+
+        {/* Acciones */}
+        <YStack gap="$3">
+          <BookmarkActions
+            isFavorito={isFavorito}
+            isDescartado={isDescartado}
+            onToggleFavorito={() =>
+              toggleFav.mutate(candidatoId, {
+                onError: (e) => toast.error("Error", getErrorMessage(e)),
+              })
+            }
+            onToggleDescartado={() =>
+              toggleDesc.mutate(candidatoId, {
+                onError: (e) => toast.error("Error", getErrorMessage(e)),
+              })
+            }
+            loading={toggleFav.isPending || toggleDesc.isPending}
+            size="lg"
+          />
+          {!isMyVote && !isDescartado ? (
+            <PrimaryButton
+              variant="success"
+              onPress={handleSaveDecision}
+              loading={saveDecision.isPending}
+            >
+              Este es mi voto final
+            </PrimaryButton>
+          ) : null}
+        </YStack>
 
         {/* Radar grande */}
         {Object.keys(chartData).length >= 3 ? (
@@ -134,11 +215,7 @@ export function DetalleCandidatoScreen({
           </XStack>
           {noticias.length === 0 ? (
             <Paragraph color="$textSecondary">
-              Aun no hay noticias cargadas para este candidato. Corre en el backend:
-              {"\n"}
-              <SizableText fontFamily="$mono" size="$2">
-                uv run python manage.py fetch_noticias
-              </SizableText>
+              Aun no hay noticias cargadas para este candidato.
             </Paragraph>
           ) : (
             <YStack gap="$3">

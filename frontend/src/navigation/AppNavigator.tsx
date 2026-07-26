@@ -9,6 +9,8 @@ import { CuestionarioScreen } from "../screens/CuestionarioScreen";
 import { DetalleCandidatoScreen } from "../screens/DetalleCandidatoScreen";
 import { HomeScreen } from "../screens/HomeScreen";
 import { LoginScreen } from "../screens/LoginScreen";
+import { MiDecisionScreen } from "../screens/MiDecisionScreen";
+import { MisDescartadosScreen } from "../screens/MisDescartadosScreen";
 import { RegisterScreen } from "../screens/RegisterScreen";
 import { ResultadosScreen } from "../screens/ResultadosScreen";
 import { SubmitDoneScreen } from "../screens/SubmitDoneScreen";
@@ -29,6 +31,8 @@ export function AppNavigator() {
           <Stack.Screen name="SubmitDone" component={SubmitDoneScreen} />
           <Stack.Screen name="Resultados" component={ResultadosScreen} />
           <Stack.Screen name="DetalleCandidato" component={DetalleCandidatoScreen} />
+          <Stack.Screen name="MisDescartados" component={MisDescartadosScreen} />
+          <Stack.Screen name="MiDecision" component={MiDecisionScreen} />
         </>
       ) : (
         <>

@@ -15,6 +15,8 @@ export type RootStackParamList = {
     matchPct: number;
     confianza: string;
   };
+  MisDescartados: undefined;
+  MiDecision: undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> =
