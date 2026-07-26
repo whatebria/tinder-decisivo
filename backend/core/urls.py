@@ -2,6 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
+    ActualizarComunaView,
     CambiarPasswordView,
     CandidatoDescartadoViewSet,
     CandidatoDetailView,
@@ -10,6 +11,7 @@ from .views import (
     CandidatoMatchDetalleView,
     CandidatoNoticiasView,
     CandidatoPosturasView,
+    ComunaListView,
     CustomAuthToken,
     DecisionFinalViewSet,
     EditarRespuestaView,
@@ -23,6 +25,7 @@ from .views import (
     PerfilView,
     PosturaBookmarkViewSet,
     PreguntasPendientesView,
+    RegionListView,
     RegisterUserView,
     ReiniciarCuestionarioView,
     SubmitUserAnswersView,
@@ -57,6 +60,14 @@ urlpatterns = [
         CambiarPasswordView.as_view(),
         name="perfil-cambiar-password",
     ),
+    path(
+        "perfil/comuna/",
+        ActualizarComunaView.as_view(),
+        name="perfil-comuna",
+    ),
+    # Territorio (publico, para autocomplete)
+    path("regiones/", RegionListView.as_view(), name="region-list"),
+    path("comunas/", ComunaListView.as_view(), name="comuna-list"),
     # Catalogos
     path("tipos-eleccion/", TipoEleccionListView.as_view(), name="tipos-eleccion-list"),
     path("candidatos/", CandidatoListView.as_view(), name="candidato-list"),

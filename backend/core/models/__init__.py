@@ -32,6 +32,7 @@ from .cuestionario import (
 )
 from .electoral import Candidato, TipoEleccion
 from .matching import MatchCandidato, PosturaCandidato
+from .perfil import UserProfile
 from .territorio import Comuna, Distrito, Region
 from .user_data import (
     CandidatoDescartado,
@@ -65,5 +66,6 @@ __all__ = [
     "Region",
     "RespuestaUsuario",
     "TipoEleccion",
+    "UserProfile",
     "crear_opciones_acuerdo_desacuerdo",
 ]

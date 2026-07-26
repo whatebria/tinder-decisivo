@@ -34,17 +34,21 @@ from .matching import (
 )
 from .noticias import NoticiaSerializer
 from .perfil import (
+    ActualizarComunaSerializer,
     CambiarPasswordSerializer,
+    ComunaInlineSerializer,
     EliminarCuentaSerializer,
     PerfilSerializer,
 )
 
 __all__ = [
+    "ActualizarComunaSerializer",
     "AnonMatchResultSerializer",
     "CambiarPasswordSerializer",
     "CandidatoDescartadoSerializer",
     "CandidatoFavoritoSerializer",
     "CandidatoSerializer",
+    "ComunaInlineSerializer",
     "DecisionFinalSerializer",
     "EliminarCuentaSerializer",
     "MatchCandidatoResultSerializer",

@@ -11,11 +11,15 @@ from rest_framework.views import APIView
 from ..models import (
     CandidatoDescartado,
     CandidatoFavorito,
+    Comuna,
     DecisionFinal,
     RespuestaUsuario,
+    UserProfile,
 )
 from ..serializers.perfil import (
+    ActualizarComunaSerializer,
     CambiarPasswordSerializer,
+    ComunaInlineSerializer,
     EliminarCuentaSerializer,
     PerfilSerializer,
 )
@@ -32,6 +36,10 @@ class PerfilView(APIView):
     @extend_schema(responses={200: PerfilSerializer})
     def get(self, request):
         user = request.user
+        # Asegura que el profile exista aunque no haya corrido el backfill.
+        profile, _ = UserProfile.objects.select_related(
+            "comuna", "comuna__region", "comuna__distrito"
+        ).get_or_create(user=user)
         data = {
             "id": user.id,
             "username": user.username,
@@ -43,6 +51,10 @@ class PerfilView(APIView):
                 "descartados": CandidatoDescartado.objects.filter(user=user).count(),
                 "decisiones": DecisionFinal.objects.filter(user=user).count(),
             },
+            "comuna": (
+                ComunaInlineSerializer(profile.comuna).data
+                if profile.comuna_id else None
+            ),
         }
         return Response(data)
 
@@ -93,3 +105,39 @@ class CambiarPasswordView(APIView):
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"message": "Contrasena actualizada."}, status=status.HTTP_200_OK)
+
+
+class ActualizarComunaView(APIView):
+    """PATCH /perfil/comuna/: setea o limpia la comuna donde vota el usuario.
+
+    Body: {"comuna_id": <int|null>}
+    Respuesta: perfil actualizado con la comuna inline.
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+        request=ActualizarComunaSerializer,
+        responses={
+            200: ComunaInlineSerializer(allow_null=True),
+            400: OpenApiResponse(description="comuna_id invalido"),
+        },
+    )
+    def patch(self, request):
+        serializer = ActualizarComunaSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        comuna_id = serializer.validated_data["comuna_id"]
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        profile.comuna = (
+            Comuna.objects.select_related("region", "distrito").get(id=comuna_id)
+            if comuna_id else None
+        )
+        profile.save(update_fields=["comuna", "fecha_actualizacion"])
+
+        return Response(
+            ComunaInlineSerializer(profile.comuna).data if profile.comuna else None,
+            status=status.HTTP_200_OK,
+        )
+

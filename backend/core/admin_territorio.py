@@ -7,7 +7,7 @@ electoral. Django autodescubre este modulo si lo importamos desde admin.py.
 from django.contrib import admin
 from django.db.models import Count
 
-from .models import Comuna, Distrito, Region
+from .models import Comuna, Distrito, Region, UserProfile
 
 
 @admin.register(Region)
@@ -47,3 +47,15 @@ class ComunaAdmin(admin.ModelAdmin):
     ordering = ("region__orden", "nombre")
     search_fields = ("nombre", "codigo")
     autocomplete_fields = ("region", "distrito")
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ("user", "comuna", "get_region", "fecha_actualizacion")
+    list_filter = ("comuna__region",)
+    search_fields = ("user__username", "user__email", "comuna__nombre")
+    autocomplete_fields = ("user", "comuna")
+
+    @admin.display(description="Region", ordering="comuna__region__orden")
+    def get_region(self, obj):
+        return obj.comuna.region.nombre if obj.comuna_id else "-"
