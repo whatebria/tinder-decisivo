@@ -10,6 +10,14 @@
  * - Al vaciar el pool: pantalla "ya viste a todos" con CTAs.
  *
  * Requiere auth (favoritos/descartados necesitan user). Guest ve un CTA.
+ *
+ * Migrado a Fase 5:
+ *   - AppShell con active=null (accedido desde Home, screen polimorfica)
+ *   - HomeTopBar con subtitle dinamico ("N por evaluar")
+ *   - Empty states via EmptyState (organism)
+ *   - Iconos reales (Icon atom) en botones de accion en vez de "X"/"OK"/"i"
+ *   - Deshacer usa Button variant="secondary" size="sm"
+ *   - Cero hardcodes: todo via spacing/radii/typography tokens
  */
 
 import React, { useMemo, useState } from "react";
@@ -25,17 +33,35 @@ import {
   useToggleDescartado,
   useToggleFavorito,
 } from "../api/hooks";
+import {
+  AppShell,
+  Button,
+  EmptyState,
+  HomeTopBar,
+  Icon,
+  Spinner,
+  useToast,
+} from "../components";
 import { SwipeCard } from "../components/organisms/SwipeCard";
-import { useToast } from "../components/molecules/Toast";
-import { Link } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { formatMatchPercentage, getMatchColor } from "../services/matching";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
+import { radii } from "../theme/radii";
+import { spacing } from "../theme/spacing";
+import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
 
 // Cuantas cards "de fondo" pre-renderizar detras de la activa.
 const STACK_PEEK = 1;
+
+// Altura del stack. Es un caso de "canvas fija" (patron Tinder): la card
+// no responde a contenido variable, sino que el contenido se recorta. No
+// se puede tokenizar sin agregar un token semantico ('cardCanvas') que
+// hoy solo se usa aca -> YAGNI.
+const CARD_CANVAS_HEIGHT = 520;
+const CARD_PHOTO_HEIGHT = 260;
+const ROUND_BTN_SIZE = 56;
 
 export function SwipeScreen({ navigation }: RootStackScreenProps<"Swipe">) {
   const c = useThemeColors();
@@ -98,7 +124,8 @@ export function SwipeScreen({ navigation }: RootStackScreenProps<"Swipe">) {
   function handleLike(cand: Candidato) {
     if (cand.id == null) return;
     toggleFav.mutate(cand.id, {
-      onError: (e) => toast.error("No pudimos guardar el favorito", getErrorMessage(e)),
+      onError: (e) =>
+        toast.error("No pudimos guardar el favorito", getErrorMessage(e)),
     });
     setUltimaAccion({ candidato: cand, tipo: "like" });
     advance();
@@ -107,7 +134,8 @@ export function SwipeScreen({ navigation }: RootStackScreenProps<"Swipe">) {
   function handleNope(cand: Candidato) {
     if (cand.id == null) return;
     toggleDesc.mutate(cand.id, {
-      onError: (e) => toast.error("No pudimos descartar", getErrorMessage(e)),
+      onError: (e) =>
+        toast.error("No pudimos descartar", getErrorMessage(e)),
     });
     setUltimaAccion({ candidato: cand, tipo: "nope" });
     advance();
@@ -132,7 +160,7 @@ export function SwipeScreen({ navigation }: RootStackScreenProps<"Swipe">) {
     setIndex((i) => Math.max(0, i - 1));
     setUltimaAccion(null);
     toast.success(
-      `Deshecho: ${candidato.nombre} ${candidato.apellido ?? ""}`.trim()
+      `Deshecho: ${candidato.nombre} ${candidato.apellido ?? ""}`.trim(),
     );
   }
 
@@ -151,47 +179,44 @@ export function SwipeScreen({ navigation }: RootStackScreenProps<"Swipe">) {
 
   if (isGuest) {
     return (
-      <View style={[styles.center, { backgroundColor: c.bg }]}>
-        <Text style={[styles.emptyTitle, { color: c.text }]}>
-          Modo invitado
-        </Text>
-        <Text style={[styles.emptyBody, { color: c.textSecondary }]}>
-          El swipe usa tus favoritos y descartados. Crea una cuenta para
-          usarlo.
-        </Text>
-        <Link block onPress={() => navigation.goBack()}>Volver</Link>
-      </View>
+      <AppShell active={null} navigation={navigation}>
+        <View style={[styles.stateWrap, { backgroundColor: c.bg }]}>
+          <EmptyState
+            icon="user"
+            title="Modo invitado"
+            description="El swipe usa tus favoritos y descartados. Crea una cuenta para usarlo."
+            actionLabel="Volver"
+            onAction={() => navigation.goBack()}
+          />
+        </View>
+      </AppShell>
     );
   }
 
   if (candidatosQ.isLoading) {
     return (
-      <View style={[styles.center, { backgroundColor: c.bg }]}>
-        <Text style={{ color: c.textSecondary }}>Cargando candidatos...</Text>
-      </View>
+      <AppShell active={null} navigation={navigation}>
+        <View style={[styles.stateWrap, { backgroundColor: c.bg }]}>
+          <Spinner size="large" />
+        </View>
+      </AppShell>
     );
   }
 
   const remaining = pool.slice(index);
   if (remaining.length === 0) {
     return (
-      <View style={[styles.center, { backgroundColor: c.bg }]}>
-        <Text style={[styles.emptyTitle, { color: c.text }]}>
-          Ya viste a todos
-        </Text>
-        <Text style={[styles.emptyBody, { color: c.textSecondary }]}>
-          Ya evaluaste a todos los candidatos disponibles para esta eleccion.
-        </Text>
-        <View style={{ gap: 8, marginTop: 12 }}>
-          <Link block onPress={() => navigation.navigate("MisFavoritos")}>
-            Ver mis favoritos
-          </Link>
-          <Link block onPress={() => navigation.navigate("Resultados")}>
-            Ver mi ranking
-          </Link>
-          <Link block onPress={() => navigation.goBack()}>Volver</Link>
+      <AppShell active={null} navigation={navigation}>
+        <View style={[styles.stateWrap, { backgroundColor: c.bg }]}>
+          <EmptyState
+            icon="check"
+            title="Ya viste a todos"
+            description="Ya evaluaste a todos los candidatos disponibles para esta eleccion."
+            actionLabel="Ver mi ranking"
+            onAction={() => navigation.navigate("Resultados")}
+          />
         </View>
-      </View>
+      </AppShell>
     );
   }
 
@@ -199,92 +224,88 @@ export function SwipeScreen({ navigation }: RootStackScreenProps<"Swipe">) {
   const visibles = remaining.slice(0, STACK_PEEK + 1);
 
   return (
-    <View style={[styles.container, { backgroundColor: c.bg }]}>
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: c.text }]}>Swipe</Text>
-        <View style={styles.headerRight}>
-          {ultimaAccion ? (
-            <Pressable
+    <AppShell active={null} navigation={navigation}>
+      <View style={[styles.container, { backgroundColor: c.bg }]}>
+        <HomeTopBar brand="Swipe" />
+        <Text style={[styles.counter, { color: c.textSecondary }]}>
+          {`${remaining.length} por evaluar`}
+        </Text>
+
+        {ultimaAccion ? (
+          <View style={styles.undoRow}>
+            <Button
+              variant="secondary"
+              size="sm"
+              fullWidth={false}
               onPress={handleUndo}
-              style={({ pressed }) => [
-                styles.undoBtn,
-                { borderColor: c.primary, opacity: pressed ? 0.6 : 1 },
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel="Deshacer ultima accion"
             >
-              <Text style={{ color: c.primary, fontWeight: "700", fontSize: 12 }}>
-                Deshacer
-              </Text>
-            </Pressable>
-          ) : null}
-          <Text style={[styles.counter, { color: c.textSecondary }]}>
-            {remaining.length} por evaluar
-          </Text>
+              Deshacer
+            </Button>
+          </View>
+        ) : null}
+
+        <View style={styles.stackArea}>
+          {/* Renderizo de atras a adelante */}
+          {visibles
+            .slice()
+            .reverse()
+            .map((cand, idxRev) => {
+              const relIdx = visibles.length - 1 - idxRev; // 0 = activa
+              const esActiva = relIdx === 0;
+              const pct = cand.id != null ? matchPctById.get(cand.id) : undefined;
+
+              return (
+                <SwipeCard
+                  key={cand.id}
+                  onSwipedLeft={() => handleNope(cand)}
+                  onSwipedRight={() => handleLike(cand)}
+                  onTap={() => handleTap(cand)}
+                  disabled={!esActiva}
+                  scaleBelow={esActiva ? 1 : 0.96}
+                >
+                  <CandidatoCard candidato={cand} matchPct={pct} />
+                </SwipeCard>
+              );
+            })}
+        </View>
+
+        {/* Botones alternativos (para desktop/mouse sin gesto) */}
+        <View style={styles.actions}>
+          <RoundBtn
+            iconName="close"
+            color={c.danger}
+            label="Descartar"
+            onPress={() => handleNope(remaining[0])}
+          />
+          <RoundBtn
+            iconName="info"
+            color={c.primary}
+            label="Ver detalle"
+            onPress={() => handleTap(remaining[0])}
+          />
+          <RoundBtn
+            iconName="check"
+            color={c.success}
+            label="Agregar a favoritos"
+            onPress={() => handleLike(remaining[0])}
+          />
         </View>
       </View>
-
-      <View style={styles.stackArea}>
-        {/* Renderizo de atras a adelante */}
-        {visibles
-          .slice()
-          .reverse()
-          .map((cand, idxRev) => {
-            const relIdx = visibles.length - 1 - idxRev; // 0 = activa
-            const esActiva = relIdx === 0;
-            const pct = cand.id != null ? matchPctById.get(cand.id) : undefined;
-
-            return (
-              <SwipeCard
-                key={cand.id}
-                onSwipedLeft={() => handleNope(cand)}
-                onSwipedRight={() => handleLike(cand)}
-                onTap={() => handleTap(cand)}
-                disabled={!esActiva}
-                scaleBelow={esActiva ? 1 : 0.96}
-              >
-                <CandidatoCard candidato={cand} matchPct={pct} colors={c} />
-              </SwipeCard>
-            );
-          })}
-      </View>
-
-      {/* Botones alternativos (para desktop/mouse sin gesto) */}
-      <View style={styles.actions}>
-        <RoundBtn
-          label="X"
-          color={c.danger}
-          onPress={() => handleNope(remaining[0])}
-        />
-        <RoundBtn
-          label="i"
-          color={c.primary}
-          onPress={() => handleTap(remaining[0])}
-        />
-        <RoundBtn
-          label="OK"
-          color={c.success}
-          onPress={() => handleLike(remaining[0])}
-        />
-      </View>
-
-      <View style={{ padding: 12, alignItems: "center" }}>
-        <Link block onPress={() => navigation.goBack()}>Salir</Link>
-      </View>
-    </View>
+    </AppShell>
   );
 }
 
-// ---------- Sub-componentes ----------
+// ---------- Sub-componentes locales ----------
 
 interface CandidatoCardProps {
   candidato: Candidato;
   matchPct?: number;
-  colors: ReturnType<typeof useThemeColors>;
 }
 
-function CandidatoCard({ candidato, matchPct, colors: c }: CandidatoCardProps) {
-  const scoreCol = matchPct != null ? getMatchColor(matchPct, c) : c.textSecondary;
+function CandidatoCard({ candidato, matchPct }: CandidatoCardProps) {
+  const c = useThemeColors();
+  const scoreCol =
+    matchPct != null ? getMatchColor(matchPct, c) : c.textSecondary;
 
   return (
     <View
@@ -329,7 +350,10 @@ function CandidatoCard({ candidato, matchPct, colors: c }: CandidatoCardProps) {
             {candidato.propuesta_electoral}
           </Text>
         ) : candidato.bio ? (
-          <Text style={[styles.propuesta, { color: c.text }]} numberOfLines={5}>
+          <Text
+            style={[styles.propuesta, { color: c.text }]}
+            numberOfLines={5}
+          >
             {candidato.bio}
           </Text>
         ) : null}
@@ -341,15 +365,14 @@ function CandidatoCard({ candidato, matchPct, colors: c }: CandidatoCardProps) {
   );
 }
 
-function RoundBtn({
-  label,
-  color,
-  onPress,
-}: {
-  label: string;
+interface RoundBtnProps {
+  iconName: React.ComponentProps<typeof Icon>["name"];
   color: string;
+  label: string;
   onPress: () => void;
-}) {
+}
+
+function RoundBtn({ iconName, color, label, onPress }: RoundBtnProps) {
   return (
     <Pressable
       onPress={onPress}
@@ -360,86 +383,101 @@ function RoundBtn({
       accessibilityRole="button"
       accessibilityLabel={label}
     >
-      <Text style={{ color, fontSize: 18, fontWeight: "800" }}>{label}</Text>
+      <Icon name={iconName} size={24} color={color} />
     </Pressable>
   );
 }
 
-const CARD_HEIGHT = 520;
+// ---------- Styles ----------
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 44 },
-  center: {
+  container: { flex: 1 },
+  stateWrap: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
-    padding: 32,
-    gap: 8,
+    padding: spacing.sp5,
   },
-  header: {
-    paddingHorizontal: 20,
-    marginBottom: 12,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+
+  counter: {
+    ...typography.small,
+    fontWeight: "600",
+    paddingHorizontal: spacing.sp5,
+    marginTop: -spacing.sp1,
+    marginBottom: spacing.sp2,
   },
-  headerRight: { flexDirection: "row", alignItems: "center", gap: 10 },
-  undoBtn: {
-    borderWidth: 1,
-    borderRadius: 14,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+
+  undoRow: {
+    paddingHorizontal: spacing.sp5,
+    alignItems: "flex-end",
+    marginBottom: spacing.sp2,
   },
-  title: { fontSize: 24, fontWeight: "800" },
-  counter: { fontSize: 12, fontWeight: "600" },
 
   stackArea: {
-    height: CARD_HEIGHT,
-    marginHorizontal: 16,
+    height: CARD_CANVAS_HEIGHT,
+    marginHorizontal: spacing.sp4,
     position: "relative",
   },
 
   candidatoCard: {
     flex: 1,
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: radii.rLg,
     overflow: "hidden",
   },
   foto: {
     width: "100%",
-    height: 260,
+    height: CARD_PHOTO_HEIGHT,
     resizeMode: "cover",
   },
-  info: { padding: 14, gap: 6 },
-  nombre: { fontSize: 20, fontWeight: "800" },
-  partido: { fontSize: 13, fontWeight: "600" },
-  matchRow: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 2 },
-  matchLabel: { fontSize: 12, fontWeight: "600" },
-  matchValor: { fontSize: 16, fontWeight: "800" },
-  propuesta: { fontSize: 13, lineHeight: 18, marginTop: 4 },
+  info: { padding: spacing.sp4, gap: spacing.sp2 },
+  nombre: {
+    ...typography.h2,
+    fontWeight: "800",
+  },
+  partido: {
+    ...typography.small,
+    fontWeight: "600",
+  },
+  matchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sp2,
+    marginTop: spacing.sp1,
+  },
+  matchLabel: {
+    ...typography.overline,
+    fontWeight: "600",
+  },
+  matchValor: {
+    ...typography.h3,
+    fontWeight: "800",
+  },
+  propuesta: {
+    ...typography.small,
+    marginTop: spacing.sp1,
+  },
   hint: {
-    fontSize: 11,
+    ...typography.overline,
     fontStyle: "italic",
-    marginTop: 6,
+    marginTop: spacing.sp2,
     textAlign: "center",
+    textTransform: "none",
+    letterSpacing: 0,
   },
 
   actions: {
     flexDirection: "row",
     justifyContent: "center",
-    gap: 20,
-    padding: 16,
-    marginTop: 12,
+    gap: spacing.sp5,
+    padding: spacing.sp4,
+    marginTop: spacing.sp3,
   },
   roundBtn: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: ROUND_BTN_SIZE,
+    height: ROUND_BTN_SIZE,
+    borderRadius: ROUND_BTN_SIZE / 2,
     borderWidth: 3,
     alignItems: "center",
     justifyContent: "center",
   },
-
-  emptyTitle: { fontSize: 20, fontWeight: "700" },
-  emptyBody: { fontSize: 14, textAlign: "center" },
 });
