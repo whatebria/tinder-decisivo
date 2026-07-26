@@ -23,6 +23,7 @@ import {
 } from "tamagui";
 
 import { getErrorMessage } from "../api/client";
+import { Chip } from "../components";
 import {
   breakdownToChartData,
   type BreakdownPorEje,
@@ -110,6 +111,22 @@ export function ResultadosScreen({
     [allResults, descartadoIds]
   );
   const hiddenCount = allResults.length - visibleResults.length;
+
+  // Filtro por partido: derivar partidos unicos de los visibleResults
+  const [partidoFiltro, setPartidoFiltro] = useState<string | null>(null);
+  const partidosDisponibles = useMemo(() => {
+    const set = new Set<string>();
+    visibleResults.forEach((r) => {
+      const p = r.candidato_data.partido;
+      if (p && p.trim()) set.add(p);
+    });
+    return Array.from(set).sort();
+  }, [visibleResults]);
+
+  const filteredResults = useMemo(() => {
+    if (!partidoFiltro) return visibleResults;
+    return visibleResults.filter((r) => r.candidato_data.partido === partidoFiltro);
+  }, [visibleResults, partidoFiltro]);
 
   const favoritoIds = useMemo(
     () =>
@@ -297,7 +314,7 @@ export function ResultadosScreen({
         )}
 
         <YStack flex={1} />
-        {visibleResults.length > 0 ? (
+        {filteredResults.length > 0 ? (
           <Button onPress={() => setShareOpen(true)} variant="secondary">
             Compartir mi ranking
           </Button>
@@ -314,7 +331,7 @@ export function ResultadosScreen({
           tipoNombre:
             (tiposQ.data ?? []).find((t) => t.id === tipoEleccionId)?.nombre ??
             "Eleccion",
-          matches: fromMatchResults(visibleResults),
+          matches: fromMatchResults(filteredResults),
         })}
         onClose={() => setShareOpen(false)}
       />

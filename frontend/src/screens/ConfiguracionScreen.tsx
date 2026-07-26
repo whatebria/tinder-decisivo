@@ -123,7 +123,7 @@ export function ConfiguracionScreen({ navigation }: RootStackScreenProps<"Config
                   color={c.danger}
                   accessibilityLabel={`Reiniciar cuestionario ${tipo.nombre}`}
                 >
-                  Empezar de nuevo: {tipo.nombre}
+                  {`Empezar de nuevo: ${tipo.nombre}`}
                 </Link>
               ))}
             </View>
