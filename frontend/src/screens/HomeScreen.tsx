@@ -157,6 +157,9 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
               <TextButton onPress={() => navigation.navigate("MiDecision")}>
                 Ver mi voto final
               </TextButton>
+              <TextButton onPress={() => navigation.navigate("MisFavoritos")}>
+                Ver mis favoritos
+              </TextButton>
               <TextButton onPress={() => navigation.navigate("MisDescartados")}>
                 Ver mis descartados
               </TextButton>

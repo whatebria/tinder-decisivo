@@ -18,6 +18,7 @@ export type RootStackParamList = {
     confianza: string;
   };
   MisDescartados: undefined;
+  MisFavoritos: undefined;
   MiDecision: undefined;
 };
 
