@@ -41,6 +41,7 @@ import {
   type TipoEleccion,
 } from "./endpoints";
 import { queryKeys } from "./queryClient";
+import { useAuthStore } from "../store/auth";
 
 // -- Tipos de eleccion (Home) -----------------------------------------------
 
@@ -144,9 +145,11 @@ export function useConfirmPasswordReset() {
 
 // -- Favoritos --------------------------------------------------------------
 export function useFavoritos() {
+  const isAuth = useAuthStore((s) => s.isAuthenticated);
   return useQuery<CandidatoFavorito[]>({
     queryKey: queryKeys.favoritos,
     queryFn: listFavoritos,
+    enabled: isAuth, // Guest no tiene sesion -> no dispara 401.
   });
 }
 
@@ -175,9 +178,11 @@ export function useToggleFavorito() {
 
 // -- Descartados ------------------------------------------------------------
 export function useDescartados() {
+  const isAuth = useAuthStore((s) => s.isAuthenticated);
   return useQuery<CandidatoDescartado[]>({
     queryKey: queryKeys.descartados,
     queryFn: listDescartados,
+    enabled: isAuth,
   });
 }
 
@@ -202,9 +207,11 @@ export function useToggleDescartado() {
 
 // -- Decision final ---------------------------------------------------------
 export function useDecisiones() {
+  const isAuth = useAuthStore((s) => s.isAuthenticated);
   return useQuery<DecisionFinal[]>({
     queryKey: queryKeys.decisiones,
     queryFn: listDecisiones,
+    enabled: isAuth,
   });
 }
 

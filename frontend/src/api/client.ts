@@ -30,12 +30,18 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config;
 });
 
-// Response interceptor: 401 -> logout
+// Response interceptor: 401 -> logout, PERO solo si estabamos autenticados.
+// En modo guest un 401 solo significa "esta ruta requiere auth", no hay sesion
+// que expirar. Sin este guard, entrar a Resultados como guest disparaba
+// logout() al primer query de bookmarking (401) y te tiraba al Login.
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error.response?.status === 401) {
-      useAuthStore.getState().logout();
+      const state = useAuthStore.getState();
+      if (state.token) {
+        state.logout();
+      }
     }
     return Promise.reject(error);
   }
