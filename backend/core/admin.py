@@ -1,100 +1,232 @@
+"""
+Django admin: registro de todos los modelos con filters, search e inlines.
+
+Convenciones:
+- list_display: columnas utiles en la lista
+- list_filter: filtros en el sidebar
+- search_fields: input de busqueda
+- autocomplete_fields: FK con muchos objetos (evita <select> gigante)
+- inlines: crear objetos relacionados desde el mismo formulario
+"""
+
 from django.contrib import admin
+from django.db.models import Count
+
 from .models import (
-    TipoEleccion,
-    Candidato,
-    Pregunta,
-    OpcionRespuesta,
-    PosturaCandidato,
-    CandidatoFavorito,
-    CandidatoDescartado,
-    DecisionFinal,
     OPCIONES_ACUERDO_DESACUERDO,
-    crear_opciones_acuerdo_desacuerdo,
+    Candidato,
+    CandidatoDescartado,
+    CandidatoFavorito,
+    DecisionFinal,
+    Noticia,
+    NoticiaBookmark,
+    OpcionRespuesta,
+    PosturaBookmark,
+    PosturaCandidato,
+    Pregunta,
     RespuestaUsuario,
-    Noticia
+    TipoEleccion,
+    crear_opciones_acuerdo_desacuerdo,
 )
 
-# --- Define OpcionRespuestaInline PRIMERO ---
-#  Mostrar las OpcionRespuesta directamente dentro de la vista de Pregunta
+# ---------------------------------------------------------------------------
+# Inlines (declarados primero porque los usan los admins de abajo)
+# ---------------------------------------------------------------------------
+
 class OpcionRespuestaInline(admin.TabularInline):
+    """Editar las opciones directamente desde la vista de Pregunta."""
     model = OpcionRespuesta
-    extra = 0 # No añade campos vacíos extra para nuevas opciones por defecto
+    extra = 0
+    fields = ("texto", "valor", "es_no_se")
+    ordering = ("valor",)
 
-admin.site.register(TipoEleccion)
-admin.site.register(RespuestaUsuario)
+
+class PreguntaInline(admin.TabularInline):
+    """Ver preguntas asociadas desde la vista de TipoEleccion (solo lectura)."""
+    model = Pregunta
+    extra = 0
+    fields = ("orden", "texto", "eje_tematico")
+    ordering = ("orden",)
+    show_change_link = True
+    readonly_fields = ("texto",)
+    can_delete = False
 
 
-@admin.register(Noticia)
-class NoticiaAdmin(admin.ModelAdmin):
-    list_display = ('titulo', 'fuente', 'fecha_publicacion')
-    list_filter = ('fuente', 'candidatos_mencionados')
-    search_fields = ('titulo', 'descripcion')
-    filter_horizontal = ('candidatos_mencionados',)
-    readonly_fields = ('fecha_publicacion', 'actualizado_en')
+# ---------------------------------------------------------------------------
+# TipoEleccion
+# ---------------------------------------------------------------------------
+
+@admin.register(TipoEleccion)
+class TipoEleccionAdmin(admin.ModelAdmin):
+    list_display = ("nombre", "fecha_eleccion", "num_preguntas", "num_candidatos")
+    search_fields = ("nombre", "descripcion")
+    ordering = ("-fecha_eleccion", "nombre")
+    inlines = [PreguntaInline]
+
+    def get_queryset(self, request):
+        # Anota conteos para evitar N+1 en la lista.
+        return (
+            super().get_queryset(request)
+            .annotate(_num_pregs=Count("preguntas", distinct=True))
+            .annotate(_num_cands=Count("candidatos", distinct=True))
+        )
+
+    @admin.display(description="Preguntas", ordering="_num_pregs")
+    def num_preguntas(self, obj):
+        return obj._num_pregs
+
+    @admin.display(description="Candidatos", ordering="_num_cands")
+    def num_candidatos(self, obj):
+        return obj._num_cands
+
+
+# ---------------------------------------------------------------------------
+# Candidato
+# ---------------------------------------------------------------------------
 
 @admin.register(Candidato)
 class CandidatoAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'apellido', 'ciudad', 'get_tipos_eleccion') # Columnas a mostrar en la lista
-    search_fields = ('nombre', 'apellido', 'ciudad') # Campos para búsqueda
-    list_filter = ('tipos_eleccion',) # Filtros en la barra lateral
+    list_display = ("nombre", "apellido", "partido", "ciudad", "get_tipos_eleccion")
+    list_filter = ("tipos_eleccion", "partido")
+    search_fields = ("nombre", "apellido", "partido", "ciudad")
+    filter_horizontal = ("tipos_eleccion",)
+    ordering = ("apellido", "nombre")
 
+    @admin.display(description="Tipos de Eleccion")
     def get_tipos_eleccion(self, obj):
-        return ", ".join([te.nombre for te in obj.tipos_eleccion.all()])
-    get_tipos_eleccion.short_description = "Tipos de Elección" # Nombre de la columna
+        return ", ".join(t.nombre for t in obj.tipos_eleccion.all())
 
-@admin.register(Pregunta) # <--- Aquí registramos PreguntaAdmin UNA SOLA VEZ
+
+# ---------------------------------------------------------------------------
+# Pregunta + OpcionRespuesta
+# ---------------------------------------------------------------------------
+
+@admin.register(Pregunta)
 class PreguntaAdmin(admin.ModelAdmin):
-    list_display = ('texto', 'tipo_eleccion', 'eje_tematico', 'orden')
-    list_filter = ('tipo_eleccion', 'eje_tematico')
-    list_editable = ('eje_tematico',)
-    search_fields = ('texto',)
-    ordering = ('tipo_eleccion', 'orden')
+    list_display = ("texto_corto", "tipo_eleccion", "eje_tematico", "orden")
+    list_filter = ("tipo_eleccion", "eje_tematico")
+    list_editable = ("eje_tematico",)
+    search_fields = ("texto",)
+    ordering = ("tipo_eleccion", "orden")
+    autocomplete_fields = ("tipo_eleccion",)
     inlines = [OpcionRespuestaInline]
+    actions = ["crear_opciones_estandar"]
 
-    actions = ['crear_opciones_estandar']
+    @admin.display(description="Texto")
+    def texto_corto(self, obj):
+        return obj.texto[:80] + ("..." if len(obj.texto) > 80 else "")
 
+    @admin.action(description="Crear/Actualizar opciones Likert 5 (Muy de acuerdo...Muy en desacuerdo)")
     def crear_opciones_estandar(self, request, queryset):
-        """
-        Crea las opciones estándar de 'acuerdo/desacuerdo' para las preguntas seleccionadas.
-        Elimina las opciones existentes primero para evitar duplicados.
-        """
         for pregunta in queryset:
-            # Eliminar opciones existentes antes de crear las nuevas para evitar duplicados.
-            # Esto es importante si el usuario ejecuta la acción varias veces.
             OpcionRespuesta.objects.filter(pregunta=pregunta).delete()
             crear_opciones_acuerdo_desacuerdo(pregunta)
-        self.message_user(request, f"Opciones estándar creadas/actualizadas para {queryset.count()} preguntas.")
-    crear_opciones_estandar.short_description = "Crear/Actualizar opciones estándar (Muy de acuerdo...Muy en desacuerdo)"
+        self.message_user(
+            request,
+            f"Opciones estandar creadas/actualizadas para {queryset.count()} preguntas.",
+        )
 
-@admin.register(OpcionRespuesta) # <--- Aquí registramos OpcionRespuestaAdmin
+
+@admin.register(OpcionRespuesta)
 class OpcionRespuestaAdmin(admin.ModelAdmin):
-    list_display = ('texto', 'valor', 'es_no_se', 'pregunta')
-    list_filter = ('pregunta__tipo_eleccion', 'es_no_se', 'pregunta')
-    search_fields = ('texto', 'pregunta__texto')
-    list_editable = ('valor', 'es_no_se')
-    ordering = ('pregunta__orden', 'valor')
+    list_display = ("texto", "valor", "es_no_se", "pregunta")
+    list_filter = ("pregunta__tipo_eleccion", "es_no_se")
+    search_fields = ("texto", "pregunta__texto")
+    list_editable = ("valor", "es_no_se")
+    ordering = ("pregunta__orden", "valor")
+    autocomplete_fields = ("pregunta",)
+
+
+# ---------------------------------------------------------------------------
+# PosturaCandidato
+# ---------------------------------------------------------------------------
 
 @admin.register(PosturaCandidato)
 class PosturaCandidatoAdmin(admin.ModelAdmin):
-    list_display = ('candidato', 'pregunta', 'opcion_respuesta')
-    list_filter = ('candidato__tipos_eleccion', 'pregunta__tipo_eleccion', 'candidato', 'pregunta') # Filtros útiles
-    search_fields = ('candidato__nombre', 'candidato__apellido', 'pregunta__texto', 'justificacion')
-    raw_id_fields = ('candidato', 'pregunta', 'opcion_respuesta') # Para selección más fácil con muchos objetos
+    list_display = ("candidato", "pregunta_corta", "opcion_respuesta")
+    list_filter = ("candidato__tipos_eleccion", "pregunta__eje_tematico")
+    search_fields = (
+        "candidato__nombre",
+        "candidato__apellido",
+        "pregunta__texto",
+        "justificacion",
+    )
+    autocomplete_fields = ("candidato", "pregunta", "opcion_respuesta")
+
+    @admin.display(description="Pregunta", ordering="pregunta__orden")
+    def pregunta_corta(self, obj):
+        return obj.pregunta.texto[:60] + ("..." if len(obj.pregunta.texto) > 60 else "")
+
+
+# ---------------------------------------------------------------------------
+# Datos de usuario
+# ---------------------------------------------------------------------------
+
+@admin.register(RespuestaUsuario)
+class RespuestaUsuarioAdmin(admin.ModelAdmin):
+    list_display = ("user", "pregunta", "opcion_elegida", "peso", "fecha_respuesta")
+    list_filter = ("peso", "pregunta__tipo_eleccion", "pregunta__eje_tematico")
+    search_fields = ("user__username", "pregunta__texto")
+    autocomplete_fields = ("user", "pregunta", "opcion_elegida")
+    date_hierarchy = "fecha_respuesta"
+
 
 @admin.register(CandidatoFavorito)
 class CandidatoFavoritoAdmin(admin.ModelAdmin):
-    list_display = ('user', 'candidato', 'fecha_agregado')
-    list_filter = ('user', 'candidato__tipos_eleccion')
-    search_fields = ('user__username', 'candidato__nombre', 'candidato__apellido')
+    list_display = ("user", "candidato", "fecha_agregado")
+    list_filter = ("candidato__tipos_eleccion",)
+    search_fields = ("user__username", "candidato__nombre", "candidato__apellido")
+    autocomplete_fields = ("user", "candidato")
+    date_hierarchy = "fecha_agregado"
+
 
 @admin.register(CandidatoDescartado)
 class CandidatoDescartadoAdmin(admin.ModelAdmin):
-    list_display = ('user', 'candidato', 'fecha_descartado')
-    list_filter = ('user', 'candidato__tipos_eleccion')
-    search_fields = ('user__username', 'candidato__nombre', 'candidato__apellido')
+    list_display = ("user", "candidato", "fecha_descartado")
+    list_filter = ("candidato__tipos_eleccion",)
+    search_fields = ("user__username", "candidato__nombre", "candidato__apellido")
+    autocomplete_fields = ("user", "candidato")
+    date_hierarchy = "fecha_descartado"
+
 
 @admin.register(DecisionFinal)
 class DecisionFinalAdmin(admin.ModelAdmin):
-    list_display = ('user', 'candidato_elegido', 'tipo_eleccion', 'fecha_decision')
-    list_filter = ('user', 'tipo_eleccion', 'candidato_elegido__tipos_eleccion')
-    search_fields = ('user__username', 'candidato_elegido__nombre', 'candidato_elegido__apellido')
+    list_display = ("user", "candidato_elegido", "tipo_eleccion", "fecha_decision")
+    list_filter = ("tipo_eleccion",)
+    search_fields = (
+        "user__username",
+        "candidato_elegido__nombre",
+        "candidato_elegido__apellido",
+    )
+    autocomplete_fields = ("user", "candidato_elegido", "tipo_eleccion")
+    date_hierarchy = "fecha_decision"
+
+
+# ---------------------------------------------------------------------------
+# Contenido y bookmarks
+# ---------------------------------------------------------------------------
+
+@admin.register(Noticia)
+class NoticiaAdmin(admin.ModelAdmin):
+    list_display = ("titulo", "fuente", "fecha_publicacion")
+    list_filter = ("fuente",)
+    search_fields = ("titulo", "descripcion")
+    filter_horizontal = ("candidatos_mencionados",)
+    readonly_fields = ("fecha_publicacion", "actualizado_en")
+    date_hierarchy = "fecha_publicacion"
+
+
+@admin.register(NoticiaBookmark)
+class NoticiaBookmarkAdmin(admin.ModelAdmin):
+    list_display = ("user", "noticia", "fecha_agregado")
+    search_fields = ("user__username", "noticia__titulo")
+    autocomplete_fields = ("user", "noticia")
+    date_hierarchy = "fecha_agregado"
+
+
+@admin.register(PosturaBookmark)
+class PosturaBookmarkAdmin(admin.ModelAdmin):
+    list_display = ("user", "postura", "fecha_agregado")
+    search_fields = ("user__username", "postura__candidato__apellido")
+    autocomplete_fields = ("user", "postura")
+    date_hierarchy = "fecha_agregado"
