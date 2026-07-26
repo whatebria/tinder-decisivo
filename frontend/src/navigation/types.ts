@@ -28,7 +28,7 @@ export type RootStackParamList = {
    */
   MisFavoritos: undefined;
   MisGuardados: undefined;
-  MisRespuestas: { tipoEleccionId: number };
+  MisRespuestas: undefined;
   MiDecision: undefined;
   Comparar: undefined;
   Noticias: undefined;
@@ -36,6 +36,11 @@ export type RootStackParamList = {
   Perfil: undefined;
   Configuracion: undefined;
   GestionElecciones: undefined;
+  /**
+   * Design System visualizador interno. Solo se registra en el navigator
+   * cuando __DEV__ es true (dev builds). No accesible en produccion.
+   */
+  DesignSystem: undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> =

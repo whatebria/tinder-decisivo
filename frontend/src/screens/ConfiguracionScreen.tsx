@@ -4,13 +4,11 @@
  * Layout basado en design-system-lowfi.html `tpl-config` (Template 17).
  * Secciones (solo las que tienen backend/feature real hoy — NO invento):
  *
- *   1. Cuenta       (auth)  — Card con avatar + username + email + "Editar perfil"
- *   2. Mis datos    (auth)  — NavRow por tipo de eleccion (editar respuestas)
+ *   1. Cuenta       (auth)  — Card con avatar + shortName + email + "Editar perfil"
+ *   2. Mis datos    (auth)  — NavRow a MisRespuestas (hub) con reiniciar/editar dentro
  *   3. Elecciones           — NavRow a GestionElecciones
- *   4. Mi voto              (auth) — NavRow a MiDecision
- *   5. Apariencia           — ThemeToggle
- *   6. Reiniciar    (auth)  — NavRow variant="danger" por tipo (dispara ConfirmModal)
- *   7. Cerrar sesion (auth) — Button secondary full-width
+ *   4. Apariencia           — ThemeToggle
+ *   5. Cerrar sesion (auth) — Button secondary full-width
  *
  * Modo invitado: en vez de las secciones auth, muestra CTA para crear cuenta.
  *
@@ -18,23 +16,18 @@
  * Notificaciones, Privacidad · Exportar, Sobre la app, Version.
  */
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { getErrorMessage } from "../api/client";
-import { useReiniciarCuestionario, useTiposEleccion } from "../api/hooks";
-import type { TipoEleccion } from "../api/endpoints";
 import {
   AppShell,
   Avatar,
   Button,
-  ConfirmModal,
   HomeTopBar,
   Link,
   NavRow,
   SectionTitle,
   ThemeToggle,
-  useToast,
 } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
@@ -51,13 +44,6 @@ export function ConfiguracionScreen({
   const isGuest = useAuthStore((s) => s.isGuest);
   const logout = useAuthStore((s) => s.logout);
   const exitGuestMode = useAuthStore((s) => s.exitGuestMode);
-
-  const { data: tipos = [] } = useTiposEleccion();
-  const reiniciar = useReiniciarCuestionario();
-  const toast = useToast();
-  const [tipoAReiniciar, setTipoAReiniciar] = useState<TipoEleccion | null>(
-    null,
-  );
 
   const styles = useMemo(
     () =>
@@ -101,23 +87,6 @@ export function ConfiguracionScreen({
     [c],
   );
 
-  async function handleConfirmReiniciar() {
-    if (!tipoAReiniciar?.id) return;
-    try {
-      const result = await reiniciar.mutateAsync(tipoAReiniciar.id);
-      toast.success(
-        "Cuestionario reiniciado",
-        `Se borraron ${result.respuestas_borradas} respuestas. Tus favoritos y voto siguen ahí.`,
-      );
-      setTipoAReiniciar(null);
-    } catch (err) {
-      toast.error(
-        "No pudimos reiniciar el cuestionario",
-        getErrorMessage(err),
-      );
-    }
-  }
-
   // Nombre "corto" derivado del email (parte antes del @). No es identidad
   // real (no tenemos first/last name en el store todavia) pero evita mostrar
   // el email dos veces.
@@ -156,24 +125,15 @@ export function ConfiguracionScreen({
           </View>
         ) : null}
 
-        {/* 2. Mis datos (respuestas por tipo de eleccion) */}
-        {!isGuest && tipos.length > 0 ? (
+        {/* 2. Mis datos */}
+        {!isGuest ? (
           <View style={styles.section}>
             <SectionTitle title="Mis datos" />
-            {tipos.map((tipo) => (
-              <NavRow
-                key={`resp-${tipo.id}`}
-                label={`Respuestas · ${tipo.nombre}`}
-                subtitle="Ver o editar mis respuestas"
-                onPress={() =>
-                  tipo.id &&
-                  navigation.navigate("MisRespuestas", {
-                    tipoEleccionId: tipo.id,
-                  })
-                }
-                accessibilityLabel={`Ver o editar mis respuestas de ${tipo.nombre}`}
-              />
-            ))}
+            <NavRow
+              label="Mis respuestas"
+              subtitle="Ver, editar o reiniciar tus respuestas del cuestionario"
+              onPress={() => navigation.navigate("MisRespuestas")}
+            />
           </View>
         ) : null}
 
@@ -187,40 +147,11 @@ export function ConfiguracionScreen({
           />
         </View>
 
-        {/* 4. Mi voto */}
-        {!isGuest ? (
-          <View style={styles.section}>
-            <SectionTitle title="Mi voto" />
-            <NavRow
-              label="Mi voto final"
-              subtitle="Ver o cambiar el candidato que elegiste"
-              onPress={() => navigation.navigate("MiDecision")}
-            />
-          </View>
-        ) : null}
-
-        {/* 5. Apariencia */}
+        {/* 4. Apariencia */}
         <View style={styles.section}>
           <SectionTitle title="Apariencia" />
           <ThemeToggle />
         </View>
-
-        {/* 6. Reiniciar cuestionario (destructivo) */}
-        {!isGuest && tipos.length > 0 ? (
-          <View style={styles.section}>
-            <SectionTitle title="Reiniciar cuestionario" />
-            {tipos.map((tipo) => (
-              <NavRow
-                key={`reset-${tipo.id}`}
-                label={`Empezar de nuevo: ${tipo.nombre}`}
-                subtitle="Borra tus respuestas y ranking calculado"
-                variant="danger"
-                onPress={() => setTipoAReiniciar(tipo)}
-                accessibilityLabel={`Reiniciar cuestionario ${tipo.nombre}`}
-              />
-            ))}
-          </View>
-        ) : null}
 
         {/* Bloque modo invitado */}
         {isGuest ? (
@@ -237,7 +168,7 @@ export function ConfiguracionScreen({
           </View>
         ) : null}
 
-        {/* 7. Cerrar sesion */}
+        {/* 5. Cerrar sesion */}
         {!isGuest ? (
           <View style={styles.logoutWrap}>
             <Button variant="secondary" onPress={logout}>
@@ -245,22 +176,6 @@ export function ConfiguracionScreen({
             </Button>
           </View>
         ) : null}
-
-        <ConfirmModal
-          visible={tipoAReiniciar !== null}
-          title="¿Empezar de nuevo?"
-          message={
-            tipoAReiniciar
-              ? `Esto borra tus respuestas y tu ranking calculado para "${tipoAReiniciar.nombre}". Tus favoritos, descartados y voto final se mantienen.`
-              : ""
-          }
-          confirmLabel="Sí, borrar y empezar de nuevo"
-          cancelLabel="Cancelar"
-          variant="danger"
-          loading={reiniciar.isPending}
-          onConfirm={handleConfirmReiniciar}
-          onCancel={() => setTipoAReiniciar(null)}
-        />
       </ScrollView>
     </AppShell>
   );

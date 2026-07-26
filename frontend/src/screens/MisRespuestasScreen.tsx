@@ -1,35 +1,47 @@
 /**
- * MisRespuestasScreen: lista todas las respuestas del user para un tipo de
- * eleccion, agrupadas por eje tematico. Tap en una card abre modal de edicion.
+ * MisRespuestasScreen: HUB de todas las respuestas del cuestionario, agrupadas
+ * por tipo de eleccion y por eje tematico dentro de cada tipo.
  *
- * Recibe { tipoEleccionId } por route params. Si no hay respuestas todavia,
- * muestra empty state con CTA a completar el cuestionario.
+ * Layout basado en design-system-lowfi.html `tpl-respuestas` (Template 10):
+ *   - ScreenTopBar con back + subtitle con conteo total
+ *   - Chips filtro por tipo de eleccion (Todas / Presidencial / Municipal / ...)
+ *   - Por cada tipo: seccion con grupos por eje, cada respuesta como card
+ *     tap-able que abre EditarRespuestaModal
+ *   - Seccion final "Reiniciar cuestionario" con NavRow variant="danger" por
+ *     tipo (accion destructiva, dispara ConfirmModal). Movido desde
+ *     ConfiguracionScreen para consolidar todas las acciones de respuestas
+ *     en un solo lugar.
  *
- * Migrado a Fase 5:
- *   - Fuera Tamagui, todo con React Native + DS + tokens
- *   - AppShell con active=null (screen polimorfica accedida desde Config)
- *   - ScreenTopBar con back button + subtitle dinamico con conteo
- *   - EmptyState (organism) para caso sin respuestas
- *   - Cards inline (patron unico de "respuesta editable", no reusable)
+ * Fetch: usa `useMisRespuestasMultiple` (useQueries por tipo). Como el
+ * backend no expone un endpoint agregado, corremos 1 fetch por tipo en
+ * paralelo. React Query los cachea y desduplica.
+ *
+ * Fuera de scope: progress bars por bloque (requeririan saber "total de
+ * preguntas por tipo", metadata que hoy no viaja al frontend). Chips filtro
+ * por bloque (base/extras) — nuestro backend no distingue, solo agrupa por
+ * eje tematico.
  */
 
 import React, { useMemo, useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getErrorMessage } from "../api/client";
-import type { MiRespuesta } from "../api/endpoints";
-import { useMisRespuestas, useUpdateRespuesta } from "../api/hooks";
+import type { MiRespuesta, TipoEleccion } from "../api/endpoints";
+import {
+  useMisRespuestasMultiple,
+  useReiniciarCuestionario,
+  useTiposEleccion,
+  useUpdateRespuesta,
+} from "../api/hooks";
 import {
   AppShell,
+  Chip,
+  ConfirmModal,
   EditarRespuestaModal,
   EmptyState,
+  NavRow,
   ScreenTopBar,
+  SectionTitle,
   Spinner,
   useToast,
 } from "../components";
@@ -46,30 +58,56 @@ const PESO_LABELS: Record<number, string> = {
   3: "Muy importante",
 };
 
+/** "Todas" cuando no hay filtro por tipo. */
+const FILTRO_TODAS: number | "todas" = "todas";
+
 export function MisRespuestasScreen({
   navigation,
-  route,
 }: RootStackScreenProps<"MisRespuestas">) {
-  const { tipoEleccionId } = route.params;
   const c = useThemeColors();
-  const respuestasQ = useMisRespuestas(tipoEleccionId);
-  const update = useUpdateRespuesta(tipoEleccionId);
   const toast = useToast();
-  const [editando, setEditando] = useState<MiRespuesta | null>(null);
 
-  // Agrupamos por eje para la UI.
-  const agrupadas = useMemo(() => {
-    const items = respuestasQ.data ?? [];
-    const map = new Map<string, { display: string; items: MiRespuesta[] }>();
-    for (const r of items) {
-      const key = r.eje_tematico;
-      if (!map.has(key)) {
-        map.set(key, { display: r.eje_tematico_display || key, items: [] });
-      }
-      map.get(key)!.items.push(r);
-    }
-    return Array.from(map.values());
-  }, [respuestasQ.data]);
+  const { data: tipos = [] } = useTiposEleccion();
+  const tipoIds = useMemo(
+    () => tipos.map((t) => t.id).filter((id): id is number => id != null),
+    [tipos],
+  );
+  const respuestasPorTipo = useMisRespuestasMultiple(tipoIds);
+  const update = useUpdateRespuesta();
+  const reiniciar = useReiniciarCuestionario();
+
+  const [filtroTipo, setFiltroTipo] = useState<number | "todas">(FILTRO_TODAS);
+  const [editando, setEditando] = useState<MiRespuesta | null>(null);
+  const [tipoAReiniciar, setTipoAReiniciar] = useState<TipoEleccion | null>(
+    null,
+  );
+
+  // -- Derivados ------------------------------------------------------------
+
+  const isLoading = respuestasPorTipo.some((r) => r.isLoading);
+  const totalRespuestas = respuestasPorTipo.reduce(
+    (acc, r) => acc + (r.data?.length ?? 0),
+    0,
+  );
+
+  /** Tipos visibles segun el filtro. Cada uno con sus respuestas cargadas. */
+  const tiposVisibles = useMemo(() => {
+    return tipos
+      .filter((t) => t.id != null)
+      .filter((t) => filtroTipo === FILTRO_TODAS || t.id === filtroTipo)
+      .map((tipo) => {
+        const bucket = respuestasPorTipo.find(
+          (r) => r.tipoEleccionId === tipo.id,
+        );
+        return {
+          tipo,
+          respuestas: bucket?.data ?? [],
+        };
+      })
+      .filter((entry) => entry.respuestas.length > 0);
+  }, [tipos, filtroTipo, respuestasPorTipo]);
+
+  // -- Handlers -------------------------------------------------------------
 
   async function handleSave(opcionId: number, peso: number) {
     if (!editando) return;
@@ -89,10 +127,28 @@ export function MisRespuestasScreen({
     }
   }
 
-  const total = respuestasQ.data?.length ?? 0;
+  async function handleConfirmReiniciar() {
+    if (!tipoAReiniciar?.id) return;
+    try {
+      const result = await reiniciar.mutateAsync(tipoAReiniciar.id);
+      toast.success(
+        "Cuestionario reiniciado",
+        `Se borraron ${result.respuestas_borradas} respuestas. Tus favoritos y voto siguen ahí.`,
+      );
+      setTipoAReiniciar(null);
+    } catch (err) {
+      toast.error(
+        "No pudimos reiniciar el cuestionario",
+        getErrorMessage(err),
+      );
+    }
+  }
+
+  // -- Render ---------------------------------------------------------------
+
   const subtitle =
-    total > 0
-      ? `${total} pregunta${total === 1 ? "" : "s"} respondida${total === 1 ? "" : "s"}`
+    totalRespuestas > 0
+      ? `${totalRespuestas} pregunta${totalRespuestas === 1 ? "" : "s"} respondida${totalRespuestas === 1 ? "" : "s"}`
       : "Sin respuestas todavia";
 
   return (
@@ -105,85 +161,78 @@ export function MisRespuestasScreen({
             onBack={() => navigation.goBack()}
           />
 
-          {respuestasQ.isLoading ? (
+          {isLoading ? (
             <View style={styles.loadingBox}>
               <Spinner size="large" />
             </View>
-          ) : total === 0 ? (
+          ) : totalRespuestas === 0 ? (
             <EmptyState
               icon="info"
-              title="Todavia no respondiste esta eleccion"
-              description="Completa el cuestionario para ver y editar tus respuestas aqui."
-              actionLabel="Volver al inicio"
-              onAction={() => navigation.goBack()}
+              title="Todavia no respondiste ningun cuestionario"
+              description="Completa un cuestionario desde el inicio para ver y editar tus respuestas aqui."
+              actionLabel="Ir al inicio"
+              onAction={() => navigation.navigate("Home")}
             />
           ) : (
             <>
+              {/* Chips filtro por tipo */}
+              {tipos.length > 1 ? (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.chipsRow}
+                >
+                  <Chip
+                    active={filtroTipo === FILTRO_TODAS}
+                    onPress={() => setFiltroTipo(FILTRO_TODAS)}
+                  >
+                    Todas
+                  </Chip>
+                  {tipos.map((t) =>
+                    t.id != null ? (
+                      <Chip
+                        key={t.id}
+                        active={filtroTipo === t.id}
+                        onPress={() => setFiltroTipo(t.id!)}
+                      >
+                        {t.nombre}
+                      </Chip>
+                    ) : null,
+                  )}
+                </ScrollView>
+              ) : null}
+
               <Text style={[styles.intro, { color: c.textSecondary }]}>
                 Toca cualquier pregunta para modificar tu respuesta.
               </Text>
 
-              <View style={styles.groups}>
-                {agrupadas.map((grupo) => (
-                  <View key={grupo.display} style={styles.group}>
-                    <Text
-                      style={[styles.groupTitle, { color: c.textSecondary }]}
-                    >
-                      {grupo.display}
-                    </Text>
-                    <View style={styles.groupItems}>
-                      {grupo.items.map((r) => {
-                        const opActual = r.opciones.find(
-                          (o) => o.id === r.opcion_elegida,
-                        );
-                        return (
-                          <Pressable
-                            key={r.id}
-                            style={({ pressed }) => [
-                              styles.card,
-                              {
-                                backgroundColor: c.card,
-                                borderColor: c.border,
-                                opacity: pressed ? 0.7 : 1,
-                              },
-                            ]}
-                            onPress={() => setEditando(r)}
-                            accessibilityLabel={`Editar respuesta: ${r.pregunta_texto}`}
-                            accessibilityRole="button"
-                          >
-                            <Text
-                              style={[styles.pregunta, { color: c.text }]}
-                            >
-                              {r.pregunta_texto}
-                            </Text>
-                            <View style={styles.metaRow}>
-                              <Text
-                                style={[styles.opActual, { color: c.primary }]}
-                              >
-                                {opActual?.texto ?? "(opcion desconocida)"}
-                              </Text>
-                              <Text
-                                style={[styles.metaSep, { color: c.textTertiary }]}
-                              >
-                                ·
-                              </Text>
-                              <Text
-                                style={[styles.metaPeso, { color: c.textSecondary }]}
-                              >
-                                {PESO_LABELS[r.peso] ?? `peso ${r.peso}`}
-                              </Text>
-                            </View>
-                            <Text
-                              style={[styles.hint, { color: c.textTertiary }]}
-                            >
-                              Toca para editar
-                            </Text>
-                          </Pressable>
-                        );
-                      })}
-                    </View>
-                  </View>
+              {/* Secciones por tipo -> grupos por eje -> cards */}
+              <View style={styles.tipos}>
+                {tiposVisibles.map(({ tipo, respuestas }) => (
+                  <TipoSeccion
+                    key={tipo.id}
+                    tipoNombre={tipo.nombre}
+                    respuestas={respuestas}
+                    onEditar={setEditando}
+                  />
                 ))}
+              </View>
+
+              {/* Reiniciar cuestionario (destructivo) */}
+              <View style={styles.reiniciarSection}>
+                <SectionTitle title="Reiniciar cuestionario" />
+                {tipos.map((tipo) =>
+                  tipo.id != null ? (
+                    <NavRow
+                      key={`reset-${tipo.id}`}
+                      label={`Empezar de nuevo: ${tipo.nombre}`}
+                      subtitle="Borra tus respuestas y ranking calculado"
+                      variant="danger"
+                      onPress={() => setTipoAReiniciar(tipo)}
+                      accessibilityLabel={`Reiniciar cuestionario ${tipo.nombre}`}
+                    />
+                  ) : null,
+                )}
               </View>
             </>
           )}
@@ -196,12 +245,131 @@ export function MisRespuestasScreen({
           onCancel={() => setEditando(null)}
           onSubmit={handleSave}
         />
+
+        <ConfirmModal
+          visible={tipoAReiniciar !== null}
+          title="¿Empezar de nuevo?"
+          message={
+            tipoAReiniciar
+              ? `Esto borra tus respuestas y tu ranking calculado para "${tipoAReiniciar.nombre}". Tus favoritos, descartados y voto final se mantienen.`
+              : ""
+          }
+          confirmLabel="Sí, borrar y empezar de nuevo"
+          cancelLabel="Cancelar"
+          variant="danger"
+          loading={reiniciar.isPending}
+          onConfirm={handleConfirmReiniciar}
+          onCancel={() => setTipoAReiniciar(null)}
+        />
       </View>
     </AppShell>
   );
 }
 
-// ---------- Styles ----------
+// ---------- Sub-componentes locales --------------------------------------
+
+interface TipoSeccionProps {
+  tipoNombre: string;
+  respuestas: MiRespuesta[];
+  onEditar: (r: MiRespuesta) => void;
+}
+
+/**
+ * Renderiza una seccion de un tipo de eleccion: cabecera con el nombre del
+ * tipo + grupos internos por eje tematico + cards editables.
+ */
+function TipoSeccion({ tipoNombre, respuestas, onEditar }: TipoSeccionProps) {
+  const c = useThemeColors();
+
+  // Agrupamos por eje dentro del tipo.
+  const grupos = useMemo(() => {
+    const map = new Map<string, { display: string; items: MiRespuesta[] }>();
+    for (const r of respuestas) {
+      const key = r.eje_tematico;
+      if (!map.has(key)) {
+        map.set(key, { display: r.eje_tematico_display || key, items: [] });
+      }
+      map.get(key)!.items.push(r);
+    }
+    return Array.from(map.values());
+  }, [respuestas]);
+
+  return (
+    <View style={styles.tipoBlock}>
+      <SectionTitle title={tipoNombre} />
+      <View style={styles.gruposEje}>
+        {grupos.map((grupo) => (
+          <View key={grupo.display} style={styles.grupoEje}>
+            <Text style={[styles.grupoEjeTitle, { color: c.textSecondary }]}>
+              {grupo.display}
+            </Text>
+            <View style={styles.grupoItems}>
+              {grupo.items.map((r) => (
+                <RespuestaCard
+                  key={r.id}
+                  respuesta={r}
+                  onPress={() => onEditar(r)}
+                />
+              ))}
+            </View>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+interface RespuestaCardProps {
+  respuesta: MiRespuesta;
+  onPress: () => void;
+}
+
+/**
+ * Card individual de una respuesta editable. Muestra pregunta + opcion
+ * actual + peso. Tap abre el modal de edicion.
+ *
+ * Patron unico (no reusable) — no promuevo a molecule sin un segundo uso.
+ */
+function RespuestaCard({ respuesta, onPress }: RespuestaCardProps) {
+  const c = useThemeColors();
+  const opActual = respuesta.opciones.find(
+    (o) => o.id === respuesta.opcion_elegida,
+  );
+
+  return (
+    <Pressable
+      style={({ pressed }) => [
+        styles.card,
+        {
+          backgroundColor: c.card,
+          borderColor: c.border,
+          opacity: pressed ? 0.7 : 1,
+        },
+      ]}
+      onPress={onPress}
+      accessibilityLabel={`Editar respuesta: ${respuesta.pregunta_texto}`}
+      accessibilityRole="button"
+    >
+      <Text style={[styles.pregunta, { color: c.text }]}>
+        {respuesta.pregunta_texto}
+      </Text>
+      <View style={styles.metaRow}>
+        <Text style={[styles.opActual, { color: c.primary }]}>
+          {opActual?.texto ?? "(opcion desconocida)"}
+        </Text>
+        <Text style={[styles.metaSep, { color: c.textTertiary }]}>·</Text>
+        <Text style={[styles.metaPeso, { color: c.textSecondary }]}>
+          {PESO_LABELS[respuesta.peso] ?? `peso ${respuesta.peso}`}
+        </Text>
+      </View>
+      <Text style={[styles.hint, { color: c.textTertiary }]}>
+        Toca para editar
+      </Text>
+    </Pressable>
+  );
+}
+
+// ---------- Styles -------------------------------------------------------
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
@@ -217,13 +385,20 @@ const styles = StyleSheet.create({
     padding: spacing.sp5,
   },
 
-  groups: { gap: spacing.sp5 },
-  group: { gap: spacing.sp2 },
-  groupTitle: {
+  chipsRow: {
+    gap: spacing.sp2,
+    paddingVertical: spacing.sp1,
+  },
+
+  tipos: { gap: spacing.sp6 },
+  tipoBlock: { gap: spacing.sp3 },
+  gruposEje: { gap: spacing.sp4 },
+  grupoEje: { gap: spacing.sp2 },
+  grupoEjeTitle: {
     ...typography.overline,
     fontWeight: "600",
   },
-  groupItems: { gap: spacing.sp2 },
+  grupoItems: { gap: spacing.sp2 },
 
   card: {
     padding: spacing.sp4,
@@ -248,4 +423,9 @@ const styles = StyleSheet.create({
   metaSep: typography.small,
   metaPeso: typography.small,
   hint: typography.overline,
+
+  reiniciarSection: {
+    gap: spacing.sp2,
+    marginTop: spacing.sp4,
+  },
 });

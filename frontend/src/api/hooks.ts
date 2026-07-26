@@ -8,7 +8,7 @@
  * Para POSTs (submit, login) seguimos usando los stores (Zustand)
  * porque involucran side-effects mas complejos (navegar, resetear form).
  */
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   addDescartado,
@@ -203,7 +203,32 @@ export function useMisRespuestas(tipoEleccionId: number | null | undefined) {
   });
 }
 
-export function useUpdateRespuesta(tipoEleccionId: number | null | undefined) {
+/**
+ * Fetch de respuestas para MULTIPLES tipos de eleccion en paralelo.
+ * Devuelve un array alineado 1:1 con `tipoIds`, cada elemento con
+ * `{ tipoEleccionId, data, isLoading, error }`.
+ *
+ * Uso tipico: MisRespuestasScreen (hub) que muestra respuestas agrupadas
+ * por (tipo x eje) sin tener un endpoint agregado en el backend.
+ */
+export function useMisRespuestasMultiple(tipoIds: number[]) {
+  const isAuth = useAuthStore((s) => s.isAuthenticated);
+  const results = useQueries({
+    queries: tipoIds.map((tipoId) => ({
+      queryKey: ["misRespuestas", tipoId] as const,
+      queryFn: () => listMisRespuestas(tipoId),
+      enabled: isAuth,
+    })),
+  });
+  return results.map((r, i) => ({
+    tipoEleccionId: tipoIds[i],
+    data: r.data as MiRespuesta[] | undefined,
+    isLoading: r.isLoading,
+    error: r.error as Error | null,
+  }));
+}
+
+export function useUpdateRespuesta() {
   const qc = useQueryClient();
   return useMutation<
     EditarRespuestaResponse,
@@ -213,7 +238,9 @@ export function useUpdateRespuesta(tipoEleccionId: number | null | undefined) {
     mutationFn: ({ respuestaId, opcionId, peso }) =>
       updateRespuesta(respuestaId, opcionId, peso),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["misRespuestas", tipoEleccionId] });
+      // Invalida por prefix: cubre tanto el caso single-tipo como el hub
+      // multi-tipo (MisRespuestasScreen) sin necesitar el id exacto.
+      qc.invalidateQueries({ queryKey: ["misRespuestas"] });
       // Los matches se invalidaron en el backend; forzamos refetch al pedirlos.
       qc.invalidateQueries({ queryKey: ["matches"] });
     },
