@@ -180,7 +180,12 @@ We're in MVP stage — contributions welcome, especially:
 3. **UI improvements**: WCAG 2.2 AA fixes, mobile ergonomics
 4. **Translations**: Mapuzugun, Aymara, English for expat voters
 
-Please open an issue first for large changes. See [`docs/doc-tecnica.md`](docs/doc-tecnica.md) for architecture deep-dive.
+Please open an issue first for large changes. See the [`docs/`](docs/) folder for architecture deep-dives:
+
+- [`sprints.md`](docs/sprints.md) — full project history by sprint
+- [`algoritmo-tecnico.md`](docs/algoritmo-tecnico.md) — matching algorithm reference (formulas, API, complexity)
+- [`algoritmo-simple.md`](docs/algoritmo-simple.md) — same algorithm without math, for non-technical readers
+- [`doc-tecnica.md`](docs/doc-tecnica.md) — legacy system-wide architecture doc (pre-refactor)
 
 ## Status
 

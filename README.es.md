@@ -180,7 +180,12 @@ Estamos en etapa MVP — se agradecen contribuciones, especialmente:
 3. **Mejoras UI**: fixes de WCAG 2.2 AA, ergonomia mobile
 4. **Traducciones**: Mapuzugun, Aymara, ingles para votantes en el exterior
 
-Por favor abrir un issue primero para cambios grandes. Ver [`docs/doc-tecnica.md`](docs/doc-tecnica.md) para el deep-dive de arquitectura.
+Por favor abrir un issue primero para cambios grandes. Ver la carpeta [`docs/`](docs/) para deep-dives de arquitectura:
+
+- [`sprints.md`](docs/sprints.md) — historial completo del proyecto por sprints
+- [`algoritmo-tecnico.md`](docs/algoritmo-tecnico.md) — referencia del algoritmo de matching (formulas, API, complejidad)
+- [`algoritmo-simple.md`](docs/algoritmo-simple.md) — el mismo algoritmo sin matematica, para publico no tecnico
+- [`doc-tecnica.md`](docs/doc-tecnica.md) — doc legacy con arquitectura del sistema completo (pre-refactor)
 
 ## Estado
 
