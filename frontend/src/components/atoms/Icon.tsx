@@ -31,8 +31,7 @@ export type IconName =
   | "newspaper"
   | "compare"
   | "swipe"
-  | "home"
-  | "bookmark";
+  | "home";
 
 export interface IconProps {
   name: IconName;
@@ -222,8 +221,5 @@ function renderIcon(name: IconName, p: object) {
           <Path d="M10 20v-6h4v6" {...p} />
         </>
       );
-    case "bookmark":
-      // Marcador clasico — para tab Guardados
-      return <Path d="M6 3h12v18l-6-4-6 4V3Z" {...p} />;
   }
 }

@@ -1,16 +1,18 @@
 /**
- * BottomNav: barra de navegaci\u00f3n inferior fija con 5 tabs.
+ * BottomNav: barra de navegacion inferior fija con 5 tabs.
  *
  * Basado en design-system-lowfi.html \u00b7 wf-bottomnav (pattern estandar).
  * Tabs: Home / Guardados / Comparar / Noticias / Config.
  *
- * Encapsula toda la l\u00f3gica de navegaci\u00f3n: solo recibe la key `active` y
- * el prop `navigation` (o handlers custom). El screen consumidor no sabe
- * qu\u00e9 route corresponde a cada tab \u2014 eso vive ac\u00e1.
+ * Screens que SI lo usan (segun el wireframe):
+ *   Home HUB, Gestion Elecciones, Resultados, Mis Guardados, Mis Respuestas,
+ *   Noticias, Perfil candidato, Perfil empty, Comparador, Config, Editar perfil.
  *
- * Sticky: no incluye positioning por s\u00ed mismo. El screen debe wrap-earlo
- * en un View con `position: absolute, bottom: 0` o similar. Alternativamente
- * el screen puede ponerlo al final de un layout column con flex + safe area.
+ * Screens que NO lo usan (full-focus o pre-app):
+ *   Splash, Onboarding, Ubicacion, Login, Signup, Cuestionario, Share modal.
+ *
+ * Encapsula toda la logica de navegacion: solo recibe la key `active` y el
+ * prop `navigation`. Los iconos vienen del Icon atom (Feather-style).
  */
 
 import React, { useMemo } from "react";
@@ -44,13 +46,13 @@ export interface BottomNavProps {
 interface TabDef {
   key: BottomNavTab;
   route: string;
-  icon: "home" | "bookmark" | "compare" | "newspaper" | "settings";
+  icon: "home" | "heart" | "compare" | "newspaper" | "settings";
   label: string;
 }
 
 const TABS: readonly TabDef[] = [
   { key: "home", route: "Home", icon: "home", label: "Home" },
-  { key: "guardados", route: "MisGuardados", icon: "bookmark", label: "Guardados" },
+  { key: "guardados", route: "MisGuardados", icon: "heart", label: "Guardados" },
   { key: "comparar", route: "Comparar", icon: "compare", label: "Comparar" },
   { key: "noticias", route: "Noticias", icon: "newspaper", label: "Noticias" },
   { key: "config", route: "Configuracion", icon: "settings", label: "Config" },
