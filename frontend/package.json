@@ -22,9 +22,13 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@react-native/jest-preset": "^0.86.1",
     "@tamagui/babel-plugin": "^2.5.1",
+    "@types/jest": "^29.5.14",
     "@types/react": "~19.2.2",
     "babel-preset-expo": "^57.0.4",
+    "jest": "^29.7.0",
+    "jest-expo": "^57.0.2",
     "openapi-typescript": "^7.13.0",
     "typescript": "~6.0.3"
   },
@@ -34,7 +38,10 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "types:gen": "cd ../backend && uv run python manage.py spectacular --file ../frontend/schema.yml && cd ../frontend && openapi-typescript schema.yml -o src/types/api.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "private": true
 }
