@@ -183,6 +183,8 @@ We're in MVP stage — contributions welcome, especially:
 Please open an issue first for large changes. See the [`docs/`](docs/) folder for architecture deep-dives:
 
 - [`sprints.md`](docs/sprints.md) — full project history by sprint
+- [`sistema-tecnico.md`](docs/sistema-tecnico.md) — backend + frontend architecture reference
+- [`sistema-simple.md`](docs/sistema-simple.md) — same architecture in plain language
 - [`algoritmo-tecnico.md`](docs/algoritmo-tecnico.md) — matching algorithm reference (formulas, API, complexity)
 - [`algoritmo-simple.md`](docs/algoritmo-simple.md) — same algorithm without math, for non-technical readers
 - [`doc-tecnica.md`](docs/doc-tecnica.md) — legacy system-wide architecture doc (pre-refactor)

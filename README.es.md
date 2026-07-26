@@ -183,6 +183,8 @@ Estamos en etapa MVP — se agradecen contribuciones, especialmente:
 Por favor abrir un issue primero para cambios grandes. Ver la carpeta [`docs/`](docs/) para deep-dives de arquitectura:
 
 - [`sprints.md`](docs/sprints.md) — historial completo del proyecto por sprints
+- [`sistema-tecnico.md`](docs/sistema-tecnico.md) — referencia de arquitectura backend + frontend
+- [`sistema-simple.md`](docs/sistema-simple.md) — la misma arquitectura en lenguaje simple
 - [`algoritmo-tecnico.md`](docs/algoritmo-tecnico.md) — referencia del algoritmo de matching (formulas, API, complejidad)
 - [`algoritmo-simple.md`](docs/algoritmo-simple.md) — el mismo algoritmo sin matematica, para publico no tecnico
 - [`doc-tecnica.md`](docs/doc-tecnica.md) — doc legacy con arquitectura del sistema completo (pre-refactor)
