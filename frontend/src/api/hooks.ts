@@ -26,6 +26,7 @@ import {
   matchCandidatos,
   noticiasPorCandidato,
   preguntasPendientes,
+  reiniciarCuestionario,
   requestPasswordReset,
   saveDecision,
   type AnonRespuestaInput,
@@ -37,6 +38,7 @@ import {
   type Noticia,
   type PasswordResetRequestResponse,
   type Pregunta,
+  type ReiniciarCuestionarioResponse,
   type SaveDecisionInput,
   type TipoEleccion,
 } from "./endpoints";
@@ -136,6 +138,20 @@ export function useConfirmPasswordReset() {
   >({
     mutationFn: ({ token, newPassword }) =>
       confirmPasswordReset(token, newPassword),
+  });
+}
+
+// -- Reset cuestionario -----------------------------------------------------
+
+export function useReiniciarCuestionario() {
+  const qc = useQueryClient();
+  return useMutation<ReiniciarCuestionarioResponse, Error, number>({
+    mutationFn: reiniciarCuestionario,
+    onSuccess: () => {
+      // Invalida todo lo que puede haber cambiado: respuestas ya no existen,
+      // matches se recalcularan proximo submit. Bookmarks NO se tocan.
+      qc.invalidateQueries();
+    },
   });
 }
 

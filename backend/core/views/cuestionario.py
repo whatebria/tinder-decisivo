@@ -15,6 +15,7 @@ from rest_framework.views import APIView
 
 from ..models import Pregunta, RespuestaUsuario, TipoEleccion
 from ..serializers import PreguntaSerializer, RespuestaUsuarioCreateSerializer
+from ..services.respuestas import ReiniciarError, reiniciar_cuestionario
 
 logger = logging.getLogger(__name__)
 
@@ -103,4 +104,48 @@ class SubmitUserAnswersView(APIView):
         return Response(
             {"message": "Respuestas procesadas exitosamente."},
             status=status.HTTP_201_CREATED,
+        )
+
+
+@extend_schema(
+    request={"application/json": {"type": "object", "properties": {"tipo_eleccion_id": {"type": "integer"}}, "required": ["tipo_eleccion_id"]}},
+    responses={
+        200: OpenApiResponse(description="Cuestionario reiniciado. Devuelve counts."),
+        400: OpenApiResponse(description="tipo_eleccion_id faltante"),
+        404: OpenApiResponse(description="Tipo de eleccion no encontrado"),
+    },
+)
+class ReiniciarCuestionarioView(APIView):
+    """Borra todas las respuestas + matches del user para un tipo de eleccion.
+
+    NO toca favoritos, descartados ni decision final: esos son bookmarks
+    personales aparte del cuestionario.
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        tipo_eleccion_id = request.data.get("tipo_eleccion_id")
+        if not tipo_eleccion_id:
+            return Response(
+                {"detail": "Se requiere 'tipo_eleccion_id'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            result = reiniciar_cuestionario(request.user, int(tipo_eleccion_id))
+        except ReiniciarError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
+        except (TypeError, ValueError):
+            return Response(
+                {"detail": "tipo_eleccion_id invalido."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            {
+                "respuestas_borradas": result.respuestas_borradas,
+                "matches_borrados": result.matches_borrados,
+            },
+            status=status.HTTP_200_OK,
         )

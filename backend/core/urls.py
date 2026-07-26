@@ -16,6 +16,7 @@ from .views import (
     PasswordResetRequestView,
     PreguntasPendientesView,
     RegisterUserView,
+    ReiniciarCuestionarioView,
     SubmitUserAnswersView,
     TipoEleccionListView,
 )
@@ -51,6 +52,11 @@ urlpatterns = [
     # Preguntas / respuestas
     path("preguntas/", PreguntasPendientesView.as_view(), name="pregunta-list"),
     path("respuestas/", SubmitUserAnswersView.as_view(), name="submit-answers"),
+    path(
+        "respuestas/reiniciar/",
+        ReiniciarCuestionarioView.as_view(),
+        name="respuestas-reiniciar",
+    ),
     # Match
     path(
         "match-candidatos/",

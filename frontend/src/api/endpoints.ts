@@ -210,6 +210,24 @@ export async function deleteDecision(decisionId: number): Promise<void> {
 }
 
 // ============================================================
+// Reset de cuestionario
+// ============================================================
+export interface ReiniciarCuestionarioResponse {
+  respuestas_borradas: number;
+  matches_borrados: number;
+}
+
+export async function reiniciarCuestionario(
+  tipoEleccionId: number
+): Promise<ReiniciarCuestionarioResponse> {
+  const { data } = await apiClient.post<ReiniciarCuestionarioResponse>(
+    "/respuestas/reiniciar/",
+    { tipo_eleccion_id: tipoEleccionId }
+  );
+  return data;
+}
+
+// ============================================================
 // Password reset
 // ============================================================
 export interface PasswordResetRequestResponse {

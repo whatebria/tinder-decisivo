@@ -20,7 +20,11 @@ from .catalog import (
     CandidatoListView,
     TipoEleccionListView,
 )
-from .cuestionario import PreguntasPendientesView, SubmitUserAnswersView
+from .cuestionario import (
+    PreguntasPendientesView,
+    ReiniciarCuestionarioView,
+    SubmitUserAnswersView,
+)
 from .matching import MatchCandidatoViewSet
 from .noticias import (
     CandidatoNoticiasView,
@@ -43,6 +47,7 @@ __all__ = [
     "PasswordResetRequestView",
     "PreguntasPendientesView",
     "RegisterUserView",
+    "ReiniciarCuestionarioView",
     "SubmitUserAnswersView",
     "TipoEleccionListView",
 ]

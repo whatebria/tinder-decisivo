@@ -16,7 +16,8 @@ import {
 
 import type { TipoEleccion } from "../api/endpoints";
 import { getErrorMessage } from "../api/client";
-import { useTiposEleccion } from "../api/hooks";
+import { useReiniciarCuestionario, useTiposEleccion } from "../api/hooks";
+import { ConfirmModal } from "../components/ConfirmModal";
 import { useToast } from "../components/Toast";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
@@ -35,6 +36,8 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   const toast = useToast();
   const { data: tipos = [], isLoading, error } = useTiposEleccion();
   const [startingId, setStartingId] = useState<number | null>(null);
+  const [tipoAReiniciar, setTipoAReiniciar] = useState<TipoEleccion | null>(null);
+  const reiniciar = useReiniciarCuestionario();
 
   // Muestro el error como toast una sola vez
   React.useEffect(() => {
@@ -68,6 +71,20 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
     // muestra un toast amigable.
     setTipoEleccion(tipo.id);
     navigation.navigate("Resultados");
+  }
+
+  async function handleConfirmReiniciar() {
+    if (!tipoAReiniciar?.id) return;
+    try {
+      const result = await reiniciar.mutateAsync(tipoAReiniciar.id);
+      toast.success(
+        "Cuestionario reiniciado",
+        `Se borraron ${result.respuestas_borradas} respuestas. Tus favoritos y voto siguen ahí.`
+      );
+      setTipoAReiniciar(null);
+    } catch (err) {
+      toast.error("No pudimos reiniciar el cuestionario", getErrorMessage(err));
+    }
   }
 
   return (
@@ -129,12 +146,21 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
                   {startingId === tipo.id ? "Cargando..." : "Comenzar"}
                 </PrimaryButton>
                 {!isGuest ? (
-                  <TextButton
-                    onPress={() => handleVerMatches(tipo)}
-                    accessibilityLabel={`Ver mis matches de ${tipo.nombre}`}
-                  >
-                    Ver mis matches guardados
-                  </TextButton>
+                  <>
+                    <TextButton
+                      onPress={() => handleVerMatches(tipo)}
+                      accessibilityLabel={`Ver mis matches de ${tipo.nombre}`}
+                    >
+                      Ver mis matches guardados
+                    </TextButton>
+                    <TextButton
+                      onPress={() => setTipoAReiniciar(tipo)}
+                      color={colors.danger}
+                      accessibilityLabel={`Reiniciar cuestionario ${tipo.nombre}`}
+                    >
+                      Empezar de nuevo
+                    </TextButton>
+                  </>
                 ) : null}
               </YStack>
             ))}
@@ -170,6 +196,22 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
           )}
         </YStack>
       </YStack>
+
+      <ConfirmModal
+        visible={tipoAReiniciar !== null}
+        title="¿Empezar de nuevo?"
+        message={
+          tipoAReiniciar
+            ? `Esto borra tus respuestas y tu ranking calculado para "${tipoAReiniciar.nombre}". Tus favoritos, descartados y voto final se mantienen.`
+            : ""
+        }
+        confirmLabel="Si, borrar y empezar de nuevo"
+        cancelLabel="Cancelar"
+        variant="danger"
+        loading={reiniciar.isPending}
+        onConfirm={handleConfirmReiniciar}
+        onCancel={() => setTipoAReiniciar(null)}
+      />
     </ScrollView>
   );
 }
