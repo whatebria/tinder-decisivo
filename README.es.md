@@ -187,6 +187,7 @@ Por favor abrir un issue primero para cambios grandes. Ver la carpeta [`docs/`](
 - [`sistema-simple.md`](docs/sistema-simple.md) — la misma arquitectura en lenguaje simple
 - [`algoritmo-tecnico.md`](docs/algoritmo-tecnico.md) — referencia del algoritmo de matching (formulas, API, complejidad)
 - [`algoritmo-simple.md`](docs/algoritmo-simple.md) — el mismo algoritmo sin matematica, para publico no tecnico
+- [`comparacion-vaas.md`](docs/comparacion-vaas.md) — analisis comparativo vs Wahl-O-Mat, StemWijzer, Smartvote y 6 otros VAAs
 - [`doc-tecnica.md`](docs/doc-tecnica.md) — doc legacy con arquitectura del sistema completo (pre-refactor)
 
 ## Estado

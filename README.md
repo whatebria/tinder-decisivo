@@ -187,6 +187,7 @@ Please open an issue first for large changes. See the [`docs/`](docs/) folder fo
 - [`sistema-simple.md`](docs/sistema-simple.md) — same architecture in plain language
 - [`algoritmo-tecnico.md`](docs/algoritmo-tecnico.md) — matching algorithm reference (formulas, API, complexity)
 - [`algoritmo-simple.md`](docs/algoritmo-simple.md) — same algorithm without math, for non-technical readers
+- [`comparacion-vaas.md`](docs/comparacion-vaas.md) — competitive analysis vs Wahl-O-Mat, StemWijzer, Smartvote and 6 others
 - [`doc-tecnica.md`](docs/doc-tecnica.md) — legacy system-wide architecture doc (pre-refactor)
 
 ## Status
