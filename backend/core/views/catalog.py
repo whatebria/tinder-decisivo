@@ -23,13 +23,21 @@ class TipoEleccionListView(generics.ListAPIView):
 
 
 class CandidatoListView(generics.ListAPIView):
-    queryset = Candidato.objects.all().prefetch_related("tipos_eleccion")
+    queryset = (
+        Candidato.objects.all()
+        .select_related("comuna", "comuna__region", "distrito")
+        .prefetch_related("tipos_eleccion")
+    )
     serializer_class = CandidatoSerializer
     permission_classes = [permissions.AllowAny]
 
 
 class CandidatoDetailView(generics.RetrieveAPIView):
-    queryset = Candidato.objects.all().prefetch_related("tipos_eleccion")
+    queryset = (
+        Candidato.objects.all()
+        .select_related("comuna", "comuna__region", "distrito")
+        .prefetch_related("tipos_eleccion")
+    )
     serializer_class = CandidatoSerializer
     permission_classes = [permissions.AllowAny]
 

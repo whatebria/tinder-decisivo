@@ -51,6 +51,20 @@ class CandidatoSerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field="nombre",
     )
+    # Info territorial expandida para el detalle candidato del frontend.
+    comuna_nombre = serializers.CharField(
+        source="comuna.nombre", read_only=True, default=None,
+    )
+    comuna_region_nombre = serializers.CharField(
+        source="comuna.region.nombre", read_only=True, default=None,
+    )
+    distrito_numero = serializers.IntegerField(
+        source="distrito.numero", read_only=True, default=None,
+    )
+    distrito_nombre = serializers.CharField(
+        source="distrito.nombre", read_only=True, default=None,
+    )
+    alcance_territorial = serializers.CharField(read_only=True)
 
     class Meta:
         model = Candidato
@@ -65,4 +79,12 @@ class CandidatoSerializer(serializers.ModelSerializer):
             "profile_picture",
             "tipos_eleccion",
             "tipos_eleccion_nombres",
+            # Territorio
+            "comuna",
+            "comuna_nombre",
+            "comuna_region_nombre",
+            "distrito",
+            "distrito_numero",
+            "distrito_nombre",
+            "alcance_territorial",
         ]
