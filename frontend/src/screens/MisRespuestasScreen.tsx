@@ -107,6 +107,23 @@ export function MisRespuestasScreen({
       .filter((entry) => entry.respuestas.length > 0);
   }, [tipos, filtroTipo, respuestasPorTipo]);
 
+  /**
+   * Tipo elegible para reiniciar desde el header. Es "claro" cuando:
+   *   - el user filtro por un tipo especifico, o
+   *   - solo hay un tipo con respuestas.
+   * Si esta en "Todas" y hay 2+ tipos con datos, no mostramos el boton
+   * (seria ambiguo cual reiniciar sin agregar un modal selector).
+   */
+  const tipoActivoParaReiniciar = useMemo<TipoEleccion | null>(() => {
+    if (filtroTipo !== FILTRO_TODAS) {
+      return tipos.find((t) => t.id === filtroTipo) ?? null;
+    }
+    if (tiposVisibles.length === 1) {
+      return tiposVisibles[0].tipo;
+    }
+    return null;
+  }, [filtroTipo, tipos, tiposVisibles]);
+
   // -- Handlers -------------------------------------------------------------
 
   async function handleSave(opcionId: number, peso: number) {
@@ -202,11 +219,23 @@ export function MisRespuestasScreen({
                 </ScrollView>
               ) : null}
 
-              <Text style={[styles.intro, { color: c.textSecondary }]}>
-                Toca cualquier pregunta para modificar tu respuesta.
-              </Text>
+              <View style={styles.introRow}>
+                <Text style={[styles.intro, { color: c.textSecondary }]}>
+                  Toca cualquier pregunta para modificar tu respuesta.
+                </Text>
+                {tipoActivoParaReiniciar ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onPress={() => setTipoAReiniciar(tipoActivoParaReiniciar)}
+                    accessibilityLabel={`Reiniciar cuestionario ${tipoActivoParaReiniciar.nombre}`}
+                  >
+                    Reiniciar cuestionario
+                  </Button>
+                ) : null}
+              </View>
 
-              {/* Secciones por tipo -> grupos por eje -> cards + reiniciar contextual */}
+              {/* Secciones por tipo -> grupos por eje -> cards */}
               <View style={styles.tipos}>
                 {tiposVisibles.map(({ tipo, respuestas }) => (
                   <TipoSeccion
@@ -214,7 +243,6 @@ export function MisRespuestasScreen({
                     tipoNombre={tipo.nombre}
                     respuestas={respuestas}
                     onEditar={setEditando}
-                    onReiniciar={() => setTipoAReiniciar(tipo)}
                   />
                 ))}
               </View>
@@ -256,21 +284,15 @@ interface TipoSeccionProps {
   tipoNombre: string;
   respuestas: MiRespuesta[];
   onEditar: (r: MiRespuesta) => void;
-  onReiniciar: () => void;
 }
 
 /**
  * Renderiza una seccion de un tipo de eleccion: cabecera con el nombre del
- * tipo + grupos internos por eje tematico + cards editables + boton
- * "Reiniciar este cuestionario" al pie (accion destructiva contextual, en
- * vez de acumular todos los reiniciar al final de la pantalla).
+ * tipo + grupos internos por eje tematico + cards editables. La accion de
+ * reiniciar vive en el header global (junto al texto intro), no aca —
+ * evita que se repita 1 vez por seccion cuando hay varios tipos.
  */
-function TipoSeccion({
-  tipoNombre,
-  respuestas,
-  onEditar,
-  onReiniciar,
-}: TipoSeccionProps) {
+function TipoSeccion({ tipoNombre, respuestas, onEditar }: TipoSeccionProps) {
   const c = useThemeColors();
 
   // Agrupamos por eje dentro del tipo.
@@ -289,16 +311,6 @@ function TipoSeccion({
   return (
     <View style={styles.tipoBlock}>
       <SectionTitle title={tipoNombre} />
-      <View style={styles.reiniciarBtn}>
-        <Button
-          variant="ghost"
-          size="sm"
-          onPress={onReiniciar}
-          accessibilityLabel={`Reiniciar cuestionario ${tipoNombre}`}
-        >
-          Reiniciar este cuestionario
-        </Button>
-      </View>
       <View style={styles.gruposEje}>
         {grupos.map((grupo) => (
           <View key={grupo.display} style={styles.grupoEje}>
@@ -380,7 +392,16 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sp7,
     gap: spacing.sp4,
   },
-  intro: typography.small,
+  intro: {
+    ...typography.small,
+    flexShrink: 1,
+  },
+  introRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: spacing.sp3,
+  },
 
   loadingBox: {
     alignItems: "center",
@@ -425,9 +446,4 @@ const styles = StyleSheet.create({
   metaSep: typography.small,
   metaPeso: typography.small,
   hint: typography.overline,
-
-  reiniciarBtn: {
-    alignSelf: "flex-start",
-    marginBottom: spacing.sp1,
-  },
 });
