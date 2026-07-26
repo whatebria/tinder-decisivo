@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentación para Todo Público</title>
+<style>
+:root {
+  --primary: #0E7C7B;
+  --primary-dark: #095958;
+  --accent: #F26430;
+  --bg: #FFFFFF;
+  --bg-soft: #F7F5F0;
+  --text: #1A1A1A;
+  --text-muted: #5A5A5A;
+  --border: #E1DED6;
+  --code-bg: #F2F0EA;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--text);
+  background: var(--bg);
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 48px 32px 96px;
+}
+h1, h2, h3, h4 {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--primary-dark);
+  line-height: 1.25;
+  margin-top: 2em;
+  margin-bottom: 0.6em;
+}
+h1 {
+  font-size: 2.4em;
+  border-bottom: 3px solid var(--primary);
+  padding-bottom: 12px;
+  margin-top: 0;
+}
+h2 {
+  font-size: 1.7em;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+}
+h3 { font-size: 1.3em; color: var(--primary); }
+h4 { font-size: 1.1em; color: var(--text); }
+p { margin: 0.8em 0; }
+strong { color: var(--primary-dark); }
+a { color: var(--primary); text-decoration: underline; }
+a:hover { color: var(--accent); }
+ul, ol { padding-left: 1.6em; }
+li { margin: 0.25em 0; }
+code {
+  font-family: "SF Mono", Consolas, "Courier New", monospace;
+  font-size: 0.9em;
+  background: var(--code-bg);
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: var(--primary-dark);
+}
+pre {
+  background: var(--code-bg);
+  border-left: 4px solid var(--primary);
+  padding: 16px 20px;
+  overflow-x: auto;
+  border-radius: 4px;
+  font-size: 0.85em;
+  line-height: 1.5;
+}
+pre code {
+  background: transparent;
+  padding: 0;
+  color: var(--text);
+}
+blockquote {
+  border-left: 4px solid var(--accent);
+  padding-left: 16px;
+  margin: 1em 0;
+  color: var(--text-muted);
+  font-style: italic;
+}
+table {
+  border-collapse: collapse;
+  margin: 1em 0;
+  width: 100%;
+  font-size: 0.92em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  background: var(--bg-soft);
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+tbody tr:nth-child(even) {
+  background: var(--bg-soft);
+}
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2.5em 0;
+}
+.doc-meta {
+  color: var(--text-muted);
+  font-size: 0.9em;
+  font-style: italic;
+  text-align: center;
+  margin-bottom: 32px;
+}
+@media print {
+  body { font-size: 11pt; padding: 0; }
+  h1 { page-break-before: always; }
+  h1:first-of-type { page-break-before: avoid; }
+  h2, h3 { page-break-after: avoid; }
+  pre, table, blockquote { page-break-inside: avoid; }
+}
+@media (max-width: 640px) {
+  body { padding: 24px 16px; font-size: 16px; }
+  h1 { font-size: 1.9em; }
+  h2 { font-size: 1.4em; }
+}
+</style>
+</head>
+<body>
+<h1 id="tinder-decisivo-diseno-e-implementacion">Tinder Decisivo — Diseño e Implementación</h1>
+<p><strong>Una aplicación para ayudar a los chilenos a decidir su voto</strong></p>
+<p><em>Versión para todo público — 1.0 — 2026-07-25</em></p>
+<hr />
+<h2 id="tabla-de-contenidos">Tabla de contenidos</h2>
+<ol>
+<li><a href="#1-contexto">Contexto</a></li>
+<li><a href="#2-definicion-del-problema">Definición del problema</a></li>
+<li><a href="#3-problemas-encontrados">Problemas encontrados</a></li>
+<li><a href="#4-sintomas-e-impacto">Síntomas e impacto</a></li>
+<li><a href="#5-objetivos">Objetivos</a></li>
+<li><a href="#6-justificacion">Justificación</a></li>
+<li><a href="#7-beneficios">Beneficios</a></li>
+<li><a href="#8-metodologia">Metodología</a></li>
+<li><a href="#9-marco-teorico">Marco teórico</a></li>
+<li><a href="#10-flujo-del-usuario">Flujo del usuario</a></li>
+<li><a href="#11-diseno-e-implementacion">Diseño e implementación</a></li>
+<li><a href="#12-conclusiones">Conclusiones</a></li>
+<li><a href="#13-bibliografia">Bibliografía</a></li>
+</ol>
+<hr />
+<h2 id="1-contexto">1. Contexto</h2>
+<p>Chile es uno de los países con más elecciones en América Latina. En una década, un votante chileno tiene que decidir sobre elecciones presidenciales, parlamentarias, municipales, regionales y plebiscitos constitucionales. Son decenas de decisiones, cada una con muchos candidatos.</p>
+<p>Pensemos en un caso concreto: una elección presidencial. Hay entre 6 y 8 candidaturas. Cada una publica un programa de gobierno de entre 80 y 200 páginas. Si un votante quisiera leer todos los programas antes de decidir, necesitaría literalmente semanas de lectura. <strong>Nadie hace eso.</strong></p>
+<p>En otros países existen desde hace décadas herramientas digitales pensadas para resolver este problema. Se llaman <strong>Voting Advice Applications</strong> (VAA), que en español podríamos traducir como "aplicaciones de recomendación de voto". La primera de ellas, <em>StemWijzer</em>, nació en Países Bajos en 1989 y hoy la usan millones de votantes en cada elección. En Alemania la herramienta se llama <em>Wahl-O-Mat</em>, en Suiza <em>Smartvote</em>, y así en muchos países.</p>
+<p>En Chile, sin embargo, <strong>no existe una VAA activa, transparente y sostenida en el tiempo</strong>. Hubo intentos, como <em>Voto Informado</em> o <em>Decide Chile</em>, pero fueron intermitentes o se abandonaron. El votante chileno hoy no tiene un equivalente local de estas herramientas.</p>
+<p>Este proyecto, llamado <strong>Tinder Decisivo</strong>, busca llenar ese vacío.</p>
+<hr />
+<h2 id="2-definicion-del-problema">2. Definición del problema</h2>
+<p>El votante chileno se encuentra frente a una decisión importante —a quién elegir— con tres obstáculos grandes:</p>
+<p><strong>Obstáculo 1: Demasiada información y muy poco tiempo.</strong><br />
+Los programas oficiales de los candidatos son extensos y técnicos. Nadie con un trabajo, hijos o vida cotidiana normal puede leerlos todos y comparar en detalle.</p>
+<p><strong>Obstáculo 2: Desinformación circulando en redes sociales.</strong><br />
+Especialmente desde 2020, se ha vuelto común encontrar en WhatsApp, TikTok, Instagram y Facebook mensajes falsos o manipulados sobre lo que los candidatos supuestamente proponen. Organizaciones como <em>Fast Check CL</em> y <em>Mala Espina Check</em> trabajan revisando cientos de estos mensajes cada semana. El problema es que el mensaje falso se comparte mil veces más rápido que la verificación.</p>
+<p><strong>Obstáculo 3: No hay una herramienta chilena que compare candidatos.</strong><br />
+En Alemania, cualquier votante puede entrar a Wahl-O-Mat, responder 38 preguntas y ver de forma clara cuál partido está más cerca de sus posturas. En Chile no existe una herramienta parecida que esté funcionando, sea confiable, y no dependa solo de que un medio la impulse durante una elección específica.</p>
+<p>En resumen: <strong>el votante chileno tiene que decidir sin buena información, en un ambiente contaminado por desinformación, y sin una herramienta neutral que lo ayude a comparar.</strong></p>
+<p>Ese es el problema que Tinder Decisivo busca resolver.</p>
+<hr />
+<h2 id="3-problemas-encontrados">3. Problemas encontrados</h2>
+<p>Durante la investigación para diseñar esta aplicación, identificamos varios problemas concretos:</p>
+<h3 id="31-con-la-informacion-que-hoy-existe">3.1 Con la información que hoy existe</h3>
+<ul>
+<li><strong>Los programas son ilegibles para la mayoría.</strong> No por falta de inteligencia del votante, sino por falta de tiempo y por el lenguaje técnico.</li>
+<li><strong>Los medios se enfocan en frases de impacto o encuestas</strong>, no en comparar propuestas puntuales.</li>
+<li><strong>Circulan muchas mentiras y datos manipulados</strong> en cadenas de mensajes y redes sociales, especialmente durante los últimos meses de campaña.</li>
+<li><strong>La información sobre un mismo candidato está dispersa</strong> en su sitio web, entrevistas en YouTube, publicaciones en Twitter, notas de prensa. Reunir todo es agotador.</li>
+<li><strong>Cuando un medio o influencer dice "X candidato propone Y", raramente muestra la fuente exacta</strong>. El votante tiene que confiar sin poder verificar.</li>
+</ul>
+<h3 id="32-con-las-herramientas-que-se-intentaron-antes-en-chile">3.2 Con las herramientas que se intentaron antes en Chile</h3>
+<ul>
+<li>Fueron <strong>intermitentes</strong>: aparecían para una elección y desaparecían.</li>
+<li><strong>Nunca explicaron cómo hacían el cálculo</strong> del match entre votante y candidato.</li>
+<li><strong>Ninguna publicó su código</strong> para que otros pudieran revisar si el cálculo era justo.</li>
+<li><strong>Las posturas asignadas a los candidatos no traían justificación ni fuente verificable.</strong></li>
+</ul>
+<h3 id="33-con-las-vaas-internacionales-que-si-funcionan">3.3 Con las VAAs internacionales que sí funcionan</h3>
+<p>Aún las herramientas exitosas del mundo tienen limitaciones que quisimos evitar:</p>
+<ul>
+<li>La mayoría usa <strong>fórmulas muy simples</strong> que tratan las diferencias grandes igual que las chicas.</li>
+<li>Pocas ofrecen <strong>opción "No sé"</strong>. Fuerzan al usuario a elegir "neutral" aunque no tenga opinión, lo que distorsiona el resultado.</li>
+<li><strong>No muestran nivel de confianza</strong>: si respondiste 3 preguntas te muestran un 80% con la misma seguridad que si respondiste 30.</li>
+<li><strong>Dan un porcentaje global sin explicar en qué temas coincides o difieres</strong> con cada candidato.</li>
+<li><strong>Muchas no son accesibles</strong>: no funcionan bien para personas con discapacidad visual o motora.</li>
+</ul>
+<hr />
+<h2 id="4-sintomas-e-impacto">4. Síntomas e impacto</h2>
+<p>Los problemas descritos se ven en la realidad chilena de varias maneras:</p>
+<h3 id="41-lo-que-se-observa">4.1 Lo que se observa</h3>
+<ul>
+<li>Los votantes deciden por la imagen del candidato, por el partido de la familia, o por lo que dijo un amigo, más que por comparar propuestas.</li>
+<li>La votación cambia mucho entre una elección y la siguiente, señal de decisiones tomadas sin información sólida.</li>
+<li>La confianza en las instituciones políticas viene bajando desde hace años.</li>
+<li>Cada elección aparecen nuevas piezas de desinformación viralizadas.</li>
+<li>Antes del voto obligatorio, en muchas elecciones votaba menos de la mitad de la gente habilitada.</li>
+</ul>
+<h3 id="42-a-quien-afecta-y-como">4.2 A quién afecta y cómo</h3>
+<p><strong>A cada votante:</strong> termina eligiendo candidatos que en realidad no representan bien sus prioridades. Si le hubieran preguntado tema por tema, habría descubierto que su match era otro.</p>
+<p><strong>A las instituciones democráticas:</strong> las autoridades electas no siempre reflejan las mayorías reales del país, sino las mayorías mediáticas. Esto alimenta la desconfianza y la polarización.</p>
+<p><strong>A la democracia en general:</strong> el debate público se centra en los personajes en vez de en las propuestas. Se pierde la capacidad de conversar sobre política real.</p>
+<hr />
+<h2 id="5-objetivos">5. Objetivos</h2>
+<h3 id="51-objetivo-general">5.1 Objetivo general</h3>
+<p>Diseñar y construir una aplicación móvil que funcione en teléfonos y en la web, disponible sin costo para cualquier ciudadano chileno, que le permita en menos de 10 minutos comparar sus propias posturas políticas con las de los candidatos en competencia, con un cálculo transparente y datos verificables.</p>
+<h3 id="52-objetivos-especificos">5.2 Objetivos específicos</h3>
+<ol>
+<li>
+<p><strong>Diseñar un cálculo de afinidad que sea justo y explicable.</strong> Que no penalice igual a una diferencia chica que a una grande, que le permita al usuario decir qué temas le importan más, y que ofrezca la opción honesta "No sé".</p>
+</li>
+<li>
+<p><strong>Construir una aplicación multiplataforma.</strong> Un solo desarrollo que funcione bien en la web, en iPhone y en Android, sin tener que mantener tres apps distintas.</p>
+</li>
+<li>
+<p><strong>Garantizar que cada postura de un candidato tenga fuente verificable.</strong> Nadie debería creer un match sin poder ir a revisar de dónde salió la información.</p>
+</li>
+<li>
+<p><strong>Asegurar la accesibilidad.</strong> La aplicación debe funcionar bien para personas con distintas capacidades: buenos contrastes de color, navegación por teclado, botones grandes suficientes para ser presionados con facilidad, compatibilidad con lectores de pantalla.</p>
+</li>
+<li>
+<p><strong>Publicar el código como open source.</strong> Cualquier persona debe poder revisar cómo funciona el cálculo y proponer mejoras. Si alguien monta una versión modificada en público, la licencia lo obliga a compartir sus cambios (esa es la lógica de la licencia AGPL).</p>
+</li>
+<li>
+<p><strong>Hacer una aplicación mantenible.</strong> Con estructura clara, componentes reutilizables y pruebas automáticas, para que futuras personas puedan mejorarla sin romper lo que ya funciona.</p>
+</li>
+</ol>
+<hr />
+<h2 id="6-justificacion">6. Justificación</h2>
+<h3 id="61-es-un-aporte-civico-concreto">6.1 Es un aporte cívico concreto</h3>
+<p>En una democracia, la calidad del voto depende de la calidad de la información que tiene el votante. Si esa información es escasa, contradictoria o falsa, la democracia se debilita. Una aplicación como esta reduce esa asimetría entregando una herramienta comparativa que devuelve el foco a las propuestas concretas.</p>
+<h3 id="62-la-tecnologia-para-hacerlo-ya-existe">6.2 La tecnología para hacerlo ya existe</h3>
+<p>Hoy hay herramientas de programación maduras que permiten construir, con recursos modestos, aplicaciones que hace diez años requerían presupuestos de institución grande. Este proyecto aprovecha esa disponibilidad.</p>
+<h3 id="63-es-un-caso-de-estudio-academico-completo">6.3 Es un caso de estudio académico completo</h3>
+<p>Este trabajo se enmarca en una tesis de pregrado sobre desarrollo de aplicaciones móviles. Cubre en un solo proyecto: diseño de arquitectura, creación de un algoritmo, integración entre servidor y aplicación, pruebas automatizadas, cumplimiento de estándares de accesibilidad, y publicación multiplataforma. Es un ejemplo integral de aplicación de lo aprendido en la carrera.</p>
+<h3 id="64-ser-open-source-es-un-principio-no-un-accidente">6.4 Ser open source es un principio, no un accidente</h3>
+<p>La tecnología electoral debe ser auditable. Los ciudadanos tienen derecho a saber cómo funciona un algoritmo que les recomienda por quién votar. Por eso el código es público bajo una licencia (AGPL) que obliga a cualquier fork público a compartir también sus modificaciones.</p>
+<hr />
+<h2 id="7-beneficios">7. Beneficios</h2>
+<h3 id="71-para-quien-vota">7.1 Para quien vota</h3>
+<ul>
+<li>Puede comparar candidatos en menos de 10 minutos, en vez de horas.</li>
+<li>Recibe un ranking con criterios claros: sabe por qué un candidato aparece arriba y otro abajo.</li>
+<li>Ve un desglose por tema: puede coincidir mucho en economía con un candidato y muy poco en medio ambiente con el mismo.</li>
+<li>Puede verificar cada postura yendo directamente a la fuente citada.</li>
+<li>Usa la aplicación gratis, sin publicidad, y sin que se extraigan sus datos personales.</li>
+</ul>
+<h3 id="72-para-la-ciudadania-informada">7.2 Para la ciudadanía informada</h3>
+<ul>
+<li>Contribuye a reducir la desinformación al ofrecer una fuente confiable con citas verificables.</li>
+<li>Es una herramienta educativa: al pasar por el cuestionario, uno aprende cuáles son los ejes principales de la política pública chilena.</li>
+<li>Cada pregunta incluye un botón de información con explicación y repercusiones, para que quien no domine el tema pueda entenderlo.</li>
+</ul>
+<h3 id="73-para-investigadores-periodistas-y-academicos">7.3 Para investigadores, periodistas y académicos</h3>
+<ul>
+<li>Existe un dataset abierto de posturas con fuentes, disponible para análisis.</li>
+<li>El código del algoritmo es público y auditable, permitiendo réplica académica.</li>
+<li>Se puede adaptar el sistema para elecciones parlamentarias, municipales, o para otros países.</li>
+</ul>
+<h3 id="74-para-los-propios-candidatos">7.4 Para los propios candidatos</h3>
+<ul>
+<li>Reciben retroalimentación sobre en qué temas su programa genera más o menos afinidad con el electorado.</li>
+<li>Se incentiva la explicitación de posturas con fuentes verificables en lugar de comunicación vaga.</li>
+</ul>
+<h3 id="75-para-el-ecosistema-tecnologico-chileno">7.5 Para el ecosistema tecnológico chileno</h3>
+<ul>
+<li>Es un ejemplo de proyecto cívico hecho con estándares profesionales.</li>
+<li>La base de código puede reutilizarse para otras iniciativas de tecnología ciudadana.</li>
+</ul>
+<hr />
+<h2 id="8-metodologia">8. Metodología</h2>
+<p>El proyecto se construyó en sprints cortos, de una semana cada uno, entregando funcionalidades completas de punta a punta (servidor + aplicación + pruebas) en cada iteración. Este enfoque, conocido como <strong>desarrollo iterativo</strong>, permite corregir el rumbo si algo no funciona sin haber invertido meses en la dirección equivocada.</p>
+<h3 id="81-fases-del-trabajo">8.1 Fases del trabajo</h3>
+<p><strong>Fase 0 — Investigar qué existe.</strong> Antes de construir nada, se estudió cómo son las VAAs de otros países, qué hacen bien, qué hacen mal, y qué falta en Chile. Este análisis produjo el documento <code>docs/comparacion-vaas.md</code> con comparación de 9 herramientas internacionales.</p>
+<p><strong>Fase 1 — Diseñar la arquitectura.</strong> Se definió cómo se organizarían los datos, qué información se guardaría, cómo se comunicarían el servidor y la aplicación, y qué tecnologías se usarían. La regla fue "elegir herramientas aburridas y probadas", no las más modernas.</p>
+<p><strong>Fase 2 — Construir el MVP.</strong> Se implementó funcionalidad por funcionalidad: primero autenticación, después el catálogo, después el cuestionario, después el cálculo de match, después los resultados, y así.</p>
+<p><strong>Fase 3 — Auditar y limpiar.</strong> Se hizo una revisión sistemática del código en busca de errores, malas prácticas o riesgos de seguridad. Se detectaron 17 problemas de distinta severidad y se corrigieron todos los críticos y altos.</p>
+<p><strong>Fase 4 — Verificar los datos.</strong> Se importaron 6 candidatos, 12 preguntas y 72 posturas iniciales, marcadas con niveles de confianza (alta, media, baja) para transparentar qué información aún requiere verificación adicional.</p>
+<h3 id="82-practicas-aplicadas">8.2 Prácticas aplicadas</h3>
+<ul>
+<li><strong>Pruebas automáticas antes que código nuevo:</strong> especialmente para las partes críticas como el algoritmo de cálculo.</li>
+<li><strong>Contrato claro entre servidor y aplicación:</strong> el servidor publica un documento formal describiendo su API, y la aplicación lo consume de forma que si algo cambia en el servidor, la aplicación deja de compilar hasta que se ajuste. Esto evita errores en producción.</li>
+<li><strong>Componentes reutilizables:</strong> los botones, formularios y controles visuales se construyeron una sola vez y se usan en todas las pantallas.</li>
+<li><strong>Nada se importa dos veces:</strong> los importadores de datos pueden correrse muchas veces con el mismo efecto que una sola.</li>
+</ul>
+<hr />
+<h2 id="9-marco-teorico">9. Marco teórico</h2>
+<p>Esta sección presenta los conceptos y las ideas de fondo sobre los que se apoya el proyecto.</p>
+<h3 id="91-que-es-una-voting-advice-application">9.1 Qué es una Voting Advice Application</h3>
+<p>Una VAA es una aplicación que compara las opiniones políticas de un votante con las de partidos o candidatos, y le muestra con quiénes tiene más afinidad. La primera fue <strong>StemWijzer</strong>, creada en Países Bajos en 1989 (originalmente distribuida en disquete). Los estudios académicos sobre estas herramientas muestran que llegan a mover entre el 2% y el 6% del voto en países con alto uso, por lo que no son un juguete: tienen impacto electoral real.</p>
+<p>Las VAAs se diferencian entre sí por:</p>
+<ul>
+<li><strong>De dónde sacan las posturas de los candidatos:</strong> algunas les preguntan directamente a los candidatos, otras contratan equipos que las investigan, otras hacen ambas cosas.</li>
+<li><strong>Qué escala usan para las respuestas:</strong> algunas son binarias (a favor/en contra), otras usan 3 niveles, otras usan 5 (la escala Likert), otras usan opciones múltiples.</li>
+<li><strong>Cómo muestran el resultado:</strong> algunas dan un ranking simple, otras dibujan un mapa 2D del espectro político, otras muestran un radar con varios ejes.</li>
+</ul>
+<h3 id="92-la-escala-likert">9.2 La escala Likert</h3>
+<p>Cuando alguien te pregunta "¿qué tan de acuerdo estás con X?" y te da 5 opciones (Muy en desacuerdo, En desacuerdo, Neutral, De acuerdo, Muy de acuerdo), eso es una escala Likert. La inventó el psicólogo Rensis Likert en 1932, y es hoy uno de los instrumentos más usados en encuestas de opinión en todo el mundo. Los estudios sobre estas escalas sugieren que 5 puntos es el balance óptimo entre precisión y fatiga: más opciones dan más detalle pero cansan al respondiente.</p>
+<p>Tinder Decisivo usa la escala Likert de 5 puntos, y añade una sexta opción explícita: "No sé / Prefiero no responder", que no se cuenta en el cálculo. Esto es más honesto que forzar una respuesta neutral falsa.</p>
+<h3 id="93-como-se-compara-la-afinidad">9.3 Cómo se compara la afinidad</h3>
+<p>El proyecto no usa un promedio simple. Usa una fórmula que castiga más las diferencias grandes que las chicas. La idea es que estar "muy en desacuerdo" con un candidato en un tema debería descontar más puntos que dos pequeñas diferencias sumadas. Esto refleja mejor cómo las personas percibimos la similitud política.</p>
+<p>Además, cada respuesta se puede ponderar por importancia: si dijiste "muy importante" en una pregunta, esa pregunta pesa el doble que una donde dijiste "poco importante", y cuatro veces más que una donde dijiste "no me importa".</p>
+<h3 id="94-buenas-practicas-de-arquitectura-de-software">9.4 Buenas prácticas de arquitectura de software</h3>
+<p>El proyecto se guía por principios establecidos de ingeniería:</p>
+<ul>
+<li><strong>SOLID</strong>: cinco reglas para escribir código que sea fácil de mantener y modificar.</li>
+<li><strong>DRY</strong> ("No te repitas"): si algo aparece dos veces en el código, hay que unificarlo.</li>
+<li><strong>YAGNI</strong> ("No lo vas a necesitar"): no construir funcionalidades hipotéticas, solo las que se usan hoy.</li>
+<li><strong>Clean Architecture</strong>: separar el código en capas con responsabilidades claras.</li>
+<li><strong>12-Factor App</strong>: reglas para hacer aplicaciones que se puedan desplegar y escalar sin sorpresas.</li>
+</ul>
+<h3 id="95-diseno-atomico">9.5 Diseño atómico</h3>
+<p>Los componentes de la aplicación se organizan como una tabla periódica de elementos:</p>
+<ul>
+<li><strong>Átomos</strong>: piezas mínimas (un botón, un cuadro de texto, un ícono).</li>
+<li><strong>Moléculas</strong>: combinaciones simples (un campo de formulario con etiqueta, mensaje de error e ícono).</li>
+<li><strong>Organismos</strong>: bloques funcionales (una barra de navegación, una tarjeta de candidato).</li>
+<li><strong>Templates</strong>: esqueletos de pantalla completa.</li>
+<li><strong>Páginas</strong>: pantallas reales con datos.</li>
+</ul>
+<p>Esta metodología, propuesta por el diseñador Brad Frost, ayuda a mantener consistencia visual y a reutilizar componentes en toda la aplicación.</p>
+<h3 id="96-accesibilidad-web">9.6 Accesibilidad web</h3>
+<p>Existe un estándar internacional del W3C llamado <strong>WCAG 2.2</strong> (<em>Web Content Accessibility Guidelines</em>) que define cómo debe ser una interfaz digital para ser accesible a personas con discapacidades. Incluye reglas como: contraste mínimo entre texto y fondo, tamaño mínimo de botones, capacidad de navegar todo con el teclado (sin mouse), compatibilidad con lectores de pantalla para personas ciegas.</p>
+<p>Tinder Decisivo apunta al nivel AA de estas guías, que es el nivel exigido por leyes de accesibilidad de la mayoría de los países desarrollados.</p>
+<hr />
+<h2 id="10-flujo-del-usuario">10. Flujo del usuario</h2>
+<p>Esta sección describe qué pasa cuando alguien abre la aplicación por primera vez, hasta que ve su match con un candidato.</p>
+<h3 id="101-vista-general-del-recorrido">10.1 Vista general del recorrido</h3>
+<pre><code>+------------------+
+| Registro o Login |
++------------------+
+         |
+         v
++------------------+
+| Home             |
+| (elegir tipo de  |
+|  elección)       |
++------------------+
+         |
+         v
++------------------+
+| Cuestionario     |
+| (12 preguntas    |
+|  con importancia)|
++------------------+
+         |
+         v
++------------------+
+| Enviado          |
++------------------+
+         |
+         v
++------------------+
+| Resultados       |
+| (ranking de      |
+|  candidatos)     |
++------------------+
+         |
+    +----+-----+
+    v          v
++---------+ +---------+
+| Detalle | | Comparar|
+| candi-  | | dos     |
+| dato    | | candi-  |
+|         | | datos   |
++---------+ +---------+
+</code></pre>
+<h3 id="102-paso-a-paso">10.2 Paso a paso</h3>
+<p><strong>Paso 1 — Registrarse o iniciar sesión.</strong><br />
+El usuario abre la aplicación. Si es la primera vez, se registra con nombre de usuario, correo y contraseña. Si ya tiene cuenta, ingresa con sus credenciales. La contraseña se guarda encriptada en el servidor, imposible de leer en claro incluso para quien administra la base de datos.</p>
+<p><strong>Paso 2 — Elegir el tipo de elección.</strong><br />
+Aparece la pantalla principal (Home) donde el usuario selecciona qué elección le interesa. En esta versión, la única opción disponible es "Presidencial".</p>
+<p><strong>Paso 3 — Responder el cuestionario.</strong><br />
+Se muestran las 12 preguntas de una en una. Cada pregunta es una afirmación política, por ejemplo: "Chile debe cerrar las centrales de carbón antes de 2030".</p>
+<p>Para cada pregunta el usuario:
+- Puede presionar un ícono de información para ver contexto y explicación de por qué el tema es relevante.
+- Elige una de 5 opciones: Muy en desacuerdo, En desacuerdo, Neutral, De acuerdo, Muy de acuerdo. O bien "No sé", que hace que esa pregunta no cuente en el cálculo.
+- Elige el nivel de importancia que le da a ese tema: No me importa, Poco, Medio, Mucho.</p>
+<p>Puede volver atrás y cambiar respuestas anteriores antes de enviar.</p>
+<p><strong>Paso 4 — Enviar el cuestionario.</strong><br />
+Al llegar a la última pregunta y presionar "Enviar", todas las respuestas viajan al servidor y se guardan. Aparece una pantalla intermedia confirmando "Enviado" con un botón para ver los resultados.</p>
+<p><strong>Paso 5 — Ver el cálculo del match.</strong><br />
+Cuando el usuario presiona "Ver mis matches", el servidor:</p>
+<ol>
+<li>Toma sus respuestas (ignorando las "No sé").</li>
+<li>Toma las posturas de cada candidato de la elección.</li>
+<li>Compara pregunta por pregunta.</li>
+<li>Aplica la fórmula que castiga más las diferencias grandes.</li>
+<li>Multiplica por la importancia que el usuario dio a cada tema.</li>
+<li>Saca un porcentaje global y un porcentaje por cada eje temático (Economía, Sociedad, Ambiente, Seguridad, Derechos Humanos, Política Internacional, Reforma Institucional).</li>
+<li>Determina un nivel de confianza según cuántas preguntas usó: si fueron pocas (menos de 5), el match es "tentativo"; si fueron muchas (10 o más), es "alto".</li>
+</ol>
+<p><strong>Paso 6 — Ver el ranking de resultados.</strong><br />
+Se muestra la lista de candidatos ordenados de mayor a menor afinidad. Cada uno con:
+- Foto y nombre.
+- Partido político.
+- Porcentaje de match.
+- Etiqueta con el nivel de confianza.</p>
+<p><strong>Paso 7 — Ver el detalle de un candidato.</strong><br />
+Al presionar sobre un candidato, se abre su perfil completo con:
+- Biografía y propuesta electoral.
+- Radar visual con los 7 ejes temáticos, mostrando cuánto se coincide en cada uno.
+- Lista completa de todas las posturas del candidato, cada una con justificación y enlace a la fuente original.
+- Noticias recientes del candidato (obtenidas automáticamente de la prensa chilena).</p>
+<p><strong>Paso 8 — Comparar dos candidatos (opcional).</strong><br />
+Desde el detalle o desde el menú, el usuario puede elegir dos candidatos y verlos lado a lado, comparando sus posturas pregunta por pregunta.</p>
+<h3 id="103-otras-cosas-que-puede-hacer-el-usuario">10.3 Otras cosas que puede hacer el usuario</h3>
+<ul>
+<li><strong>Marcar candidatos como favoritos</strong> para revisar después.</li>
+<li><strong>Descartar candidatos</strong> que no le interesan, para simplificar la vista.</li>
+<li><strong>Guardar su decisión final</strong> de voto (esta es privada, solo la ve el propio usuario).</li>
+<li><strong>Leer un feed de noticias</strong> con las últimas noticias de todos los candidatos.</li>
+<li><strong>Editar su perfil</strong>, cambiar su contraseña, o eliminar su cuenta.</li>
+<li><strong>Recuperar la contraseña</strong> si se le olvida, mediante un correo con enlace de recuperación.</li>
+</ul>
+<hr />
+<h2 id="11-diseno-e-implementacion">11. Diseño e implementación</h2>
+<p>Esta sección explica, sin entrar en detalles técnicos, cómo se construyó la aplicación.</p>
+<h3 id="111-dos-mitades-el-servidor-y-la-aplicacion">11.1 Dos mitades: el servidor y la aplicación</h3>
+<p>Una aplicación moderna tiene dos partes principales:</p>
+<p><strong>El servidor (backend).</strong> Es una computadora en la nube que guarda todos los datos: los candidatos, las preguntas, las posturas, los usuarios, las respuestas de cada uno, los cálculos de match. También hace las cuentas cuando alguien pide su match. Está construido con Django, una tecnología madura ampliamente usada en el mundo (Instagram, Spotify y Pinterest la usaron en sus inicios).</p>
+<p><strong>La aplicación (frontend).</strong> Es lo que el usuario ve y toca. Está construida con React Native, una tecnología que permite escribir el código una sola vez y generar la aplicación para web, iPhone y Android. Es lo mismo que usan aplicaciones como Facebook, Instagram y Discord para tener una sola base de código en múltiples plataformas.</p>
+<p>Ambas partes se hablan entre sí por internet, enviándose mensajes con un formato estándar (JSON) a través de un tipo de comunicación llamada API REST. Es como si el frontend fuera un mesero que pasa pedidos a una cocina (el backend) y espera la respuesta.</p>
+<h3 id="112-que-se-guarda-en-el-servidor">11.2 Qué se guarda en el servidor</h3>
+<p>El servidor mantiene varias tablas de información, análogas a hojas de un Excel gigante:</p>
+<ul>
+<li><strong>Usuarios</strong>: nombre, correo, contraseña encriptada.</li>
+<li><strong>Tipos de elección</strong>: Presidencial, Parlamentaria, etc.</li>
+<li><strong>Candidatos</strong>: nombre, apellido, partido, biografía, foto, propuesta electoral.</li>
+<li><strong>Preguntas</strong>: enunciado, eje temático (a qué categoría pertenece), orden en el cuestionario, explicación educativa.</li>
+<li><strong>Opciones de respuesta</strong>: las 5 de la escala Likert más la opción "No sé".</li>
+<li><strong>Respuestas de los usuarios</strong>: qué respondió cada uno y con qué importancia.</li>
+<li><strong>Posturas de los candidatos</strong>: qué opina cada candidato de cada pregunta, con justificación y fuente.</li>
+<li><strong>Cálculos de match</strong>: los porcentajes ya calculados por usuario y por candidato.</li>
+<li><strong>Favoritos, descartados y decisión final</strong>: elecciones personales del usuario.</li>
+<li><strong>Noticias</strong>: artículos de prensa asociados a cada candidato.</li>
+</ul>
+<h3 id="113-el-algoritmo-de-match">11.3 El algoritmo de match</h3>
+<p>Cuando el usuario pide su match, el servidor compara sus respuestas con las posturas de cada candidato. Para cada pregunta:</p>
+<ul>
+<li>Si el usuario respondió "Muy de acuerdo" (5) y el candidato tiene "Muy de acuerdo" (5), la diferencia es 0 y coinciden 100%.</li>
+<li>Si el usuario respondió "Muy de acuerdo" (5) y el candidato tiene "Muy en desacuerdo" (1), la diferencia es 4 y coinciden 0%.</li>
+<li>Las diferencias intermedias no dan puntajes lineales: una diferencia de 1 (casi igual) da 94% de coincidencia; una diferencia de 3 (grande) da solo 44%. Se castiga más fuerte las diferencias extremas.</li>
+</ul>
+<p>Luego se multiplica por la importancia que el usuario le dio al tema. Si dijo "Muy importante", la pregunta pesa el doble.</p>
+<p>Se suma todo, se divide por el peso total, y se obtiene un porcentaje.</p>
+<p>Además de este porcentaje global, el servidor calcula un porcentaje por cada uno de los 7 ejes temáticos, para dibujar el radar que el usuario ve en el detalle del candidato.</p>
+<h3 id="114-como-se-organiza-el-codigo">11.4 Cómo se organiza el código</h3>
+<p>Tanto el servidor como la aplicación se organizan en capas claras, con la idea de que cada archivo tenga una responsabilidad específica.</p>
+<p><strong>En el servidor:</strong>
+- Una capa que define las tablas de datos.
+- Una capa que convierte los datos a JSON para enviarlos.
+- Una capa que recibe los mensajes de la aplicación y decide qué hacer.
+- Una capa aislada que contiene la lógica del algoritmo (esta se puede probar sin necesidad de conectar con la aplicación).
+- Una capa de scripts que importan datos desde archivos CSV.</p>
+<p><strong>En la aplicación:</strong>
+- Una capa que se comunica con el servidor.
+- Componentes visuales organizados por complejidad (átomos, moléculas, organismos).
+- Pantallas completas que combinan varios componentes.
+- Una capa de servicios con la lógica que no depende de lo visual.
+- Un estado global que guarda las respuestas del cuestionario mientras el usuario responde.</p>
+<p>Esta organización tiene una ventaja concreta: si mañana quisiéramos cambiar cómo se ven los botones, tocamos solo la capa visual. Si quisiéramos mejorar el algoritmo, tocamos solo la capa de servicios. Los cambios son locales y no se propagan por toda la aplicación.</p>
+<h3 id="115-de-donde-salen-los-datos-de-los-candidatos">11.5 De dónde salen los datos de los candidatos</h3>
+<p>Chile no tiene una API pública oficial con las posturas de los candidatos. El SERVEL publica datos electorales, pero no las posiciones programáticas. Por eso, la solución adoptada es cargar los datos manualmente desde archivos CSV mediante scripts especiales que:</p>
+<ul>
+<li>Pueden ejecutarse varias veces sin duplicar información.</li>
+<li>Validan que cada fila tenga los campos requeridos.</li>
+<li>Marcan cada postura con un nivel de confianza (alta, media, baja) según qué tan bien verificada esté.</li>
+<li>Permiten previsualizar sin escribir (modo "dry-run") antes de aplicar los cambios.</li>
+</ul>
+<p>Las noticias, en cambio, se obtienen automáticamente desde Google News, mediante un script que corre una vez al día y busca las noticias recientes de cada candidato.</p>
+<h3 id="116-seguridad">11.6 Seguridad</h3>
+<p>La aplicación aplica varias medidas de seguridad:</p>
+<ul>
+<li>Las contraseñas se guardan encriptadas mediante un algoritmo llamado PBKDF2, que aplica 600.000 vueltas de encriptación. Es prácticamente imposible revertir.</li>
+<li>Los datos sensibles de configuración (claves, URLs, etc.) no viven dentro del código, sino en archivos aparte que no se suben a repositorios públicos.</li>
+<li>Cada solicitud del usuario debe venir acompañada de un token de autenticación. Sin token, el servidor no responde.</li>
+<li>Cada tipo de endpoint tiene reglas claras de quién puede acceder (usuario común, administrador, público general).</li>
+<li>En producción se planifica agregar límites de velocidad para evitar ataques de fuerza bruta y despliegue con HTTPS.</li>
+</ul>
+<h3 id="117-pruebas-automaticas">11.7 Pruebas automáticas</h3>
+<p>El proyecto tiene más de 40 pruebas automáticas que se corren cada vez que se hace un cambio. Estas pruebas verifican, entre otras cosas:</p>
+<ul>
+<li>Que el algoritmo dé los resultados correctos ante casos conocidos.</li>
+<li>Que las respuestas "No sé" se excluyan correctamente del cálculo.</li>
+<li>Que los importadores de datos sean seguros de correr múltiples veces.</li>
+<li>Que las noticias no se pueden modificar sin ser administrador.</li>
+<li>Que las contraseñas se guarden encriptadas.</li>
+</ul>
+<p>Este conjunto de pruebas permite hacer cambios con confianza: si algo se rompe, las pruebas avisan antes de llegar a los usuarios.</p>
+<h3 id="118-accesibilidad">11.8 Accesibilidad</h3>
+<p>La aplicación se diseñó pensando en el estándar WCAG 2.2 nivel AA. Se incluyó:</p>
+<ul>
+<li>Contraste de color suficiente entre texto y fondo (al menos 4.5:1).</li>
+<li>Botones y áreas táctiles con tamaño adecuado (mayor al mínimo recomendado).</li>
+<li>Estados visuales claros para focus, hover y disabled.</li>
+<li>Compatibilidad con lectores de pantalla mediante etiquetas descriptivas en cada elemento interactivo.</li>
+</ul>
+<p>Se incluye además un script de auditoría automática que verifica el contraste de todos los colores de la aplicación contra la guía WCAG.</p>
+<hr />
+<h2 id="12-conclusiones">12. Conclusiones</h2>
+<h3 id="121-se-cumplieron-los-objetivos-principales">12.1 Se cumplieron los objetivos principales</h3>
+<p>El proyecto logró construir una aplicación funcional de recomendación de voto para Chile, con las características que se propuso al inicio:</p>
+<ul>
+<li>Algoritmo transparente y explicable, superior al de la mayoría de VAAs internacionales en varios aspectos (opción "No sé" honesta, nivel de confianza, radar por eje).</li>
+<li>Arquitectura modular que separa datos, lógica y presentación.</li>
+<li>Contrato claro entre servidor y aplicación, que evita errores de coordinación.</li>
+<li>Datos con fuentes verificables en cada postura.</li>
+<li>Cobertura de pruebas que permite hacer cambios con confianza.</li>
+<li>Bases de accesibilidad implementadas.</li>
+<li>Aplicación multiplataforma desde un único código.</li>
+</ul>
+<h3 id="122-en-que-estado-esta-hoy">12.2 En qué estado está hoy</h3>
+<p>La aplicación está en versión MVP (0.1), la primera versión funcional. Tiene 12 funcionalidades completas de punta a punta, 3 con servidor listo pero sin interfaz visual, y 6 más planificadas para versiones futuras.</p>
+<p>Está lista para ser presentada como trabajo de tesis. Para publicarla al gran público chileno, faltan aproximadamente 2 o 3 sprints más de trabajo, principalmente para agregar funcionalidades faltantes, verificar las posturas contra fuentes primarias, y hacer el despliegue en un servidor de producción.</p>
+<h3 id="123-lo-que-se-aprendio">12.3 Lo que se aprendió</h3>
+<p><strong>Sobre tecnología:</strong>
+- Combinar Django (servidor) con React Native (aplicación) es una fórmula muy productiva para un desarrollador solo.
+- Definir un contrato formal entre servidor y aplicación (con OpenAPI) es una de las mejores decisiones del proyecto: evita muchísimos errores.
+- Hacer auditorías del propio código de forma periódica ayuda a mejorar la calidad sin necesidad de reescribir todo.
+- No construir funcionalidades "por si las necesito después" (principio YAGNI). Todo código que se escribe pero no se usa se convierte en carga.</p>
+<p><strong>Sobre el problema:</strong>
+- Verificar las posturas de los candidatos contra fuentes primarias es más trabajo que programar la aplicación. Es la parte más costosa del proyecto.
+- Diseñar buenas preguntas para el cuestionario requiere colaboración con personas expertas en ciencias políticas.
+- Las VAAs exitosas del mundo comparten tres cosas: algoritmo transparente, datos verificados, y respaldo institucional continuo entre elecciones. Este último punto es el más difícil de replicar en Chile hoy.</p>
+<h3 id="124-que-falta">12.4 Qué falta</h3>
+<p><strong>Prioridad alta</strong> (para poder lanzar al público):
+- Terminar la interfaz para favoritos, descartados y decisión final.
+- Permitir usar la aplicación sin registrarse (para bajar la barrera de entrada).
+- Verificar todas las 72 posturas iniciales contra fuentes primarias.</p>
+<p><strong>Prioridad media</strong> (para aguantar mucho tráfico):
+- Migrar la base de datos a PostgreSQL en producción.
+- Agregar cache para consultas frecuentes.
+- Implementar límites de velocidad para evitar abuso.
+- Configurar servidor de producción con las mejores prácticas.</p>
+<p><strong>Prioridad baja</strong> (mejoras deseables):
+- Permitir compartir el resultado como imagen para redes sociales.
+- Agregar un tour inicial para nuevos usuarios.
+- Implementar monitoreo automático de errores.</p>
+<h3 id="125-hacia-donde-va-el-proyecto">12.5 Hacia dónde va el proyecto</h3>
+<p>Se identifican cuatro líneas de trabajo natural:</p>
+<ol>
+<li><strong>Publicación pública</strong> de la versión completa en <code>tinder-decisivo.cl</code>.</li>
+<li><strong>Verificación colaborativa de datos</strong>, en alianza con universidades o think tanks de análisis político.</li>
+<li><strong>Explicabilidad avanzada</strong>: agregar simulador "¿qué pasa si cambio esta respuesta?" y mapa 2D del espectro político.</li>
+<li><strong>Investigación académica</strong>: publicar análisis agregado y anonimizado de las respuestas, contribuyendo al estudio empírico de las VAAs en América Latina.</li>
+</ol>
+<h3 id="126-una-reflexion-final">12.6 Una reflexión final</h3>
+<p>Este proyecto demuestra que es posible construir tecnología cívica de calidad profesional con recursos modestos, siempre que se apliquen buenos principios de ingeniería y disciplina en la verificación de datos. La combinación de código abierto, arquitectura limpia y datos trazables constituye una respuesta concreta a los problemas de desinformación y de asimetría de información que enfrenta el votante chileno.</p>
+<p>La existencia de VAAs internacionales que llevan más de 30 años operando (StemWijzer nació en 1989) prueba que estas herramientas pueden ser sostenibles a largo plazo. El desafío en Chile no es técnico —eso lo demuestra este trabajo— sino institucional: encontrar un modelo de gobernanza y financiamiento que permita mantenerla activa entre elecciones, no solo cuando hay urgencia.</p>
+<p>Si este proyecto sirve, aunque sea como semilla, para que en el futuro Chile tenga su propia VAA consolidada como Wahl-O-Mat en Alemania o StemWijzer en Países Bajos, habrá cumplido más de lo que buscaba una tesis de pregrado.</p>
+<hr />
+<h2 id="13-bibliografia">13. Bibliografía</h2>
+<h3 id="131-sobre-voting-advice-applications">13.1 Sobre Voting Advice Applications</h3>
+<ul>
+<li>Cedroni, L., &amp; Garzia, D. (Eds.). (2010). <em>Voting Advice Applications in Europe: The State of the Art</em>. Napoli: ScriptaWeb.</li>
+<li>Garzia, D., &amp; Marschall, S. (Eds.). (2014). <em>Matching Voters with Parties and Candidates: Voting Advice Applications in a Comparative Perspective</em>. Colchester: ECPR Press.</li>
+<li>Marschall, S. (2005). <em>Idee und Wirkung des Wahl-O-Mat</em>. Aus Politik und Zeitgeschichte, 51-52.</li>
+<li>Walgrave, S., van Aelst, P., &amp; Nuytemans, M. (2008). "Do the vote test": The electoral effects of a Popular Vote Advice Application at the 2004 Belgian Elections. <em>Acta Politica</em>, 43, 50-70.</li>
+</ul>
+<h3 id="132-vaas-consultadas">13.2 VAAs consultadas</h3>
+<ul>
+<li>StemWijzer (Países Bajos). https://stemwijzer.nl/</li>
+<li>Wahl-O-Mat (Alemania). https://www.bpb.de/themen/wahl-o-mat/</li>
+<li>Smartvote (Suiza). https://www.smartvote.ch/</li>
+<li>Kieskompas (Países Bajos). https://www.kieskompas.nl/</li>
+<li>Vote Compass (Canadá y Australia). https://votecompass.com/</li>
+</ul>
+<h3 id="133-sobre-desinformacion-electoral">13.3 Sobre desinformación electoral</h3>
+<ul>
+<li>Fast Check CL. https://www.fastcheck.cl/</li>
+<li>Mala Espina Check. https://malaespinacheck.cl/</li>
+<li>Servicio Electoral de Chile (SERVEL). https://www.servel.cl/</li>
+<li>Datos abiertos SERVEL. https://opendata.servel.cl/</li>
+</ul>
+<h3 id="134-sobre-escalas-de-medicion">13.4 Sobre escalas de medición</h3>
+<ul>
+<li>Likert, R. (1932). A Technique for the Measurement of Attitudes. <em>Archives of Psychology</em>, 140, 1-55.</li>
+</ul>
+<h3 id="135-sobre-buenas-practicas-de-software">13.5 Sobre buenas prácticas de software</h3>
+<ul>
+<li>Martin, R. C. (2017). <em>Clean Architecture: A Craftsman's Guide to Software Structure and Design</em>. Prentice Hall.</li>
+<li>Hunt, A., &amp; Thomas, D. (1999). <em>The Pragmatic Programmer: From Journeyman to Master</em>. Addison-Wesley.</li>
+<li>Wiggins, A. (2011). <em>The Twelve-Factor App</em>. https://12factor.net/</li>
+<li>Frost, B. (2016). <em>Atomic Design</em>. https://atomicdesign.bradfrost.com/</li>
+</ul>
+<h3 id="136-sobre-accesibilidad">13.6 Sobre accesibilidad</h3>
+<ul>
+<li>World Wide Web Consortium (W3C). <em>Web Content Accessibility Guidelines (WCAG) 2.2</em>. https://www.w3.org/TR/WCAG22/</li>
+</ul>
+<h3 id="137-sobre-las-tecnologias-utilizadas">13.7 Sobre las tecnologías utilizadas</h3>
+<ul>
+<li>Django. https://www.djangoproject.com/</li>
+<li>React Native. https://reactnative.dev/</li>
+<li>Expo. https://expo.dev/</li>
+</ul>
+<h3 id="138-documentacion-interna-del-proyecto">13.8 Documentación interna del proyecto</h3>
+<ul>
+<li><code>docs/algoritmo-simple.md</code> — Explicación del algoritmo sin matemática.</li>
+<li><code>docs/sistema-simple.md</code> — Arquitectura en lenguaje simple.</li>
+<li><code>docs/comparacion-vaas.md</code> — Comparación con VAAs internacionales.</li>
+<li><code>docs/estado-actual.md</code> — Estado de las funcionalidades y trabajo pendiente.</li>
+</ul>
+<hr />
+<p><em>Documento elaborado como parte de la tesis de pregrado sobre desarrollo de aplicaciones móviles. Autora: Jenifer Castillo (@whatebria). Repositorio: https://github.com/whatebria/tinder-decisivo. Licencia del código: AGPL-3.0.</em></p>
+</body>
+</html>
