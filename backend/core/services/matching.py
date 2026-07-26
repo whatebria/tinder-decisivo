@@ -15,10 +15,11 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Iterable, Optional, TypedDict
 
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 
 from ..models import (
     Candidato,
+    Comuna,
     MatchCandidato,
     OpcionRespuesta,
     PosturaCandidato,
@@ -59,6 +60,27 @@ def _tipo_ids_con_base(tipo_eleccion) -> list[int]:
     base_ids = list(TipoEleccion.objects.filter(es_base=True).values_list("id", flat=True))
     tipo_id = tipo_eleccion.id if hasattr(tipo_eleccion, "id") else int(tipo_eleccion)
     return list({tipo_id, *base_ids})
+
+
+def _filtrar_candidatos_por_territorio(qs, comuna: Optional[Comuna]):
+    """Aplica filtro territorial al queryset de candidatos segun la comuna del user.
+
+    - Si `comuna` es None (user sin comuna o guest): NO filtra, devuelve todos.
+    - Si `comuna` es dada: devuelve solo candidatos que:
+      * son nacionales (comuna=None y distrito=None), O
+      * son de esa comuna especifica (alcaldes), O
+      * son del distrito de esa comuna (diputados).
+
+    Asi un mismo call de matching devuelve solo los candidatos aplicables
+    territorialmente al usuario, sin importar el tipo de eleccion.
+    """
+    if comuna is None:
+        return qs
+    return qs.filter(
+        Q(comuna__isnull=True, distrito__isnull=True)  # nacionales
+        | Q(comuna_id=comuna.id)                         # alcaldes de esa comuna
+        | Q(distrito_id=comuna.distrito_id)              # diputados de ese distrito
+    )
 
 
 # ------------------------------------------------------------
@@ -103,15 +125,20 @@ def confianza_por_n(n: int) -> str:
 # ------------------------------------------------------------
 # Core del algoritmo (in-memory, sin DB writes)
 # ------------------------------------------------------------
-def _calcular_scores(user_map: dict, tipo_eleccion) -> list[ScoreCandidato]:
+def _calcular_scores(
+    user_map: dict, tipo_eleccion, comuna_usuario: Optional[Comuna] = None
+) -> list[ScoreCandidato]:
     """Core del algoritmo. Recibe respuestas en memoria, devuelve scores.
 
     user_map: {pregunta_id: (valor_usuario, peso_multiplier, eje_tematico)}
+    comuna_usuario: si se pasa, filtra candidatos por territorio del user.
     """
     if not user_map:
         return []
 
-    candidatos = Candidato.objects.filter(tipos_eleccion=tipo_eleccion).prefetch_related(
+    candidatos_qs = Candidato.objects.filter(tipos_eleccion=tipo_eleccion)
+    candidatos_qs = _filtrar_candidatos_por_territorio(candidatos_qs, comuna_usuario)
+    candidatos = candidatos_qs.prefetch_related(
         Prefetch(
             "posturas_candidato",
             queryset=PosturaCandidato.objects.select_related("pregunta", "opcion_respuesta"),
@@ -202,7 +229,9 @@ def calcular_match(user, tipo_eleccion) -> Optional[list[MatchCandidato]]:
         for r in respuestas_validas
     }
 
-    scores = _calcular_scores(user_map, tipo_eleccion)
+    # Comuna del user para filtrar candidatos territorialmente.
+    comuna_usuario = getattr(getattr(user, "profile", None), "comuna", None)
+    scores = _calcular_scores(user_map, tipo_eleccion, comuna_usuario=comuna_usuario)
 
     # Persistir como MatchCandidato
     resultados: list[MatchCandidato] = []
@@ -310,11 +339,12 @@ def calcular_match_detalle(user, candidato) -> Optional[dict]:
 
 
 def calcular_match_anonimo(
-    respuestas_raw: Iterable[dict], tipo_eleccion
+    respuestas_raw: Iterable[dict], tipo_eleccion, comuna: Optional[Comuna] = None
 ) -> list[ScoreCandidato]:
     """Variante para usuarios guest. Recibe respuestas en el body, no persiste nada.
 
     respuestas_raw: [{"pregunta_id": int, "opcion_id": int, "peso": int}]
+    comuna: opcional, si se pasa filtra candidatos territorialmente.
 
     Valida que las opciones/preguntas existan y pertenezcan al tipo de eleccion.
     Ignora las respuestas con opciones "No se" (mismo criterio que el modo auth).
@@ -351,4 +381,4 @@ def calcular_match_anonimo(
             pregunta.eje_tematico,
         )
 
-    return _calcular_scores(user_map, tipo_eleccion)
+    return _calcular_scores(user_map, tipo_eleccion, comuna_usuario=comuna)
