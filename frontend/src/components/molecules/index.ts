@@ -15,6 +15,7 @@ export { BookmarkActions } from "./BookmarkActions";
 
 // Nuevas (Fase 2)
 export { Modal, type ModalProps } from "./Modal";
+export { BottomSheet, type BottomSheetProps } from "./BottomSheet";
 export { FormField, type FormFieldProps } from "./FormField";
 export { RadioGroup, type RadioGroupProps, type RadioOption } from "./RadioGroup";
 export { WeightSelector, type WeightSelectorProps, type Weight } from "./WeightSelector";

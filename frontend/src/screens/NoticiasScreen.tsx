@@ -35,13 +35,13 @@ import {
 import {
   AppShell,
   Badge,
+  BottomSheet,
   Button,
   Chip,
   EmptyState,
   HomeTopBar,
   Icon,
   Input,
-  Modal,
   NewsCard,
   Spinner,
   type Sentiment,
@@ -311,8 +311,8 @@ export function NoticiasScreen({
         </ScrollView>
       </View>
 
-      {/* Modal de filtros expandidos */}
-      <FiltrosModal
+      {/* Bottom sheet de filtros expandidos */}
+      <FiltrosSheet
         visible={filtersOpen}
         onClose={() => setFiltersOpen(false)}
         query={query}
@@ -326,6 +326,10 @@ export function NoticiasScreen({
         onFuenteChange={setFuente}
         fuentesDisponibles={fuentesDisponibles}
         onLimpiar={limpiarTodo}
+        filtrosActivosCount={filtrosActivosCount}
+        resultadosCount={totalNoticias}
+        rangoLabel={rango.label}
+        candidatoNombre={candidatoNombre}
       />
     </AppShell>
   );
@@ -367,7 +371,7 @@ function ChipActivo({ label, onRemove }: ChipActivoProps) {
   );
 }
 
-interface FiltrosModalProps {
+interface FiltrosSheetProps {
   visible: boolean;
   onClose: () => void;
   query: string;
@@ -381,14 +385,22 @@ interface FiltrosModalProps {
   onFuenteChange: (f: string | null) => void;
   fuentesDisponibles: string[];
   onLimpiar: () => void;
+  filtrosActivosCount: number;
+  resultadosCount: number;
+  rangoLabel: string;
+  candidatoNombre: string | null;
 }
 
 /**
- * Modal con las secciones de filtros expandidas. Cambios se aplican en vivo
- * (no hay draft/committed): tap en un chip afecta el fetch inmediatamente.
- * El boton "Aplicar" solo cierra el modal (feedback explicito de la accion).
+ * Bottom sheet con filtros expandidos siguiendo tpl-filtros (Template 22):
+ * secciones colapsables con summary del estado, footer sticky con
+ * "Limpiar todo" + "Aplicar (N)" con contador de resultados en vivo.
+ *
+ * Los cambios se aplican en vivo (no draft/committed): tap en un chip
+ * actualiza el fetch inmediatamente, y el contador del boton "Aplicar"
+ * refleja ese cambio. "Aplicar" solo cierra el sheet.
  */
-function FiltrosModal({
+function FiltrosSheet({
   visible,
   onClose,
   query,
@@ -402,15 +414,51 @@ function FiltrosModal({
   onFuenteChange,
   fuentesDisponibles,
   onLimpiar,
-}: FiltrosModalProps) {
+  filtrosActivosCount,
+  resultadosCount,
+  rangoLabel,
+  candidatoNombre,
+}: FiltrosSheetProps) {
   const c = useThemeColors();
   const candidatosList = candidatos ?? [];
 
+  const trailing =
+    filtrosActivosCount > 0 ? (
+      <View
+        style={[styles.contadorPill, { backgroundColor: c.primary }]}
+      >
+        <Text style={[styles.contadorPillText, { color: c.textOnPrimary }]}>
+          {filtrosActivosCount} activo{filtrosActivosCount === 1 ? "" : "s"}
+        </Text>
+      </View>
+    ) : null;
+
+  const footer = (
+    <>
+      <View style={styles.footerBtnLimpiar}>
+        <Button variant="ghost" onPress={onLimpiar}>
+          Limpiar todo
+        </Button>
+      </View>
+      <View style={styles.footerBtnAplicar}>
+        <Button variant="primary" onPress={onClose}>
+          {`Aplicar (${resultadosCount})`}
+        </Button>
+      </View>
+    </>
+  );
+
   return (
-    <Modal visible={visible} onClose={onClose} title="Filtros">
-      <ScrollView contentContainerStyle={styles.modalContent}>
-        {/* Busqueda */}
-        <Text style={[styles.filtroLabel, { color: c.textSecondary }]}>
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      title="Filtros"
+      titleTrailing={trailing}
+      footer={footer}
+    >
+      {/* Busqueda: no colapsable (input necesita estar siempre visible) */}
+      <View style={styles.sheetSearchBlock}>
+        <Text style={[styles.sheetSectionLabel, { color: c.textSecondary }]}>
           Buscar
         </Text>
         <Input
@@ -420,11 +468,13 @@ function FiltrosModal({
           accessibilityLabel="Buscar noticias"
           returnKeyType="search"
         />
+      </View>
 
-        {/* Fecha */}
-        <Text style={[styles.filtroLabel, { color: c.textSecondary }]}>
-          Fecha
-        </Text>
+      <CollapsibleFilterSection
+        title="Fecha"
+        summary={rangoId === "todo" ? "Todo" : rangoLabel}
+        defaultExpanded={rangoId !== "todo"}
+      >
         <View style={styles.chipsGrid}>
           {RANGOS_FECHA.map((r) => (
             <Chip
@@ -436,11 +486,13 @@ function FiltrosModal({
             </Chip>
           ))}
         </View>
+      </CollapsibleFilterSection>
 
-        {/* Candidato */}
-        <Text style={[styles.filtroLabel, { color: c.textSecondary }]}>
-          Candidato
-        </Text>
+      <CollapsibleFilterSection
+        title="Candidato"
+        summary={candidatoNombre ?? "Todos"}
+        defaultExpanded={candidatoId !== null}
+      >
         <View style={styles.chipsGrid}>
           <Chip
             active={candidatoId === null}
@@ -460,48 +512,89 @@ function FiltrosModal({
               </Chip>
             ))}
         </View>
+      </CollapsibleFilterSection>
 
-        {/* Fuente */}
-        {fuentesDisponibles.length > 0 ? (
-          <>
-            <Text style={[styles.filtroLabel, { color: c.textSecondary }]}>
-              Fuente
-            </Text>
-            <View style={styles.chipsGrid}>
+      {fuentesDisponibles.length > 0 ? (
+        <CollapsibleFilterSection
+          title="Fuente"
+          summary={fuente ?? "Todas"}
+          defaultExpanded={fuente !== null}
+        >
+          <View style={styles.chipsGrid}>
+            <Chip
+              active={fuente === null}
+              onPress={() => onFuenteChange(null)}
+            >
+              Todas
+            </Chip>
+            {fuentesDisponibles.map((f) => (
               <Chip
-                active={fuente === null}
-                onPress={() => onFuenteChange(null)}
+                key={f}
+                active={fuente === f}
+                onPress={() => onFuenteChange(f)}
               >
-                Todas
+                {f}
               </Chip>
-              {fuentesDisponibles.map((f) => (
-                <Chip
-                  key={f}
-                  active={fuente === f}
-                  onPress={() => onFuenteChange(f)}
-                >
-                  {f}
-                </Chip>
-              ))}
-            </View>
-          </>
-        ) : null}
+            ))}
+          </View>
+        </CollapsibleFilterSection>
+      ) : null}
+    </BottomSheet>
+  );
+}
 
-        {/* Acciones */}
-        <View style={styles.modalActions}>
-          <View style={styles.modalActionBtn}>
-            <Button variant="ghost" onPress={onLimpiar}>
-              Limpiar todo
-            </Button>
-          </View>
-          <View style={styles.modalActionBtn}>
-            <Button variant="primary" onPress={onClose}>
-              Aplicar
-            </Button>
-          </View>
+interface CollapsibleFilterSectionProps {
+  title: string;
+  /** Resumen del estado (ej: "Todos", "2 seleccionados", "7 dias"). */
+  summary: string;
+  defaultExpanded?: boolean;
+  children: React.ReactNode;
+}
+
+/**
+ * Seccion colapsable del bottom sheet de filtros. Header con titulo +
+ * summary + chevron (v cuando expandida, > cuando colapsada). Border
+ * inferior para separar de la siguiente.
+ *
+ * Patron unico del sheet de filtros por ahora — si aparece un segundo caso
+ * (ej. sheet de settings), promuevo a molecule.
+ */
+function CollapsibleFilterSection({
+  title,
+  summary,
+  defaultExpanded = false,
+  children,
+}: CollapsibleFilterSectionProps) {
+  const c = useThemeColors();
+  const [expanded, setExpanded] = useState(defaultExpanded);
+
+  return (
+    <View style={[styles.collapsibleWrap, { borderBottomColor: c.border }]}>
+      <Pressable
+        onPress={() => setExpanded((v) => !v)}
+        accessibilityRole="button"
+        accessibilityState={{ expanded }}
+        accessibilityLabel={`${title}, ${summary}`}
+        style={styles.collapsibleHeader}
+      >
+        <View style={styles.collapsibleTitles}>
+          <Text style={[styles.collapsibleTitle, { color: c.text }]}>
+            {title}
+          </Text>
+          <Text style={[styles.collapsibleSummary, { color: c.textSecondary }]}>
+            {summary}
+          </Text>
         </View>
-      </ScrollView>
-    </Modal>
+        <Icon
+          name={expanded ? "chevron-left" : "chevron-right"}
+          size={16}
+          color={c.textSecondary}
+        />
+      </Pressable>
+      {expanded ? (
+        <View style={styles.collapsibleBody}>{children}</View>
+      ) : null}
+    </View>
   );
 }
 
@@ -575,25 +668,61 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sp2,
   },
 
-  // Modal
-  modalContent: {
-    gap: spacing.sp3,
-    paddingBottom: spacing.sp4,
+  // Sheet content
+  sheetSearchBlock: {
+    gap: spacing.sp2,
+    paddingBottom: spacing.sp3,
   },
-  filtroLabel: {
+  sheetSectionLabel: {
     ...typography.overline,
     fontWeight: "700",
-    marginTop: spacing.sp2,
   },
+
+  collapsibleWrap: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingVertical: spacing.sp3,
+  },
+  collapsibleHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: spacing.sp3,
+  },
+  collapsibleTitles: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: spacing.sp2,
+    flexShrink: 1,
+  },
+  collapsibleTitle: {
+    ...typography.body,
+    fontWeight: "600",
+  },
+  collapsibleSummary: {
+    ...typography.small,
+  },
+  collapsibleBody: {
+    paddingTop: spacing.sp2,
+  },
+
   chipsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sp2,
   },
-  modalActions: {
-    flexDirection: "row",
-    gap: spacing.sp2,
-    marginTop: spacing.sp4,
+
+  contadorPill: {
+    paddingHorizontal: spacing.sp2,
+    paddingVertical: 2,
+    borderRadius: radii.rFull,
   },
-  modalActionBtn: { flex: 1 },
+  contadorPillText: {
+    ...typography.overline,
+    fontWeight: "700",
+    textTransform: "none",
+    letterSpacing: 0,
+  },
+
+  footerBtnLimpiar: { flex: 1 },
+  footerBtnAplicar: { flex: 2 },
 });
