@@ -1,33 +1,24 @@
 /**
- * Ranking de candidatos post-submit.
+ * Resultados: ranking de candidatos post-cuestionario.
  *
- * En modo auth:  llama POST /match-candidatos/ (persiste).
- * En modo guest: llama POST /match-anonimo/ con respuestas locales (no persiste).
+ * Basado en design-system-lowfi.html \u00b7 Resultados.
+ * Estructura:
+ *   1. ScreenTopBar (back + eleccion + "Tus resultados")
+ *   2. Guest CTA (si corresponde) + shortcuts (descartados, decision)
+ *   3. Filtro por partido (chips) - opcional
+ *   4. ResultadoHero (top match)
+ *   5. Ranking (RankingRow desde #2 en adelante) + BookmarkActions
+ *   6. Footer: compartir, comparar, volver
  *
- * Ademas filtra descartados y marca al candidato de la decision final.
- * Guests no ven bookmarks (los reemplaza un CTA de registrarse).
+ * En modo auth:  POST /match-candidatos/ (persiste).
+ * En modo guest: POST /match-anonimo/ con respuestas locales (no persiste).
  */
 
 import React, { useEffect, useMemo, useState } from "react";
-import { ScrollView } from "react-native";
-import {
-  Card,
-  H1,
-  H3,
-  Paragraph,
-  Separator,
-  SizableText,
-  Spinner,
-  XStack,
-  YStack,
-} from "tamagui";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getErrorMessage } from "../api/client";
-import { Chip } from "../components";
-import {
-  breakdownToChartData,
-  type BreakdownPorEje,
-} from "../api/endpoints";
+import { breakdownToChartData, type BreakdownPorEje } from "../api/endpoints";
 import {
   useDecisionActual,
   useDescartados,
@@ -38,13 +29,20 @@ import {
   useToggleDescartado,
   useToggleFavorito,
 } from "../api/hooks";
-import { BookmarkActions } from "../components";
-import { Badge, type BadgeVariant } from "../components";
-import { Button } from "../components";
-import { RadarChart } from "../components";
-import { ShareModal } from "../components";
-import { Link } from "../components";
-import { useToast } from "../components";
+import {
+  Badge,
+  type BadgeVariant,
+  BookmarkActions,
+  Button,
+  Chip,
+  Link,
+  RankingRow,
+  ResultadoHero,
+  ScreenTopBar,
+  ShareModal,
+  Spinner,
+  useToast,
+} from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import {
   formatMatchPercentage,
@@ -55,9 +53,10 @@ import {
 import { buildShareText, fromMatchResults } from "../services/share";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
+import { radii } from "../theme/radii";
+import { spacing } from "../theme/spacing";
 import { useThemeColors } from "../theme/useTheme";
 
-/** Mapea el nivel de confianza del backend a la variante de Badge correcta. */
 function confianzaToBadge(confianza: string | undefined): BadgeVariant {
   const key = (confianza ?? "TENTATIVA").toUpperCase();
   if (key === "ALTA") return "success";
@@ -74,20 +73,16 @@ export function ResultadosScreen({
   const tipoEleccionId = useCuestionarioStore((s) => s.tipoEleccionId);
   const reset = useCuestionarioStore((s) => s.reset);
   const getRespuestasParaAnonimo = useCuestionarioStore(
-    (s) => s.getRespuestasParaAnonimo
+    (s) => s.getRespuestasParaAnonimo,
   );
   const toast = useToast();
 
-  // Dos mutations distintas. Solo se ejecuta la que corresponde al modo.
   const authMutation = useMatchCandidatos();
   const guestMutation = useMatchAnonimo();
   const activeMutation = isGuest ? guestMutation : authMutation;
   const tiposQ = useTiposEleccion();
   const [shareOpen, setShareOpen] = useState(false);
 
-  // Bookmarking solo en modo auth. Los queries no se ejecutan si no hay token
-  // porque el backend devuelve 401 (los hooks van a mostrar error, pero el UI
-  // no los renderiza si isGuest).
   const favoritosQ = useFavoritos();
   const descartadosQ = useDescartados();
   const decisionQ = useDecisionActual(tipoEleccionId);
@@ -97,22 +92,22 @@ export function ResultadosScreen({
   const allResults = activeMutation.data ? sortByMatchDesc(activeMutation.data) : [];
   const loading = activeMutation.isPending;
 
-  // Filtra descartados del ranking (por decisión de UX). Solo en auth.
   const descartadoIds = useMemo(
     () =>
-      isGuest ? new Set<number>() : new Set((descartadosQ.data ?? []).map((d) => d.candidato)),
-    [descartadosQ.data, isGuest]
+      isGuest
+        ? new Set<number>()
+        : new Set((descartadosQ.data ?? []).map((d) => d.candidato)),
+    [descartadosQ.data, isGuest],
   );
   const visibleResults = useMemo(
     () =>
       allResults.filter(
-        (r) => r.candidato_data.id != null && !descartadoIds.has(r.candidato_data.id)
+        (r) => r.candidato_data.id != null && !descartadoIds.has(r.candidato_data.id),
       ),
-    [allResults, descartadoIds]
+    [allResults, descartadoIds],
   );
   const hiddenCount = allResults.length - visibleResults.length;
 
-  // Filtro por partido: derivar partidos unicos de los visibleResults
   const [partidoFiltro, setPartidoFiltro] = useState<string | null>(null);
   const partidosDisponibles = useMemo(() => {
     const set = new Set<string>();
@@ -130,10 +125,18 @@ export function ResultadosScreen({
 
   const favoritoIds = useMemo(
     () =>
-      isGuest ? new Set<number>() : new Set((favoritosQ.data ?? []).map((f) => f.candidato)),
-    [favoritosQ.data, isGuest]
+      isGuest
+        ? new Set<number>()
+        : new Set((favoritosQ.data ?? []).map((f) => f.candidato)),
+    [favoritosQ.data, isGuest],
   );
   const decisionCandidatoId = isGuest ? undefined : decisionQ.data?.candidato_elegido;
+
+  const tipoNombre = useMemo(
+    () =>
+      (tiposQ.data ?? []).find((t) => t.id === tipoEleccionId)?.nombre ?? "Elecci\u00f3n",
+    [tiposQ.data, tipoEleccionId],
+  );
 
   useEffect(() => {
     if (!tipoEleccionId) return;
@@ -171,170 +174,247 @@ export function ResultadosScreen({
     });
   }
 
+  function goToDetalle(r: (typeof filteredResults)[number]) {
+    const candId = r.candidato_data.id!;
+    const pct = Number(r.match_percentage);
+    navigation.navigate("DetalleCandidato", {
+      candidatoId: candId,
+      breakdown: r.breakdown_por_eje as BreakdownPorEje | null,
+      matchPct: pct,
+      confianza: r.confianza ?? "TENTATIVA",
+    });
+  }
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        scroll: { flex: 1, backgroundColor: c.bg },
+        content: {
+          padding: spacing.sp4,
+          paddingBottom: spacing.sp8,
+          gap: spacing.sp4,
+        },
+        loadingBox: {
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          gap: spacing.sp3,
+          paddingTop: spacing.sp8,
+        },
+        loadingText: { color: c.textSecondary },
+        guestCard: {
+          padding: spacing.sp3,
+          borderRadius: radii.rMd,
+          borderWidth: 2,
+          borderColor: c.primary,
+          backgroundColor: c.card,
+          gap: spacing.sp2,
+        },
+        guestTitle: { fontSize: 14, fontWeight: "700", color: c.text },
+        guestBody: { fontSize: 12, color: c.textSecondary },
+        sectionLabel: {
+          fontSize: 10,
+          textTransform: "uppercase",
+          letterSpacing: 0.8,
+          color: c.textSecondary,
+          fontWeight: "600",
+        },
+        chipRow: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sp1 },
+        rankList: { gap: spacing.sp2 },
+        emptyText: {
+          color: c.textSecondary,
+          fontSize: 13,
+          textAlign: "center",
+          paddingVertical: spacing.sp5,
+        },
+        footerCol: { gap: spacing.sp2, marginTop: spacing.sp3 },
+      }),
+    [c],
+  );
+
   if (loading) {
     return (
-      <YStack flex={1} justifyContent="center" alignItems="center" backgroundColor="$background" gap="$3">
+      <View style={[styles.scroll, styles.loadingBox]}>
         <Spinner size="large" />
-        <Paragraph color="$textSecondary">Calculando tus matches...</Paragraph>
-      </YStack>
+        <Text style={styles.loadingText}>Calculando tus matches\u2026</Text>
+      </View>
     );
   }
 
+  const top = filteredResults[0];
+  const rest = filteredResults.slice(1);
+
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <YStack flex={1} padding="$5" gap="$4" backgroundColor="$background" paddingTop="$8">
-        <YStack gap="$2">
-          <H1 color="$text">Tus matches</H1>
-          <Paragraph color="$textSecondary">
-            Ordenados de mayor a menor afinidad. Tap en el nombre para ver el detalle.
-          </Paragraph>
-          {isGuest ? (
-            <Card
-              padding="$3"
-              borderWidth={2}
-              borderColor={c.primary as any}
-              backgroundColor="$backgroundHover"
-            >
-              <YStack gap="$2">
-                <SizableText size="$3" color="$text" fontWeight="700">
-                  * Modo invitado
-                </SizableText>
-                <SizableText size="$2" color="$textSecondary">
-                  Tu match no se guardo. Crea una cuenta para conservarlo,
-                  marcar favoritos y elegir tu voto final.
-                </SizableText>
-                <Button onPress={exitGuestMode}>
-                  Crear una cuenta
-                </Button>
-              </YStack>
-            </Card>
-          ) : null}
-          {hiddenCount > 0 ? (
-            <Link block onPress={() => navigation.navigate("MisDescartados")}>
-              {`${hiddenCount} candidato(s) descartado(s). Ver lista`}
-            </Link>
-          ) : null}
-          {!isGuest && decisionQ.data ? (
-            <Link block onPress={() => navigation.navigate("MiDecision")}>
-              Ya tienes una decision guardada. Ver mi voto
-            </Link>
-          ) : null}
-        </YStack>
+    <>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+        <ScreenTopBar
+          title={tipoNombre}
+          subtitle="Tus resultados"
+          onBack={() => navigation.goBack()}
+          onInfo={() => navigation.navigate("Comparar")}
+        />
 
-        <Separator />
+        {isGuest ? (
+          <View style={styles.guestCard}>
+            <Text style={styles.guestTitle}>Modo invitado</Text>
+            <Text style={styles.guestBody}>
+              Tu match no se guard\u00f3. Crea una cuenta para conservarlo, marcar favoritos y elegir tu voto final.
+            </Text>
+            <Button onPress={exitGuestMode}>Crear una cuenta</Button>
+          </View>
+        ) : null}
 
-        {visibleResults.length === 0 ? (
-          <Paragraph color="$textSecondary">
-            No hay candidatos para mostrar. Intenta nuevamente mas tarde.
-          </Paragraph>
-        ) : (
-          <YStack gap="$3">
-            {visibleResults.map((r, idx) => {
-              const pct = Number(r.match_percentage);
-              const scoreCol = getMatchColor(pct, c);
-              const conf = getConfianzaBadge(r.confianza);
-              const chartData = breakdownToChartData(
-                r.breakdown_por_eje as BreakdownPorEje | null | undefined
-              );
-              const candidato = r.candidato_data;
-              const candId = candidato.id!;
-              const isFav = favoritoIds.has(candId);
-              const isDecision = decisionCandidatoId === candId;
+        {hiddenCount > 0 ? (
+          <Link block onPress={() => navigation.navigate("MisDescartados")}>
+            {`${hiddenCount} candidato(s) descartado(s). Ver lista`}
+          </Link>
+        ) : null}
+        {!isGuest && decisionQ.data ? (
+          <Link block onPress={() => navigation.navigate("MiDecision")}>
+            Ya tienes una decisi\u00f3n guardada. Ver mi voto
+          </Link>
+        ) : null}
 
-              return (
-                <Card
-                  key={r.id ?? candId}
-                  padding="$4"
-                  borderWidth={isDecision ? 2 : 1}
-                  borderColor={isDecision ? (c.primary as any) : "$border"}
+        {partidosDisponibles.length > 1 ? (
+          <View style={{ gap: spacing.sp2 }}>
+            <Text style={styles.sectionLabel}>Filtrar por partido</Text>
+            <View style={styles.chipRow}>
+              <Chip
+                active={partidoFiltro === null}
+                onPress={() => setPartidoFiltro(null)}
+                accessibilityLabel="Todos los partidos"
+              >
+                Todos
+              </Chip>
+              {partidosDisponibles.map((p) => (
+                <Chip
+                  key={p}
+                  active={partidoFiltro === p}
+                  onPress={() => setPartidoFiltro(p)}
+                  accessibilityLabel={`Filtrar por ${p}`}
                 >
-                  <XStack gap="$4" alignItems="center">
-                    <YStack
-                      flex={1}
-                      gap="$1"
-                      pressStyle={{ opacity: 0.7 }}
-                      onPress={() =>
-                        navigation.navigate("DetalleCandidato", {
-                          candidatoId: candId,
-                          breakdown: r.breakdown_por_eje as BreakdownPorEje | null,
-                          matchPct: pct,
-                          confianza: r.confianza ?? "TENTATIVA",
-                        })
-                      }
-                    >
-                      <XStack alignItems="baseline" gap="$2">
-                        <SizableText size="$2" color="$textSecondary">
-                          #{idx + 1}
-                        </SizableText>
-                        <H3 color="$text" flex={1} numberOfLines={2}>
-                          {candidato.nombre} {candidato.apellido}
-                        </H3>
-                      </XStack>
-                      {candidato.partido ? (
-                        <YStack alignItems="flex-start">
-                          <Badge variant="neutral">{candidato.partido}</Badge>
-                        </YStack>
-                      ) : null}
-                      {isDecision ? (
-                        <SizableText size="$2" color={c.primary} fontWeight="700">
-                          * Tu voto
-                        </SizableText>
-                      ) : null}
-                      <XStack gap="$2" marginTop="$2" alignItems="center">
-                        <SizableText size="$8" fontWeight="800" color={scoreCol as any}>
-                          {formatMatchPercentage(pct)}
-                        </SizableText>
-                        <Badge variant={confianzaToBadge(r.confianza)}>
-                          {`${conf.label} (${r.preguntas_consideradas}p)`}
-                        </Badge>
-                      </XStack>
-                    </YStack>
-                    {Object.keys(chartData).length >= 3 ? (
-                      <RadarChart data={chartData} size={110} showLabels={false} color={scoreCol} />
-                    ) : null}
-                  </XStack>
+                  {p}
+                </Chip>
+              ))}
+            </View>
+          </View>
+        ) : null}
 
-                  {/* Acciones solo en modo auth */}
-                  {!isGuest ? (
-                    <YStack marginTop="$3">
-                      <BookmarkActions
-                        isFavorito={isFav}
-                        isDescartado={false}
-                        onToggleFavorito={() => handleToggleFav(candId)}
-                        onToggleDescartado={() => handleToggleDesc(candId)}
-                        loading={toggleFav.isPending || toggleDesc.isPending}
-                        size="sm"
-                      />
-                    </YStack>
-                  ) : null}
-                </Card>
-              );
-            })}
-          </YStack>
+        {top ? (
+          (() => {
+            const pct = Number(top.match_percentage);
+            const scoreCol = getMatchColor(pct, c);
+            const conf = getConfianzaBadge(top.confianza);
+            const chartData = breakdownToChartData(
+              top.breakdown_por_eje as BreakdownPorEje | null | undefined,
+            );
+            const candidato = top.candidato_data;
+            const candId = candidato.id!;
+            const isFav = favoritoIds.has(candId);
+            const isDecision = decisionCandidatoId === candId;
+            return (
+              <View style={{ gap: spacing.sp3 }}>
+                <ResultadoHero
+                  nombre={candidato.nombre}
+                  apellido={candidato.apellido}
+                  partido={candidato.partido}
+                  imageUrl={candidato.profile_picture}
+                  matchPct={pct}
+                  matchColor={scoreCol}
+                  ejeScores={chartData}
+                  confianzaLabel={`${conf.label} \u00b7 ${top.preguntas_consideradas}p`}
+                  confianzaVariant={confianzaToBadge(top.confianza)}
+                  onCta={() => goToDetalle(top)}
+                  isDecision={isDecision}
+                />
+                {!isGuest ? (
+                  <BookmarkActions
+                    isFavorito={isFav}
+                    isDescartado={false}
+                    onToggleFavorito={() => handleToggleFav(candId)}
+                    onToggleDescartado={() => handleToggleDesc(candId)}
+                    loading={toggleFav.isPending || toggleDesc.isPending}
+                    size="sm"
+                  />
+                ) : null}
+              </View>
+            );
+          })()
+        ) : (
+          <Text style={styles.emptyText}>
+            No hay candidatos para mostrar. Intenta nuevamente m\u00e1s tarde.
+          </Text>
         )}
 
-        <YStack flex={1} />
-        {filteredResults.length > 0 ? (
-          <Button onPress={() => setShareOpen(true)} variant="secondary">
-            Compartir mi ranking
-          </Button>
+        {rest.length > 0 ? (
+          <View style={{ gap: spacing.sp2 }}>
+            <Text style={styles.sectionLabel}>Ranking completo</Text>
+            <View style={styles.rankList}>
+              {rest.map((r, idx) => {
+                const pct = Number(r.match_percentage);
+                const scoreCol = getMatchColor(pct, c);
+                const chartData = breakdownToChartData(
+                  r.breakdown_por_eje as BreakdownPorEje | null | undefined,
+                );
+                const candidato = r.candidato_data;
+                const candId = candidato.id!;
+                const isFav = favoritoIds.has(candId);
+                const isDecision = decisionCandidatoId === candId;
+                return (
+                  <RankingRow
+                    key={r.id ?? candId}
+                    rank={idx + 2}
+                    nombre={candidato.nombre}
+                    apellido={candidato.apellido}
+                    partido={candidato.partido}
+                    imageUrl={candidato.profile_picture}
+                    matchPct={pct}
+                    matchColor={scoreCol}
+                    ejeScores={chartData}
+                    isDecision={isDecision}
+                    onPress={() => goToDetalle(r)}
+                    actions={
+                      !isGuest ? (
+                        <BookmarkActions
+                          isFavorito={isFav}
+                          isDescartado={false}
+                          onToggleFavorito={() => handleToggleFav(candId)}
+                          onToggleDescartado={() => handleToggleDesc(candId)}
+                          loading={toggleFav.isPending || toggleDesc.isPending}
+                          size="sm"
+                        />
+                      ) : null
+                    }
+                  />
+                );
+              })}
+            </View>
+          </View>
         ) : null}
-        <Link block onPress={() => navigation.navigate("Comparar")}>
-          Comparar candidatos
-        </Link>
-        <Link block onPress={handleVolver}>Volver al inicio</Link>
-      </YStack>
+
+        <View style={styles.footerCol}>
+          {filteredResults.length > 0 ? (
+            <Button variant="secondary" onPress={() => setShareOpen(true)}>
+              Compartir mi ranking
+            </Button>
+          ) : null}
+          <Link block onPress={() => navigation.navigate("Comparar")}>
+            Comparar candidatos
+          </Link>
+          <Link block onPress={handleVolver}>
+            Volver al inicio
+          </Link>
+        </View>
+      </ScrollView>
 
       <ShareModal
         visible={shareOpen}
         text={buildShareText({
-          tipoNombre:
-            (tiposQ.data ?? []).find((t) => t.id === tipoEleccionId)?.nombre ??
-            "Eleccion",
+          tipoNombre,
           matches: fromMatchResults(filteredResults),
         })}
         onClose={() => setShareOpen(false)}
       />
-    </ScrollView>
+    </>
   );
 }

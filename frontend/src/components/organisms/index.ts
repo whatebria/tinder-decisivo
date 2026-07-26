@@ -36,5 +36,9 @@ export { HomeTopBar, type HomeTopBarProps } from "./HomeTopBar";
 export { ElectionsStrip, type ElectionsStripProps } from "./ElectionsStrip";
 export { NovedadesFeed, type NovedadesFeedProps, type NovedadFeedItem } from "./NovedadesFeed";
 
+// Nuevos (Fase 5 — Resultados wireframe)
+export { ResultadoHero, type ResultadoHeroProps } from "./ResultadoHero";
+export { RankingRow, type RankingRowProps } from "./RankingRow";
+
 // Nuevos (Sprint post-swipe: explicacion del match)
 export { MatchExplanation } from "./MatchExplanation";
