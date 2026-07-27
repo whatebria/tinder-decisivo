@@ -9,6 +9,12 @@
  * dark mode reactivo). Los colores de las 5 dimensiones se mantienen
  * hardcoded como paleta de dominio (parte del "branding" de los ejes),
  * pero fondos/bordes/textos base van via tokens del theme.
+ *
+ * Dark mode: cards internas (enunciado + repercusiones) usan c.gray100 que
+ * se auto-invierte por tema (light: #EEF0EE sutil sobre card blanco, dark:
+ * #2E3532 levemente elevado sobre card oscuro). Antes se hacia
+ * `isDark ? c.gray800 : c.bg` que en dark resolvia a c.gray800 = #EEF0EE
+ * (blanco), dejando cards blancas dentro del modal oscuro.
  */
 
 import React, { useMemo } from "react";
@@ -18,7 +24,7 @@ import { Modal } from "./Modal";
 import { Button } from "../atoms/Button";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
-import { useIsDark, useThemeColors } from "../../theme/useTheme";
+import { useThemeColors } from "../../theme/useTheme";
 
 // ---- Tipos ----------------------------------------------------------------
 
@@ -67,7 +73,6 @@ interface Props {
 
 export function PreguntaInfoModal({ visible, onClose, pregunta }: Props) {
   const c = useThemeColors();
-  const isDark = useIsDark();
 
   const styles = useMemo(
     () =>
@@ -81,7 +86,7 @@ export function PreguntaInfoModal({ visible, onClose, pregunta }: Props) {
           letterSpacing: 0.5,
         },
         enunciadoBox: {
-          backgroundColor: isDark ? c.gray800 : c.bg,
+          backgroundColor: c.gray100,
           borderRadius: radii.rSm,
           padding: spacing.sp3,
           marginBottom: spacing.sp4,
@@ -118,7 +123,7 @@ export function PreguntaInfoModal({ visible, onClose, pregunta }: Props) {
           lineHeight: 22,
         },
         dimCard: {
-          backgroundColor: isDark ? c.gray800 : c.bg,
+          backgroundColor: c.gray100,
           borderLeftWidth: 4,
           borderRadius: radii.rSm,
           padding: spacing.sp3,
@@ -160,7 +165,7 @@ export function PreguntaInfoModal({ visible, onClose, pregunta }: Props) {
           lineHeight: 16,
         },
       }),
-    [c, isDark],
+    [c],
   );
 
   if (!pregunta) return null;
