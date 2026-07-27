@@ -4,12 +4,22 @@
  *
  * El share nativo solo aparece si el browser lo soporta (mobile mayormente).
  * En desktop suele fallback a solo-copiar, que igual es util.
+ *
+ * Refactor: colores y sombras via tokens de theme (antes: hardcoded #FFFFFF,
+ * #111827, etc — invisible en dark mode). onClose envuelto con
+ * useBlurBeforeClose para no dejar foco en un descendiente cuando el modal
+ * se oculta con aria-hidden.
  */
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { canShareNative, copyToClipboard, shareNative } from "../../services/share";
+import { useBlurBeforeClose } from "../../hooks/useBlurBeforeClose";
+import { radii } from "../../theme/radii";
+import { spacing } from "../../theme/spacing";
+import { typography } from "../../theme/typography";
+import { useThemeColors, useThemeShadows } from "../../theme/useTheme";
 import { Button } from "../atoms/Button";
 import { Link } from "../atoms/Link";
 
@@ -20,9 +30,12 @@ interface Props {
 }
 
 export function ShareModal({ visible, text, onClose }: Props) {
+  const c = useThemeColors();
+  const shadows = useThemeShadows();
   const [copied, setCopied] = useState(false);
   const [sharing, setSharing] = useState(false);
   const hasNative = canShareNative();
+  const handleClose = useBlurBeforeClose(onClose);
 
   async function handleCopy() {
     const ok = await copyToClipboard(text);
@@ -36,17 +49,58 @@ export function ShareModal({ visible, text, onClose }: Props) {
     setSharing(true);
     const ok = await shareNative(text);
     setSharing(false);
-    if (ok) onClose();
+    if (ok) handleClose();
   }
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        backdrop: {
+          flex: 1,
+          backgroundColor: "rgba(0,0,0,0.5)",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: spacing.sp4,
+        },
+        card: {
+          backgroundColor: c.card,
+          borderRadius: radii.rLg,
+          width: "100%",
+          maxWidth: 480,
+          maxHeight: "85%",
+          padding: spacing.sp4,
+          gap: spacing.sp3,
+          ...shadows.shLg,
+        },
+        title: { ...typography.h3, fontWeight: "700", color: c.text },
+        subtitle: { ...typography.small, color: c.textSecondary },
+        previewBox: {
+          backgroundColor: c.gray100,
+          borderRadius: radii.rSm,
+          padding: spacing.sp3,
+          maxHeight: 240,
+          borderLeftWidth: 3,
+          borderLeftColor: c.border,
+        },
+        previewText: {
+          fontSize: 14,
+          color: c.text,
+          lineHeight: 20,
+          fontFamily: "monospace",
+        },
+        actions: { marginTop: spacing.sp2, gap: spacing.sp2 },
+      }),
+    [c, shadows],
+  );
 
   return (
     <Modal
       animationType="fade"
       transparent
       visible={visible}
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
-      <Pressable style={styles.backdrop} onPress={onClose}>
+      <Pressable style={styles.backdrop} onPress={handleClose}>
         <Pressable style={styles.card} onPress={(e) => e.stopPropagation()}>
           <Text style={styles.title}>Compartir mi ranking</Text>
           <Text style={styles.subtitle}>
@@ -63,56 +117,13 @@ export function ShareModal({ visible, text, onClose }: Props) {
                 Compartir
               </Button>
             ) : null}
-            <Button
-              onPress={handleCopy}
-              variant={hasNative ? "primary" : "primary"}
-            >
+            <Button onPress={handleCopy}>
               {copied ? "Copiado!" : "Copiar al portapapeles"}
             </Button>
-            <Link block onPress={onClose}>Cerrar</Link>
+            <Link block onPress={handleClose}>Cerrar</Link>
           </View>
         </Pressable>
       </Pressable>
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-  },
-  card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    width: "100%",
-    maxWidth: 480,
-    maxHeight: "85%",
-    padding: 20,
-    gap: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  title: { fontSize: 18, fontWeight: "700", color: "#111827" },
-  subtitle: { fontSize: 13, color: "#6B7280" },
-  previewBox: {
-    backgroundColor: "#F9FAFB",
-    borderRadius: 8,
-    padding: 12,
-    maxHeight: 240,
-    borderLeftWidth: 3,
-    borderLeftColor: "#9CA3AF",
-  },
-  previewText: {
-    fontSize: 14,
-    color: "#374151",
-    lineHeight: 20,
-    fontFamily: "monospace",
-  },
-  actions: { marginTop: 8, gap: 8 },
-});
