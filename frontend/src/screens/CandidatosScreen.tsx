@@ -36,13 +36,15 @@ import {
   useMatchesQuery,
   useTiposEleccion,
 } from "../api/hooks";
-import type { Candidato, MatchResult } from "../api/endpoints";
+import type { Candidato, MatchResult, TipoEleccion } from "../api/endpoints";
 import {
   AppShell,
   BottomSheet,
   Button,
   CandidateCard,
   Chip,
+  ChipActivo,
+  CollapsibleFilterSection,
   EmptyState,
   HomeTopBar,
   Icon,
@@ -55,6 +57,11 @@ import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
+import {
+  iniciales,
+  nombreCompleto,
+  sublabelCandidato,
+} from "../utils/candidato";
 
 // -- Helpers ----------------------------------------------------------------
 
@@ -63,25 +70,6 @@ function normalizar(s: string): string {
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
-}
-
-function nombreCompleto(c: Candidato): string {
-  return `${c.nombre}${c.apellido ? ` ${c.apellido}` : ""}`.trim();
-}
-
-function iniciales(c: Candidato): string {
-  const first = c.nombre?.[0] ?? "";
-  const last = c.apellido?.[0] ?? "";
-  return (first + last).toUpperCase() || "?";
-}
-
-function sublabelCandidato(c: Candidato): string | undefined {
-  const tipos = c.tipos_eleccion_nombres ?? [];
-  if (tipos.length === 0) return undefined;
-  if (c.alcance_territorial && c.alcance_territorial !== "nacional") {
-    return `${tipos.join(" · ")} · ${c.alcance_territorial}`;
-  }
-  return tipos.join(" · ");
 }
 
 // -- Screen -----------------------------------------------------------------
@@ -395,33 +383,6 @@ export function CandidatosScreen({
   );
 }
 
-// -- ChipActivo (removible) -----------------------------------------------
-
-interface ChipActivoProps {
-  label: string;
-  onRemove: () => void;
-}
-
-function ChipActivo({ label, onRemove }: ChipActivoProps) {
-  const c = useThemeColors();
-  return (
-    <Pressable
-      onPress={onRemove}
-      accessibilityRole="button"
-      accessibilityLabel={`Quitar filtro ${label}`}
-      style={({ pressed }) => [
-        styles.chipActivo,
-        { backgroundColor: c.primary, opacity: pressed ? 0.7 : 1 },
-      ]}
-    >
-      <Text style={[styles.chipActivoText, { color: c.textOnPrimary }]}>
-        {label}
-      </Text>
-      <Icon name="close" size={14} color={c.textOnPrimary} />
-    </Pressable>
-  );
-}
-
 // -- FiltrosSheet --------------------------------------------------------
 
 interface FiltrosSheetProps {
@@ -434,7 +395,7 @@ interface FiltrosSheetProps {
   partidosDisponibles: string[];
   tipoEleccionSel: number | null;
   onTipoEleccionChange: (id: number | null) => void;
-  tiposEleccion: NonNullable<ReturnType<typeof useTiposEleccion>["data"]>;
+  tiposEleccion: TipoEleccion[];
   regionSel: string | null;
   onRegionChange: (r: string | null) => void;
   regionesDisponibles: string[];
@@ -600,52 +561,6 @@ function FiltrosSheet({
   );
 }
 
-// -- CollapsibleFilterSection -------------------------------------------
-
-interface CollapsibleFilterSectionProps {
-  title: string;
-  summary: string;
-  defaultExpanded?: boolean;
-  children: React.ReactNode;
-}
-
-function CollapsibleFilterSection({
-  title,
-  summary,
-  defaultExpanded = false,
-  children,
-}: CollapsibleFilterSectionProps) {
-  const c = useThemeColors();
-  const [expanded, setExpanded] = useState(defaultExpanded);
-
-  return (
-    <View style={[styles.collapsibleWrap, { borderBottomColor: c.border }]}>
-      <Pressable
-        onPress={() => setExpanded((v) => !v)}
-        accessibilityRole="button"
-        accessibilityState={{ expanded }}
-        accessibilityLabel={`${title}, ${summary}`}
-        style={styles.collapsibleHeader}
-      >
-        <View style={styles.collapsibleTitles}>
-          <Text style={[styles.collapsibleTitle, { color: c.text }]}>{title}</Text>
-          <Text style={[styles.collapsibleSummary, { color: c.textSecondary }]}>
-            {summary}
-          </Text>
-        </View>
-        <Icon
-          name={expanded ? "chevron-left" : "chevron-right"}
-          size={16}
-          color={c.textSecondary}
-        />
-      </Pressable>
-      {expanded ? (
-        <View style={styles.collapsibleBody}>{children}</View>
-      ) : null}
-    </View>
-  );
-}
-
 // -- Styles -------------------------------------------------------------
 
 const styles = StyleSheet.create({
@@ -667,21 +582,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sp4,
     gap: spacing.sp2,
     alignItems: "center",
-  },
-
-  chipActivo: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sp1,
-    paddingHorizontal: spacing.sp3,
-    paddingVertical: spacing.sp1,
-    borderRadius: radii.rFull,
-  },
-  chipActivoText: {
-    ...typography.overline,
-    fontWeight: "600",
-    textTransform: "none",
-    letterSpacing: 0,
   },
 
   limpiarBtn: { marginLeft: spacing.sp2 },
@@ -716,26 +616,6 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sp3,
   },
   sheetSectionLabel: { ...typography.overline, fontWeight: "700" },
-
-  collapsibleWrap: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    paddingVertical: spacing.sp3,
-  },
-  collapsibleHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: spacing.sp3,
-  },
-  collapsibleTitles: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    gap: spacing.sp2,
-    flexShrink: 1,
-  },
-  collapsibleTitle: { ...typography.body, fontWeight: "600" },
-  collapsibleSummary: { ...typography.small },
-  collapsibleBody: { paddingTop: spacing.sp2 },
 
   chipsGrid: {
     flexDirection: "row",

@@ -17,13 +17,7 @@
  */
 
 import React, { useMemo, useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import {
   useCandidatos,
@@ -34,13 +28,13 @@ import {
 } from "../api/hooks";
 import {
   AppShell,
-  Badge,
   BottomSheet,
   Button,
   Chip,
+  ChipActivo,
+  CollapsibleFilterSection,
   EmptyState,
   HomeTopBar,
-  Icon,
   Input,
   NewsCard,
   NoticiaDetailSheet,
@@ -298,31 +292,21 @@ export function NoticiasScreen({
                   candidatosMencionados: n.candidatos_mencionados_data,
                 });
               return (
-                <View key={id} style={styles.newsCardWrap}>
-                  <NewsCard
-                    headline={sanitizeSnippet(n.titulo)}
-                    snippet={sanitizeSnippet(n.descripcion)}
-                    source={source}
-                    when={when}
-                    sentiment={sentiment}
-                    onPress={openDetail}
-                    bookmarked={!isGuest ? isBookmarked : undefined}
-                    onToggleBookmark={
-                      !isGuest ? () => toggleBookmark.mutate(id) : undefined
-                    }
-                    bookmarkLoading={toggleBookmark.isPending}
-                  />
-                  {n.candidatos_mencionados_data &&
-                  n.candidatos_mencionados_data.length > 0 ? (
-                    <View style={styles.mencionRow}>
-                      {n.candidatos_mencionados_data.map((cand) => (
-                        <Badge key={cand.id} variant="neutral">
-                          {`${cand.nombre} ${cand.apellido ?? ""}`.trim()}
-                        </Badge>
-                      ))}
-                    </View>
-                  ) : null}
-                </View>
+                <NewsCard
+                  key={id}
+                  headline={sanitizeSnippet(n.titulo)}
+                  snippet={sanitizeSnippet(n.descripcion)}
+                  source={source}
+                  when={when}
+                  sentiment={sentiment}
+                  mentionedCandidates={n.candidatos_mencionados_data}
+                  onPress={openDetail}
+                  bookmarked={!isGuest ? isBookmarked : undefined}
+                  onToggleBookmark={
+                    !isGuest ? () => toggleBookmark.mutate(id) : undefined
+                  }
+                  bookmarkLoading={toggleBookmark.isPending}
+                />
               );
             })
           )}
@@ -373,40 +357,6 @@ export function NoticiasScreen({
 }
 
 // -- Sub-componentes locales ------------------------------------------------
-
-interface ChipActivoProps {
-  label: string;
-  onRemove: () => void;
-}
-
-/**
- * Chip "activo" removible del filter bar. Muestra el valor del filtro con un
- * icono X a la derecha. Al presionar, quita el filtro sin abrir el modal.
- *
- * Patron unico de este screen — no promuevo a molecule sin un segundo uso.
- */
-function ChipActivo({ label, onRemove }: ChipActivoProps) {
-  const c = useThemeColors();
-  return (
-    <Pressable
-      onPress={onRemove}
-      accessibilityRole="button"
-      accessibilityLabel={`Quitar filtro ${label}`}
-      style={({ pressed }) => [
-        styles.chipActivo,
-        {
-          backgroundColor: c.primary,
-          opacity: pressed ? 0.7 : 1,
-        },
-      ]}
-    >
-      <Text style={[styles.chipActivoText, { color: c.textOnPrimary }]}>
-        {label}
-      </Text>
-      <Icon name="close" size={14} color={c.textOnPrimary} />
-    </Pressable>
-  );
-}
 
 interface FiltrosSheetProps {
   visible: boolean;
@@ -565,61 +515,6 @@ function FiltrosSheet({
         </CollapsibleFilterSection>
       ) : null}
     </BottomSheet>
-  );
-}
-
-interface CollapsibleFilterSectionProps {
-  title: string;
-  /** Resumen del estado (ej: "Todos", "2 seleccionados", "7 dias"). */
-  summary: string;
-  defaultExpanded?: boolean;
-  children: React.ReactNode;
-}
-
-/**
- * Seccion colapsable del bottom sheet de filtros. Header con titulo +
- * summary + chevron (v cuando expandida, > cuando colapsada). Border
- * inferior para separar de la siguiente.
- *
- * Patron unico del sheet de filtros por ahora — si aparece un segundo caso
- * (ej. sheet de settings), promuevo a molecule.
- */
-function CollapsibleFilterSection({
-  title,
-  summary,
-  defaultExpanded = false,
-  children,
-}: CollapsibleFilterSectionProps) {
-  const c = useThemeColors();
-  const [expanded, setExpanded] = useState(defaultExpanded);
-
-  return (
-    <View style={[styles.collapsibleWrap, { borderBottomColor: c.border }]}>
-      <Pressable
-        onPress={() => setExpanded((v) => !v)}
-        accessibilityRole="button"
-        accessibilityState={{ expanded }}
-        accessibilityLabel={`${title}, ${summary}`}
-        style={styles.collapsibleHeader}
-      >
-        <View style={styles.collapsibleTitles}>
-          <Text style={[styles.collapsibleTitle, { color: c.text }]}>
-            {title}
-          </Text>
-          <Text style={[styles.collapsibleSummary, { color: c.textSecondary }]}>
-            {summary}
-          </Text>
-        </View>
-        <Icon
-          name={expanded ? "chevron-left" : "chevron-right"}
-          size={16}
-          color={c.textSecondary}
-        />
-      </Pressable>
-      {expanded ? (
-        <View style={styles.collapsibleBody}>{children}</View>
-      ) : null}
-    </View>
   );
 }
 
@@ -792,21 +687,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  chipActivo: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sp1,
-    paddingHorizontal: spacing.sp3,
-    paddingVertical: spacing.sp1,
-    borderRadius: radii.rFull,
-  },
-  chipActivoText: {
-    ...typography.overline,
-    fontWeight: "600",
-    textTransform: "none",
-    letterSpacing: 0,
-  },
-
   limpiarBtn: {
     marginLeft: spacing.sp2,
   },
@@ -822,13 +702,6 @@ const styles = StyleSheet.create({
     padding: spacing.sp6,
   },
 
-  newsCardWrap: { gap: spacing.sp2 },
-  mencionRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sp1,
-    paddingHorizontal: spacing.sp2,
-  },
 
   // Sheet content
   sheetSearchBlock: {
@@ -838,33 +711,6 @@ const styles = StyleSheet.create({
   sheetSectionLabel: {
     ...typography.overline,
     fontWeight: "700",
-  },
-
-  collapsibleWrap: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    paddingVertical: spacing.sp3,
-  },
-  collapsibleHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: spacing.sp3,
-  },
-  collapsibleTitles: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    gap: spacing.sp2,
-    flexShrink: 1,
-  },
-  collapsibleTitle: {
-    ...typography.body,
-    fontWeight: "600",
-  },
-  collapsibleSummary: {
-    ...typography.small,
-  },
-  collapsibleBody: {
-    paddingTop: spacing.sp2,
   },
 
   chipsGrid: {

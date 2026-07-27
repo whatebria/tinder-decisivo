@@ -46,3 +46,10 @@ export { NavRow, type NavRowProps, type NavRowVariant } from "./NavRow";
 // Nuevas (Perfil territorial)
 export { ListPickerModal, type ListPickerItem } from "./ListPickerModal";
 export { UbicacionPicker } from "./UbicacionPicker";
+
+// Nuevas (filtros — usadas por NoticiasScreen y CandidatosScreen)
+export { ChipActivo, type ChipActivoProps } from "./ChipActivo";
+export {
+  CollapsibleFilterSection,
+  type CollapsibleFilterSectionProps,
+} from "./CollapsibleFilterSection";
