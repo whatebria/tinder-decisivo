@@ -18,6 +18,7 @@ import React, { useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getErrorMessage } from "../api/client";
+import { useTiposEleccion } from "../api/hooks";
 import {
   Button,
   Chip,
@@ -56,12 +57,21 @@ export function CuestionarioScreen({
     currentIndex,
     respuestas,
     submitting,
+    tipoEleccionId,
     setRespuesta,
     setPeso,
     next,
     prev,
     submit,
   } = useCuestionarioStore();
+
+  // Necesitamos saber si el tipo actual es es_base para redirigir al SubmitDone
+  // en modo correcto (los tipos base no tienen candidatos propios).
+  const { data: tipos = [] } = useTiposEleccion();
+  const esTipoBase = useMemo(() => {
+    if (tipoEleccionId == null) return false;
+    return tipos.find((t) => t.id === tipoEleccionId)?.es_base ?? false;
+  }, [tipos, tipoEleccionId]);
 
   const pregunta = preguntas[currentIndex];
   const isLast = esUltimaPregunta(currentIndex, preguntas.length);
@@ -154,7 +164,7 @@ export function CuestionarioScreen({
   async function handleSubmit() {
     try {
       await submit({ skipServer: isGuest });
-      navigation.replace("SubmitDone");
+      navigation.replace("SubmitDone", { mode: esTipoBase ? "base" : "eleccion" });
     } catch (err) {
       toast.error("No pudimos guardar tus respuestas", getErrorMessage(err));
     }
