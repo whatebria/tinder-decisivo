@@ -27,7 +27,7 @@ function colorForValor(valor: number, c: ReturnType<typeof useThemeColors>): str
 }
 
 /** Extrae URLs de la justificacion (formato "... (https://...)" comun en fixtures). */
-function extractUrl(justificacion: string | null): string | null {
+function extractUrl(justificacion: string | null | undefined): string | null {
   if (!justificacion) return null;
   const match = justificacion.match(/https?:\/\/[^\s)]+/);
   return match ? match[0] : null;

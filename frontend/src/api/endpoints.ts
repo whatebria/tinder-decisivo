@@ -61,6 +61,16 @@ export interface LoginInput {
   password: string;
 }
 
+/**
+ * Response de POST /login/.
+ *
+ * NOTA sobre schema drift: el backend responde `{token, user_id, email}`
+ * (ver `backend/core/views/auth.py::CustomAuthToken`), pero el schema
+ * OpenAPI declara solo `AuthToken { token }` porque hereda de
+ * `ObtainAuthToken` sin decorar con `@extend_schema`. Cuando el backend
+ * documente correctamente el response, migrar a `Schemas["AuthToken"]`
+ * extendido (o al nuevo schema que definan).
+ */
 export interface LoginResponse {
   token: string;
   user_id: number;
@@ -204,19 +214,12 @@ export async function deleteDescartado(descartadoId: number): Promise<void> {
 }
 
 // -- Bookmarks de contenido: noticias y posturas guardadas -----------------
-export interface NoticiaBookmark {
-  id: number;
-  noticia: number;
-  fecha_agregado: string;
-  noticia_data: Noticia;
-}
 
-export interface PosturaBookmark {
-  id: number;
-  postura: number;
-  fecha_agregado: string;
-  postura_data: PosturaCandidatoDetalle;
-}
+/** Alias del schema: bookmark de una noticia (incluye la noticia embebida). */
+export type NoticiaBookmark = Schemas["NoticiaBookmark"];
+
+/** Alias del schema: bookmark de una postura (incluye la postura embebida). */
+export type PosturaBookmark = Schemas["PosturaBookmark"];
 
 export async function listNoticiasBookmarks(): Promise<NoticiaBookmark[]> {
   const { data } = await apiClient.get<NoticiaBookmark[]>("/noticias-guardadas/");
@@ -255,21 +258,18 @@ export async function deletePosturaBookmark(bookmarkId: number): Promise<void> {
 // ============================================================
 // Perfil de usuario
 // ============================================================
-export interface PerfilContadores {
-  respuestas: number;
-  favoritos: number;
-  descartados: number;
-}
 
-export interface Perfil {
-  id: number;
-  username: string;
-  email: string;
-  fecha_registro: string;
-  contadores: PerfilContadores;
-  comuna: ComunaInline | null;
-}
+/** Alias del schema: contadores agregados de la seccion Perfil. */
+export type PerfilContadores = Schemas["Contadores"];
 
+/** Alias del schema: perfil completo del usuario autenticado. */
+export type Perfil = Schemas["Perfil"];
+
+/**
+ * Region no esta en el schema OpenAPI (el endpoint /regiones/ no fue
+ * incluido en drf-spectacular). Cuando el backend lo exponga, migrar
+ * a `Schemas["Region"]`.
+ */
 export interface Region {
   id: number;
   numero_romano: string;
@@ -279,13 +279,8 @@ export interface Region {
   orden: number;
 }
 
-export interface ComunaInline {
-  id: number;
-  codigo: string;
-  nombre: string;
-  region_nombre: string;
-  distrito_numero: number;
-}
+/** Alias del schema: comuna con datos minimos para pickers y perfil. */
+export type ComunaInline = Schemas["ComunaInline"];
 
 export async function getPerfil(): Promise<Perfil> {
   const { data } = await apiClient.get<Perfil>("/perfil/");
@@ -336,20 +331,14 @@ export async function eliminarCuenta(password: string): Promise<void> {
 // ============================================================
 // Posturas de un candidato
 // ============================================================
-export interface PosturaCandidatoDetalle {
-  id: number;
-  candidato: number;
-  pregunta: number;
-  opcion_respuesta: number;
-  justificacion: string | null;
-  opcion_respuesta_texto: string;
-  opcion_respuesta_valor: number;
-  candidato_nombre_completo: string;
-  pregunta_texto: string;
-  pregunta_orden: number;
-  eje_tematico: string;
-  eje_tematico_display: string;
-}
+
+/**
+ * Alias del schema: postura de un candidato sobre una pregunta especifica,
+ * con los campos de display precomputados por el backend. El schema le
+ * llama `PosturaCandidato`; le mantenemos el sufijo `Detalle` para no
+ * romper los call sites.
+ */
+export type PosturaCandidatoDetalle = Schemas["PosturaCandidato"];
 
 export async function listPosturasCandidato(
   candidatoId: number,
@@ -402,23 +391,18 @@ export async function getMatchDetalle(candidatoId: number): Promise<MatchDetalle
 // ============================================================
 // Mis respuestas (list + edit)
 // ============================================================
-export interface OpcionSimple {
-  id: number;
-  texto: string;
-  valor: number;
-}
 
-export interface MiRespuesta {
-  id: number;
-  pregunta: number;
-  pregunta_texto: string;
-  eje_tematico: string;
-  eje_tematico_display: string;
-  opcion_elegida: number;
-  peso: number;
-  opciones: OpcionSimple[];
-  fecha_respuesta: string;
-}
+/** Alias del schema: opcion minima para poblar el editor de respuestas. */
+export type OpcionSimple = Schemas["OpcionSimple"];
+
+/**
+ * Alias del schema: item del listado de mis respuestas por eleccion.
+ *
+ * NOTA: el schema declara `peso` como `PesoEnum` (0 | 1 | 2 | 3) — mas
+ * estricto que el `number` anterior. Si algun consumer intenta asignar
+ * un valor fuera de ese rango, `tsc` lo cacha (bug catcher gratis).
+ */
+export type MiRespuesta = Schemas["MisRespuestasItem"];
 
 export interface EditarRespuestaResponse extends MiRespuesta {
   matches_invalidados: number;
