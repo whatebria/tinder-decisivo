@@ -29,6 +29,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Icon } from "../atoms/Icon";
 import { IconButton } from "../atoms/IconButton";
+import { useBlurBeforeClose } from "../../hooks/useBlurBeforeClose";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { typography } from "../../theme/typography";
@@ -61,18 +62,20 @@ export function BottomSheet({
   const c = useThemeColors();
   const { height } = useWindowDimensions();
   const maxHeight = height * 0.85;
+  // Blur al elemento con foco antes de cerrar (evita warning aria-hidden en web).
+  const handleClose = useBlurBeforeClose(onClose);
 
   return (
     <RNModal
       visible={visible}
       transparent
       animationType="slide"
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
       statusBarTranslucent
     >
       <Pressable
         style={styles.backdrop}
-        onPress={dismissOnBackdrop ? onClose : undefined}
+        onPress={dismissOnBackdrop ? handleClose : undefined}
         accessibilityRole={dismissOnBackdrop ? "button" : undefined}
         accessibilityLabel={dismissOnBackdrop ? "Cerrar" : undefined}
       >
@@ -102,7 +105,7 @@ export function BottomSheet({
                   {titleTrailing}
                 </View>
                 <IconButton
-                  onPress={onClose}
+                  onPress={handleClose}
                   accessibilityLabel="Cerrar"
                   size="sm"
                   variant="ghost"

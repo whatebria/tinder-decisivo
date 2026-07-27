@@ -22,6 +22,7 @@ import {
 
 import { Icon } from "../atoms/Icon";
 import { IconButton } from "../atoms/IconButton";
+import { useBlurBeforeClose } from "../../hooks/useBlurBeforeClose";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors, useThemeShadows } from "../../theme/useTheme";
@@ -55,6 +56,8 @@ export function Modal({
 }: ModalProps) {
   const c = useThemeColors();
   const shadows = useThemeShadows();
+  // Blur al elemento con foco antes de cerrar (evita warning aria-hidden en web).
+  const handleClose = useBlurBeforeClose(onClose);
 
   const styles = useMemo(
     () =>
@@ -105,10 +108,10 @@ export function Modal({
   );
 
   return (
-    <RNModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <RNModal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
       <Pressable
         style={styles.backdrop}
-        onPress={dismissOnBackdrop ? onClose : undefined}
+        onPress={dismissOnBackdrop ? handleClose : undefined}
         accessibilityRole="none"
       >
         <Pressable onPress={() => {}} style={[styles.card, cardStyle]}>
@@ -116,7 +119,7 @@ export function Modal({
             <View style={styles.header}>
               <Text style={styles.title}>{title}</Text>
               <IconButton
-                onPress={onClose}
+                onPress={handleClose}
                 accessibilityLabel="Cerrar"
                 variant="ghost"
                 size="sm"

@@ -27,6 +27,7 @@ import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { typography } from "../../theme/typography";
 import { useThemeColors } from "../../theme/useTheme";
+import { useBlurBeforeClose } from "../../hooks/useBlurBeforeClose";
 import { Spinner } from "../atoms/Spinner";
 
 export interface ListPickerItem {
@@ -63,6 +64,11 @@ export function ListPickerModal({
   const c = useThemeColors();
   const [query, setQuery] = useState("");
 
+  const handleClose = useBlurBeforeClose(() => {
+    setQuery("");
+    onClose();
+  });
+
   const filtered = useMemo(() => {
     if (!searchable) return items;
     const q = query.trim().toLowerCase();
@@ -73,9 +79,16 @@ export function ListPickerModal({
     });
   }, [items, query, searchable]);
 
-  function handleClose() {
+  function selectAndReset(item: ListPickerItem) {
+    // Blur al item apretado antes de que el modal se oculte con aria-hidden.
+    if (typeof document !== "undefined") {
+      const active = document.activeElement as HTMLElement | null;
+      if (active && active !== document.body && typeof active.blur === "function") {
+        active.blur();
+      }
+    }
     setQuery("");
-    onClose();
+    onSelect(item);
   }
 
   return (
@@ -131,10 +144,7 @@ export function ListPickerModal({
                 return (
                   <Pressable
                     key={item.id}
-                    onPress={() => {
-                      setQuery("");
-                      onSelect(item);
-                    }}
+                    onPress={() => selectAndReset(item)}
                     accessibilityRole="button"
                     accessibilityState={{ selected: isSelected }}
                     style={({ pressed }) => [
