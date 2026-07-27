@@ -1,0 +1,48 @@
+# Documentacion del backend
+
+Guia completa del backend Django/DRF de Tinder Decisivo (Servel).
+
+Esta carpeta contiene docs **especificas del backend**, en detalle y separadas
+por tema. Hay dos series paralelas segun tu audiencia:
+
+## Serie tecnica (`tecnico/`)
+
+Para devs, revisores tecnicos, tesis capitulo de implementacion.
+
+1. [`01-arquitectura.md`](tecnico/01-arquitectura.md) - stack, layout, apps, config, como levantar el entorno.
+2. [`02-modelos.md`](tecnico/02-modelos.md) - los 12 modelos de dominio con relaciones, constraints y ejemplos.
+3. [`03-api-endpoints.md`](tecnico/03-api-endpoints.md) - todos los endpoints REST con metodo, permisos, payload/response.
+4. [`04-algoritmo-matching.md`](tecnico/04-algoritmo-matching.md) - deep-dive del algoritmo de matching y filtro territorial.
+5. [`05-servicios.md`](tecnico/05-servicios.md) - la capa `services/` (matching, respuestas, password_reset, perfil).
+6. [`06-comandos-seeds.md`](tecnico/06-comandos-seeds.md) - los 16 management commands: que hacen, en que orden.
+7. [`07-migraciones.md`](tecnico/07-migraciones.md) - narrativa de las 36 migrations con las decisiones clave.
+8. [`08-signals.md`](tecnico/08-signals.md) - todos los `post_save` / `pre_save` y su intencion.
+9. [`09-auth-y-perfil.md`](tecnico/09-auth-y-perfil.md) - token auth, registro, password reset, perfil territorial.
+10. [`10-tests.md`](tecnico/10-tests.md) - estrategia de tests, fixtures, como correrlos.
+
+## Serie simple (`simple/`)
+
+Para audiencia no tecnica: usuarios avanzados, tesis capitulo de contexto, product.
+
+1. [`01-que-hace-el-backend.md`](simple/01-que-hace-el-backend.md) - analogia + tour visual sin codigo.
+2. [`02-datos-que-guarda.md`](simple/02-datos-que-guarda.md) - que informacion vive ahi y por que.
+3. [`03-como-hace-el-match.md`](simple/03-como-hace-el-match.md) - explicacion del matching sin ecuaciones.
+4. [`04-como-agregar-cosas.md`](simple/04-como-agregar-cosas.md) - admin paso a paso para agregar candidatos, preguntas, ejes.
+5. [`05-troubleshooting.md`](simple/05-troubleshooting.md) - levantar el entorno, errores comunes.
+
+## Relacion con otras docs
+
+- Docs generales del sistema (front + back combinados): [`../doc-tecnica.md`](../doc-tecnica.md), [`../sistema-tecnico.md`](../sistema-tecnico.md), [`../sistema-simple.md`](../sistema-simple.md).
+- Algoritmo de matching en profundidad conceptual: [`../algoritmo-tecnico.md`](../algoritmo-tecnico.md), [`../algoritmo-simple.md`](../algoritmo-simple.md).
+- Buenas practicas de codigo: [`../buenas-practicas.md`](../buenas-practicas.md).
+- Estado del proyecto y sprints: [`../estado-actual.md`](../estado-actual.md), [`../sprints.md`](../sprints.md).
+
+Los docs de `docs/backend/` complementan (no reemplazan) los generales:
+son mas granulares y hablan solo del backend.
+
+## Convenciones
+
+- Espanol neutro (tuteo).
+- Sin emojis en el codigo o commands.
+- Snippets de codigo cortos; el codigo completo vive en el repo.
+- Cada doc arranca con "para quien es" y "para que sirve".
