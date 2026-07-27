@@ -53,13 +53,6 @@ function greetingByHour(): string {
   return "Buenas noches";
 }
 
-function daysUntil(dateIso?: string | null): number | null {
-  if (!dateIso) return null;
-  const target = new Date(dateIso).getTime();
-  const now = Date.now();
-  return Math.max(0, Math.ceil((target - now) / (1000 * 60 * 60 * 24)));
-}
-
 function whenLabel(dateIso?: string): string {
   if (!dateIso) return "";
   const diffMs = Date.now() - new Date(dateIso).getTime();
@@ -89,7 +82,6 @@ function ElectionCardConnected({ tipo, isActive, onPress }: ConnectedCardProps) 
   return (
     <ElectionCard
       name={tipo.nombre}
-      daysRemaining={daysUntil(tipo.fecha_eleccion)}
       isCompleted={isLoading ? undefined : isCompleted}
       matchPercent={isLoading ? null : matchPct}
       progressPercent={progress}

@@ -279,15 +279,14 @@ export const displayCatalog: CatalogEntry[] = [
     name: "ElectionCard",
     path: "atoms/ElectionCard",
     category: "atoms",
-    description: "Card de eleccion activa en Home HUB. 3 variantes (active, secondary, pending). Badge dual: dias restantes (<=30d) o estado (Completado/Pendiente).",
+    description: "Card de eleccion activa en Home HUB. 3 variantes (active, secondary, pending). Badge de estado (Completado/Pendiente) si isCompleted esta definido.",
     variants: [
       {
-        label: "active + urgente (<30d)",
+        label: "active + completado",
         render: () => (
           <ElectionCard
             name="Presidencial 2025"
             scope="NACIONAL"
-            daysRemaining={12}
             isCompleted
             matchPercent={87}
             progressPercent={100}
@@ -296,12 +295,11 @@ export const displayCatalog: CatalogEntry[] = [
         ),
       },
       {
-        label: "secondary + completado (lejos)",
+        label: "secondary + completado",
         render: () => (
           <ElectionCard
             name="Municipal Providencia"
             scope="COMUNAL"
-            daysRemaining={180}
             isCompleted
             matchPercent={64}
             progressPercent={100}
@@ -309,12 +307,11 @@ export const displayCatalog: CatalogEntry[] = [
         ),
       },
       {
-        label: "pending + lejos (badge estado)",
+        label: "pending (sin cuestionario)",
         render: () => (
           <ElectionCard
             name="Convencion Constituyente 2026"
             scope="NACIONAL"
-            daysRemaining={365}
             isCompleted={false}
             progressPercent={0}
             pendingLabel="6 preguntas pendientes"
@@ -323,15 +320,13 @@ export const displayCatalog: CatalogEntry[] = [
         ),
       },
       {
-        label: "urgente + pendiente (peor caso)",
+        label: "loading (sin badge)",
         render: () => (
           <ElectionCard
             name="Plebiscito Constitucional"
             scope="NACIONAL"
-            daysRemaining={3}
-            isCompleted={false}
             progressPercent={0}
-            pendingLabel="Cuestionario pendiente"
+            pendingLabel="Cargando…"
             variant="pending"
           />
         ),
@@ -340,8 +335,7 @@ export const displayCatalog: CatalogEntry[] = [
     props: [
       { name: "name", type: "string", required: true },
       { name: "scope", type: "string", description: "Ej. 'NACIONAL', 'COMUNAL'." },
-      { name: "daysRemaining", type: "number | null", description: "Dias hasta la eleccion. Si <=30 se muestra chip 'Xd'/'Hoy'/'Mañana', sino chip de estado." },
-      { name: "isCompleted", type: "boolean", description: "Si el user completo el cuestionario. Usado para el badge cuando la eleccion es >30d." },
+      { name: "isCompleted", type: "boolean", description: "Si el user completo el cuestionario. Undefined oculta el badge (util para skeletons)." },
       { name: "matchPercent", type: "number | null", description: "0-100. null si aun no hay match." },
       { name: "progressPercent", type: "number", required: true, description: "0-100 progreso del cuestionario." },
       { name: "pendingLabel", type: "string", description: "Texto alt cuando no hay match." },
@@ -353,7 +347,6 @@ export const displayCatalog: CatalogEntry[] = [
 <ElectionCard
   name="Presidencial 2025"
   scope="NACIONAL"
-  daysRemaining={12}
   isCompleted
   matchPercent={87}
   progressPercent={100}

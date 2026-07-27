@@ -8,11 +8,9 @@
  *   - pending: sin cuestionario respondido aún (progress 0%)
  *
  * Badge (esquina sup. derecha):
- *   - Si la eleccion es en <=30 dias: muestra "Xd" / "Hoy" (urgencia)
- *   - Sino: muestra "Completado" (verde) o "Pendiente" (neutro) segun isCompleted
- *
- * Se ocultan ambos badges si `daysRemaining` es null y no hay `isCompleted`
- * definido — util para skeletons/loading.
+ *   - "Completado" (verde) si isCompleted === true
+ *   - "Pendiente" (neutro) si isCompleted === false
+ *   - Sin badge si isCompleted === undefined (util para skeletons/loading)
  */
 
 import React, { useMemo } from "react";
@@ -25,19 +23,10 @@ import { Progress } from "./Progress";
 
 export type ElectionCardVariant = "active" | "secondary" | "pending";
 
-/** Umbral en dias bajo el cual mostramos el badge de dias en vez del de estado. */
-export const DAYS_BADGE_THRESHOLD = 30;
-
 export interface ElectionCardProps {
   name: string;
   scope?: string;
-  /**
-   * Dias restantes hasta la eleccion. `null` si no hay fecha.
-   * - Si es <= DAYS_BADGE_THRESHOLD (30d): se muestra badge "Xd" / "Hoy".
-   * - Sino: se muestra badge "Completado" / "Pendiente" segun `isCompleted`.
-   */
-  daysRemaining?: number | null;
-  /** Si el user ya completo el cuestionario. Solo se usa cuando el badge es de estado. */
+  /** Si el user ya completo el cuestionario. Si undefined, no se muestra badge. */
   isCompleted?: boolean;
   /** 0–100. `null` → sin cuestionario respondido. */
   matchPercent?: number | null;
@@ -54,18 +43,11 @@ export interface ElectionCardProps {
 const CARD_WIDTH = 180;
 
 /**
- * Deriva label + colores del badge segun daysRemaining + isCompleted.
- * Pattern-matcheado como funcion pura para testear facil si lo pedimos.
+ * Deriva label + colores del badge segun isCompleted. Funcion pura.
  */
 function pickBadge(
-  daysRemaining: number | null | undefined,
   isCompleted: boolean | undefined,
-): { label: string; tone: "urgent" | "success" | "neutral" } | null {
-  if (daysRemaining != null && daysRemaining <= DAYS_BADGE_THRESHOLD) {
-    if (daysRemaining <= 0) return { label: "Hoy", tone: "urgent" };
-    if (daysRemaining === 1) return { label: "Mañana", tone: "urgent" };
-    return { label: `${daysRemaining}d`, tone: "urgent" };
-  }
+): { label: string; tone: "success" | "neutral" } | null {
   if (isCompleted === undefined) return null;
   return isCompleted
     ? { label: "Completado", tone: "success" }
@@ -75,7 +57,6 @@ function pickBadge(
 export function ElectionCard({
   name,
   scope,
-  daysRemaining,
   isCompleted,
   matchPercent,
   progressPercent,
@@ -89,12 +70,10 @@ export function ElectionCard({
   const isActive = variant === "active";
   const isPending = variant === "pending" || matchPercent == null;
 
-  const badge = pickBadge(daysRemaining, isCompleted);
+  const badge = pickBadge(isCompleted);
   const badgeColors = useMemo(() => {
     if (!badge) return null;
     switch (badge.tone) {
-      case "urgent":
-        return { bg: c.primary, fg: c.textOnPrimary };
       case "success":
         return { bg: c.success, fg: c.textOnPrimary };
       case "neutral":
