@@ -12,7 +12,6 @@ from ..models import (
     CandidatoDescartado,
     CandidatoFavorito,
     Comuna,
-    DecisionFinal,
     RespuestaUsuario,
     UserProfile,
 )
@@ -54,7 +53,6 @@ class PerfilView(APIView):
                 "respuestas": RespuestaUsuario.objects.filter(user=user).count(),
                 "favoritos": CandidatoFavorito.objects.filter(user=user).count(),
                 "descartados": CandidatoDescartado.objects.filter(user=user).count(),
-                "decisiones": DecisionFinal.objects.filter(user=user).count(),
             },
             "comuna": (
                 ComunaInlineSerializer(profile.comuna).data

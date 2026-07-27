@@ -61,7 +61,6 @@ class TestVersionadoAPI:
         for path in [
             "/api/v1/candidatos-favoritos/",
             "/api/v1/descartados/",
-            "/api/v1/decision-final/",
             "/api/v1/respuestas/",
         ]:
             resp = anon_api.get(path)

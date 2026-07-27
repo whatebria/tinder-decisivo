@@ -1,18 +1,16 @@
-"""Viewsets de bookmarking: favoritos, descartados, decision final, bookmarks de contenido."""
+"""Viewsets de bookmarking: favoritos, descartados, bookmarks de contenido."""
 
 from rest_framework import mixins, viewsets
 
 from ..models import (
     CandidatoDescartado,
     CandidatoFavorito,
-    DecisionFinal,
     NoticiaBookmark,
     PosturaBookmark,
 )
 from ..serializers import (
     CandidatoDescartadoSerializer,
     CandidatoFavoritoSerializer,
-    DecisionFinalSerializer,
     NoticiaBookmarkSerializer,
     PosturaBookmarkSerializer,
 )
@@ -86,28 +84,3 @@ class PosturaBookmarkViewSet(
         serializer.save(user=self.request.user)
 
 
-class DecisionFinalViewSet(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-):
-    """Voto final del usuario por tipo de eleccion."""
-
-    serializer_class = DecisionFinalSerializer
-    queryset = DecisionFinal.objects.none()  # hint para drf-spectacular
-
-    def get_queryset(self):
-        return DecisionFinal.objects.filter(user=self.request.user).select_related(
-            "candidato_elegido", "tipo_eleccion"
-        )
-
-    def perform_create(self, serializer):
-        # unique_together (user, tipo_eleccion): usamos update_or_create
-        # para que el usuario pueda cambiar de opinion.
-        DecisionFinal.objects.update_or_create(
-            user=self.request.user,
-            tipo_eleccion=serializer.validated_data["tipo_eleccion"],
-            defaults={"candidato_elegido": serializer.validated_data["candidato_elegido"]},
-        )

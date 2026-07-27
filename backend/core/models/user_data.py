@@ -1,10 +1,10 @@
-"""Bookmarking del usuario: favoritos, descartados, decision final, bookmarks de contenido."""
+"""Bookmarking del usuario: favoritos, descartados, bookmarks de contenido."""
 
 from django.contrib.auth.models import User
 from django.db import models
 
 from .content import Noticia
-from .electoral import Candidato, TipoEleccion
+from .electoral import Candidato
 from .matching import PosturaCandidato
 
 
@@ -39,26 +39,6 @@ class CandidatoDescartado(models.Model):
         return (
             f"{self.user.username} - Descartado: "
             f"{self.candidato.nombre} {self.candidato.apellido}"
-        )
-
-
-class DecisionFinal(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="decisiones_finales")
-    candidato_elegido = models.ForeignKey(
-        Candidato, on_delete=models.CASCADE, related_name="elegido_por_usuarios"
-    )
-    tipo_eleccion = models.ForeignKey(TipoEleccion, on_delete=models.CASCADE)
-    fecha_decision = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        app_label = "core"
-        verbose_name_plural = "Decisiones Finales"
-        unique_together = ("user", "tipo_eleccion")
-
-    def __str__(self):
-        return (
-            f"{self.user.username} eligió a {self.candidato_elegido.nombre} "
-            f"para {self.tipo_eleccion.nombre}"
         )
 
 

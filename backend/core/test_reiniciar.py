@@ -10,7 +10,6 @@ from core.models import (
     Candidato,
     CandidatoDescartado,
     CandidatoFavorito,
-    DecisionFinal,
     MatchCandidato,
     OpcionRespuesta,
     Pregunta,
@@ -137,9 +136,6 @@ def user_con_datos(
     # Bookmarks: sobre candidato_tipo1 (NO deben borrarse)
     CandidatoFavorito.objects.create(user=user, candidato=candidato_tipo1)
     CandidatoDescartado.objects.create(user=user, candidato=candidato_tipo1)
-    DecisionFinal.objects.create(
-        user=user, candidato_elegido=candidato_tipo1, tipo_eleccion=tipo1
-    )
     return user
 
 
@@ -173,10 +169,9 @@ class TestReiniciarCuestionario:
 
     def test_no_toca_bookmarks(self, user_con_datos, tipo1):
         reiniciar_cuestionario(user_con_datos, tipo1.id)
-        # Favoritos, descartados, decisiones sobreviven.
+        # Favoritos, descartados sobreviven.
         assert CandidatoFavorito.objects.filter(user=user_con_datos).count() == 1
         assert CandidatoDescartado.objects.filter(user=user_con_datos).count() == 1
-        assert DecisionFinal.objects.filter(user=user_con_datos).count() == 1
 
     def test_tipo_eleccion_inexistente_error(self, user):
         with pytest.raises(ReiniciarError):

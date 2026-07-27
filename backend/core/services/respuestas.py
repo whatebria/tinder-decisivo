@@ -101,8 +101,7 @@ def reiniciar_cuestionario(user: User, tipo_eleccion_id: int) -> ReiniciarResult
     NO toca:
     - CandidatoFavorito (favoritos sobreviven)
     - CandidatoDescartado (descartados sobreviven)
-    - DecisionFinal (voto guardado sobrevive)
-    - Datos de OTROS tipos de eleccion
+        - Datos de OTROS tipos de eleccion
 
     Motivacion UX: si el usuario cambia de opinion y quiere responder de nuevo,
     no queremos perder los candidatos que ya marco como interesantes.

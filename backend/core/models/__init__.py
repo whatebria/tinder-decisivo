@@ -39,7 +39,6 @@ from .unidad_territorial import UnidadTerritorial
 from .user_data import (
     CandidatoDescartado,
     CandidatoFavorito,
-    DecisionFinal,
     NoticiaBookmark,
     PosturaBookmark,
 )
@@ -55,7 +54,6 @@ __all__ = [
     "CandidatoDescartado",
     "CandidatoFavorito",
     "Comuna",
-    "DecisionFinal",
     "Distrito",
     "Eje",
     "MatchCandidato",

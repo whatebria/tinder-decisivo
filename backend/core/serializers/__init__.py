@@ -13,7 +13,6 @@ from .auth import (
 from .bookmarking import (
     CandidatoDescartadoSerializer,
     CandidatoFavoritoSerializer,
-    DecisionFinalSerializer,
     NoticiaBookmarkSerializer,
     PosturaBookmarkSerializer,
 )
@@ -50,7 +49,6 @@ __all__ = [
     "CandidatoFavoritoSerializer",
     "CandidatoSerializer",
     "ComunaInlineSerializer",
-    "DecisionFinalSerializer",
     "EliminarCuentaSerializer",
     "EjeSerializer",
     "MatchCandidatoResultSerializer",

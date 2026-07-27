@@ -59,7 +59,7 @@ def eliminar_cuenta(user: User, password: str) -> None:
 
     CASCADE de Django limpia todos los objetos relacionados:
     RespuestaUsuario, MatchCandidato, CandidatoFavorito, CandidatoDescartado,
-    DecisionFinal, PasswordResetToken, Token (auth).
+    PasswordResetToken, Token (auth).
 
     Args:
         user: usuario autenticado a eliminar.

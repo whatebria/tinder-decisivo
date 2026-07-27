@@ -24,7 +24,6 @@ from .models import (
     CandidatoDescartado,
     CandidatoFavorito,
     Comuna,
-    DecisionFinal,
     Distrito,
     Noticia,
     NoticiaBookmark,
@@ -208,19 +207,6 @@ class CandidatoDescartadoAdmin(admin.ModelAdmin):
     search_fields = ("user__username", "candidato__nombre", "candidato__apellido")
     autocomplete_fields = ("user", "candidato")
     date_hierarchy = "fecha_descartado"
-
-
-@admin.register(DecisionFinal)
-class DecisionFinalAdmin(admin.ModelAdmin):
-    list_display = ("user", "candidato_elegido", "tipo_eleccion", "fecha_decision")
-    list_filter = ("tipo_eleccion",)
-    search_fields = (
-        "user__username",
-        "candidato_elegido__nombre",
-        "candidato_elegido__apellido",
-    )
-    autocomplete_fields = ("user", "candidato_elegido", "tipo_eleccion")
-    date_hierarchy = "fecha_decision"
 
 
 # ---------------------------------------------------------------------------

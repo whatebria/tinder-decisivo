@@ -9,7 +9,6 @@ class ContadoresSerializer(serializers.Serializer):
     respuestas = serializers.IntegerField()
     favoritos = serializers.IntegerField()
     descartados = serializers.IntegerField()
-    decisiones = serializers.IntegerField()
 
 
 class ComunaInlineSerializer(serializers.ModelSerializer):

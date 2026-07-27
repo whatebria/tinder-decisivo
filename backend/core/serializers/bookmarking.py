@@ -1,11 +1,10 @@
-"""Serializers de bookmarking: favoritos, descartados, decision final, bookmarks de contenido."""
+"""Serializers de bookmarking: favoritos, descartados, bookmarks de contenido."""
 
 from rest_framework import serializers
 
 from ..models import (
     CandidatoDescartado,
     CandidatoFavorito,
-    DecisionFinal,
     NoticiaBookmark,
     PosturaBookmark,
 )
@@ -42,25 +41,6 @@ class CandidatoDescartadoSerializer(serializers.ModelSerializer):
         if CandidatoDescartado.objects.filter(user=user, candidato=data["candidato"]).exists():
             raise serializers.ValidationError("Este candidato ya esta descartado.")
         return data
-
-
-class DecisionFinalSerializer(serializers.ModelSerializer):
-    candidato_data = CandidatoSerializer(source="candidato_elegido", read_only=True)
-    tipo_eleccion_nombre = serializers.CharField(
-        source="tipo_eleccion.nombre", read_only=True
-    )
-
-    class Meta:
-        model = DecisionFinal
-        fields = [
-            "id",
-            "candidato_elegido",
-            "tipo_eleccion",
-            "fecha_decision",
-            "candidato_data",
-            "tipo_eleccion_nombre",
-        ]
-        read_only_fields = ["fecha_decision", "candidato_data", "tipo_eleccion_nombre"]
 
 
 class NoticiaBookmarkSerializer(serializers.ModelSerializer):
