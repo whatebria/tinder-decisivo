@@ -262,7 +262,6 @@ export function ResultadosScreen({
           title={tipoNombre}
           subtitle="Tus resultados"
           onBack={() => navigation.goBack()}
-          onInfo={() => navigation.navigate("Comparar")}
         />
 
         {isGuest ? (
