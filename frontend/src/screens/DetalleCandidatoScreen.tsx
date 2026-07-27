@@ -23,7 +23,6 @@
 
 import React, { useMemo, useState } from "react";
 import {
-  Linking,
   ScrollView,
   StyleSheet,
   Text,
@@ -55,6 +54,7 @@ import {
   MatchTier,
   Modal,
   NewsCard,
+  NoticiaDetailSheet,
   ProfileHero,
   RadarChart,
   ScreenTopBar,
@@ -62,6 +62,7 @@ import {
   Spinner,
   Tabs,
   useToast,
+  type NoticiaDetail,
 } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { formatMatchPercentage, getMatchColor } from "../services/matching";
@@ -560,6 +561,8 @@ function formatWhen(n: Noticia): string {
 
 function NoticiasTab({ noticias }: { noticias: Noticia[] }) {
   const c = useThemeColors();
+  const [selected, setSelected] = React.useState<NoticiaDetail | null>(null);
+
   if (noticias.length === 0) {
     return (
       <Text style={[styles.empty, { color: c.textSecondary }]}>
@@ -575,10 +578,26 @@ function NoticiasTab({ noticias }: { noticias: Noticia[] }) {
           <NewsCard
             key={n.id}
             {...cardProps}
-            onPress={n.url ? () => Linking.openURL(n.url!) : undefined}
+            onPress={() =>
+              setSelected({
+                id: n.id,
+                titulo: n.titulo,
+                descripcion: n.descripcion ?? "",
+                url: n.url,
+                fuente: n.fuente,
+                imagenUrl: (n as unknown as { imagen_url?: string | null }).imagen_url ?? null,
+                fechaFormateada: cardProps.when,
+                sentiment: cardProps.sentiment,
+              })
+            }
           />
         );
       })}
+      <NoticiaDetailSheet
+        visible={selected !== null}
+        onClose={() => setSelected(null)}
+        noticia={selected}
+      />
     </View>
   );
 }
