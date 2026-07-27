@@ -26,7 +26,7 @@ import {
   CambiarPasswordModal,
   Divider,
   EliminarCuentaModal,
-  Link,
+  NavRow,
   ScreenTopBar,
   SectionTitle,
   Spinner,
@@ -199,19 +199,19 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
           {/* Acciones */}
           <SectionTitle title="Cuenta" />
           <View style={styles.actions}>
-            <Link block onPress={() => setPassOpen(true)}>
-              Cambiar mi contrasena
-            </Link>
-            <Link block onPress={logout}>
-              Cerrar sesion
-            </Link>
-            <Link
-              block
+            <NavRow
+              label="Cambiar mi contraseña"
+              onPress={() => setPassOpen(true)}
+            />
+            <NavRow
+              label="Cerrar sesión"
+              onPress={logout}
+            />
+            <NavRow
+              label="Eliminar mi cuenta"
+              variant="danger"
               onPress={() => setDeleteOpen(true)}
-              color={c.danger}
-            >
-              Eliminar mi cuenta
-            </Link>
+            />
           </View>
         </ScrollView>
 
