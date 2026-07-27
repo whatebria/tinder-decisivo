@@ -69,10 +69,24 @@ import { useAuthStore } from "../store/auth";
 
 // -- Tipos de eleccion (Home) -----------------------------------------------
 
+/**
+ * Lista de tipos de eleccion visibles en el UI.
+ *
+ * IMPORTANTE: filtramos los tipos con es_base=true (Preguntas generales) porque
+ * son transversales — sus respuestas se aplican al match de todas las elecciones,
+ * pero no tienen candidatos propios. Exponerlos como cuestionario separado
+ * confundia al usuario (aterrizaba en un empty state "no hay candidatos").
+ *
+ * Los tipos base siguen existiendo en el backend y las respuestas del user siguen
+ * enriqueciendo sus matches; simplemente no aparecen como cards seleccionables.
+ *
+ * Si en el futuro se decide re-exponerlos con UI diferenciada, remover el select.
+ */
 export function useTiposEleccion() {
-  return useQuery<TipoEleccion[]>({
+  return useQuery<TipoEleccion[], Error, TipoEleccion[]>({
     queryKey: queryKeys.tiposEleccion,
     queryFn: listTiposEleccion,
+    select: (data) => data.filter((t) => !t.es_base),
   });
 }
 
