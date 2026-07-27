@@ -331,14 +331,27 @@ export const displayCatalog: CatalogEntry[] = [
           />
         ),
       },
+      {
+        label: "esBase (Preguntas generales)",
+        render: () => (
+          <ElectionCard
+            name="Preguntas generales"
+            esBase
+            isCompleted
+            progressPercent={100}
+          />
+        ),
+      },
     ],
     props: [
       { name: "name", type: "string", required: true },
-      { name: "scope", type: "string", description: "Ej. 'NACIONAL', 'COMUNAL'." },
+      { name: "scope", type: "string", description: "Ej. 'NACIONAL', 'COMUNAL'. Se ignora si esBase=true." },
       { name: "isCompleted", type: "boolean", description: "Si el user completo el cuestionario. Undefined oculta el badge (util para skeletons)." },
-      { name: "matchPercent", type: "number | null", description: "0-100. null si aun no hay match." },
+      { name: "matchPercent", type: "number | null", description: "0-100. null si aun no hay match. Se ignora si esBase=true." },
       { name: "progressPercent", type: "number", required: true, description: "0-100 progreso del cuestionario." },
       { name: "pendingLabel", type: "string", description: "Texto alt cuando no hay match." },
+      { name: "esBase", type: "boolean", defaultValue: "false", description: "Si true, la card representa un TipoEleccion con es_base=true (preguntas transversales). Oculta match%, muestra chip 'APLICA A TODAS'." },
+      { name: "baseHint", type: "string", description: "Texto explicativo para cards esBase. Default: 'Mejora tus matches en todas las elecciones'." },
       { name: "variant", type: "\"active\" | \"secondary\" | \"pending\"", defaultValue: "\"secondary\"" },
       { name: "onPress", type: "() => void" },
     ],

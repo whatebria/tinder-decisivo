@@ -7,6 +7,14 @@
  *   - secondary: otra eleccion activa (border-1 gris)
  *   - pending: sin cuestionario respondido aún (progress 0%)
  *
+ * Prop `esBase`:
+ *   Cuando true, la card representa un TipoEleccion con es_base=true
+ *   ("Preguntas generales" transversal). No tiene candidatos propios, entonces:
+ *     - no se muestra matchPercent (aunque venga)
+ *     - se sustituye el `scope` por un chip "APLICA A TODAS"
+ *     - se muestra un sub-texto explicativo en vez del ranking
+ *   El resto (progress, badge de completado/pendiente, onPress) sigue igual.
+ *
  * Badge (esquina sup. derecha):
  *   - "Completado" (verde) si isCompleted === true
  *   - "Pendiente" (neutro) si isCompleted === false
@@ -34,6 +42,13 @@ export interface ElectionCardProps {
   progressPercent: number;
   /** Texto alternativo cuando no hay matchPercent (ej: "6 preguntas extras pendientes"). */
   pendingLabel?: string;
+  /**
+   * Si true, esta card representa un TipoEleccion con es_base=true.
+   * Cambia el UI: oculta match%, muestra chip "APLICA A TODAS" y sub-texto explicativo.
+   */
+  esBase?: boolean;
+  /** Texto explicativo custom para cards con esBase=true. Default: 'Mejora tus matches en todas las elecciones'. */
+  baseHint?: string;
   variant?: ElectionCardVariant;
   onPress?: () => void;
   style?: ViewStyle;
@@ -61,6 +76,8 @@ export function ElectionCard({
   matchPercent,
   progressPercent,
   pendingLabel,
+  esBase = false,
+  baseHint,
   variant = "secondary",
   onPress,
   style,
@@ -68,7 +85,8 @@ export function ElectionCard({
 }: ElectionCardProps) {
   const c = useThemeColors();
   const isActive = variant === "active";
-  const isPending = variant === "pending" || matchPercent == null;
+  // esBase pisa el flag de pending porque el match% no tiene sentido en estas cards
+  const isPending = !esBase && (variant === "pending" || matchPercent == null);
 
   const badge = pickBadge(isCompleted);
   const badgeColors = useMemo(() => {
@@ -115,6 +133,21 @@ export function ElectionCard({
           color: c.textSecondary,
           fontWeight: "600",
         },
+        baseChip: {
+          alignSelf: "flex-start",
+          paddingHorizontal: spacing.sp2,
+          paddingVertical: 2,
+          borderRadius: radii.rFull,
+          backgroundColor: c.accent2,
+          marginTop: 2,
+        },
+        baseChipText: {
+          fontSize: 10,
+          textTransform: "uppercase",
+          letterSpacing: 0.6,
+          color: c.primary,
+          fontWeight: "700",
+        },
         badge: {
           paddingHorizontal: spacing.sp2,
           paddingVertical: 2,
@@ -154,7 +187,13 @@ export function ElectionCard({
           <Text style={styles.name} numberOfLines={2}>
             {name}
           </Text>
-          {scope ? <Text style={styles.scope}>{scope}</Text> : null}
+          {esBase ? (
+            <View style={styles.baseChip}>
+              <Text style={styles.baseChipText}>Aplica a todas</Text>
+            </View>
+          ) : scope ? (
+            <Text style={styles.scope}>{scope}</Text>
+          ) : null}
         </View>
         {badge && badgeColors ? (
           <View style={[styles.badge, { backgroundColor: badgeColors.bg }]}>
@@ -165,7 +204,11 @@ export function ElectionCard({
         ) : null}
       </View>
 
-      {isPending ? (
+      {esBase ? (
+        <Text style={styles.pendingText}>
+          {baseHint ?? "Mejora tus matches en todas las elecciones"}
+        </Text>
+      ) : isPending ? (
         <Text style={styles.pendingText}>{pendingLabel ?? "Sin cuestionario"}</Text>
       ) : (
         <View style={styles.matchRow}>
