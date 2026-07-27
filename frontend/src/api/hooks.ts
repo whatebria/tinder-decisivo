@@ -96,14 +96,23 @@ export function useCandidatos() {
 }
 
 /**
- * Detalle de un candidato. Reusa el list y filtra en memoria porque el
- * backend no expone /candidatos/{id}/ suelto. Si crece a >100 candidatos,
- * agregar endpoint dedicado y cambiar este hook (sin tocar screens).
+ * Detalle de un candidato. Reusa el cache de `useCandidatos()` cuando esta
+ * disponible (evita un round-trip completo al backend por cada mount). Si
+ * el cache esta vacio o stale, hace fetch de la lista y filtra en memoria
+ * porque el backend no expone /candidatos/{id}/ suelto.
+ *
+ * Si crece a >100 candidatos, agregar endpoint dedicado y cambiar este hook
+ * (sin tocar screens).
  */
 export function useCandidato(id: number) {
+  const qc = useQueryClient();
   return useQuery<Candidato | null>({
     queryKey: queryKeys.candidato(id),
     queryFn: async () => {
+      const cached = qc.getQueryData<Candidato[]>(queryKeys.candidatos);
+      if (cached && cached.length > 0) {
+        return cached.find((c) => c.id === id) ?? null;
+      }
       const all = await listCandidatos();
       return all.find((c) => c.id === id) ?? null;
     },
@@ -136,7 +145,7 @@ export function useMatchCandidatos() {
  */
 export function useMatchesQuery(tipoEleccionId: number | null | undefined) {
   return useQuery<MatchResult[]>({
-    queryKey: ["matches", tipoEleccionId ?? null],
+    queryKey: queryKeys.matches(tipoEleccionId),
     queryFn: () => matchCandidatos(tipoEleccionId as number),
     enabled: tipoEleccionId != null,
     staleTime: 60_000,
@@ -197,7 +206,7 @@ export function useReiniciarCuestionario() {
 export function useMisRespuestas(tipoEleccionId: number | null | undefined) {
   const isAuth = useAuthStore((s) => s.isAuthenticated);
   return useQuery<MiRespuesta[]>({
-    queryKey: ["misRespuestas", tipoEleccionId],
+    queryKey: queryKeys.misRespuestas(tipoEleccionId),
     queryFn: () => listMisRespuestas(tipoEleccionId as number),
     enabled: isAuth && !!tipoEleccionId,
   });
@@ -215,7 +224,7 @@ export function useMisRespuestasMultiple(tipoIds: number[]) {
   const isAuth = useAuthStore((s) => s.isAuthenticated);
   const results = useQueries({
     queries: tipoIds.map((tipoId) => ({
-      queryKey: ["misRespuestas", tipoId] as const,
+      queryKey: queryKeys.misRespuestas(tipoId),
       queryFn: () => listMisRespuestas(tipoId),
       enabled: isAuth,
     })),
@@ -240,9 +249,9 @@ export function useUpdateRespuesta() {
     onSuccess: () => {
       // Invalida por prefix: cubre tanto el caso single-tipo como el hub
       // multi-tipo (MisRespuestasScreen) sin necesitar el id exacto.
-      qc.invalidateQueries({ queryKey: ["misRespuestas"] });
+      qc.invalidateQueries({ queryKey: queryKeys.misRespuestasAll });
       // Los matches se invalidaron en el backend; forzamos refetch al pedirlos.
-      qc.invalidateQueries({ queryKey: ["matches"] });
+      qc.invalidateQueries({ queryKey: queryKeys.matchesAll });
     },
   });
 }
@@ -251,13 +260,7 @@ export function useUpdateRespuesta() {
 
 export function useNoticiasFeed(filters: NoticiaFeedFilters = {}) {
   return useQuery<Noticia[]>({
-    queryKey: [
-      "noticias",
-      filters.candidatoId ?? null,
-      filters.fuente ?? null,
-      filters.dias ?? null,
-      filters.q ?? null,
-    ],
+    queryKey: queryKeys.noticiasFeed(filters),
     queryFn: () => listNoticias(filters),
     staleTime: 60_000,
   });
@@ -267,7 +270,7 @@ export function useNoticiasFeed(filters: NoticiaFeedFilters = {}) {
 
 export function useMatchDetalle(candidatoId: number | undefined) {
   return useQuery<MatchDetalle>({
-    queryKey: ["match-detalle", candidatoId ?? null],
+    queryKey: queryKeys.matchDetalle(candidatoId),
     queryFn: () => getMatchDetalle(candidatoId!),
     enabled: candidatoId != null,
     staleTime: 60_000,
@@ -281,7 +284,7 @@ export function usePosturasCandidato(
   tipoEleccionId?: number | null
 ) {
   return useQuery<PosturaCandidatoDetalle[]>({
-    queryKey: ["posturas", candidatoId, tipoEleccionId ?? null],
+    queryKey: queryKeys.posturas(candidatoId, tipoEleccionId),
     queryFn: () =>
       listPosturasCandidato(candidatoId as number, tipoEleccionId),
     enabled: !!candidatoId,
@@ -293,7 +296,7 @@ export function usePosturasCandidato(
 export function usePerfil() {
   const isAuth = useAuthStore((s) => s.isAuthenticated);
   return useQuery<Perfil>({
-    queryKey: ["perfil"],
+    queryKey: queryKeys.perfil,
     queryFn: getPerfil,
     enabled: isAuth,
   });
@@ -320,7 +323,7 @@ export function useEliminarCuenta() {
 
 export function useRegiones() {
   return useQuery<Region[]>({
-    queryKey: ["regiones"],
+    queryKey: queryKeys.regiones,
     queryFn: listRegiones,
     staleTime: 24 * 60 * 60 * 1000, // 24h: catalogo super estable
   });
@@ -328,7 +331,7 @@ export function useRegiones() {
 
 export function useComunas(regionId?: number | null, q?: string) {
   return useQuery<ComunaInline[]>({
-    queryKey: ["comunas", regionId ?? null, q ?? ""],
+    queryKey: queryKeys.comunas(regionId, q),
     queryFn: () => listComunas(regionId ?? undefined, q),
     enabled: !!regionId, // no cargar 346 comunas si no hay region
     staleTime: 24 * 60 * 60 * 1000,
@@ -342,8 +345,11 @@ export function useActualizarComuna() {
     onSuccess: () => {
       // El perfil trae comuna inline; invalidamos para refrescar UI.
       // Los matches del user dependen del filtro territorial, tambien se invalidan.
-      qc.invalidateQueries({ queryKey: ["perfil"] });
-      qc.invalidateQueries({ queryKey: ["match"] });
+      qc.invalidateQueries({ queryKey: queryKeys.perfil });
+      // Los matches del user dependen del filtro territorial; invalidamos
+      // "matches" (list) y "match-detalle" (detail) para que se recalculen.
+      qc.invalidateQueries({ queryKey: queryKeys.matchesAll });
+      qc.invalidateQueries({ queryKey: queryKeys.matchDetalleAll });
     },
   });
 }
