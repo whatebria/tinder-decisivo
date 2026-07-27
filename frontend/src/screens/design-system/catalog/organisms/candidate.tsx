@@ -175,8 +175,9 @@ export const candidateOrgCatalog: CatalogEntry[] = [
               partido="Frente Amplio"
               matchPct={87}
               ejeScores={ejeScoresMock}
-              confianzaLabel="Alta confianza"
+              confianzaLabel="Confianza alta"
               confianzaVariant="success"
+              confianzaSubtext="10 preguntas coinciden"
               ctaLabel="Ver perfil completo"
               onCta={() => {}}
             />
@@ -189,7 +190,8 @@ export const candidateOrgCatalog: CatalogEntry[] = [
       { name: "matchPct", type: "number", required: true },
       { name: "matchColor", type: "string", description: "Override del color del %." },
       { name: "ejeScores", type: "Record<string, number>", description: "3+ ejes para mostrar radar." },
-      { name: "confianzaLabel / confianzaVariant", type: "string / BadgeVariant" },
+      { name: "confianzaLabel / confianzaVariant", type: "string / BadgeVariant", description: "Chip de confianza (ej: 'Confianza alta')." },
+      { name: "confianzaSubtext", type: "string", description: "Texto contextual al lado del chip (ej: '10 preguntas coinciden')." },
       { name: "ctaLabel", type: "string", defaultValue: "\"Ver perfil completo\"" },
       { name: "onCta", type: "() => void" },
     ],

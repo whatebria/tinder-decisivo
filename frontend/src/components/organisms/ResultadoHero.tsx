@@ -8,6 +8,7 @@
  *   [Nombre y apellido]
  *   [Partido / subtitulo]
  *   [80% big number]
+ *   [Row: Badge confianza + texto 'N preguntas coinciden']
  *   [Compatibilidad label]
  *   [Radar chart 180]
  *   [Button: Ver perfil completo]
@@ -32,8 +33,11 @@ export interface ResultadoHeroProps {
   matchPct: number;
   matchColor?: string;
   ejeScores?: Record<string, number>;
+  /** Label del chip de confianza. Ej: "Confianza alta". */
   confianzaLabel?: string;
   confianzaVariant?: BadgeVariant;
+  /** Texto contextual al lado del chip. Ej: "10 preguntas coinciden". */
+  confianzaSubtext?: string;
   ctaLabel?: string;
   onCta?: () => void;
   style?: ViewStyle;
@@ -49,6 +53,7 @@ export function ResultadoHero({
   ejeScores,
   confianzaLabel,
   confianzaVariant = "neutral",
+  confianzaSubtext,
   ctaLabel = "Ver perfil completo",
   onCta,
   style,
@@ -94,6 +99,17 @@ export function ResultadoHero({
           marginTop: spacing.sp1,
           lineHeight: 44,
         },
+        confianzaRow: {
+          flexDirection: "row",
+          alignItems: "center",
+          gap: spacing.sp2,
+          flexWrap: "wrap",
+          justifyContent: "center",
+        },
+        confianzaSub: {
+          fontSize: 11,
+          color: c.textSecondary,
+        },
         compat: {
           fontSize: 10,
           textTransform: "uppercase",
@@ -116,11 +132,17 @@ export function ResultadoHero({
       {partido ? <Text style={styles.partido}>{partido}</Text> : null}
 
       <Text style={styles.pct}>{Math.round(matchPct)}%</Text>
-      <Text style={styles.compat}>Compatibilidad</Text>
 
       {confianzaLabel ? (
-        <Badge variant={confianzaVariant}>{confianzaLabel}</Badge>
+        <View style={styles.confianzaRow}>
+          <Badge variant={confianzaVariant}>{confianzaLabel}</Badge>
+          {confianzaSubtext ? (
+            <Text style={styles.confianzaSub}>{confianzaSubtext}</Text>
+          ) : null}
+        </View>
       ) : null}
+
+      <Text style={styles.compat}>Compatibilidad</Text>
 
       {hasRadar ? (
         <RadarChart data={ejeScores!} size={180} color={scoreColor} showLabels />

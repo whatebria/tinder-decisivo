@@ -363,8 +363,9 @@ export function ResultadosScreen({
                   matchPct={pct}
                   matchColor={scoreCol}
                   ejeScores={chartData}
-                  confianzaLabel={`${conf.label} · ${top.preguntas_consideradas}p`}
+                  confianzaLabel={`Confianza ${conf.label.toLowerCase()}`}
                   confianzaVariant={confianzaToBadge(top.confianza)}
+                  confianzaSubtext={`${top.preguntas_consideradas} ${top.preguntas_consideradas === 1 ? "pregunta coincide" : "preguntas coinciden"}`}
                   onCta={() => goToDetalle(top)}
                 />
                 {!isGuest ? (
