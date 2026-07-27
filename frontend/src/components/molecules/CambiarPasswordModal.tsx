@@ -3,14 +3,19 @@
  *
  * Requiere current + new + confirm. Valida match en cliente antes de disparar
  * la mutation.
+ *
+ * Refactor: usa <Modal> molecule base (tokens + dark mode reactivos).
  */
 
-import React, { useState } from "react";
-import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import React, { useMemo, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
 
+import { Modal } from "./Modal";
 import { Input } from "../atoms/Input";
 import { Button } from "../atoms/Button";
 import { Link } from "../atoms/Link";
+import { spacing } from "../../theme/spacing";
+import { useThemeColors } from "../../theme/useTheme";
 
 interface Props {
   visible: boolean;
@@ -25,6 +30,7 @@ export function CambiarPasswordModal({
   onSubmit,
   loading = false,
 }: Props) {
+  const c = useThemeColors();
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -44,79 +50,65 @@ export function CambiarPasswordModal({
     onCancel();
   }
 
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        message: { fontSize: 14, color: c.textSecondary, lineHeight: 20 },
+        form: { gap: spacing.sp2, marginTop: spacing.sp1 },
+        error: { fontSize: 13, color: c.danger, fontWeight: "600" },
+        actions: { gap: spacing.sp2 },
+      }),
+    [c],
+  );
+
   return (
-    <Modal animationType="fade" transparent visible={visible} onRequestClose={handleCancel}>
-      <Pressable style={styles.backdrop} onPress={loading ? undefined : handleCancel}>
-        <Pressable style={styles.card} onPress={(e) => e.stopPropagation()}>
-          <Text style={styles.title}>Cambiar contrasena</Text>
-          <Text style={styles.message}>
-            Ingresa tu contrasena actual y luego la nueva (minimo 8 caracteres).
-          </Text>
+    <Modal
+      visible={visible}
+      onClose={handleCancel}
+      title="Cambiar contrasena"
+      dismissOnBackdrop={!loading}
+      maxWidth={440}
+      footer={
+        <View style={styles.actions}>
+          <Button onPress={handleSubmit} loading={loading} disabled={!canSubmit}>
+            Cambiar contrasena
+          </Button>
+          <Link block onPress={handleCancel} disabled={loading}>
+            Cancelar
+          </Link>
+        </View>
+      }
+    >
+      <Text style={styles.message}>
+        Ingresa tu contrasena actual y luego la nueva (minimo 8 caracteres).
+      </Text>
 
-          <View style={styles.form}>
-            <Input
-              placeholder="Contrasena actual"
-              value={current}
-              onChangeText={setCurrent}
-              secureTextEntry
-              accessibilityLabel="Contrasena actual"
-            />
-            <Input
-              placeholder="Nueva contrasena"
-              value={next}
-              onChangeText={setNext}
-              secureTextEntry
-              accessibilityLabel="Nueva contrasena"
-            />
-            <Input
-              placeholder="Confirmar nueva contrasena"
-              value={confirm}
-              onChangeText={setConfirm}
-              secureTextEntry
-              accessibilityLabel="Confirmar nueva contrasena"
-            />
-            {confirm.length > 0 && !passwordsMatch ? (
-              <Text style={styles.error}>Las contrasenas no coinciden.</Text>
-            ) : null}
-          </View>
-
-          <View style={styles.actions}>
-            <Button onPress={handleSubmit} loading={loading} disabled={!canSubmit}>
-              Cambiar contrasena
-            </Button>
-            <Link block onPress={handleCancel} disabled={loading}>
-              Cancelar
-            </Link>
-          </View>
-        </Pressable>
-      </Pressable>
+      <View style={styles.form}>
+        <Input
+          placeholder="Contrasena actual"
+          value={current}
+          onChangeText={setCurrent}
+          secureTextEntry
+          accessibilityLabel="Contrasena actual"
+        />
+        <Input
+          placeholder="Nueva contrasena"
+          value={next}
+          onChangeText={setNext}
+          secureTextEntry
+       accessibilityLabel="Nueva contrasena"
+        />
+        <Input
+          placeholder="Confirmar nueva contrasena"
+          value={confirm}
+          onChangeText={setConfirm}
+          secureTextEntry
+          accessibilityLabel="Confirmar nueva contrasena"
+        />
+        {confirm.length > 0 && !passwordsMatch ? (
+          <Text style={styles.error}>Las contrasenas no coinciden.</Text>
+        ) : null}
+      </View>
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-  },
-  card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    width: "100%",
-    maxWidth: 440,
-    padding: 24,
-    gap: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  title: { fontSize: 18, fontWeight: "700", color: "#111827" },
-  message: { fontSize: 14, color: "#374151", lineHeight: 20 },
-  form: { gap: 8, marginTop: 4 },
-  error: { fontSize: 13, color: "#DC2626", fontWeight: "600" },
-  actions: { marginTop: 8, gap: 8 },
-});

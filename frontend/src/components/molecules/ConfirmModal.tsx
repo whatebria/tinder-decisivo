@@ -13,15 +13,19 @@
  *     loading={mutation.isPending}
  *   />
  *
- * Implementado con RN Modal + Pressable para consistencia con PreguntaInfoModal
- * (evita bugs de Tamagui en RN Web).
+ * Refactor: ahora consume el <Modal> molecule base (backdrop, animacion,
+ * dark mode, tokens). Antes duplicaba backdrop/card/shadow con literales
+ * hardcoded (no reactivo al tema, contrast issues en dark mode).
  */
 
-import React from "react";
-import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import React, { useMemo } from "react";
+import { StyleSheet, Text, View } from "react-native";
 
+import { Modal } from "./Modal";
 import { Button } from "../atoms/Button";
 import { Link } from "../atoms/Link";
+import { spacing } from "../../theme/spacing";
+import { useThemeColors } from "../../theme/useTheme";
 
 interface Props {
   visible: boolean;
@@ -46,68 +50,46 @@ export function ConfirmModal({
   onCancel,
   loading = false,
 }: Props) {
+  const c = useThemeColors();
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        message: {
+          fontSize: 15,
+          color: c.textSecondary,
+          lineHeight: 22,
+        },
+        actions: {
+          gap: spacing.sp2,
+        },
+      }),
+    [c],
+  );
+
   return (
     <Modal
-      animationType="fade"
-      transparent
       visible={visible}
-      onRequestClose={onCancel}
+      onClose={onCancel}
+      title={title}
+      dismissOnBackdrop={!loading}
+      maxWidth={440}
+      footer={
+        <View style={styles.actions}>
+          <Button
+            onPress={onConfirm}
+            loading={loading}
+            variant={variant === "danger" ? "danger" : "primary"}
+          >
+            {confirmLabel}
+          </Button>
+          <Link block onPress={onCancel} disabled={loading}>
+            {cancelLabel}
+          </Link>
+        </View>
+      }
     >
-      <Pressable style={styles.backdrop} onPress={loading ? undefined : onCancel}>
-        <Pressable style={styles.card} onPress={(e) => e.stopPropagation()}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.message}>{message}</Text>
-
-          <View style={styles.actions}>
-            <Button
-              onPress={onConfirm}
-              loading={loading}
-              variant={variant === "danger" ? "danger" : "primary"}
-            >
-              {confirmLabel}
-            </Button>
-            <Link block onPress={onCancel} disabled={loading}>
-              {cancelLabel}
-            </Link>
-          </View>
-        </Pressable>
-      </Pressable>
+      <Text style={styles.message}>{message}</Text>
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-  },
-  card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    width: "100%",
-    maxWidth: 440,
-    padding: 24,
-    gap: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  message: {
-    fontSize: 15,
-    color: "#374151",
-    lineHeight: 22,
-  },
-  actions: {
-    marginTop: 8,
-    gap: 8,
-  },
-});

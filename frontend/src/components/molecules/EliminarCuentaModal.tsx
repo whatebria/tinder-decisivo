@@ -4,14 +4,20 @@
  * Requiere ingresar password + escribir "ELIMINAR" (uppercase) para habilitar
  * el boton. Diseno pensado para prevenir clicks accidentales en accion no
  * recuperable.
+ *
+ * Refactor: usa <Modal> molecule base (tokens + dark mode reactivos).
  */
 
-import React, { useState } from "react";
-import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import React, { useMemo, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
 
+import { Modal } from "./Modal";
 import { Input } from "../atoms/Input";
 import { Button } from "../atoms/Button";
 import { Link } from "../atoms/Link";
+import { radii } from "../../theme/radii";
+import { spacing } from "../../theme/spacing";
+import { useIsDark, useThemeColors } from "../../theme/useTheme";
 
 const PALABRA_MAGICA = "ELIMINAR";
 
@@ -28,6 +34,8 @@ export function EliminarCuentaModal({
   onSubmit,
   loading = false,
 }: Props) {
+  const c = useThemeColors();
+  const isDark = useIsDark();
   const [password, setPassword] = useState("");
   const [palabra, setPalabra] = useState("");
 
@@ -44,90 +52,84 @@ export function EliminarCuentaModal({
     onSubmit(password);
   }
 
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        warning: {
+          fontSize: 14,
+          color: isDark ? c.danger100 : c.danger700,
+          lineHeight: 20,
+          backgroundColor: isDark ? c.danger800 : c.danger50,
+          padding: spacing.sp3,
+          borderRadius: radii.rSm,
+          borderLeftWidth: 3,
+          borderLeftColor: c.danger,
+        },
+        form: { gap: spacing.sp2, marginTop: spacing.sp1 },
+        instruccion: {
+          fontSize: 13,
+          color: c.textSecondary,
+          marginTop: spacing.sp1,
+        },
+        palabraMagica: {
+          fontWeight: "700",
+          color: c.danger,
+          letterSpacing: 1,
+        },
+        actions: { gap: spacing.sp2 },
+      }),
+    [c, isDark],
+  );
+
   return (
-    <Modal animationType="fade" transparent visible={visible} onRequestClose={handleCancel}>
-      <Pressable style={styles.backdrop} onPress={loading ? undefined : handleCancel}>
-        <Pressable style={styles.card} onPress={(e) => e.stopPropagation()}>
-          <Text style={styles.title}>Eliminar mi cuenta</Text>
-          <Text style={styles.warning}>
-            Esta accion es PERMANENTE. Se borran tus respuestas, tu ranking,
-            tus favoritos, descartados y tu voto final. No hay vuelta atras.
-          </Text>
+    <Modal
+      visible={visible}
+      onClose={handleCancel}
+      title="Eliminar mi cuenta"
+      dismissOnBackdrop={!loading}
+      maxWidth={440}
+      footer={
+        <View style={styles.actions}>
+          <Button
+            onPress={handleSubmit}
+            loading={loading}
+            disabled={!canSubmit}
+            variant="danger"
+          >
+            Si, eliminar mi cuenta
+          </Button>
+          <Link block onPress={handleCancel} disabled={loading}>
+            Cancelar
+          </Link>
+        </View>
+      }
+    >
+      <Text style={styles.warning}>
+        Esta accion es PERMANENTE. Se borran tus respuestas, tu ranking,
+        tus favoritos, descartados y tu voto final. No hay vuelta atras.
+      </Text>
 
-          <View style={styles.form}>
-            <Input
-              placeholder="Tu contrasena"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              accessibilityLabel="Contrasena"
-            />
-            <Text style={styles.instruccion}>
-              Para confirmar, escribe la palabra{" "}
-              <Text style={styles.palabraMagica}>{PALABRA_MAGICA}</Text>:
-            </Text>
-            <Input
-              placeholder={PALABRA_MAGICA}
-              value={palabra}
-              onChangeText={setPalabra}
-              autoCapitalize="characters"
-              autoCorrect={false}
-              accessibilityLabel="Palabra de confirmacion"
-            />
-          </View>
-
-          <View style={styles.actions}>
-            <Button
-              onPress={handleSubmit}
-              loading={loading}
-              disabled={!canSubmit}
-              variant="danger"
-            >
-              Si, eliminar mi cuenta
-            </Button>
-            <Link block onPress={handleCancel} disabled={loading}>
-              Cancelar
-            </Link>
-          </View>
-        </Pressable>
-      </Pressable>
+      <View style={styles.form}>
+        <Input
+          placeholder="Tu contrasena"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          accessibilityLabel="Contrasena"
+        />
+        <Text style={styles.instruccion}>
+          Para confirmar, escribe la palabra{" "}
+          <Text style={styles.palabraMagica}>{PALABRA_MAGICA}</Text>:
+        </Text>
+        <Input
+          placeholder={PALABRA_MAGICA}
+          value={palabra}
+          onChangeText={setPalabra}
+          autoCapitalize="characters"
+          autoCorrect={false}
+          accessibilityLabel="Palabra de confirmacion"
+        />
+      </View>
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-  },
-  card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    width: "100%",
-    maxWidth: 440,
-    padding: 24,
-    gap: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  title: { fontSize: 18, fontWeight: "700", color: "#DC2626" },
-  warning: {
-    fontSize: 14,
-    color: "#7F1D1D",
-    lineHeight: 20,
-    backgroundColor: "#FEF2F2",
-    padding: 12,
-    borderRadius: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: "#DC2626",
-  },
-  form: { gap: 8, marginTop: 4 },
-  instruccion: { fontSize: 13, color: "#374151", marginTop: 4 },
-  palabraMagica: { fontWeight: "700", color: "#DC2626", letterSpacing: 1 },
-  actions: { marginTop: 8, gap: 8 },
-});

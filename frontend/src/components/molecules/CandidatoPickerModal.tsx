@@ -1,21 +1,20 @@
 /**
  * Modal para elegir un candidato de una lista. Usado por el comparador.
  * Client-side: no fetchea, recibe la lista via props.
+ *
+ * Refactor: usa <Modal> molecule base. El boton "Cerrar" del footer se
+ * elimina porque el Modal base ya trae la X en el header (evita redundancia).
  */
 
 import React, { useMemo, useState } from "react";
-import {
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 import type { Candidato } from "../../api/endpoints";
+import { Modal } from "./Modal";
+import { radii } from "../../theme/radii";
+import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
+import { nombreCompleto } from "../../utils/candidato";
 
 interface Props {
   visible: boolean;
@@ -44,108 +43,93 @@ export function CandidatoPickerModal({
       if (cand.id == null) return false;
       if (excluirId != null && cand.id === excluirId) return false;
       if (!q) return true;
-      const nombre = `${cand.nombre} ${cand.apellido ?? ""}`.toLowerCase();
+      const nombre = nombreCompleto(cand).toLowerCase();
       const partido = (cand.partido ?? "").toLowerCase();
       return nombre.includes(q) || partido.includes(q);
     });
   }, [candidatos, query, excluirId]);
 
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        search: {
+          borderWidth: 1,
+          borderRadius: radii.rSm,
+          paddingHorizontal: spacing.sp3,
+          paddingVertical: spacing.sp2,
+          fontSize: 14,
+          backgroundColor: c.bg,
+          borderColor: c.border,
+          color: c.text,
+          marginBottom: spacing.sp3,
+        },
+        emptyText: {
+          color: c.textSecondary,
+          padding: spacing.sp3,
+          textAlign: "center",
+        },
+        item: {
+          paddingVertical: spacing.sp3,
+          paddingHorizontal: spacing.sp2,
+          borderBottomWidth: 1,
+          borderBottomColor: c.border,
+        },
+        itemPressed: {
+          backgroundColor: c.bg,
+        },
+        itemName: {
+          fontSize: 15,
+          fontWeight: "600",
+          color: c.text,
+        },
+        itemMeta: {
+          fontSize: 12,
+          marginTop: 2,
+          color: c.textSecondary,
+        },
+      }),
+    [c],
+  );
+
+  function handleSelect(cand: Candidato) {
+    onSelect(cand);
+    setQuery("");
+  }
+
   return (
-    <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose}>
-        <Pressable
-          style={[styles.card, { backgroundColor: c.card }]}
-          onPress={(e) => e.stopPropagation()}
-        >
-          <Text style={[styles.title, { color: c.text }]}>{title}</Text>
+    <Modal visible={visible} onClose={onClose} title={title} maxWidth={480}>
+      <TextInput
+        value={query}
+        onChangeText={setQuery}
+        placeholder="Buscar por nombre o partido..."
+        placeholderTextColor={c.textSecondary}
+        style={styles.search}
+        accessibilityLabel="Buscar candidato"
+      />
 
-          <TextInput
-            value={query}
-            onChangeText={setQuery}
-            placeholder="Buscar por nombre o partido..."
-            placeholderTextColor={c.textSecondary}
-            style={[
-              styles.search,
-              { backgroundColor: c.bg, borderColor: c.border, color: c.text },
-            ]}
-          />
-
-          <ScrollView style={{ maxHeight: 360 }}>
-            {filtrados.length === 0 ? (
-              <Text style={{ color: c.textSecondary, padding: 12, textAlign: "center" }}>
-                No hay candidatos que coincidan.
-              </Text>
-            ) : (
-              filtrados.map((cand) => (
-                <Pressable
-                  key={cand.id}
-                  onPress={() => {
-                    onSelect(cand);
-                    setQuery("");
-                  }}
-                  style={({ pressed }) => [
-                    styles.item,
-                    {
-                      backgroundColor: pressed ? c.bg : "transparent",
-                      borderBottomColor: c.border,
-                    },
-                  ]}
-                >
-                  <Text style={[styles.itemName, { color: c.text }]}>
-                    {cand.nombre} {cand.apellido ?? ""}
-                  </Text>
-                  {cand.partido ? (
-                    <Text style={[styles.itemMeta, { color: c.textSecondary }]}>
-                      {cand.partido}
-                    </Text>
-                  ) : null}
-                </Pressable>
-              ))
-            )}
-          </ScrollView>
-
-          <Pressable onPress={onClose} style={styles.closeBtn}>
-            <Text style={{ color: c.textSecondary, fontWeight: "600" }}>Cerrar</Text>
-          </Pressable>
-        </Pressable>
-      </Pressable>
+      {filtrados.length === 0 ? (
+        <Text style={styles.emptyText}>No hay candidatos que coincidan.</Text>
+      ) : (
+        <View>
+          {filtrados.map((cand) => (
+            <Pressable
+              key={cand.id}
+              onPress={() => handleSelect(cand)}
+              accessibilityRole="button"
+              accessibilityLabel={`Elegir ${nombreCompleto(cand)}`}
+              style={({ pressed }) => [
+                styles.item,
+                pressed && styles.itemPressed,
+              ]}
+            >
+              <Text style={styles.itemName}>{nombreCompleto(cand)}</Text>
+              {cand.partido ? (
+                <Text style={styles.itemMeta}>{cand.partido}</Text>
+              ) : null}
+            </Pressable>
+          ))}
+        </View>
+      )}
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-  },
-  card: {
-    width: "100%",
-    maxWidth: 480,
-    borderRadius: 12,
-    padding: 16,
-    gap: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  title: { fontSize: 17, fontWeight: "700" },
-  search: {
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    fontSize: 14,
-  },
-  item: {
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderBottomWidth: 1,
-  },
-  itemName: { fontSize: 15, fontWeight: "600" },
-  itemMeta: { fontSize: 12, marginTop: 2 },
-  closeBtn: { alignSelf: "center", paddingVertical: 8, paddingHorizontal: 16 },
-});

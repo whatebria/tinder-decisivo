@@ -3,8 +3,9 @@
  * Backdrop semitransparente (RN no soporta backdrop-filter blur nativo).
  * Animacion fade + scale desde 96% via `animationType="fade"` nativo.
  *
- * Los *Modal de dominio (Confirm, Share, Pregunta, ...) se refactorizan
- * en Fase 3 para consumir este.
+ * Consumido por todos los *Modal de dominio del proyecto: ConfirmModal,
+ * ShareModal, PreguntaInfoModal, CambiarPasswordModal, EliminarCuentaModal,
+ * EditarRespuestaModal, CandidatoPickerModal.
  */
 
 import React, { useMemo } from "react";
