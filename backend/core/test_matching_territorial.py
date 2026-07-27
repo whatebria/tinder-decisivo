@@ -75,19 +75,19 @@ def escenario_territorial(db, seed_chile):
 
     alc_nunoa = Candidato.objects.create(
         nombre="Ana", apellido="AlcNunoa", partido="P",
-        propuesta_electoral="...", comuna=nunoa, unidad_territorial=ut_nunoa,
+        propuesta_electoral="...", unidad_territorial=ut_nunoa,
     )
     alc_nunoa.tipos_eleccion.add(tipo_alc)
 
     alc_prov = Candidato.objects.create(
         nombre="Bea", apellido="AlcProv", partido="P",
-        propuesta_electoral="...", comuna=providencia, unidad_territorial=ut_prov,
+        propuesta_electoral="...", unidad_territorial=ut_prov,
     )
     alc_prov.tipos_eleccion.add(tipo_alc)
 
     dip_d10 = Candidato.objects.create(
         nombre="Dip", apellido="D10", partido="P",
-        propuesta_electoral="...", distrito=d10, unidad_territorial=ut_d10,
+        propuesta_electoral="...", unidad_territorial=ut_d10,
     )
     dip_d10.tipos_eleccion.add(tipo_dip)
 

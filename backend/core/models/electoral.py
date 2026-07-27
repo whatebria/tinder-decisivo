@@ -1,11 +1,8 @@
 """Catalogo electoral: tipos de eleccion y candidatos."""
 
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
-
-from .territorio import Comuna, Distrito
 
 
 class TipoEleccion(models.Model):
@@ -56,26 +53,9 @@ class Candidato(models.Model):
     profile_picture = models.ImageField(default="assets/default.avif", upload_to="profiles/")
     tipos_eleccion = models.ManyToManyField(TipoEleccion, related_name="candidatos")
 
-    # Scope territorial. Nulos = candidato nacional (ej. Presidencial).
-    # Alcaldes usan `comuna`. Diputados usan `distrito`. Un candidato solo
-    # deberia tener uno de los dos, o ninguno para nacional.
-    #
-    # DEPRECATED: estos dos FKs quedan por compatibilidad hasta terminar la
-    # migracion a `unidad_territorial`. Ver `docs/MIGRATION_TERRITORIAL.md`.
-    # No usar en codigo nuevo; usar `unidad_territorial` en su lugar.
-    comuna = models.ForeignKey(
-        Comuna, on_delete=models.PROTECT, related_name="candidatos",
-        null=True, blank=True,
-        help_text="Comuna en la que compite (alcaldes/concejales). Null si es nacional o distrital.",
-    )
-    distrito = models.ForeignKey(
-        Distrito, on_delete=models.PROTECT, related_name="candidatos",
-        null=True, blank=True,
-        help_text="Distrito en el que compite (diputados). Null si es nacional o comunal.",
-    )
-    # Nuevo modelo polimorfico. Reemplaza el uso directo de comuna/distrito.
-    # Se auto-sincroniza via signal desde comuna/distrito hasta que migremos
-    # todo el codigo a usar unidad_territorial.
+    # Scope territorial polimorfico. Nulo = candidato nacional (ej. Presidencial).
+    # Alcaldes usan UT nivel=comunal, diputados UT nivel=distrital, senadores
+    # (a futuro) UT nivel=regional. Un solo FK para todos los niveles.
     unidad_territorial = models.ForeignKey(
         "UnidadTerritorial", on_delete=models.PROTECT,
         related_name="candidatos",
@@ -89,47 +69,18 @@ class Candidato(models.Model):
     class Meta:
         app_label = "core"
         verbose_name_plural = "Candidatos"
-        constraints = [
-            # Un candidato compite en un solo territorio: nacional, distrito o
-            # comuna. Nunca dos a la vez.
-            models.CheckConstraint(
-                condition=~(
-                    models.Q(comuna__isnull=False) & models.Q(distrito__isnull=False)
-                ),
-                name="candidato_no_comuna_y_distrito_a_la_vez",
-            ),
-        ]
-
-    def clean(self):
-        # Redundante con el CheckConstraint pero da un mensaje amigable
-        # en el admin/forms antes de golpear la DB.
-        if self.comuna_id and self.distrito_id:
-            raise ValidationError(
-                "Un candidato no puede tener comuna Y distrito al mismo tiempo. "
-                "Usa comuna para alcaldes, distrito para diputados, ninguno para presidenciales."
-            )
 
     @property
     def alcance_territorial(self) -> str:
-        """Etiqueta legible del alcance: 'nacional', 'distrital', 'comunal' o el nivel UT crudo.
+        """Etiqueta legible del alcance: 'nacional', 'comunal', 'distrital', etc.
 
-        Se lee de `unidad_territorial` (fuente unica). Fallback a los FKs
-        legacy comuna/distrito por retrocompat mientras dura la migracion.
+        Lee del nivel de `unidad_territorial`. Sin UT = nacional.
         """
-        if self.unidad_territorial_id:
-            nivel = self.unidad_territorial.nivel
-            if nivel == "comunal":
-                return "comunal"
-            if nivel == "distrital":
-                return "distrital"
-            # regional/provincial/nacional -> devolver el nivel crudo.
-            return nivel
-        # Fallback legacy: se ira cuando dropeen las columnas.
-        if self.comuna_id:
-            return "comunal"
-        if self.distrito_id:
-            return "distrital"
-        return "nacional"
+        if not self.unidad_territorial_id:
+            return "nacional"
+        # nivel es 'comunal'/'distrital'/'regional'/'provincial'/'nacional'
+        # y ya sirve como etiqueta legible directa.
+        return self.unidad_territorial.nivel
 
     def __str__(self):
         return f"{self.nombre} {self.apellido}"

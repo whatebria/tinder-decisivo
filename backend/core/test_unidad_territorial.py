@@ -58,7 +58,6 @@ class TestSignalCandidato:
         tipo = TipoEleccion.objects.get(nombre="Alcaldes 2024")
         c = Candidato.objects.create(
             nombre="Test", apellido="Directo", partido="X",
-            comuna=Comuna.objects.get(nombre="Nunoa"),
             unidad_territorial=nunoa_ut,
         )
         c.tipos_eleccion.add(tipo)
@@ -66,16 +65,13 @@ class TestSignalCandidato:
         assert c.unidad_territorial_id == nunoa_ut.id
 
     def test_ut_null_cuando_no_se_setea(self, datos_pesados):
-        """Documenta comportamiento: sin signal, si no seteas UT queda null."""
-        nunoa = Comuna.objects.get(nombre="Nunoa")
+        """Documenta comportamiento: si no seteas UT queda null (candidato nacional)."""
         tipo = TipoEleccion.objects.get(nombre="Alcaldes 2024")
         c = Candidato.objects.create(
             nombre="Test", apellido="NoUT", partido="X",
-            comuna=nunoa,
         )
         c.tipos_eleccion.add(tipo)
         c.refresh_from_db()
-        # Sin signal, UT no se auto-poblo.
         assert c.unidad_territorial is None
 
 
