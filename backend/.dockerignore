@@ -1,0 +1,37 @@
+# Docker files
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.ruff_cache
+**/.mypy_cache
+
+# venvs
+venv/
+.venv/
+.venv2/
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+*.log
+
+# Env
+.env
+.env.local
+
+# Git / IDE
+.git/
+.gitignore
+.vscode/
+.idea/
+*.md
+
+# Tests (no van en la imagen prod)
+core/test_*.py
+core/tests.py
+core/conftest.py
+
+# Node (por si acaso)
+node_modules/

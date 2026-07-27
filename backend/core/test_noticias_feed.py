@@ -40,6 +40,11 @@ def escenario(db):
 URL = "/api/v1/noticias/"
 
 
+def _items(response):
+    """Extrae la lista paginada del response (shape: {count, next, previous, results})."""
+    return response.json()["results"]
+
+
 class TestFeedNoticiasGlobal:
     def test_endpoint_publico_sin_auth(self, escenario):
         client = APIClient()
@@ -47,12 +52,12 @@ class TestFeedNoticiasGlobal:
 
     def test_lista_todas_por_default(self, escenario):
         client = APIClient()
-        data = client.get(URL).json()
+        data = _items(client.get(URL))
         assert len(data) == 4
 
     def test_incluye_candidatos_mencionados_data(self, escenario):
         client = APIClient()
-        data = client.get(URL).json()
+        data = _items(client.get(URL))
         n = next(x for x in data if x["titulo"] == "Ana en debate")
         assert len(n["candidatos_mencionados_data"]) == 1
         assert n["candidatos_mencionados_data"][0]["nombre"] == "Ana"
@@ -60,19 +65,19 @@ class TestFeedNoticiasGlobal:
 
     def test_filtra_por_candidato_id(self, escenario):
         client = APIClient()
-        data = client.get(URL, {"candidato_id": escenario["ana"].id}).json()
+        data = _items(client.get(URL, {"candidato_id": escenario["ana"].id}))
         # Ana esta en n1 y n3
         titulos = {x["titulo"] for x in data}
         assert titulos == {"Ana en debate", "Ana y Beto en foro"}
 
     def test_filtra_por_fuente_case_insensitive(self, escenario):
         client = APIClient()
-        data = client.get(URL, {"fuente": "tercera"}).json()
+        data = _items(client.get(URL, {"fuente": "tercera"}))
         assert len(data) == 2
         assert all("Tercera" in x["fuente"] for x in data)
 
     def test_orden_desc_por_fecha_publicacion(self, escenario):
         client = APIClient()
-        data = client.get(URL).json()
+        data = _items(client.get(URL))
         fechas = [x["fecha_publicacion"] for x in data]
         assert fechas == sorted(fechas, reverse=True)

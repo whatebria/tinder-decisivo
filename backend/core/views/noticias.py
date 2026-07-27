@@ -7,6 +7,7 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import generics, permissions
 
 from ..models import Noticia
+from ..pagination import StandardResultsSetPagination
 from ..serializers import NoticiaSerializer
 
 
@@ -42,6 +43,7 @@ class NoticiaListCreateView(_NoticiaPermMixin, generics.ListCreateAPIView):
     """GET /api/noticias/ (feed global, con filtros opcionales) / POST admin."""
 
     serializer_class = NoticiaSerializer
+    pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
         qs = (

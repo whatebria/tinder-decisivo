@@ -225,6 +225,36 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     # Si estas detras de un proxy que hace HTTPS termination (Nginx, Cloudflare, etc.)
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    # HttpOnly + SameSite para las cookies (defensa profunda vs XSS/CSRF)
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+    CSRF_COOKIE_SAMESITE = "Lax"
+    # No exponer la version de Django en errores.
+    X_FRAME_OPTIONS = "DENY"
+
+
+# ------------------------------------------------------------
+# Observabilidad: Sentry (opcional, se activa si hay SENTRY_DSN)
+# ------------------------------------------------------------
+SENTRY_DSN = config("SENTRY_DSN", default="")
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[
+            DjangoIntegration(),
+            LoggingIntegration(level=None, event_level=None),  # solo captura via logger.exception
+        ],
+        # Sample rate: 100% de errores, 10% de traces (baja este ultimo si te comes la quota)
+        traces_sample_rate=config("SENTRY_TRACES_SAMPLE_RATE", default=0.1, cast=float),
+        send_default_pii=False,  # no mandar emails/IPs del user sin consentimiento
+        environment=config("SENTRY_ENVIRONMENT", default="development" if DEBUG else "production"),
+        release=config("SENTRY_RELEASE", default=None),
+    )
 
 
 # ------------------------------------------------------------

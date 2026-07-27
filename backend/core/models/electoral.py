@@ -57,6 +57,10 @@ class Candidato(models.Model):
     # Scope territorial. Nulos = candidato nacional (ej. Presidencial).
     # Alcaldes usan `comuna`. Diputados usan `distrito`. Un candidato solo
     # deberia tener uno de los dos, o ninguno para nacional.
+    #
+    # DEPRECATED: estos dos FKs quedan por compatibilidad hasta terminar la
+    # migracion a `unidad_territorial`. Ver `docs/MIGRATION_TERRITORIAL.md`.
+    # No usar en codigo nuevo; usar `unidad_territorial` en su lugar.
     comuna = models.ForeignKey(
         Comuna, on_delete=models.PROTECT, related_name="candidatos",
         null=True, blank=True,

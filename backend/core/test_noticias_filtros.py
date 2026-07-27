@@ -13,6 +13,11 @@ from core.models import Noticia
 URL = "/api/v1/noticias/"
 
 
+def _items(response):
+    """Extrae la lista paginada del response (shape: {count, next, previous, results})."""
+    return response.json()["results"]
+
+
 @pytest.fixture
 def escenario(db):
     """4 noticias con distintas fuentes, edades y texto."""
@@ -60,63 +65,63 @@ def escenario(db):
 class TestFiltroDias:
     def test_dias_7_solo_devuelve_reciente(self, escenario):
         client = APIClient()
-        data = client.get(URL, {"dias": 7}).json()
+        data = _items(client.get(URL, {"dias": 7}))
         assert len(data) == 1
         assert data[0]["titulo"] == "Debate economico esta semana"
 
     def test_dias_30_devuelve_reciente_y_semana(self, escenario):
         client = APIClient()
-        data = client.get(URL, {"dias": 30}).json()
+        data = _items(client.get(URL, {"dias": 30}))
         titulos = {x["titulo"] for x in data}
         assert titulos == {"Debate economico esta semana", "Nueva encuesta CADEM"}
 
     def test_dias_90_incluye_el_de_45_dias(self, escenario):
         client = APIClient()
-        data = client.get(URL, {"dias": 90}).json()
+        data = _items(client.get(URL, {"dias": 90}))
         assert len(data) == 3  # reciente + semana + mes, no viejo
 
     def test_dias_invalido_se_ignora(self, escenario):
         client = APIClient()
-        data = client.get(URL, {"dias": "abc"}).json()
+        data = _items(client.get(URL, {"dias": "abc"}))
         assert len(data) == 4  # devuelve todas
 
 
 class TestFiltroBusquedaTexto:
     def test_busqueda_en_titulo(self, escenario):
         client = APIClient()
-        data = client.get(URL, {"q": "debate"}).json()
+        data = _items(client.get(URL, {"q": "debate"}))
         assert len(data) == 1
         assert "Debate" in data[0]["titulo"]
 
     def test_busqueda_en_descripcion(self, escenario):
         client = APIClient()
-        data = client.get(URL, {"q": "sondeo"}).json()
+        data = _items(client.get(URL, {"q": "sondeo"}))
         assert len(data) == 1
         assert data[0]["titulo"] == "Nueva encuesta CADEM"
 
     def test_busqueda_case_insensitive(self, escenario):
         client = APIClient()
-        data = client.get(URL, {"q": "PROGRAMA"}).json()
+        data = _items(client.get(URL, {"q": "PROGRAMA"}))
         assert len(data) == 1
 
     def test_busqueda_vacia_devuelve_todo(self, escenario):
         client = APIClient()
-        assert len(client.get(URL, {"q": ""}).json()) == 4
-        assert len(client.get(URL, {"q": "   "}).json()) == 4
+        assert len(_items(client.get(URL, {"q": ""}))) == 4
+        assert len(_items(client.get(URL, {"q": "   "}))) == 4
 
 
 class TestFiltrosCombinados:
     def test_dias_mas_fuente(self, escenario):
         client = APIClient()
-        data = client.get(URL, {"dias": 30, "fuente": "tercera"}).json()
+        data = _items(client.get(URL, {"dias": 30, "fuente": "tercera"}))
         assert len(data) == 1
         assert data[0]["fuente"] == "La Tercera"
 
     def test_q_mas_dias(self, escenario):
         client = APIClient()
         # "programa" existe en n_mes (45 dias) -> con dias=7 no debe aparecer
-        data = client.get(URL, {"q": "programa", "dias": 7}).json()
+        data = _items(client.get(URL, {"q": "programa", "dias": 7}))
         assert len(data) == 0
         # con dias=90 si
-        data = client.get(URL, {"q": "programa", "dias": 90}).json()
+        data = _items(client.get(URL, {"q": "programa", "dias": 90}))
         assert len(data) == 1

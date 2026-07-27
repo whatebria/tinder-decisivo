@@ -1,3 +1,16 @@
+# Deployment (Fly.io, Railway, Heroku, etc.)
+#
+# Este archivo se regenera automaticamente desde pyproject.toml + uv.lock.
+# NO editar a mano. Los cambios de dependencias se hacen SIEMPRE en pyproject.toml
+# con `uv add <paquete>`.
+#
+# Para regenerar:
+#   uv export --format requirements-txt --no-hashes --no-dev -o requirements.txt
+#
+# Alternativa moderna: si tu plataforma de deploy soporta pyproject.toml + uv.lock
+# nativamente (Railway, Fly.io), borrar este archivo.
+
+# ---- generado automaticamente ----
 Django>=5.2,<5.3
 djangorestframework>=3.15
 django-cors-headers>=4.4
@@ -8,3 +21,4 @@ feedparser>=6.0
 drf-spectacular>=0.27
 dj-database-url>=2.2
 psycopg[binary]>=3.2
+sentry-sdk>=2.18
