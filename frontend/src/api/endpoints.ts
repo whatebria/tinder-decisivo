@@ -417,7 +417,11 @@ export type OpcionSimple = Schemas["OpcionSimple"];
 export type MiRespuesta = Schemas["MisRespuestasItem"];
 
 export interface EditarRespuestaResponse extends MiRespuesta {
-  matches_invalidados: number;
+  /**
+   * Cantidad de MatchCandidato recalculados in-place (UPDATE, no delete+insert).
+   * El backend recalcula sync al editar, asi los matches quedan siempre frescos.
+   */
+  matches_actualizados: number;
 }
 
 export async function listMisRespuestas(

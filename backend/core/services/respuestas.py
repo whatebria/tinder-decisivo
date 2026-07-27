@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 from django.db import transaction
 
 from ..models import MatchCandidato, OpcionRespuesta, RespuestaUsuario, TipoEleccion
+from .matching import calcular_match
 
 
 @dataclass(frozen=True)
@@ -32,7 +33,7 @@ class EditarRespuestaError(Exception):
 @dataclass(frozen=True)
 class EditarRespuestaResult:
     respuesta: RespuestaUsuario
-    matches_invalidados: int
+    matches_actualizados: int
 
 
 def editar_respuesta(
@@ -43,9 +44,14 @@ def editar_respuesta(
 ) -> EditarRespuestaResult:
     """Actualiza opcion_elegida + peso de una respuesta del user.
 
-    Al mutar la respuesta, invalidamos los MatchCandidato del user contra
-    candidatos del mismo tipo de eleccion. Se recalculan la proxima vez que
-    el user visite Resultados (patron lazy: no pagamos costo si no lo pide).
+    Al mutar la respuesta, recalculamos INLINE los MatchCandidato del user
+    contra candidatos del mismo tipo de eleccion. Usamos calcular_match que
+    hace update_or_create: los rows existentes se UPDATE (no delete+insert),
+    evitando fragmentacion del B-tree en SQLite (M4 del audit).
+
+    Trade-off: la request de edicion paga el costo del recalculo inmediato
+    (~50-100ms) en vez de defer al proximo GET /match-candidatos/. Ganamos
+    matches siempre frescos + cero delete-recreate.
 
     Args:
         user: usuario autenticado (owner de la respuesta).
@@ -78,21 +84,24 @@ def editar_respuesta(
             "La opcion no pertenece a la pregunta de la respuesta."
         )
 
-    tipo_id = respuesta.pregunta.tipo_eleccion_id
+    tipo = respuesta.pregunta.tipo_eleccion
 
     with transaction.atomic():
         respuesta.opcion_elegida = opcion
         respuesta.peso = peso
         respuesta.save(update_fields=["opcion_elegida", "peso", "fecha_respuesta"])
 
-        matches_invalidados, _ = MatchCandidato.objects.filter(
-            user=user,
-            candidato__tipos_eleccion__id=tipo_id,
-        ).delete()
+        # Recalcular inline: update_or_create sobre los MatchCandidato
+        # existentes (UPDATE in-place, sin delete + insert). Si la respuesta
+        # editada es de un tipo base, calcular_match ya considera todas las
+        # preguntas base + del tipo, no hace falta iterar sobre todos los
+        # tipos donde el user respondio.
+        matches = calcular_match(user, tipo)
+        matches_actualizados = len(matches) if matches else 0
 
     return EditarRespuestaResult(
         respuesta=respuesta,
-        matches_invalidados=matches_invalidados,
+        matches_actualizados=matches_actualizados,
     )
 
 def reiniciar_cuestionario(user: User, tipo_eleccion_id: int) -> ReiniciarResult:

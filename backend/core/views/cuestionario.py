@@ -240,7 +240,7 @@ class EditarRespuestaView(APIView):
         return Response(
             {
                 **MisRespuestasItemSerializer(result.respuesta).data,
-                "matches_invalidados": result.matches_invalidados,
+                "matches_actualizados": result.matches_actualizados,
             },
             status=status.HTTP_200_OK,
         )

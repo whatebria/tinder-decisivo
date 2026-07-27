@@ -46,8 +46,13 @@ def escenario(db, user):
     """Un tipo con 2 preguntas, cada una con 5 opciones Likert.
 
     User respondio la P1 con la opcion 'muy_desacuerdo' + peso 1.
-    Ademas un candidato con match calculado (para probar invalidacion).
+    Ademas un candidato con match calculado (para probar recalculo).
+
+    IMPORTANTE: el candidato tiene POSTURA en P1. Sin eso, calcular_match
+    no genera match (necesita al menos 1 pregunta comun user vs candidato).
     """
+    from core.models import PosturaCandidato
+
     tipo = TipoEleccion.objects.create(nombre="Presidencial")
     p1 = Pregunta.objects.create(
         tipo_eleccion=tipo, texto="P1", eje_tematico="economia", orden=1
@@ -59,6 +64,7 @@ def escenario(db, user):
     crear_opciones_acuerdo_desacuerdo(p2)
 
     opcion_p1_muy_desacuerdo = p1.opciones_respuesta.get(valor=1)
+    opcion_p1_muy_deacuerdo = p1.opciones_respuesta.get(valor=5)
     respuesta = RespuestaUsuario.objects.create(
         user=user,
         pregunta=p1,
@@ -68,6 +74,13 @@ def escenario(db, user):
 
     candidato = Candidato.objects.create(nombre="Ana", apellido="X", partido="A")
     candidato.tipos_eleccion.add(tipo)
+    # Postura del candidato en P1 para que el recalculo genere match.
+    PosturaCandidato.objects.create(
+        candidato=candidato,
+        pregunta=p1,
+        opcion_respuesta=opcion_p1_muy_deacuerdo,
+        justificacion="seed",
+    )
     match = MatchCandidato.objects.create(
         user=user, candidato=candidato, match_percentage_value=75.0
     )
@@ -97,12 +110,25 @@ class TestEditarRespuestaService:
         escenario["respuesta"].refresh_from_db()
         assert escenario["respuesta"].opcion_elegida_id == opcion_nueva.id
         assert escenario["respuesta"].peso == 3
-        assert result.matches_invalidados == 1
+        # 1 candidato con postura -> 1 match recalculado in-place.
+        assert result.matches_actualizados == 1
 
-    def test_invalida_matches_del_tipo(self, user, escenario):
-        opcion_nueva = escenario["p1"].opciones_respuesta.get(valor=3)
-        editar_respuesta(user, escenario["respuesta"].id, opcion_nueva.id, 2)
-        assert not MatchCandidato.objects.filter(id=escenario["match"].id).exists()
+    def test_match_actualizado_in_place_no_delete_recreate(self, user, escenario):
+        """M4: el MatchCandidato se UPDATEa, no se borra + recrea.
+
+        Verifica que el mismo row de DB (mismo id) sobrevive la edicion.
+        """
+        id_original = escenario["match"].id
+        opcion_nueva = escenario["p1"].opciones_respuesta.get(valor=5)
+        editar_respuesta(user, escenario["respuesta"].id, opcion_nueva.id, 3)
+
+        # El match SIGUE existiendo con el mismo id (update in-place).
+        assert MatchCandidato.objects.filter(id=id_original).exists()
+        # Y con valores actualizados (el % cambio porque cambio la respuesta).
+        match_actualizado = MatchCandidato.objects.get(id=id_original)
+        # Antes: user opcion=1, candidato opcion=5 -> diff maximo (0% match).
+        # Ahora: user opcion=5, candidato opcion=5 -> match perfecto (100%).
+        assert float(match_actualizado.match_percentage_value) == 100.0
 
     def test_no_toca_matches_de_otro_tipo(self, user, escenario):
         # Otro tipo con otro candidato + match del user
@@ -116,7 +142,9 @@ class TestEditarRespuestaService:
         opcion_nueva = escenario["p1"].opciones_respuesta.get(valor=3)
         editar_respuesta(user, escenario["respuesta"].id, opcion_nueva.id, 2)
 
-        assert MatchCandidato.objects.filter(id=otro_match.id).exists()
+        # El match del otro tipo sobrevive (mismo id, mismos valores).
+        otro_match.refresh_from_db()
+        assert float(otro_match.match_percentage_value) == 50.0
 
     def test_respuesta_de_otro_user_falla(self, otro_user, escenario):
         opcion = escenario["p1"].opciones_respuesta.get(valor=3)
@@ -186,7 +214,7 @@ class TestEditarRespuestaAPI:
         data = resp.json()
         assert data["peso"] == 3
         assert data["opcion_elegida"] == opcion_nueva.id
-        assert data["matches_invalidados"] == 1
+        assert data["matches_actualizados"] == 1
 
     def test_respuesta_de_otro_user_404(self, escenario, otro_user):
         token, _ = Token.objects.get_or_create(user=otro_user)
