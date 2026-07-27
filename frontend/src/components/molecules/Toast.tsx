@@ -87,8 +87,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={value}>
       {children}
       <View
-        pointerEvents="box-none"
-        style={[styles.container, { top: insets.top + 12 }]}
+        style={[styles.container, { top: insets.top + 12, pointerEvents: "box-none" }]}
       >
         {toasts.map((t) => {
           const style = VARIANT_STYLES[t.variant];
