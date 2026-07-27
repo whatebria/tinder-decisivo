@@ -20,7 +20,6 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { getErrorMessage } from "../api/client";
 import { breakdownToChartData, type BreakdownPorEje } from "../api/endpoints";
 import {
-  useDecisionActual,
   useDescartados,
   useFavoritos,
   useMatchAnonimo,
@@ -90,7 +89,6 @@ export function ResultadosScreen({
 
   const favoritosQ = useFavoritos();
   const descartadosQ = useDescartados();
-  const decisionQ = useDecisionActual(tipoEleccionId);
   const toggleFav = useToggleFavorito();
   const toggleDesc = useToggleDescartado();
 
@@ -135,7 +133,6 @@ export function ResultadosScreen({
         : new Set((favoritosQ.data ?? []).map((f) => f.candidato)),
     [favoritosQ.data, isGuest],
   );
-  const decisionCandidatoId = isGuest ? undefined : decisionQ.data?.candidato_elegido;
 
   const tipoNombre = useMemo(
     () =>
@@ -320,11 +317,6 @@ export function ResultadosScreen({
             {`${hiddenCount} candidato(s) descartado(s). Ver lista`}
           </Link>
         ) : null}
-        {!isGuest && decisionQ.data ? (
-          <Link block onPress={() => navigation.navigate("MiDecision")}>
-            Ya tienes una decisión guardada. Ver mi voto
-          </Link>
-        ) : null}
 
         {partidosDisponibles.length > 1 ? (
           <View style={{ gap: spacing.sp2 }}>
@@ -362,7 +354,6 @@ export function ResultadosScreen({
             const candidato = top.candidato_data;
             const candId = candidato.id!;
             const isFav = favoritoIds.has(candId);
-            const isDecision = decisionCandidatoId === candId;
             return (
               <View style={{ gap: spacing.sp3 }}>
                 <ResultadoHero
@@ -376,7 +367,6 @@ export function ResultadosScreen({
                   confianzaLabel={`${conf.label} · ${top.preguntas_consideradas}p`}
                   confianzaVariant={confianzaToBadge(top.confianza)}
                   onCta={() => goToDetalle(top)}
-                  isDecision={isDecision}
                 />
                 {!isGuest ? (
                   <BookmarkActions
@@ -410,7 +400,6 @@ export function ResultadosScreen({
                 const candidato = r.candidato_data;
                 const candId = candidato.id!;
                 const isFav = favoritoIds.has(candId);
-                const isDecision = decisionCandidatoId === candId;
                 return (
                   <RankingRow
                     key={r.id ?? candId}
@@ -422,7 +411,6 @@ export function ResultadosScreen({
                     matchPct={pct}
                     matchColor={scoreCol}
                     ejeScores={chartData}
-                    isDecision={isDecision}
                     onPress={() => goToDetalle(r)}
                     actions={
                       !isGuest ? (

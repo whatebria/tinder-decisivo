@@ -18,7 +18,6 @@ import {
   addPosturaBookmark,
   cambiarPassword,
   confirmPasswordReset,
-  deleteDecision,
   deleteDescartado,
   deleteFavorito,
   deleteNoticiaBookmark,
@@ -28,7 +27,6 @@ import {
   getPerfil,
   listCandidatos,
   listComunas,
-  listDecisiones,
   listDescartados,
   listFavoritos,
   listMisRespuestas,
@@ -44,14 +42,12 @@ import {
   preguntasPendientes,
   reiniciarCuestionario,
   requestPasswordReset,
-  saveDecision,
   updateRespuesta,
   type AnonRespuestaInput,
   type Candidato,
   type CandidatoDescartado,
   type CandidatoFavorito,
   type ComunaInline,
-  type DecisionFinal,
   type EditarRespuestaResponse,
   type MatchResult,
   type MatchDetalle,
@@ -66,7 +62,6 @@ import {
   type Pregunta,
   type Region,
   type ReiniciarCuestionarioResponse,
-  type SaveDecisionInput,
   type TipoEleccion,
 } from "./endpoints";
 import { queryKeys } from "./queryClient";
@@ -354,7 +349,7 @@ export function useActualizarComuna() {
 }
 
 // ============================================================
-// Bookmarking: favoritos, descartados, decision final
+// Bookmarking: favoritos, descartados
 // ============================================================
 
 // -- Favoritos --------------------------------------------------------------
@@ -415,46 +410,6 @@ export function useToggleDescartado() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.descartados });
-    },
-  });
-}
-
-// -- Decision final ---------------------------------------------------------
-export function useDecisiones() {
-  const isAuth = useAuthStore((s) => s.isAuthenticated);
-  return useQuery<DecisionFinal[]>({
-    queryKey: queryKeys.decisiones,
-    queryFn: listDecisiones,
-    enabled: isAuth,
-  });
-}
-
-/**
- * Devuelve la decision guardada para un tipo de eleccion, o undefined.
- * Usa el mismo cache que useDecisiones para evitar N requests.
- */
-export function useDecisionActual(tipoEleccionId: number | null | undefined) {
-  const { data, ...rest } = useDecisiones();
-  const decision = data?.find((d) => d.tipo_eleccion === tipoEleccionId);
-  return { data: decision, ...rest };
-}
-
-export function useSaveDecision() {
-  const qc = useQueryClient();
-  return useMutation<DecisionFinal, Error, SaveDecisionInput>({
-    mutationFn: saveDecision,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.decisiones });
-    },
-  });
-}
-
-export function useDeleteDecision() {
-  const qc = useQueryClient();
-  return useMutation<void, Error, number>({
-    mutationFn: deleteDecision,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.decisiones });
     },
   });
 }

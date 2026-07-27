@@ -179,42 +179,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/decision-final/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Voto final del usuario por tipo de eleccion. */
-        get: operations["decision_final_list"];
-        put?: never;
-        /** @description Voto final del usuario por tipo de eleccion. */
-        post: operations["decision_final_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/decision-final/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Voto final del usuario por tipo de eleccion. */
-        get: operations["decision_final_retrieve"];
-        put?: never;
-        post?: never;
-        /** @description Voto final del usuario por tipo de eleccion. */
-        delete: operations["decision_final_destroy"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/descartados/": {
         parameters: {
             query?: never;
@@ -822,20 +786,6 @@ export interface components {
             respuestas: number;
             favoritos: number;
             descartados: number;
-            decisiones: number;
-        };
-        DecisionFinal: {
-            readonly id: number;
-            candidato_elegido: number;
-            tipo_eleccion: number;
-            /** Format: date-time */
-            readonly fecha_decision: string;
-            readonly candidato_data: components["schemas"]["Candidato"];
-            readonly tipo_eleccion_nombre: string;
-        };
-        DecisionFinalRequest: {
-            candidato_elegido: number;
-            tipo_eleccion: number;
         };
         Eje: {
             readonly id: number;
@@ -1371,93 +1321,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ComunaInline"][];
                 };
-            };
-        };
-    };
-    decision_final_list: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DecisionFinal"][];
-                };
-            };
-        };
-    };
-    decision_final_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DecisionFinalRequest"];
-                "application/x-www-form-urlencoded": components["schemas"]["DecisionFinalRequest"];
-                "multipart/form-data": components["schemas"]["DecisionFinalRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DecisionFinal"];
-                };
-            };
-        };
-    };
-    decision_final_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Un valor de entero único que identifique este decision final. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DecisionFinal"];
-                };
-            };
-        };
-    };
-    decision_final_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Un valor de entero único que identifique este decision final. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };

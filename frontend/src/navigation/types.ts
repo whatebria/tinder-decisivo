@@ -20,20 +20,11 @@ export type RootStackParamList = {
     /** null cuando el user aun no tiene match calculado. */
     confianza: string | null;
   };
-  /**
-   * @deprecated Ruta legacy que apunta al mismo screen que `MisGuardados`
-   * (Mis guardados unifica favoritos + descartados + posturas + noticias
-   * en tabs). Se mantiene registrada mientras `SwipeScreen` la referencia;
-   * cuando SwipeScreen resurja, migrar su link y borrar esta linea.
-   */
-  MisFavoritos: undefined;
   MisGuardados: undefined;
   MisRespuestas: undefined;
-  MiDecision: undefined;
   Comparar: undefined;
   Noticias: undefined;
   Candidatos: undefined;
-  Swipe: undefined;
   Perfil: undefined;
   Configuracion: undefined;
   GestionElecciones: undefined;

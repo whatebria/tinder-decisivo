@@ -55,7 +55,7 @@ function TabsDemo() {
 const ICON_NAMES: IconName[] = [
   "chevron-right", "chevron-left", "check", "close", "info", "alert", "clock",
   "user", "heart", "undo", "search", "plus", "mail", "link", "bell", "gear",
-  "news", "columns", "swipe", "home", "bookmark", "whatsapp", "twitter",
+  "news", "columns", "home", "bookmark", "whatsapp", "twitter",
 ];
 
 const RADAR_DATA = {

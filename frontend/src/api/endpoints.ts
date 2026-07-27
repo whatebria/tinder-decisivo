@@ -159,11 +159,10 @@ export async function listNoticias(
 }
 
 // ============================================================
-// Bookmarking: favoritos, descartados, decision final
+// Bookmarking: favoritos, descartados
 // ============================================================
 export type CandidatoFavorito = Schemas["CandidatoFavorito"];
 export type CandidatoDescartado = Schemas["CandidatoDescartado"];
-export type DecisionFinal = Schemas["DecisionFinal"];
 
 // -- Favoritos --------------------------------------------------------------
 export async function listFavoritos(): Promise<CandidatoFavorito[]> {
@@ -202,31 +201,6 @@ export async function addDescartado(
 
 export async function deleteDescartado(descartadoId: number): Promise<void> {
   await apiClient.delete(`/descartados/${descartadoId}/`);
-}
-
-// -- Decision final ---------------------------------------------------------
-export async function listDecisiones(): Promise<DecisionFinal[]> {
-  const { data } = await apiClient.get<DecisionFinal[]>("/decision-final/");
-  return data;
-}
-
-export interface SaveDecisionInput {
-  candidatoId: number;
-  tipoEleccionId: number;
-}
-
-export async function saveDecision(input: SaveDecisionInput): Promise<DecisionFinal> {
-  // El backend usa update_or_create sobre (user, tipo_eleccion), asi que
-  // POST es idempotente para cambiar de opinion.
-  const { data } = await apiClient.post<DecisionFinal>("/decision-final/", {
-    candidato_elegido: input.candidatoId,
-    tipo_eleccion: input.tipoEleccionId,
-  });
-  return data;
-}
-
-export async function deleteDecision(decisionId: number): Promise<void> {
-  await apiClient.delete(`/decision-final/${decisionId}/`);
 }
 
 // -- Bookmarks de contenido: noticias y posturas guardadas -----------------
@@ -285,7 +259,6 @@ export interface PerfilContadores {
   respuestas: number;
   favoritos: number;
   descartados: number;
-  decisiones: number;
 }
 
 export interface Perfil {

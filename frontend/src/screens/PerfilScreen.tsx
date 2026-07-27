@@ -158,10 +158,6 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
                   label="Descartados"
                   value={perfil.contadores.descartados}
                 />
-                <StatBadge
-                  label="Votos guardados"
-                  value={perfil.contadores.decisiones}
-                />
               </View>
             </>
           ) : (

@@ -36,7 +36,6 @@ export interface ResultadoHeroProps {
   confianzaVariant?: BadgeVariant;
   ctaLabel?: string;
   onCta?: () => void;
-  isDecision?: boolean;
   style?: ViewStyle;
 }
 
@@ -52,7 +51,6 @@ export function ResultadoHero({
   confianzaVariant = "neutral",
   ctaLabel = "Ver perfil completo",
   onCta,
-  isDecision,
   style,
 }: ResultadoHeroProps) {
   const c = useThemeColors();
@@ -66,8 +64,8 @@ export function ResultadoHero({
         card: {
           padding: spacing.sp4,
           borderRadius: radii.rLg,
-          borderWidth: isDecision ? 2 : 1,
-          borderColor: isDecision ? c.primary : c.border2,
+          borderWidth: 1,
+          borderColor: c.border2,
           backgroundColor: c.card,
           alignItems: "center",
           gap: spacing.sp2,
@@ -103,16 +101,9 @@ export function ResultadoHero({
           color: c.text,
           fontWeight: "600",
         },
-        decisionMark: {
-          fontSize: 11,
-          color: c.primary,
-          fontWeight: "700",
-          textTransform: "uppercase",
-          letterSpacing: 0.6,
-        },
         ctaWrapper: { alignSelf: "stretch", marginTop: spacing.sp3 },
       }),
-    [c, isDecision, scoreColor],
+    [c, scoreColor],
   );
 
   return (
@@ -123,7 +114,6 @@ export function ResultadoHero({
         {nombre}{apellido ? ` ${apellido}` : ""}
       </Text>
       {partido ? <Text style={styles.partido}>{partido}</Text> : null}
-      {isDecision ? <Text style={styles.decisionMark}>Tu voto</Text> : null}
 
       <Text style={styles.pct}>{Math.round(matchPct)}%</Text>
       <Text style={styles.compat}>Compatibilidad</Text>

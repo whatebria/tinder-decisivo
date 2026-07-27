@@ -183,25 +183,6 @@ export const candidateOrgCatalog: CatalogEntry[] = [
           </View>
         ),
       },
-      {
-        label: "isDecision (tu voto)",
-        render: () => (
-          <View style={{ maxWidth: 360 }}>
-            <ResultadoHero
-              nombre="Michelle"
-              apellido="Bachelet"
-              partido="Partido Socialista"
-              matchPct={72}
-              isDecision
-              ejeScores={ejeScoresMock}
-              confianzaLabel="Confianza media"
-              confianzaVariant="info"
-              ctaLabel="Ver perfil"
-              onCta={() => {}}
-            />
-          </View>
-        ),
-      },
     ],
     props: [
       { name: "nombre / apellido / partido", type: "string", description: "apellido y partido opcionales." },
@@ -211,7 +192,6 @@ export const candidateOrgCatalog: CatalogEntry[] = [
       { name: "confianzaLabel / confianzaVariant", type: "string / BadgeVariant" },
       { name: "ctaLabel", type: "string", defaultValue: "\"Ver perfil completo\"" },
       { name: "onCta", type: "() => void" },
-      { name: "isDecision", type: "boolean", description: "Border-primary y label 'Tu voto'." },
     ],
     snippet: `import { ResultadoHero } from "../components";
 
@@ -221,7 +201,6 @@ export const candidateOrgCatalog: CatalogEntry[] = [
   partido={top.partido}
   matchPct={top.matchPercent}
   ejeScores={top.scoresByEje}
-  isDecision={top.id === decisionId}
   onCta={() => navigate("DetalleCandidato", { id: top.id })}
 />`,
   },
@@ -246,7 +225,7 @@ export const candidateOrgCatalog: CatalogEntry[] = [
         ),
       },
       {
-        label: "isDecision con actions",
+        label: "con actions",
         render: () => (
           <RankingRow
             rank={3}
@@ -255,7 +234,6 @@ export const candidateOrgCatalog: CatalogEntry[] = [
             partido="Republicanos"
             matchPct={28}
             ejeScores={ejeScoresMock}
-            isDecision
             onPress={() => {}}
             actions={
               <View style={{ paddingTop: 8 }}>
@@ -271,7 +249,6 @@ export const candidateOrgCatalog: CatalogEntry[] = [
       { name: "nombre / apellido / partido", type: "string", description: "apellido y partido opcionales." },
       { name: "matchPct", type: "number", required: true },
       { name: "ejeScores", type: "Record<string, number>" },
-      { name: "isDecision", type: "boolean" },
       { name: "onPress", type: "() => void" },
       { name: "actions", type: "ReactNode", description: "Slot para BookmarkActions u otras acciones debajo." },
     ],

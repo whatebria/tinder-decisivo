@@ -18,7 +18,7 @@
  * hardcodes de padding, gap, fontSize ni borderRadius (ver seccion Styles).
  *
  * No usa AppShell porque es una detail screen accesible desde 4 origenes
- * distintos (Resultados, Guardados, Comparar, Swipe).
+ * distintos (Resultados, Guardados, Comparar).
  */
 
 import React, { useMemo, useState } from "react";
@@ -33,12 +33,10 @@ import { getErrorMessage } from "../api/client";
 import { breakdownToChartData } from "../api/endpoints";
 import {
   useCandidato,
-  useDecisionActual,
   useDescartados,
   useFavoritos,
   useNoticiasCandidato,
   usePosturasCandidato,
-  useSaveDecision,
   useTiposEleccion,
   useToggleDescartado,
   useToggleFavorito,
@@ -104,11 +102,9 @@ export function DetalleCandidatoScreen({
   const posturasQ = usePosturasCandidato(candidatoId, tipoEleccionId);
   const favoritosQ = useFavoritos();
   const descartadosQ = useDescartados();
-  const decisionQ = useDecisionActual(tipoEleccionId);
   const tiposQ = useTiposEleccion();
   const toggleFav = useToggleFavorito();
   const toggleDesc = useToggleDescartado();
-  const saveDecision = useSaveDecision();
 
   const candidato = candidatoQ.data ?? null;
   const posturas = posturasQ.data ?? [];
@@ -120,7 +116,6 @@ export function DetalleCandidatoScreen({
   const isDescartado = (descartadosQ.data ?? []).some(
     (d) => d.candidato === candidatoId,
   );
-  const isMyVote = decisionQ.data?.candidato_elegido === candidatoId;
   const hasMatch = matchPct != null;
 
   const eleccionNombre = useMemo(() => {
@@ -136,25 +131,6 @@ export function DetalleCandidatoScreen({
     [breakdown],
   );
   const scoreCol = getMatchColor(matchPct ?? 0, c);
-
-  function handleSaveDecision() {
-    if (!tipoEleccionId) {
-      toast.error(
-        "Falta el tipo de eleccion",
-        "Vuelve al inicio y elige un cuestionario.",
-      );
-      return;
-    }
-    saveDecision.mutate(
-      { candidatoId, tipoEleccionId },
-      {
-        onSuccess: () =>
-          toast.success("Marcado como tu elegido", "Guardamos tu preferencia."),
-        onError: (e) =>
-          toast.error("No pudimos guardar", getErrorMessage(e)),
-      },
-    );
-  }
 
   if (candidatoQ.isLoading) {
     return (
@@ -201,7 +177,6 @@ export function DetalleCandidatoScreen({
             matchPct={matchPct}
             confianza={confianza}
             scoreCol={scoreCol}
-            isMyVote={isMyVote}
             onOpenInfo={() => setConfianzaInfoOpen(true)}
           />
         ) : (
@@ -209,17 +184,6 @@ export function DetalleCandidatoScreen({
             onStart={() => navigation.navigate("Cuestionario")}
           />
         )}
-
-        {!isGuest && hasMatch && !isMyVote && !isDescartado ? (
-          <Button
-            variant="secondary"
-            onPress={handleSaveDecision}
-            loading={saveDecision.isPending}
-            leftIcon={<Icon name="check" size={18} color={c.primary} />}
-          >
-            Marcar como mi elegido
-          </Button>
-        ) : null}
 
         {!isGuest ? (
           <ActionRow
@@ -305,7 +269,6 @@ interface MatchBlockProps {
   matchPct: number;
   confianza: string | null;
   scoreCol: string;
-  isMyVote: boolean;
   onOpenInfo: () => void;
 }
 
@@ -313,7 +276,6 @@ function MatchBlock({
   matchPct,
   confianza,
   scoreCol,
-  isMyVote,
   onOpenInfo,
 }: MatchBlockProps) {
   const c = useThemeColors();
@@ -339,13 +301,6 @@ function MatchBlock({
           >
             <Icon name="info" size={16} color={c.textSecondary} />
           </IconButton>
-        </View>
-      ) : null}
-      {isMyVote ? (
-        <View style={[styles.myVoteBadge, { borderColor: c.primary }]}>
-          <Text style={[styles.myVoteText, { color: c.primary }]}>
-            Marcado como tu elegido
-          </Text>
         </View>
       ) : null}
     </View>
@@ -648,17 +603,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sp2,
-  },
-  myVoteBadge: {
-    marginTop: spacing.sp2,
-    borderWidth: 1,
-    borderRadius: radii.rFull,
-    paddingHorizontal: spacing.sp3,
-    paddingVertical: spacing.sp1,
-  },
-  myVoteText: {
-    ...typography.overline,
-    fontWeight: "700",
   },
 
   // Empty state (sin match)

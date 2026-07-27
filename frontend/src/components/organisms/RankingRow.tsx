@@ -24,7 +24,6 @@ export interface RankingRowProps {
   matchPct: number;
   matchColor?: string;
   ejeScores?: Record<string, number>;
-  isDecision?: boolean;
   onPress?: () => void;
   /** Slot para acciones (favorito, descartar, etc.) debajo de la fila. */
   actions?: React.ReactNode;
@@ -40,7 +39,6 @@ export function RankingRow({
   matchPct,
   matchColor,
   ejeScores,
-  isDecision,
   onPress,
   actions,
   style,
@@ -56,8 +54,8 @@ export function RankingRow({
         card: {
           padding: spacing.sp3,
           borderRadius: radii.rMd,
-          borderWidth: isDecision ? 2 : 1,
-          borderColor: isDecision ? c.primary : c.border2,
+          borderWidth: 1,
+          borderColor: c.border2,
           backgroundColor: c.card,
           gap: spacing.sp2,
         },
@@ -89,15 +87,8 @@ export function RankingRow({
           minWidth: 44,
           textAlign: "right",
         },
-        decisionMark: {
-          fontSize: 9,
-          color: c.primary,
-          fontWeight: "700",
-          textTransform: "uppercase",
-          letterSpacing: 0.6,
-        },
       }),
-    [c, isDecision, scoreColor],
+    [c, scoreColor],
   );
 
   const inner = (
@@ -113,7 +104,6 @@ export function RankingRow({
             {partido}
           </Text>
         ) : null}
-        {isDecision ? <Text style={styles.decisionMark}>Tu voto</Text> : null}
       </View>
       {hasRadar ? (
         <RadarChart data={ejeScores!} size={56} color={scoreColor} showLabels={false} />
