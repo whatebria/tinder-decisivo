@@ -21,8 +21,7 @@ export { RadioGroup, type RadioGroupProps, type RadioOption } from "./RadioGroup
 export { WeightSelector, type WeightSelectorProps, type Weight } from "./WeightSelector";
 export { ProgressStepper, type ProgressStepperProps, type StepperStep } from "./ProgressStepper";
 export { MatchTier, type MatchTierProps, type MatchTierKind } from "./MatchTier";
-export { SwipeCard, type SwipeCardProps } from "./SwipeCard";
-export { NewsCard, type NewsCardProps } from "./NewsCard";
+export { NewsCard, type NewsCardProps, type NewsCardMention } from "./NewsCard";
 export {
   NoticiaDetailSheet,
   type NoticiaDetailSheetProps,

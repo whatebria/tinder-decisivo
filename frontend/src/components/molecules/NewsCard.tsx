@@ -8,11 +8,23 @@
 import React, { useMemo } from "react";
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
+import { Badge } from "../atoms/Badge";
 import { SentimentBadge, type Sentiment } from "../atoms/SentimentBadge";
 import { BookmarkButton } from "../atoms/BookmarkButton";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors, useThemeShadows } from "../../theme/useTheme";
+
+/** Candidato mencionado en una noticia, para mostrarlo como badge en el card. */
+export interface NewsCardMention {
+  id: number;
+  nombre: string;
+  apellido?: string;
+  partido?: string;
+}
+
+/** Cap sensato para no romper el layout cuando una noticia menciona a muchos. */
+const MAX_MENTIONS_VISIBLE = 3;
 
 export interface NewsCardProps {
   headline: string;
@@ -21,6 +33,12 @@ export interface NewsCardProps {
   /** Timestamp ya formateado ("hace 3 horas", "ayer", "hace 2 dias"). */
   when: string;
   sentiment: Sentiment;
+  /**
+   * Candidatos mencionados en la noticia. Si se pasa, se renderean como
+   * badges compactos debajo del meta row. Si es undefined o array vacio,
+   * no se muestra la seccion.
+   */
+  mentionedCandidates?: readonly NewsCardMention[];
   onPress?: () => void;
   /** Si esta definido, se muestra el chip de bookmark. */
   bookmarked?: boolean;
@@ -35,6 +53,7 @@ export function NewsCard({
   source,
   when,
   sentiment,
+  mentionedCandidates,
   onPress,
   bookmarked,
   onToggleBookmark,
@@ -81,9 +100,14 @@ export function NewsCard({
       source: { fontSize: 12, fontWeight: "600", color: c.text },
       dot: { fontSize: 12, color: c.textTertiary },
       when: { fontSize: 12, color: c.textSecondary },
+      mentionsRow: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sp1, marginTop: spacing.sp1 },
       pressed: { opacity: 0.85 },
     });
   }, [c, shadows, sentiment]);
+
+  const visibleMentions = mentionedCandidates?.slice(0, MAX_MENTIONS_VISIBLE) ?? [];
+  const hiddenMentionsCount =
+    (mentionedCandidates?.length ?? 0) - visibleMentions.length;
 
   const content = (
     <>
@@ -104,6 +128,18 @@ export function NewsCard({
           <Text style={styles.dot}>{"·"}</Text>
           <SentimentBadge sentiment={sentiment} />
         </View>
+        {visibleMentions.length > 0 ? (
+          <View style={styles.mentionsRow}>
+            {visibleMentions.map((m) => (
+              <Badge key={m.id} variant="info">
+                {`${m.nombre}${m.apellido ? ` ${m.apellido}` : ""}`.trim()}
+              </Badge>
+            ))}
+            {hiddenMentionsCount > 0 ? (
+              <Badge variant="neutral">{`+${hiddenMentionsCount}`}</Badge>
+            ) : null}
+          </View>
+        ) : null}
         {onToggleBookmark != null && bookmarked != null ? (
           <BookmarkButton
             saved={bookmarked}
