@@ -1,23 +1,26 @@
 /**
  * PasswordResetRequestScreen: usuario ingresa su email para recibir el link.
  * NO revela si el email existe (siempre muestra el mismo mensaje).
+ *
+ * Migrado a design system nativo (RN + tokens). Antes usaba Tamagui.
  */
 
-import React, { useState } from "react";
-import { ScrollView } from "react-native";
-import { H1, Paragraph, SizableText, YStack } from "tamagui";
+import React, { useMemo, useState } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getErrorMessage } from "../api/client";
 import { useRequestPasswordReset } from "../api/hooks";
-import { Input } from "../components";
-import { Button } from "../components";
-import { Link } from "../components";
-import { useToast } from "../components";
+import { Button, Input, Link, useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
+import { radii } from "../theme/radii";
+import { spacing } from "../theme/spacing";
+import { typography } from "../theme/typography";
+import { useThemeColors } from "../theme/useTheme";
 
 export function PasswordResetRequestScreen({
   navigation,
 }: RootStackScreenProps<"PasswordResetRequest">) {
+  const c = useThemeColors();
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [devLink, setDevLink] = useState<string | null>(null);
@@ -37,101 +40,122 @@ export function PasswordResetRequestScreen({
     }
   }
 
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        scroll: { backgroundColor: c.bg, flexGrow: 1 },
+        content: {
+          padding: spacing.sp5,
+          gap: spacing.sp4,
+          flexGrow: 1,
+          justifyContent: "center",
+        },
+        titleSuccess: { ...typography.h1, color: c.success },
+        title: { ...typography.h1, color: c.text },
+        body: { ...typography.body, color: c.text },
+        subtle: { ...typography.small, color: c.textSecondary },
+        subtitle: { ...typography.body, color: c.textSecondary },
+        devBox: {
+          padding: spacing.sp3,
+          borderRadius: radii.rMd,
+          backgroundColor: c.card,
+          borderWidth: 1,
+          borderColor: c.border,
+          gap: spacing.sp2,
+        },
+        devLabel: {
+          ...typography.small,
+          color: c.textSecondary,
+          fontWeight: "700",
+        },
+        devLink: {
+          ...typography.small,
+          color: c.primary,
+        },
+      }),
+    [c],
+  );
+
   if (sent) {
     return (
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <YStack
-          flex={1}
-          padding="$6"
-          gap="$4"
-          backgroundColor="$background"
-          justifyContent="center"
-        >
-          <H1 color="$success">Revisa tu email</H1>
-          <Paragraph color="$text">
-            Si esa direccion tiene una cuenta, te enviamos un link para
-            restablecer tu contrasena. El link expira en 1 hora.
-          </Paragraph>
-          <Paragraph color="$textSecondary" size="$2">
-            No aparece? Revisa la carpeta de spam.
-          </Paragraph>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.titleSuccess}>Revisa tu email</Text>
+        <Text style={styles.body}>
+          Si esa direccion tiene una cuenta, te enviamos un link para
+          restablecer tu contrasena. El link expira en 1 hora.
+        </Text>
+        <Text style={styles.subtle}>No aparece? Revisa la carpeta de spam.</Text>
 
-          {devLink ? (
-            <YStack
-              padding="$3"
-              backgroundColor="$backgroundHover"
-              borderRadius="$3"
-              gap="$2"
+        {devLink ? (
+          <View style={styles.devBox}>
+            <Text style={styles.devLabel}>
+              Link de desarrollo (solo visible en DEBUG=True):
+            </Text>
+            <Text style={styles.devLink}>{devLink}</Text>
+            <Button
+              onPress={() => {
+                const url = new URL(devLink);
+                const token = url.searchParams.get("token") ?? "";
+                navigation.replace("PasswordResetConfirm", { token });
+              }}
             >
-              <SizableText size="$2" color="$textSecondary" fontWeight="700">
-                Link de desarrollo (solo visible en DEBUG=True):
-              </SizableText>
-              <SizableText size="$2" fontFamily="$mono" color="$primary">
-                {devLink}
-              </SizableText>
-              <Button
-                fullWidth
-                onPress={() => {
-                  const url = new URL(devLink);
-                  const token = url.searchParams.get("token") ?? "";
-                  navigation.replace("PasswordResetConfirm", { token });
-                }}
-              >
-                Continuar con este link
-              </Button>
-            </YStack>
-          ) : null}
+              Continuar con este link
+            </Button>
+          </View>
+        ) : null}
 
-          <Link block onPress={() => navigation.replace("Login")}>
-            Volver al login
-          </Link>
-          <Link block
-            onPress={() => navigation.navigate("PasswordResetConfirm", { token: "" })}
-          >
-            Ya tengo un token
-          </Link>
-        </YStack>
+        <Link block onPress={() => navigation.replace("Login")}>
+          Volver al login
+        </Link>
+        <Link
+          block
+          onPress={() =>
+            navigation.navigate("PasswordResetConfirm", { token: "" })
+          }
+        >
+          Ya tengo un token
+        </Link>
       </ScrollView>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <YStack
-        flex={1}
-        padding="$6"
-        gap="$4"
-        backgroundColor="$background"
-        justifyContent="center"
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps="handled"
+    >
+      <Text style={styles.title}>Olvidaste tu contrasena?</Text>
+      <Text style={styles.subtitle}>
+        Ingresa el email con el que te registraste. Te enviaremos un link para
+        crear una nueva.
+      </Text>
+
+      <Input
+        placeholder="tu@email.com"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        autoCorrect={false}
+        keyboardType="email-address"
+        accessibilityLabel="Email"
+      />
+
+      <Button
+        onPress={handleSubmit}
+        disabled={!canSubmit}
+        loading={requestReset.isPending}
       >
-        <H1 color="$text">Olvidaste tu contrasena?</H1>
-        <Paragraph color="$textSecondary">
-          Ingresa el email con el que te registraste. Te enviaremos un link para
-          crear una nueva.
-        </Paragraph>
+        Enviar link
+      </Button>
 
-        <Input
-          placeholder="tu@email.com"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="email-address"
-          accessibilityLabel="Email"
-        />
-
-        <Button
-          onPress={handleSubmit}
-          disabled={!canSubmit}
-          loading={requestReset.isPending}
-        >
-          Enviar link
-        </Button>
-
-        <Link block onPress={() => navigation.replace("Login")}>
-          Volver al login
-        </Link>
-      </YStack>
+      <Link block onPress={() => navigation.replace("Login")}>
+        Volver al login
+      </Link>
     </ScrollView>
   );
 }

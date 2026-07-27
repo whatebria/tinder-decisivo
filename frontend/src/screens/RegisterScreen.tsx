@@ -1,21 +1,24 @@
 /**
  * Screen de registro: username + email + password.
  * Al exito, hace login automatico.
+ *
+ * Migrado a design system nativo (RN + tokens). Antes usaba Tamagui.
  */
 
-import React, { useState } from "react";
-import { H1, Paragraph, YStack } from "tamagui";
+import React, { useMemo, useState } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { login, register } from "../api/endpoints";
 import { getErrorMessage } from "../api/client";
-import { Input } from "../components";
-import { Button } from "../components";
-import { Link } from "../components";
-import { useToast } from "../components";
-import { useAuthStore } from "../store/auth";
+import { Button, Input, Link, useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
+import { useAuthStore } from "../store/auth";
+import { spacing } from "../theme/spacing";
+import { typography } from "../theme/typography";
+import { useThemeColors } from "../theme/useTheme";
 
 export function RegisterScreen({ navigation }: RootStackScreenProps<"Register">) {
+  const c = useThemeColors();
   const setSession = useAuthStore((s) => s.setSession);
   const toast = useToast();
   const [username, setUsername] = useState("");
@@ -43,14 +46,33 @@ export function RegisterScreen({ navigation }: RootStackScreenProps<"Register">)
     }
   }
 
-  return (
-    <YStack flex={1} padding="$6" gap="$4" backgroundColor="$background" justifyContent="center">
-      <H1 color="$text">Crear cuenta</H1>
-      <Paragraph color="$textSecondary">
-        Necesitamos algunos datos basicos.
-      </Paragraph>
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        scroll: { backgroundColor: c.bg, flexGrow: 1 },
+        content: {
+          padding: spacing.sp5,
+          gap: spacing.sp4,
+          flexGrow: 1,
+          justifyContent: "center",
+        },
+        title: { ...typography.h1, color: c.text },
+        subtitle: { ...typography.body, color: c.textSecondary },
+        inputs: { gap: spacing.sp3 },
+      }),
+    [c],
+  );
 
-      <YStack gap="$3">
+  return (
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps="handled"
+    >
+      <Text style={styles.title}>Crear cuenta</Text>
+      <Text style={styles.subtitle}>Necesitamos algunos datos basicos.</Text>
+
+      <View style={styles.inputs}>
         <Input
           placeholder="Usuario (mínimo 3 caracteres)"
           value={username}
@@ -74,19 +96,15 @@ export function RegisterScreen({ navigation }: RootStackScreenProps<"Register">)
           secureTextEntry
           accessibilityLabel="Contraseña"
         />
-      </YStack>
+      </View>
 
-      <Button
-        onPress={handleRegister}
-        disabled={!canSubmit}
-        loading={loading}
-      >
+      <Button onPress={handleRegister} disabled={!canSubmit} loading={loading}>
         {loading ? "Creando cuenta..." : "Registrarme"}
       </Button>
 
       <Link block onPress={() => navigation.goBack()}>
         Ya tengo cuenta — Volver
       </Link>
-    </YStack>
+    </ScrollView>
   );
 }
