@@ -56,6 +56,7 @@ import {
 import { buildShareText, fromMatchResults } from "../services/share";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
+import { partitionTipos, useElectionsPrefsStore } from "../store/electionsPrefs";
 import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
@@ -143,8 +144,26 @@ export function ResultadosScreen({
     [tiposQ.data, tipoEleccionId],
   );
 
+  // Guardia: los tipos con es_base=true (Preguntas generales) no tienen candidatos propios.
+  // Sus respuestas se aplican transversalmente al match de otras elecciones. Aterrizar
+  // en Resultados con un tipo base es un caso de borde (back button, deep link viejo,
+  // navegacion inconsistente) que resolvemos con UI dedicada + CTA para redirigir.
+  const esTipoBase = useMemo(
+    () => (tiposQ.data ?? []).find((t) => t.id === tipoEleccionId)?.es_base ?? false,
+    [tiposQ.data, tipoEleccionId],
+  );
+  const activeIds = useElectionsPrefsStore((s) => s.activeIds);
+  const setTipoEleccion = useCuestionarioStore((s) => s.setTipoEleccion);
+  const loadForTipoEleccion = useCuestionarioStore((s) => s.loadForTipoEleccion);
+  const primeraEspecificaActiva = useMemo(() => {
+    if (!esTipoBase) return null;
+    const { activas } = partitionTipos(tiposQ.data ?? [], activeIds);
+    return activas.find((t) => !t.es_base && t.id != null) ?? null;
+  }, [esTipoBase, tiposQ.data, activeIds]);
+
   useEffect(() => {
     if (!tipoEleccionId) return;
+    if (esTipoBase) return; // Skip el fetch: sabemos que devolvera 400.
     if (isGuest) {
       guestMutation.mutate({
         tipoEleccionId,
@@ -154,13 +173,28 @@ export function ResultadosScreen({
       authMutation.mutate(tipoEleccionId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tipoEleccionId, isGuest]);
+  }, [tipoEleccionId, isGuest, esTipoBase]);
 
   useEffect(() => {
-    if (activeMutation.error) {
-      toast.error("No pudimos calcular tus matches", getErrorMessage(activeMutation.error));
-    }
+    if (!activeMutation.error) return;
+    // Silenciamos el toast si el error viene del guardia backend (ya tenemos UI dedicada).
+    const errAny = activeMutation.error as { response?: { data?: { code?: string } } };
+    if (errAny?.response?.data?.code === "tipo_base_sin_candidatos") return;
+    toast.error("No pudimos calcular tus matches", getErrorMessage(activeMutation.error));
   }, [activeMutation.error, toast]);
+
+  async function handleCtaTipoBase() {
+    if (primeraEspecificaActiva?.id != null) {
+      try {
+        setTipoEleccion(primeraEspecificaActiva.id);
+        await loadForTipoEleccion(primeraEspecificaActiva.id);
+      } catch {
+        // Fail-safe: el proximo render intentara el match igual.
+      }
+    } else {
+      navigation.replace("GestionElecciones");
+    }
+  }
 
   function handleVolver() {
     reset();
@@ -238,6 +272,15 @@ export function ResultadosScreen({
           textAlign: "center",
           paddingVertical: spacing.sp5,
         },
+        emptyBox: {
+          gap: spacing.sp4,
+          paddingVertical: spacing.sp6,
+          alignItems: "stretch",
+        },
+        emptyTitle: {
+          ...typography.h2,
+          textAlign: "center",
+        },
         footerCol: { gap: spacing.sp2, marginTop: spacing.sp3 },
       }),
     [c],
@@ -250,6 +293,41 @@ export function ResultadosScreen({
           <Spinner size="large" />
           <Text style={styles.loadingText}>Calculando tus matches…</Text>
         </View>
+      </AppShell>
+    );
+  }
+
+  // Guardia dedicada: el tipo actual es es_base (Preguntas generales). Sus preguntas
+  // se aplican transversalmente al match de OTRAS elecciones, entonces aca no hay
+  // ranking que mostrar. Ofrecemos redirigir al user a activar (o abrir) una eleccion
+  // especifica en vez del empty state generico 'no hay candidatos'.
+  if (esTipoBase) {
+    const ctaLabel = primeraEspecificaActiva
+      ? `Ver mis matches en ${primeraEspecificaActiva.nombre}`
+      : "Activar una elección";
+    return (
+      <AppShell active="home" navigation={navigation}>
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+          <ScreenTopBar
+            title={tipoNombre}
+            subtitle="Tus resultados"
+            onBack={() => navigation.goBack()}
+          />
+          <View style={styles.emptyBox}>
+            <Text style={[styles.emptyTitle, { color: c.text }]}>
+              Estas preguntas no tienen candidatos propios
+            </Text>
+            <Text style={styles.emptyText}>
+              Las respuestas del cuestionario "{tipoNombre}" se aplican automaticamente
+              al match de todas las elecciones que actives. Cuanto mas contestes, mas
+              precisos son tus matches especificos.
+            </Text>
+            <Button onPress={handleCtaTipoBase}>{ctaLabel}</Button>
+            <Link block onPress={handleVolver}>
+              Volver al inicio
+            </Link>
+          </View>
+        </ScrollView>
       </AppShell>
     );
   }
