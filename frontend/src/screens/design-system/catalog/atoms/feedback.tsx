@@ -16,6 +16,7 @@ import {
   Spinner,
   Tooltip,
 } from "../../../../components";
+import { DemoText } from "../../showcase/DemoText";
 import type { CatalogEntry } from "../../showcase/types";
 
 export const feedbackCatalog: CatalogEntry[] = [
@@ -132,9 +133,9 @@ export const feedbackCatalog: CatalogEntry[] = [
       {
         label: "top (default)",
         render: () => (
-          <View style={{ paddingTop: 40 }}>
+          <View style={{ paddingTop: 48, alignItems: "flex-start" }}>
             <Tooltip tip="Este es un tooltip">
-              <Text style={{ padding: 8, fontSize: 14 }}>Manten pulsado</Text>
+              <DemoText style={{ padding: 8 }}>Manten pulsado</DemoText>
             </Tooltip>
           </View>
         ),
@@ -142,9 +143,19 @@ export const feedbackCatalog: CatalogEntry[] = [
       {
         label: "visible controlado",
         render: () => (
-          <View style={{ paddingTop: 40 }}>
+          <View style={{ paddingTop: 56, alignItems: "flex-start" }}>
             <Tooltip tip="Estoy siempre visible" visible>
-              <Text style={{ padding: 8, fontSize: 14 }}>Elemento</Text>
+              <DemoText style={{ padding: 8 }}>Elemento</DemoText>
+            </Tooltip>
+          </View>
+        ),
+      },
+      {
+        label: "bottom position",
+        render: () => (
+          <View style={{ paddingBottom: 48, alignItems: "flex-start" }}>
+            <Tooltip tip="Aparece abajo" visible position="bottom">
+              <DemoText style={{ padding: 8 }}>Elemento</DemoText>
             </Tooltip>
           </View>
         ),
@@ -172,9 +183,9 @@ export const feedbackCatalog: CatalogEntry[] = [
         label: "horizontal",
         render: () => (
           <View style={{ width: 200 }}>
-            <Text style={{ marginBottom: 8 }}>Arriba</Text>
+            <DemoText style={{ marginBottom: 8 }}>Arriba</DemoText>
             <Divider />
-            <Text style={{ marginTop: 8 }}>Abajo</Text>
+            <DemoText style={{ marginTop: 8 }}>Abajo</DemoText>
           </View>
         ),
       },
@@ -182,9 +193,9 @@ export const feedbackCatalog: CatalogEntry[] = [
         label: "vertical",
         render: () => (
           <View style={{ flexDirection: "row", height: 60, alignItems: "center", gap: 12 }}>
-            <Text>Izq</Text>
+            <DemoText>Izq</DemoText>
             <Divider orientation="vertical" />
-            <Text>Der</Text>
+            <DemoText>Der</DemoText>
           </View>
         ),
       },

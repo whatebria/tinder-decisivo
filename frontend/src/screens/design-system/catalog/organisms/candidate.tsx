@@ -2,20 +2,21 @@
  * Catalogo de organismos: relacionados a candidatos.
  *
  * Incluye: CandidateCard, ProfileHero, ResultadoHero, RankingRow, Comparator,
- * MatchExplanation, CandidatoPosturas, SwipeCard (organism con swipe gestual).
+ * MatchExplanation, CandidatoPosturas.
  */
 
 import React from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 
 import {
   CandidateCard,
   Comparator,
   ProfileHero,
+  RadarChart,
   RankingRow,
   ResultadoHero,
 } from "../../../../components";
-import { SwipeCard as SwipeCardOrg } from "../../../../components/organisms/SwipeCard";
+import { DemoText } from "../../showcase/DemoText";
 import type { CatalogEntry } from "../../showcase/types";
 
 const ejeScoresMock = {
@@ -70,12 +71,26 @@ export const candidateOrgCatalog: CatalogEntry[] = [
           />
         ),
       },
+      {
+        label: "sin match (vista exploratoria)",
+        render: () => (
+          <CandidateCard
+            name="Yasna Provoste"
+            partido="Democracia Cristiana"
+            initials="YP"
+            matchPercent={null}
+            sublabel="Presidencial"
+            onPress={() => {}}
+          />
+        ),
+      },
     ],
     props: [
       { name: "name", type: "string", required: true },
       { name: "partido", type: "string", required: true },
       { name: "initials", type: "string", required: true },
-      { name: "matchPercent", type: "number", required: true, description: "0-100." },
+      { name: "matchPercent", type: "number | null", required: true, description: "0-100 o null para ocultar % y MatchTier (vista exploratoria)." },
+      { name: "sublabel", type: "string", description: "Texto extra bajo el partido (ej. tipo eleccion)." },
       { name: "avatarColor", type: "string", description: "Color de fondo del avatar." },
       { name: "onPress", type: "() => void", description: "Si se pasa, muestra chevron." },
     ],
@@ -179,6 +194,8 @@ export const candidateOrgCatalog: CatalogEntry[] = [
               matchPct={72}
               isDecision
               ejeScores={ejeScoresMock}
+              confianzaLabel="Confianza media"
+              confianzaVariant="info"
               ctaLabel="Ver perfil"
               onCta={() => {}}
             />
@@ -242,7 +259,7 @@ export const candidateOrgCatalog: CatalogEntry[] = [
             onPress={() => {}}
             actions={
               <View style={{ paddingTop: 8 }}>
-                <Text style={{ fontSize: 11, color: "#666" }}>Slot custom para BookmarkActions u otras acciones.</Text>
+                <DemoText tone="secondary" style={{ fontSize: 11 }}>Slot custom para BookmarkActions u otras acciones.</DemoText>
               </View>
             }
           />
@@ -283,7 +300,13 @@ export const candidateOrgCatalog: CatalogEntry[] = [
           <View style={{ maxWidth: 500 }}>
             <Comparator
               slots={[
-                { name: "Boric", partido: "Frente Amplio", initials: "GB", matchPercent: 87 },
+                {
+                  name: "Boric",
+                  partido: "Frente Amplio",
+                  initials: "GB",
+                  matchPercent: 87,
+                  chart: <RadarChart data={ejeScoresMock} size={140} />,
+                },
               ]}
               onRemove={() => {}}
               onAdd={() => {}}
@@ -297,8 +320,20 @@ export const candidateOrgCatalog: CatalogEntry[] = [
           <View style={{ maxWidth: 500 }}>
             <Comparator
               slots={[
-                { name: "Boric", partido: "Frente Amplio", initials: "GB", matchPercent: 87 },
-                { name: "Kast", partido: "Republicanos", initials: "JK", matchPercent: 28 },
+                {
+                  name: "Boric",
+                  partido: "Frente Amplio",
+                  initials: "GB",
+                  matchPercent: 87,
+                  chart: <RadarChart data={ejeScoresMock} size={140} />,
+                },
+                {
+                  name: "Kast",
+                  partido: "Republicanos",
+                  initials: "JK",
+                  matchPercent: 28,
+                  chart: <RadarChart data={ejeScoresMock} size={140} />,
+                },
               ]}
               onRemove={() => {}}
             />
@@ -326,48 +361,6 @@ export const candidateOrgCatalog: CatalogEntry[] = [
 />`,
   },
   {
-    name: "SwipeCard (organism)",
-    path: "organisms/SwipeCard",
-    category: "organisms",
-    description: "Wrapper con soporte de swipe gestual (Animated + PanResponder). Diferente al SwipeCard molecule (que es el visual). El organism envuelve al molecule para agregar gestos.",
-    variants: [
-      {
-        label: "con children (dummy card)",
-        render: () => (
-          <View style={{ maxWidth: 340, height: 200 }}>
-            <SwipeCardOrg
-              onSwipedLeft={() => console.log("nope")}
-              onSwipedRight={() => console.log("like")}
-              onTap={() => console.log("tap")}
-            >
-              <View style={{ padding: 24, backgroundColor: "#F0F0F0", borderRadius: 16, alignItems: "center" }}>
-                <Text style={{ fontSize: 16, fontWeight: "600" }}>Arrastrame!</Text>
-                <Text style={{ fontSize: 12, color: "#666", marginTop: 8 }}>Izq = nope · Der = like · tap corto = onTap</Text>
-              </View>
-            </SwipeCardOrg>
-          </View>
-        ),
-      },
-    ],
-    props: [
-      { name: "children", type: "ReactNode", required: true, description: "Contenido de la card (tipicamente el molecule SwipeCard)." },
-      { name: "onSwipedLeft", type: "() => void", required: true, description: "Descartar / nope." },
-      { name: "onSwipedRight", type: "() => void", required: true, description: "Favorito / like." },
-      { name: "onTap", type: "() => void", description: "Tap corto sin drag." },
-      { name: "disabled", type: "boolean", description: "Deshabilita el gesto (card debajo del stack)." },
-      { name: "scaleBelow", type: "number", defaultValue: "1", description: "Escala para feedback de 'card debajo del stack'." },
-    ],
-    snippet: `import { SwipeCard as SwipeCardOrg, SwipeCard as SwipeCardMol } from "../components";
-
-<SwipeCardOrg
-  onSwipedLeft={() => dislike(candidato.id)}
-  onSwipedRight={() => like(candidato.id)}
-  onTap={() => openDetalle(candidato.id)}
->
-  <SwipeCardMol name={...} />
-</SwipeCardOrg>`,
-  },
-  {
     name: "MatchExplanation",
     path: "organisms/MatchExplanation",
     category: "organisms",
@@ -377,9 +370,9 @@ export const candidateOrgCatalog: CatalogEntry[] = [
         label: "no demoable aqui",
         render: () => (
           <View style={{ padding: 12 }}>
-            <Text style={{ fontSize: 13, color: "#666" }}>
+            <DemoText tone="secondary" style={{ fontSize: 13 }}>
               Requiere QueryClient con API viva (usa useMatchDetalle). Ver en uso desde DetalleCandidatoScreen.
-            </Text>
+            </DemoText>
           </View>
         ),
       },
@@ -401,9 +394,9 @@ export const candidateOrgCatalog: CatalogEntry[] = [
         label: "no demoable aqui",
         render: () => (
           <View style={{ padding: 12 }}>
-            <Text style={{ fontSize: 13, color: "#666" }}>
+            <DemoText tone="secondary" style={{ fontSize: 13 }}>
               Requiere PosturaCandidatoDetalle[] del API. Ver en uso desde DetalleCandidatoScreen.
-            </Text>
+            </DemoText>
           </View>
         ),
       },

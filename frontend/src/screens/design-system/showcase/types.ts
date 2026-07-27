@@ -11,7 +11,7 @@
 
 import type { ReactNode } from "react";
 
-export type CatalogCategory = "atoms" | "molecules" | "organisms" | "templates";
+export type CatalogCategory = "tokens" | "atoms" | "molecules" | "organisms" | "templates";
 
 export interface PropEntry {
   name: string;
@@ -42,4 +42,9 @@ export interface CatalogEntry {
   props: PropEntry[];
   /** Snippet copy-paste con imports + JSX minimo. */
   snippet: string;
+  /**
+   * Override del path completo mostrado en el header.
+   * Default: `src/components/{path}.tsx`. Usalo para tokens (`src/theme/{path}.ts`).
+   */
+  sourcePath?: string;
 }

@@ -5,9 +5,10 @@
  */
 
 import React from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 import { AppShell } from "../../../components";
+import { DemoText } from "../showcase/DemoText";
 import type { CatalogEntry } from "../showcase/types";
 
 const mockNav = { navigate: (r: string) => console.log("navigate:", r) };
@@ -25,14 +26,14 @@ export const templatesCatalog: CatalogEntry[] = [
           <View style={{ height: 400, borderWidth: 1, borderColor: "#ccc" }}>
             <AppShell active="home" navigation={mockNav}>
               <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, gap: 12 }}>
-                <Text style={{ fontSize: 18, fontWeight: "700" }}>Screen contents</Text>
-                <Text style={{ fontSize: 13, color: "#666" }}>
+                <DemoText style={{ fontSize: 18, fontWeight: "700" }}>Screen contents</DemoText>
+                <DemoText tone="secondary" style={{ fontSize: 13 }}>
                   Los children ocupan flex:1. Si tu ventana es &lt;900px veras BottomNav abajo,
                   si es &gt;=900px veras Sidebar a la izquierda. Recomendacion: cambia el ancho de la ventana para verlo.
-                </Text>
-                <Text style={{ fontSize: 13, color: "#666" }}>
+                </DemoText>
+                <DemoText tone="secondary" style={{ fontSize: 13 }}>
                   Nota: el shell renderizado dentro del design system esta constrainted a 400px de alto para no romper el layout del browser.
-                </Text>
+                </DemoText>
               </ScrollView>
             </AppShell>
           </View>

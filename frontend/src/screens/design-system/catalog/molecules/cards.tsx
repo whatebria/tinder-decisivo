@@ -1,7 +1,7 @@
 /**
  * Catalogo de moleculas: CARDS e items de contenido.
  *
- * Incluye: NewsCard, PosturaItem, NovedadItem, SwipeCard, MatchTier.
+ * Incluye: NewsCard, PosturaItem, NovedadItem, MatchTier.
  */
 
 import React from "react";
@@ -12,7 +12,6 @@ import {
   NewsCard,
   NovedadItem,
   PosturaItem,
-  SwipeCard,
 } from "../../../../components";
 import type { CatalogEntry } from "../../showcase/types";
 
@@ -236,68 +235,6 @@ export const cardsCatalog: CatalogEntry[] = [
   title="Complete 3 preguntas mas"
   ctaLabel="Ir"
   onCta={() => navigate("Cuestionario")}
-/>`,
-  },
-  {
-    name: "SwipeCard",
-    path: "molecules/SwipeCard",
-    category: "molecules",
-    description: "Card estilo Tinder para explorar candidatos. Avatar + info + 4 action buttons (undo/dislike/like/info).",
-    variants: [
-      {
-        label: "completa",
-        render: () => (
-          <View style={{ maxWidth: 340 }}>
-            <SwipeCard
-              name="Gabriel Boric"
-              partido="Frente Amplio"
-              initials="GB"
-              quote="Chile sera la tumba del neoliberalismo"
-              topics={["Educacion", "Salud", "Medio ambiente"]}
-              onUndo={() => {}}
-              onDislike={() => {}}
-              onLike={() => {}}
-              onInfo={() => {}}
-              canUndo={true}
-            />
-          </View>
-        ),
-      },
-      {
-        label: "sin quote ni topics",
-        render: () => (
-          <View style={{ maxWidth: 340 }}>
-            <SwipeCard
-              name="Jose Antonio Kast"
-              partido="Republicanos"
-              initials="JK"
-              onDislike={() => {}}
-              onLike={() => {}}
-            />
-          </View>
-        ),
-      },
-    ],
-    props: [
-      { name: "name", type: "string", required: true },
-      { name: "partido", type: "string", required: true },
-      { name: "initials", type: "string", required: true, description: "2-3 caracteres." },
-      { name: "quote", type: "string" },
-      { name: "topics", type: "ReadonlyArray<string>", description: "Chips de temas/tags." },
-      { name: "onUndo / onDislike / onLike / onInfo", type: "() => void", description: "Solo se renderiza el boton si el handler existe." },
-      { name: "canUndo", type: "boolean", defaultValue: "true", description: "Deshabilita undo cuando no hay historial." },
-    ],
-    snippet: `import { SwipeCard } from "../components";
-
-<SwipeCard
-  name={candidato.nombre}
-  partido={candidato.partido}
-  initials={getInitials(candidato.nombre)}
-  quote={candidato.frase}
-  topics={candidato.tags}
-  onLike={() => addFavorito(candidato.id)}
-  onDislike={() => descartar(candidato.id)}
-  onInfo={() => openDetalle(candidato.id)}
 />`,
   },
 ];

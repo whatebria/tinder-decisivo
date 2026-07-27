@@ -12,12 +12,15 @@
 import React from "react";
 import { Text, View } from "react-native";
 
+import { DemoText } from "../../showcase/DemoText";
+
 import {
   Button,
   CambiarPasswordModal,
   ConfirmModal,
   EliminarCuentaModal,
   Modal,
+  NoticiaDetailSheet,
   PreguntaInfoModal,
   ShareModal,
   useToast,
@@ -41,9 +44,9 @@ function ModalDemo() {
           </>
         }
       >
-        <Text style={{ fontSize: 14 }}>
+        <DemoText style={{ fontSize: 14 }}>
           Este es el body del modal. Puede contener cualquier contenido: texto, forms, listas...
-        </Text>
+        </DemoText>
       </Modal>
     </>
   );
@@ -142,6 +145,68 @@ function ToastDemo() {
       <Button variant="danger" fullWidth={false} onPress={() => toast.error("Algo salio mal", "Intenta de nuevo.")}>error</Button>
       <Button fullWidth={false} onPress={() => toast.info("Sincronizando datos...")}>info</Button>
     </View>
+  );
+}
+
+function NoticiaDetailSheetDemo({ variant }: { variant: "completa" | "minima" | "sinLink" }) {
+  const [open, setOpen] = React.useState(false);
+  const [saved, setSaved] = React.useState(false);
+
+  const noticiaCompleta = {
+    id: 1,
+    titulo: "Gabriel Boric anuncia nueva pol\u00edtica de vivienda con foco en clase media",
+    descripcion:
+      "El presidente present\u00f3 un plan de subsidios y regulaci\u00f3n del mercado de arriendos que apunta a reducir la brecha entre ingresos y costo de vida. Incluye 60 mil nuevas soluciones habitacionales en 2026 y modificaciones tributarias para propiedades sin uso.",
+    url: "https://www.latercera.com/noticia/ejemplo",
+    fuente: "La Tercera",
+    imagenUrl: "https://picsum.photos/seed/noticia1/800/400",
+    fechaFormateada: "hace 3 horas",
+    sentiment: "positive" as const,
+    candidatosMencionados: [
+      { id: 1, nombre: "Gabriel", apellido: "Boric" },
+      { id: 2, nombre: "Jose Antonio", apellido: "Kast" },
+    ],
+  };
+
+  const noticiaMinima = {
+    id: 2,
+    titulo: "Debate presidencial reune a 5 candidatos en TVN",
+    descripcion:
+      "Los candidatos discutieron econom\u00eda, seguridad y educaci\u00f3n en un formato de 90 minutos.",
+    url: "https://www.emol.com/noticia/ejemplo",
+    fuente: "Emol",
+    imagenUrl: null,
+    fechaFormateada: "ayer",
+    sentiment: "neutral" as const,
+  };
+
+  const noticiaSinLink = {
+    id: 3,
+    titulo: "Encuesta muestra empate t\u00e9cnico entre principales candidatos",
+    descripcion: "Segun el sondeo, 3 de cada 5 votantes sigue indeciso.",
+    url: null,
+    fuente: "Cadem",
+    imagenUrl: null,
+    fechaFormateada: "hace 2 dias",
+    sentiment: "negative" as const,
+  };
+
+  const noticia =
+    variant === "completa" ? noticiaCompleta : variant === "minima" ? noticiaMinima : noticiaSinLink;
+
+  return (
+    <>
+      <Button onPress={() => setOpen(true)} fullWidth={false}>
+        Abrir preview
+      </Button>
+      <NoticiaDetailSheet
+        visible={open}
+        onClose={() => setOpen(false)}
+        noticia={noticia}
+        bookmarked={variant === "completa" ? saved : undefined}
+        onToggleBookmark={variant === "completa" ? () => setSaved((s) => !s) : undefined}
+      />
+    </>
   );
 }
 
@@ -295,9 +360,9 @@ export const overlaysCatalog: CatalogEntry[] = [
         label: "no demoable aqui",
         render: () => (
           <View style={{ padding: 12 }}>
-            <Text style={{ fontSize: 13, color: "#666" }}>
+            <DemoText tone="secondary" style={{ fontSize: 13 }}>
               Requiere un objeto MiRespuesta real del API. Ver EditarRespuestaModal en uso desde MisRespuestasScreen.
-            </Text>
+            </DemoText>
           </View>
         ),
       },
@@ -348,5 +413,51 @@ function MyScreen() {
 }
 
 // En App.tsx, envolver con <ToastProvider>.`,
+  },
+  {
+    name: "NoticiaDetailSheet",
+    path: "molecules/NoticiaDetailSheet",
+    category: "molecules",
+    description:
+      "Bottom sheet con el detalle completo de una noticia (imagen hero, meta, titulo, descripcion, candidatos mencionados) + boton \"Abrir noticia original\" que hace Linking.openURL. Se abre al tocar una NewsCard.",
+    variants: [
+      { label: "completa (imagen + bookmark + candidatos)", render: () => <NoticiaDetailSheetDemo variant="completa" /> },
+      { label: "minima (sin imagen ni bookmark)", render: () => <NoticiaDetailSheetDemo variant="minima" /> },
+      { label: "sin link (footer oculto)", render: () => <NoticiaDetailSheetDemo variant="sinLink" /> },
+    ],
+    props: [
+      { name: "visible", type: "boolean", required: true },
+      { name: "onClose", type: "() => void", required: true },
+      { name: "noticia", type: "NoticiaDetail | null", required: true, description: "{ id, titulo, descripcion, url?, fuente?, imagenUrl?, fechaFormateada, sentiment, candidatosMencionados? }" },
+      { name: "bookmarked", type: "boolean", description: "Si se pasa junto con onToggleBookmark, muestra el BookmarkButton." },
+      { name: "onToggleBookmark", type: "() => void" },
+      { name: "bookmarkLoading", type: "boolean", defaultValue: "false" },
+    ],
+    snippet: `import { NoticiaDetailSheet, type NoticiaDetail } from "../components";
+
+const [selected, setSelected] = useState<NoticiaDetail | null>(null);
+
+<NewsCard
+  onPress={() =>
+    setSelected({
+      id: n.id,
+      titulo: n.titulo,
+      descripcion: n.descripcion,
+      url: n.url,
+      fuente: n.fuente,
+      imagenUrl: n.imagen_url,
+      fechaFormateada: formatearFecha(n.fecha_publicacion),
+      sentiment: "neutral",
+      candidatosMencionados: n.candidatos_mencionados_data,
+    })
+  }
+  // ...
+/>
+
+<NoticiaDetailSheet
+  visible={selected !== null}
+  onClose={() => setSelected(null)}
+  noticia={selected}
+/>`,
   },
 ];

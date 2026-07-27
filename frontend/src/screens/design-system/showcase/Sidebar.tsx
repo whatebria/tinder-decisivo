@@ -23,6 +23,7 @@ interface SidebarProps {
 }
 
 const CATEGORIES: { key: CatalogEntry["category"]; label: string }[] = [
+  { key: "tokens", label: "Tokens" },
   { key: "atoms", label: "Atomos" },
   { key: "molecules", label: "Moleculas" },
   { key: "organisms", label: "Organismos" },

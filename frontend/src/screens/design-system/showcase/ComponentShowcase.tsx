@@ -121,7 +121,7 @@ export function ComponentShowcase({ entry }: ComponentShowcaseProps) {
       <View style={styles.header}>
         <View style={styles.titleRow}>
           <Text style={styles.name}>{entry.name}</Text>
-          <Text style={styles.path}>src/components/{entry.path}.tsx</Text>
+          <Text style={styles.path}>{entry.sourcePath ?? `src/components/${entry.path}.tsx`}</Text>
         </View>
         <Text style={styles.description}>{entry.description}</Text>
       </View>

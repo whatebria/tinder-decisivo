@@ -107,9 +107,9 @@ export const feedsCatalog: CatalogEntry[] = [
           <View style={{ maxWidth: 600 }}>
             <ElectionsStrip
               elections={[
-                { key: "pres", name: "Presidencial", scope: "Nacional", daysLabel: "42d", matchPercent: 87, progressPercent: 100, variant: "active" },
-                { key: "dip", name: "Diputados", scope: "D8", daysLabel: "42d", matchPercent: 62, progressPercent: 75 },
-                { key: "cons", name: "Consejeros", scope: "RM", daysLabel: "42d", matchPercent: null, progressPercent: 40, pendingLabel: "6 preguntas extras pendientes" },
+                { key: "pres", name: "Presidencial 2025", scope: "Nacional", daysRemaining: 12, isCompleted: true, matchPercent: 87, progressPercent: 100, variant: "active" },
+                { key: "dip", name: "Diputados D8", scope: "D8", daysRemaining: 12, isCompleted: false, matchPercent: 62, progressPercent: 75 },
+                { key: "cons", name: "Consejeros Regionales", scope: "RM", daysRemaining: 200, isCompleted: false, matchPercent: null, progressPercent: 40, pendingLabel: "6 preguntas extras pendientes" },
               ]}
               addOptions={[
                 { key: "alcalde", label: "Alcalde", onPress: () => {} },
@@ -124,7 +124,7 @@ export const feedsCatalog: CatalogEntry[] = [
           <View style={{ maxWidth: 600 }}>
             <ElectionsStrip
               elections={[
-                { key: "pres", name: "Presidencial", daysLabel: "42d", matchPercent: 87, progressPercent: 100, variant: "active" },
+                { key: "pres", name: "Presidencial 2025", daysRemaining: 12, isCompleted: true, matchPercent: 87, progressPercent: 100, variant: "active" },
               ]}
             />
           </View>
@@ -142,7 +142,8 @@ export const feedsCatalog: CatalogEntry[] = [
     key: e.id,
     name: e.tipo,
     scope: e.scope,
-    daysLabel: \`\${e.diasFaltan}d\`,
+    daysRemaining: e.diasFaltan,
+    isCompleted: e.completado,
     matchPercent: e.matchPercent,
     progressPercent: e.progresoCuestionario,
     variant: e.id === selectedId ? "active" : undefined,

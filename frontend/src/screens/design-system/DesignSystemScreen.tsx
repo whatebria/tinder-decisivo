@@ -69,6 +69,7 @@ export function DesignSystemScreen({ navigation }: Props) {
 
   const grouped = useMemo(() => {
     const map: Record<string, typeof filtered> = {
+      tokens: [],
       atoms: [],
       molecules: [],
       organisms: [],
@@ -123,12 +124,13 @@ export function DesignSystemScreen({ navigation }: Props) {
   );
 
   const CATEGORY_LABELS: Record<string, string> = {
+    tokens: "Tokens",
     atoms: "Atomos",
     molecules: "Moleculas",
     organisms: "Organismos",
     templates: "Templates",
   };
-  const CATEGORY_ORDER = ["atoms", "molecules", "organisms", "templates"] as const;
+  const CATEGORY_ORDER = ["tokens", "atoms", "molecules", "organisms", "templates"] as const;
 
   return (
     <SafeAreaView style={styles.root} edges={["top"]}>

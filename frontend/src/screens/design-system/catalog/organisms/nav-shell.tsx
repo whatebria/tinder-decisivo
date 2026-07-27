@@ -15,6 +15,7 @@ import {
   Sidebar,
   TopNav,
 } from "../../../../components";
+import { DemoText } from "../../showcase/DemoText";
 import type { CatalogEntry } from "../../showcase/types";
 
 // Mock navigator: solo se necesita { navigate }. En el catalogo no navega a nada real.
@@ -161,7 +162,7 @@ export const navShellCatalog: CatalogEntry[] = [
         label: "sin error (renderiza children)",
         render: () => (
           <ErrorBoundary>
-            <Text style={{ padding: 12 }}>Contenido normal renderizado dentro de ErrorBoundary.</Text>
+            <DemoText style={{ padding: 12 }}>Contenido normal renderizado dentro de ErrorBoundary.</DemoText>
           </ErrorBoundary>
         ),
       },
@@ -169,9 +170,9 @@ export const navShellCatalog: CatalogEntry[] = [
         label: "nota",
         render: () => (
           <View style={{ padding: 12 }}>
-            <Text style={{ fontSize: 13, color: "#666" }}>
+            <DemoText tone="secondary" style={{ fontSize: 13 }}>
               Para ver el fallback, tira un throw dentro de un componente hijo en dev.
-            </Text>
+            </DemoText>
           </View>
         ),
       },

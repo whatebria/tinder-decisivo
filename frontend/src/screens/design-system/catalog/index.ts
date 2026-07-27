@@ -14,9 +14,11 @@ import { atomsCatalog } from "./atoms";
 import { moleculesCatalog } from "./molecules";
 import { organismsCatalog } from "./organisms";
 import { templatesCatalog } from "./templates";
+import { tokensCatalog } from "./tokens";
 import type { CatalogEntry } from "../showcase/types";
 
 export const catalog: CatalogEntry[] = [
+  ...tokensCatalog,
   ...atomsCatalog,
   ...moleculesCatalog,
   ...organismsCatalog,
