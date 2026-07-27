@@ -90,11 +90,17 @@ class TestFiltroMatchingPolimorfico:
         candidatos = list(qs)
 
         # Debe incluir alcaldes de Nunoa (3).
-        alcaldes_nunoa = [c for c in candidatos if c.comuna_id == nunoa.id]
+        alcaldes_nunoa = [
+            c for c in candidatos
+            if c.unidad_territorial and c.unidad_territorial.nombre == "Nunoa"
+        ]
         assert len(alcaldes_nunoa) == 3
 
         # Debe incluir diputados D10 (5).
-        diputados_d10 = [c for c in candidatos if c.distrito and c.distrito.numero == 10]
+        diputados_d10 = [
+            c for c in candidatos
+            if c.unidad_territorial and c.unidad_territorial.codigo == "D-10"
+        ]
         assert len(diputados_d10) == 5
 
         # Debe incluir presidenciales (nacionales, UT=None).
@@ -102,8 +108,10 @@ class TestFiltroMatchingPolimorfico:
         assert len(presis) >= 8  # los 8 oficiales
 
         # NO debe incluir alcaldes de otra comuna.
-        provi = Comuna.objects.get(nombre="Providencia")
-        alcaldes_provi = [c for c in candidatos if c.comuna_id == provi.id]
+        alcaldes_provi = [
+            c for c in candidatos
+            if c.unidad_territorial and c.unidad_territorial.nombre == "Providencia"
+        ]
         assert len(alcaldes_provi) == 0
 
     def test_votante_ve_candidatos_regionales_futuros(self, datos_pesados):

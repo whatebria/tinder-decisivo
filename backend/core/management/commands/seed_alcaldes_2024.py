@@ -101,46 +101,50 @@ class Command(BaseCommand):
         ):
             opciones_por_pregunta[(op.pregunta_id, op.valor)] = op
 
-        # 2. Indice de candidatos existentes (para idempotencia).
-        existentes = {
-            (c.nombre, c.apellido, c.comuna_id): c
-            for c in Candidato.objects.filter(comuna__in=comunas)
-        }
-
-        # 2.5. Indice de UnidadTerritorial por comuna (para asignar en bulk_create).
-        #      bulk_create NO dispara signals, entonces hay que setear el FK aca.
-        ut_por_comuna = {
-            int(ut.metadata.get("codigo_ine", 0)): ut
-            for ut in UnidadTerritorial.objects.filter(nivel="comunal")
-            if ut.metadata.get("codigo_ine")
-        }
-        # Backup: buscar por codigo si el metadata no tiene codigo_ine.
+        # 2. Indice UnidadTerritorial por codigo_ine (metadata o parseando codigo).
+        #    Se calcula antes que 'existentes' porque el dedup ahora usa ut_id.
         ut_por_codigo_ine = {}
         for ut in UnidadTerritorial.objects.filter(nivel="comunal"):
             codigo_ine = ut.metadata.get("codigo_ine") or ut.codigo.replace("COM-", "")
             ut_por_codigo_ine[codigo_ine] = ut
 
-        # 3. Preparar lote de candidatos nuevos y datos de posturas.
+        # Mapa comuna.codigo (INE) -> UT.id, usado para dedup y M2M lookups.
+        ut_id_por_comuna_codigo = {
+            codigo: ut.id for codigo, ut in ut_por_codigo_ine.items()
+        }
+        # IDs UT de las comunas de este seed (para filtrar querys downstream).
+        ut_ids_de_comunas = [
+            ut_id_por_comuna_codigo[c.codigo]
+            for c in comunas
+            if c.codigo in ut_id_por_comuna_codigo
+        ]
+
+        # 3. Indice de candidatos existentes (para idempotencia). Ahora por UT.
+        existentes = {
+            (c.nombre, c.apellido, c.unidad_territorial_id): c
+            for c in Candidato.objects.filter(
+                unidad_territorial_id__in=ut_ids_de_comunas,
+            )
+        }
+
+        # 4. Preparar lote de candidatos nuevos y datos de posturas.
         candidatos_nuevos = []
-        # Lista de tuplas (idx_en_nuevos_o_existente, posturas_valores)
-        # donde el indice es negativo si es existente (para diferenciar).
         plan_posturas = []  # list of (candidato_key, posturas_valores)
 
         for comuna in comunas:
             seed_int = int(comuna.codigo)
+            ut = ut_por_codigo_ine.get(comuna.codigo)
             partidos = elegir_partidos(
                 seed_int, CANDIDATOS_POR_COMUNA, DISTRIBUCION_ALCALDES,
             )
             for idx, partido in enumerate(partidos):
                 data = generar_candidato(seed_int, idx, partido)
-                key = (data["nombre"], data["apellido"], comuna.id)
+                key = (data["nombre"], data["apellido"], ut.id if ut else None)
                 if key not in existentes:
-                    ut = ut_por_codigo_ine.get(comuna.codigo)
                     candidatos_nuevos.append(Candidato(
                         nombre=data["nombre"],
                         apellido=data["apellido"],
-                        comuna=comuna,
-                        unidad_territorial=ut,  # bulk_create no dispara signal
+                        unidad_territorial=ut,
                         partido=data["partido"],
                         bio=f"Candidato/a a alcalde/sa de {comuna.nombre}.",
                         propuesta_electoral=(
@@ -150,22 +154,25 @@ class Command(BaseCommand):
                     ))
                 plan_posturas.append((key, data["posturas"]))
 
-        # 4. Bulk create candidatos nuevos (1 query en vez de N).
+        # 5. Bulk create candidatos nuevos (1 query en vez de N).
         Candidato.objects.bulk_create(candidatos_nuevos)
         creados = len(candidatos_nuevos)
 
-        # 5. Refrescar indice con los recien creados.
+        # 6. Refrescar indice con los recien creados.
         todos = {
-            (c.nombre, c.apellido, c.comuna_id): c
-            for c in Candidato.objects.filter(comuna__in=comunas)
+            (c.nombre, c.apellido, c.unidad_territorial_id): c
+            for c in Candidato.objects.filter(
+                unidad_territorial_id__in=ut_ids_de_comunas,
+            )
         }
 
-        # 6. Bulk M2M add tipo_eleccion. Usamos through directamente para
+        # 7. Bulk M2M add tipo_eleccion. Usamos through directamente para
         #    evitar N queries de .add().
         Through = Candidato.tipos_eleccion.through
         m2m_existentes = set(
             Through.objects.filter(
-                candidato__comuna__in=comunas, tipoeleccion=tipo,
+                candidato__unidad_territorial_id__in=ut_ids_de_comunas,
+                tipoeleccion=tipo,
             ).values_list("candidato_id", flat=True)
         )
         m2m_nuevos = [
@@ -174,11 +181,11 @@ class Command(BaseCommand):
         ]
         Through.objects.bulk_create(m2m_nuevos, ignore_conflicts=True)
 
-        # 7. Bulk crear posturas nuevas. Primero indexar posturas existentes.
+        # 8. Bulk crear posturas nuevas. Primero indexar posturas existentes.
         posturas_existentes = {
             (p.candidato_id, p.pregunta_id)
             for p in PosturaCandidato.objects.filter(
-                candidato__comuna__in=comunas,
+                candidato__unidad_territorial_id__in=ut_ids_de_comunas,
                 pregunta__in=preguntas_base,
             )
         }

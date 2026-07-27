@@ -115,10 +115,10 @@ class Command(BaseCommand):
             )
             for idx, partido in enumerate(partidos):
                 data = generar_candidato(distrito.numero, idx, partido)
-                # Idempotencia: buscamos por (nombre, apellido, distrito).
+                # Idempotencia: buscamos por (nombre, apellido, unidad_territorial).
                 candidato, cand_created = Candidato.objects.update_or_create(
                     nombre=data["nombre"], apellido=data["apellido"],
-                    distrito=distrito,
+                    unidad_territorial=ut,
                     defaults={
                         "partido": data["partido"],
                         "bio": f"Candidato/a a diputado/a por {distrito.nombre}.",
@@ -126,7 +126,6 @@ class Command(BaseCommand):
                             f"Representar los intereses del {distrito.nombre} "
                             f"desde los valores del {data['partido']}."
                         ),
-                        "unidad_territorial": ut,
                     },
                 )
                 candidato.tipos_eleccion.add(tipo)
