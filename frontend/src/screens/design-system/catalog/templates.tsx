@@ -7,7 +7,7 @@
 import React from "react";
 import { ScrollView, View } from "react-native";
 
-import { AppShell } from "../../../components";
+import { AppShell, ScreenChrome } from "../../../components";
 import { DemoText } from "../showcase/DemoText";
 import type { CatalogEntry } from "../showcase/types";
 
@@ -59,5 +59,46 @@ export function HomeScreen({ navigation }) {
 
 // SIDEBAR_BREAKPOINT = 900. Screens que NO usan AppShell:
 // Splash, Onboarding, Ubicacion, Login, Signup, Cuestionario.`,
+  },
+  {
+    name: "ScreenChrome",
+    path: "templates/ScreenChrome",
+    category: "templates",
+    description: "Wrapper minimalista para screens que NO usan AppShell (Cuestionario, DetalleCandidato). Aplica safe-area top y background del theme. NO aplica padding horizontal (responsabilidad del content container). Usar cuando la screen es full-focus o polimorfica sin nav lateral/inferior.",
+    variants: [
+      {
+        label: "chrome minimo",
+        render: () => (
+          <View style={{ height: 200, borderWidth: 1, borderColor: "#ccc" }}>
+            <ScreenChrome>
+              <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, gap: 8 }}>
+                <DemoText style={{ fontSize: 18, fontWeight: "700" }}>Screen sin AppShell</DemoText>
+                <DemoText tone="secondary" style={{ fontSize: 13 }}>
+                  Este wrapper aplica safe-area top y bg del theme. El padding sp4 lo pone el content container del ScrollView, igual que en las screens con AppShell.
+                </DemoText>
+              </ScrollView>
+            </ScreenChrome>
+          </View>
+        ),
+      },
+    ],
+    props: [
+      { name: "children", type: "ReactNode", required: true },
+      { name: "edges", type: 'Edge[] (default ["top"])', description: "Safe-area edges a respetar. Agregar 'bottom' si la screen no tiene BottomNav propia." },
+      { name: "bg", type: "string", description: "Override del backgroundColor. Default: theme.bg" },
+    ],
+    snippet: `import { ScreenChrome } from "../components";
+
+// Screens sin AppShell (full-focus, detail, pre-auth):
+export function CuestionarioScreen({ navigation }) {
+  return (
+    <ScreenChrome>
+      <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
+        <ScreenTopBar title="Cuestionario" onBack={goBack} />
+        {/* ... */}
+      </ScrollView>
+    </ScreenChrome>
+  );
+}`,
   },
 ];

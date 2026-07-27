@@ -23,6 +23,7 @@ import {
   Button,
   Chip,
   CoachMark,
+  ScreenChrome,
   ScreenTopBar,
   PreguntaInfoModal,
   ProgressSplit,
@@ -130,10 +131,12 @@ export function CuestionarioScreen({
 
   if (!pregunta) {
     return (
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.emptyBox}>
-        <Text style={styles.emptyText}>No hay preguntas cargadas.</Text>
-        <Button onPress={() => navigation.goBack()}>Volver</Button>
-      </ScrollView>
+      <ScreenChrome>
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.emptyBox}>
+          <Text style={styles.emptyText}>No hay preguntas cargadas.</Text>
+          <Button onPress={() => navigation.goBack()}>Volver</Button>
+        </ScrollView>
+      </ScreenChrome>
     );
   }
 
@@ -172,6 +175,7 @@ export function CuestionarioScreen({
 
   return (
     <>
+      <ScreenChrome>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <ScreenTopBar
           title={pregunta.tipo_eleccion_nombre ?? "Cuestionario"}
@@ -250,6 +254,7 @@ export function CuestionarioScreen({
           </View>
         </View>
       </ScrollView>
+      </ScreenChrome>
 
       <PreguntaInfoModal
         visible={infoOpen}

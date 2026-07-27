@@ -4,3 +4,4 @@
  */
 
 export { AppShell, SIDEBAR_BREAKPOINT, type AppShellProps } from "./AppShell";
+export { ScreenChrome, type ScreenChromeProps } from "./ScreenChrome";

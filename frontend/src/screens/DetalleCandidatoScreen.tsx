@@ -55,6 +55,7 @@ import {
   NoticiaDetailSheet,
   ProfileHero,
   RadarChart,
+  ScreenChrome,
   ScreenTopBar,
   ShareModal,
   Spinner,
@@ -134,29 +135,33 @@ export function DetalleCandidatoScreen({
 
   if (candidatoQ.isLoading) {
     return (
-      <View style={[styles.center, { backgroundColor: c.bg }]}>
-        <Spinner size="large" />
-      </View>
+      <ScreenChrome>
+        <View style={styles.center}>
+          <Spinner size="large" />
+        </View>
+      </ScreenChrome>
     );
   }
 
   if (!candidato) {
     return (
-      <View style={[styles.center, { backgroundColor: c.bg }]}>
-        <Text style={[styles.paragraph, styles.centerMuted, { color: c.textSecondary }]}>
-          Candidato no encontrado.
-        </Text>
-        <Button variant="ghost" onPress={() => navigation.goBack()}>
-          Volver
-        </Button>
-      </View>
+      <ScreenChrome>
+        <View style={styles.center}>
+          <Text style={[styles.paragraph, styles.centerMuted, { color: c.textSecondary }]}>
+            Candidato no encontrado.
+          </Text>
+          <Button variant="ghost" onPress={() => navigation.goBack()}>
+            Volver
+          </Button>
+        </View>
+      </ScreenChrome>
     );
   }
 
   const shareText = buildShareText(candidato, matchPct);
 
   return (
-    <View style={[styles.root, { backgroundColor: c.bg }]}>
+    <ScreenChrome>
       <ScrollView contentContainerStyle={styles.scroll}>
         <ScreenTopBar
           title="Perfil de candidato"
@@ -259,7 +264,7 @@ export function DetalleCandidatoScreen({
           Mientras mas preguntas coincidan en ambos, mayor confianza.
         </Text>
       </Modal>
-    </View>
+    </ScreenChrome>
   );
 }
 
@@ -567,7 +572,6 @@ function buildShareText(cand: Candidato, matchPct: number | null): string {
 // (numero de compatibilidad ultra prominente). Es el UNICO hardcode.
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
   center: {
     flex: 1,
     justifyContent: "center",
