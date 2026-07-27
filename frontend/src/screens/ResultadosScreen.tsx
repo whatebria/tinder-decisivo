@@ -25,6 +25,7 @@ import {
   useFavoritos,
   useMatchAnonimo,
   useMatchCandidatos,
+  usePerfil,
   useTiposEleccion,
   useToggleDescartado,
   useToggleFavorito,
@@ -72,6 +73,8 @@ export function ResultadosScreen({
   const c = useThemeColors();
   const isGuest = useAuthStore((s) => s.isGuest);
   const exitGuestMode = useAuthStore((s) => s.exitGuestMode);
+  const perfilQ = usePerfil();
+  const comunaUsuario = perfilQ.data?.comuna ?? null;
   const tipoEleccionId = useCuestionarioStore((s) => s.tipoEleccionId);
   const reset = useCuestionarioStore((s) => s.reset);
   const getRespuestasParaAnonimo = useCuestionarioStore(
@@ -214,6 +217,14 @@ export function ResultadosScreen({
         },
         guestTitle: { ...typography.small, fontWeight: "700", color: c.text },
         guestBody: { ...typography.overline, textTransform: "none", letterSpacing: 0, color: c.textSecondary },
+        ubicacionCard: {
+          padding: spacing.sp3,
+          borderRadius: radii.rMd,
+          borderWidth: 1,
+          gap: spacing.sp2,
+        },
+        ubicacionTitle: { ...typography.small, fontWeight: "700" },
+        ubicacionBody: { ...typography.overline, textTransform: "none", letterSpacing: 0, lineHeight: 18 },
         sectionLabel: {
           ...typography.overline,
           color: c.textSecondary,
@@ -264,6 +275,43 @@ export function ResultadosScreen({
               Tu match no se guardó. Crea una cuenta para conservarlo, marcar favoritos y elegir tu voto final.
             </Text>
             <Button onPress={exitGuestMode}>Crear una cuenta</Button>
+          </View>
+        ) : null}
+
+        {!isGuest && !comunaUsuario ? (
+          <View
+            style={[
+              styles.ubicacionCard,
+              { backgroundColor: c.warning + "18", borderColor: c.warning },
+            ]}
+          >
+            <Text style={[styles.ubicacionTitle, { color: c.text }]}>
+              Estas viendo TODOS los candidatos del pais
+            </Text>
+            <Text style={[styles.ubicacionBody, { color: c.textSecondary }]}>
+              Setea tu comuna en Perfil y solo veras a quienes puedes votar
+              (alcaldes de tu comuna, diputados de tu distrito).
+            </Text>
+            <Link block onPress={() => navigation.navigate("Perfil")}>
+              Ir a configurar mi comuna
+            </Link>
+          </View>
+        ) : null}
+
+        {!isGuest && comunaUsuario ? (
+          <View
+            style={[
+              styles.ubicacionCard,
+              { backgroundColor: c.card, borderColor: c.border },
+            ]}
+          >
+            <Text style={[styles.ubicacionBody, { color: c.textSecondary }]}>
+              Mostrando candidatos filtrados para {comunaUsuario.nombre}, Distrito{" "}
+              {comunaUsuario.distrito_numero}.
+            </Text>
+            <Link block onPress={() => navigation.navigate("Perfil")}>
+              Cambiar mi comuna
+            </Link>
           </View>
         ) : null}
 
