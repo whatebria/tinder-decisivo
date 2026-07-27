@@ -8,7 +8,7 @@ import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-na
 
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
-import { useThemeColors } from "../../theme/useTheme";
+import { useIsDark, useThemeColors } from "../../theme/useTheme";
 
 export type MatchTierKind = "high" | "mid" | "low";
 
@@ -38,16 +38,23 @@ function tierFromPercent(p: number): MatchTierKind {
 
 export function MatchTier({ percent, tier, label, showPercent, style }: MatchTierProps) {
   const c = useThemeColors();
+  const isDark = useIsDark();
   const resolvedTier: MatchTierKind =
     tier ?? (percent !== undefined ? tierFromPercent(percent) : "mid");
   const displayPercent = showPercent ?? percent !== undefined;
 
   const styles = useMemo(() => {
-    const palette: Record<MatchTierKind, { bg: string; fg: string }> = {
-      high: { bg: c.accent2, fg: c.success },
-      mid: { bg: c.card, fg: c.info },
-      low: { bg: c.card, fg: c.warning },
-    };
+    const palette: Record<MatchTierKind, { bg: string; fg: string; border: string }> = isDark
+      ? {
+          high: { bg: c.success800, fg: c.success100, border: c.success600 },
+          mid: { bg: c.info800, fg: c.info100, border: c.info600 },
+          low: { bg: c.warning800, fg: c.warning100, border: c.warning600 },
+        }
+      : {
+          high: { bg: c.success100, fg: c.success700, border: c.success500 },
+          mid: { bg: c.info100, fg: c.info700, border: c.info500 },
+          low: { bg: c.warning100, fg: c.warning700, border: c.warning500 },
+        };
     return {
       base: {
         alignSelf: "flex-start" as const,
@@ -57,7 +64,7 @@ export function MatchTier({ percent, tier, label, showPercent, style }: MatchTie
         borderRadius: radii.rFull,
         backgroundColor: palette[resolvedTier].bg,
         borderWidth: 1,
-        borderColor: palette[resolvedTier].fg,
+        borderColor: palette[resolvedTier].border,
       },
       text: {
         color: palette[resolvedTier].fg,
@@ -65,7 +72,7 @@ export function MatchTier({ percent, tier, label, showPercent, style }: MatchTie
         fontWeight: "600" as const,
       },
     };
-  }, [c, resolvedTier]);
+  }, [c, isDark, resolvedTier]);
 
   const finalLabel =
     label ??

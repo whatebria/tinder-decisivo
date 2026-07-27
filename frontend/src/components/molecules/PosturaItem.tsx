@@ -1,6 +1,10 @@
 /**
  * PosturaItem: compara tu respuesta con la del candidato en una pregunta.
- * Border-left semantico: verde = match total, amarillo = parcial, rojo = no coincide.
+ *
+ * Layout: pregunta arriba + match badge pill destacado + 2 columnas comparativas
+ * ("Tu voto" | "Candidato") con divider central. Border-left semantico segun match.
+ *
+ * Reactivo al tema (light/dark) via useThemeColors + useIsDark.
  */
 
 import React, { useMemo } from "react";
@@ -8,24 +12,18 @@ import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-na
 
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
-import { useThemeColors } from "../../theme/useTheme";
+import { useIsDark, useThemeColors } from "../../theme/useTheme";
 import { BookmarkButton } from "../atoms/BookmarkButton";
 
 export type PosturaMatch = "match" | "partial" | "no-match";
 
 export interface PosturaItemProps {
-  /** Pregunta original. */
   question: string;
-  /** Respuesta del usuario. */
   userAnswer: string;
-  /** Respuesta del candidato. */
   candidateAnswer: string;
-  /** Nombre corto del candidato para la columna. Default: "Candidato". */
   candidateName?: string;
   match: PosturaMatch;
-  /** Texto custom debajo. Default segun match. */
   matchLabel?: string;
-  /** Si esta definido, se muestra el chip de bookmark. */
   bookmarked?: boolean;
   onToggleBookmark?: () => void;
   bookmarkLoading?: boolean;
@@ -33,7 +31,7 @@ export interface PosturaItemProps {
 }
 
 const DEFAULT_LABEL: Record<PosturaMatch, string> = {
-  match: "Coinciden completamente",
+  match: "Coinciden",
   partial: "Coinciden parcialmente",
   "no-match": "No coinciden",
 };
@@ -51,71 +49,125 @@ export function PosturaItem({
   style,
 }: PosturaItemProps) {
   const c = useThemeColors();
+  const isDark = useIsDark();
 
   const styles = useMemo(() => {
-    const palette: Record<PosturaMatch, string> = {
-      match: c.success,
-      partial: c.warning,
-      "no-match": c.danger,
-    };
+    // Paleta por tipo de match. En dark invertimos (bg oscuro + fg claro).
+    const palette: Record<PosturaMatch, { bar: string; badgeBg: string; badgeFg: string }> = isDark
+      ? {
+          match: { bar: c.success500, badgeBg: c.success800, badgeFg: c.success100 },
+          partial: { bar: c.warning500, badgeBg: c.warning800, badgeFg: c.warning100 },
+          "no-match": { bar: c.danger500, badgeBg: c.danger800, badgeFg: c.danger100 },
+        }
+      : {
+          match: { bar: c.success, badgeBg: c.success100, badgeFg: c.success700 },
+          partial: { bar: c.warning, badgeBg: c.warning100, badgeFg: c.warning700 },
+          "no-match": { bar: c.danger, badgeBg: c.danger100, badgeFg: c.danger700 },
+        };
+    const p = palette[match];
+
     return StyleSheet.create({
       card: {
         backgroundColor: c.card,
         borderRadius: radii.rMd,
         padding: spacing.sp4,
         borderLeftWidth: 4,
-        borderLeftColor: palette[match],
+        borderLeftColor: p.bar,
+        gap: spacing.sp4,
+      },
+      headerRow: {
+        flexDirection: "row",
+        alignItems: "flex-start",
         gap: spacing.sp3,
       },
-      question: { fontSize: 15, fontWeight: "500", color: c.text, lineHeight: 22 },
-      votes: { flexDirection: "row", gap: spacing.sp4 },
-      voteCell: { flex: 1 },
-      lbl: { fontSize: 11, color: c.textTertiary, textTransform: "uppercase", letterSpacing: 0.5 },
-      val: { fontSize: 14, fontWeight: "600", color: c.text, marginTop: spacing.sp1 },
-      indicator: {
+      question: {
+        flex: 1,
+        fontSize: 15,
+        fontWeight: "600",
+        color: c.text,
+        lineHeight: 22,
+      },
+      badge: {
+        alignSelf: "flex-start",
+        paddingHorizontal: spacing.sp3,
+        paddingVertical: 4,
+        borderRadius: radii.rFull,
+        backgroundColor: p.badgeBg,
+      },
+      badgeText: {
+        fontSize: 11,
+        fontWeight: "700",
+        color: p.badgeFg,
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+      },
+      columns: {
         flexDirection: "row",
-        alignItems: "center",
-        gap: spacing.sp2,
-        marginTop: spacing.sp2,
+        alignItems: "stretch",
+        gap: spacing.sp3,
       },
-      dot: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: palette[match],
+      col: {
+        flex: 1,
+        gap: 4,
       },
-      indicatorText: { fontSize: 13, color: palette[match], fontWeight: "600" },
+      colLabel: {
+        fontSize: 11,
+        fontWeight: "600",
+        color: c.textTertiary,
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+      },
+      colValue: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: c.text,
+        lineHeight: 20,
+      },
+      divider: {
+        width: 1,
+        backgroundColor: c.border,
+        alignSelf: "stretch",
+      },
+      bookmarkRow: {
+        marginTop: spacing.sp1,
+      },
     });
-  }, [c, match]);
+  }, [c, isDark, match]);
 
   return (
     <View style={[styles.card, style]} accessibilityRole="none">
-      <Text style={styles.question}>{question}</Text>
-      <View style={styles.votes}>
-        <View style={styles.voteCell}>
-          <Text style={styles.lbl}>Tu voto</Text>
-          <Text style={styles.val}>{userAnswer}</Text>
-        </View>
-        <View style={styles.voteCell}>
-          <Text style={styles.lbl}>{candidateName}</Text>
-          <Text style={styles.val}>{candidateAnswer}</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.question}>{question}</Text>
+        <View style={styles.badge} accessibilityRole="text">
+          <Text style={styles.badgeText}>{matchLabel ?? DEFAULT_LABEL[match]}</Text>
         </View>
       </View>
-      <View style={styles.indicator}>
-        <View style={styles.dot} />
-        <Text style={styles.indicatorText}>{matchLabel ?? DEFAULT_LABEL[match]}</Text>
+
+      <View style={styles.columns}>
+        <View style={styles.col}>
+          <Text style={styles.colLabel}>Tu voto</Text>
+          <Text style={styles.colValue}>{userAnswer}</Text>
+        </View>
+        <View style={styles.divider} />
+        <View style={styles.col}>
+          <Text style={styles.colLabel}>{candidateName}</Text>
+          <Text style={styles.colValue}>{candidateAnswer}</Text>
+        </View>
       </View>
+
       {onToggleBookmark != null && bookmarked != null ? (
-        <BookmarkButton
-          saved={bookmarked}
-          onPress={onToggleBookmark}
-          loading={bookmarkLoading}
-          accessibilityLabel={
-            bookmarked
-              ? `Quitar postura guardada: ${question}`
-              : `Guardar postura: ${question}`
-          }
-        />
+        <View style={styles.bookmarkRow}>
+          <BookmarkButton
+            saved={bookmarked}
+            onPress={onToggleBookmark}
+            loading={bookmarkLoading}
+            accessibilityLabel={
+              bookmarked
+                ? `Quitar postura guardada: ${question}`
+                : `Guardar postura: ${question}`
+            }
+          />
+        </View>
       ) : null}
     </View>
   );
