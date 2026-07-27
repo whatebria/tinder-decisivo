@@ -30,10 +30,12 @@ import {
   ElectionCardAdd,
   HomeGreeting,
   HomeTopBar,
+  NoticiaDetailSheet,
   NovedadesFeed,
   SectionTitle,
   Spinner,
   useToast,
+  type NoticiaDetail,
   type NovedadFeedItem,
 } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
@@ -43,6 +45,7 @@ import { partitionTipos, useElectionsPrefsStore } from "../store/electionsPrefs"
 import { spacing } from "../theme/spacing";
 import { useThemeColors } from "../theme/useTheme";
 import { sanitizeSnippet } from "../utils/text";
+import { noticiaToDetail } from "../utils/noticia";
 
 // -- Helpers --------------------------------------------------------------
 
@@ -108,6 +111,7 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   const reiniciar = useReiniciarCuestionario();
 
   const [tipoAReiniciar, setTipoAReiniciar] = useState<TipoEleccion | null>(null);
+  const [selectedNoticia, setSelectedNoticia] = useState<NoticiaDetail | null>(null);
 
   const saludo = useMemo(() => {
     const base = greetingByHour();
@@ -211,7 +215,13 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
       snippet: sanitizeSnippet(n.descripcion),
       category: n.fuente,
       when: whenLabel(n.fecha_publicacion),
-      onPress: () => navigation.navigate("Noticias"),
+      onPress: () =>
+        setSelectedNoticia(
+          noticiaToDetail(n, {
+            when: whenLabel(n.fecha_publicacion),
+            sentiment: "neutral",
+          }),
+        ),
     });
   });
 
@@ -290,6 +300,12 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
         onConfirm={handleConfirmReiniciar}
         onCancel={() => setTipoAReiniciar(null)}
         variant="danger"
+      />
+
+      <NoticiaDetailSheet
+        visible={selectedNoticia !== null}
+        onClose={() => setSelectedNoticia(null)}
+        noticia={selectedNoticia}
       />
     </>
   );
