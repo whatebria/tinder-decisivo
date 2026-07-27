@@ -25,6 +25,7 @@ from ..services.respuestas import (
     editar_respuesta,
     reiniciar_cuestionario,
 )
+from ..services.tipos import get_base_tipo_ids
 
 logger = logging.getLogger(__name__)
 
@@ -62,10 +63,8 @@ class PreguntasPendientesView(APIView):
         # Combinar el tipo pedido + todos los tipos base (preguntas transversales
         # compartidas por todas las elecciones). Asi el user responde el base
         # una sola vez y cuenta para el match de cualquier eleccion.
-        base_ids = list(
-            TipoEleccion.objects.filter(es_base=True).values_list("id", flat=True)
-        )
-        tipo_ids = {int(tipo_eleccion_id), *base_ids}
+        # get_base_tipo_ids() esta cacheado (ver services/tipos.py).
+        tipo_ids = {int(tipo_eleccion_id), *get_base_tipo_ids()}
 
         pending = (
             Pregunta.objects.filter(tipo_eleccion_id__in=tipo_ids)

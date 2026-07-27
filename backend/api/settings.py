@@ -127,6 +127,23 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # ------------------------------------------------------------
+# Cache
+# ------------------------------------------------------------
+# LocMem: per-proceso, sin dependencias externas. Perfecto para dev y OK
+# para prod con 1 worker. Con multiples workers/pods, migrar a Redis:
+#   "BACKEND": "django.core.cache.backends.redis.RedisCache",
+#   "LOCATION": config("REDIS_URL"),
+# La logica de invalidacion (signals en TipoEleccion) es transparente al
+# backend usado.
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "servel-locmem",
+    },
+}
+
+
+# ------------------------------------------------------------
 # Email (para password reset)
 # ------------------------------------------------------------
 # En dev: console backend (imprime al stdout).

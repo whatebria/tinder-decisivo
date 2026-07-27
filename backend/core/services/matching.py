@@ -27,6 +27,7 @@ from ..models import (
     RespuestaUsuario,
     TipoEleccion,
 )
+from .tipos import get_base_tipo_ids
 
 # ------------------------------------------------------------
 # Constantes del algoritmo
@@ -56,10 +57,11 @@ def _tipo_ids_con_base(tipo_eleccion) -> list[int]:
 
     Preguntas de tipos con `es_base=True` son transversales y aplican a TODAS
     las elecciones (valores/ideologia que se responden una sola vez).
+
+    Los ids base vienen cacheados (ver services/tipos.py).
     """
-    base_ids = list(TipoEleccion.objects.filter(es_base=True).values_list("id", flat=True))
     tipo_id = tipo_eleccion.id if hasattr(tipo_eleccion, "id") else int(tipo_eleccion)
-    return list({tipo_id, *base_ids})
+    return list({tipo_id, *get_base_tipo_ids()})
 
 
 def _filtrar_candidatos_por_territorio(qs, comuna: Optional[Comuna]):
@@ -283,12 +285,14 @@ def calcular_match_detalle(user, candidato) -> Optional[dict]:
 
     # Incluir tipos base: preguntas transversales aplican a candidatos de
     # cualquier eleccion (si el candidato tiene postura en ellas).
-    base_tipos = list(TipoEleccion.objects.filter(es_base=True))
-    tipos_con_base = list({t.id: t for t in tipos + base_tipos}.values())
+    # Usamos _tipo_ids_con_base para todos los tipos del candidato y unimos.
+    tipo_ids: set[int] = set()
+    for t in tipos:
+        tipo_ids.update(_tipo_ids_con_base(t))
 
     respuestas = (
         RespuestaUsuario.objects
-        .filter(user=user, pregunta__tipo_eleccion__in=tipos_con_base)
+        .filter(user=user, pregunta__tipo_eleccion_id__in=tipo_ids)
         .select_related("opcion_elegida", "pregunta")
     )
     respuestas_validas = [r for r in respuestas if not r.opcion_elegida.es_no_se]

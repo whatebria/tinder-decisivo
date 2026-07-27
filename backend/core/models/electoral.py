@@ -2,6 +2,8 @@
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.signals import post_delete, post_save
+from django.dispatch import receiver
 
 from .territorio import Comuna, Distrito
 
@@ -123,3 +125,19 @@ class Candidato(models.Model):
 # NOTA: no hay signal Candidato.pre_save para sincronizar unidad_territorial.
 # Los seeds setean el FK explicitamente. Si creas un Candidato manualmente
 # con solo comuna/distrito, corre `sync_candidatos_ut` para actualizar UT.
+
+
+# ----------------------------------------------------------------------------
+# Signal: invalidar cache de tipos base cuando TipoEleccion cambia.
+# ----------------------------------------------------------------------------
+# El cache de `get_base_tipo_ids()` tiene TTL 1h. Este signal lo tira antes
+# si alguien crea/edita/borra un TipoEleccion, garantizando cero staleness.
+# Se dispara para TODO save/delete (aunque es_base no haya cambiado): es mas
+# barato que trackear el diff y correcto siempre. Los TipoEleccion se editan
+# una vez cada anios, no es hot path.
+@receiver(post_save, sender=TipoEleccion)
+@receiver(post_delete, sender=TipoEleccion)
+def _invalidar_cache_tipos_base(sender, instance, **kwargs):
+    # Import local para evitar circular (services -> models -> services).
+    from ..services.tipos import invalidar_cache_base_tipo_ids
+    invalidar_cache_base_tipo_ids()
