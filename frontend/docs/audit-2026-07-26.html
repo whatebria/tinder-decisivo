@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Auditoría Frontend Servel · 2026-07-26</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg:        "#F5F7F5",
+          card:      "#FFFFFF",
+          ink:       "#1A2B33",
+          ink2:      "#5A6B73",
+          ink3:      "#8A9199",
+          border:    "#DDE4E1",
+          border2:   "#EEF2EF",
+          brand:     "#2E5F7E",
+          brand2:    "#24506C",
+          brand50:   "#EEF3F7",
+          brand100:  "#D6E2EB",
+          sage:      "#7BA098",
+          success:   "#6B9B7A",
+          success50: "#F0F5F1",
+          warning:   "#C89B5C",
+          warning50: "#FBF6EE",
+          danger:    "#B85C5C",
+          danger50:  "#FAEEEE",
+          info:      "#5C8AB8",
+          info50:    "#EEF3F8",
+        },
+        fontFamily: {
+          sans: ['system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+          mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  :root { color-scheme: light; }
+  html, body { background: #F5F7F5; }
+  details > summary { list-style: none; cursor: pointer; }
+  details > summary::-webkit-details-marker { display: none; }
+  details[open] > summary .chev { transform: rotate(90deg); }
+  .chev { transition: transform .15s ease; }
+  .anchor { scroll-margin-top: 1rem; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  table { border-collapse: collapse; }
+</style>
+</head>
+<body class="text-ink font-sans">
+
+<!-- ==================== HEADER ==================== -->
+<header class="border-b border-border bg-card">
+  <div class="max-w-6xl mx-auto px-6 py-8">
+    <p class="text-xs uppercase tracking-widest text-ink3 mb-2">Auditoría técnica · Frontend</p>
+    <h1 class="text-3xl md:text-4xl font-bold text-ink">
+      Servel <span class="text-brand">/</span> tinder-decisivo
+    </h1>
+    <p class="mt-2 text-ink2 max-w-2xl">
+      Revisión de arquitectura, escalabilidad, mantenibilidad y documentación del código
+      del frontend (React Native + Expo + Tamagui). Snapshot tomado del working tree actual
+      (con workstream «delete decision» a medio hacer).
+    </p>
+    <div class="mt-6 flex flex-wrap gap-4 text-sm">
+      <span class="inline-flex items-center gap-2 rounded-full bg-brand50 text-brand2 px-3 py-1 border border-brand100">
+        <span class="font-semibold">Fecha:</span> 2026-07-26
+      </span>
+      <span class="inline-flex items-center gap-2 rounded-full bg-brand50 text-brand2 px-3 py-1 border border-brand100">
+        <span class="font-semibold">Alcance:</span> <code>frontend/</code> (164 archivos, ~755 KB)
+      </span>
+      <span class="inline-flex items-center gap-2 rounded-full bg-brand50 text-brand2 px-3 py-1 border border-brand100">
+        <span class="font-semibold">Stack:</span> Expo 57 · RN 0.86 · React 19 · TS strict
+      </span>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-6 py-10 space-y-10">
+
+  <!-- ==================== EXECUTIVE INSIGHTS (TOP) ==================== -->
+  <section class="rounded-2xl border border-border bg-card p-6 shadow-sm">
+    <h2 class="text-xl font-bold text-ink mb-4">TL;DR ejecutivo</h2>
+    <p class="text-ink2 leading-relaxed">
+      La <strong class="text-ink">arquitectura del proyecto es muy sana</strong>: atomic design real,
+      tokens con dark mode y WCAG AA verificado, tipos autogenerados desde OpenAPI, hooks React Query
+      centralizados y catálogo de design system navegable. Pero tiene
+      <strong class="text-danger">4 bugs latentes</strong> (uno bloquea <code>tsc</code>),
+      <strong class="text-warning">duplicación de utils en 3 screens</strong>,
+      <strong class="text-warning">4 screens que rompen la regla de &lt;600 líneas</strong>,
+      <strong class="text-warning">cobertura de tests limitada a services</strong> y
+      <strong class="text-warning">README congelado en Fase 2C</strong> (vamos por Fase 5+).
+    </p>
+  </section>
+
+  <!-- ==================== KPI CARDS ==================== -->
+  <section aria-label="Métricas clave" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="rounded-xl border border-border bg-card p-5">
+      <div class="text-xs uppercase tracking-wide text-ink3">Bugs P0</div>
+      <div class="mt-1 text-3xl font-bold text-danger">4</div>
+      <div class="mt-1 text-xs text-ink2">tsc roto en HEAD</div>
+    </div>
+    <div class="rounded-xl border border-border bg-card p-5">
+      <div class="text-xs uppercase tracking-wide text-ink3">Findings P1</div>
+      <div class="mt-1 text-3xl font-bold text-warning">7</div>
+      <div class="mt-1 text-xs text-ink2">mantenibilidad</div>
+    </div>
+    <div class="rounded-xl border border-border bg-card p-5">
+      <div class="text-xs uppercase tracking-wide text-ink3">Archivos &gt; 600 líneas</div>
+      <div class="mt-1 text-3xl font-bold text-warning">3</div>
+      <div class="mt-1 text-xs text-ink2">de 164 (+1 al borde)</div>
+    </div>
+    <div class="rounded-xl border border-border bg-card p-5">
+      <div class="text-xs uppercase tracking-wide text-ink3">Tests unitarios</div>
+      <div class="mt-1 text-3xl font-bold text-info">4</div>
+      <div class="mt-1 text-xs text-ink2">solo en services/</div>
+    </div>
+  </section>
+
+  <!-- ==================== NAV ==================== -->
+  <nav aria-label="Índice" class="rounded-xl border border-border bg-card p-4 text-sm">
+    <p class="text-xs uppercase tracking-widest text-ink3 mb-2">Índice</p>
+    <ul class="flex flex-wrap gap-x-4 gap-y-1">
+      <li><a class="text-brand hover:text-brand2 underline" href="#bien">Lo que está bien</a></li>
+      <li><a class="text-brand hover:text-brand2 underline" href="#p0">Findings P0 · bugs</a></li>
+      <li><a class="text-brand hover:text-brand2 underline" href="#p1">Findings P1 · mantenibilidad</a></li>
+      <li><a class="text-brand hover:text-brand2 underline" href="#p2">Findings P2 · docs &amp; tests</a></li>
+      <li><a class="text-brand hover:text-brand2 underline" href="#p3">Findings P3 · nice-to-have</a></li>
+      <li><a class="text-brand hover:text-brand2 underline" href="#plan">Plan de refactor</a></li>
+    </ul>
+  </nav>
+
+  <!-- ==================== LO QUE ESTÁ BIEN ==================== -->
+  <section id="bien" class="anchor space-y-4">
+    <h2 class="text-2xl font-bold text-ink flex items-center gap-3">
+      <span class="inline-block w-2 h-6 rounded bg-success"></span>
+      Lo que está muy bien
+    </h2>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="rounded-xl border border-border bg-success50 p-5">
+        <h3 class="font-semibold text-ink mb-2">Configuración base</h3>
+        <ul class="text-sm text-ink2 space-y-1 list-disc pl-5">
+          <li><code>tsconfig.json</code> con <code>strict: true</code></li>
+          <li>Types autogenerados desde OpenAPI (<code>schema.yml</code> + <code>types:gen</code>)</li>
+          <li>Contrato con backend tipado end-to-end</li>
+        </ul>
+      </div>
+      <div class="rounded-xl border border-border bg-success50 p-5">
+        <h3 class="font-semibold text-ink mb-2">Bootstrap sólido</h3>
+        <ul class="text-sm text-ink2 space-y-1 list-disc pl-5">
+          <li><code>App.tsx</code>: ErrorBoundary → QueryClient → Tamagui → Nav</li>
+          <li>4 stores se hidratan en paralelo antes de rendear</li>
+          <li>Web: sincroniza bg del <code>&lt;body&gt;</code> con tema activo</li>
+        </ul>
+      </div>
+      <div class="rounded-xl border border-border bg-success50 p-5">
+        <h3 class="font-semibold text-ink mb-2">Design system real</h3>
+        <ul class="text-sm text-ink2 space-y-1 list-disc pl-5">
+          <li>Atomic design con 27 atoms · 29 molecules · 16 organisms</li>
+          <li>Barrel <code>components/index.ts</code> documentado por fase</li>
+          <li><code>DesignSystemScreen</code> con toolbar + sidebar + search (gated <code>__DEV__</code>)</li>
+        </ul>
+      </div>
+      <div class="rounded-xl border border-border bg-success50 p-5">
+        <h3 class="font-semibold text-ink mb-2">Tokens con dark mode</h3>
+        <ul class="text-sm text-ink2 space-y-1 list-disc pl-5">
+          <li>Contrast ratios documentados (WCAG 2.2 AA verificado)</li>
+          <li>Escalas 50-900 por familia semántica</li>
+          <li><code>useThemeColors()</code>/<code>useIsDark()</code> reactivos al store</li>
+        </ul>
+      </div>
+      <div class="rounded-xl border border-border bg-success50 p-5">
+        <h3 class="font-semibold text-ink mb-2">Auth &amp; API</h3>
+        <ul class="text-sm text-ink2 space-y-1 list-disc pl-5">
+          <li>3 estados: unauthenticated / guest / authenticated</li>
+          <li><code>isGuest</code> intencionalmente NO persistido</li>
+          <li>Interceptor 401 con guard anti-logout-en-guest</li>
+        </ul>
+      </div>
+      <div class="rounded-xl border border-border bg-success50 p-5">
+        <h3 class="font-semibold text-ink mb-2">Accesibilidad</h3>
+        <ul class="text-sm text-ink2 space-y-1 list-disc pl-5">
+          <li>40+ <code>accessibilityLabel/Role/Hint</code> distribuidos</li>
+          <li>Cubre atoms, molecules, organisms y screens</li>
+          <li>Labels contextuales (ej: «Ver detalle de {nombre}»)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== P0 ==================== -->
+  <section id="p0" class="anchor space-y-4">
+    <h2 class="text-2xl font-bold text-ink flex items-center gap-3">
+      <span class="inline-block w-2 h-6 rounded bg-danger"></span>
+      Findings P0 · bugs latentes
+    </h2>
+    <p class="text-sm text-ink2">
+      Estos cuatro rompen <code>tsc</code> en HEAD (verificado) o generan comportamiento incorrecto silencioso.
+      Bloquean cualquier refactor grande hasta resolverlos.
+    </p>
+
+    <details open class="rounded-xl border border-danger/30 bg-card overflow-hidden">
+      <summary class="flex items-center justify-between px-5 py-4 bg-danger50 border-b border-danger/20">
+        <div class="flex items-center gap-3">
+          <span class="chev text-danger">▶</span>
+          <span class="font-mono text-xs bg-danger text-white px-2 py-0.5 rounded">P0.1</span>
+          <span class="font-semibold text-ink">Invalidate a queryKey inexistente</span>
+        </div>
+        <span class="text-xs text-ink3">hooks.ts:346</span>
+      </summary>
+      <div class="p-5 space-y-3 text-sm">
+        <p class="text-ink2">
+          <code>useActualizarComuna</code> invalida <code>["match"]</code> (singular), pero los keys reales son
+          <code>["matches", ...]</code> y <code>["match-detalle", ...]</code>. Cambiar de comuna
+          <strong>no invalida los matches</strong> aunque el backend sí los recalcula.
+        </p>
+        <pre class="bg-ink text-brand50 text-xs p-3 rounded overflow-x-auto"><code>// hooks.ts:346
+qc.invalidateQueries({ queryKey: ["match"] });   // ← singular, no matchea nada</code></pre>
+        <p class="text-ink2"><strong>Fix:</strong> cambiar a <code>["matches"]</code> o usar helper de <code>queryKeys</code>.</p>
+      </div>
+    </details>
+
+    <details class="rounded-xl border border-danger/30 bg-card overflow-hidden">
+      <summary class="flex items-center justify-between px-5 py-4 bg-danger50 border-b border-danger/20">
+        <div class="flex items-center gap-3">
+          <span class="chev text-danger">▶</span>
+          <span class="font-mono text-xs bg-danger text-white px-2 py-0.5 rounded">P0.2</span>
+          <span class="font-semibold text-ink">NewsCard sin prop <code>mentionedCandidates</code></span>
+        </div>
+        <span class="text-xs text-ink3">NoticiasScreen.tsx:302</span>
+      </summary>
+      <div class="p-5 space-y-3 text-sm">
+        <p class="text-ink2"><code>tsc</code> falla en HEAD. La screen pasa un prop que la interface del componente no declara.</p>
+        <pre class="bg-ink text-brand50 text-xs p-3 rounded overflow-x-auto"><code>error TS2322: Property 'mentionedCandidates' does not exist
+  on type 'IntrinsicAttributes &amp; NewsCardProps'.</code></pre>
+        <p class="text-ink2"><strong>Fix:</strong> agregar el prop a <code>NewsCardProps</code> (parte del workstream nuevo).</p>
+      </div>
+    </details>
+
+    <details class="rounded-xl border border-danger/30 bg-card overflow-hidden">
+      <summary class="flex items-center justify-between px-5 py-4 bg-danger50 border-b border-danger/20">
+        <div class="flex items-center gap-3">
+          <span class="chev text-danger">▶</span>
+          <span class="font-mono text-xs bg-danger text-white px-2 py-0.5 rounded">P0.3</span>
+          <span class="font-semibold text-ink">ResultadoHero rompió contrato con consumers</span>
+        </div>
+        <span class="text-xs text-ink3">catalog/organisms · ResultadosScreen</span>
+      </summary>
+      <div class="p-5 space-y-3 text-sm">
+        <p class="text-ink2">
+          <code>ResultadoHero</code> ya no declara <code>isDecision</code> en su interface, pero
+          <code>catalog/organisms/candidate.tsx:196</code> y <code>ResultadosScreen.tsx:379</code>
+          siguen pasándolo. En strict mode, props extra rompen.
+        </p>
+        <p class="text-ink2"><strong>Fix:</strong> sacar <code>isDecision</code> de ambos consumers (parte del workstream «delete decision»).</p>
+      </div>
+    </details>
+
+    <details class="rounded-xl border border-danger/30 bg-card overflow-hidden">
+      <summary class="flex items-center justify-between px-5 py-4 bg-danger50 border-b border-danger/20">
+        <div class="flex items-center gap-3">
+          <span class="chev text-danger">▶</span>
+          <span class="font-mono text-xs bg-danger text-white px-2 py-0.5 rounded">P0.4</span>
+          <span class="font-semibold text-ink">Import huérfano a MiDecisionScreen</span>
+        </div>
+        <span class="text-xs text-ink3">AppNavigator.tsx:20</span>
+      </summary>
+      <div class="p-5 space-y-3 text-sm">
+        <p class="text-ink2">
+          Se borró el archivo <code>MiDecisionScreen.tsx</code> pero el import quedó en
+          <code>AppNavigator.tsx</code>. <code>tsc</code> rompe.
+        </p>
+        <p class="text-ink2"><strong>Fix:</strong> borrar el import + la ruta del stack.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ==================== P1 ==================== -->
+  <section id="p1" class="anchor space-y-4">
+    <h2 class="text-2xl font-bold text-ink flex items-center gap-3">
+      <span class="inline-block w-2 h-6 rounded bg-warning"></span>
+      Findings P1 · mantenibilidad &amp; escalabilidad
+    </h2>
+
+    <details open class="rounded-xl border border-warning/30 bg-card overflow-hidden">
+      <summary class="flex items-center justify-between px-5 py-4 bg-warning50 border-b border-warning/20">
+        <div class="flex items-center gap-3">
+          <span class="chev text-warning">▶</span>
+          <span class="font-mono text-xs bg-warning text-white px-2 py-0.5 rounded">P1.1</span>
+          <span class="font-semibold text-ink"><code>queryKeys</code> centralizados abandonados</span>
+        </div>
+        <span class="text-xs text-ink3">DRY</span>
+      </summary>
+      <div class="p-5 space-y-3 text-sm">
+        <p class="text-ink2">
+          <code>queryClient.ts</code> define un helper <code>queryKeys</code>, pero <code>hooks.ts</code> lo ignora en 8 lugares.
+        </p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs border border-border">
+            <thead class="bg-brand50">
+              <tr>
+                <th class="text-left px-3 py-2 border border-border">queryKey hardcoded</th>
+                <th class="text-left px-3 py-2 border border-border">Debería usar</th>
+              </tr>
+            </thead>
+            <tbody class="text-ink2">
+              <tr><td class="px-3 py-1.5 border border-border"><code>["matches", tipoEleccionId]</code></td><td class="px-3 py-1.5 border border-border"><code>queryKeys.matches(...)</code></td></tr>
+              <tr><td class="px-3 py-1.5 border border-border"><code>["misRespuestas", ...]</code> (x2)</td><td class="px-3 py-1.5 border border-border"><code>queryKeys.misRespuestas(...)</code></td></tr>
+              <tr><td class="px-3 py-1.5 border border-border"><code>["match-detalle", candidatoId]</code></td><td class="px-3 py-1.5 border border-border"><code>queryKeys.matchDetalle(...)</code></td></tr>
+              <tr><td class="px-3 py-1.5 border border-border"><code>["posturas", ...]</code></td><td class="px-3 py-1.5 border border-border"><code>queryKeys.posturas(...)</code></td></tr>
+              <tr><td class="px-3 py-1.5 border border-border"><code>["perfil"]</code></td><td class="px-3 py-1.5 border border-border"><code>queryKeys.perfil</code></td></tr>
+              <tr><td class="px-3 py-1.5 border border-border"><code>["regiones"]</code></td><td class="px-3 py-1.5 border border-border"><code>queryKeys.regiones</code></td></tr>
+              <tr><td class="px-3 py-1.5 border border-border"><code>["comunas", ...]</code></td><td class="px-3 py-1.5 border border-border"><code>queryKeys.comunas(...)</code></td></tr>
+              <tr class="bg-danger50">
+                <td class="px-3 py-1.5 border border-border"><code>["noticias", ...]</code> (feed)</td>
+                <td class="px-3 py-1.5 border border-border">colisiona por prefix con <code>queryKeys.noticiasCandidato</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-ink2"><strong>Recomendación:</strong> promover todo a helpers y separar namespaces (<code>["noticias", "feed", ...]</code> vs <code>["noticias", "porCandidato", id]</code>).</p>
+      </div>
+    </details>
+
+    <details class="rounded-xl border border-warning/30 bg-card overflow-hidden">
+      <summary class="flex items-center justify-between px-5 py-4 bg-warning50 border-b border-warning/20">
+        <div class="flex items-center gap-3">
+          <span class="chev text-warning">▶</span>
+          <span class="font-mono text-xs bg-warning text-white px-2 py-0.5 rounded">P1.2</span>
+          <span class="font-semibold text-ink"><code>nombreCompleto</code>/<code>iniciales</code> duplicados en 3 screens</span>
+        </div>
+        <span class="text-xs text-ink3">DRY + idioma</span>
+      </summary>
+      <div class="p-5 space-y-3 text-sm">
+        <p class="text-ink2"><code>utils/candidato.ts</code> exporta ambas funciones. Sin embargo:</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs border border-border">
+            <thead class="bg-brand50">
+              <tr>
+                <th class="text-left px-3 py-2 border border-border">Screen</th>
+                <th class="text-left px-3 py-2 border border-border">Duplica como</th>
+                <th class="text-left px-3 py-2 border border-border">Idioma</th>
+              </tr>
+            </thead>
+            <tbody class="text-ink2">
+              <tr><td class="px-3 py-1.5 border border-border"><code>CompararScreen.tsx:61,66</code></td><td class="px-3 py-1.5 border border-border"><code>nombreCompleto</code>, <code>iniciales</code></td><td class="px-3 py-1.5 border border-border">es </td></tr>
+              <tr><td class="px-3 py-1.5 border border-border"><code>DetalleCandidatoScreen.tsx:76,80</code></td><td class="px-3 py-1.5 border border-border"><code>fullName</code>, <code>initials</code></td><td class="px-3 py-1.5 border border-border text-danger">en </td></tr>
+              <tr><td class="px-3 py-1.5 border border-border"><code>MisGuardadosScreen.tsx:64,155</code></td><td class="px-3 py-1.5 border border-border"><code>fullName</code>, <code>initials</code> (signature distinta)</td><td class="px-3 py-1.5 border border-border text-danger">en </td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-ink2">
+          <strong>Impacto:</strong> mezcla de idiomas (regla del proyecto: español neutro),
+          3 implementaciones divergentes, cambios locales que no propagan.
+        </p>
+        <p class="text-ink2"><strong>Fix:</strong> borrar las locales e importar de <code>utils/candidato</code>. Refactor mecánico.</p>
+      </div>
+    </details>
+
+    <details class="rounded-xl border border-warning/30 bg-card overflow-hidden">
+      <summary class="flex items-center justify-between px-5 py-4 bg-warning50 border-b border-warning/20">
+        <div class="flex items-center gap-3">
+          <span class="chev text-warning">▶</span>
+          <span class="font-mono text-xs bg-warning text-white px-2 py-0.5 rounded">P1.3</span>
+          <span class="font-semibold text-ink">Screens que rompen el límite de 600 líneas</span>
+        </div>
+        <span class="text-xs text-ink3">cohesión</span>
+      </summary>
+      <div class="p-5 space-y-3 text-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs border border-border">
+            <thead class="bg-brand50">
+              <tr>
+                <th class="text-left px-3 py-2 border border-border">Screen</th>
+                <th class="text-right px-3 py-2 border border-border">Líneas</th>
+                <th class="text-left px-3 py-2 border border-border">Causa raíz</th>
+              </tr>
+            </thead>
+            <tbody class="text-ink2">
+              <tr class="bg-danger50">
+                <td class="px-3 py-1.5 border border-border"><code>NoticiasScreen</code></td>
+                <td class="px-3 py-1.5 border border-border text-right font-mono font-bold text-danger">754</td>
+                <td class="px-3 py-1.5 border border-border">6 states de filtros + modal + feed + detail sheet inline</td>
+              </tr>
+              <tr class="bg-danger50">
+                <td class="px-3 py-1.5 border border-border"><code>DetalleCandidatoScreen</code></td>
+                <td class="px-3 py-1.5 border border-border text-right font-mono font-bold text-danger">676</td>
+                <td class="px-3 py-1.5 border border-border">3 tabs (resumen/posturas/noticias) en 1 sola screen</td>
+              </tr>
+              <tr class="bg-danger50">
+                <td class="px-3 py-1.5 border border-border"><code>CandidatosScreen</code></td>
+                <td class="px-3 py-1.5 border border-border text-right font-mono font-bold text-danger">640</td>
+                <td class="px-3 py-1.5 border border-border">Filtros similares a Noticias (pattern repetido)</td>
+              </tr>
+              <tr class="bg-warning50">
+                <td class="px-3 py-1.5 border border-border"><code>CompararScreen</code></td>
+                <td class="px-3 py-1.5 border border-border text-right font-mono font-bold text-warning">532</td>
+                <td class="px-3 py-1.5 border border-border">Comparator + slot picker + filtros diff</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-3 space-y-2">
+          <p class="text-ink2"><strong>Splits sugeridos:</strong></p>
+          <ul class="list-disc pl-5 text-ink2 space-y-1">
+            <li><strong>NoticiasScreen</strong>: extraer <code>useNoticiasFilters()</code> + <code>&lt;NoticiasFiltersSheet&gt;</code> + <code>&lt;NoticiasFilterBar&gt;</code> → screen queda ~200 líneas.</li>
+            <li><strong>DetalleCandidatoScreen</strong>: separar <code>&lt;TabResumen&gt;</code>, <code>&lt;TabPosturas&gt;</code>, <code>&lt;TabNoticias&gt;</code> como sub-componentes.</li>
+            <li><strong>CompararScreen</strong>: verificar si sigue vigente después del delete-decision workstream.</li>
+          </ul>
+        </div>
+      </div>
+    </details>
+
+    <details class="rounded-xl border border-warning/30 bg-card overflow-hidden">
+      <summary class="flex items-center justify-between px-5 py-4 bg-warning50 border-b border-warning/20">
+        <div class="flex items-center gap-3">
+          <span class="chev text-warning">▶</span>
+          <span class="font-mono text-xs bg-warning text-white px-2 py-0.5 rounded">P1.4</span>
+          <span class="font-semibold text-ink">Modal molecule sub-adoptada</span>
+        </div>
+        <span class="text-xs text-ink3">5 modales legacy</span>
+      </summary>
+      <div class="p-5 space-y-3 text-sm">
+        <p class="text-ink2">
+          ConfirmModal ya está migrado en el stash. Faltan 5 modales que siguen implementando
+          backdrop/card/shadows a mano en vez de consumir <code>&lt;Modal&gt;</code>:
+        </p>
+        <ul class="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+          <li class="px-3 py-2 rounded bg-brand50 border border-brand100 font-mono text-brand2">PreguntaInfoModal</li>
+          <li class="px-3 py-2 rounded bg-brand50 border border-brand100 font-mono text-brand2">ShareModal</li>
+          <li class="px-3 py-2 rounded bg-brand50 border border-brand100 font-mono text-brand2">CambiarPasswordModal</li>
+          <li class="px-3 py-2 rounded bg-brand50 border border-brand100 font-mono text-brand2">EliminarCuentaModal</li>
+          <li class="px-3 py-2 rounded bg-brand50 border border-brand100 font-mono text-brand2">EditarRespuestaModal</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="rounded-xl border border-warning/30 bg-card overflow-hidden">
+      <summary class="flex items-center justify-between px-5 py-4 bg-warning50 border-b border-warning/20">
+        <div class="flex items-center gap-3">
+          <span class="chev text-warning">▶</span>
+          <span class="font-mono text-xs bg-warning text-white px-2 py-0.5 rounded">P1.5</span>
+          <span class="font-semibold text-ink">Types duplicados entre <code>endpoints.ts</code> y <code>types/api.ts</code></span>
+        </div>
+        <span class="text-xs text-ink3">contrato</span>
+      </summary>
+      <div class="p-5 space-y-3 text-sm">
+        <p class="text-ink2">
+          Pattern inconsistente. Para <code>Candidato</code>, <code>Pregunta</code>, <code>Noticia</code>
+          usás alias del schema OpenAPI. Para <code>Perfil</code>, <code>Region</code>, <code>ComunaInline</code>,
+          <code>NoticiaBookmark</code>, <code>MatchDetalle</code>, <code>MiRespuesta</code>… declarás la interface a mano.
+        </p>
+        <p class="text-ink2">
+          <strong>Riesgo:</strong> si el backend cambia el shape, los alias se actualizan con
+          <code>types:gen</code>, las interfaces manuales no. Bug latente esperando.
+        </p>
+        <p class="text-ink2"><strong>Fix:</strong> migrar todas a <code>Schemas["X"]</code> cuando existan en el schema.</p>
+      </div>
+    </details>
+
+    <details class="rounded-xl border border-warning/30 bg-card overflow-hidden">
+      <summary class="flex items-center justify-between px-5 py-4 bg-warning50 border-b border-warning/20">
+        <div class="flex items-center gap-3">
+          <span class="chev text-warning">▶</span>
+          <span class="font-mono text-xs bg-warning text-white px-2 py-0.5 rounded">P1.6</span>
+          <span class="font-semibold text-ink"><code>useCandidato(id)</code> refetchea la lista completa</span>
+        </div>
+        <span class="text-xs text-ink3">performance</span>
+      </summary>
+      <div class="p-5 space-y-3 text-sm">
+        <p class="text-ink2">
+          Ya está el comentario «si crece a &gt;100 candidatos, agregar endpoint dedicado», pero
+          el <code>queryKey</code> es <code>queryKeys.candidato(id)</code> — cada <code>useCandidato(id)</code>
+          hace un fetch completo. <strong>Falta reusar el cache</strong>.
+        </p>
+        <pre class="bg-ink text-brand50 text-xs p-3 rounded overflow-x-auto"><code>// Fix: leer del cache antes de fetchear
+const cached = queryClient.getQueryData&lt;Candidato[]&gt;(queryKeys.candidatos);
+if (cached) return cached.find(c =&gt; c.id === id) ?? null;
+// ...else fetch</code></pre>
+      </div>
+    </details>
+
+    <details class="rounded-xl border border-warning/30 bg-card overflow-hidden">
+      <summary class="flex items-center justify-between px-5 py-4 bg-warning50 border-b border-warning/20">
+        <div class="flex items-center gap-3">
+          <span class="chev text-warning">▶</span>
+          <span class="font-mono text-xs bg-warning text-white px-2 py-0.5 rounded">P1.7</span>
+          <span class="font-semibold text-ink"><code>apiClient</code> sin retry ni cancel token</span>
+        </div>
+        <span class="text-xs text-ink3">resiliencia</span>
+      </summary>
+      <div class="p-5 space-y-3 text-sm">
+        <p class="text-ink2">
+          Requests fuera de React Query (login, submit, mutations) van sin retry.
+          Aceptable, pero conviene documentar la decisión o aplicar retry a nivel axios interceptor
+          para operaciones idempotentes.
+        </p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ==================== P2 ==================== -->
+  <section id="p2" class="anchor space-y-4">
+    <h2 class="text-2xl font-bold text-ink flex items-center gap-3">
+      <span class="inline-block w-2 h-6 rounded bg-info"></span>
+      Findings P2 · documentación &amp; tests
+    </h2>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <details open class="rounded-xl border border-info/30 bg-card overflow-hidden">
+        <summary class="flex items-center gap-3 px-5 py-4 bg-info50 border-b border-info/20">
+          <span class="chev text-info">▶</span>
+          <span class="font-mono text-xs bg-info text-white px-2 py-0.5 rounded">P2.1</span>
+          <span class="font-semibold text-ink">README desactualizado (grave)</span>
+        </summary>
+        <div class="p-5 text-sm text-ink2">
+          <ul class="list-disc pl-5 space-y-1">
+            <li>Dice «theme <strong>Walmart</strong>» — es Servel/decisivo. Herencia de template.</li>
+            <li>Estructura menciona <strong>solo <code>RadarChart.tsx</code></strong> — hoy hay 72 components.</li>
+            <li>Enumera 2 stores. Existen 6.</li>
+            <li>Roadmap: <strong>Fase 2C</strong>. Realidad: post Fase 5.</li>
+            <li>Base URL dice puerto <strong>8000</strong>. <code>config.ts</code> usa <strong>8010</strong>.</li>
+            <li>Sin mención al modo guest, DesignSystemScreen, tests, coverage.</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="rounded-xl border border-info/30 bg-card overflow-hidden">
+        <summary class="flex items-center gap-3 px-5 py-4 bg-info50 border-b border-info/20">
+          <span class="chev text-info">▶</span>
+          <span class="font-mono text-xs bg-info text-white px-2 py-0.5 rounded">P2.2</span>
+          <span class="font-semibold text-ink">AGENTS.md muy escueto</span>
+        </summary>
+        <div class="p-5 text-sm text-ink2">
+          <p class="mb-2">3 líneas útiles pero le faltan hints críticos:</p>
+          <ul class="list-disc pl-5 space-y-1">
+            <li>Ubicación de tokens (<code>src/theme/</code>)</li>
+            <li>«Usar <code>useThemeColors()</code>, no <code>import { colors }</code>»</li>
+            <li>«Antes de tocar tipos, chequear <code>types/api.ts</code>»</li>
+            <li>«Antes de duplicar helpers, ver <code>utils/candidato.ts</code>»</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="rounded-xl border border-info/30 bg-card overflow-hidden">
+        <summary class="flex items-center gap-3 px-5 py-4 bg-info50 border-b border-info/20">
+          <span class="chev text-info">▶</span>
+          <span class="font-mono text-xs bg-info text-white px-2 py-0.5 rounded">P2.3</span>
+          <span class="font-semibold text-ink">CLAUDE.md prácticamente vacío</span>
+        </summary>
+        <div class="p-5 text-sm text-ink2">
+          11 bytes. O bórralo o llénalo.
+        </div>
+      </details>
+
+      <details class="rounded-xl border border-info/30 bg-card overflow-hidden">
+        <summary class="flex items-center gap-3 px-5 py-4 bg-info50 border-b border-info/20">
+          <span class="chev text-info">▶</span>
+          <span class="font-mono text-xs bg-info text-white px-2 py-0.5 rounded">P2.4</span>
+          <span class="font-semibold text-ink">Cobertura de tests limitada</span>
+        </summary>
+        <div class="p-5 text-sm text-ink2">
+          <p class="mb-2">4 tests totales, todos en <code>services/</code>:</p>
+          <ul class="list-disc pl-5 space-y-1 mb-3">
+            <li><code>cuestionario.test.ts</code> · 230 líneas</li>
+            <li><code>matching.test.ts</code> · 158 líneas</li>
+            <li><code>comparar.test.ts</code> · 130 líneas</li>
+            <li><code>share.test.ts</code> · 91 líneas</li>
+          </ul>
+          <p><strong>Cero tests</strong> de components, hooks, stores, screens o utils.</p>
+          <p class="mt-2"><strong>Mínimo recomendado:</strong> utils puros + stores auth/cuestionario + Modal/BottomSheet/NewsCard/RadarChart.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ==================== P3 ==================== -->
+  <section id="p3" class="anchor space-y-4">
+    <h2 class="text-2xl font-bold text-ink flex items-center gap-3">
+      <span class="inline-block w-2 h-6 rounded bg-sage"></span>
+      Findings P3 · nice-to-have
+    </h2>
+    <div class="rounded-xl border border-border bg-card p-5">
+      <ul class="text-sm text-ink2 space-y-2 list-disc pl-5">
+        <li><code>ConfiguracionScreen</code> (212) y <code>GestionEleccionesScreen</code> (224) podrían compartir <code>&lt;SettingsSection&gt;</code> molecule si visualmente coinciden.</li>
+        <li>Grep de <code>console.log</code>/<code>console.warn</code> antes de shippear.</li>
+        <li>El mapper <code>noticiaToDetail()</code> de <code>utils/noticia.ts</code> es candidato ideal para test unitario.</li>
+        <li><code>formatearFecha</code> en <code>NoticiasScreen.tsx:82</code> probablemente está duplicado en otras screens — consolidar en <code>utils/date.ts</code>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ==================== PLAN ==================== -->
+  <section id="plan" class="anchor space-y-4">
+    <h2 class="text-2xl font-bold text-ink flex items-center gap-3">
+      <span class="inline-block w-2 h-6 rounded bg-brand"></span>
+      Plan de refactor sugerido (ordenado por ROI)
+    </h2>
+    <ol class="space-y-3">
+      <li class="rounded-xl border border-border bg-card p-4 flex gap-4">
+        <span class="flex-shrink-0 w-8 h-8 rounded-full bg-danger text-white grid place-items-center font-bold text-sm">1</span>
+        <div>
+          <p class="font-semibold text-ink">Terminar workstream «delete decision»</p>
+          <p class="text-sm text-ink2">Resuelve P0.2, P0.3, P0.4. Sin <code>tsc</code> verde, lo demás es especular.</p>
+        </div>
+      </li>
+      <li class="rounded-xl border border-border bg-card p-4 flex gap-4">
+        <span class="flex-shrink-0 w-8 h-8 rounded-full bg-danger text-white grid place-items-center font-bold text-sm">2</span>
+        <div>
+          <p class="font-semibold text-ink">Recuperar stash <code>cp-refactor-p1-p2-wip</code></p>
+          <p class="text-sm text-ink2">Resolver conflicto de <code>PerfilScreen</code>, commit P1 (ConfirmModal→Modal) + P2 (utils/noticia types).</p>
+        </div>
+      </li>
+      <li class="rounded-xl border border-border bg-card p-4 flex gap-4">
+        <span class="flex-shrink-0 w-8 h-8 rounded-full bg-danger text-white grid place-items-center font-bold text-sm">3</span>
+        <div>
+          <p class="font-semibold text-ink">Fix P0.1</p>
+          <p class="text-sm text-ink2">Una línea: <code>["match"]</code> → <code>["matches"]</code>.</p>
+        </div>
+      </li>
+      <li class="rounded-xl border border-border bg-card p-4 flex gap-4">
+        <span class="flex-shrink-0 w-8 h-8 rounded-full bg-warning text-white grid place-items-center font-bold text-sm">4</span>
+        <div>
+          <p class="font-semibold text-ink">Fix P1.2 (helpers duplicados)</p>
+          <p class="text-sm text-ink2">3 archivos, ~15 líneas eliminadas, corrige idioma de paso.</p>
+        </div>
+      </li>
+      <li class="rounded-xl border border-border bg-card p-4 flex gap-4">
+        <span class="flex-shrink-0 w-8 h-8 rounded-full bg-warning text-white grid place-items-center font-bold text-sm">5</span>
+        <div>
+          <p class="font-semibold text-ink">Fix P1.1 (centralizar queryKeys)</p>
+          <p class="text-sm text-ink2">Refactor mecánico, 1 commit chico.</p>
+        </div>
+      </li>
+      <li class="rounded-xl border border-border bg-card p-4 flex gap-4">
+        <span class="flex-shrink-0 w-8 h-8 rounded-full bg-warning text-white grid place-items-center font-bold text-sm">6</span>
+        <div>
+          <p class="font-semibold text-ink">Refactor P1.3 (splitear screens grandes)</p>
+          <p class="text-sm text-ink2">NoticiasScreen + DetalleCandidatoScreen. 2 commits medianos.</p>
+        </div>
+      </li>
+      <li class="rounded-xl border border-border bg-card p-4 flex gap-4">
+        <span class="flex-shrink-0 w-8 h-8 rounded-full bg-warning text-white grid place-items-center font-bold text-sm">7</span>
+        <div>
+          <p class="font-semibold text-ink">Migrar 4 modales restantes a <code>&lt;Modal&gt;</code></p>
+          <p class="text-sm text-ink2">Extensión de P1.4.</p>
+        </div>
+      </li>
+      <li class="rounded-xl border border-border bg-card p-4 flex gap-4">
+        <span class="flex-shrink-0 w-8 h-8 rounded-full bg-info text-white grid place-items-center font-bold text-sm">8</span>
+        <div>
+          <p class="font-semibold text-ink">Actualizar README + expandir AGENTS.md</p>
+        </div>
+      </li>
+      <li class="rounded-xl border border-border bg-card p-4 flex gap-4">
+        <span class="flex-shrink-0 w-8 h-8 rounded-full bg-info text-white grid place-items-center font-bold text-sm">9</span>
+        <div>
+          <p class="font-semibold text-ink">Tests básicos para utils + stores auth/cuestionario</p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ==================== BOTTOM INSIGHTS ==================== -->
+  <section class="rounded-2xl border border-border bg-brand50 p-6">
+    <h2 class="text-xl font-bold text-ink mb-3">Cierre ejecutivo</h2>
+    <p class="text-ink2 leading-relaxed">
+      El código está en una <strong class="text-ink">excelente posición</strong> para escalar:
+      atomic design, tokens, dark mode, WCAG y typing end-to-end ya están resueltos. Los findings
+      son <strong class="text-ink">deuda técnica localizada</strong>, no problemas estructurales.
+      Prioridad 1: terminar el workstream de «delete decision» para desbloquear <code>tsc</code>.
+      Prioridad 2: fixes mecánicos de DRY (P0.1, P1.1, P1.2) — probablemente 1-2 horas.
+      Prioridad 3: refactor de las 2 screens gigantes con un patrón reutilizable
+      (custom hook de filtros + sub-componentes por tab) que después se replica en Candidatos.
+      Los tests son la deuda más grande pero también la que menos bloquea shippear.
+    </p>
+  </section>
+
+</main>
+
+<footer class="max-w-6xl mx-auto px-6 py-8 text-xs text-ink3 border-t border-border mt-10">
+  Auditoría generada por Perrito · Snapshot 2026-07-26 · Frontend Servel <code>tinder-decisivo</code>
+</footer>
+
+</body>
+</html>
