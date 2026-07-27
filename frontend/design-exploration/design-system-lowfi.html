@@ -11,7 +11,7 @@
     --g-2: #F0F0F0;
     --g-3: #E0E0E0;
     --g-4: #BDBDBD;
-    --g-5: #9E9E9E;
+    --g-5: #6E6E6E;    /* subido de #9E9E9E para contraste AA 4.5:1 sobre fondos claros */
     --g-6: #616161;
     --g-7: #212121;
     --sp: 8px;
@@ -20,6 +20,25 @@
     --r-full: 999px;
   }
   * { box-sizing: border-box; }
+
+  /* A11y: focus visible global (WCAG 2.4.11) */
+  :where(a, button, input, [tabindex]):focus-visible {
+    outline: 2px solid var(--g-7);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Reset buttons para que hereden fuente y no muestren estilos default */
+  button { font-family: inherit; cursor: pointer; }
+
+  /* A11y: respetar preferencia de motion reducido (WCAG 2.3.3) */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
   html, body { margin: 0; padding: 0; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -42,7 +61,7 @@
   }
   aside .group {
     font-size: 10px; text-transform: uppercase; letter-spacing: .1em;
-    color: var(--g-5); margin: 20px 0 8px; font-weight: 600;
+    color: var(--g-4); margin: 20px 0 8px; font-weight: 600;   /* g-4 en vez de g-5 para contraste AA sobre fondo oscuro */
   }
   aside a {
     display: block; color: var(--g-3); text-decoration: none;
@@ -155,6 +174,7 @@
 
   /* Icon placeholder (small square with X) */
   .wf-icon {
+    display: inline-block; vertical-align: middle;
     width: 20px; height: 20px;
     border: 1px solid var(--g-4); background: var(--g-1);
     position: relative; flex-shrink: 0; border-radius: 2px;
@@ -200,6 +220,30 @@
     border-radius: var(--r-full); font-size: 11px; color: var(--g-6);
     background: var(--g-0);
   }
+
+  /* Info button (?) integrado a chips u otros contextos */
+  .wf-info-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 50%;   /* 24x24 min por WCAG 2.5.8 target size */
+    border: 1px solid var(--g-5); color: var(--g-5);
+    font-size: 12px; font-weight: 700;
+    background: transparent; cursor: pointer;
+    padding: 0;
+  }
+
+  /* Tooltip / popover: aparece sobre el elemento anchor */
+  .wf-tooltip {
+    position: relative;
+    padding: 10px 12px; background: var(--g-7); color: var(--g-0);
+    border-radius: var(--r); font-size: 11px; line-height: 1.45;
+    max-width: 240px; box-shadow: 0 4px 12px rgba(0,0,0,.15);
+  }
+  .wf-tooltip::before {
+    content: ""; position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+    border-left: 6px solid transparent; border-right: 6px solid transparent;
+    border-bottom: 6px solid var(--g-7);
+  }
+  .wf-tooltip .title { font-weight: 700; font-size: 12px; display: block; margin-bottom: 4px; }
   .wf-chip.active { background: var(--g-6); color: var(--g-0); border-color: var(--g-6); }
 
   /* Layout helpers */
@@ -270,7 +314,9 @@
     display: flex; flex-direction: column; align-items: center; gap: 4px;
     padding: 4px; border-radius: var(--r);
     font-size: 9px; color: var(--g-5); text-transform: uppercase; letter-spacing: .04em;
+    border: none; background: transparent; font-family: inherit; cursor: pointer;
   }
+  .wf-bottomnav-item.active { color: var(--g-7); font-weight: 700; background: var(--g-2); }
 
   /* Card */
   .wf-card {
@@ -318,6 +364,15 @@
   .mt-auto { margin-top: auto; }
   .center { text-align: center; }
   .flex-center { display: flex; align-items: center; justify-content: center; flex: 1; }
+
+  /* A11y: skip link, visible al recibir foco */
+  .wf-skip {
+    position: absolute; top: -40px; left: 8px; z-index: 100;
+    background: var(--g-7); color: var(--g-0);
+    padding: 8px 14px; border-radius: var(--r);
+    text-decoration: none; font-size: 13px; font-weight: 600;
+  }
+  .wf-skip:focus-visible { top: 8px; outline: 2px solid var(--g-0); outline-offset: 2px; }
 </style>
 </head>
 <body>
@@ -334,16 +389,14 @@
   <a href="#tpl-signup">Signup</a>
 
   <div class="group">Core</div>
-  <a href="#tpl-home">Home HUB (2 var)</a>
+  <a href="#tpl-home">Home HUB (3 var)</a>
   <a href="#tpl-elecciones">Gestion elecciones</a>
   <a href="#tpl-cuestionario">Cuestionario</a>
   <a href="#tpl-resultados">Resultados</a>
-  <a href="#tpl-swipe">Swipe</a>
 
   <div class="group">Contenido</div>
-  <a href="#tpl-mislistas">Mis Listas</a>
-  <a href="#tpl-respuestas">Mis Respuestas</a>
   <a href="#tpl-guardados">Mis Guardados</a>
+  <a href="#tpl-respuestas">Mis Respuestas</a>
   <a href="#tpl-noticias">Noticias</a>
   <a href="#tpl-perfil">Perfil candidato</a>
   <a href="#tpl-perfil-empty">Perfil empty</a>
@@ -351,12 +404,20 @@
 
   <div class="group">Sistema</div>
   <a href="#tpl-config">Configuración</a>
+  <a href="#tpl-editar-perfil">Editar perfil</a>
 
   <div class="group">Modales</div>
-  <a href="#tpl-share">Share modal</a>
+  <a href="#tpl-share">Share</a>
+  <a href="#tpl-saber-mas">Saber más</a>
+  <a href="#tpl-filtros">Filtros (bottom sheet)</a>
+
+  <div class="group">Onboarding contextual</div>
+  <a href="#tpl-coach-marks">Coach marks (5)</a>
+  <a href="#tpl-empty-states">Empty states (4)</a>
 </aside>
 
-<main>
+<main id="main" tabindex="-1">
+<a href="#main" class="wf-skip">Saltar al contenido</a>
 
 <!-- 1. SPLASH -->
 <section class="wf-section" id="tpl-splash">
@@ -384,54 +445,142 @@
 <section class="wf-section" id="tpl-onboarding">
   <div class="wf-section-head">
     <div class="kicker">Template · 2</div>
-    <h2>Onboarding</h2>
-    <p>Carrusel de 3 pantallas explicativas + CTA final. Dots inferiores indican progreso.</p>
+    <h2>Onboarding · Welcome tour</h2>
+    <p>Carrusel de 5 slides que presenta la app antes del signup. Cada slide tiene ilustración + título + subtexto + dots + CTAs. "Saltar" siempre disponible salvo en el último slide.</p>
   </div>
   <div class="wf-frames">
+
+    <!-- Slide 1: Que es -->
     <div class="wf-frame">
-      <span class="wf-frame-label">Onboarding · 1/3</span>
+      <span class="wf-frame-label">1/5 · Que es</span>
       <div class="wf-row between">
         <span></span>
-        <span class="wf-text">Saltar</span>
+        <button type="button" class="wf-btn ghost" style="padding:6px 10px; font-size:12px; min-width:0">Saltar</button>
       </div>
-      <div class="wf-img full-bleed"></div>
-      <div class="wf-col" style="align-items:center; text-align:center; gap:12px">
-        <div class="wf-line title" style="width:60%"></div>
-        <div class="wf-line long"></div>
-        <div class="wf-line med"></div>
+      <div class="wf-img full-bleed">Ilustracion: match</div>
+      <div class="wf-col" style="align-items:center; text-align:center; gap:8px">
+        <span class="wf-text" style="font-size:18px; font-weight:700; color:var(--g-7)">Descubre quién piensa como tú</span>
+        <div class="wf-line long c"></div>
+        <div class="wf-line med c"></div>
       </div>
       <div class="wf-spacer"></div>
       <div class="wf-row" style="justify-content:center; gap:6px">
-        <span class="wf-icon" style="width:8px; height:8px; background:var(--g-6); border-color:var(--g-6)"></span>
-        <span class="wf-icon" style="width:8px; height:8px"></span>
-        <span class="wf-icon" style="width:8px; height:8px"></span>
+        <span class="wf-icon" style="width:8px; height:8px; background:var(--g-6); border-color:var(--g-6)" aria-hidden="true"></span>
+        <span class="wf-icon" style="width:8px; height:8px" aria-hidden="true"></span>
+        <span class="wf-icon" style="width:8px; height:8px" aria-hidden="true"></span>
+        <span class="wf-icon" style="width:8px; height:8px" aria-hidden="true"></span>
+        <span class="wf-icon" style="width:8px; height:8px" aria-hidden="true"></span>
       </div>
-      <div class="wf-btn primary wide">Siguiente</div>
+      <button type="button" class="wf-btn primary wide">Siguiente</button>
     </div>
 
+    <!-- Slide 2: Como funciona -->
     <div class="wf-frame">
-      <span class="wf-frame-label">Onboarding · 3/3</span>
+      <span class="wf-frame-label">2/5 · Como funciona</span>
+      <div class="wf-row between">
+        <span></span>
+        <button type="button" class="wf-btn ghost" style="padding:6px 10px; font-size:12px; min-width:0">Saltar</button>
+      </div>
+      <div class="wf-img full-bleed">Ilustracion: cuestionario</div>
+      <div class="wf-col" style="align-items:center; text-align:center; gap:8px">
+        <span class="wf-text" style="font-size:18px; font-weight:700; color:var(--g-7)">Contesta 12 preguntas rápidas</span>
+        <div class="wf-line long c"></div>
+        <div class="wf-line med c"></div>
+      </div>
+      <div class="wf-spacer"></div>
+      <div class="wf-row" style="justify-content:center; gap:6px">
+        <span class="wf-icon" style="width:8px; height:8px" aria-hidden="true"></span>
+        <span class="wf-icon" style="width:8px; height:8px; background:var(--g-6); border-color:var(--g-6)" aria-hidden="true"></span>
+        <span class="wf-icon" style="width:8px; height:8px" aria-hidden="true"></span>
+        <span class="wf-icon" style="width:8px; height:8px" aria-hidden="true"></span>
+        <span class="wf-icon" style="width:8px; height:8px" aria-hidden="true"></span>
+      </div>
+      <button type="button" class="wf-btn primary wide">Siguiente</button>
+    </div>
+
+    <!-- Slide 3: Multi-eleccion -->
+    <div class="wf-frame">
+      <span class="wf-frame-label">3/5 · Multi-eleccion</span>
+      <div class="wf-row between">
+        <span></span>
+        <button type="button" class="wf-btn ghost" style="padding:6px 10px; font-size:12px; min-width:0">Saltar</button>
+      </div>
+      <div class="wf-img full-bleed">Ilustracion: 3 elecciones</div>
+      <div class="wf-col" style="align-items:center; text-align:center; gap:8px">
+        <span class="wf-text" style="font-size:18px; font-weight:700; color:var(--g-7)">Presidencial, alcalde, congreso</span>
+        <div class="wf-line long c"></div>
+        <div class="wf-line med c"></div>
+      </div>
+      <div class="wf-spacer"></div>
+      <div class="wf-row" style="justify-content:center; gap:6px">
+        <span class="wf-icon" style="width:8px; height:8px" aria-hidden="true"></span>
+        <span class="wf-icon" style="width:8px; height:8px" aria-hidden="true"></span>
+        <span class="wf-icon" style="width:8px; height:8px; background:var(--g-6); border-color:var(--g-6)" aria-hidden="true"></span>
+        <span class="wf-icon" style="width:8px; height:8px" aria-hidden="true"></span>
+        <span class="wf-icon" style="width:8px; height:8px" aria-hidden="true"></span>
+      </div>
+      <button type="button" class="wf-btn primary wide">Siguiente</button>
+    </div>
+
+    <!-- Slide 4: Transparencia -->
+    <div class="wf-frame">
+      <span class="wf-frame-label">4/5 · Transparencia</span>
+      <div class="wf-row between">
+        <span></span>
+        <button type="button" class="wf-btn ghost" style="padding:6px 10px; font-size:12px; min-width:0">Saltar</button>
+      </div>
+      <div class="wf-img full-bleed">Ilustracion: fuentes + %</div>
+      <div class="wf-col" style="align-items:center; text-align:center; gap:8px">
+        <span class="wf-text" style="font-size:18px; font-weight:700; color:var(--g-7)">Ves de dónde vienen los datos</span>
+        <div class="wf-line long c"></div>
+        <div class="wf-line med c"></div>
+        <div class="wf-row" style="gap:6px; margin-top:4px">
+          <span class="wf-chip">Confianza alta</span>
+          <span class="wf-chip">Fuentes verificadas</span>
+        </div>
+      </div>
+      <div class="wf-spacer"></div>
+      <div class="wf-row" style="justify-content:center; gap:6px">
+        <span class="wf-icon" style="width:8px; height:8px" aria-hidden="true"></span>
+        <span class="wf-icon" style="width:8px; height:8px" aria-hidden="true"></span>
+        <span class="wf-icon" style="width:8px; height:8px" aria-hidden="true"></span>
+        <span class="wf-icon" style="width:8px; height:8px; background:var(--g-6); border-color:var(--g-6)" aria-hidden="true"></span>
+        <span class="wf-icon" style="width:8px; height:8px" aria-hidden="true"></span>
+      </div>
+      <button type="button" class="wf-btn primary wide">Siguiente</button>
+    </div>
+
+    <!-- Slide 5: CTAs finales -->
+    <div class="wf-frame">
+      <span class="wf-frame-label">5/5 · Empezar</span>
       <div class="wf-row between">
         <span></span>
         <span></span>
       </div>
-      <div class="wf-img full-bleed"></div>
-      <div class="wf-col" style="align-items:center; text-align:center; gap:12px">
-        <div class="wf-line title" style="width:60%"></div>
-        <div class="wf-line long"></div>
-        <div class="wf-line med"></div>
+      <div class="wf-img full-bleed">Ilustracion: bienvenida</div>
+      <div class="wf-col" style="align-items:center; text-align:center; gap:8px">
+        <span class="wf-text" style="font-size:20px; font-weight:700; color:var(--g-7)">Listo para empezar?</span>
+        <div class="wf-line long c"></div>
+        <div class="wf-line med c"></div>
       </div>
       <div class="wf-spacer"></div>
-      <div class="wf-btn primary wide">Empezar</div>
-      <div class="wf-btn ghost wide">Ya tengo cuenta</div>
+      <div class="wf-row" style="justify-content:center; gap:6px">
+        <span class="wf-icon" style="width:8px; height:8px" aria-hidden="true"></span>
+        <span class="wf-icon" style="width:8px; height:8px" aria-hidden="true"></span>
+        <span class="wf-icon" style="width:8px; height:8px" aria-hidden="true"></span>
+        <span class="wf-icon" style="width:8px; height:8px" aria-hidden="true"></span>
+        <span class="wf-icon" style="width:8px; height:8px; background:var(--g-6); border-color:var(--g-6)" aria-hidden="true"></span>
+      </div>
+      <button type="button" class="wf-btn primary wide">Crear cuenta</button>
+      <button type="button" class="wf-btn ghost wide">Ya tengo cuenta</button>
     </div>
   </div>
 </section>
 
-<!-- 2b. UBICACION (paso extra onboarding) -->
+<!-- 3. UBICACION -->
 <section class="wf-section" id="tpl-ubicacion">
   <div class="wf-section-head">
-    <div class="kicker">Template · 2b (nuevo)</div>
+    <div class="kicker">Template · 3</div>
     <h2>Onboarding · Ubicación</h2>
     <p>Paso opcional después del signup. Pedimos región + comuna para poder mostrar candidatos locales (municipal/regional). El usuario puede saltarlo y elegir después al activar una elección local. Aunque tenga una comuna guardada, siempre puede explorar otra desde el switcher del hub.</p>
   </div>
@@ -439,7 +588,7 @@
     <div class="wf-frame">
       <span class="wf-frame-label">Ubicacion</span>
       <div class="wf-row between">
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
         <span class="wf-text">Saltar</span>
       </div>
       <div class="wf-col" style="gap:6px; margin-top:16px">
@@ -468,22 +617,22 @@
         </div>
       </div>
       <div class="wf-spacer"></div>
-      <div class="wf-btn primary wide">Confirmar ubicación</div>
-      <div class="wf-btn ghost wide">Ahora no</div>
+      <button type="button" class="wf-btn primary wide">Confirmar ubicación</button>
+      <button type="button" class="wf-btn ghost wide">Ahora no</button>
     </div>
   </div>
 </section>
 
-<!-- 3. LOGIN -->
+<!-- 4. LOGIN -->
 <section class="wf-section" id="tpl-login">  <div class="wf-section-head">
-    <div class="kicker">Template · 3</div>
+    <div class="kicker">Template · 4</div>
     <h2>Login</h2>
     <p>Email + password + botón. Link a signup y a recuperar contraseña. Sociales opcionales.</p>
   </div>
   <div class="wf-frames">
     <div class="wf-frame">
       <span class="wf-frame-label">Login</span>
-      <div class="wf-row"><div class="wf-btn icon"></div></div>
+      <div class="wf-row"><button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button></div>
       <div class="wf-col" style="gap:6px; margin-top:16px">
         <div class="wf-line title" style="width:50%"></div>
         <div class="wf-line med"></div>
@@ -502,15 +651,15 @@
           <span class="wf-text">¿Olvidaste?</span>
         </div>
       </div>
-      <div class="wf-btn primary wide" style="margin-top:8px">Iniciar sesión</div>
+      <button type="button" class="wf-btn primary wide" style="margin-top:8px">Iniciar sesión</button>
       <div class="wf-row" style="gap:12px; align-items:center">
         <div class="wf-divider" style="flex:1"></div>
         <span class="wf-label">o</span>
         <div class="wf-divider" style="flex:1"></div>
       </div>
       <div class="wf-grid-2">
-        <div class="wf-btn"><span class="wf-icon" style="margin-right:6px"></span>Google</div>
-        <div class="wf-btn"><span class="wf-icon" style="margin-right:6px"></span>Apple</div>
+        <button type="button" class="wf-btn"><span class="wf-icon" style="margin-right:6px"></span>Google</button>
+        <button type="button" class="wf-btn"><span class="wf-icon" style="margin-right:6px"></span>Apple</button>
       </div>
       <div class="wf-spacer"></div>
       <div class="center wf-text">¿No tienes cuenta? <strong>Regístrate</strong></div>
@@ -518,17 +667,17 @@
   </div>
 </section>
 
-<!-- 4. SIGNUP -->
+<!-- 5. SIGNUP -->
 <section class="wf-section" id="tpl-signup">
   <div class="wf-section-head">
-    <div class="kicker">Template · 4</div>
+    <div class="kicker">Template · 5</div>
     <h2>Signup</h2>
     <p>Nombre + email + password + confirmar. Checkbox de términos. CTA principal.</p>
   </div>
   <div class="wf-frames">
     <div class="wf-frame">
       <span class="wf-frame-label">Signup</span>
-      <div class="wf-row"><div class="wf-btn icon"></div></div>
+      <div class="wf-row"><button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button></div>
       <div class="wf-col" style="gap:6px; margin-top:16px">
         <div class="wf-line title" style="width:60%"></div>
         <div class="wf-line med"></div>
@@ -543,17 +692,17 @@
           <span class="wf-text" style="font-size:11px">Acepto los términos y la política de privacidad.</span>
         </div>
       </div>
-      <div class="wf-btn primary wide" style="margin-top:8px">Crear cuenta</div>
+      <button type="button" class="wf-btn primary wide" style="margin-top:8px">Crear cuenta</button>
       <div class="wf-spacer"></div>
       <div class="center wf-text">¿Ya tienes cuenta? <strong>Inicia sesión</strong></div>
     </div>
   </div>
 </section>
 
-<!-- 5. HOME HUB -->
+<!-- 6. HOME HUB -->
 <section class="wf-section" id="tpl-home">
   <div class="wf-section-head">
-    <div class="kicker">Template · 5 (rehecho)</div>
+    <div class="kicker">Template · 6</div>
     <h2>Home HUB</h2>
     <p>El home es el HUB central de la app: muestra <strong>todas las elecciones activas</strong> como cards scrolleables. Debajo, un feed de <strong>Novedades</strong> unificado con noticias + acciones sugeridas de todas las elecciones (no privilegia una sola). Al tocar una card, entras al detalle específico de esa elección.</p>
   </div>
@@ -563,7 +712,7 @@
       <span class="wf-frame-label">Home HUB · 1 eleccion (default)</span>
       <div class="wf-topnav">
         <div class="brand"><span class="wf-icon"></span>Tinder Decisivo</div>
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
       </div>
       <div class="wf-col" style="gap:4px">
         <div class="wf-line title" style="width:55%"></div>
@@ -576,8 +725,8 @@
           <span class="wf-text">Gestionar</span>
         </div>
         <div class="wf-row" style="overflow-x:auto; gap:8px">
-          <!-- election-card ACTIVE (única) -->
-          <div class="wf-col" style="width:180px; padding:12px; border:2px solid var(--g-7); border-radius:var(--r-lg); flex-shrink:0; gap:6px">
+          <!-- election-card ACTIVE (única, completada 100%) -->
+          <div class="wf-col" style="width:200px; padding:12px; border:2px solid var(--g-7); border-radius:var(--r-lg); flex-shrink:0; gap:8px">
             <div class="wf-row between">
               <div class="wf-col" style="gap:2px">
                 <div class="wf-line title" style="width:100px"></div>
@@ -585,8 +734,13 @@
               </div>
               <span class="wf-chip">42d</span>
             </div>
-            <div class="wf-line title" style="width:48px; height:22px"></div>
+            <div class="wf-row" style="align-items:baseline; gap:4px">
+              <div class="wf-line title" style="width:48px; height:22px"></div>
+              <span class="wf-text" style="font-size:10px">top match · 10/12</span>
+            </div>
             <div class="wf-progress"><div style="width:100%"></div></div>
+            <button type="button" class="wf-btn primary" style="padding:6px; font-size:11px">Ver mis resultados</button>
+            <button type="button" class="wf-btn" style="padding:6px; font-size:11px">Ver candidatos</button>
           </div>
           <!-- + activar -->
           <div class="wf-col" style="align-items:center; justify-content:center; gap:6px; width:140px; padding:12px; border:2px dashed var(--g-4); border-radius:var(--r-lg); flex-shrink:0; color:var(--g-5)">
@@ -616,7 +770,7 @@
               <div class="wf-line title" style="width:75%"></div>
               <span class="wf-text" style="font-size:11px">Presidencial · 6 preguntas extras</span>
             </div>
-            <div class="wf-btn" style="padding:6px 10px; font-size:11px">Ir</div>
+            <button type="button" class="wf-btn" style="padding:6px 10px; font-size:11px">Ir</button>
           </div>
         </div>
         <!-- Noticia -->
@@ -654,6 +808,13 @@
           </div>
         </div>
       </div>
+      <nav class="wf-bottomnav" aria-label="Navegacion principal">
+        <button type="button" class="wf-bottomnav-item active" aria-current="page"><span class="wf-icon" aria-hidden="true"></span>Home</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Guardados</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Comparar</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Noticias</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Config</button>
+      </nav>
     </div>
 
     <!-- Home HUB · 3 elecciones activas (usuario power) -->
@@ -661,7 +822,7 @@
       <span class="wf-frame-label">Home HUB · 3 elecciones activas</span>
       <div class="wf-topnav">
         <div class="brand"><span class="wf-icon"></span>Tinder Decisivo</div>
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
       </div>
       <div class="wf-col" style="gap:4px">
         <div class="wf-line title" style="width:55%"></div>
@@ -674,8 +835,8 @@
           <span class="wf-text">Gestionar</span>
         </div>
         <div class="wf-row" style="overflow-x:auto; gap:8px">
-          <!-- active -->
-          <div class="wf-col" style="width:180px; padding:12px; border:2px solid var(--g-7); border-radius:var(--r-lg); flex-shrink:0; gap:6px">
+          <!-- active completada -->
+          <div class="wf-col" style="width:200px; padding:12px; border:2px solid var(--g-7); border-radius:var(--r-lg); flex-shrink:0; gap:8px">
             <div class="wf-row between">
               <div class="wf-col" style="gap:2px">
                 <div class="wf-line title" style="width:100px"></div>
@@ -683,11 +844,16 @@
               </div>
               <span class="wf-chip">42d</span>
             </div>
-            <div class="wf-line title" style="width:48px; height:22px"></div>
+            <div class="wf-row" style="align-items:baseline; gap:4px">
+              <div class="wf-line title" style="width:48px; height:22px"></div>
+              <span class="wf-text" style="font-size:10px">top match · 10/12</span>
+            </div>
             <div class="wf-progress"><div style="width:100%"></div></div>
+            <button type="button" class="wf-btn primary" style="padding:6px; font-size:11px">Ver mis resultados</button>
+            <button type="button" class="wf-btn" style="padding:6px; font-size:11px">Ver candidatos</button>
           </div>
-          <!-- otras activas -->
-          <div class="wf-col" style="width:180px; padding:12px; border:1px solid var(--g-4); border-radius:var(--r-lg); flex-shrink:0; gap:6px">
+          <!-- en progreso 50% -->
+          <div class="wf-col" style="width:200px; padding:12px; border:1px solid var(--g-4); border-radius:var(--r-lg); flex-shrink:0; gap:8px">
             <div class="wf-row between">
               <div class="wf-col" style="gap:2px">
                 <div class="wf-line title" style="width:100px"></div>
@@ -695,10 +861,12 @@
               </div>
               <span class="wf-chip">180d</span>
             </div>
-            <div class="wf-line title" style="width:40px; height:22px"></div>
+            <span class="wf-text" style="font-size:11px">6 de 12 preguntas</span>
             <div class="wf-progress"><div style="width:50%"></div></div>
+            <button type="button" class="wf-btn primary" style="padding:6px; font-size:11px">Continuar cuestionario</button>
           </div>
-          <div class="wf-col" style="width:180px; padding:12px; border:1px solid var(--g-4); border-radius:var(--r-lg); flex-shrink:0; gap:6px">
+          <!-- no empezado con extras -->
+          <div class="wf-col" style="width:200px; padding:12px; border:1px solid var(--g-4); border-radius:var(--r-lg); flex-shrink:0; gap:8px">
             <div class="wf-row between">
               <div class="wf-col" style="gap:2px">
                 <div class="wf-line title" style="width:100px"></div>
@@ -708,6 +876,7 @@
             </div>
             <span class="wf-text" style="font-size:10px">6 preguntas extras pendientes</span>
             <div class="wf-progress"><div style="width:0%"></div></div>
+            <button type="button" class="wf-btn primary" style="padding:6px; font-size:11px">Contestar extras</button>
           </div>
           <div class="wf-col" style="align-items:center; justify-content:center; gap:6px; width:140px; padding:12px; border:2px dashed var(--g-4); border-radius:var(--r-lg); flex-shrink:0; color:var(--g-5)">
             <div class="wf-icon lg"></div>
@@ -732,7 +901,7 @@
               <div class="wf-line title" style="width:75%"></div>
               <span class="wf-text" style="font-size:11px">Parlamentaria · 6 extras pendientes</span>
             </div>
-            <div class="wf-btn" style="padding:6px 10px; font-size:11px">Ir</div>
+            <button type="button" class="wf-btn" style="padding:6px 10px; font-size:11px">Ir</button>
           </div>
         </div>
         <div class="wf-news">
@@ -767,6 +936,13 @@
           </div>
         </div>
       </div>
+      <nav class="wf-bottomnav" aria-label="Navegacion principal">
+        <button type="button" class="wf-bottomnav-item active" aria-current="page"><span class="wf-icon" aria-hidden="true"></span>Home</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Guardados</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Comparar</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Noticias</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Config</button>
+      </nav>
     </div>
 
     <!-- Home HUB · sin novedades aún (empty state) -->
@@ -774,7 +950,7 @@
       <span class="wf-frame-label">Home HUB · sin novedades</span>
       <div class="wf-topnav">
         <div class="brand"><span class="wf-icon"></span>Tinder Decisivo</div>
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
       </div>
       <div class="wf-col" style="gap:4px">
         <div class="wf-line title" style="width:55%"></div>
@@ -787,7 +963,7 @@
           <span class="wf-text">Gestionar</span>
         </div>
         <div class="wf-row" style="overflow-x:auto; gap:8px">
-          <div class="wf-col" style="width:180px; padding:12px; border:2px solid var(--g-7); border-radius:var(--r-lg); flex-shrink:0; gap:6px">
+          <div class="wf-col" style="width:200px; padding:12px; border:2px solid var(--g-7); border-radius:var(--r-lg); flex-shrink:0; gap:8px">
             <div class="wf-row between">
               <div class="wf-col" style="gap:2px">
                 <div class="wf-line title" style="width:100px"></div>
@@ -795,8 +971,9 @@
               </div>
               <span class="wf-chip">42d</span>
             </div>
-            <div class="wf-text" style="font-size:10px">Completa el cuestionario</div>
+            <div class="wf-text" style="font-size:11px">Aun no empezado</div>
             <div class="wf-progress"><div style="width:0%"></div></div>
+            <button type="button" class="wf-btn primary" style="padding:6px; font-size:11px">Empezar cuestionario</button>
           </div>
           <div class="wf-col" style="align-items:center; justify-content:center; gap:6px; width:140px; padding:12px; border:2px dashed var(--g-4); border-radius:var(--r-lg); flex-shrink:0; color:var(--g-5)">
             <div class="wf-icon lg"></div>
@@ -815,17 +992,36 @@
           <div class="wf-line long c"></div>
           <div class="wf-line med c"></div>
         </div>
-        <div class="wf-btn primary">Empezar cuestionario</div>
+        <button type="button" class="wf-btn primary">Empezar cuestionario</button>
         <span class="wf-text" style="font-size:10px">Cuando haya movimiento aparecerá aquí</span>
+      </div>
+      <nav class="wf-bottomnav" aria-label="Navegacion principal">
+        <button type="button" class="wf-bottomnav-item active" aria-current="page"><span class="wf-icon" aria-hidden="true"></span>Home</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Guardados</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Comparar</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Noticias</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Config</button>
+      </nav>
+    </div>
+
+    <!-- Frame variante: hero con tooltip de confianza abierto -->
+    <div class="wf-frame" style="min-height:auto">
+      <span class="wf-frame-label">Detalle: tooltip confianza</span>
+      <div class="wf-card" style="align-items:center; text-align:center">
+        <div class="wf-line title c" style="width:80px; height:32px"></div>
+        <div class="wf-tooltip" style="margin-top:12px">
+          <span class="title">Confianza del match</span>
+          Se basa en cuántas de tus 12 preguntas tiene respondidas este candidato. Alta = 10 o más. Media = 6-9. Baja = menos de 6.
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 5b. GESTION DE ELECCIONES (nuevo) -->
+<!-- 7. GESTION DE ELECCIONES -->
 <section class="wf-section" id="tpl-elecciones">
   <div class="wf-section-head">
-    <div class="kicker">Template · 5b (nuevo)</div>
+    <div class="kicker">Template · 7</div>
     <h2>Gestión de elecciones</h2>
     <p>Se abre desde el link "Gestionar" del HUB o desde una card "+ Activar". Muestra el catálogo completo de tipos de elección disponibles, con su scope geográfico y toggle para activar/desactivar. Para elecciones locales, deja elegir la comuna/región específica.</p>
   </div>
@@ -833,7 +1029,7 @@
     <div class="wf-frame">
       <span class="wf-frame-label">Gestion · catalogo</span>
       <div class="wf-topnav">
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
         <span class="wf-text">Tus elecciones</span>
         <span></span>
       </div>
@@ -902,27 +1098,34 @@
           </div>
         </div>
       </div>
+      <nav class="wf-bottomnav" aria-label="Navegacion principal">
+        <button type="button" class="wf-bottomnav-item active" aria-current="page"><span class="wf-icon" aria-hidden="true"></span>Home</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Guardados</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Comparar</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Noticias</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Config</button>
+      </nav>
     </div>
   </div>
 </section>
 
-<!-- 6. CUESTIONARIO -->
+<!-- 8. CUESTIONARIO -->
 <section class="wf-section" id="tpl-cuestionario">
   <div class="wf-section-head">
-    <div class="kicker">Template · 6</div>
+    <div class="kicker">Template · 8</div>
     <h2>Cuestionario</h2>
-    <p>Pregunta 3/12. Topnav muestra la elección en foco. Progress dividido en <strong>base</strong> (compartido entre todas las elecciones) y <strong>extras</strong> (específicas de esta elección). El usuario contesta la base una sola vez y solo repite extras al activar una elección nueva.</p>
+    <p>Pregunta 3/12. Topnav muestra la elección en foco. Progress dividido en <strong>base</strong> (compartido entre todas las elecciones) y <strong>extras</strong> (específicas de esta elección). El usuario contesta la base una sola vez y solo repite extras al activar una elección nueva. Cada pregunta tiene un link <strong>"Saber más"</strong> que abre un bottom sheet con contexto y las repercusiones sociales, medioambientales, políticas, económicas e institucionales del tema.</p>
   </div>
   <div class="wf-frames">
     <div class="wf-frame">
       <span class="wf-frame-label">Pregunta 3/12</span>
       <div class="wf-topnav">
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
         <div class="wf-col" style="align-items:center; gap:2px; flex:1">
           <span class="wf-text" style="font-size:12px; font-weight:600">Presidencial 2026</span>
           <span class="wf-label">3 de 12 · base</span>
         </div>
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
       </div>
       <div class="wf-row" style="gap:4px">
         <div class="wf-progress" style="flex:3"><div style="width:33%"></div></div>
@@ -937,6 +1140,10 @@
         <div class="wf-line title long"></div>
         <div class="wf-line title long"></div>
         <div class="wf-line title med"></div>
+        <div class="wf-row" style="gap:6px; align-items:center; margin-top:4px">
+          <button class="wf-info-btn">?</button>
+          <span class="wf-text" style="font-size:11px; text-decoration:underline; color:var(--g-6)">Saber más sobre este tema</span>
+        </div>
       </div>
       <div class="wf-col" style="gap:8px; margin-top:8px">
         <div class="wf-box"><div class="wf-line med"></div></div>
@@ -956,30 +1163,30 @@
       </div>
       <div class="wf-spacer"></div>
       <div class="wf-row" style="gap:8px">
-        <div class="wf-btn" style="flex:1">Atrás</div>
-        <div class="wf-btn primary" style="flex:2">Siguiente</div>
+        <button type="button" class="wf-btn" style="flex:1">Atrás</button>
+        <button type="button" class="wf-btn primary" style="flex:2">Siguiente</button>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 7. RESULTADOS -->
+<!-- 9. RESULTADOS -->
 <section class="wf-section" id="tpl-resultados">
   <div class="wf-section-head">
-    <div class="kicker">Template · 7</div>
+    <div class="kicker">Template · 9</div>
     <h2>Resultados</h2>
-    <p>Post-cuestionario, para la elección en foco. Card hero con top match + %, radar chart grande al lado. Debajo, lista de ranking donde cada candidato lleva su propio mini radar (60x60) para comparar patrones de un vistazo.</p>
+    <p>Post-cuestionario, para la elección en foco. Card hero con top match + % + <strong>confianza del match</strong> (Alta/Media/Baja según cuántas preguntas respondió el candidato de las que tú contestaste). Radar chart grande. En el ranking, cada candidato lleva su mini radar (60x60) + una <strong>barrita de cobertura</strong> junto al % para comparar sanamente: un 87% sobre 4 preguntas es muy distinto a 87% sobre 12.</p>
   </div>
   <div class="wf-frames">
     <div class="wf-frame">
       <span class="wf-frame-label">Resultados</span>
       <div class="wf-topnav">
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
         <div class="wf-col" style="align-items:center; gap:2px; flex:1">
           <span class="wf-text" style="font-size:12px; font-weight:600">Presidencial 2026</span>
           <span class="wf-label">Tus resultados</span>
         </div>
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
       </div>
       <div class="wf-card" style="align-items:center; text-align:center">
         <span class="wf-label">Tu match</span>
@@ -987,9 +1194,13 @@
         <div class="wf-line title" style="width:50%"></div>
         <div class="wf-line short"></div>
         <div class="wf-line title" style="width:80px; height:32px; margin:8px 0"></div>
+        <div class="wf-row" style="gap:6px; align-items:center; margin-bottom:4px">
+          <span class="wf-chip active" style="padding:2px 8px; font-size:10px; gap:6px">Confianza alta <button class="wf-info-btn">?</button></span>
+          <span class="wf-text" style="font-size:10px">10 de 12 preguntas coinciden</span>
+        </div>
         <span class="wf-label">Compatibilidad</span>
         <div class="wf-img" style="aspect-ratio:1; max-height:180px; margin-top:8px; width:180px">Radar</div>
-        <div class="wf-btn primary wide" style="margin-top:12px">Ver perfil completo</div>
+        <button type="button" class="wf-btn primary wide" style="margin-top:12px">Ver perfil completo</button>
       </div>
       <div class="wf-col" style="gap:8px">
         <span class="wf-label">Ranking completo</span>
@@ -1001,7 +1212,11 @@
             <div class="wf-line tiny"></div>
           </div>
           <div class="wf-img" style="aspect-ratio:1; width:60px; height:60px; font-size:10px">radar</div>
-          <div class="wf-line title" style="width:32px; height:18px"></div>
+          <div class="wf-col" style="align-items:flex-end; gap:3px; min-width:44px">
+            <div class="wf-line title" style="width:32px; height:18px"></div>
+            <div style="width:32px; height:3px; background:var(--g-3); border-radius:2px; overflow:hidden"><div style="width:100%; height:100%; background:var(--g-6)"></div></div>
+            <span style="font-size:8px; color:var(--g-5); text-transform:uppercase; letter-spacing:.04em">12/12</span>
+          </div>
         </div>
         <div class="wf-row" style="gap:8px; padding:8px; border:1px solid var(--g-4); border-radius:var(--r)">
           <span class="wf-text">#3</span>
@@ -1011,7 +1226,11 @@
             <div class="wf-line tiny"></div>
           </div>
           <div class="wf-img" style="aspect-ratio:1; width:60px; height:60px; font-size:10px">radar</div>
-          <div class="wf-line title" style="width:32px; height:18px"></div>
+          <div class="wf-col" style="align-items:flex-end; gap:3px; min-width:44px">
+            <div class="wf-line title" style="width:32px; height:18px"></div>
+            <div style="width:32px; height:3px; background:var(--g-3); border-radius:2px; overflow:hidden"><div style="width:83%; height:100%; background:var(--g-6)"></div></div>
+            <span style="font-size:8px; color:var(--g-5); text-transform:uppercase; letter-spacing:.04em">10/12</span>
+          </div>
         </div>
         <div class="wf-row" style="gap:8px; padding:8px; border:1px solid var(--g-4); border-radius:var(--r)">
           <span class="wf-text">#4</span>
@@ -1021,7 +1240,11 @@
             <div class="wf-line tiny"></div>
           </div>
           <div class="wf-img" style="aspect-ratio:1; width:60px; height:60px; font-size:10px">radar</div>
-          <div class="wf-line title" style="width:32px; height:18px"></div>
+          <div class="wf-col" style="align-items:flex-end; gap:3px; min-width:44px">
+            <div class="wf-line title" style="width:32px; height:18px"></div>
+            <div style="width:32px; height:3px; background:var(--g-3); border-radius:2px; overflow:hidden"><div style="width:58%; height:100%; background:var(--g-5)"></div></div>
+            <span style="font-size:8px; color:var(--g-5); text-transform:uppercase; letter-spacing:.04em">7/12</span>
+          </div>
         </div>
         <div class="wf-row" style="gap:8px; padding:8px; border:1px solid var(--g-4); border-radius:var(--r)">
           <span class="wf-text">#5</span>
@@ -1031,107 +1254,28 @@
             <div class="wf-line tiny"></div>
           </div>
           <div class="wf-img" style="aspect-ratio:1; width:60px; height:60px; font-size:10px">radar</div>
-          <div class="wf-line title" style="width:32px; height:18px"></div>
+          <div class="wf-col" style="align-items:flex-end; gap:3px; min-width:44px">
+            <div class="wf-line title" style="width:32px; height:18px"></div>
+            <div style="width:32px; height:3px; background:var(--g-3); border-radius:2px; overflow:hidden"><div style="width:33%; height:100%; background:var(--g-4)"></div></div>
+            <span style="font-size:8px; color:var(--g-5); text-transform:uppercase; letter-spacing:.04em">4/12</span>
+          </div>
         </div>
       </div>
+      <nav class="wf-bottomnav" aria-label="Navegacion principal">
+        <button type="button" class="wf-bottomnav-item active" aria-current="page"><span class="wf-icon" aria-hidden="true"></span>Home</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Guardados</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Comparar</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Noticias</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Config</button>
+      </nav>
     </div>
   </div>
 </section>
 
-<!-- 8. SWIPE -->
-<section class="wf-section" id="tpl-swipe">
-  <div class="wf-section-head">
-    <div class="kicker">Template · 8</div>
-    <h2>Swipe</h2>
-    <p>Modo tinder: card grande con candidato, swipe izq (descartar) o der (favorito). Contador de pendientes.</p>
-  </div>
-  <div class="wf-frames">
-    <div class="wf-frame">
-      <span class="wf-frame-label">Swipe</span>
-      <div class="wf-topnav">
-        <div class="wf-btn icon"></div>
-        <span class="wf-text">3 de 6</span>
-        <div class="wf-btn icon"></div>
-      </div>
-      <div class="wf-card" style="flex:1; padding:0; overflow:hidden">
-        <div class="wf-img tall" style="aspect-ratio:auto; flex:1; border:none; border-bottom:1px solid var(--g-4); border-radius:0"></div>
-        <div class="wf-col" style="padding:16px; gap:6px">
-          <div class="wf-line title" style="width:60%"></div>
-          <div class="wf-line med"></div>
-          <div class="wf-line short"></div>
-        </div>
-      </div>
-      <div class="wf-row" style="justify-content:center; gap:24px; padding:8px">
-        <div class="wf-btn icon" style="width:56px; height:56px; border-radius:50%"></div>
-        <div class="wf-btn icon" style="width:56px; height:56px; border-radius:50%"></div>
-        <div class="wf-btn icon" style="width:56px; height:56px; border-radius:50%"></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- 9. MIS LISTAS -->
-<section class="wf-section" id="tpl-mislistas">
-  <div class="wf-section-head">
-    <div class="kicker">Template · 9</div>
-    <h2>Mis Listas</h2>
-    <p>Tabs Favoritos / Descartados. Grid de cards con avatar, nombre, match %, acción rápida.</p>
-  </div>
-  <div class="wf-frames">
-    <div class="wf-frame">
-      <span class="wf-frame-label">Mis Listas · Favoritos</span>
-      <div class="wf-topnav">
-        <div class="wf-btn icon"></div>
-        <span class="wf-text">Mis listas</span>
-        <div class="wf-btn icon"></div>
-      </div>
-      <div class="wf-tabs">
-        <div class="wf-tab active">Favoritos <span class="wf-text">(3)</span></div>
-        <div class="wf-tab">Descartados <span class="wf-text">(2)</span></div>
-      </div>
-      <div class="wf-col" style="gap:8px; margin-top:8px">
-        <div class="wf-card" style="padding:10px">
-          <div class="wf-row" style="gap:12px">
-            <div class="wf-avatar"></div>
-            <div class="wf-col grow" style="gap:4px">
-              <div class="wf-line title" style="width:60%"></div>
-              <div class="wf-line short"></div>
-            </div>
-            <div class="wf-line title" style="width:40px"></div>
-            <div class="wf-btn icon"></div>
-          </div>
-        </div>
-        <div class="wf-card" style="padding:10px">
-          <div class="wf-row" style="gap:12px">
-            <div class="wf-avatar"></div>
-            <div class="wf-col grow" style="gap:4px">
-              <div class="wf-line title" style="width:60%"></div>
-              <div class="wf-line short"></div>
-            </div>
-            <div class="wf-line title" style="width:40px"></div>
-            <div class="wf-btn icon"></div>
-          </div>
-        </div>
-        <div class="wf-card" style="padding:10px">
-          <div class="wf-row" style="gap:12px">
-            <div class="wf-avatar"></div>
-            <div class="wf-col grow" style="gap:4px">
-              <div class="wf-line title" style="width:60%"></div>
-              <div class="wf-line short"></div>
-            </div>
-            <div class="wf-line title" style="width:40px"></div>
-            <div class="wf-btn icon"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- 9b. MIS RESPUESTAS DEL CUESTIONARIO (nuevo, multi-eleccion) -->
+<!-- 10. MIS RESPUESTAS -->
 <section class="wf-section" id="tpl-respuestas">
   <div class="wf-section-head">
-    <div class="kicker">Template · 9b (nuevo)</div>
+    <div class="kicker">Template · 10</div>
     <h2>Mis respuestas del cuestionario</h2>
     <p>Vista para revisar y editar tus respuestas del cuestionario. Con múltiples elecciones, se agrupan por bloque: <strong>Base</strong> (compartido, contestas una vez) y <strong>Extras</strong> (por elección específica). Cada respuesta es editable inline. Al final, opción de rehacer todo (destructivo).</p>
   </div>
@@ -1139,7 +1283,7 @@
     <div class="wf-frame">
       <span class="wf-frame-label">Mis respuestas</span>
       <div class="wf-topnav">
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
         <span class="wf-text">Mis respuestas</span>
         <span></span>
       </div>
@@ -1182,7 +1326,7 @@
               <span class="wf-chip" style="padding:2px 8px; font-size:10px">De acuerdo</span>
               <span class="wf-chip" style="padding:2px 8px; font-size:10px">Importante</span>
             </div>
-            <div class="wf-btn" style="padding:4px 10px; font-size:11px">Editar</div>
+            <button type="button" class="wf-btn" style="padding:4px 10px; font-size:11px">Editar</button>
           </div>
         </div>
         <div class="wf-card" style="padding:10px; gap:6px">
@@ -1193,7 +1337,7 @@
               <span class="wf-chip" style="padding:2px 8px; font-size:10px">Muy de acuerdo</span>
               <span class="wf-chip" style="padding:2px 8px; font-size:10px">Muy importante</span>
             </div>
-            <div class="wf-btn" style="padding:4px 10px; font-size:11px">Editar</div>
+            <button type="button" class="wf-btn" style="padding:4px 10px; font-size:11px">Editar</button>
           </div>
         </div>
       </div>
@@ -1208,7 +1352,7 @@
             <div class="wf-row" style="gap:6px">
               <span class="wf-chip" style="padding:2px 8px; font-size:10px">Neutral</span>
             </div>
-            <div class="wf-btn" style="padding:4px 10px; font-size:11px">Editar</div>
+            <button type="button" class="wf-btn" style="padding:4px 10px; font-size:11px">Editar</button>
           </div>
         </div>
       </div>
@@ -1223,21 +1367,28 @@
               <div class="wf-line short"></div>
               <span class="wf-text" style="font-size:11px">Contesta 3 preguntas para completar tu match</span>
             </div>
-            <div class="wf-btn" style="padding:6px 10px; font-size:11px">Ir</div>
+            <button type="button" class="wf-btn" style="padding:6px 10px; font-size:11px">Ir</button>
           </div>
         </div>
       </div>
 
       <div class="wf-spacer"></div>
-      <div class="wf-btn ghost wide">Rehacer todo el cuestionario</div>
+      <button type="button" class="wf-btn ghost wide">Rehacer todo el cuestionario</button>
+      <nav class="wf-bottomnav" aria-label="Navegacion principal">
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Home</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Guardados</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Comparar</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Noticias</button>
+        <button type="button" class="wf-bottomnav-item active" aria-current="page"><span class="wf-icon" aria-hidden="true"></span>Config</button>
+      </nav>
     </div>
   </div>
 </section>
 
-<!-- 9c. MIS GUARDADOS (nuevo) -->
+<!-- 11. MIS GUARDADOS -->
 <section class="wf-section" id="tpl-guardados">
   <div class="wf-section-head">
-    <div class="kicker">Template · 9c (nuevo)</div>
+    <div class="kicker">Template · 11</div>
     <h2>Mis guardados</h2>
     <p>Vista consolidada de todo lo que el usuario ha guardado. Tabs: <strong>Favoritos</strong> (candidatos marcados como interesantes), <strong>Descartados</strong> (con opción restaurar) y <strong>Posturas</strong> (posturas específicas de candidatos que quisiste guardar). Filtro por elección encima de tabs.</p>
   </div>
@@ -1245,9 +1396,9 @@
     <div class="wf-frame">
       <span class="wf-frame-label">Guardados · Favoritos</span>
       <div class="wf-topnav">
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
         <span class="wf-text">Mis guardados</span>
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
       </div>
 
       <!-- Filtro por eleccion -->
@@ -1276,7 +1427,7 @@
                 <span class="wf-text" style="font-size:10px">87% match</span>
               </div>
             </div>
-            <div class="wf-btn icon"></div>
+            <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
           </div>
         </div>
         <div class="wf-card" style="padding:10px">
@@ -1289,7 +1440,7 @@
                 <span class="wf-text" style="font-size:10px">72% match</span>
               </div>
             </div>
-            <div class="wf-btn icon"></div>
+            <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
           </div>
         </div>
         <div class="wf-card" style="padding:10px">
@@ -1302,18 +1453,25 @@
                 <span class="wf-text" style="font-size:10px">64% match</span>
               </div>
             </div>
-            <div class="wf-btn icon"></div>
+            <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
           </div>
         </div>
       </div>
+      <nav class="wf-bottomnav" aria-label="Navegacion principal">
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Home</button>
+        <button type="button" class="wf-bottomnav-item active" aria-current="page"><span class="wf-icon" aria-hidden="true"></span>Guardados</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Comparar</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Noticias</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Config</button>
+      </nav>
     </div>
 
     <div class="wf-frame">
       <span class="wf-frame-label">Guardados · Posturas</span>
       <div class="wf-topnav">
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
         <span class="wf-text">Mis guardados</span>
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
       </div>
 
       <div class="wf-row" style="gap:6px; overflow-x:auto">
@@ -1339,7 +1497,7 @@
                 <span class="wf-text" style="font-size:10px">Educación · hace 2 dias</span>
               </div>
             </div>
-            <div class="wf-btn icon"></div>
+            <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
           </div>
           <div class="wf-line title long"></div>
           <div class="wf-line med"></div>
@@ -1353,7 +1511,7 @@
                 <span class="wf-text" style="font-size:10px">Salud · ayer</span>
               </div>
             </div>
-            <div class="wf-btn icon"></div>
+            <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
           </div>
           <div class="wf-line title long"></div>
           <div class="wf-line med"></div>
@@ -1367,60 +1525,55 @@
                 <span class="wf-text" style="font-size:10px">Pensiones · hoy</span>
               </div>
             </div>
-            <div class="wf-btn icon"></div>
+            <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
           </div>
           <div class="wf-line title long"></div>
           <div class="wf-line med"></div>
         </div>
       </div>
+      <nav class="wf-bottomnav" aria-label="Navegacion principal">
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Home</button>
+        <button type="button" class="wf-bottomnav-item active" aria-current="page"><span class="wf-icon" aria-hidden="true"></span>Guardados</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Comparar</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Noticias</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Config</button>
+      </nav>
     </div>
   </div>
 </section>
 
-<!-- 10. NOTICIAS -->
+<!-- 12. NOTICIAS -->
 <section class="wf-section" id="tpl-noticias">
   <div class="wf-section-head">
-    <div class="kicker">Template · 10</div>
+    <div class="kicker">Template · 12</div>
     <h2>Noticias</h2>
-    <p>Feed con topnav breadcrumb + filtros scrolleables (elección, candidato, sentimiento) + lista de news cards en 1 columna + botón cargar más.</p>
+    <p>Feed con topnav breadcrumb + filter bar compacto (botón "Filtros" + chips activos + limpiar) + lista de news cards en 1 columna + botón cargar más. Los filtros expandidos abren un bottom sheet (ver template 22 Filtros).</p>
   </div>
   <div class="wf-frames">
     <div class="wf-frame">
       <span class="wf-frame-label">Noticias</span>
       <div class="wf-topnav">
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
         <div class="wf-col" style="align-items:center; gap:2px; flex:1">
           <span class="wf-text" style="font-size:12px; font-weight:600">Presidencial 2026</span>
           <span class="wf-label">Noticias</span>
         </div>
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
       </div>
       <div class="wf-row between" style="align-items:baseline">
         <div class="wf-line title" style="width:180px"></div>
         <span class="wf-text">128 resultados</span>
       </div>
-      <div class="wf-col" style="gap:6px">
-        <div class="wf-row" style="gap:6px; overflow-x:auto">
-          <span class="wf-label" style="align-self:center">Elección</span>
-          <span class="wf-chip active">Presidencial</span>
-          <span class="wf-chip">Municipal</span>
-          <span class="wf-chip">Todas</span>
-        </div>
-        <div class="wf-row" style="gap:6px; overflow-x:auto">
-          <span class="wf-label" style="align-self:center">Candidato</span>
-          <span class="wf-chip active">Todos</span>
-          <span class="wf-chip">Chip</span>
-          <span class="wf-chip">Chip</span>
-          <span class="wf-chip">Chip</span>
-          <span class="wf-chip">Chip</span>
-        </div>
-        <div class="wf-row" style="gap:6px">
-          <span class="wf-label" style="align-self:center">Sentimiento</span>
-          <span class="wf-chip active">Todos</span>
-          <span class="wf-chip">Positivas</span>
-          <span class="wf-chip">Neutrales</span>
-          <span class="wf-chip">Negativas</span>
-        </div>
+      <!-- Filter bar compacto: boton "Filtros" + chips de activos + limpiar -->
+      <div class="wf-row" style="gap:6px; align-items:center; overflow-x:auto; flex-wrap:nowrap">
+        <button type="button" class="wf-btn" style="gap:6px; padding:6px 10px; min-width:0; font-size:12px; flex-shrink:0">
+          <span class="wf-icon" aria-hidden="true" style="width:14px; height:14px"></span>
+          Filtros
+          <span class="wf-chip active" style="padding:1px 6px; font-size:10px">2</span>
+        </button>
+        <button type="button" class="wf-chip active" style="gap:4px; flex-shrink:0">Presidencial <span aria-hidden="true" style="font-size:10px">X</span></button>
+        <button type="button" class="wf-chip active" style="gap:4px; flex-shrink:0">Positivas <span aria-hidden="true" style="font-size:10px">X</span></button>
+        <button type="button" class="wf-btn ghost" style="margin-left:auto; font-size:11px; padding:6px 8px; min-width:0; flex-shrink:0">Limpiar</button>
       </div>
       <div class="wf-col" style="gap:8px">
         <div class="wf-news">
@@ -1449,16 +1602,23 @@
         </div>
       </div>
       <div class="wf-row" style="justify-content:center">
-        <div class="wf-btn">Cargar más</div>
+        <button type="button" class="wf-btn">Cargar más</button>
       </div>
+      <nav class="wf-bottomnav" aria-label="Navegacion principal">
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Home</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Guardados</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Comparar</button>
+        <button type="button" class="wf-bottomnav-item active" aria-current="page"><span class="wf-icon" aria-hidden="true"></span>Noticias</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Config</button>
+      </nav>
     </div>
   </div>
 </section>
 
-<!-- 11. PERFIL CANDIDATO -->
+<!-- 13. PERFIL CANDIDATO -->
 <section class="wf-section" id="tpl-perfil">
   <div class="wf-section-head">
-    <div class="kicker">Template · 11</div>
+    <div class="kicker">Template · 13</div>
     <h2>Perfil de candidato</h2>
     <p>Hero con avatar + nombre + partido + match %. Botón discreto "Marcar como mi elegido" (opcional, uno por elección — reemplaza la idea de "voto final" con algo más liviano). Tabs Resumen / Posturas / Noticias. Sección de posturas destacadas + últimas noticias.</p>
   </div>
@@ -1466,28 +1626,32 @@
     <div class="wf-frame">
       <span class="wf-frame-label">Perfil · Resumen</span>
       <div class="wf-topnav">
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
         <div class="wf-col" style="align-items:center; gap:2px; flex:1">
           <span class="wf-text" style="font-size:12px; font-weight:600">Presidencial 2026</span>
           <span class="wf-label">Perfil de candidato</span>
         </div>
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
       </div>
       <div class="wf-col" style="align-items:center; gap:8px; padding:12px 0">
         <div class="wf-avatar xl"></div>
         <div class="wf-line title c" style="width:50%"></div>
         <div class="wf-line short c"></div>
         <div class="wf-line title c" style="width:64px; height:28px"></div>
+        <div class="wf-row" style="gap:6px; align-items:center; justify-content:center">
+          <span class="wf-chip active" style="padding:2px 8px; font-size:10px; gap:6px">Confianza alta <button class="wf-info-btn">?</button></span>
+          <span class="wf-text" style="font-size:10px">10 de 12 preguntas</span>
+        </div>
         <span class="wf-label">Compatibilidad</span>
         <!-- Marcar como mi elegido: toggle discreto -->
-        <div class="wf-btn wide" style="margin-top:8px; gap:6px">
+        <button type="button" class="wf-btn wide" style="margin-top:8px; gap:6px">
           <div class="wf-icon"></div>
           <span>Marcar como mi elegido</span>
-        </div>
+        </button>
         <div class="wf-row" style="gap:8px; margin-top:4px">
-          <div class="wf-btn icon"></div>
-          <div class="wf-btn icon"></div>
-          <div class="wf-btn icon"></div>
+          <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
+          <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
+          <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
         </div>
       </div>
       <div class="wf-tabs">
@@ -1518,14 +1682,21 @@
           </div>
         </div>
       </div>
+      <nav class="wf-bottomnav" aria-label="Navegacion principal">
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Home</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Guardados</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Comparar</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Noticias</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Config</button>
+      </nav>
     </div>
   </div>
 </section>
 
-<!-- 12. PERFIL EMPTY -->
+<!-- 14. PERFIL EMPTY -->
 <section class="wf-section" id="tpl-perfil-empty">
   <div class="wf-section-head">
-    <div class="kicker">Template · 12</div>
+    <div class="kicker">Template · 14</div>
     <h2>Perfil · empty state</h2>
     <p>Cuando el usuario aún no completó el cuestionario, oculta el % de match y muestra CTA para completarlo.</p>
   </div>
@@ -1533,12 +1704,12 @@
     <div class="wf-frame">
       <span class="wf-frame-label">Perfil · sin match</span>
       <div class="wf-topnav">
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
         <div class="wf-col" style="align-items:center; gap:2px; flex:1">
           <span class="wf-text" style="font-size:12px; font-weight:600">Municipal 2028</span>
           <span class="wf-label">Perfil de candidato</span>
         </div>
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
       </div>
       <div class="wf-col" style="align-items:center; gap:8px; padding:12px 0">
         <div class="wf-avatar xl"></div>
@@ -1547,7 +1718,7 @@
         <div class="wf-box" style="padding:12px; text-align:center; margin-top:8px; width:100%">
           <div class="wf-line med" style="margin:0 auto"></div>
           <div class="wf-line short" style="margin:6px auto"></div>
-          <div class="wf-btn primary" style="margin-top:8px">Empezar cuestionario</div>
+          <button type="button" class="wf-btn primary" style="margin-top:8px">Empezar cuestionario</button>
         </div>
       </div>
       <div class="wf-tabs">
@@ -1561,14 +1732,21 @@
         <div class="wf-line long"></div>
         <div class="wf-line med"></div>
       </div>
+      <nav class="wf-bottomnav" aria-label="Navegacion principal">
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Home</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Guardados</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Comparar</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Noticias</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Config</button>
+      </nav>
     </div>
   </div>
 </section>
 
-<!-- 13. COMPARADOR -->
+<!-- 15. COMPARADOR -->
 <section class="wf-section" id="tpl-comparador">
   <div class="wf-section-head">
-    <div class="kicker">Template · 13</div>
+    <div class="kicker">Template · 15</div>
     <h2>Comparador</h2>
     <p>Hasta 3 candidatos en 360px móvil. Header compacto con avatares fijos y match% de cada uno. Debajo, filas por eje mostrando la posición de cada candidato (barra o valor) alineada bajo su avatar. Sticky header al hacer scroll.</p>
   </div>
@@ -1576,12 +1754,12 @@
     <div class="wf-frame">
       <span class="wf-frame-label">Comparador · 2 candidatos</span>
       <div class="wf-topnav">
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
         <div class="wf-col" style="align-items:center; gap:2px; flex:1">
           <span class="wf-text" style="font-size:12px; font-weight:600">Presidencial 2026</span>
           <span class="wf-label">Comparar candidatos</span>
         </div>
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
       </div>
 
       <!-- Header sticky con avatares fijos y match -->
@@ -1673,14 +1851,21 @@
           <div style="width:32px"></div>
         </div>
       </div>
+      <nav class="wf-bottomnav" aria-label="Navegacion principal">
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Home</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Guardados</button>
+        <button type="button" class="wf-bottomnav-item active" aria-current="page"><span class="wf-icon" aria-hidden="true"></span>Comparar</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Noticias</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Config</button>
+      </nav>
     </div>
   </div>
 </section>
 
-<!-- 14. SHARE MODAL -->
-<section class="wf-section" id="tpl-share">
+<!-- 16. SHARE MODAL -->
+<section class="wf-section" id="tpl-share" role="dialog" aria-modal="true" aria-labelledby="tpl-share-title">
   <div class="wf-section-head">
-    <div class="kicker">Template · 14</div>
+    <div class="kicker">Template · 16</div>
     <h2>Share modal</h2>
     <p>Bottom sheet modal para compartir tus resultados. Preview + opciones de canal (WhatsApp, IG, Twitter, copiar link).</p>
   </div>
@@ -1709,17 +1894,17 @@
             <div class="wf-col" style="align-items:center; gap:4px"><div class="wf-icon lg"></div><span class="wf-text" style="font-size:10px">Twitter</span></div>
             <div class="wf-col" style="align-items:center; gap:4px"><div class="wf-icon lg"></div><span class="wf-text" style="font-size:10px">Copiar link</span></div>
           </div>
-          <div class="wf-btn wide">Cancelar</div>
+          <button type="button" class="wf-btn wide">Cancelar</button>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 15. CONFIGURACION -->
+<!-- 17. CONFIGURACION -->
 <section class="wf-section" id="tpl-config">
   <div class="wf-section-head">
-    <div class="kicker">Template · 15 (nuevo)</div>
+    <div class="kicker">Template · 17</div>
     <h2>Configuración</h2>
     <p>Ajustes de la app. Agrupado en secciones: Cuenta, Ubicación, Elecciones (link a la gestión), Notificaciones, Tema, Privacidad y Sobre la app. Cada item es tap-able (arrow ›) o toggle.</p>
   </div>
@@ -1727,7 +1912,7 @@
     <div class="wf-frame">
       <span class="wf-frame-label">Configuracion</span>
       <div class="wf-topnav">
-        <div class="wf-btn icon"></div>
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
         <span class="wf-text">Configuración</span>
         <span></span>
       </div>
@@ -1739,7 +1924,7 @@
           <div class="wf-avatar lg"></div>
           <div class="wf-line title c" style="width:60%"></div>
           <div class="wf-line short c"></div>
-          <div class="wf-btn" style="margin-top:8px">Editar perfil</div>
+          <button type="button" class="wf-btn" style="margin-top:8px">Editar perfil</button>
         </div>
       </div>
 
@@ -1870,7 +2055,733 @@
         <div class="center wf-text" style="font-size:10px; padding:8px">Version 1.0.0</div>
       </div>
 
-      <div class="wf-btn wide" style="margin-top:8px">Cerrar sesión</div>
+      <button type="button" class="wf-btn wide" style="margin-top:8px">Cerrar sesión</button>
+      <nav class="wf-bottomnav" aria-label="Navegacion principal">
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Home</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Guardados</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Comparar</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Noticias</button>
+        <button type="button" class="wf-bottomnav-item active" aria-current="page"><span class="wf-icon" aria-hidden="true"></span>Config</button>
+      </nav>
+    </div>
+  </div>
+</section>
+
+<!-- 18. EDITAR PERFIL -->
+<section class="wf-section" id="tpl-editar-perfil">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 18</div>
+    <h2>Editar perfil</h2>
+    <p>Sub-pantalla de Config · Cuenta → "Editar perfil". Foto, nombre, email (solo lectura si viene de OAuth), cambiar contraseña y borrar cuenta. Botones guardar/cancelar sticky abajo.</p>
+  </div>
+  <div class="wf-frames">
+    <div class="wf-frame">
+      <span class="wf-frame-label">Editar perfil</span>
+      <div class="wf-topnav">
+        <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
+        <span class="wf-text">Editar perfil</span>
+        <span></span>
+      </div>
+
+      <!-- Foto -->
+      <div class="wf-col" style="align-items:center; gap:8px; padding:16px 0">
+        <div class="wf-avatar xl"></div>
+        <button type="button" class="wf-btn" style="padding:6px 14px">Cambiar foto</button>
+      </div>
+
+      <!-- Datos basicos -->
+      <div class="wf-col" style="gap:12px">
+        <div>
+          <span class="wf-label">Nombre</span>
+          <div class="wf-input" style="margin-top:4px"><div class="wf-line med"></div></div>
+        </div>
+        <div>
+          <span class="wf-label">Email</span>
+          <div class="wf-input" style="margin-top:4px; opacity:.6">
+            <div class="wf-line long"></div>
+            <div class="wf-icon"></div>
+          </div>
+          <span class="wf-text" style="font-size:10px; color:var(--g-5)">Vinculado a Google · no editable</span>
+        </div>
+      </div>
+
+      <!-- Seguridad -->
+      <div class="wf-col" style="gap:6px">
+        <span class="wf-label">Seguridad</span>
+        <div class="wf-box" style="padding:10px">
+          <div class="wf-row between">
+            <span class="wf-text" style="font-size:12px">Cambiar contraseña</span>
+            <div class="wf-icon"></div>
+          </div>
+        </div>
+        <div class="wf-box" style="padding:10px">
+          <div class="wf-row between">
+            <div class="wf-col" style="gap:2px">
+              <span class="wf-text" style="font-size:12px">Autenticación biométrica</span>
+              <span class="wf-text" style="font-size:10px; color:var(--g-5)">Face ID / Touch ID</span>
+            </div>
+            <div class="wf-box" style="width:36px; height:20px; padding:0; border-radius:10px; background:var(--g-7); border-color:var(--g-7)"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cuentas vinculadas -->
+      <div class="wf-col" style="gap:6px">
+        <span class="wf-label">Cuentas vinculadas</span>
+        <div class="wf-box" style="padding:10px">
+          <div class="wf-row between">
+            <div class="wf-row" style="gap:8px">
+              <div class="wf-icon"></div>
+              <span class="wf-text" style="font-size:12px">Google</span>
+            </div>
+            <span class="wf-text" style="font-size:11px; color:var(--g-5)">Vinculado</span>
+          </div>
+        </div>
+        <div class="wf-box" style="padding:10px">
+          <div class="wf-row between">
+            <div class="wf-row" style="gap:8px">
+              <div class="wf-icon"></div>
+              <span class="wf-text" style="font-size:12px">Apple</span>
+            </div>
+            <button type="button" class="wf-btn" style="padding:4px 10px; font-size:11px">Vincular</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zona peligro -->
+      <div class="wf-col" style="gap:6px">
+        <span class="wf-label">Zona peligrosa</span>
+        <div class="wf-box" style="padding:10px; border-color:var(--g-6)">
+          <div class="wf-row between">
+            <div class="wf-col" style="gap:2px">
+              <span class="wf-text" style="font-size:12px">Borrar mi cuenta</span>
+              <span class="wf-text" style="font-size:10px; color:var(--g-5)">Irreversible · requiere confirmación</span>
+            </div>
+            <div class="wf-icon"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wf-spacer"></div>
+
+      <!-- Botones sticky -->
+      <div class="wf-row" style="gap:8px">
+        <button type="button" class="wf-btn ghost" style="flex:1">Cancelar</button>
+        <button type="button" class="wf-btn primary" style="flex:1">Guardar cambios</button>
+      </div>
+      <nav class="wf-bottomnav" aria-label="Navegacion principal">
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Home</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Guardados</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Comparar</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Noticias</button>
+        <button type="button" class="wf-bottomnav-item active" aria-current="page"><span class="wf-icon" aria-hidden="true"></span>Config</button>
+      </nav>
+    </div>
+  </div>
+</section>
+
+<!-- 19. MODAL SABER MAS -->
+<section class="wf-section" id="tpl-saber-mas" role="dialog" aria-modal="true" aria-labelledby="tpl-saber-mas-title">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 19</div>
+    <h2>Modal · Saber más</h2>
+    <p>Bottom sheet que aparece desde abajo al tocar el link "Saber más" en el Cuestionario. Explica el tema de la pregunta actual y sus repercusiones en 5 dimensiones: social, medioambiental, política, económica e institucional. El contenido debe ser breve (2-3 líneas por dimensión), neutral y educativo — no tomar postura, solo informar.</p>
+  </div>
+  <div class="wf-frames">
+    <div class="wf-frame" style="background:rgba(0,0,0,.35); padding:0; overflow:hidden">
+      <span class="wf-frame-label">Bottom sheet abierto</span>
+      <div style="flex:1"></div>
+      <div class="wf-col" style="background:var(--g-0); border-radius:var(--r-lg) var(--r-lg) 0 0; padding:12px; gap:12px; box-shadow:0 -4px 12px rgba(0,0,0,.1)">
+        <!-- handle bar -->
+        <div style="width:36px; height:4px; background:var(--g-4); border-radius:2px; margin:0 auto"></div>
+
+        <!-- header -->
+        <div class="wf-row between">
+          <div class="wf-col" style="gap:2px">
+            <span class="wf-label">Sobre la pregunta</span>
+            <span class="wf-text" style="font-size:14px; font-weight:700">Reforma educacional</span>
+          </div>
+          <button type="button" class="wf-btn icon" aria-label="Accion (definir en prod)"></button>
+        </div>
+
+        <!-- Contexto -->
+        <div class="wf-col" style="gap:6px">
+          <span class="wf-label">De qué se trata</span>
+          <div class="wf-line long"></div>
+          <div class="wf-line long"></div>
+          <div class="wf-line med"></div>
+        </div>
+
+        <!-- Repercusiones -->
+        <div class="wf-col" style="gap:8px">
+          <span class="wf-label">Repercusiones</span>
+
+          <div class="wf-box" style="padding:10px; gap:6px">
+            <div class="wf-row" style="gap:6px; align-items:center">
+              <div class="wf-icon"></div>
+              <span class="wf-text" style="font-size:12px; font-weight:700">Social</span>
+            </div>
+            <div class="wf-line long"></div>
+            <div class="wf-line med"></div>
+          </div>
+
+          <div class="wf-box" style="padding:10px; gap:6px">
+            <div class="wf-row" style="gap:6px; align-items:center">
+              <div class="wf-icon"></div>
+              <span class="wf-text" style="font-size:12px; font-weight:700">Medioambiental</span>
+            </div>
+            <div class="wf-line long"></div>
+            <div class="wf-line med"></div>
+          </div>
+
+          <div class="wf-box" style="padding:10px; gap:6px">
+            <div class="wf-row" style="gap:6px; align-items:center">
+              <div class="wf-icon"></div>
+              <span class="wf-text" style="font-size:12px; font-weight:700">Política</span>
+            </div>
+            <div class="wf-line long"></div>
+            <div class="wf-line med"></div>
+          </div>
+
+          <div class="wf-box" style="padding:10px; gap:6px">
+            <div class="wf-row" style="gap:6px; align-items:center">
+              <div class="wf-icon"></div>
+              <span class="wf-text" style="font-size:12px; font-weight:700">Económica</span>
+            </div>
+            <div class="wf-line long"></div>
+            <div class="wf-line med"></div>
+          </div>
+
+          <div class="wf-box" style="padding:10px; gap:6px">
+            <div class="wf-row" style="gap:6px; align-items:center">
+              <div class="wf-icon"></div>
+              <span class="wf-text" style="font-size:12px; font-weight:700">Institucional</span>
+            </div>
+            <div class="wf-line long"></div>
+            <div class="wf-line med"></div>
+          </div>
+        </div>
+
+        <button type="button" class="wf-btn primary wide">Entendido</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 20. COACH MARKS -->
+<section class="wf-section" id="tpl-coach-marks">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 20</div>
+    <h2>Coach marks contextuales</h2>
+    <p>Overlays que aparecen la <strong>primera vez</strong> que el usuario llega a una pantalla clave. Oscurecen el fondo, hacen "spotlight" sobre el elemento a destacar, y muestran una tarjeta explicativa. Cada tour tiene 1-3 pasos con "Siguiente/Entendido/Saltar tour". Se dispara solo una vez por pantalla (se guarda en localStorage/user prefs).</p>
+  </div>
+  <div class="wf-frames">
+
+    <!-- Coach 1: Home HUB primera vez -->
+    <div class="wf-frame" style="background:rgba(0,0,0,.35); padding:0; overflow:hidden">
+      <span class="wf-frame-label">Coach 1 · Home HUB</span>
+      <!-- Contenido base blurry / oscurecido -->
+      <div class="wf-col" style="padding:12px; gap:8px; opacity:.55">
+        <div class="wf-topnav" style="background:var(--g-0)">
+          <span class="wf-line title" style="width:80px"></span>
+          <span></span>
+          <span></span>
+        </div>
+        <span class="wf-label">Tus elecciones</span>
+      </div>
+      <!-- Spotlight: election card con ring destacado -->
+      <div style="padding:0 12px; margin-top:-8px; position:relative; z-index:1">
+        <div class="wf-col" style="width:200px; padding:12px; background:var(--g-0); border:2px solid var(--g-7); border-radius:var(--r-lg); gap:8px; box-shadow:0 0 0 4px rgba(33,33,33,.15)">
+          <div class="wf-row between">
+            <div class="wf-col" style="gap:2px">
+              <div class="wf-line title" style="width:100px"></div>
+              <span class="wf-label">Nacional</span>
+            </div>
+            <span class="wf-chip">42d</span>
+          </div>
+          <div class="wf-line title" style="width:48px; height:22px"></div>
+          <div class="wf-progress"><div style="width:100%"></div></div>
+        </div>
+      </div>
+      <!-- Tarjeta explicativa -->
+      <div class="wf-col" style="margin:16px 12px 12px; padding:14px; background:var(--g-0); border-radius:var(--r-lg); gap:10px; box-shadow:0 4px 12px rgba(0,0,0,.15)">
+        <div class="wf-row between">
+          <span class="wf-label">Paso 1 de 2</span>
+          <button type="button" class="wf-btn ghost" style="padding:2px 6px; font-size:11px; min-width:0">Saltar tour</button>
+        </div>
+        <span class="wf-text" style="font-size:14px; font-weight:700; color:var(--g-7)">Aquí están tus elecciones</span>
+        <div class="wf-line long"></div>
+        <div class="wf-line med"></div>
+        <div class="wf-btn primary wide">Siguiente</div>
+      </div>
+      <div style="flex:1"></div>
+    </div>
+
+    <!-- Coach 2: Cuestionario - Saber mas -->
+    <div class="wf-frame" style="background:rgba(0,0,0,.35); padding:0; overflow:hidden">
+      <span class="wf-frame-label">Coach 2 · Cuestionario</span>
+      <div class="wf-col" style="padding:12px; gap:8px; opacity:.55">
+        <div class="wf-topnav" style="background:var(--g-0)">
+          <span></span>
+          <span class="wf-label">3 de 12 · base</span>
+          <span></span>
+        </div>
+        <span class="wf-label">Educación</span>
+        <div class="wf-line title long"></div>
+        <div class="wf-line title long"></div>
+      </div>
+      <!-- Spotlight sobre el link Saber mas -->
+      <div class="wf-row" style="margin:0 12px; padding:10px; background:var(--g-0); border:2px solid var(--g-7); border-radius:var(--r); gap:8px; align-items:center; box-shadow:0 0 0 4px rgba(33,33,33,.15); position:relative; z-index:1">
+        <span class="wf-info-btn">?</span>
+        <span class="wf-text" style="font-size:12px; text-decoration:underline">Saber más sobre este tema</span>
+      </div>
+      <!-- Tarjeta explicativa -->
+      <div class="wf-col" style="margin:16px 12px 12px; padding:14px; background:var(--g-0); border-radius:var(--r-lg); gap:10px; box-shadow:0 4px 12px rgba(0,0,0,.15)">
+        <div class="wf-row between">
+          <span class="wf-label">Paso 1 de 1</span>
+          <button type="button" class="wf-btn ghost" style="padding:2px 6px; font-size:11px; min-width:0">X</button>
+        </div>
+        <span class="wf-text" style="font-size:14px; font-weight:700; color:var(--g-7)">Toca aquí si quieres profundizar</span>
+        <div class="wf-line long"></div>
+        <div class="wf-line med"></div>
+        <div class="wf-btn primary wide">Entendido</div>
+      </div>
+      <div style="flex:1"></div>
+    </div>
+
+    <!-- Coach 3: Resultados - Radar + cobertura -->
+    <div class="wf-frame" style="background:rgba(0,0,0,.35); padding:0; overflow:hidden">
+      <span class="wf-frame-label">Coach 3 · Resultados</span>
+      <div class="wf-col" style="padding:12px; gap:8px; opacity:.55">
+        <div class="wf-topnav" style="background:var(--g-0)">
+          <span></span>
+          <span class="wf-label">Resultados</span>
+          <span></span>
+        </div>
+      </div>
+      <!-- Spotlight sobre radar -->
+      <div style="margin:0 auto; position:relative; z-index:1">
+        <div class="wf-img" style="aspect-ratio:1; width:140px; height:140px; background:var(--g-0); border:2px solid var(--g-7); box-shadow:0 0 0 4px rgba(33,33,33,.15)">Radar</div>
+      </div>
+      <!-- Tarjeta explicativa -->
+      <div class="wf-col" style="margin:16px 12px 12px; padding:14px; background:var(--g-0); border-radius:var(--r-lg); gap:10px; box-shadow:0 4px 12px rgba(0,0,0,.15)">
+        <div class="wf-row between">
+          <span class="wf-label">Paso 1 de 3</span>
+          <button type="button" class="wf-btn ghost" style="padding:2px 6px; font-size:11px; min-width:0">Saltar tour</button>
+        </div>
+        <span class="wf-text" style="font-size:14px; font-weight:700; color:var(--g-7)">Así se compara tu perfil</span>
+        <div class="wf-line long"></div>
+        <div class="wf-line med"></div>
+        <div class="wf-row" style="gap:6px">
+          <div class="wf-btn ghost" style="flex:1">Atrás</div>
+          <div class="wf-btn primary" style="flex:2">Siguiente</div>
+        </div>
+      </div>
+      <div style="flex:1"></div>
+    </div>
+
+    <!-- Coach 4: Ranking - Confianza -->
+    <div class="wf-frame" style="background:rgba(0,0,0,.35); padding:0; overflow:hidden">
+      <span class="wf-frame-label">Coach 4 · Cobertura</span>
+      <div class="wf-col" style="padding:12px; gap:8px; opacity:.55">
+        <span class="wf-label">Ranking completo</span>
+        <div class="wf-row" style="gap:8px; padding:8px; border:1px solid var(--g-4); border-radius:var(--r); background:var(--g-0)">
+          <span class="wf-text">#2</span>
+          <div class="wf-avatar sm"></div>
+          <div class="wf-col grow" style="gap:2px">
+            <div class="wf-line short"></div>
+          </div>
+          <div class="wf-line title" style="width:32px; height:18px"></div>
+        </div>
+      </div>
+      <!-- Spotlight sobre la barrita de cobertura -->
+      <div class="wf-row" style="margin:0 12px; padding:10px; background:var(--g-0); border:2px solid var(--g-7); border-radius:var(--r); gap:8px; align-items:center; box-shadow:0 0 0 4px rgba(33,33,33,.15); position:relative; z-index:1; justify-content:flex-end">
+        <div class="wf-col" style="align-items:flex-end; gap:3px; min-width:44px">
+          <div class="wf-line title" style="width:32px; height:18px"></div>
+          <div style="width:32px; height:3px; background:var(--g-3); border-radius:2px"><div style="width:83%; height:100%; background:var(--g-6)"></div></div>
+          <span style="font-size:8px; color:var(--g-5); text-transform:uppercase">10/12</span>
+        </div>
+      </div>
+      <div class="wf-col" style="margin:16px 12px 12px; padding:14px; background:var(--g-0); border-radius:var(--r-lg); gap:10px; box-shadow:0 4px 12px rgba(0,0,0,.15)">
+        <div class="wf-row between">
+          <span class="wf-label">Paso 2 de 3</span>
+          <button type="button" class="wf-btn ghost" style="padding:2px 6px; font-size:11px; min-width:0">Saltar tour</button>
+        </div>
+        <span class="wf-text" style="font-size:14px; font-weight:700; color:var(--g-7)">Qué tan confiable es cada match</span>
+        <div class="wf-line long"></div>
+        <div class="wf-line med"></div>
+        <div class="wf-row" style="gap:6px">
+          <div class="wf-btn ghost" style="flex:1">Atrás</div>
+          <div class="wf-btn primary" style="flex:2">Siguiente</div>
+        </div>
+      </div>
+      <div style="flex:1"></div>
+    </div>
+
+    <!-- Coach 5: Comparador - Toggle diferencias -->
+    <div class="wf-frame" style="background:rgba(0,0,0,.35); padding:0; overflow:hidden">
+      <span class="wf-frame-label">Coach 5 · Comparador</span>
+      <div class="wf-col" style="padding:12px; gap:8px; opacity:.55">
+        <div class="wf-topnav" style="background:var(--g-0)">
+          <span></span>
+          <span class="wf-label">Comparador</span>
+          <span></span>
+        </div>
+        <div class="wf-row" style="gap:8px; padding:8px; background:var(--g-0)">
+          <div class="wf-avatar"></div>
+          <div class="wf-avatar"></div>
+        </div>
+      </div>
+      <!-- Spotlight sobre el toggle -->
+      <div class="wf-row" style="margin:0 12px; padding:10px; background:var(--g-0); border:2px solid var(--g-7); border-radius:var(--r); gap:8px; align-items:center; box-shadow:0 0 0 4px rgba(33,33,33,.15); position:relative; z-index:1">
+        <span class="wf-text" style="font-size:12px; flex:1">Solo diferencias</span>
+        <div class="wf-box" style="width:36px; height:20px; padding:0; border-radius:10px; background:var(--g-7); border-color:var(--g-7)"></div>
+      </div>
+      <div class="wf-col" style="margin:16px 12px 12px; padding:14px; background:var(--g-0); border-radius:var(--r-lg); gap:10px; box-shadow:0 4px 12px rgba(0,0,0,.15)">
+        <div class="wf-row between">
+          <span class="wf-label">Paso 1 de 1</span>
+          <button type="button" class="wf-btn ghost" style="padding:2px 6px; font-size:11px; min-width:0">X</button>
+        </div>
+        <span class="wf-text" style="font-size:14px; font-weight:700; color:var(--g-7)">Enfócate en lo que separa</span>
+        <div class="wf-line long"></div>
+        <div class="wf-line med"></div>
+        <div class="wf-btn primary wide">Entendido</div>
+      </div>
+      <div style="flex:1"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 21. EMPTY STATES -->
+<section class="wf-section" id="tpl-empty-states">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 21</div>
+    <h2>Empty states educativos</h2>
+    <p>Cuando el usuario llega a una pantalla sin datos, en vez de mostrar solo "Nada aquí", explicamos <strong>cómo llenarla</strong>. Cada empty state tiene: icono + título + descripción breve + CTA claro. Estilo consistente: fondo dashed suave, textos centrados.</p>
+  </div>
+  <div class="wf-frames">
+
+    <!-- Empty 1: Guardados sin favoritos -->
+    <div class="wf-frame">
+      <span class="wf-frame-label">Empty · Guardados</span>
+      <div class="wf-topnav">
+        <span></span>
+        <span class="wf-text" style="font-size:12px; font-weight:600">Mis Guardados</span>
+        <span></span>
+      </div>
+      <div class="wf-tabs">
+        <div class="wf-tab active">Favoritos</div>
+        <div class="wf-tab">Descartados</div>
+        <div class="wf-tab">Posturas</div>
+      </div>
+      <div class="wf-col" style="flex:1; align-items:center; justify-content:center; text-align:center; gap:12px; padding:24px; border:2px dashed var(--g-3); border-radius:var(--r-lg); margin-top:12px">
+        <div class="wf-icon" style="width:48px; height:48px" aria-hidden="true"></div>
+        <span class="wf-text" style="font-size:15px; font-weight:700; color:var(--g-7)">Aún no tienes favoritos</span>
+        <div class="wf-line long c"></div>
+        <div class="wf-line med c"></div>
+        <div class="wf-btn primary" style="margin-top:8px">Ver candidatos</div>
+      </div>
+      <div class="wf-spacer"></div>
+      <nav class="wf-bottomnav" aria-label="Navegacion principal">
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Home</button>
+        <button type="button" class="wf-bottomnav-item active" aria-current="page"><span class="wf-icon" aria-hidden="true"></span>Guardados</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Comparar</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Noticias</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Config</button>
+      </nav>
+    </div>
+
+    <!-- Empty 2: Comparador vacio -->
+    <div class="wf-frame">
+      <span class="wf-frame-label">Empty · Comparador</span>
+      <div class="wf-topnav">
+        <span></span>
+        <span class="wf-text" style="font-size:12px; font-weight:600">Comparador</span>
+        <span></span>
+      </div>
+      <div class="wf-col" style="flex:1; align-items:center; justify-content:center; text-align:center; gap:12px; padding:24px; border:2px dashed var(--g-3); border-radius:var(--r-lg); margin-top:12px">
+        <div class="wf-row" style="gap:12px; margin-bottom:4px">
+          <div class="wf-avatar lg" style="border-style:dashed"></div>
+          <span class="wf-text" style="font-size:20px; align-self:center; color:var(--g-4)">vs</span>
+          <div class="wf-avatar lg" style="border-style:dashed"></div>
+        </div>
+        <span class="wf-text" style="font-size:15px; font-weight:700; color:var(--g-7)">Elige 2 candidatos</span>
+        <div class="wf-line long c"></div>
+        <div class="wf-line med c"></div>
+        <div class="wf-btn primary" style="margin-top:8px">Ver ranking</div>
+      </div>
+      <div class="wf-spacer"></div>
+      <nav class="wf-bottomnav" aria-label="Navegacion principal">
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Home</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Guardados</button>
+        <button type="button" class="wf-bottomnav-item active" aria-current="page"><span class="wf-icon" aria-hidden="true"></span>Comparar</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Noticias</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Config</button>
+      </nav>
+    </div>
+
+    <!-- Empty 3: Noticias sin resultados por filtro -->
+    <div class="wf-frame">
+      <span class="wf-frame-label">Empty · Noticias filtradas</span>
+      <div class="wf-topnav">
+        <span></span>
+        <span class="wf-text" style="font-size:12px; font-weight:600">Noticias</span>
+        <span></span>
+      </div>
+      <div class="wf-row" style="gap:6px; overflow-x:auto">
+        <div class="wf-chip active">Presidencial</div>
+        <div class="wf-chip">Municipal</div>
+        <div class="wf-chip">Constituyente</div>
+      </div>
+      <div class="wf-col" style="flex:1; align-items:center; justify-content:center; text-align:center; gap:12px; padding:24px; border:2px dashed var(--g-3); border-radius:var(--r-lg); margin-top:12px">
+        <div class="wf-icon" style="width:48px; height:48px" aria-hidden="true"></div>
+        <span class="wf-text" style="font-size:15px; font-weight:700; color:var(--g-7)">Sin novedades por ahora</span>
+        <div class="wf-line long c"></div>
+        <div class="wf-line med c"></div>
+        <div class="wf-btn" style="margin-top:8px">Quitar filtros</div>
+      </div>
+      <div class="wf-spacer"></div>
+      <nav class="wf-bottomnav" aria-label="Navegacion principal">
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Home</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Guardados</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Comparar</button>
+        <button type="button" class="wf-bottomnav-item active" aria-current="page"><span class="wf-icon" aria-hidden="true"></span>Noticias</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Config</button>
+      </nav>
+    </div>
+
+    <!-- Empty 4: Ranking sin resultados (cuestionario incompleto) -->
+    <div class="wf-frame">
+      <span class="wf-frame-label">Empty · Sin cuestionario</span>
+      <div class="wf-topnav">
+        <span></span>
+        <div class="wf-col" style="align-items:center; gap:2px; flex:1">
+          <span class="wf-text" style="font-size:12px; font-weight:600">Presidencial 2026</span>
+          <span class="wf-label">Resultados</span>
+        </div>
+        <span></span>
+      </div>
+      <div class="wf-col" style="flex:1; align-items:center; justify-content:center; text-align:center; gap:12px; padding:24px; border:2px dashed var(--g-3); border-radius:var(--r-lg); margin-top:12px">
+        <div class="wf-icon" style="width:48px; height:48px" aria-hidden="true"></div>
+        <span class="wf-text" style="font-size:15px; font-weight:700; color:var(--g-7)">Faltan tus respuestas</span>
+        <div class="wf-line long c"></div>
+        <div class="wf-line med c"></div>
+        <div class="wf-row" style="gap:6px; margin-top:4px">
+          <span class="wf-chip">3 de 12 contestadas</span>
+        </div>
+        <div class="wf-btn primary" style="margin-top:8px">Continuar cuestionario</div>
+        <div class="wf-btn ghost">Explorar candidatos igual</div>
+      </div>
+      <div class="wf-spacer"></div>
+      <nav class="wf-bottomnav" aria-label="Navegacion principal">
+        <button type="button" class="wf-bottomnav-item active" aria-current="page"><span class="wf-icon" aria-hidden="true"></span>Home</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Guardados</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Comparar</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Noticias</button>
+        <button type="button" class="wf-bottomnav-item"><span class="wf-icon" aria-hidden="true"></span>Config</button>
+      </nav>
+    </div>
+  </div>
+</section>
+
+<!-- 22. FILTROS (bottom sheet) -->
+<section class="wf-section" id="tpl-filtros" role="dialog" aria-modal="true" aria-labelledby="tpl-filtros-title">
+  <div class="wf-section-head">
+    <div class="kicker">Template · 22</div>
+    <h2 id="tpl-filtros-title">Filtros expandidos (bottom sheet)</h2>
+    <p>Al tocar el botón "Filtros" en cualquier pantalla con filter bar (Noticias, Ranking, Guardados, etc.), se abre este bottom sheet. Cada categoría es una sección <strong>colapsable</strong> con contador. Al final: "Limpiar todo" + "Aplicar (128 resultados)" con conteo en vivo. Patrón reutilizable.</p>
+  </div>
+  <div class="wf-frames">
+
+    <!-- Frame 1: bottom sheet abierto - vista principal -->
+    <div class="wf-frame">
+      <span class="wf-frame-label">Filtros · vista principal</span>
+      <!-- handle bar -->
+      <div class="wf-row" style="justify-content:center; margin:-8px 0 4px">
+        <div style="width:36px; height:4px; background:var(--g-4); border-radius:2px" aria-hidden="true"></div>
+      </div>
+      <div class="wf-row between">
+        <span class="wf-text" style="font-size:16px; font-weight:700; color:var(--g-7)">Filtros</span>
+        <button type="button" class="wf-btn icon" aria-label="Cerrar filtros"></button>
+      </div>
+
+      <!-- Seccion 1: Eleccion (expandida) -->
+      <div class="wf-col" style="gap:8px; padding:10px 0; border-bottom:1px solid var(--g-3)">
+        <button type="button" class="wf-row between" style="padding:0; background:none; border:none; cursor:pointer" aria-expanded="true">
+          <div class="wf-row" style="gap:6px; align-items:baseline">
+            <span class="wf-text" style="font-size:13px; font-weight:600">Elección</span>
+            <span class="wf-label">1 seleccionada</span>
+          </div>
+          <span aria-hidden="true" style="font-size:14px">v</span>
+        </button>
+        <div class="wf-row" style="gap:6px; flex-wrap:wrap">
+          <button type="button" class="wf-chip active">Presidencial</button>
+          <button type="button" class="wf-chip">Municipal</button>
+          <button type="button" class="wf-chip">Constituyente</button>
+          <button type="button" class="wf-chip">Congreso</button>
+        </div>
+      </div>
+
+      <!-- Seccion 2: Candidato (colapsada con contador) -->
+      <div class="wf-col" style="gap:8px; padding:10px 0; border-bottom:1px solid var(--g-3)">
+        <button type="button" class="wf-row between" style="padding:0; background:none; border:none; cursor:pointer" aria-expanded="false">
+          <div class="wf-row" style="gap:6px; align-items:baseline">
+            <span class="wf-text" style="font-size:13px; font-weight:600">Candidato</span>
+            <span class="wf-label">Todos</span>
+          </div>
+          <span aria-hidden="true" style="font-size:14px">></span>
+        </button>
+      </div>
+
+      <!-- Seccion 3: Sentimiento (expandida) -->
+      <div class="wf-col" style="gap:8px; padding:10px 0; border-bottom:1px solid var(--g-3)">
+        <button type="button" class="wf-row between" style="padding:0; background:none; border:none; cursor:pointer" aria-expanded="true">
+          <div class="wf-row" style="gap:6px; align-items:baseline">
+            <span class="wf-text" style="font-size:13px; font-weight:600">Sentimiento</span>
+            <span class="wf-label">1 seleccionada</span>
+          </div>
+          <span aria-hidden="true" style="font-size:14px">v</span>
+        </button>
+        <div class="wf-row" style="gap:6px; flex-wrap:wrap">
+          <button type="button" class="wf-chip">Todas</button>
+          <button type="button" class="wf-chip active">Positivas</button>
+          <button type="button" class="wf-chip">Neutrales</button>
+          <button type="button" class="wf-chip">Negativas</button>
+        </div>
+      </div>
+
+      <!-- Seccion 4: Fecha (colapsada) -->
+      <div class="wf-col" style="gap:8px; padding:10px 0; border-bottom:1px solid var(--g-3)">
+        <button type="button" class="wf-row between" style="padding:0; background:none; border:none; cursor:pointer" aria-expanded="false">
+          <div class="wf-row" style="gap:6px; align-items:baseline">
+            <span class="wf-text" style="font-size:13px; font-weight:600">Fecha</span>
+            <span class="wf-label">Últimos 30 días</span>
+          </div>
+          <span aria-hidden="true" style="font-size:14px">></span>
+        </button>
+      </div>
+
+      <div class="wf-spacer"></div>
+
+      <!-- CTAs -->
+      <div class="wf-row" style="gap:8px">
+        <button type="button" class="wf-btn ghost" style="flex:1">Limpiar todo</button>
+        <button type="button" class="wf-btn primary" style="flex:2">Aplicar (128)</button>
+      </div>
+    </div>
+
+    <!-- Frame 2: Todos los filtros aplicados - conteo bajo -->
+    <div class="wf-frame">
+      <span class="wf-frame-label">Filtros · muchos activos</span>
+      <div class="wf-row" style="justify-content:center; margin:-8px 0 4px">
+        <div style="width:36px; height:4px; background:var(--g-4); border-radius:2px" aria-hidden="true"></div>
+      </div>
+      <div class="wf-row between">
+        <div class="wf-row" style="gap:8px; align-items:baseline">
+          <span class="wf-text" style="font-size:16px; font-weight:700; color:var(--g-7)">Filtros</span>
+          <span class="wf-chip active" style="font-size:10px">5 activos</span>
+        </div>
+        <button type="button" class="wf-btn icon" aria-label="Cerrar filtros"></button>
+      </div>
+
+      <div class="wf-col" style="gap:8px; padding:10px 0; border-bottom:1px solid var(--g-3)">
+        <button type="button" class="wf-row between" style="padding:0; background:none; border:none; cursor:pointer" aria-expanded="true">
+          <div class="wf-row" style="gap:6px; align-items:baseline">
+            <span class="wf-text" style="font-size:13px; font-weight:600">Elección</span>
+            <span class="wf-label">2 seleccionadas</span>
+          </div>
+          <span aria-hidden="true" style="font-size:14px">v</span>
+        </button>
+        <div class="wf-row" style="gap:6px; flex-wrap:wrap">
+          <button type="button" class="wf-chip active">Presidencial</button>
+          <button type="button" class="wf-chip active">Municipal</button>
+          <button type="button" class="wf-chip">Constituyente</button>
+        </div>
+      </div>
+
+      <div class="wf-col" style="gap:8px; padding:10px 0; border-bottom:1px solid var(--g-3)">
+        <button type="button" class="wf-row between" style="padding:0; background:none; border:none; cursor:pointer" aria-expanded="true">
+          <div class="wf-row" style="gap:6px; align-items:baseline">
+            <span class="wf-text" style="font-size:13px; font-weight:600">Candidato</span>
+            <span class="wf-label">3 seleccionados</span>
+          </div>
+          <span aria-hidden="true" style="font-size:14px">v</span>
+        </button>
+        <div class="wf-row" style="gap:6px; flex-wrap:wrap">
+          <button type="button" class="wf-chip active">Boric</button>
+          <button type="button" class="wf-chip active">Kast</button>
+          <button type="button" class="wf-chip active">Bachelet</button>
+          <button type="button" class="wf-chip">+ 3 más</button>
+        </div>
+      </div>
+
+      <div class="wf-spacer"></div>
+
+      <!-- Aviso de pocos resultados -->
+      <div class="wf-col" style="gap:6px; padding:10px; background:var(--g-2); border-radius:var(--r)">
+        <span class="wf-text" style="font-size:11px; color:var(--g-6)">Con estos filtros: 4 resultados</span>
+      </div>
+
+      <div class="wf-row" style="gap:8px">
+        <button type="button" class="wf-btn ghost" style="flex:1">Limpiar todo</button>
+        <button type="button" class="wf-btn primary" style="flex:2">Aplicar (4)</button>
+      </div>
+    </div>
+
+    <!-- Frame 3: Filtros vacio - todos por default -->
+    <div class="wf-frame">
+      <span class="wf-frame-label">Filtros · sin filtros</span>
+      <div class="wf-row" style="justify-content:center; margin:-8px 0 4px">
+        <div style="width:36px; height:4px; background:var(--g-4); border-radius:2px" aria-hidden="true"></div>
+      </div>
+      <div class="wf-row between">
+        <span class="wf-text" style="font-size:16px; font-weight:700; color:var(--g-7)">Filtros</span>
+        <button type="button" class="wf-btn icon" aria-label="Cerrar filtros"></button>
+      </div>
+
+      <div class="wf-col" style="gap:8px; padding:10px 0; border-bottom:1px solid var(--g-3)">
+        <button type="button" class="wf-row between" style="padding:0; background:none; border:none; cursor:pointer" aria-expanded="false">
+          <div class="wf-row" style="gap:6px; align-items:baseline">
+            <span class="wf-text" style="font-size:13px; font-weight:600">Elección</span>
+            <span class="wf-label">Todas</span>
+          </div>
+          <span aria-hidden="true" style="font-size:14px">></span>
+        </button>
+      </div>
+      <div class="wf-col" style="gap:8px; padding:10px 0; border-bottom:1px solid var(--g-3)">
+        <button type="button" class="wf-row between" style="padding:0; background:none; border:none; cursor:pointer" aria-expanded="false">
+          <div class="wf-row" style="gap:6px; align-items:baseline">
+            <span class="wf-text" style="font-size:13px; font-weight:600">Candidato</span>
+            <span class="wf-label">Todos</span>
+          </div>
+          <span aria-hidden="true" style="font-size:14px">></span>
+        </button>
+      </div>
+      <div class="wf-col" style="gap:8px; padding:10px 0; border-bottom:1px solid var(--g-3)">
+        <button type="button" class="wf-row between" style="padding:0; background:none; border:none; cursor:pointer" aria-expanded="false">
+          <div class="wf-row" style="gap:6px; align-items:baseline">
+            <span class="wf-text" style="font-size:13px; font-weight:600">Sentimiento</span>
+            <span class="wf-label">Todos</span>
+          </div>
+          <span aria-hidden="true" style="font-size:14px">></span>
+        </button>
+      </div>
+      <div class="wf-col" style="gap:8px; padding:10px 0; border-bottom:1px solid var(--g-3)">
+        <button type="button" class="wf-row between" style="padding:0; background:none; border:none; cursor:pointer" aria-expanded="false">
+          <div class="wf-row" style="gap:6px; align-items:baseline">
+            <span class="wf-text" style="font-size:13px; font-weight:600">Fecha</span>
+            <span class="wf-label">Cualquiera</span>
+          </div>
+          <span aria-hidden="true" style="font-size:14px">></span>
+        </button>
+      </div>
+
+      <div class="wf-spacer"></div>
+
+      <div class="wf-row" style="gap:8px">
+        <button type="button" class="wf-btn ghost" style="flex:1" disabled>Limpiar todo</button>
+        <button type="button" class="wf-btn primary" style="flex:2">Aplicar (256)</button>
+      </div>
     </div>
   </div>
 </section>
