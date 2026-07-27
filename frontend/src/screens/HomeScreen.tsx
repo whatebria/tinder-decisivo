@@ -42,6 +42,7 @@ import { useCuestionarioStore } from "../store/cuestionario";
 import { partitionTipos, useElectionsPrefsStore } from "../store/electionsPrefs";
 import { spacing } from "../theme/spacing";
 import { useThemeColors } from "../theme/useTheme";
+import { sanitizeSnippet } from "../utils/text";
 
 // -- Helpers --------------------------------------------------------------
 
@@ -213,8 +214,8 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
       key: `noticia-${n.id}`,
       kind: "noticia",
       imageUrl: n.imagen_url,
-      title: n.titulo,
-      snippet: n.descripcion,
+      title: sanitizeSnippet(n.titulo),
+      snippet: sanitizeSnippet(n.descripcion),
       category: n.fuente,
       when: whenLabel(n.fecha_publicacion),
       onPress: () => navigation.navigate("Noticias"),

@@ -18,7 +18,6 @@
 
 import React, { useMemo, useState } from "react";
 import {
-  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -44,7 +43,9 @@ import {
   Icon,
   Input,
   NewsCard,
+  NoticiaDetailSheet,
   Spinner,
+  type NoticiaDetail,
   type Sentiment,
 } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
@@ -53,6 +54,7 @@ import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
+import { sanitizeSnippet } from "../utils/text";
 
 // -- Tipos y constantes ------------------------------------------------------
 
@@ -99,37 +101,6 @@ function formatearFecha(iso?: string): string {
   }
 }
 
-/**
- * Limpia texto que puede venir con markup HTML crudo desde el scraper del
- * backend (ej: <a href="...">link</a>, &amp;, &nbsp;). React Native Text no
- * parsea HTML, asi que sin esto se ven las tags literales en la card.
- *
- * Estrategia minima:
- *   1. Reemplaza <br> por espacio (comun en descripciones scrapeadas)
- *   2. Remueve todas las tags <...>
- *   3. Decodifica un set corto de entidades HTML basicas
- *   4. Colapsa whitespace y trim
- *
- * No intenta ser un parser HTML completo — solo limpia el 90% de los casos
- * comunes de contenido scrapeado. Para casos raros (entidades exoticas)
- * degrada elegante: deja el texto tal cual esta.
- */
-function sanitizeSnippet(raw?: string): string {
-  if (!raw) return "";
-  return raw
-    .replace(/<br\s*\/?>/gi, " ")
-    .replace(/<[^>]+>/g, "")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">")
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/&apos;/gi, "'")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 // -- Screen -----------------------------------------------------------------
 
 export function NoticiasScreen({
@@ -149,6 +120,7 @@ export function NoticiasScreen({
   const [rangoId, setRangoId] = useState<string>("todo");
   const [query, setQuery] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [selectedNoticia, setSelectedNoticia] = useState<NoticiaDetail | null>(null);
 
   const rango = RANGOS_FECHA.find((r) => r.id === rangoId) ?? RANGOS_FECHA[0];
 
@@ -313,6 +285,18 @@ export function NoticiasScreen({
               const source = n.fuente ?? "Fuente";
               const when = formatearFecha(n.fecha_publicacion);
               const sentiment: Sentiment = "neutral";
+              const openDetail = () =>
+                setSelectedNoticia({
+                  id,
+                  titulo: sanitizeSnippet(n.titulo),
+                  descripcion: sanitizeSnippet(n.descripcion),
+                  url: n.url,
+                  fuente: n.fuente,
+                  imagenUrl: n.imagen_url,
+                  fechaFormateada: when,
+                  sentiment,
+                  candidatosMencionados: n.candidatos_mencionados_data,
+                });
               return (
                 <View key={id} style={styles.newsCardWrap}>
                   <NewsCard
@@ -321,7 +305,7 @@ export function NoticiasScreen({
                     source={source}
                     when={when}
                     sentiment={sentiment}
-                    onPress={n.url ? () => Linking.openURL(n.url!) : undefined}
+                    onPress={openDetail}
                     bookmarked={!isGuest ? isBookmarked : undefined}
                     onToggleBookmark={
                       !isGuest ? () => toggleBookmark.mutate(id) : undefined
@@ -365,6 +349,24 @@ export function NoticiasScreen({
         resultadosCount={totalNoticias}
         rangoLabel={rango.label}
         candidatoNombre={candidatoNombre}
+      />
+
+      {/* Preview de detalle de noticia (bottom sheet). */}
+      <NoticiaDetailSheet
+        visible={selectedNoticia !== null}
+        onClose={() => setSelectedNoticia(null)}
+        noticia={selectedNoticia}
+        bookmarked={
+          !isGuest && selectedNoticia
+            ? bookmarkedIds.has(selectedNoticia.id)
+            : undefined
+        }
+        onToggleBookmark={
+          !isGuest && selectedNoticia
+            ? () => toggleBookmark.mutate(selectedNoticia.id)
+            : undefined
+        }
+        bookmarkLoading={toggleBookmark.isPending}
       />
     </AppShell>
   );
