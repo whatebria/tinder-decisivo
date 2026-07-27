@@ -156,12 +156,17 @@ export function useMatchCandidatos() {
  * Version cacheada de matchCandidatos, para el Home donde queremos leer
  * el ranking sin re-calcular a cada mount. Retry deshabilitado porque un
  * 400 ("no respondiste preguntas") no se resuelve reintentando.
+ *
+ * IMPORTANTE: se dispara SOLO si el user esta autenticado. Los guests
+ * usan `useMatchAnonimo` con respuestas in-memory — llamar este endpoint
+ * en modo guest tira 401 automatico (POST persiste, requiere Token auth).
  */
 export function useMatchesQuery(tipoEleccionId: number | null | undefined) {
+  const isAuth = useAuthStore((s) => s.isAuthenticated);
   return useQuery<MatchResult[]>({
     queryKey: queryKeys.matches(tipoEleccionId),
     queryFn: () => matchCandidatos(tipoEleccionId as number),
-    enabled: tipoEleccionId != null,
+    enabled: tipoEleccionId != null && isAuth,
     staleTime: 60_000,
     retry: 0,
   });
