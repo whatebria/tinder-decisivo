@@ -7,7 +7,7 @@ import React, { useMemo } from "react";
 import { StyleSheet, Text, View, type ViewStyle } from "react-native";
 
 import { radii } from "../../theme/radii";
-import { useThemeColors } from "../../theme/useTheme";
+import { useIsDark, useThemeColors } from "../../theme/useTheme";
 
 export type Sentiment = "positive" | "neutral" | "negative";
 
@@ -25,13 +25,20 @@ const DEFAULT_LABEL: Record<Sentiment, string> = {
 
 export function SentimentBadge({ sentiment, label, style }: SentimentBadgeProps) {
   const c = useThemeColors();
+  const isDark = useIsDark();
 
   const s = useMemo(() => {
-    const CONFIG = {
-      positive: { bg: c.success100, fg: c.success700, dot: c.success500 },
-      neutral: { bg: c.gray100, fg: c.gray700, dot: c.gray500 },
-      negative: { bg: c.danger100, fg: c.danger700, dot: c.danger500 },
-    } as const;
+    const CONFIG = isDark
+      ? {
+          positive: { bg: c.success800, fg: c.success100, dot: c.success300 },
+          neutral: { bg: c.gray800, fg: c.gray100, dot: c.gray400 },
+          negative: { bg: c.danger800, fg: c.danger100, dot: c.danger300 },
+        }
+      : ({
+          positive: { bg: c.success100, fg: c.success700, dot: c.success500 },
+          neutral: { bg: c.gray100, fg: c.gray700, dot: c.gray500 },
+          negative: { bg: c.danger100, fg: c.danger700, dot: c.danger500 },
+        } as const);
     const cfg = CONFIG[sentiment];
     return StyleSheet.create({
       container: {
@@ -53,7 +60,7 @@ export function SentimentBadge({ sentiment, label, style }: SentimentBadgeProps)
         letterSpacing: 0.4,
       },
     });
-  }, [c, sentiment]);
+  }, [c, isDark, sentiment]);
 
   return (
     <View style={[s.container, style]}>

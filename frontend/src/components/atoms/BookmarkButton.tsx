@@ -46,11 +46,11 @@ export function BookmarkButton({
         },
         savedStyle: {
           backgroundColor: c.accent2,
-          borderColor: c.accent,
+          borderColor: c.primary,
         },
         text: { fontSize: 12, fontWeight: "600" },
         textUnsaved: { color: c.textSecondary },
-        textSaved: { color: c.accent },
+        textSaved: { color: c.primary },
         pressed: { opacity: 0.7 },
         disabled: { opacity: 0.5 },
       }),
