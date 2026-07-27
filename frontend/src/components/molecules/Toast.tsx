@@ -23,7 +23,7 @@ import React, {
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { useThemeColors } from "../../theme/useTheme";
+import { useThemeColors, useThemeShadows } from "../../theme/useTheme";
 
 export type ToastVariant = "success" | "error" | "info";
 
@@ -47,6 +47,7 @@ const AUTO_DISMISS_MS = 4000;
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const c = useThemeColors();
+  const shadows = useThemeShadows();
   const [toasts, setToasts] = useState<Toast[]>([]);
   const nextId = useRef(1);
   const insets = useSafeAreaInsets();
@@ -95,7 +96,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             <Pressable
               key={t.id}
               onPress={() => dismiss(t.id)}
-              style={[styles.toast, { backgroundColor: style.bg }]}
+              style={[styles.toast, shadows.shSm, { backgroundColor: style.bg }]}
               accessibilityRole="alert"
               accessibilityLabel={`${t.variant}: ${t.title}`}
             >
@@ -136,11 +137,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 4,
   },
   title: {
     fontSize: 15,

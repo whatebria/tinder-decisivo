@@ -26,7 +26,7 @@ import {
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { typography } from "../../theme/typography";
-import { useThemeColors } from "../../theme/useTheme";
+import { useThemeColors, useThemeShadows } from "../../theme/useTheme";
 import { useBlurBeforeClose } from "../../hooks/useBlurBeforeClose";
 import { Spinner } from "../atoms/Spinner";
 
@@ -62,6 +62,7 @@ export function ListPickerModal({
   onClose,
 }: ListPickerModalProps) {
   const c = useThemeColors();
+  const shadows = useThemeShadows();
   const [query, setQuery] = useState("");
 
   const handleClose = useBlurBeforeClose(() => {
@@ -100,7 +101,7 @@ export function ListPickerModal({
     >
       <Pressable style={styles.backdrop} onPress={handleClose}>
         <Pressable
-          style={[styles.card, { backgroundColor: c.card }]}
+          style={[styles.card, shadows.shLg, { backgroundColor: c.card }]}
           onPress={(e) => e.stopPropagation()}
         >
           <Text style={[styles.title, { color: c.text }]}>{title}</Text>
@@ -207,10 +208,6 @@ const styles = StyleSheet.create({
     borderRadius: radii.rLg,
     padding: spacing.sp4,
     gap: spacing.sp3,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 8,
   },
   title: { ...typography.h3, fontWeight: "700" },
   subtitle: typography.small,
