@@ -21,12 +21,14 @@ import { getErrorMessage } from "../api/client";
 import {
   Button,
   Chip,
+  CoachMark,
   ScreenTopBar,
   PreguntaInfoModal,
   ProgressSplit,
   RadioGroup,
   useToast,
 } from "../components";
+import { useCoachMarkTour } from "../hooks/useCoachMarkTour";
 import type { RootStackScreenProps } from "../navigation/types";
 import {
   debeMostrarPeso,
@@ -48,6 +50,7 @@ export function CuestionarioScreen({
   const toast = useToast();
   const [infoOpen, setInfoOpen] = useState(false);
   const isGuest = useAuthStore((s) => s.isGuest);
+  const cuestionarioTour = useCoachMarkTour("cuestionario");
   const {
     preguntas,
     currentIndex,
@@ -242,6 +245,16 @@ export function CuestionarioScreen({
         visible={infoOpen}
         onClose={() => setInfoOpen(false)}
         pregunta={pregunta as any}
+      />
+
+      <CoachMark
+        visible={cuestionarioTour.visible}
+        step={cuestionarioTour.step}
+        currentIndex={cuestionarioTour.currentIndex}
+        total={cuestionarioTour.total}
+        onNext={cuestionarioTour.next}
+        onBack={cuestionarioTour.back}
+        onSkip={cuestionarioTour.skip}
       />
     </>
   );

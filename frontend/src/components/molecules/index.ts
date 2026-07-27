@@ -52,3 +52,6 @@ export {
   CollapsibleFilterSection,
   type CollapsibleFilterSectionProps,
 } from "./CollapsibleFilterSection";
+
+// Nuevas (onboarding contextual — ver src/content/coachMarks.ts)
+export { CoachMark, type CoachMarkProps } from "./CoachMark";

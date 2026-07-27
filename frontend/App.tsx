@@ -25,6 +25,7 @@ import { ErrorBoundary } from "./src/components";
 import { ToastProvider } from "./src/components";
 import { AppNavigator } from "./src/navigation/AppNavigator";
 import { useAuthStore } from "./src/store/auth";
+import { useCoachMarksStore } from "./src/store/coachMarks";
 import { useElectionsPrefsStore } from "./src/store/electionsPrefs";
 import { useOnboardingStore } from "./src/store/onboarding";
 import { useThemeStore } from "./src/store/theme";
@@ -34,8 +35,11 @@ import tamaguiConfig from "./tamagui.config";
 export default function App() {
   const hydrateAuth = useAuthStore((s) => s.hydrate);
   const authHydrated = useAuthStore((s) => s.isHydrated);
+  const authToken = useAuthStore((s) => s.token);
+  const authIsGuest = useAuthStore((s) => s.isGuest);
   const hydrateOnboarding = useOnboardingStore((s) => s.hydrate);
   const onboardingHydrated = useOnboardingStore((s) => s.isHydrated);
+  const resetCoachMarks = useCoachMarksStore((s) => s.resetAll);
   const hydrateElections = useElectionsPrefsStore((s) => s.hydrate);
   const hydrateTheme = useThemeStore((s) => s.hydrate);
   const themeHydrated = useThemeStore((s) => s.isHydrated);
@@ -47,6 +51,14 @@ export default function App() {
     hydrateElections();
     hydrateTheme();
   }, [hydrateAuth, hydrateOnboarding, hydrateElections, hydrateTheme]);
+
+  // Los coach marks están ligados a la sesión: cada vez que cambia la
+  // identidad (login, logout, entrada/salida del modo invitado) volvemos a
+  // mostrar los tours una vez por pantalla. En modo invitado esto significa
+  // que cada nueva entrada como guest los ve de nuevo.
+  useEffect(() => {
+    resetCoachMarks();
+  }, [authToken, authIsGuest, resetCoachMarks]);
 
   // Web: sincroniza el bg del <body> y <html> con el tema activo para evitar
   // que se vea blanco cuando el contenido es mas corto que el viewport.

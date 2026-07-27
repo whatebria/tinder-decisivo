@@ -30,9 +30,11 @@ import {
   NavRow,
   SectionTitle,
   ThemeToggle,
+  useToast,
 } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
+import { useCoachMarksStore } from "../store/coachMarks";
 import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
@@ -46,6 +48,16 @@ export function ConfiguracionScreen({
   const isGuest = useAuthStore((s) => s.isGuest);
   const logout = useAuthStore((s) => s.logout);
   const exitGuestMode = useAuthStore((s) => s.exitGuestMode);
+  const resetCoachMarks = useCoachMarksStore((s) => s.resetAll);
+  const toast = useToast();
+
+  async function handleReactivarTours() {
+    resetCoachMarks();
+    toast.info(
+      "Tours reactivados",
+      "Volver\u00e1n a aparecer en cada pantalla clave.",
+    );
+  }
 
   const styles = useMemo(
     () =>
@@ -158,6 +170,16 @@ export function ConfiguracionScreen({
         <View style={styles.section}>
           <SectionTitle title="Apariencia" />
           <ThemeToggle />
+        </View>
+
+        {/* 5. Ayuda */}
+        <View style={styles.section}>
+          <SectionTitle title="Ayuda" />
+          <NavRow
+            label="Ver tours de nuevo"
+            subtitle="Reactiva los coach marks explicativos de cada pantalla"
+            onPress={handleReactivarTours}
+          />
         </View>
 
         {/* 5. Debug (solo dev builds) */}

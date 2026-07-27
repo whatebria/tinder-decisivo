@@ -36,6 +36,7 @@ import {
   AppShell,
   Button,
   Chip,
+  CoachMark,
   Link,
   RankingRow,
   ResultadoHero,
@@ -44,6 +45,7 @@ import {
   Spinner,
   useToast,
 } from "../components";
+import { useCoachMarkTour } from "../hooks/useCoachMarkTour";
 import type { RootStackScreenProps } from "../navigation/types";
 import {
   formatMatchPercentage,
@@ -80,6 +82,7 @@ export function ResultadosScreen({
     (s) => s.getRespuestasParaAnonimo,
   );
   const toast = useToast();
+  const resultadosTour = useCoachMarkTour("resultados");
 
   const authMutation = useMatchCandidatos();
   const guestMutation = useMatchAnonimo();
@@ -454,6 +457,16 @@ export function ResultadosScreen({
           matches: fromMatchResults(filteredResults),
         })}
         onClose={() => setShareOpen(false)}
+      />
+
+      <CoachMark
+        visible={resultadosTour.visible}
+        step={resultadosTour.step}
+        currentIndex={resultadosTour.currentIndex}
+        total={resultadosTour.total}
+        onNext={resultadosTour.next}
+        onBack={resultadosTour.back}
+        onSkip={resultadosTour.skip}
       />
     </>
   );
