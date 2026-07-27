@@ -6,6 +6,13 @@
  *   - active: eleccion actualmente seleccionada (border-2 primary)
  *   - secondary: otra eleccion activa (border-1 gris)
  *   - pending: sin cuestionario respondido aún (progress 0%)
+ *
+ * Badge (esquina sup. derecha):
+ *   - Si la eleccion es en <=30 dias: muestra "Xd" / "Hoy" (urgencia)
+ *   - Sino: muestra "Completado" (verde) o "Pendiente" (neutro) segun isCompleted
+ *
+ * Se ocultan ambos badges si `daysRemaining` es null y no hay `isCompleted`
+ * definido — util para skeletons/loading.
  */
 
 import React, { useMemo } from "react";
@@ -15,15 +22,23 @@ import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
 import { Progress } from "./Progress";
-import { Chip } from "./Chip";
 
 export type ElectionCardVariant = "active" | "secondary" | "pending";
+
+/** Umbral en dias bajo el cual mostramos el badge de dias en vez del de estado. */
+export const DAYS_BADGE_THRESHOLD = 30;
 
 export interface ElectionCardProps {
   name: string;
   scope?: string;
-  /** Ej: "42d", "180d" — corto para el chip. */
-  daysLabel: string;
+  /**
+   * Dias restantes hasta la eleccion. `null` si no hay fecha.
+   * - Si es <= DAYS_BADGE_THRESHOLD (30d): se muestra badge "Xd" / "Hoy".
+   * - Sino: se muestra badge "Completado" / "Pendiente" segun `isCompleted`.
+   */
+  daysRemaining?: number | null;
+  /** Si el user ya completo el cuestionario. Solo se usa cuando el badge es de estado. */
+  isCompleted?: boolean;
   /** 0–100. `null` → sin cuestionario respondido. */
   matchPercent?: number | null;
   /** 0–100 (progreso del cuestionario). */
@@ -38,10 +53,30 @@ export interface ElectionCardProps {
 
 const CARD_WIDTH = 180;
 
+/**
+ * Deriva label + colores del badge segun daysRemaining + isCompleted.
+ * Pattern-matcheado como funcion pura para testear facil si lo pedimos.
+ */
+function pickBadge(
+  daysRemaining: number | null | undefined,
+  isCompleted: boolean | undefined,
+): { label: string; tone: "urgent" | "success" | "neutral" } | null {
+  if (daysRemaining != null && daysRemaining <= DAYS_BADGE_THRESHOLD) {
+    if (daysRemaining <= 0) return { label: "Hoy", tone: "urgent" };
+    if (daysRemaining === 1) return { label: "Mañana", tone: "urgent" };
+    return { label: `${daysRemaining}d`, tone: "urgent" };
+  }
+  if (isCompleted === undefined) return null;
+  return isCompleted
+    ? { label: "Completado", tone: "success" }
+    : { label: "Pendiente", tone: "neutral" };
+}
+
 export function ElectionCard({
   name,
   scope,
-  daysLabel,
+  daysRemaining,
+  isCompleted,
   matchPercent,
   progressPercent,
   pendingLabel,
@@ -53,6 +88,20 @@ export function ElectionCard({
   const c = useThemeColors();
   const isActive = variant === "active";
   const isPending = variant === "pending" || matchPercent == null;
+
+  const badge = pickBadge(daysRemaining, isCompleted);
+  const badgeColors = useMemo(() => {
+    if (!badge) return null;
+    switch (badge.tone) {
+      case "urgent":
+        return { bg: c.primary, fg: c.textOnPrimary };
+      case "success":
+        return { bg: c.success, fg: c.textOnPrimary };
+      case "neutral":
+      default:
+        return { bg: c.accent2, fg: c.textSecondary };
+    }
+  }, [badge, c]);
 
   const styles = useMemo(
     () =>
@@ -78,6 +127,7 @@ export function ElectionCard({
           fontSize: 14,
           fontWeight: "600",
           color: c.text,
+          lineHeight: 18,
         },
         scope: {
           fontSize: 10,
@@ -85,6 +135,16 @@ export function ElectionCard({
           letterSpacing: 0.6,
           color: c.textSecondary,
           fontWeight: "600",
+        },
+        badge: {
+          paddingHorizontal: spacing.sp2,
+          paddingVertical: 2,
+          borderRadius: radii.rFull,
+          flexShrink: 0,
+        },
+        badgeText: {
+          fontSize: 11,
+          fontWeight: "700",
         },
         matchRow: {
           flexDirection: "row",
@@ -112,12 +172,18 @@ export function ElectionCard({
     <View style={[styles.card, style]}>
       <View style={styles.headRow}>
         <View style={styles.titleCol}>
-          <Text style={styles.name} numberOfLines={1}>
+          <Text style={styles.name} numberOfLines={2}>
             {name}
           </Text>
           {scope ? <Text style={styles.scope}>{scope}</Text> : null}
         </View>
-        <Chip>{daysLabel}</Chip>
+        {badge && badgeColors ? (
+          <View style={[styles.badge, { backgroundColor: badgeColors.bg }]}>
+            <Text style={[styles.badgeText, { color: badgeColors.fg }]}>
+              {badge.label}
+            </Text>
+          </View>
+        ) : null}
       </View>
 
       {isPending ? (

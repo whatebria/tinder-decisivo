@@ -53,12 +53,11 @@ function greetingByHour(): string {
   return "Buenas noches";
 }
 
-function daysUntil(dateIso?: string | null): string {
-  if (!dateIso) return "—";
+function daysUntil(dateIso?: string | null): number | null {
+  if (!dateIso) return null;
   const target = new Date(dateIso).getTime();
   const now = Date.now();
-  const days = Math.max(0, Math.ceil((target - now) / (1000 * 60 * 60 * 24)));
-  return `${days}d`;
+  return Math.max(0, Math.ceil((target - now) / (1000 * 60 * 60 * 24)));
 }
 
 function whenLabel(dateIso?: string): string {
@@ -84,16 +83,18 @@ function ElectionCardConnected({ tipo, isActive, onPress }: ConnectedCardProps) 
   const { data: matches = [], isLoading } = useMatchesQuery(tipo.id);
   const topMatch = matches[0];
   const matchPct = topMatch ? Number(topMatch.match_percentage) : null;
-  const progress = matches.length > 0 ? 100 : 0;
+  const isCompleted = matches.length > 0;
+  const progress = isCompleted ? 100 : 0;
 
   return (
     <ElectionCard
       name={tipo.nombre}
-      daysLabel={daysUntil(tipo.fecha_eleccion)}
+      daysRemaining={daysUntil(tipo.fecha_eleccion)}
+      isCompleted={isLoading ? undefined : isCompleted}
       matchPercent={isLoading ? null : matchPct}
       progressPercent={progress}
       pendingLabel={isLoading ? "Cargando…" : "Cuestionario pendiente"}
-      variant={isActive ? "active" : progress === 0 ? "pending" : "secondary"}
+      variant={isActive ? "active" : isCompleted ? "secondary" : "pending"}
       onPress={onPress}
     />
   );
