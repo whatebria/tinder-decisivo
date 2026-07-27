@@ -55,20 +55,9 @@ import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
+import { iniciales, nombreCompleto } from "../utils/candidato";
 
 type Slot = "A" | "B";
-
-function nombreCompleto(c: Candidato | null): string {
-  if (!c) return "";
-  return `${c.nombre} ${c.apellido ?? ""}`.trim();
-}
-
-function iniciales(c: Candidato | null): string {
-  if (!c) return "?";
-  const n = c.nombre?.[0] ?? "";
-  const a = c.apellido?.[0] ?? "";
-  return (n + a).toUpperCase() || "?";
-}
 
 function colorNivel(
   nivel: NivelCoincidencia,

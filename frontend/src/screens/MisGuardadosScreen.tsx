@@ -48,12 +48,18 @@ import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
+import { iniciales, nombreCompleto } from "../utils/candidato";
 
 type GuardadoTab = "favoritos" | "descartados" | "posturas" | "noticias";
 
 /** Filtro por eleccion. `null` = "Todas". */
 type EleccionFilter = number | null;
 
+/**
+ * Shape local (subset del modelo Candidato) porque los bookmarks traen los
+ * datos embebidos con campos opcionales. Compatible con el `CandidatoLike`
+ * del helper `utils/candidato`.
+ */
 interface CandidatoLike {
   id?: number;
   nombre?: string;
@@ -61,8 +67,13 @@ interface CandidatoLike {
   partido?: string | null;
 }
 
-function fullName(c: CandidatoLike): string {
-  return `${c.nombre ?? ""} ${c.apellido ?? ""}`.trim() || "Candidato";
+/**
+ * Wrap del helper compartido con fallback UX-friendly para esta screen:
+ * si el bookmark no trajo nombre/apellido, mostramos "Candidato" en vez
+ * de string vacio (evita labels de accesibilidad como "Ver detalle de ").
+ */
+function nombreParaCard(c: CandidatoLike): string {
+  return nombreCompleto(c) || "Candidato";
 }
 
 export function MisGuardadosScreen({
@@ -153,9 +164,8 @@ export function MisGuardadosScreen({
   );
 
   function initials(nombre?: string, apellido?: string): string {
-    return `${(nombre ?? "?")[0] ?? "?"}${(apellido ?? "")[0] ?? ""}`.toUpperCase();
+    return iniciales({ nombre, apellido });
   }
-
   function renderCandidatoCard(
     key: string,
     cand: CandidatoLike,
@@ -179,10 +189,10 @@ export function MisGuardadosScreen({
               })
             }
             accessibilityRole="button"
-            accessibilityLabel={`Ver detalle de ${fullName(cand)}`}
+            accessibilityLabel={`Ver detalle de ${nombreParaCard(cand)}`}
           >
             <Text style={styles.candidatoName} numberOfLines={1}>
-              {fullName(cand)}
+              {nombreParaCard(cand)}
             </Text>
             {cand.partido ? (
               <View style={styles.candidatoMeta}>
@@ -219,7 +229,7 @@ export function MisGuardadosScreen({
           saved
           onPress={() => cand.id != null && handleQuitarFav(cand.id)}
           loading={toggleFav.isPending}
-          accessibilityLabel={`Quitar de favoritos: ${fullName(cand)}`}
+          accessibilityLabel={`Quitar de favoritos: ${nombreParaCard(cand)}`}
         />,
       );
     });
@@ -246,7 +256,7 @@ export function MisGuardadosScreen({
           variant="secondary"
           size="sm"
           onPress={() => cand.id != null && handleRestoreDesc(cand.id)}
-          accessibilityLabel={`Restaurar ${fullName(cand)} al ranking`}
+          accessibilityLabel={`Restaurar ${nombreParaCard(cand)} al ranking`}
         >
           Restaurar
         </Button>,

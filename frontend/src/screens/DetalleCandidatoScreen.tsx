@@ -72,18 +72,9 @@ import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
+import { iniciales, nombreCompleto } from "../utils/candidato";
 
 type PerfilTab = "resumen" | "posturas" | "noticias";
-
-function fullName(c: Candidato): string {
-  return `${c.nombre} ${c.apellido ?? ""}`.trim();
-}
-
-function initials(c: Candidato): string {
-  const n = c.nombre?.[0] ?? "";
-  const a = c.apellido?.[0] ?? "";
-  return (n + a).toUpperCase() || "?";
-}
 
 /** Mapea el string de confianza del backend al tier del DS. */
 function confianzaToTier(confianza: string | null): "high" | "mid" | "low" {
@@ -198,8 +189,8 @@ export function DetalleCandidatoScreen({
         />
 
         <ProfileHero
-          name={fullName(candidato)}
-          initials={initials(candidato)}
+          name={nombreCompleto(candidato)}
+          initials={iniciales(candidato)}
           partido={candidato.partido ?? "Independiente"}
           subtitle={hasMatch ? "Perfil basado en tus respuestas" : "Aun sin match calculado"}
           tilt="default"
@@ -606,7 +597,7 @@ function NoticiasTab({ noticias }: { noticias: Noticia[] }) {
 
 function buildShareText(cand: Candidato, matchPct: number | null): string {
   const pct = matchPct != null ? `${Math.round(matchPct)}%` : "?";
-  return `${fullName(cand)} — ${pct} de afinidad conmigo segun mi cuestionario en TinderPolitico.`;
+  return `${nombreCompleto(cand)} — ${pct} de afinidad conmigo segun mi cuestionario en TinderPolitico.`;
 }
 
 // ---------- Styles ----------
