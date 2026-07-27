@@ -253,7 +253,7 @@ export function CandidatosScreen({
   return (
     <AppShell active="candidatos" navigation={navigation}>
       <View style={[styles.container, { backgroundColor: c.bg }]}>
-        <HomeTopBar brand="Candidatos" />
+        <HomeTopBar brand="Candidatos" style={styles.topBar} />
 
         <View style={styles.headerRow}>
           <Text style={[styles.h1, { color: c.text }]}>Candidatos</Text>
@@ -565,6 +565,10 @@ function FiltrosSheet({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  topBar: {
+    marginHorizontal: spacing.sp4,
+    marginTop: spacing.sp3,
+  },
   headerRow: {
     flexDirection: "row",
     alignItems: "baseline",

@@ -202,7 +202,7 @@ export function NoticiasScreen({
   return (
     <AppShell active="noticias" navigation={navigation}>
       <View style={[styles.container, { backgroundColor: c.bg }]}>
-        <HomeTopBar brand="Noticias" />
+        <HomeTopBar brand="Noticias" style={styles.topBar} />
 
         {/* Header con contador */}
         <View style={styles.headerRow}>
@@ -659,6 +659,10 @@ function CandidatoPicker({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  topBar: {
+    marginHorizontal: spacing.sp4,
+    marginTop: spacing.sp3,
+  },
 
   headerRow: {
     flexDirection: "row",
