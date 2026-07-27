@@ -294,10 +294,54 @@ export interface Perfil {
   email: string;
   fecha_registro: string;
   contadores: PerfilContadores;
+  comuna: ComunaInline | null;
+}
+
+export interface Region {
+  id: number;
+  numero_romano: string;
+  codigo: string;
+  nombre: string;
+  nombre_corto: string;
+  orden: number;
+}
+
+export interface ComunaInline {
+  id: number;
+  codigo: string;
+  nombre: string;
+  region_nombre: string;
+  distrito_numero: number;
 }
 
 export async function getPerfil(): Promise<Perfil> {
   const { data } = await apiClient.get<Perfil>("/perfil/");
+  return data;
+}
+
+export async function listRegiones(): Promise<Region[]> {
+  const { data } = await apiClient.get<Region[]>("/regiones/");
+  return data;
+}
+
+export async function listComunas(
+  regionId?: number,
+  q?: string,
+): Promise<ComunaInline[]> {
+  const params: Record<string, string | number> = {};
+  if (regionId) params.region_id = regionId;
+  if (q) params.q = q;
+  const { data } = await apiClient.get<ComunaInline[]>("/comunas/", { params });
+  return data;
+}
+
+export async function actualizarComuna(
+  comunaId: number | null,
+): Promise<ComunaInline | null> {
+  const { data } = await apiClient.patch<ComunaInline | null>(
+    "/perfil/comuna/",
+    { comuna_id: comunaId },
+  );
   return data;
 }
 

@@ -16,6 +16,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getErrorMessage } from "../api/client";
 import {
+  useActualizarComuna,
   useCambiarPassword,
   useEliminarCuenta,
   usePerfil,
@@ -30,8 +31,10 @@ import {
   SectionTitle,
   Spinner,
   ThemeToggle,
+  UbicacionPicker,
   useToast,
 } from "../components";
+import type { ComunaInline } from "../api/endpoints";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
 import { radii } from "../theme/radii";
@@ -45,9 +48,27 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
   const perfilQ = usePerfil();
   const cambiar = useCambiarPassword();
   const eliminar = useEliminarCuenta();
+  const actualizarComuna = useActualizarComuna();
   const toast = useToast();
   const [passOpen, setPassOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+
+  async function handleUbicacion(comuna: ComunaInline | null) {
+    try {
+      await actualizarComuna.mutateAsync(comuna?.id ?? null);
+      toast.success(
+        comuna ? "Ubicacion actualizada" : "Ubicacion eliminada",
+        comuna
+          ? `Ahora ves los candidatos de ${comuna.nombre}.`
+          : "Vuelves a ver todos los candidatos.",
+      );
+    } catch (err) {
+      toast.error(
+        "No pudimos actualizar tu ubicacion",
+        getErrorMessage(err),
+      );
+    }
+  }
 
   async function handleCambiarPass(current: string, next: string) {
     try {
@@ -148,6 +169,28 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
               No pudimos cargar tu perfil.
             </Text>
           )}
+
+          <Divider />
+
+          {/* Ubicacion (comuna donde vota) */}
+          <SectionTitle title="Donde votas" />
+          <View
+            style={[
+              styles.infoCard,
+              { backgroundColor: c.card, borderColor: c.border },
+            ]}
+          >
+            <Text style={[styles.helpText, { color: c.textSecondary }]}>
+              Setea tu comuna para ver solo los candidatos que puedes votar
+              (alcaldes de tu comuna, diputados de tu distrito, presidenciales).
+              Puedes cambiarla o quitarla cuando quieras.
+            </Text>
+            <UbicacionPicker
+              value={perfil?.comuna ?? null}
+              onChange={handleUbicacion}
+              disabled={actualizarComuna.isPending}
+            />
+          </View>
 
           <Divider />
 
@@ -268,6 +311,7 @@ const styles = StyleSheet.create({
     ...typography.overline,
     fontWeight: "700",
   },
+  helpText: { ...typography.small, lineHeight: 20 },
 
   statsRow: {
     flexDirection: "row",

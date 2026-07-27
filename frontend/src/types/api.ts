@@ -81,6 +81,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/candidatos/{candidato_id}/match-detalle/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description GET /api/v1/candidatos/<id>/match-detalle/ - explicacion del match del user. */
+        get: operations["candidatos_match_detalle_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/candidatos/{candidato_id}/noticias/": {
         parameters: {
             query?: never;
@@ -98,6 +115,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/candidatos/{candidato_id}/posturas/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description GET /candidatos/<candidato_id>/posturas/.
+         *
+         *     Devuelve todas las posturas del candidato (12 tipicamente), con la
+         *     pregunta + opcion elegida + justificacion + eje tematico expandidos.
+         *
+         *     Publico: cualquiera puede ver las posturas de un candidato (es data
+         *     editorial, no PII del user).
+         */
+        get: operations["candidatos_posturas_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/candidatos/{id}/": {
         parameters: {
             query?: never;
@@ -106,6 +148,29 @@ export interface paths {
             cookie?: never;
         };
         get: operations["candidatos_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/comunas/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description GET /comunas/: lista comunas para dropdown/autocomplete.
+         *
+         *     Query params:
+         *     - `region_id`: filtra por region.
+         *     - `q`: match parcial case-insensitive en nombre de comuna.
+         */
+        get: operations["comunas_list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -185,6 +250,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/ejes/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description GET /ejes/: lista todos los ejes activos ordenados por `orden`.
+         *
+         *     Publico: se usa desde el frontend para dropdown de filtros, radar chart
+         *     con colores canonicos, y tooltips educativos.
+         */
+        get: operations["ejes_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/login/": {
         parameters: {
             query?: never;
@@ -196,6 +283,23 @@ export interface paths {
         put?: never;
         /** @description Login. Retorna token, user_id y email. */
         post: operations["login_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/match-anonimo/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Match para usuarios guest. No persiste nada. */
+        post: operations["match_anonimo_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -226,10 +330,44 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description GET /api/noticias/ (feed global, con filtros opcionales) / POST admin. */
         get: operations["noticias_list"];
         put?: never;
+        /** @description GET /api/noticias/ (feed global, con filtros opcionales) / POST admin. */
         post: operations["noticias_create"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/noticias-guardadas/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["noticias_guardadas_list"];
+        put?: never;
+        post: operations["noticias_guardadas_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/noticias-guardadas/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["noticias_guardadas_destroy"];
         options?: never;
         head?: never;
         patch?: never;
@@ -251,6 +389,129 @@ export interface paths {
         patch: operations["noticias_partial_update"];
         trace?: never;
     };
+    "/api/v1/password-reset/confirm/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description POST /password-reset/confirm/ -> cambia password si el token es valido. */
+        post: operations["password_reset_confirm_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/password-reset/request/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description POST /password-reset/request/ -> genera token y envia email. */
+        post: operations["password_reset_request_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/perfil/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description GET: devuelve info del user + contadores. DELETE: elimina la cuenta. */
+        get: operations["perfil_retrieve"];
+        put?: never;
+        post?: never;
+        /** @description GET: devuelve info del user + contadores. DELETE: elimina la cuenta. */
+        delete: operations["perfil_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/perfil/cambiar-password/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description POST /perfil/cambiar-password/: cambia password verificando la actual. */
+        post: operations["perfil_cambiar_password_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/perfil/comuna/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * @description PATCH /perfil/comuna/: setea o limpia la comuna donde vota el usuario.
+         *
+         *     Body: {"comuna_id": <int|null>}
+         *     Respuesta: perfil actualizado con la comuna inline.
+         */
+        patch: operations["perfil_comuna_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/posturas-guardadas/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["posturas_guardadas_list"];
+        put?: never;
+        post: operations["posturas_guardadas_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/posturas-guardadas/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["posturas_guardadas_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/preguntas/": {
         parameters: {
             query?: never;
@@ -258,7 +519,30 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * @description Lista preguntas pendientes de responder.
+         *
+         *     - Autenticado: excluye las que ya respondio el user.
+         *     - Guest (anonymous): devuelve todas las preguntas del tipo de eleccion.
+         */
         get: operations["preguntas_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/regiones/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description GET /regiones/: lista las 16 regiones ordenadas norte-sur. */
+        get: operations["regiones_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -299,6 +583,72 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/respuestas/mias/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description GET /respuestas/mias/?tipo_eleccion_id=X: lista respuestas del user auth.
+         *
+         *     Incluye la pregunta, el eje tematico, la opcion elegida, el peso y
+         *     todas las opciones disponibles (para poblar el editor).
+         */
+        get: operations["respuestas_mias_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/respuestas/mias/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * @description PATCH /respuestas/mias/{pk}/: actualiza opcion + peso de UNA respuesta.
+         *
+         *     Efecto colateral: s MatchCandidato del user para el tipo
+         *     de eleccion afectado (se recalculan lazy al pedir Resultados).
+         */
+        patch: operations["respuestas_mias_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/respuestas/reiniciar/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Borra todas las respuestas + matches del user para un tipo de eleccion.
+         *
+         *     NO toca favoritos, descartados ni decision final: esos son bookmarks
+         *     personales aparte del cuestionario.
+         */
+        post: operations["respuestas_reiniciar_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/tipos-eleccion/": {
         parameters: {
             query?: never;
@@ -315,10 +665,52 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/unidades-territoriales/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description GET /unidades-territoriales/ con filtros:
+         *
+         *     - ?nivel=comunal  -> solo comunas
+         *     - ?padre=<id>     -> solo hijos directos de esa unidad (ej. comunas del D10)
+         *     - ?q=nunoa        -> busqueda por nombre (icontains)
+         */
+        get: operations["unidades_territoriales_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * @description Serializer para resultados de match anonimo (guest).
+         *
+         *     Trabaja con el dict ScoreCandidato del service, no con un modelo.
+         *     Mismo shape que MatchCandidatoResultSerializer para que el frontend
+         *     pueda usar un solo tipo Result.
+         */
+        AnonMatchResult: {
+            readonly candidato_data: {
+                [key: string]: unknown;
+            };
+            /** Format: decimal */
+            readonly match_percentage: string;
+            readonly preguntas_consideradas: number;
+            readonly breakdown_por_eje: {
+                [key: string]: unknown;
+            };
+            readonly confianza: string;
+        };
         AuthToken: {
             readonly token: string;
         };
@@ -327,6 +719,10 @@ export interface components {
             username: string;
             /** Contraseña */
             password: string;
+        };
+        CambiarPasswordRequest: {
+            current_password: string;
+            new_password: string;
         };
         Candidato: {
             readonly id: number;
@@ -343,6 +739,15 @@ export interface components {
             profile_picture?: string | null;
             tipos_eleccion: number[];
             readonly tipos_eleccion_nombres: string[];
+            /** @description Comuna en la que compite (alcaldes/concejales). Null si es nacional o distrital. */
+            comuna?: number | null;
+            readonly comuna_nombre: string;
+            readonly comuna_region_nombre: string;
+            /** @description Distrito en el que compite (diputados). Null si es nacional o comunal. */
+            distrito?: number | null;
+            readonly distrito_numero: number;
+            readonly distrito_nombre: string;
+            readonly alcance_territorial: string;
         };
         CandidatoDescartado: {
             readonly id: number;
@@ -364,6 +769,21 @@ export interface components {
         CandidatoFavoritoRequest: {
             candidato: number;
         };
+        /** @description Info minima del candidato para chips en el feed de noticias. */
+        CandidatoMencionado: {
+            readonly id: number;
+            nombre: string;
+            apellido?: string;
+            /** @description Nombre del partido politico */
+            partido: string;
+        };
+        /** @description Info minima del candidato para chips en el feed de noticias. */
+        CandidatoMencionadoRequest: {
+            nombre: string;
+            apellido?: string;
+            /** @description Nombre del partido politico */
+            partido: string;
+        };
         CandidatoRequest: {
             nombre: string;
             apellido?: string;
@@ -377,6 +797,19 @@ export interface components {
             /** Format: binary */
             profile_picture?: string;
             tipos_eleccion: number[];
+            /** @description Comuna en la que compite (alcaldes/concejales). Null si es nacional o distrital. */
+            comuna?: number | null;
+            /** @description Distrito en el que compite (diputados). Null si es nacional o comunal. */
+            distrito?: number | null;
+        };
+        /** @description Representacion inline de comuna dentro del perfil. */
+        ComunaInline: {
+            readonly id: number;
+            /** @description Codigo oficial de comuna (5 digitos SUBDERE). */
+            codigo: string;
+            nombre: string;
+            readonly region_nombre: string;
+            readonly distrito_numero: number;
         };
         /**
          * @description * `tentativa` - Tentativa (pocos datos)
@@ -385,6 +818,12 @@ export interface components {
          * @enum {string}
          */
         ConfianzaEnum: "tentativa" | "media" | "alta";
+        Contadores: {
+            respuestas: number;
+            favoritos: number;
+            descartados: number;
+            decisiones: number;
+        };
         DecisionFinal: {
             readonly id: number;
             candidato_elegido: number;
@@ -397,6 +836,26 @@ export interface components {
         DecisionFinalRequest: {
             candidato_elegido: number;
             tipo_eleccion: number;
+        };
+        Eje: {
+            readonly id: number;
+            /** @description Slug canonico. Ej: 'ECONOMIA', 'SALUD'. Se compara case-insensitive. */
+            codigo: string;
+            /** @description Nombre para mostrar. Ej: 'Economia', 'Salud'. */
+            nombre: string;
+            /** @description Color hex para el radar chart y badges. Ej: '#FFC220'. */
+            color?: string;
+            /** @description Nombre de icono (Ionicons/Lucide). Opcional. */
+            icono?: string;
+            /**
+             * Format: int64
+             * @description Orden de aparicion en el radar/UI.
+             */
+            orden?: number;
+            /** @description Si esta desactivado, el eje sigue en DB pero no se muestra al usuario. */
+            activo?: boolean;
+            /** @description Descripcion educativa del eje. Se muestra en tooltips. */
+            descripcion?: string;
         };
         /**
          * @description * `ECONOMIA` - Economia
@@ -427,6 +886,41 @@ export interface components {
             breakdown_por_eje?: unknown;
             confianza?: components["schemas"]["ConfianzaEnum"];
         };
+        /**
+         * @description Respuesta del user con pregunta + eje + opciones disponibles.
+         *
+         *     Diseñado para el editor: el cliente muestra la pregunta, la opcion
+         *     actual (con peso), y las alternativas para elegir otra.
+         */
+        MisRespuestasItem: {
+            readonly id: number;
+            readonly pregunta: number;
+            readonly pregunta_texto: string;
+            readonly eje_tematico: string;
+            readonly eje_tematico_display: string;
+            readonly opcion_elegida: number;
+            /**
+             * @description Cuanto le importa al usuario este tema. Multiplica el peso de la pregunta en el match.
+             *
+             *     * `0` - No me importa
+             *     * `1` - Poco importante
+             *     * `2` - Importante
+             *     * `3` - Muy importante
+             */
+            readonly peso: components["schemas"]["PesoEnum"];
+            readonly opciones: components["schemas"]["OpcionSimple"][];
+            /** Format: date-time */
+            readonly fecha_respuesta: string;
+        };
+        /**
+         * @description * `nacional` - Nacional
+         *     * `regional` - Regional
+         *     * `provincial` - Provincial
+         *     * `distrital` - Distrital
+         *     * `comunal` - Comunal
+         * @enum {string}
+         */
+        NivelEnum: "nacional" | "regional" | "provincial" | "distrital" | "comunal";
         Noticia: {
             readonly id: number;
             titulo: string;
@@ -438,10 +932,21 @@ export interface components {
             /** @description URL del thumbnail (opcional). */
             imagen_url?: string;
             candidatos_mencionados?: number[];
+            readonly candidatos_mencionados_data: components["schemas"]["CandidatoMencionado"][];
             /** Format: date-time */
             readonly fecha_publicacion: string;
             /** Format: date-time */
             readonly actualizado_en: string;
+        };
+        NoticiaBookmark: {
+            readonly id: number;
+            noticia: number;
+            /** Format: date-time */
+            readonly fecha_agregado: string;
+            readonly noticia_data: components["schemas"]["Noticia"];
+        };
+        NoticiaBookmarkRequest: {
+            noticia: number;
         };
         NoticiaRequest: {
             titulo: string;
@@ -465,6 +970,36 @@ export interface components {
             /** @description Si es True, esta opcion representa 'No se / Prefiero no responder' y se excluye del calculo de match. */
             es_no_se?: boolean;
         };
+        /** @description Opcion minima para poblar el editor de respuestas. */
+        OpcionSimple: {
+            readonly id: number;
+            texto: string;
+            /**
+             * Format: int64
+             * @description Valor numérico de la opción (ej. 1 al 5 para escalas, 0/1 para sí/no).
+             */
+            valor: number;
+        };
+        /** @description Payload: token + password nueva. */
+        PasswordResetConfirmRequest: {
+            token: string;
+            new_password: string;
+        };
+        /** @description Payload: solo email. */
+        PasswordResetRequestRequest: {
+            /** Format: email */
+            email: string;
+        };
+        /** @description Body del PATCH /perfil/comuna/. Solo requiere comuna_id. */
+        PatchedActualizarComunaRequest: {
+            /** @description ID de la comuna donde vota. null para limpiar. */
+            comuna_id?: number | null;
+        };
+        /** @description Input para PATCH /respuestas/mias/{id}/. */
+        PatchedEditarRespuestaRequest: {
+            opcion_elegida?: number;
+            peso?: number;
+        };
         PatchedNoticiaRequest: {
             titulo?: string;
             descripcion?: string;
@@ -475,6 +1010,56 @@ export interface components {
             /** @description URL del thumbnail (opcional). */
             imagen_url?: string;
             candidatos_mencionados?: number[];
+        };
+        Perfil: {
+            id: number;
+            username: string;
+            /** Format: email */
+            email: string;
+            /** Format: date-time */
+            fecha_registro: string;
+            contadores: components["schemas"]["Contadores"];
+            comuna: components["schemas"]["ComunaInline"] | null;
+        };
+        /**
+         * @description * `0` - No me importa
+         *     * `1` - Poco importante
+         *     * `2` - Importante
+         *     * `3` - Muy importante
+         * @enum {integer}
+         */
+        PesoEnum: 0 | 1 | 2 | 3;
+        PosturaBookmark: {
+            readonly id: number;
+            postura: number;
+            /** Format: date-time */
+            readonly fecha_agregado: string;
+            readonly postura_data: components["schemas"]["PosturaCandidato"];
+        };
+        PosturaBookmarkRequest: {
+            postura: number;
+        };
+        PosturaCandidato: {
+            readonly id: number;
+            candidato: number;
+            pregunta: number;
+            opcion_respuesta: number;
+            /** @description Breve justificación de la postura del candidato sobre el tema. */
+            justificacion?: string | null;
+            readonly opcion_respuesta_texto: string;
+            readonly opcion_respuesta_valor: number;
+            readonly candidato_nombre_completo: string;
+            readonly pregunta_texto: string;
+            readonly pregunta_orden: number;
+            readonly eje_tematico: string;
+            readonly eje_tematico_display: string;
+        };
+        PosturaCandidatoRequest: {
+            candidato: number;
+            pregunta: number;
+            opcion_respuesta: number;
+            /** @description Breve justificación de la postura del candidato sobre el tema. */
+            justificacion?: string | null;
         };
         Pregunta: {
             readonly id: number;
@@ -497,6 +1082,11 @@ export interface components {
              */
             eje_tematico?: components["schemas"]["EjeTematicoEnum"];
             readonly eje_tematico_display: string;
+            /** @description Referencia al catalogo Eje. Se sincroniza automaticamente con eje_tematico. Setealo aca si querés override o dejalo vacio y el signal lo resuelve por codigo. */
+            eje?: number | null;
+            readonly eje_nombre: string;
+            readonly eje_color: string;
+            readonly eje_icono: string;
             /** @description Contexto educativo neutro sobre que trata la pregunta (2-3 lineas). */
             explicacion?: string;
             /** @description Dict con keys: economico, social, cultural, ambiental, institucional. Cada valor es un texto breve explicando el impacto en esa dimension. */
@@ -520,6 +1110,26 @@ export interface components {
              * @description Fecha oficial de la eleccion
              */
             fecha_eleccion?: string | null;
+            /**
+             * Format: int64
+             * @description Ano electoral (ej. 2021, 2025). Permite tener multiples versiones del mismo tipo (Presidencial 2021 vs Presidencial 2025) y filtrar.
+             */
+            anio?: number | null;
+            /** @description Si es True, las preguntas de este tipo se agregan a TODAS las elecciones. Usado para preguntas transversales de valores/ideologia que se responden una sola vez. */
+            es_base?: boolean;
+        };
+        UnidadTerritorial: {
+            readonly id: number;
+            /** @description Codigo canonico. Ej: 'NACIONAL', 'REG-13', 'D-10', 'COM-13120'. */
+            codigo: string;
+            nombre: string;
+            nivel: components["schemas"]["NivelEnum"];
+            /** @description Unidad de nivel superior. Ej: comuna -> distrito, distrito -> region. */
+            padre?: number | null;
+            readonly padre_nombre: string;
+            readonly padre_nivel: string;
+            /** @description Data extra: 'poblacion', 'codigo_ine', 'circunscripcion_senatorial', etc. */
+            metadata?: unknown;
         };
         User: {
             readonly id: number;
@@ -659,6 +1269,26 @@ export interface operations {
             };
         };
     };
+    candidatos_match_detalle_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                candidato_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     candidatos_noticias_list: {
         parameters: {
             query?: never;
@@ -680,6 +1310,30 @@ export interface operations {
             };
         };
     };
+    candidatos_posturas_list: {
+        parameters: {
+            query?: {
+                /** @description Filtra posturas por preguntas de este tipo de eleccion. */
+                tipo_eleccion_id?: number;
+            };
+            header?: never;
+            path: {
+                candidato_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PosturaCandidato"][];
+                };
+            };
+        };
+    };
     candidatos_retrieve: {
         parameters: {
             query?: never;
@@ -697,6 +1351,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Candidato"];
+                };
+            };
+        };
+    };
+    comunas_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ComunaInline"][];
                 };
             };
         };
@@ -853,6 +1526,25 @@ export interface operations {
             };
         };
     };
+    ejes_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Eje"][];
+                };
+            };
+        };
+    };
     login_create: {
         parameters: {
             query?: never;
@@ -875,6 +1567,42 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AuthToken"];
                 };
+            };
+        };
+    };
+    match_anonimo_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                type: {
+                    [key: string]: unknown;
+                };
+                properties: unknown;
+                required: {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnonMatchResult"][];
+                };
+            };
+            /** @description Payload invalido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -905,7 +1633,16 @@ export interface operations {
     };
     noticias_list: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Filtra noticias que mencionen a este candidato. */
+                candidato_id?: number;
+                /** @description Solo noticias de los ultimos N dias (ej. 7, 30, 90). */
+                dias?: number;
+                /** @description Filtra por medio de origen (match parcial, case-insensitive). */
+                fuente?: string;
+                /** @description Busqueda de texto libre en titulo y descripcion. */
+                q?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -924,7 +1661,16 @@ export interface operations {
     };
     noticias_create: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Filtra noticias que mencionen a este candidato. */
+                candidato_id?: number;
+                /** @description Solo noticias de los ultimos N dias (ej. 7, 30, 90). */
+                dias?: number;
+                /** @description Filtra por medio de origen (match parcial, case-insensitive). */
+                fuente?: string;
+                /** @description Busqueda de texto libre en titulo y descripcion. */
+                q?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -937,13 +1683,78 @@ export interface operations {
             };
         };
         responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Noticia"][];
+                };
+            };
+        };
+    };
+    noticias_guardadas_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoticiaBookmark"][];
+                };
+            };
+        };
+    };
+    noticias_guardadas_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NoticiaBookmarkRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["NoticiaBookmarkRequest"];
+                "multipart/form-data": components["schemas"]["NoticiaBookmarkRequest"];
+            };
+        };
+        responses: {
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Noticia"];
+                    "application/json": components["schemas"]["NoticiaBookmark"];
                 };
+            };
+        };
+    };
+    noticias_guardadas_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un valor de entero único que identifique este noticia bookmark. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -1042,6 +1853,233 @@ export interface operations {
             };
         };
     };
+    password_reset_confirm_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordResetConfirmRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PasswordResetConfirmRequest"];
+                "multipart/form-data": components["schemas"]["PasswordResetConfirmRequest"];
+            };
+        };
+        responses: {
+            /** @description Password cambiada */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Token invalido / expirado / password debil */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    password_reset_request_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordResetRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PasswordResetRequestRequest"];
+                "multipart/form-data": components["schemas"]["PasswordResetRequestRequest"];
+            };
+        };
+        responses: {
+            /** @description email_sent siempre True (no revelamos si el email existe). En DEBUG=True devuelve reset_link para testing. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    perfil_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Perfil"];
+                };
+            };
+        };
+    };
+    perfil_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cuenta eliminada */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Password incorrecta o faltante */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    perfil_cambiar_password_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CambiarPasswordRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CambiarPasswordRequest"];
+                "multipart/form-data": components["schemas"]["CambiarPasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Password actualizada */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Password actual incorrecta o nueva invalida */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    perfil_comuna_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedActualizarComunaRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedActualizarComunaRequest"];
+                "multipart/form-data": components["schemas"]["PatchedActualizarComunaRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ComunaInline"];
+                };
+            };
+            /** @description comuna_id invalido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    posturas_guardadas_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PosturaBookmark"][];
+                };
+            };
+        };
+    };
+    posturas_guardadas_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PosturaBookmarkRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PosturaBookmarkRequest"];
+                "multipart/form-data": components["schemas"]["PosturaBookmarkRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PosturaBookmark"];
+                };
+            };
+        };
+    };
+    posturas_guardadas_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un valor de entero único que identifique este postura bookmark. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     preguntas_list: {
         parameters: {
             query: {
@@ -1063,6 +2101,24 @@ export interface operations {
             };
             /** @description tipo_eleccion_id faltante */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    regiones_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1126,6 +2182,113 @@ export interface operations {
             };
         };
     };
+    respuestas_mias_list: {
+        parameters: {
+            query: {
+                tipo_eleccion_id: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MisRespuestasItem"][];
+                };
+            };
+            /** @description tipo_eleccion_id faltante */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    respuestas_mias_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedEditarRespuestaRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedEditarRespuestaRequest"];
+                "multipart/form-data": components["schemas"]["PatchedEditarRespuestaRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MisRespuestasItem"];
+                };
+            };
+            /** @description Payload invalido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Respuesta no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    respuestas_reiniciar_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    tipo_eleccion_id: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Cuestionario reiniciado. Devuelve counts. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description tipo_eleccion_id faltante */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Tipo de eleccion no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     tipos_eleccion_list: {
         parameters: {
             query?: never;
@@ -1141,6 +2304,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TipoEleccion"][];
+                };
+            };
+        };
+    };
+    unidades_territoriales_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnidadTerritorial"][];
                 };
             };
         };

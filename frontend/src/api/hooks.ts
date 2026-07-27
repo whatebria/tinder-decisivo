@@ -11,6 +11,7 @@
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
+  actualizarComuna,
   addDescartado,
   addFavorito,
   addNoticiaBookmark,
@@ -26,6 +27,7 @@ import {
   getMatchDetalle,
   getPerfil,
   listCandidatos,
+  listComunas,
   listDecisiones,
   listDescartados,
   listFavoritos,
@@ -34,6 +36,7 @@ import {
   listNoticiasBookmarks,
   listPosturasBookmarks,
   listPosturasCandidato,
+  listRegiones,
   listTiposEleccion,
   matchAnonimo,
   matchCandidatos,
@@ -47,6 +50,7 @@ import {
   type Candidato,
   type CandidatoDescartado,
   type CandidatoFavorito,
+  type ComunaInline,
   type DecisionFinal,
   type EditarRespuestaResponse,
   type MatchResult,
@@ -60,6 +64,7 @@ import {
   type PosturaBookmark,
   type PosturaCandidatoDetalle,
   type Pregunta,
+  type Region,
   type ReiniciarCuestionarioResponse,
   type SaveDecisionInput,
   type TipoEleccion,
@@ -313,6 +318,38 @@ export function useCambiarPassword() {
 export function useEliminarCuenta() {
   return useMutation<void, Error, string>({
     mutationFn: eliminarCuenta,
+  });
+}
+
+// -- Territorio (regiones + comunas para el picker) -------------------------
+
+export function useRegiones() {
+  return useQuery<Region[]>({
+    queryKey: ["regiones"],
+    queryFn: listRegiones,
+    staleTime: 24 * 60 * 60 * 1000, // 24h: catalogo super estable
+  });
+}
+
+export function useComunas(regionId?: number | null, q?: string) {
+  return useQuery<ComunaInline[]>({
+    queryKey: ["comunas", regionId ?? null, q ?? ""],
+    queryFn: () => listComunas(regionId ?? undefined, q),
+    enabled: !!regionId, // no cargar 346 comunas si no hay region
+    staleTime: 24 * 60 * 60 * 1000,
+  });
+}
+
+export function useActualizarComuna() {
+  const qc = useQueryClient();
+  return useMutation<ComunaInline | null, Error, number | null>({
+    mutationFn: actualizarComuna,
+    onSuccess: () => {
+      // El perfil trae comuna inline; invalidamos para refrescar UI.
+      // Los matches del user dependen del filtro territorial, tambien se invalidan.
+      qc.invalidateQueries({ queryKey: ["perfil"] });
+      qc.invalidateQueries({ queryKey: ["match"] });
+    },
   });
 }
 
