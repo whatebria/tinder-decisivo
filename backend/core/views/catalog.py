@@ -25,7 +25,7 @@ class TipoEleccionListView(generics.ListAPIView):
 class CandidatoListView(generics.ListAPIView):
     queryset = (
         Candidato.objects.all()
-        .select_related("comuna", "comuna__region", "distrito")
+        .select_related("unidad_territorial", "unidad_territorial__padre")
         .prefetch_related("tipos_eleccion")
         .order_by("apellido", "nombre")
     )
@@ -36,7 +36,7 @@ class CandidatoListView(generics.ListAPIView):
 class CandidatoDetailView(generics.RetrieveAPIView):
     queryset = (
         Candidato.objects.all()
-        .select_related("comuna", "comuna__region", "distrito")
+        .select_related("unidad_territorial", "unidad_territorial__padre")
         .prefetch_related("tipos_eleccion")
     )
     serializer_class = CandidatoSerializer

@@ -111,7 +111,20 @@ class Candidato(models.Model):
 
     @property
     def alcance_territorial(self) -> str:
-        """Etiqueta legible del alcance: 'nacional', 'distrital' o 'comunal'."""
+        """Etiqueta legible del alcance: 'nacional', 'distrital', 'comunal' o el nivel UT crudo.
+
+        Se lee de `unidad_territorial` (fuente unica). Fallback a los FKs
+        legacy comuna/distrito por retrocompat mientras dura la migracion.
+        """
+        if self.unidad_territorial_id:
+            nivel = self.unidad_territorial.nivel
+            if nivel == "comunal":
+                return "comunal"
+            if nivel == "distrital":
+                return "distrital"
+            # regional/provincial/nacional -> devolver el nivel crudo.
+            return nivel
+        # Fallback legacy: se ira cuando dropeen las columnas.
         if self.comuna_id:
             return "comunal"
         if self.distrito_id:

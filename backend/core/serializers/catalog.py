@@ -66,19 +66,56 @@ class CandidatoSerializer(serializers.ModelSerializer):
         slug_field="nombre",
     )
     # Info territorial expandida para el detalle candidato del frontend.
-    comuna_nombre = serializers.CharField(
-        source="comuna.nombre", read_only=True, default=None,
-    )
-    comuna_region_nombre = serializers.CharField(
-        source="comuna.region.nombre", read_only=True, default=None,
-    )
-    distrito_numero = serializers.IntegerField(
-        source="distrito.numero", read_only=True, default=None,
-    )
-    distrito_nombre = serializers.CharField(
-        source="distrito.nombre", read_only=True, default=None,
-    )
+    # Los nombres/numeros se leen del Candidato via metodos derivados que
+    # resuelven desde unidad_territorial (fuente unica de verdad).
+    comuna_nombre = serializers.SerializerMethodField()
+    comuna_region_nombre = serializers.SerializerMethodField()
+    distrito_numero = serializers.SerializerMethodField()
+    distrito_nombre = serializers.SerializerMethodField()
     alcance_territorial = serializers.CharField(read_only=True)
+
+    def _ut_comuna(self, obj):
+        """Retorna la UT nivel=comunal si el candidato compite a nivel comunal."""
+        ut = obj.unidad_territorial
+        return ut if ut and ut.nivel == "comunal" else None
+
+    def _ut_distrito(self, obj):
+        """Retorna la UT nivel=distrital si compite a nivel distrital."""
+        ut = obj.unidad_territorial
+        return ut if ut and ut.nivel == "distrital" else None
+
+    def get_comuna_nombre(self, obj):
+        ut = self._ut_comuna(obj)
+        return ut.nombre if ut else None
+
+    def get_comuna_region_nombre(self, obj):
+        """Nombre de la region ancestro cuando el candidato es comunal.
+
+        Cadena de ancestros: comuna -> distrito -> region -> pais.
+        Frontend usa esto para filtrar candidatos por region.
+        """
+        ut = self._ut_comuna(obj)
+        if not ut:
+            return None
+        for ancestro in ut.ancestros():
+            if ancestro.nivel == "regional":
+                return ancestro.nombre
+        return None
+
+    def get_distrito_numero(self, obj):
+        ut = self._ut_distrito(obj)
+        if not ut:
+            return None
+        # Codigo UT distrital es "D-<numero>", ej "D-10". Tambien esta en
+        # metadata['numero_distrito'] pero parseamos del codigo por simpleza.
+        try:
+            return int(ut.codigo.split("-", 1)[1])
+        except (IndexError, ValueError):
+            return None
+
+    def get_distrito_nombre(self, obj):
+        ut = self._ut_distrito(obj)
+        return ut.nombre if ut else None
 
     class Meta:
         model = Candidato
@@ -93,11 +130,10 @@ class CandidatoSerializer(serializers.ModelSerializer):
             "profile_picture",
             "tipos_eleccion",
             "tipos_eleccion_nombres",
-            # Territorio
-            "comuna",
+            # Territorio (todos derivados de unidad_territorial)
+            "unidad_territorial",
             "comuna_nombre",
             "comuna_region_nombre",
-            "distrito",
             "distrito_numero",
             "distrito_nombre",
             "alcance_territorial",
