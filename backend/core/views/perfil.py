@@ -23,7 +23,12 @@ from ..serializers.perfil import (
     EliminarCuentaSerializer,
     PerfilSerializer,
 )
-from ..services.perfil import PerfilError, cambiar_password, eliminar_cuenta
+from ..services.perfil import (
+    PerfilError,
+    actualizar_comuna,
+    cambiar_password,
+    eliminar_cuenta,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -129,15 +134,25 @@ class ActualizarComunaView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         comuna_id = serializer.validated_data["comuna_id"]
-        profile, _ = UserProfile.objects.get_or_create(user=request.user)
-        profile.comuna = (
-            Comuna.objects.select_related("region", "distrito").get(id=comuna_id)
-            if comuna_id else None
-        )
-        profile.save(update_fields=["comuna", "fecha_actualizacion"])
+        try:
+            result = actualizar_comuna(request.user, comuna_id)
+        except Comuna.DoesNotExist:
+            return Response(
+                {"detail": "La comuna indicada no existe."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if result.comuna_cambio and result.matches_invalidados:
+            logger.info(
+                "Comuna del user %s cambio; invalidados %d MatchCandidato cacheados.",
+                request.user.username,
+                result.matches_invalidados,
+            )
 
         return Response(
-            ComunaInlineSerializer(profile.comuna).data if profile.comuna else None,
+            ComunaInlineSerializer(result.profile.comuna).data
+            if result.profile.comuna
+            else None,
             status=status.HTTP_200_OK,
         )
 

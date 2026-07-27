@@ -6,7 +6,8 @@ from django.core.management import call_command
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from core.models import Comuna, Region, UserProfile
+from core.models import Comuna, MatchCandidato, Region, UserProfile
+from core.models.electoral import Candidato, TipoEleccion
 
 
 @pytest.fixture
@@ -95,6 +96,97 @@ class TestActualizarComunaEndpoint:
         anon = APIClient()
         resp = anon.patch(reverse("perfil-comuna"), {"comuna_id": 1}, format="json")
         assert resp.status_code in (401, 403)
+
+
+class TestActualizarComunaInvalidaMatches:
+    """Al cambiar la comuna, los MatchCandidato viejos se borran para forzar
+    recalculo con el filtro territorial nuevo."""
+
+    @pytest.fixture
+    def match_cacheado(self, user, seed_chile):
+        """Deja un MatchCandidato en DB para el user."""
+        tipo = TipoEleccion.objects.create(nombre="TestElecc")
+        candidato = Candidato.objects.create(
+            nombre="Test",
+            apellido="Cand",
+            partido="Independiente",
+        )
+        candidato.tipos_eleccion.add(tipo)
+        MatchCandidato.objects.create(
+            user=user,
+            candidato=candidato,
+            match_percentage_value=75.0,
+            num_preguntas_consideradas=10,
+            confianza=MatchCandidato.CONFIANZA_MEDIA,
+        )
+        return candidato
+
+    def test_cambio_de_comuna_borra_matches(self, api, user, seed_chile, match_cacheado):
+        """Setear comuna por primera vez cuenta como cambio."""
+        nunoa = Comuna.objects.get(nombre="Nunoa")
+        assert MatchCandidato.objects.filter(user=user).count() == 1
+
+        resp = api.patch(
+            reverse("perfil-comuna"),
+            {"comuna_id": nunoa.id},
+            format="json",
+        )
+        assert resp.status_code == 200
+        assert MatchCandidato.objects.filter(user=user).count() == 0
+
+    def test_misma_comuna_es_noop(self, api, user, seed_chile, match_cacheado):
+        """PATCH con la misma comuna no borra los matches (evita trabajo caro)."""
+        nunoa = Comuna.objects.get(nombre="Nunoa")
+        user.profile.comuna = nunoa
+        user.profile.save()
+        assert MatchCandidato.objects.filter(user=user).count() == 1
+
+        resp = api.patch(
+            reverse("perfil-comuna"),
+            {"comuna_id": nunoa.id},
+            format="json",
+        )
+        assert resp.status_code == 200
+        assert MatchCandidato.objects.filter(user=user).count() == 1
+
+    def test_limpiar_comuna_borra_matches(self, api, user, seed_chile, match_cacheado):
+        """Pasar de tener comuna a null tambien invalida."""
+        nunoa = Comuna.objects.get(nombre="Nunoa")
+        user.profile.comuna = nunoa
+        user.profile.save()
+        assert MatchCandidato.objects.filter(user=user).count() == 1
+
+        resp = api.patch(
+            reverse("perfil-comuna"),
+            {"comuna_id": None},
+            format="json",
+        )
+        assert resp.status_code == 200
+        assert MatchCandidato.objects.filter(user=user).count() == 0
+
+    def test_no_afecta_matches_de_otros_users(self, api, user, seed_chile, match_cacheado):
+        """Cambiar la comuna de A no debe borrar los MatchCandidato de B."""
+        otro = User.objects.create_user(username="otro", password="pw12345678")
+        MatchCandidato.objects.create(
+            user=otro,
+            candidato=match_cacheado,
+            match_percentage_value=50.0,
+            num_preguntas_consideradas=5,
+            confianza=MatchCandidato.CONFIANZA_TENTATIVA,
+        )
+        assert MatchCandidato.objects.filter(user=otro).count() == 1
+
+        nunoa = Comuna.objects.get(nombre="Nunoa")
+        resp = api.patch(
+            reverse("perfil-comuna"),
+            {"comuna_id": nunoa.id},
+            format="json",
+        )
+        assert resp.status_code == 200
+        # El match del user 'otro' sigue intacto.
+        assert MatchCandidato.objects.filter(user=otro).count() == 1
+        # El match de 'user' fue invalidado.
+        assert MatchCandidato.objects.filter(user=user).count() == 0
 
 
 class TestCatalogosTerritoriales:

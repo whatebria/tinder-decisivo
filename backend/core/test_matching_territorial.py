@@ -21,6 +21,7 @@ from core.models import (
     Pregunta,
     RespuestaUsuario,
     TipoEleccion,
+    UnidadTerritorial,
 )
 from core.services.matching import (
     _filtrar_candidatos_por_territorio,
@@ -61,6 +62,12 @@ def escenario_territorial(db, seed_chile):
     providencia = Comuna.objects.get(nombre="Providencia")
     d10 = nunoa.distrito
 
+    # Removimos el signal auto-sync Candidato->UT por performance. Ahora los
+    # tests que crean candidatos manuales deben setear unidad_territorial.
+    ut_nunoa = UnidadTerritorial.objects.get(codigo=f"COM-{nunoa.codigo}")
+    ut_prov = UnidadTerritorial.objects.get(codigo=f"COM-{providencia.codigo}")
+    ut_d10 = UnidadTerritorial.objects.get(codigo=f"D-{d10.numero}")
+
     presi = Candidato.objects.create(
         nombre="Presi", apellido="Nacional", partido="P", propuesta_electoral="...",
     )
@@ -68,19 +75,19 @@ def escenario_territorial(db, seed_chile):
 
     alc_nunoa = Candidato.objects.create(
         nombre="Ana", apellido="AlcNunoa", partido="P",
-        propuesta_electoral="...", comuna=nunoa,
+        propuesta_electoral="...", comuna=nunoa, unidad_territorial=ut_nunoa,
     )
     alc_nunoa.tipos_eleccion.add(tipo_alc)
 
     alc_prov = Candidato.objects.create(
         nombre="Bea", apellido="AlcProv", partido="P",
-        propuesta_electoral="...", comuna=providencia,
+        propuesta_electoral="...", comuna=providencia, unidad_territorial=ut_prov,
     )
     alc_prov.tipos_eleccion.add(tipo_alc)
 
     dip_d10 = Candidato.objects.create(
         nombre="Dip", apellido="D10", partido="P",
-        propuesta_electoral="...", distrito=d10,
+        propuesta_electoral="...", distrito=d10, unidad_territorial=ut_d10,
     )
     dip_d10.tipos_eleccion.add(tipo_dip)
 
