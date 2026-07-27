@@ -10,7 +10,12 @@ export type RootStackParamList = {
   PasswordResetConfirm: { token: string } | undefined;
   Home: undefined;
   Cuestionario: undefined;
-  SubmitDone: undefined;
+  /**
+   * mode: "base" para cuestionarios de tipos con es_base=true (Preguntas generales).
+   *   Cambia el copy y el destino del CTA (no ofrece Resultados, redirige a activar eleccion o a la primera especifica).
+   * mode: "eleccion" (default) para cuestionarios de una eleccion especifica.
+   */
+  SubmitDone: { mode?: "base" | "eleccion" } | undefined;
   Resultados: undefined;
   DetalleCandidato: {
     candidatoId: number;
