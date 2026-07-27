@@ -23,6 +23,12 @@ export { ProgressStepper, type ProgressStepperProps, type StepperStep } from "./
 export { MatchTier, type MatchTierProps, type MatchTierKind } from "./MatchTier";
 export { SwipeCard, type SwipeCardProps } from "./SwipeCard";
 export { NewsCard, type NewsCardProps } from "./NewsCard";
+export {
+  NoticiaDetailSheet,
+  type NoticiaDetailSheetProps,
+  type NoticiaDetail,
+  type NoticiaCandidatoMencion,
+} from "./NoticiaDetailSheet";
 export { PosturaItem, type PosturaItemProps, type PosturaMatch } from "./PosturaItem";
 
 // Nuevas (Fase 5 — Home HUB wireframe)
@@ -36,3 +42,7 @@ export { ProgressSplit, type ProgressSplitProps } from "./ProgressSplit";
 
 // Nuevas (Fase 5 — Config wireframe)
 export { NavRow, type NavRowProps, type NavRowVariant } from "./NavRow";
+
+// Nuevas (Perfil territorial)
+export { ListPickerModal, type ListPickerItem } from "./ListPickerModal";
+export { UbicacionPicker } from "./UbicacionPicker";
