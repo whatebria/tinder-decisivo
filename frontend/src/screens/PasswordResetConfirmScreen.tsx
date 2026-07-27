@@ -1,24 +1,28 @@
 /**
  * PasswordResetConfirmScreen: usuario pega el token + escribe nueva password.
  * El token puede venir por route param (deep link) o pegarse a mano.
+ *
+ * Migrado a design system nativo (RN + tokens + atoms/molecules del DS).
+ * Antes usaba Tamagui (H1, Paragraph, YStack) — reemplazado por View + Text
+ * con typography, siguiendo el patrón de LoginScreen/RegisterScreen.
  */
 
-import React, { useState } from "react";
-import { ScrollView } from "react-native";
-import { H1, Paragraph, YStack } from "tamagui";
+import React, { useMemo, useState } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getErrorMessage } from "../api/client";
 import { useConfirmPasswordReset } from "../api/hooks";
-import { Input } from "../components";
-import { Button } from "../components";
-import { Link } from "../components";
-import { useToast } from "../components";
+import { Button, Input, Link, useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
+import { spacing } from "../theme/spacing";
+import { typography } from "../theme/typography";
+import { useThemeColors } from "../theme/useTheme";
 
 export function PasswordResetConfirmScreen({
   route,
   navigation,
 }: RootStackScreenProps<"PasswordResetConfirm">) {
+  const c = useThemeColors();
   const initialToken = route.params?.token ?? "";
   const [token, setToken] = useState(initialToken);
   const [newPassword, setNewPassword] = useState("");
@@ -51,20 +55,36 @@ export function PasswordResetConfirmScreen({
     }
   }
 
-  return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <YStack
-        flex={1}
-        padding="$6"
-        gap="$4"
-        backgroundColor="$background"
-        justifyContent="center"
-      >
-        <H1 color="$text">Nueva contrasena</H1>
-        <Paragraph color="$textSecondary">
-          Pega el token del email y elige una nueva contrasena.
-        </Paragraph>
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        scroll: { backgroundColor: c.bg, flexGrow: 1 },
+        content: {
+          padding: spacing.sp5,
+          gap: spacing.sp4,
+          flexGrow: 1,
+          justifyContent: "center",
+        },
+        title: { ...typography.h1, color: c.text },
+        subtitle: { ...typography.body, color: c.textSecondary },
+        inputs: { gap: spacing.sp3 },
+        errorText: { ...typography.small, color: c.danger },
+      }),
+    [c],
+  );
 
+  return (
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps="handled"
+    >
+      <Text style={styles.title}>Nueva contrasena</Text>
+      <Text style={styles.subtitle}>
+        Pega el token del email y elige una nueva contrasena.
+      </Text>
+
+      <View style={styles.inputs}>
         <Input
           placeholder="Token"
           value={token}
@@ -88,23 +108,23 @@ export function PasswordResetConfirmScreen({
           accessibilityLabel="Confirmar contrasena"
         />
         {confirmPassword.length > 0 && !passwordsMatch ? (
-          <Paragraph size="$2" color="$danger">
+          <Text style={styles.errorText}>
             Las contrasenas no coinciden.
-          </Paragraph>
+          </Text>
         ) : null}
+      </View>
 
-        <Button
-          onPress={handleSubmit}
-          disabled={!canSubmit}
-          loading={confirmReset.isPending}
-        >
-          Cambiar contrasena
-        </Button>
+      <Button
+        onPress={handleSubmit}
+        disabled={!canSubmit}
+        loading={confirmReset.isPending}
+      >
+        Cambiar contrasena
+      </Button>
 
-        <Link block onPress={() => navigation.replace("Login")}>
-          Volver al login
-        </Link>
-      </YStack>
+      <Link block onPress={() => navigation.replace("Login")}>
+        Volver al login
+      </Link>
     </ScrollView>
   );
 }

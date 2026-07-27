@@ -1,4 +1,4 @@
-# Frontend Servel (React Native + Expo + Tamagui)
+# Frontend Servel (React Native + Expo)
 
 App movil-web para el matching votante/candidato de Servel. Cross-platform
 (iOS / Android / web) desde un solo codebase Expo.
@@ -9,7 +9,7 @@ Nombre en curso: **tinder-decisivo** (working title).
 
 - **Expo SDK 57** (React Native 0.86, React 19.2)
 - **TypeScript** strict
-- **Tamagui 2.5** (theming + primitivos, con tokens propios)
+- **Design system propio** (atoms/molecules/organisms/templates + tokens en `src/theme/`)
 - **React Navigation 7** (native stack)
 - **Zustand 5** (state management global)
 - **@tanstack/react-query 5** (server state + cache)
@@ -79,10 +79,9 @@ La app soporta tres estados de auth (`src/store/auth.ts`):
 
 ```
 frontend/
-| App.tsx                 Root: ErrorBoundary > QueryClient > Tamagui > Nav
+| App.tsx                 Root: ErrorBoundary > QueryClient > SafeArea > Nav
 | index.ts                Entry point Expo
-| babel.config.js         Babel + tamagui plugin
-| tamagui.config.ts       Config de Tamagui (usa tokens de src/theme/)
+| babel.config.js         Babel (solo babel-preset-expo)
 | schema.yml              OpenAPI del backend (input de types:gen)
 | jest.config.js          Config de tests
 | AGENTS.md               Reglas para agentes AI que tocan este codebase
