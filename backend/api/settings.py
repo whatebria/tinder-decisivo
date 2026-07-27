@@ -5,6 +5,8 @@ Docs: https://docs.djangoproject.com/en/5.2/topics/settings/
 """
 
 from pathlib import Path
+
+import dj_database_url
 from decouple import Csv, config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -77,11 +79,15 @@ WSGI_APPLICATION = "api.wsgi.application"
 # ------------------------------------------------------------
 # Base de datos
 # ------------------------------------------------------------
+# Configurable via DATABASE_URL. Default: SQLite local (dev/tests).
+# Prod: setear DATABASE_URL=postgres://user:pass@host:5432/dbname
+# Ejemplos: postgres://... (Postgres), mysql://... (MySQL), sqlite:///... (SQLite)
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,          # reusa conexiones 10 min (irrelevante para SQLite)
+        conn_health_checks=True,   # ping antes de usar conexion reciclada
+    )
 }
 
 
@@ -142,14 +148,32 @@ PASSWORD_RESET_URL_BASE = config(
 # ------------------------------------------------------------
 # DRF
 # ------------------------------------------------------------
+# TTL de tokens en dias. Tokens mas viejos son rechazados por
+# ExpiringTokenAuthentication (fuerza re-login). Configurable via env.
+TOKEN_TTL_DAYS = config("TOKEN_TTL_DAYS", default=30, cast=int)
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.TokenAuthentication",
+        # Reemplaza TokenAuthentication default para agregar expiracion.
+        "core.authentication.ExpiringTokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    # Throttling: limita brute-force en endpoints sensibles.
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+        "rest_framework.throttling.ScopedRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "60/min",              # requests anonimos genericos
+        "user": "300/min",             # requests autenticados genericos
+        "login": "5/min",              # scope custom para login (brute-force)
+        "register": "10/hour",         # scope custom para registro
+        "password_reset": "3/hour",    # scope custom para reset password
+    },
 }
 
 # ------------------------------------------------------------
@@ -159,7 +183,7 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "Servel API",
     "DESCRIPTION": (
         "API REST del proyecto Servel: matching votante/candidato, cuestionarios, "
-        "favoritos, decisiones finales y noticias por candidato."
+        "favoritos y noticias por candidato."
     ),
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
@@ -171,13 +195,36 @@ SPECTACULAR_SETTINGS = {
 # ------------------------------------------------------------
 # CORS  (para que la app React Native / Expo pueda hablar con el backend)
 # ------------------------------------------------------------
+# NUNCA acoplar CORS_ALLOW_ALL_ORIGINS a DEBUG: si un deploy accidental queda
+# con DEBUG=True, CORS se abre a todo internet. Siempre lista explicita.
+# En dev, agregar en .env los origenes de Expo web (19006) y Metro (8081).
+# Para React Native nativo (iOS/Android) el request sale sin Origin, asi que
+# CORS no aplica; no hace falta agregar nada.
 CORS_ALLOWED_ORIGINS = config(
     "CORS_ALLOWED_ORIGINS",
     default="",
     cast=Csv(),
 )
-# En dev + Expo mobile los requests salen sin Origin, asi que en dev abrimos todo.
-CORS_ALLOW_ALL_ORIGINS = DEBUG
+CORS_ALLOWED_ORIGIN_REGEXES = config(
+    "CORS_ALLOWED_ORIGIN_REGEXES",
+    default="",
+    cast=Csv(),
+)
+
+# ------------------------------------------------------------
+# Hardening de seguridad para produccion (activo solo si DEBUG=False)
+# ------------------------------------------------------------
+if not DEBUG:
+    SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=True, cast=bool)
+    SECURE_HSTS_SECONDS = config("SECURE_HSTS_SECONDS", default=31536000, cast=int)  # 1 anio
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = "same-origin"
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    # Si estas detras de un proxy que hace HTTPS termination (Nginx, Cloudflare, etc.)
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 # ------------------------------------------------------------

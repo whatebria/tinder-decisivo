@@ -13,7 +13,36 @@ Si en el futuro necesitas mas speed, la ruta correcta es:
 """
 
 import pytest
+from django.core.cache import cache
 from django.core.management import call_command
+
+
+@pytest.fixture(autouse=True)
+def _disable_throttling(settings):
+    """Desactiva throttling en toda la suite de tests.
+
+    En prod los throttle scopes de login/register/password_reset protegen
+    contra brute-force. En tests eso rompe cualquier suite que hace >N
+    requests al mismo endpoint. Los rate limits se testean por separado
+    (si hace falta) con un test dedicado que los reactive.
+    """
+    settings.REST_FRAMEWORK = {
+        **settings.REST_FRAMEWORK,
+        "DEFAULT_THROTTLE_CLASSES": [],
+        # ScopedRateThrottle esta hardcodeado a nivel clase en las views,
+        # asi que sacar la lista global no basta. Dejamos rates efectivamente
+        # infinitas para que nunca disparen en tests.
+        "DEFAULT_THROTTLE_RATES": {
+            "anon": "1000000/min",
+            "user": "1000000/min",
+            "login": "1000000/min",
+            "register": "1000000/min",
+            "password_reset": "1000000/min",
+        },
+    }
+    cache.clear()
+    yield
+    cache.clear()
 
 
 @pytest.fixture

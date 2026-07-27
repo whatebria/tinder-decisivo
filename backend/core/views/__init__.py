@@ -6,6 +6,7 @@ ni imports externos. Cada submodulo maneja un area funcional distinta.
 
 from .auth import (
     CustomAuthToken,
+    LogoutView,
     PasswordResetConfirmView,
     PasswordResetRequestView,
     RegisterUserView,
@@ -13,7 +14,6 @@ from .auth import (
 from .bookmarking import (
     CandidatoDescartadoViewSet,
     CandidatoFavoritoViewSet,
-    DecisionFinalViewSet,
     NoticiaBookmarkViewSet,
     PosturaBookmarkViewSet,
 )
@@ -55,8 +55,8 @@ __all__ = [
     "CustomAuthToken",
     "EjeListView",
     "UnidadTerritorialListView",
-    "DecisionFinalViewSet",
     "EditarRespuestaView",
+    "LogoutView",
     "MatchCandidatoViewSet",
     "MisRespuestasListView",
     "NoticiaBookmarkViewSet",

@@ -9,6 +9,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from ..serializers import (
@@ -25,19 +26,41 @@ class RegisterUserView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "register"
 
 
 class CustomAuthToken(ObtainAuthToken):
     """Login. Retorna token, user_id y email."""
 
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "login"
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
-        token, _ = Token.objects.get_or_create(user=user)
+        # Rotamos el token en cada login para invalidar sesiones viejas.
+        Token.objects.filter(user=user).delete()
+        token = Token.objects.create(user=user)
         return Response({"token": token.key, "user_id": user.pk, "email": user.email})
+
+
+class LogoutView(APIView):
+    """POST /logout/ -> borra el token del user actual (invalidacion inmediata)."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+        request=None,
+        responses={
+            204: OpenApiResponse(description="Sesion cerrada"),
+        },
+    )
+    def post(self, request):
+        Token.objects.filter(user=request.user).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @extend_schema(
@@ -56,6 +79,8 @@ class PasswordResetRequestView(APIView):
 
     permission_classes = [permissions.AllowAny]
     authentication_classes: list = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "password_reset"
 
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
@@ -83,6 +108,8 @@ class PasswordResetConfirmView(APIView):
 
     permission_classes = [permissions.AllowAny]
     authentication_classes: list = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "password_reset"
 
     def post(self, request):
         serializer = PasswordResetConfirmSerializer(data=request.data)

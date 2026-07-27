@@ -13,9 +13,9 @@ from .views import (
     CandidatoPosturasView,
     ComunaListView,
     CustomAuthToken,
-    DecisionFinalViewSet,
     EditarRespuestaView,
     EjeListView,
+    LogoutView,
     UnidadTerritorialListView,
     MatchCandidatoViewSet,
     MisRespuestasListView,
@@ -37,7 +37,6 @@ from .views import (
 router = DefaultRouter()
 router.register(r"candidatos-favoritos", CandidatoFavoritoViewSet, basename="candidato-favorito")
 router.register(r"descartados", CandidatoDescartadoViewSet, basename="descartado")
-router.register(r"decision-final", DecisionFinalViewSet, basename="decision-final")
 router.register(r"noticias-guardadas", NoticiaBookmarkViewSet, basename="noticia-bookmark")
 router.register(r"posturas-guardadas", PosturaBookmarkViewSet, basename="postura-bookmark")
 
@@ -45,6 +44,7 @@ urlpatterns = [
     # Auth
     path("register/", RegisterUserView.as_view(), name="register"),
     path("login/", CustomAuthToken.as_view(), name="login"),
+    path("logout/", LogoutView.as_view(), name="logout"),
     path(
         "password-reset/request/",
         PasswordResetRequestView.as_view(),
@@ -126,6 +126,6 @@ urlpatterns = [
     # Noticias
     path("noticias/", NoticiaListCreateView.as_view(), name="noticia-list-create"),
     path("noticias/<int:pk>/", NoticiaDetailView.as_view(), name="noticia-detail"),
-    # Router (favoritos / descartados / decision-final)
+    # Router (favoritos / descartados)
     path("", include(router.urls)),
 ]
