@@ -55,10 +55,25 @@ class MatchCandidatoViewSet(viewsets.GenericViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        if tipo_eleccion.es_base:
+            return Response(
+                {
+                    "detail": (
+                        "Este tipo de cuestionario no tiene candidatos propios. "
+                        "Sus respuestas se aplican al match de cualquier otra eleccion."
+                    ),
+                    "code": "tipo_base_sin_candidatos",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         resultados = calcular_match(request.user, tipo_eleccion)
         if resultados is None:
             return Response(
-                {"detail": "El usuario no ha respondido preguntas para este tipo de eleccion."},
+                {
+                    "detail": "El usuario no ha respondido preguntas para este tipo de eleccion.",
+                    "code": "sin_respuestas",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -109,10 +124,25 @@ class MatchCandidatoViewSet(viewsets.GenericViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        if tipo_eleccion.es_base:
+            return Response(
+                {
+                    "detail": (
+                        "Este tipo de cuestionario no tiene candidatos propios. "
+                        "Sus respuestas se aplican al match de cualquier otra eleccion."
+                    ),
+                    "code": "tipo_base_sin_candidatos",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         scores = calcular_match_anonimo(respuestas, tipo_eleccion)
         if not scores:
             return Response(
-                {"detail": "No hay respuestas validas para calcular match."},
+                {
+                    "detail": "No hay respuestas validas para calcular match.",
+                    "code": "sin_respuestas",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

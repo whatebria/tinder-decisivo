@@ -144,6 +144,23 @@ class TestMatchAlgoritmo:
         )
         assert resp.status_code == 404
 
+    def test_tipo_base_devuelve_400_con_code(self, api, db):
+        """Match auth contra tipo con es_base=True devuelve 400 con code discriminado.
+
+        Mismo contrato que /match-anonimo/: el front usa `code` para mostrar
+        UI dedicada en vez del empty state genérico.
+        """
+        from core.models import TipoEleccion
+        tipo_base = TipoEleccion.objects.create(nombre="Preguntas generales", es_base=True)
+        resp = api.post(
+            reverse("match-candidatos"),
+            {"tipo_eleccion_id": tipo_base.id},
+            format="json",
+        )
+        assert resp.status_code == 400
+        body = resp.json()
+        assert body["code"] == "tipo_base_sin_candidatos"
+
     def test_endpoint_requiere_auth(self, anon_api, escenario_presidencial):
         resp = anon_api.post(
             reverse("match-candidatos"),

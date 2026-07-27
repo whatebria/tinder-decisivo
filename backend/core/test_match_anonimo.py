@@ -141,6 +141,27 @@ class TestMatchAnonimo:
         )
         assert resp.status_code == 404
 
+    def test_tipo_base_devuelve_400_con_code(self, api, db):
+        """Match contra un tipo con es_base=True es un error UX-friendly con code discriminado.
+
+        Los tipos base no tienen candidatos propios (sus preguntas son transversales
+        y aplican al match de otras elecciones). El front usa el `code` para redirigir
+        al user a activar una eleccion especifica en vez de mostrar un empty state.
+        """
+        tipo_base = TipoEleccion.objects.create(nombre="Preguntas generales", es_base=True)
+        resp = api.post(
+            reverse("match-anonimo"),
+            {
+                "tipo_eleccion_id": tipo_base.id,
+                "respuestas": [{"pregunta_id": 1, "opcion_id": 1, "peso": 1}],
+            },
+            format="json",
+        )
+        assert resp.status_code == 400
+        body = resp.json()
+        assert body["code"] == "tipo_base_sin_candidatos"
+        assert "otra eleccion" in body["detail"].lower()
+
     def test_respuestas_invalidas_se_ignoran(self, api, tipo_eleccion, preguntas_y_opciones, candidatos_con_posturas):
         respuestas = [
             {"pregunta_id": 99999, "opcion_id": 99999, "peso": 1},  # invalida
