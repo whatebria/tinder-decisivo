@@ -12,6 +12,7 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { CuestionarioScreen } from "../screens/CuestionarioScreen";
+import { CandidatosScreen } from "../screens/CandidatosScreen";
 import { DesignSystemScreen } from "../screens/design-system/DesignSystemScreen";
 import { DetalleCandidatoScreen } from "../screens/DetalleCandidatoScreen";
 import { HomeScreen } from "../screens/HomeScreen";
@@ -77,6 +78,7 @@ export function AppNavigator() {
           <Stack.Screen name="MisGuardados" component={MisGuardadosScreen} />
           <Stack.Screen name="MisRespuestas" component={MisRespuestasScreen} />
             <Stack.Screen name="Noticias" component={NoticiasScreen} />
+            <Stack.Screen name="Candidatos" component={CandidatosScreen} />
             <Stack.Screen name="Comparar" component={CompararScreen} />
             <Stack.Screen name="Swipe" component={SwipeScreen} />
           <Stack.Screen name="MiDecision" component={MiDecisionScreen} />

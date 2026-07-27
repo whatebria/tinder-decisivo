@@ -363,7 +363,7 @@ export function MisGuardadosScreen({
   })();
 
   return (
-    <AppShell active="guardados" navigation={navigation}>
+    <AppShell active={null} navigation={navigation}>
       <ScreenTopBar
         title="Mis guardados"
         subtitle="Todo lo que guardaste en un solo lugar."

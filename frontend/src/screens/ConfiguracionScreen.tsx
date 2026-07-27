@@ -132,6 +132,11 @@ export function ConfiguracionScreen({
           <View style={styles.section}>
             <SectionTitle title="Mis datos" />
             <NavRow
+              label="Mis guardados"
+              subtitle="Favoritos, descartados, posturas y noticias guardadas"
+              onPress={() => navigation.navigate("MisGuardados")}
+            />
+            <NavRow
               label="Mis respuestas"
               subtitle="Ver, editar o reiniciar tus respuestas del cuestionario"
               onPress={() => navigation.navigate("MisRespuestas")}

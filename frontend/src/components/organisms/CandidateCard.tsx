@@ -18,8 +18,13 @@ export interface CandidateCardProps {
   partido: string;
   /** Iniciales del candidato (2-3 chars). */
   initials: string;
-  /** Porcentaje de match 0-100. */
-  matchPercent: number;
+  /**
+   * Porcentaje de match 0-100. Si es null, se oculta el % y el MatchTier
+   * (util para vistas exploratorias sin cuestionario hecho).
+   */
+  matchPercent: number | null;
+  /** Sublabel opcional debajo del partido (ej. "Presidencial" o "Alcaldia"). */
+  sublabel?: string;
   /** Color del fondo del avatar. Opcional. */
   avatarColor?: string;
   onPress?: () => void;
@@ -31,6 +36,7 @@ export function CandidateCard({
   partido,
   initials,
   matchPercent,
+  sublabel,
   avatarColor,
   onPress,
   style,
@@ -53,6 +59,7 @@ export function CandidateCard({
         info: { flex: 1, gap: spacing.sp1 },
         name: { fontSize: 16, fontWeight: "600", color: c.text },
         partido: { fontSize: 13, color: c.textSecondary },
+        sublabel: { fontSize: 12, color: c.textTertiary },
         tierWrap: { marginTop: spacing.sp1 },
         pct: { fontSize: 22, fontWeight: "700", color: c.primary, marginHorizontal: spacing.sp3 },
         pressed: { opacity: 0.85 },
@@ -66,11 +73,16 @@ export function CandidateCard({
       <View style={styles.info}>
         <Text style={styles.name}>{name}</Text>
         <Text style={styles.partido}>{partido}</Text>
-        <View style={styles.tierWrap}>
-          <MatchTier percent={matchPercent} showPercent={false} />
-        </View>
+        {sublabel ? <Text style={styles.sublabel}>{sublabel}</Text> : null}
+        {matchPercent !== null ? (
+          <View style={styles.tierWrap}>
+            <MatchTier percent={matchPercent} showPercent={false} />
+          </View>
+        ) : null}
       </View>
-      <Text style={styles.pct}>{Math.round(matchPercent)}%</Text>
+      {matchPercent !== null ? (
+        <Text style={styles.pct}>{Math.round(matchPercent)}%</Text>
+      ) : null}
       {onPress ? <Icon name="chevron-right" color={c.textSecondary} size={20} /> : null}
     </>
   );
@@ -80,7 +92,11 @@ export function CandidateCard({
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
-        accessibilityLabel={`${name}, ${partido}, match ${Math.round(matchPercent)}%`}
+        accessibilityLabel={
+          matchPercent !== null
+            ? `${name}, ${partido}, match ${Math.round(matchPercent)}%`
+            : `${name}, ${partido}`
+        }
         style={(s) => [styles.card, s.pressed && styles.pressed, style]}
       >
         {content}

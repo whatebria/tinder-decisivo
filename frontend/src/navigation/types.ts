@@ -32,6 +32,7 @@ export type RootStackParamList = {
   MiDecision: undefined;
   Comparar: undefined;
   Noticias: undefined;
+  Candidatos: undefined;
   Swipe: undefined;
   Perfil: undefined;
   Configuracion: undefined;
