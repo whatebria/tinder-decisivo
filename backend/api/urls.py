@@ -2,13 +2,14 @@
 
 Rutas:
 
-- /admin/               - Panel de Django admin
-- /api/health/          - Health check (NO versionado)
-- /api/v1/...           - API REST versionada v1
-- /api/v1/schema/       - OpenAPI 3.0 schema (JSON/YAML)
-- /api/v1/docs/         - Swagger UI
-- /api/v1/redoc/        - ReDoc
-- /media/...            - Archivos subidos (solo en DEBUG)
+- /admin/                - Panel de Django admin
+- /api/health/           - Health check (fuera del versionado, para load balancers)
+- /api/v1/health/        - Alias versionado del health check
+- /api/v1/...            - API REST versionada v1
+- /api/v1/schema/        - OpenAPI 3.0 schema (JSON/YAML)
+- /api/v1/docs/          - Swagger UI
+- /api/v1/redoc/         - ReDoc
+- /media/...             - Archivos subidos (solo en DEBUG)
 """
 
 from django.conf import settings
@@ -26,7 +27,10 @@ from .views import health_check
 urlpatterns = [
     path("admin/", admin.site.urls),
     # Health check fuera del versionado: siempre disponible en /api/health/
+    # (usado por load balancers / uptime monitors que no deberian conocer versiones)
     path("api/health/", health_check, name="health-check"),
+    # Alias versionado para consistencia con el resto de la API v1
+    path("api/v1/health/", health_check, name="health-check-v1"),
     # API v1 (sin namespace para simplicidad; cuando exista v2, migrar a namespaces)
     path("api/v1/", include("core.urls")),
     # OpenAPI

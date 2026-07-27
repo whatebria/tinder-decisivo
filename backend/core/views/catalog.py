@@ -17,7 +17,7 @@ from ..serializers import (
 
 
 class TipoEleccionListView(generics.ListAPIView):
-    queryset = TipoEleccion.objects.all()
+    queryset = TipoEleccion.objects.all().order_by("anio", "nombre")
     serializer_class = TipoEleccionSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -27,6 +27,7 @@ class CandidatoListView(generics.ListAPIView):
         Candidato.objects.all()
         .select_related("comuna", "comuna__region", "distrito")
         .prefetch_related("tipos_eleccion")
+        .order_by("apellido", "nombre")
     )
     serializer_class = CandidatoSerializer
     permission_classes = [permissions.AllowAny]

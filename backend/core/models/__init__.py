@@ -1,11 +1,17 @@
 """Modelos de dominio de Servel.
 
 Organizacion por dominio funcional:
-- electoral   -> catalogo electoral (tipos de eleccion, candidatos)
-- cuestionario -> preguntas, opciones, respuestas del usuario
-- matching    -> posturas de candidatos + resultado del match
-- user_data   -> bookmarking del usuario (favoritos, descartados, decision final)
-- content     -> contenido asociado (noticias)
+
+- auth              -> tokens de reset de password
+- content           -> noticias (feed y por candidato)
+- cuestionario      -> preguntas, opciones, respuestas del usuario
+- eje               -> ejes tematicos que agrupan preguntas
+- electoral         -> catalogo electoral (tipos de eleccion, candidatos)
+- matching          -> posturas de candidatos + resultado del match
+- perfil            -> UserProfile (comuna, distrito derivados)
+- territorio        -> Region / Comuna / Distrito (legacy, ver H2 del audit)
+- unidad_territorial -> UnidadTerritorial polimorfico (jerarquia territorial nueva)
+- user_data         -> bookmarking del usuario (favoritos, descartados, bookmarks de noticias/posturas)
 
 Re-exportamos todos los nombres publicos aca para preservar el API
 `from core.models import X` que ya usan views, serializers, admin, tests

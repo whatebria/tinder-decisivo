@@ -6,8 +6,7 @@ from django.core.management import call_command
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from core.models import Comuna, MatchCandidato, Region, UserProfile
-from core.models.electoral import Candidato, TipoEleccion
+from core.models import Candidato, Comuna, MatchCandidato, Region, TipoEleccion, UserProfile
 
 
 @pytest.fixture

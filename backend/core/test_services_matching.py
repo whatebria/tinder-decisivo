@@ -5,7 +5,7 @@ funciones helper del algoritmo (score_pregunta, confianza_por_n) que son
 puras — mismo input, mismo output, cero side effects.
 
 Los tests de integracion end-to-end del algoritmo (que si usan DB,
-usuarios reales, candidatos, etc.) viven en core/tests.py.
+usuarios reales, candidatos, etc.) viven en core/test_algoritmo_matching.py.
 
 Beneficio del refactor: antes de mover el algoritmo a services/, estas
 funciones vivian dentro de views.py como funciones privadas (_score_pregunta,
