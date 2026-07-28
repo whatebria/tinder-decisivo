@@ -147,8 +147,18 @@ export function useNoticiasCandidato(id: number) {
 // -- Match (mutation, porque es POST y cambia server state) -----------------
 
 export function useMatchCandidatos() {
+  const qc = useQueryClient();
   return useMutation<MatchResult[], Error, number>({
     mutationFn: matchCandidatos,
+    onSuccess: (data, tipoEleccionId) => {
+      // Alimenta el cache de useMatchesQuery para que HomeScreen y otros
+      // consumers vean el ranking fresco al toque, sin esperar el staleTime
+      // de 60s. Fix del bug "eleccion aparece como no completada aunque
+      // recien complete el cuestionario": HomeScreen deriva isCompleted de
+      // matches.length > 0, entonces mientras el cache siga vacio la card
+      // se ve como pendiente.
+      qc.setQueryData(queryKeys.matches(tipoEleccionId), data);
+    },
   });
 }
 
