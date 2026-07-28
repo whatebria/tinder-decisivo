@@ -1,0 +1,149 @@
+/**
+ * Catalogo de dimensiones tematicas del dominio.
+ *
+ * Cada pregunta del cuestionario puede tener repercusiones en 5 dimensiones
+ * (economico, social, cultural, ambiental, institucional). Este archivo es
+ * la unica fuente de verdad para:
+ * - Los nombres/labels legibles
+ * - El icono de la dimension
+ * - La paleta de color (variante light + variante dark, contraste WCAG AA
+ *   sobre las superficies internas de las cards del theme)
+ *
+ * Por que NO vive en `theme/colors.ts`:
+ *   Los colores del theme son tokens de UI (bg, text, primary, danger).
+ *   Los colores de dimension son tokens de DOMINIO — semanticamente
+ *   representan una idea del negocio (ej: "verde = ambiental") y no deben
+ *   invertirse arbitrariamente con el tema. Lo que si hacen es tener una
+ *   version light y una version dark que MANTIENE el hue pero ajusta la
+ *   luminancia para cumplir contraste sobre el fondo de la card interna.
+ *
+ * Consumidores:
+ * - <DimensionBadge/> — el chip circular con icono
+ * - <DimensionCard/>  — la card completa con borde izquierdo + header + body
+ * - PreguntaInfoModal — arma las cards de repercusiones
+ * - (futuro) RadarChart por eje, filtros por dimension, badges en comparador
+ *
+ * Blindaje: `dimensiones.test.ts` verifica que cada color cumpla ratio
+ * >= 4.5 sobre el gray100 del theme correspondiente (WCAG AA texto normal).
+ */
+
+// ---- Types ----------------------------------------------------------------
+
+export type DimensionKey =
+  | "economico"
+  | "social"
+  | "cultural"
+  | "ambiental"
+  | "institucional";
+
+/**
+ * Definicion completa de una dimension.
+ *
+ * - `badge`: color de fondo del chip circular. Se usa igual en light y dark
+ *   porque el texto encima siempre es blanco (contraste ~7-10:1 en ambos).
+ * - `text.{light,dark}`: color del label de texto. Se aclara en dark para
+ *   cumplir AA sobre el gray100 oscuro.
+ * - `border.{light,dark}`: color del borde izquierdo de la card. Menos
+ *   critico (adorno visual, no texto) pero se ajusta por consistencia.
+ */
+export interface Dimension {
+  key: DimensionKey;
+  label: string;
+  icon: string;
+  badge: string;
+  text: { light: string; dark: string };
+  border: { light: string; dark: string };
+}
+
+export interface DimensionColors {
+  badge: string;
+  text: string;
+  border: string;
+}
+
+// ---- Catalogo -------------------------------------------------------------
+
+/**
+ * Racional de los colores dark: se tomo el hue de cada version light y se
+ * subio la luminancia ~3-4 stops de lescala Tailwind (ej: teal-700 →
+ * teal-300). Verificado con `dimensiones.test.ts` que cumple AA sobre
+ * `gray100` de ambos themes.
+ */
+export const DIMENSIONES: readonly Dimension[] = [
+  {
+    key: "economico",
+    label: "Economico",
+    icon: "$",
+    badge: "#0F766E", // teal-700
+    text: { light: "#0F766E", dark: "#5EEAD4" }, // teal-300 en dark
+    border: { light: "#0F766E", dark: "#5EEAD4" },
+  },
+  {
+    key: "social",
+    label: "Social",
+    icon: "*",
+    badge: "#B45309", // amber-700 (bg de chip, texto blanco encima cumple AA 5.2:1)
+    // Nota: el amber-700 como texto sobre gray100 light da 4.38:1 (justo
+    // debajo de AA). Se usa amber-800 (#92400E) para el label y el border,
+    // que da 6.7:1. El chip mantiene amber-700 para no oscurecer el fondo.
+    text: { light: "#92400E", dark: "#FCD34D" }, // amber-800 en light, amber-300 en dark
+    border: { light: "#92400E", dark: "#FCD34D" },
+  },
+  {
+    key: "cultural",
+    label: "Cultural",
+    icon: "~",
+    badge: "#7C3AED", // violet-600
+    text: { light: "#7C3AED", dark: "#C4B5FD" }, // violet-300 en dark
+    border: { light: "#7C3AED", dark: "#C4B5FD" },
+  },
+  {
+    key: "ambiental",
+    label: "Ambiental",
+    icon: "^",
+    badge: "#166534", // green-800
+    text: { light: "#166534", dark: "#86EFAC" }, // green-300 en dark
+    border: { light: "#166534", dark: "#86EFAC" },
+  },
+  {
+    key: "institucional",
+    label: "Institucional",
+    icon: "#",
+    badge: "#1E40AF", // blue-800
+    text: { light: "#1E40AF", dark: "#93C5FD" }, // blue-300 en dark
+    border: { light: "#1E40AF", dark: "#93C5FD" },
+  },
+] as const;
+
+// Index para lookup O(1) por key.
+const DIM_BY_KEY: Record<DimensionKey, Dimension> = DIMENSIONES.reduce(
+  (acc, d) => {
+    acc[d.key] = d;
+    return acc;
+  },
+  {} as Record<DimensionKey, Dimension>,
+);
+
+// ---- API publica ----------------------------------------------------------
+
+/** Devuelve la definicion completa de una dimension. */
+export function getDimension(key: DimensionKey): Dimension {
+  return DIM_BY_KEY[key];
+}
+
+/**
+ * Resuelve los 3 colores efectivos de una dimension segun el tema activo.
+ * Funcion pura — el consumidor debe pasarle `isDark`. Para wiring
+ * automatico usar el hook `useDimensionColors`.
+ */
+export function getDimensionColors(
+  key: DimensionKey,
+  isDark: boolean,
+): DimensionColors {
+  const d = DIM_BY_KEY[key];
+  return {
+    badge: d.badge,
+    text: isDark ? d.text.dark : d.text.light,
+    border: isDark ? d.border.dark : d.border.light,
+  };
+}
