@@ -5,56 +5,30 @@
  *
  * Se abre desde CuestionarioScreen al tocar el icono "?" junto al enunciado.
  *
- * Refactor: usa <Modal> molecule base (backdrop + close X unificados,
- * dark mode reactivo). Los colores de las 5 dimensiones se mantienen
- * hardcoded como paleta de dominio (parte del "branding" de los ejes),
- * pero fondos/bordes/textos base van via tokens del theme.
+ * La paleta de las 5 dimensiones vive en `src/domain/dimensiones.ts` y se
+ * consume via <DimensionCard/> — este modal solo compone. Ver la token
+ * page del design system para detalle de contraste WCAG AA por variante.
  *
  * Dark mode: cards internas (enunciado + repercusiones) usan c.gray100 que
- * se auto-invierte por tema (light: #EEF0EE sutil sobre card blanco, dark:
- * #2E3532 levemente elevado sobre card oscuro). Antes se hacia
- * `isDark ? c.gray800 : c.bg` que en dark resolvia a c.gray800 = #EEF0EE
- * (blanco), dejando cards blancas dentro del modal oscuro.
+ * se auto-invierte por tema (light: sutil sobre card blanco, dark: sutil
+ * sobre card oscuro). Los colores por dimension se resuelven light/dark
+ * automaticamente dentro de DimensionCard.
  */
 
 import React, { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { Modal } from "./Modal";
+import { DimensionCard } from "./DimensionCard";
 import { Button } from "../atoms/Button";
+import { DIMENSIONES, type DimensionKey } from "../../domain/dimensiones";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
 
 // ---- Tipos ----------------------------------------------------------------
 
-export type Repercusiones = Partial<{
-  economico: string;
-  social: string;
-  cultural: string;
-  ambiental: string;
-  institucional: string;
-}>;
-
-type DimensionKey = keyof Repercusiones;
-
-/**
- * Paleta fija por dimension (no va al theme porque es semantica de dominio,
- * no de UI). Los colores estan elegidos con contrast AA sobre fondos claros
- * y oscuros — el chip cambia bg pero el color texto se mantiene.
- */
-const DIMENSIONES: Array<{
-  key: DimensionKey;
-  label: string;
-  color: string;
-  icon: string;
-}> = [
-  { key: "economico", label: "Economico", color: "#0F766E", icon: "$" },
-  { key: "social", label: "Social", color: "#B45309", icon: "*" },
-  { key: "cultural", label: "Cultural", color: "#7C3AED", icon: "~" },
-  { key: "ambiental", label: "Ambiental", color: "#166534", icon: "^" },
-  { key: "institucional", label: "Institucional", color: "#1E40AF", icon: "#" },
-];
+export type Repercusiones = Partial<Record<DimensionKey, string>>;
 
 // ---- Props ----------------------------------------------------------------
 
@@ -122,40 +96,6 @@ export function PreguntaInfoModal({ visible, onClose, pregunta }: Props) {
           color: c.textSecondary,
           lineHeight: 22,
         },
-        dimCard: {
-          backgroundColor: c.gray100,
-          borderLeftWidth: 4,
-          borderRadius: radii.rSm,
-          padding: spacing.sp3,
-          marginBottom: spacing.sp2,
-        },
-        dimHeader: {
-          flexDirection: "row",
-          alignItems: "center",
-          marginBottom: spacing.sp1,
-        },
-        dimIcon: {
-          width: 24,
-          height: 24,
-          borderRadius: 12,
-          justifyContent: "center",
-          alignItems: "center",
-          marginRight: spacing.sp2,
-        },
-        dimIconText: {
-          color: "#FFFFFF",
-          fontSize: 13,
-          fontWeight: "700",
-        },
-        dimLabel: {
-          fontSize: 14,
-          fontWeight: "700",
-        },
-        dimBody: {
-          fontSize: 14,
-          color: c.textSecondary,
-          lineHeight: 20,
-        },
         disclaimer: {
           fontSize: 12,
           color: c.textTertiary,
@@ -180,11 +120,7 @@ export function PreguntaInfoModal({ visible, onClose, pregunta }: Props) {
       onClose={onClose}
       title="Contexto de la pregunta"
       maxWidth={560}
-      footer={
-        <Button onPress={onClose}>
-          Entendido
-        </Button>
-      }
+      footer={<Button onPress={onClose}>Entendido</Button>}
     >
       {pregunta.eje_tematico_display ? (
         <Text style={styles.eje}>{pregunta.eje_tematico_display}</Text>
@@ -215,20 +151,9 @@ export function PreguntaInfoModal({ visible, onClose, pregunta }: Props) {
             const texto = rep[d.key];
             if (!texto) return null;
             return (
-              <View
-                key={d.key}
-                style={[styles.dimCard, { borderLeftColor: d.color }]}
-              >
-                <View style={styles.dimHeader}>
-                  <View style={[styles.dimIcon, { backgroundColor: d.color }]}>
-                    <Text style={styles.dimIconText}>{d.icon}</Text>
-                  </View>
-                  <Text style={[styles.dimLabel, { color: d.color }]}>
-                    {d.label}
-                  </Text>
-                </View>
-                <Text style={styles.dimBody}>{texto}</Text>
-              </View>
+              <DimensionCard key={d.key} dimension={d.key}>
+                {texto}
+              </DimensionCard>
             );
           })}
         </View>
