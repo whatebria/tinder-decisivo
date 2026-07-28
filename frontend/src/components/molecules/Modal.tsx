@@ -10,7 +10,9 @@
 
 import React, { useMemo } from "react";
 import {
+  KeyboardAvoidingView,
   Modal as RNModal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -23,6 +25,7 @@ import {
 import { Icon } from "../atoms/Icon";
 import { IconButton } from "../atoms/IconButton";
 import { useBlurBeforeClose } from "../../hooks/useBlurBeforeClose";
+import { useModalDimensions } from "../../hooks/useModalDimensions";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors, useThemeShadows } from "../../theme/useTheme";
@@ -36,7 +39,11 @@ export interface ModalProps {
   children: React.ReactNode;
   /** Botones del footer (usar <Button/> u otro). */
   footer?: React.ReactNode;
-  /** Ancho maximo del card. Default: 480. */
+  /**
+   * Override del ancho maximo del card. Default: modalLayout.maxWidth (480).
+   * Solo usar cuando la UX del modal necesita algo distinto (ej: picker
+   * con grid ancho). Preferir el default para consistencia.
+   */
   maxWidth?: number;
   /** Si el backdrop es tappable para cerrar. Default: true. */
   dismissOnBackdrop?: boolean;
@@ -50,14 +57,16 @@ export function Modal({
   title,
   children,
   footer,
-  maxWidth = 480,
+  maxWidth,
   dismissOnBackdrop = true,
   cardStyle,
 }: ModalProps) {
   const c = useThemeColors();
   const shadows = useThemeShadows();
+  const dims = useModalDimensions();
   // Blur al elemento con foco antes de cerrar (evita warning aria-hidden en web).
   const handleClose = useBlurBeforeClose(onClose);
+  const effectiveMaxWidth = maxWidth ?? dims.maxWidth;
 
   const styles = useMemo(
     () =>
@@ -71,7 +80,8 @@ export function Modal({
         },
         card: {
           width: "100%",
-          maxWidth,
+          maxWidth: effectiveMaxWidth,
+          maxHeight: dims.maxHeight,
           backgroundColor: c.card,
           borderRadius: radii.rLg,
           ...shadows.shLg,
@@ -93,7 +103,14 @@ export function Modal({
           flexShrink: 1,
           marginRight: spacing.sp3,
         },
-        body: { paddingHorizontal: spacing.sp5, paddingVertical: spacing.sp4 },
+        body: {
+          // flexShrink permite que el ScrollView respete el maxHeight del card:
+          // header y footer ocupan su alto natural (fixed), el body toma el
+          // resto y scrollea internamente cuando el contenido lo supera.
+          flexShrink: 1,
+          paddingHorizontal: spacing.sp5,
+          paddingVertical: spacing.sp4,
+        },
         footer: {
           flexDirection: "row",
           justifyContent: "flex-end",
@@ -104,36 +121,43 @@ export function Modal({
           borderTopColor: c.border2,
         },
       }),
-    [c, shadows, maxWidth],
+    [c, shadows, effectiveMaxWidth, dims.maxHeight],
   );
 
   return (
     <RNModal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
-      <Pressable
-        style={styles.backdrop}
-        onPress={dismissOnBackdrop ? handleClose : undefined}
-        accessibilityRole="none"
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        // iOS empuja hacia arriba con padding, Android reajusta el alto.
+        // Web es no-op (RNW no implementa el behavior nativo del teclado).
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <Pressable onPress={() => {}} style={[styles.card, cardStyle]}>
-          {title ? (
-            <View style={styles.header}>
-              <Text style={styles.title}>{title}</Text>
-              <IconButton
-                onPress={handleClose}
-                accessibilityLabel="Cerrar"
-                variant="ghost"
-                size="sm"
-              >
-                <Icon name="close" color={c.textSecondary} size={18} />
-              </IconButton>
-            </View>
-          ) : null}
-          <ScrollView style={styles.body} contentContainerStyle={{ paddingBottom: spacing.sp2 }}>
-            {children}
-          </ScrollView>
-          {footer ? <View style={styles.footer}>{footer}</View> : null}
+        <Pressable
+          style={styles.backdrop}
+          onPress={dismissOnBackdrop ? handleClose : undefined}
+          accessibilityRole="none"
+        >
+          <Pressable onPress={() => {}} style={[styles.card, cardStyle]}>
+            {title ? (
+              <View style={styles.header}>
+                <Text style={styles.title}>{title}</Text>
+                <IconButton
+                  onPress={handleClose}
+                  accessibilityLabel="Cerrar"
+                  variant="ghost"
+                  size="sm"
+                >
+                  <Icon name="close" color={c.textSecondary} size={18} />
+                </IconButton>
+              </View>
+            ) : null}
+            <ScrollView style={styles.body} contentContainerStyle={{ paddingBottom: spacing.sp2 }}>
+              {children}
+            </ScrollView>
+            {footer ? <View style={styles.footer}>{footer}</View> : null}
+          </Pressable>
         </Pressable>
-      </Pressable>
+      </KeyboardAvoidingView>
     </RNModal>
   );
 }
