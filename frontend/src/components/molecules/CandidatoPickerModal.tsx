@@ -97,7 +97,7 @@ export function CandidatoPickerModal({
   }
 
   return (
-    <Modal visible={visible} onClose={onClose} title={title} maxWidth={480}>
+    <Modal visible={visible} onClose={onClose} title={title}>
       <TextInput
         value={query}
         onChangeText={setQuery}

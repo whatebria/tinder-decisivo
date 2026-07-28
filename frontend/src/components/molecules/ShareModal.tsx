@@ -16,6 +16,7 @@ import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-nati
 
 import { canShareNative, copyToClipboard, shareNative } from "../../services/share";
 import { useBlurBeforeClose } from "../../hooks/useBlurBeforeClose";
+import { useModalDimensions } from "../../hooks/useModalDimensions";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { typography } from "../../theme/typography";
@@ -32,6 +33,7 @@ interface Props {
 export function ShareModal({ visible, text, onClose }: Props) {
   const c = useThemeColors();
   const shadows = useThemeShadows();
+  const dims = useModalDimensions();
   const [copied, setCopied] = useState(false);
   const [sharing, setSharing] = useState(false);
   const hasNative = canShareNative();
@@ -66,8 +68,8 @@ export function ShareModal({ visible, text, onClose }: Props) {
           backgroundColor: c.card,
           borderRadius: radii.rLg,
           width: "100%",
-          maxWidth: 480,
-          maxHeight: "85%",
+          maxWidth: dims.maxWidth,
+          maxHeight: dims.maxHeight,
           padding: spacing.sp4,
           gap: spacing.sp3,
           ...shadows.shLg,
@@ -90,7 +92,7 @@ export function ShareModal({ visible, text, onClose }: Props) {
         },
         actions: { marginTop: spacing.sp2, gap: spacing.sp2 },
       }),
-    [c, shadows],
+    [c, shadows, dims],
   );
 
   return (

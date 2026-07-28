@@ -28,6 +28,7 @@ import { spacing } from "../../theme/spacing";
 import { typography } from "../../theme/typography";
 import { useThemeColors, useThemeShadows } from "../../theme/useTheme";
 import { useBlurBeforeClose } from "../../hooks/useBlurBeforeClose";
+import { useModalDimensions } from "../../hooks/useModalDimensions";
 import { Spinner } from "../atoms/Spinner";
 
 export interface ListPickerItem {
@@ -63,6 +64,7 @@ export function ListPickerModal({
 }: ListPickerModalProps) {
   const c = useThemeColors();
   const shadows = useThemeShadows();
+  const dims = useModalDimensions();
   const [query, setQuery] = useState("");
 
   const handleClose = useBlurBeforeClose(() => {
@@ -101,7 +103,11 @@ export function ListPickerModal({
     >
       <Pressable style={styles.backdrop} onPress={handleClose}>
         <Pressable
-          style={[styles.card, shadows.shLg, { backgroundColor: c.card }]}
+          style={[
+            styles.card,
+            shadows.shLg,
+            { backgroundColor: c.card, maxWidth: dims.maxWidth, maxHeight: dims.maxHeight },
+          ]}
           onPress={(e) => e.stopPropagation()}
         >
           <Text style={[styles.title, { color: c.text }]}>{title}</Text>
@@ -204,7 +210,6 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "100%",
-    maxWidth: 480,
     borderRadius: radii.rLg,
     padding: spacing.sp4,
     gap: spacing.sp3,
