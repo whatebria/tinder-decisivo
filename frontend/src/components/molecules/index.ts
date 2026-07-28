@@ -55,3 +55,6 @@ export {
 
 // Nuevas (onboarding contextual — ver src/content/coachMarks.ts)
 export { CoachMark, type CoachMarkProps } from "./CoachMark";
+
+// Dimensiones tematicas de dominio
+export { DimensionCard, type DimensionCardProps } from "./DimensionCard";
