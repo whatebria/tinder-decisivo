@@ -37,7 +37,10 @@ export function LoginScreen({ navigation }: RootStackScreenProps<"Login">) {
   async function handleLogin() {
     setLoading(true);
     try {
-      const res = await login({ username, password });
+      // Defensive trim: paste desde password manager puede meter espacios.
+      // NO trimeamos la password (espacios pueden ser legitimos).
+      const cleanUsername = username.trim();
+      const res = await login({ username: cleanUsername, password });
       await setSession(res.token, res.user_id, res.email);
     } catch (err) {
       toast.error("No pudimos iniciar sesion", getErrorMessage(err));
@@ -58,7 +61,10 @@ export function LoginScreen({ navigation }: RootStackScreenProps<"Login">) {
         },
         title: { ...typography.h1, color: c.text },
         subtitle: { ...typography.body, color: c.textSecondary },
-        inputs: { gap: spacing.sp3 },
+        inputs: { gap: spacing.sp4 },
+        field: { gap: spacing.sp2 },
+        label: { ...typography.small, color: c.text, fontWeight: "600" },
+        hint: { ...typography.small, color: c.textSecondary },
         themeWrap: { alignItems: "center", marginTop: spacing.sp4 },
       }),
     [c],
@@ -76,21 +82,40 @@ export function LoginScreen({ navigation }: RootStackScreenProps<"Login">) {
       </Text>
 
       <View style={styles.inputs}>
-        <Input
-          placeholder="Usuario"
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-          autoCorrect={false}
-          accessibilityLabel="Usuario"
-        />
-        <Input
-          placeholder="Contraseña"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          accessibilityLabel="Contraseña"
-        />
+        <View style={styles.field}>
+          <Text nativeID="login-username-label" style={styles.label}>
+            Nombre de usuario
+          </Text>
+          <Text style={styles.hint}>No es tu email — es el usuario que elegiste al registrarte.</Text>
+          <Input
+            placeholder="tu_usuario"
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="username"
+            textContentType="username"
+            accessibilityLabel="Nombre de usuario"
+            aria-labelledby="login-username-label"
+          />
+        </View>
+        <View style={styles.field}>
+          <Text nativeID="login-password-label" style={styles.label}>
+            Contraseña
+          </Text>
+          <Input
+            placeholder="••••••••"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="current-password"
+            textContentType="password"
+            accessibilityLabel="Contraseña"
+            aria-labelledby="login-password-label"
+          />
+        </View>
       </View>
 
       <Button onPress={handleLogin} disabled={!canSubmit} loading={loading}>
