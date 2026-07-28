@@ -37,3 +37,10 @@ export { BookmarkButton, type BookmarkButtonProps } from "./BookmarkButton";
 
 // Nuevos (Fase 5 — BottomNav wireframe)
 export { TabBarItem, type TabBarItemProps } from "./TabBarItem";
+
+// Dimensiones tematicas de dominio
+export {
+  DimensionBadge,
+  type DimensionBadgeProps,
+  type DimensionBadgeSize,
+} from "./DimensionBadge";
