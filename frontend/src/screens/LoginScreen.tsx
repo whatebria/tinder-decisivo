@@ -12,7 +12,7 @@ import { login } from "../api/endpoints";
 import { getErrorMessage } from "../api/client";
 import {
   Button,
-  Input,
+  FormField,
   Link,
   ThemeToggle,
   useToast,
@@ -61,10 +61,6 @@ export function LoginScreen({ navigation }: RootStackScreenProps<"Login">) {
         },
         title: { ...typography.h1, color: c.text },
         subtitle: { ...typography.body, color: c.textSecondary },
-        inputs: { gap: spacing.sp4 },
-        field: { gap: spacing.sp2 },
-        label: { ...typography.small, color: c.text, fontWeight: "600" },
-        hint: { ...typography.small, color: c.textSecondary },
         themeWrap: { alignItems: "center", marginTop: spacing.sp4 },
       }),
     [c],
@@ -81,41 +77,27 @@ export function LoginScreen({ navigation }: RootStackScreenProps<"Login">) {
         Ingresa a tu cuenta para encontrar tu candidato ideal.
       </Text>
 
-      <View style={styles.inputs}>
-        <View style={styles.field}>
-          <Text nativeID="login-username-label" style={styles.label}>
-            Nombre de usuario
-          </Text>
-          <Text style={styles.hint}>No es tu email — es el usuario que elegiste al registrarte.</Text>
-          <Input
-            placeholder="tu_usuario"
-            value={username}
-            onChangeText={setUsername}
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoComplete="username"
-            textContentType="username"
-            accessibilityLabel="Nombre de usuario"
-            aria-labelledby="login-username-label"
-          />
-        </View>
-        <View style={styles.field}>
-          <Text nativeID="login-password-label" style={styles.label}>
-            Contraseña
-          </Text>
-          <Input
-            placeholder="••••••••"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoComplete="current-password"
-            textContentType="password"
-            accessibilityLabel="Contraseña"
-            aria-labelledby="login-password-label"
-          />
-        </View>
+      <View>
+        <FormField
+          label="Nombre de usuario"
+          helper="No es tu email — es el usuario que elegiste al registrarte."
+          value={username}
+          onChangeText={setUsername}
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="username"
+          textContentType="username"
+        />
+        <FormField
+          label="Contraseña"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="current-password"
+          textContentType="password"
+        />
       </View>
 
       <Button onPress={handleLogin} disabled={!canSubmit} loading={loading}>

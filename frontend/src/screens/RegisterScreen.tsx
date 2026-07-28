@@ -10,7 +10,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { login, register } from "../api/endpoints";
 import { getErrorMessage } from "../api/client";
-import { Button, Input, Link, useToast } from "../components";
+import { Button, FormField, Link, useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
 import { spacing } from "../theme/spacing";
@@ -63,10 +63,6 @@ export function RegisterScreen({ navigation }: RootStackScreenProps<"Register">)
         },
         title: { ...typography.h1, color: c.text },
         subtitle: { ...typography.body, color: c.textSecondary },
-        inputs: { gap: spacing.sp4 },
-        field: { gap: spacing.sp2 },
-        label: { ...typography.small, color: c.text, fontWeight: "600" },
-        hint: { ...typography.small, color: c.textSecondary },
       }),
     [c],
   );
@@ -80,63 +76,39 @@ export function RegisterScreen({ navigation }: RootStackScreenProps<"Register">)
       <Text style={styles.title}>Crear cuenta</Text>
       <Text style={styles.subtitle}>Necesitamos algunos datos basicos.</Text>
 
-      <View style={styles.inputs}>
-        <View style={styles.field}>
-          <Text nativeID="reg-username-label" style={styles.label}>
-            Nombre de usuario
-          </Text>
-          <Text style={styles.hint}>
-            El que usarás para entrar después. No es tu email.
-          </Text>
-          <Input
-            placeholder="mínimo 3 caracteres"
-            value={username}
-            onChangeText={setUsername}
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoComplete="username-new"
-            textContentType="username"
-            accessibilityLabel="Nombre de usuario"
-            aria-labelledby="reg-username-label"
-          />
-        </View>
-        <View style={styles.field}>
-          <Text nativeID="reg-email-label" style={styles.label}>
-            Email
-          </Text>
-          <Text style={styles.hint}>
-            Lo usamos para recuperar tu contraseña si la olvidas.
-          </Text>
-          <Input
-            placeholder="tu@correo.com"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="email-address"
-            autoComplete="email"
-            textContentType="emailAddress"
-            accessibilityLabel="Email"
-            aria-labelledby="reg-email-label"
-          />
-        </View>
-        <View style={styles.field}>
-          <Text nativeID="reg-password-label" style={styles.label}>
-            Contraseña
-          </Text>
-          <Input
-            placeholder="mínimo 8 caracteres"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoComplete="new-password"
-            textContentType="newPassword"
-            accessibilityLabel="Contraseña"
-            aria-labelledby="reg-password-label"
-          />
-        </View>
+      <View>
+        <FormField
+          label="Nombre de usuario"
+          helper="El que usarás para entrar después. No es tu email. Mínimo 3 caracteres."
+          value={username}
+          onChangeText={setUsername}
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="username-new"
+          textContentType="username"
+        />
+        <FormField
+          label="Email"
+          helper="Lo usamos para recuperar tu contraseña si la olvidas."
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="email-address"
+          autoComplete="email"
+          textContentType="emailAddress"
+        />
+        <FormField
+          label="Contraseña"
+          helper="Mínimo 8 caracteres."
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="new-password"
+          textContentType="newPassword"
+        />
       </View>
 
       <Button onPress={handleRegister} disabled={!canSubmit} loading={loading}>
