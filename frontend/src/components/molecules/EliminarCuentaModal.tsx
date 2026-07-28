@@ -12,7 +12,7 @@ import React, { useMemo, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { Modal } from "./Modal";
-import { Input } from "../atoms/Input";
+import { FormField } from "./FormField";
 import { Button } from "../atoms/Button";
 import { Link } from "../atoms/Link";
 import { radii } from "../../theme/radii";
@@ -66,16 +66,6 @@ export function EliminarCuentaModal({
           borderLeftColor: c.danger,
         },
         form: { gap: spacing.sp2, marginTop: spacing.sp1 },
-        instruccion: {
-          fontSize: 13,
-          color: c.textSecondary,
-          marginTop: spacing.sp1,
-        },
-        palabraMagica: {
-          fontWeight: "700",
-          color: c.danger,
-          letterSpacing: 1,
-        },
         actions: { gap: spacing.sp2 },
       }),
     [c, isDark],
@@ -110,24 +100,22 @@ export function EliminarCuentaModal({
       </Text>
 
       <View style={styles.form}>
-        <Input
-          placeholder="Tu contrasena"
+        <FormField
+          label="Tu contrasena"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
-          accessibilityLabel="Contrasena"
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="current-password"
+          textContentType="password"
         />
-        <Text style={styles.instruccion}>
-          Para confirmar, escribe la palabra{" "}
-          <Text style={styles.palabraMagica}>{PALABRA_MAGICA}</Text>:
-        </Text>
-        <Input
-          placeholder={PALABRA_MAGICA}
+        <FormField
+          label={`Escribe ${PALABRA_MAGICA} para confirmar`}
           value={palabra}
           onChangeText={setPalabra}
           autoCapitalize="characters"
           autoCorrect={false}
-          accessibilityLabel="Palabra de confirmacion"
         />
       </View>
     </Modal>

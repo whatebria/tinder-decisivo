@@ -10,7 +10,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getErrorMessage } from "../api/client";
 import { useRequestPasswordReset } from "../api/hooks";
-import { Button, Input, Link, useToast } from "../components";
+import { Button, FormField, Link, useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
@@ -135,14 +135,16 @@ export function PasswordResetRequestScreen({
         crear una nueva.
       </Text>
 
-      <Input
-        placeholder="tu@email.com"
+      <FormField
+        label="Email"
+        helper="El email con el que te registraste."
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
         autoCorrect={false}
         keyboardType="email-address"
-        accessibilityLabel="Email"
+        autoComplete="email"
+        textContentType="emailAddress"
       />
 
       <Button

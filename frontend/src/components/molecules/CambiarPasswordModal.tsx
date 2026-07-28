@@ -11,7 +11,7 @@ import React, { useMemo, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { Modal } from "./Modal";
-import { Input } from "../atoms/Input";
+import { FormField } from "./FormField";
 import { Button } from "../atoms/Button";
 import { Link } from "../atoms/Link";
 import { spacing } from "../../theme/spacing";
@@ -53,9 +53,12 @@ export function CambiarPasswordModal({
   const styles = useMemo(
     () =>
       StyleSheet.create({
-        message: { fontSize: 14, color: c.textSecondary, lineHeight: 20 },
-        form: { gap: spacing.sp2, marginTop: spacing.sp1 },
-        error: { fontSize: 13, color: c.danger, fontWeight: "600" },
+        message: {
+          fontSize: 14,
+          color: c.textSecondary,
+          lineHeight: 20,
+          marginBottom: spacing.sp3,
+        },
         actions: { gap: spacing.sp2 },
       }),
     [c],
@@ -83,31 +86,43 @@ export function CambiarPasswordModal({
         Ingresa tu contrasena actual y luego la nueva (minimo 8 caracteres).
       </Text>
 
-      <View style={styles.form}>
-        <Input
-          placeholder="Contrasena actual"
+      <View>
+        <FormField
+          label="Contrasena actual"
           value={current}
           onChangeText={setCurrent}
           secureTextEntry
-          accessibilityLabel="Contrasena actual"
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="current-password"
+          textContentType="password"
         />
-        <Input
-          placeholder="Nueva contrasena"
+        <FormField
+          label="Nueva contrasena"
+          helper="Minimo 8 caracteres."
           value={next}
           onChangeText={setNext}
           secureTextEntry
-       accessibilityLabel="Nueva contrasena"
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="new-password"
+          textContentType="newPassword"
         />
-        <Input
-          placeholder="Confirmar nueva contrasena"
+        <FormField
+          label="Confirmar nueva contrasena"
           value={confirm}
           onChangeText={setConfirm}
           secureTextEntry
-          accessibilityLabel="Confirmar nueva contrasena"
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="new-password"
+          textContentType="newPassword"
+          error={
+            confirm.length > 0 && !passwordsMatch
+              ? "Las contrasenas no coinciden."
+              : undefined
+          }
         />
-        {confirm.length > 0 && !passwordsMatch ? (
-          <Text style={styles.error}>Las contrasenas no coinciden.</Text>
-        ) : null}
       </View>
     </Modal>
   );

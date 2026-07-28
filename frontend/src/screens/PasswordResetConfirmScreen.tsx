@@ -12,7 +12,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getErrorMessage } from "../api/client";
 import { useConfirmPasswordReset } from "../api/hooks";
-import { Button, Input, Link, useToast } from "../components";
+import { Button, FormField, Link, useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
@@ -67,8 +67,6 @@ export function PasswordResetConfirmScreen({
         },
         title: { ...typography.h1, color: c.text },
         subtitle: { ...typography.body, color: c.textSecondary },
-        inputs: { gap: spacing.sp3 },
-        errorText: { ...typography.small, color: c.danger },
       }),
     [c],
   );
@@ -84,34 +82,41 @@ export function PasswordResetConfirmScreen({
         Pega el token del email y elige una nueva contrasena.
       </Text>
 
-      <View style={styles.inputs}>
-        <Input
-          placeholder="Token"
+      <View>
+        <FormField
+          label="Token"
+          helper="Pégalo del email que recibiste."
           value={token}
           onChangeText={setToken}
           autoCapitalize="none"
           autoCorrect={false}
-          accessibilityLabel="Token"
         />
-        <Input
-          placeholder="Nueva contrasena (min. 8 caracteres)"
+        <FormField
+          label="Nueva contrasena"
+          helper="Mínimo 8 caracteres."
           value={newPassword}
           onChangeText={setNewPassword}
           secureTextEntry
-          accessibilityLabel="Nueva contrasena"
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="new-password"
+          textContentType="newPassword"
         />
-        <Input
-          placeholder="Confirma tu nueva contrasena"
+        <FormField
+          label="Confirmar nueva contrasena"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
-          accessibilityLabel="Confirmar contrasena"
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="new-password"
+          textContentType="newPassword"
+          error={
+            confirmPassword.length > 0 && !passwordsMatch
+              ? "Las contrasenas no coinciden."
+              : undefined
+          }
         />
-        {confirmPassword.length > 0 && !passwordsMatch ? (
-          <Text style={styles.errorText}>
-            Las contrasenas no coinciden.
-          </Text>
-        ) : null}
       </View>
 
       <Button
