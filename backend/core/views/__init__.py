@@ -31,6 +31,7 @@ from .cuestionario import (
     SubmitUserAnswersView,
 )
 from .matching import CandidatoMatchDetalleView, MatchCandidatoViewSet
+from .mi_progreso import MiProgresoView
 from .noticias import (
     CandidatoNoticiasView,
     NoticiaDetailView,
@@ -58,6 +59,7 @@ __all__ = [
     "EditarRespuestaView",
     "LogoutView",
     "MatchCandidatoViewSet",
+    "MiProgresoView",
     "MisRespuestasListView",
     "NoticiaBookmarkViewSet",
     "NoticiaDetailView",

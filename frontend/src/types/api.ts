@@ -236,6 +236,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/health/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Devuelve el estado del sistema.
+         *
+         *     Chequea:
+         *     - App corre (200).
+         *     - DB responde (SELECT 1).
+         *     - Version de la API expuesta para debugging cross-env.
+         *
+         *     Responde 200 si todo bien, 503 si la DB no responde.
+         */
+        get: operations["health_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/login/": {
         parameters: {
             query?: never;
@@ -247,6 +273,23 @@ export interface paths {
         put?: never;
         /** @description Login. Retorna token, user_id y email. */
         post: operations["login_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/logout/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description POST /logout/ -> borra el token del user actual (invalidacion inmediata). */
+        post: operations["logout_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -281,6 +324,23 @@ export interface paths {
         put?: never;
         /** @description Calculo de match. Usa POST porque persiste estado (no idempotente en el sentido HTTP). */
         post: operations["match_candidatos_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mi-progreso/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Resumen de progreso del user en TODOS los tipos de eleccion no-base. Para cada tipo devuelve total de preguntas (incluye base), cantidad respondida y el top match si el cuestionario esta completo. */
+        get: operations["mi_progreso_list"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -703,16 +763,25 @@ export interface components {
             profile_picture?: string | null;
             tipos_eleccion: number[];
             readonly tipos_eleccion_nombres: string[];
-            /** @description Comuna en la que compite (alcaldes/concejales). Null si es nacional o distrital. */
-            comuna?: number | null;
+            /** @description Unidad territorial polimorfica. Permite escalar a senadores (regional), CORE (provincial), etc. sin agregar FKs nuevos. */
+            unidad_territorial?: number | null;
             readonly comuna_nombre: string;
             readonly comuna_region_nombre: string;
-            /** @description Distrito en el que compite (diputados). Null si es nacional o comunal. */
-            distrito?: number | null;
-            readonly distrito_numero: number;
+            readonly distrito_numero: string;
             readonly distrito_nombre: string;
             readonly alcance_territorial: string;
         };
+        /**
+         * @description Valida que no exista ya un bookmark (user, <objeto>) para este user.
+         *
+         *     El modelo YA tiene el `unique_together = ("user", <objeto>)`, entonces
+         *     intentar guardar duplicado terminaria en IntegrityError -> HTTP 500 feo.
+         *     Este mixin adelanta la validacion y devuelve un 400 con mensaje amigable.
+         *
+         *     Subclases declaran:
+         *         unique_object_field: str        # ej. "candidato", "noticia"
+         *         unique_error_message: str       # ej. "Este candidato ya esta en tus favoritos."
+         */
         CandidatoDescartado: {
             readonly id: number;
             candidato: number;
@@ -720,9 +789,31 @@ export interface components {
             readonly fecha_descartado: string;
             readonly candidato_data: components["schemas"]["Candidato"];
         };
+        /**
+         * @description Valida que no exista ya un bookmark (user, <objeto>) para este user.
+         *
+         *     El modelo YA tiene el `unique_together = ("user", <objeto>)`, entonces
+         *     intentar guardar duplicado terminaria en IntegrityError -> HTTP 500 feo.
+         *     Este mixin adelanta la validacion y devuelve un 400 con mensaje amigable.
+         *
+         *     Subclases declaran:
+         *         unique_object_field: str        # ej. "candidato", "noticia"
+         *         unique_error_message: str       # ej. "Este candidato ya esta en tus favoritos."
+         */
         CandidatoDescartadoRequest: {
             candidato: number;
         };
+        /**
+         * @description Valida que no exista ya un bookmark (user, <objeto>) para este user.
+         *
+         *     El modelo YA tiene el `unique_together = ("user", <objeto>)`, entonces
+         *     intentar guardar duplicado terminaria en IntegrityError -> HTTP 500 feo.
+         *     Este mixin adelanta la validacion y devuelve un 400 con mensaje amigable.
+         *
+         *     Subclases declaran:
+         *         unique_object_field: str        # ej. "candidato", "noticia"
+         *         unique_error_message: str       # ej. "Este candidato ya esta en tus favoritos."
+         */
         CandidatoFavorito: {
             readonly id: number;
             candidato: number;
@@ -730,6 +821,17 @@ export interface components {
             readonly fecha_agregado: string;
             readonly candidato_data: components["schemas"]["Candidato"];
         };
+        /**
+         * @description Valida que no exista ya un bookmark (user, <objeto>) para este user.
+         *
+         *     El modelo YA tiene el `unique_together = ("user", <objeto>)`, entonces
+         *     intentar guardar duplicado terminaria en IntegrityError -> HTTP 500 feo.
+         *     Este mixin adelanta la validacion y devuelve un 400 con mensaje amigable.
+         *
+         *     Subclases declaran:
+         *         unique_object_field: str        # ej. "candidato", "noticia"
+         *         unique_error_message: str       # ej. "Este candidato ya esta en tus favoritos."
+         */
         CandidatoFavoritoRequest: {
             candidato: number;
         };
@@ -761,10 +863,8 @@ export interface components {
             /** Format: binary */
             profile_picture?: string;
             tipos_eleccion: number[];
-            /** @description Comuna en la que compite (alcaldes/concejales). Null si es nacional o distrital. */
-            comuna?: number | null;
-            /** @description Distrito en el que compite (diputados). Null si es nacional o comunal. */
-            distrito?: number | null;
+            /** @description Unidad territorial polimorfica. Permite escalar a senadores (regional), CORE (provincial), etc. sin agregar FKs nuevos. */
+            unidad_territorial?: number | null;
         };
         /** @description Representacion inline de comuna dentro del perfil. */
         ComunaInline: {
@@ -836,6 +936,24 @@ export interface components {
             breakdown_por_eje?: unknown;
             confianza?: components["schemas"]["ConfianzaEnum"];
         };
+        /** @description Un item por tipo de eleccion no-base. */
+        MiProgresoItem: {
+            tipo_eleccion_id: number;
+            tipo_eleccion_nombre: string;
+            total_preguntas: number;
+            respondidas: number;
+            completa: boolean;
+            top_match: components["schemas"]["MiProgresoTopMatch"] | null;
+        };
+        /** @description Shape reducido del top match para hero cards en el Home. */
+        MiProgresoTopMatch: {
+            readonly candidato: components["schemas"]["Candidato"];
+            /** Format: decimal */
+            readonly match_percentage: string;
+            readonly preguntas_consideradas: number;
+            readonly confianza: string;
+            readonly confianza_display: string;
+        };
         /**
          * @description Respuesta del user con pregunta + eje + opciones disponibles.
          *
@@ -888,6 +1006,17 @@ export interface components {
             /** Format: date-time */
             readonly actualizado_en: string;
         };
+        /**
+         * @description Valida que no exista ya un bookmark (user, <objeto>) para este user.
+         *
+         *     El modelo YA tiene el `unique_together = ("user", <objeto>)`, entonces
+         *     intentar guardar duplicado terminaria en IntegrityError -> HTTP 500 feo.
+         *     Este mixin adelanta la validacion y devuelve un 400 con mensaje amigable.
+         *
+         *     Subclases declaran:
+         *         unique_object_field: str        # ej. "candidato", "noticia"
+         *         unique_error_message: str       # ej. "Este candidato ya esta en tus favoritos."
+         */
         NoticiaBookmark: {
             readonly id: number;
             noticia: number;
@@ -895,6 +1024,17 @@ export interface components {
             readonly fecha_agregado: string;
             readonly noticia_data: components["schemas"]["Noticia"];
         };
+        /**
+         * @description Valida que no exista ya un bookmark (user, <objeto>) para este user.
+         *
+         *     El modelo YA tiene el `unique_together = ("user", <objeto>)`, entonces
+         *     intentar guardar duplicado terminaria en IntegrityError -> HTTP 500 feo.
+         *     Este mixin adelanta la validacion y devuelve un 400 con mensaje amigable.
+         *
+         *     Subclases declaran:
+         *         unique_object_field: str        # ej. "candidato", "noticia"
+         *         unique_error_message: str       # ej. "Este candidato ya esta en tus favoritos."
+         */
         NoticiaBookmarkRequest: {
             noticia: number;
         };
@@ -929,6 +1069,21 @@ export interface components {
              * @description Valor numérico de la opción (ej. 1 al 5 para escalas, 0/1 para sí/no).
              */
             valor: number;
+        };
+        PaginatedNoticiaList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Noticia"][];
         };
         /** @description Payload: token + password nueva. */
         PasswordResetConfirmRequest: {
@@ -979,6 +1134,17 @@ export interface components {
          * @enum {integer}
          */
         PesoEnum: 0 | 1 | 2 | 3;
+        /**
+         * @description Valida que no exista ya un bookmark (user, <objeto>) para este user.
+         *
+         *     El modelo YA tiene el `unique_together = ("user", <objeto>)`, entonces
+         *     intentar guardar duplicado terminaria en IntegrityError -> HTTP 500 feo.
+         *     Este mixin adelanta la validacion y devuelve un 400 con mensaje amigable.
+         *
+         *     Subclases declaran:
+         *         unique_object_field: str        # ej. "candidato", "noticia"
+         *         unique_error_message: str       # ej. "Este candidato ya esta en tus favoritos."
+         */
         PosturaBookmark: {
             readonly id: number;
             postura: number;
@@ -986,6 +1152,17 @@ export interface components {
             readonly fecha_agregado: string;
             readonly postura_data: components["schemas"]["PosturaCandidato"];
         };
+        /**
+         * @description Valida que no exista ya un bookmark (user, <objeto>) para este user.
+         *
+         *     El modelo YA tiene el `unique_together = ("user", <objeto>)`, entonces
+         *     intentar guardar duplicado terminaria en IntegrityError -> HTTP 500 feo.
+         *     Este mixin adelanta la validacion y devuelve un 400 con mensaje amigable.
+         *
+         *     Subclases declaran:
+         *         unique_object_field: str        # ej. "candidato", "noticia"
+         *         unique_error_message: str       # ej. "Este candidato ya esta en tus favoritos."
+         */
         PosturaBookmarkRequest: {
             postura: number;
         };
@@ -1408,6 +1585,31 @@ export interface operations {
             };
         };
     };
+    health_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sistema OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description DB caida u otro fallo */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     login_create: {
         parameters: {
             query?: never;
@@ -1430,6 +1632,24 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AuthToken"];
                 };
+            };
+        };
+    };
+    logout_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sesion cerrada */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -1494,6 +1714,32 @@ export interface operations {
             };
         };
     };
+    mi_progreso_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MiProgresoItem"][];
+                };
+            };
+            /** @description Autenticacion requerida */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     noticias_list: {
         parameters: {
             query?: {
@@ -1503,6 +1749,10 @@ export interface operations {
                 dias?: number;
                 /** @description Filtra por medio de origen (match parcial, case-insensitive). */
                 fuente?: string;
+                /** @description Un número de página dentro del conjunto de resultados paginado. */
+                page?: number;
+                /** @description Número de resultados a devolver por página. */
+                page_size?: number;
                 /** @description Busqueda de texto libre en titulo y descripcion. */
                 q?: string;
             };
@@ -1517,7 +1767,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Noticia"][];
+                    "application/json": components["schemas"]["PaginatedNoticiaList"];
                 };
             };
         };
@@ -1531,6 +1781,10 @@ export interface operations {
                 dias?: number;
                 /** @description Filtra por medio de origen (match parcial, case-insensitive). */
                 fuente?: string;
+                /** @description Un número de página dentro del conjunto de resultados paginado. */
+                page?: number;
+                /** @description Número de resultados a devolver por página. */
+                page_size?: number;
                 /** @description Busqueda de texto libre en titulo y descripcion. */
                 q?: string;
             };
@@ -1551,7 +1805,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Noticia"][];
+                    "application/json": components["schemas"]["PaginatedNoticiaList"];
                 };
             };
         };

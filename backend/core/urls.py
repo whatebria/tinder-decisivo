@@ -18,6 +18,7 @@ from .views import (
     LogoutView,
     UnidadTerritorialListView,
     MatchCandidatoViewSet,
+    MiProgresoView,
     MisRespuestasListView,
     NoticiaBookmarkViewSet,
     NoticiaDetailView,
@@ -113,6 +114,11 @@ urlpatterns = [
         name="respuestas-mias-detail",
     ),
     # Match
+    path(
+        "mi-progreso/",
+        MiProgresoView.as_view(),
+        name="mi-progreso",
+    ),
     path(
         "match-candidatos/",
         MatchCandidatoViewSet.as_view({"post": "match_candidatos"}),
