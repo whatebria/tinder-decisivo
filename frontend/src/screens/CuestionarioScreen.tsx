@@ -22,7 +22,7 @@ import { useTiposEleccion } from "../api/hooks";
 import {
   Button,
   Chip,
-  CoachMark,
+  CoachMarkTour,
   ScreenChrome,
   ScreenTopBar,
   PreguntaInfoModal,
@@ -30,7 +30,6 @@ import {
   RadioGroup,
   useToast,
 } from "../components";
-import { useCoachMarkTour } from "../hooks/useCoachMarkTour";
 import type { RootStackScreenProps } from "../navigation/types";
 import {
   debeMostrarPeso,
@@ -52,7 +51,6 @@ export function CuestionarioScreen({
   const toast = useToast();
   const [infoOpen, setInfoOpen] = useState(false);
   const isGuest = useAuthStore((s) => s.isGuest);
-  const cuestionarioTour = useCoachMarkTour("cuestionario");
   const {
     preguntas,
     currentIndex,
@@ -262,15 +260,7 @@ export function CuestionarioScreen({
         pregunta={pregunta as any}
       />
 
-      <CoachMark
-        visible={cuestionarioTour.visible}
-        step={cuestionarioTour.step}
-        currentIndex={cuestionarioTour.currentIndex}
-        total={cuestionarioTour.total}
-        onNext={cuestionarioTour.next}
-        onBack={cuestionarioTour.back}
-        onSkip={cuestionarioTour.skip}
-      />
+      <CoachMarkTour tourId="cuestionario" />
     </>
   );
 }

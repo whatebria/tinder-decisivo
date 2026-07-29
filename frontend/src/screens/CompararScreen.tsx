@@ -39,12 +39,11 @@ import {
   Avatar,
   Badge,
   type BadgeVariant,
-  CoachMark,
+  CoachMarkTour,
   ScreenTopBar,
   Toggle,
 } from "../components";
 import { CandidatoPickerModal } from "../components/molecules/CandidatoPickerModal";
-import { useCoachMarkTour } from "../hooks/useCoachMarkTour";
 import type { RootStackScreenProps } from "../navigation/types";
 import {
   calcularResumen,
@@ -121,8 +120,6 @@ export function CompararScreen({
 }: RootStackScreenProps<"Comparar">) {
   const c = useThemeColors();
   const tipoEleccionId = useCuestionarioStore((s) => s.tipoEleccionId);
-  const comparadorTour = useCoachMarkTour("comparador");
-
   const [candidatoA, setCandidatoA] = useState<Candidato | null>(null);
   const [candidatoB, setCandidatoB] = useState<Candidato | null>(null);
   const [pickerOpen, setPickerOpen] = useState<Slot | null>(null);
@@ -284,15 +281,7 @@ export function CompararScreen({
         onClose={() => setPickerOpen(null)}
       />
 
-      <CoachMark
-        visible={comparadorTour.visible}
-        step={comparadorTour.step}
-        currentIndex={comparadorTour.currentIndex}
-        total={comparadorTour.total}
-        onNext={comparadorTour.next}
-        onBack={comparadorTour.back}
-        onSkip={comparadorTour.skip}
-      />
+      <CoachMarkTour tourId="comparador" />
     </AppShell>
   );
 }

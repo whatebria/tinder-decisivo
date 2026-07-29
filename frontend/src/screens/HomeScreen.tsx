@@ -25,7 +25,7 @@ import {
 } from "../api/hooks";
 import {
   AppShell,
-  CoachMark,
+  CoachMarkTour,
   ConfirmModal,
   ElectionCard,
   ElectionCardAdd,
@@ -39,7 +39,6 @@ import {
   type NoticiaDetail,
   type NovedadFeedItem,
 } from "../components";
-import { useCoachMarkTour } from "../hooks/useCoachMarkTour";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
@@ -107,7 +106,6 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   const loadForTipoEleccion = useCuestionarioStore((s) => s.loadForTipoEleccion);
   const electionsActiveIds = useElectionsPrefsStore((s) => s.activeIds);
   const toast = useToast();
-  const homeTour = useCoachMarkTour("home");
 
   const { data: tipos = [], isLoading: tiposLoading, error } = useTiposEleccion();
   const { data: noticias = [] } = useNoticiasFeed();
@@ -311,15 +309,7 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
         noticia={selectedNoticia}
       />
 
-      <CoachMark
-        visible={homeTour.visible}
-        step={homeTour.step}
-        currentIndex={homeTour.currentIndex}
-        total={homeTour.total}
-        onNext={homeTour.next}
-        onBack={homeTour.back}
-        onSkip={homeTour.skip}
-      />
+      <CoachMarkTour tourId="home" />
     </>
   );
 }
