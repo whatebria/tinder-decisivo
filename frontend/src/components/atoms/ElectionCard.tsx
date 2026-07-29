@@ -1,19 +1,30 @@
 /**
  * ElectionCard: card de una eleccion activa en el Home HUB.
  *
- * Basado en design-system-lowfi.html · Home HUB.
+ * Basado en design-system-lowfi.html · Home HUB (rediseno 2026-07-28).
+ *
  * 3 variantes:
  *   - active: eleccion actualmente seleccionada (border-2 primary)
  *   - secondary: otra eleccion activa (border-1 gris)
  *   - pending: sin cuestionario respondido aún (progress 0%)
  *
+ * MODO PRINCIPAL (recomendado): pasar `respondidas` + `totalPreguntas`. La
+ * card muestra "N de N preguntas" y la progress bar. El porcentaje de match
+ * NO se muestra aca — ahora vive en su propio hero card (MatchSummaryCard)
+ * en la seccion "Tus mejores matches" del Home. Razon: separar dos conceptos
+ * distintos (avance del cuestionario vs afinidad politica) que antes se
+ * mezclaban confundiendo al user.
+ *
+ * MODO LEGACY (deprecado): pasar `matchPercent` + `progressPercent`. Se
+ * conserva por back-compat mientras la HomeScreen migra. Si `respondidas`
+ * y `totalPreguntas` estan definidos, ganan y `matchPercent` se ignora.
+ *
  * Prop `esBase`:
  *   Cuando true, la card representa un TipoEleccion con es_base=true
  *   ("Preguntas generales" transversal). No tiene candidatos propios, entonces:
- *     - no se muestra matchPercent (aunque venga)
  *     - se sustituye el `scope` por un chip "APLICA A TODAS"
- *     - se muestra un sub-texto explicativo en vez del ranking
- *   El resto (progress, badge de completado/pendiente, onPress) sigue igual.
+ *     - se muestra un sub-texto explicativo en vez del progreso/match
+ *   El resto (badge, onPress) sigue igual.
  *
  * Badge (esquina sup. derecha):
  *   - "Completado" (verde) si isCompleted === true
@@ -24,6 +35,10 @@
 import React, { useMemo } from "react";
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from "react-native";
 
+import {
+  computeProgresoRatio,
+  formatProgresoLabel,
+} from "../../domain/eleccion";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
@@ -36,15 +51,32 @@ export interface ElectionCardProps {
   scope?: string;
   /** Si el user ya completo el cuestionario. Si undefined, no se muestra badge. */
   isCompleted?: boolean;
-  /** 0–100. `null` → sin cuestionario respondido. */
+  /**
+   * Progreso del cuestionario en preguntas absolutas. Modo recomendado.
+   * Si ambos vienen, la card muestra "N de N preguntas" y calcula la barra
+   * a partir de estos valores (matchPercent y progressPercent se ignoran).
+   */
+  respondidas?: number;
+  totalPreguntas?: number;
+  /**
+   * @deprecated Usar `respondidas` + `totalPreguntas`. El match% vive ahora
+   * en MatchSummaryCard. Se mantiene solo por back-compat mientras la
+   * HomeScreen migra.
+   */
   matchPercent?: number | null;
-  /** 0–100 (progreso del cuestionario). */
-  progressPercent: number;
-  /** Texto alternativo cuando no hay matchPercent (ej: "6 preguntas extras pendientes"). */
+  /**
+   * @deprecated Usar `respondidas` + `totalPreguntas` (la barra se deriva).
+   * Se mantiene por back-compat.
+   */
+  progressPercent?: number;
+  /**
+   * @deprecated En el nuevo diseno el sub-texto siempre es el label de
+   * progreso. Se mantiene solo para el modo legacy.
+   */
   pendingLabel?: string;
   /**
    * Si true, esta card representa un TipoEleccion con es_base=true.
-   * Cambia el UI: oculta match%, muestra chip "APLICA A TODAS" y sub-texto explicativo.
+   * Cambia el UI: oculta progreso, muestra chip "APLICA A TODAS" y sub-texto.
    */
   esBase?: boolean;
   /** Texto explicativo custom para cards con esBase=true. Default: 'Mejora tus matches en todas las elecciones'. */
@@ -73,6 +105,8 @@ export function ElectionCard({
   name,
   scope,
   isCompleted,
+  respondidas,
+  totalPreguntas,
   matchPercent,
   progressPercent,
   pendingLabel,
@@ -85,8 +119,22 @@ export function ElectionCard({
 }: ElectionCardProps) {
   const c = useThemeColors();
   const isActive = variant === "active";
-  // esBase pisa el flag de pending porque el match% no tiene sentido en estas cards
-  const isPending = !esBase && (variant === "pending" || matchPercent == null);
+
+  // Modo nuevo: si vienen respondidas + totalPreguntas, calculamos label y
+  // barra desde el dominio puro. Es el path recomendado. Modo legacy (con
+  // matchPercent) se conserva mientras la HomeScreen migra.
+  const modoProgreso = respondidas !== undefined && totalPreguntas !== undefined;
+  const progresoLabel = modoProgreso
+    ? formatProgresoLabel(respondidas!, totalPreguntas!)
+    : null;
+  const progresoRatio = modoProgreso
+    ? computeProgresoRatio(respondidas!, totalPreguntas!)
+    : Math.max(0, Math.min(100, progressPercent ?? 0)) / 100;
+
+  // esBase pisa el flag de pending porque ni el progreso ni el match% tienen
+  // sentido en estas cards.
+  const isPendingLegacy =
+    !esBase && !modoProgreso && (variant === "pending" || matchPercent == null);
 
   const badge = pickBadge(isCompleted);
   const badgeColors = useMemo(() => {
@@ -176,6 +224,11 @@ export function ElectionCard({
           fontSize: 11,
           color: c.textSecondary,
         },
+        progresoText: {
+          fontSize: 13,
+          fontWeight: "600",
+          color: c.text,
+        },
       }),
     [c, isActive],
   );
@@ -208,7 +261,9 @@ export function ElectionCard({
         <Text style={styles.pendingText}>
           {baseHint ?? "Mejora tus matches en todas las elecciones"}
         </Text>
-      ) : isPending ? (
+      ) : modoProgreso ? (
+        <Text style={styles.progresoText}>{progresoLabel}</Text>
+      ) : isPendingLegacy ? (
         <Text style={styles.pendingText}>{pendingLabel ?? "Sin cuestionario"}</Text>
       ) : (
         <View style={styles.matchRow}>
@@ -217,7 +272,7 @@ export function ElectionCard({
         </View>
       )}
 
-      <Progress value={Math.max(0, Math.min(100, progressPercent)) / 100} />
+      <Progress value={progresoRatio} />
     </View>
   );
 
