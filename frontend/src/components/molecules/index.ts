@@ -34,6 +34,10 @@ export { PosturaItem, type PosturaItemProps, type PosturaMatch } from "./Postura
 export { HomeGreeting, type HomeGreetingProps } from "./HomeGreeting";
 export { SectionTitle, type SectionTitleProps } from "./SectionTitle";
 export { NovedadItem, type NovedadItemProps, type NovedadKind } from "./NovedadItem";
+export {
+  MatchSummaryCard,
+  type MatchSummaryCardProps,
+} from "./MatchSummaryCard";
 
 // Nuevas (Fase 5 — Cuestionario wireframe)
 export { ScreenTopBar, type ScreenTopBarProps } from "./ScreenTopBar";
@@ -55,6 +59,7 @@ export {
 
 // Nuevas (onboarding contextual — ver src/content/coachMarks.ts)
 export { CoachMark, type CoachMarkProps } from "./CoachMark";
+export { CoachMarkTour, type CoachMarkTourProps } from "./CoachMarkTour";
 
 // Dimensiones tematicas de dominio
 export { DimensionCard, type DimensionCardProps } from "./DimensionCard";
