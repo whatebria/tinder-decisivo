@@ -1,0 +1,20 @@
+{
+  "name": "servel-e2e",
+  "version": "0.1.0",
+  "private": true,
+  "description": "E2E tests con Playwright para Servel (Tinder Decisivo).",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:auth": "playwright test tests/auth-",
+    "test:debug": "playwright test --debug",
+    "codegen": "playwright codegen http://localhost:8081",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.0"
+  }
+}
