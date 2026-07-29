@@ -24,6 +24,7 @@ import {
   deletePosturaBookmark,
   eliminarCuenta,
   getMatchDetalle,
+  getMiProgreso,
   getPerfil,
   listCandidatos,
   listComunas,
@@ -51,6 +52,7 @@ import {
   type EditarRespuestaResponse,
   type MatchResult,
   type MatchDetalle,
+  type MiProgresoItem,
   type MiRespuesta,
   type Noticia,
   type NoticiaBookmark,
@@ -158,6 +160,8 @@ export function useMatchCandidatos() {
       // matches.length > 0, entonces mientras el cache siga vacio la card
       // se ve como pendiente.
       qc.setQueryData(queryKeys.matches(tipoEleccionId), data);
+      // Y el resumen del Home HUB tambien: ahora tiene top_match nuevo.
+      qc.invalidateQueries({ queryKey: queryKeys.miProgreso });
     },
   });
 }
@@ -194,6 +198,29 @@ export function useMatchAnonimo() {
   >({
     mutationFn: ({ tipoEleccionId, respuestas }) =>
       matchAnonimo(tipoEleccionId, respuestas),
+  });
+}
+
+// -- Home HUB: resumen agregado de todas las elecciones --------------------
+
+/**
+ * Resumen del progreso del user en todas las elecciones no-base.
+ *
+ * Reemplaza el patron N+M de la HomeScreen (useMatchesQuery + usePreguntas
+ * por cada tipo activo) con 1 request. Cada item trae total/respondidas/
+ * completa + top_match ya resuelto, listo para pintar.
+ *
+ * enabled solo cuando el user esta autenticado — el endpoint requiere
+ * IsAuthenticated; en modo guest la HomeScreen usa otro flujo (respuestas
+ * in-memory + useMatchAnonimo).
+ */
+export function useMisElecciones() {
+  const isAuth = useAuthStore((s) => s.isAuthenticated);
+  return useQuery<MiProgresoItem[]>({
+    queryKey: queryKeys.miProgreso,
+    queryFn: getMiProgreso,
+    enabled: isAuth,
+    staleTime: 60_000,
   });
 }
 
@@ -281,6 +308,8 @@ export function useUpdateRespuesta() {
       qc.invalidateQueries({ queryKey: queryKeys.misRespuestasAll });
       // Los matches se invalidaron en el backend; forzamos refetch al pedirlos.
       qc.invalidateQueries({ queryKey: queryKeys.matchesAll });
+      // Editar una respuesta cambia top_match y respondidas del resumen.
+      qc.invalidateQueries({ queryKey: queryKeys.miProgreso });
     },
   });
 }
@@ -379,6 +408,8 @@ export function useActualizarComuna() {
       // "matches" (list) y "match-detalle" (detail) para que se recalculen.
       qc.invalidateQueries({ queryKey: queryKeys.matchesAll });
       qc.invalidateQueries({ queryKey: queryKeys.matchDetalleAll });
+      // El resumen del Home tambien depende del top_match territorial.
+      qc.invalidateQueries({ queryKey: queryKeys.miProgreso });
     },
   });
 }

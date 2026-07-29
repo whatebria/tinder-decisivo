@@ -16,6 +16,8 @@ export type TipoEleccion = Schemas["TipoEleccion"];
 export type Pregunta = Schemas["Pregunta"];
 export type OpcionRespuesta = Schemas["OpcionRespuesta"];
 export type MatchResult = Schemas["MatchCandidatoResult"];
+export type MiProgresoItem = Schemas["MiProgresoItem"];
+export type MiProgresoTopMatch = Schemas["MiProgresoTopMatch"];
 export type Noticia = Schemas["Noticia"];
 export type EjeTematico = Schemas["EjeTematicoEnum"];
 
@@ -133,6 +135,16 @@ export async function matchCandidatos(
   const { data } = await apiClient.post<MatchResult[]>("/match-candidatos/", {
     tipo_eleccion_id: tipoEleccionId,
   });
+  return data;
+}
+
+/**
+ * Resumen agregado del progreso del user en todas las elecciones no-base.
+ * Reemplaza el patron N+M (useMatchesQuery + usePreguntas por cada tipo)
+ * de la HomeScreen con 1 solo request.
+ */
+export async function getMiProgreso(): Promise<MiProgresoItem[]> {
+  const { data } = await apiClient.get<MiProgresoItem[]>("/mi-progreso/");
   return data;
 }
 

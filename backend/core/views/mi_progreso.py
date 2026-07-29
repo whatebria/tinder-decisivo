@@ -42,6 +42,10 @@ class MiProgresoTopMatchSerializer(serializers.Serializer):
     confianza_display = serializers.CharField(
         source="get_confianza_display", read_only=True
     )
+    # Radar chart data. Se incluye aca (no en un round-trip aparte) para que
+    # el DetalleCandidatoScreen navegue sin loading state adicional. Costo
+    # extra ~200 bytes por top_match — despreciable.
+    breakdown_por_eje = serializers.JSONField(read_only=True)
 
 
 class MiProgresoItemSerializer(serializers.Serializer):

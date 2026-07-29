@@ -953,6 +953,7 @@ export interface components {
             readonly preguntas_consideradas: number;
             readonly confianza: string;
             readonly confianza_display: string;
+            readonly breakdown_por_eje: unknown;
         };
         /**
          * @description Respuesta del user con pregunta + eje + opciones disponibles.

@@ -183,6 +183,25 @@ class TestMiProgreso:
         assert pres["top_match"]["candidato"]["nombre"] == "Bob"
         assert float(pres["top_match"]["match_percentage"]) == 88.0
 
+    def test_top_match_incluye_breakdown_por_eje(self, api, user, escenario):
+        """El top_match trae breakdown_por_eje para que el HomeScreen pueda
+        navegar al DetalleCandidato con el radar chart listo (sin round-trip
+        extra).
+        """
+        MatchCandidato.objects.create(
+            user=user, candidato=escenario["ada"],
+            match_percentage_value=75.0, num_preguntas_consideradas=5,
+            breakdown_por_eje={
+                "economia": {"porcentaje": 80.0, "preguntas": 2},
+                "sociedad": {"porcentaje": 70.0, "preguntas": 3},
+            },
+        )
+        resp = api.get(reverse("mi-progreso"))
+        pres = next(i for i in resp.data if i["tipo_eleccion_nombre"] == "Presidencial")
+        breakdown = pres["top_match"]["breakdown_por_eje"]
+        assert breakdown["economia"]["porcentaje"] == 80.0
+        assert breakdown["sociedad"]["preguntas"] == 3
+
     def test_completa_sin_top_match_es_posible(self, api, user, escenario):
         """Un tipo puede estar completa=True pero top_match=None si el user aun
         no gatillo el calculo del match (o si no hay candidatos).

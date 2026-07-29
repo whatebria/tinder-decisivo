@@ -65,6 +65,13 @@ export const queryKeys = {
   /** Prefix para invalidar todos los detalles. */
   matchDetalleAll: ["match-detalle"] as const,
 
+  /**
+   * Resumen agregado del Home HUB. Se invalida cuando cambia cualquier
+   * cosa que afecte el shape mostrado en el Home: submit de respuestas,
+   * edicion, reinicio, o comuna del user.
+   */
+  miProgreso: ["mi-progreso"] as const,
+
   // Posturas ----------------------------------------------------------------
   posturas: (
     candidatoId: number | null | undefined,

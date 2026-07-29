@@ -1,24 +1,31 @@
 /**
  * Home HUB: dashboard central de la app.
  *
- * Basado en design-system-lowfi.html · Home HUB.
+ * Basado en design-system-lowfi.html · Home HUB (rediseno 2026-07-28).
  * Estructura:
  *   1. TopBar (brand + notif)
  *   2. Greeting (title + subtitle)
- *   3. Section "Tus elecciones" + strip horizontal + link "Gestionar"
- *   4. Divider
- *   5. Section "Novedades" (feed mixto: noticias + acciones sugeridas)
+ *   3. Section "Tus elecciones" — cards de progreso del cuestionario
+ *   4. Section "Tus mejores matches" — hero cards por eleccion completada
+ *   5. Divider
+ *   6. Section "Novedades" (feed mixto: noticias + acciones sugeridas)
  *
- * Multi-eleccion first-class: cada tipo activo es una card con match% + progreso.
+ * Data model: 1 sola query agregada (`useMisElecciones`) trae total/respondidas/
+ * completa + top_match por cada tipo. Antes hacia N queries de matches + M de
+ * preguntas — escalaba mal con el numero de elecciones.
+ *
+ * Modo guest: no llama al endpoint agregado (requiere auth). Se apoya en el
+ * catalogo (`useTiposEleccion`) y en el flujo local del cuestionario para
+ * responder + calcular match anonimo.
  */
 
 import React, { useMemo, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
-import type { TipoEleccion } from "../api/endpoints";
+import type { BreakdownPorEje, MiProgresoItem, TipoEleccion } from "../api/endpoints";
 import { getErrorMessage } from "../api/client";
 import {
-  useMatchesQuery,
+  useMisElecciones,
   useNoticiasFeed,
   useReiniciarCuestionario,
   useTiposEleccion,
@@ -31,6 +38,7 @@ import {
   ElectionCardAdd,
   HomeGreeting,
   HomeTopBar,
+  MatchSummaryCard,
   NoticiaDetailSheet,
   NovedadesFeed,
   SectionTitle,
@@ -68,32 +76,17 @@ function whenLabel(dateIso?: string): string {
   return `hace ${d}d`;
 }
 
-// -- Election card conectado (hace el query de matches por tipo) -----------
-
-interface ConnectedCardProps {
-  tipo: TipoEleccion;
-  isActive: boolean;
-  onPress: () => void;
-}
-
-function ElectionCardConnected({ tipo, isActive, onPress }: ConnectedCardProps) {
-  const { data: matches = [], isLoading } = useMatchesQuery(tipo.id);
-  const topMatch = matches[0];
-  const matchPct = topMatch ? Number(topMatch.match_percentage) : null;
-  const isCompleted = matches.length > 0;
-  const progress = isCompleted ? 100 : 0;
-
-  return (
-    <ElectionCard
-      name={tipo.nombre}
-      isCompleted={isLoading ? undefined : isCompleted}
-      matchPercent={isLoading ? null : matchPct}
-      progressPercent={progress}
-      pendingLabel={isLoading ? "Cargando…" : "Cuestionario pendiente"}
-      variant={isActive ? "active" : isCompleted ? "secondary" : "pending"}
-      onPress={onPress}
-    />
-  );
+/**
+ * Indexa el resumen del backend por tipo_eleccion_id. Puro y O(N).
+ * Devuelve un Map porque la lookup posterior por id es O(1).
+ */
+function indexProgresoByTipo(
+  items: MiProgresoItem[] | undefined,
+): Map<number, MiProgresoItem> {
+  const m = new Map<number, MiProgresoItem>();
+  if (!items) return m;
+  for (const it of items) m.set(it.tipo_eleccion_id, it);
+  return m;
 }
 
 // -- Screen ----------------------------------------------------------------
@@ -108,6 +101,9 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   const toast = useToast();
 
   const { data: tipos = [], isLoading: tiposLoading, error } = useTiposEleccion();
+  // Guest no dispara el query (enabled: isAuth). En modo guest el Home muestra
+  // solo el catalogo + el CTA para responder — no hay resumen persistido.
+  const { data: progresoItems } = useMisElecciones();
   const { data: noticias = [] } = useNoticiasFeed();
   const reiniciar = useReiniciarCuestionario();
 
@@ -125,8 +121,7 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
     if (error) toast.error("Error cargando elecciones", getErrorMessage(error));
   }, [error, toast]);
 
-  // "activo" = el que está en el store, o el primero si no hay ninguno.
-  // Solo elecciones activadas por el user (client-side pref).
+  // Solo elecciones activadas por el user (client-side pref sobre catalogo).
   const { activas: tiposActivos } = useMemo(
     () => partitionTipos(tipos, electionsActiveIds),
     [tipos, electionsActiveIds],
@@ -134,19 +129,45 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
 
   const activeId = activeTipoId ?? tiposActivos[0]?.id ?? null;
 
-  // Al tocar una card: carga las preguntas y decide destino.
-  //   - Si el user ya respondio todas (preguntas.length === 0 en auth), va a Resultados.
-  //   - Si faltan preguntas (o es guest), va a Cuestionario.
+  // Indexa el resumen por tipoId para lookup O(1) al pintar cada card.
+  const progresoByTipo = useMemo(
+    () => indexProgresoByTipo(progresoItems),
+    [progresoItems],
+  );
+
+  // Lista de hero cards "Tus mejores matches": solo items del user con top_match
+  // resuelto, filtrados por elecciones activas. Se pinta en orden natural del
+  // backend (por id de tipo). activeIds=null significa "todas activas" (default
+  // pre-primera edicion del user).
+  const mejoresMatches = useMemo(() => {
+    if (!progresoItems) return [];
+    return progresoItems.filter(
+      (it) =>
+        it.top_match !== null &&
+        (electionsActiveIds === null ||
+          electionsActiveIds.includes(it.tipo_eleccion_id)),
+    );
+  }, [progresoItems, electionsActiveIds]);
+
+  // Al tocar una card: carga preguntas y decide destino.
+  //   - Auth + completa: va directo a Resultados (evita cuestionario vacio).
+  //   - Guest o incompleta: va al Cuestionario.
+  //
+  // Antes se derivaba de `preguntas.length === 0` post-load. Ahora usamos el
+  // flag `completa` del backend que es la fuente de verdad y evita el race
+  // condition donde el store aun no habia cargado.
   async function iniciarCuestionario(tipo: TipoEleccion) {
     if (!tipo.id) return;
+    const progreso = progresoByTipo.get(tipo.id);
+    const yaCompleto = !isGuest && progreso?.completa === true;
     try {
-      await loadForTipoEleccion(tipo.id);
-      const preguntas = useCuestionarioStore.getState().preguntas;
-      if (!isGuest && preguntas.length === 0) {
+      if (yaCompleto) {
+        await loadForTipoEleccion(tipo.id);
         navigation.navigate("Resultados");
-      } else {
-        navigation.navigate("Cuestionario");
+        return;
       }
+      await loadForTipoEleccion(tipo.id);
+      navigation.navigate("Cuestionario");
     } catch (err) {
       toast.error("No pudimos cargar las preguntas", getErrorMessage(err));
     }
@@ -191,7 +212,7 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
     );
   }
 
-  // Construyo Novedades: por ahora accion sugerida (si hay tipo sin cuestionario) + noticias reales.
+  // Construyo Novedades: accion sugerida (si hay tipo sin cuestionario) + noticias reales.
   const tipoSinCuestionario = tiposActivos.find((t) => t.id && t.id !== activeId);
   const novedades: NovedadFeedItem[] = [];
 
@@ -231,64 +252,121 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
       <AppShell active="home" navigation={navigation}>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
           <HomeTopBar
-          brand="Tinder Decisivo"
-          onNotifications={() => navigation.navigate("Noticias")}
-        />
-
-        <HomeGreeting
-          title={saludo}
-          subtitle="Explora las elecciones activas."
-        />
-
-        {tiposActivos.length === 0 ? (
-          <HomeGreeting
-            title=""
-            subtitle="Aún no hay elecciones disponibles."
+            brand="Tinder Decisivo"
+            onNotifications={() => navigation.navigate("Noticias")}
           />
-        ) : (
-          <View>
-            <SectionTitle
-              title={`Tus elecciones (${tiposActivos.length})`}
-              actionLabel="Gestionar"
-              onAction={() => navigation.navigate("GestionElecciones")}
-            />
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.strip}
-              style={{ marginTop: spacing.sp3 }}
-            >
-              {tiposActivos.map((tipo) => (
-                <ElectionCardConnected
-                  key={tipo.id}
-                  tipo={tipo}
-                  isActive={tipo.id === activeId}
-                  onPress={() => iniciarCuestionario(tipo)}
-                />
-              ))}
-              <ElectionCardAdd
-                label="+ Activar otra elección"
-                onPress={() => navigation.navigate("GestionElecciones")}
-              />
-            </ScrollView>
-          </View>
-        )}
 
-        {novedades.length > 0 ? (
-          <>
-            <View style={styles.divider} />
+          <HomeGreeting
+            title={saludo}
+            subtitle="Explora las elecciones activas."
+          />
+
+          {tiposActivos.length === 0 ? (
+            <HomeGreeting
+              title=""
+              subtitle="Aún no hay elecciones disponibles."
+            />
+          ) : (
             <View>
               <SectionTitle
-                title="Novedades"
-                actionLabel="Ver todas"
-                onAction={() => navigation.navigate("Noticias")}
+                title={`Tus elecciones (${tiposActivos.length})`}
+                actionLabel="Gestionar"
+                onAction={() => navigation.navigate("GestionElecciones")}
               />
-              <View style={{ marginTop: spacing.sp3 }}>
-                <NovedadesFeed items={novedades} />
-              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.strip}
+                style={{ marginTop: spacing.sp3 }}
+              >
+                {tiposActivos.map((tipo) => {
+                  const progreso = tipo.id
+                    ? progresoByTipo.get(tipo.id)
+                    : undefined;
+                  const isActive = tipo.id === activeId;
+                  // Modo auth: usamos progreso agregado (respondidas + total).
+                  // Modo guest: no hay progreso persistido -> card pending.
+                  const isCompleted = progreso?.completa;
+                  return (
+                    <ElectionCard
+                      key={tipo.id}
+                      name={tipo.nombre}
+                      isCompleted={isCompleted}
+                      respondidas={progreso?.respondidas}
+                      totalPreguntas={progreso?.total_preguntas}
+                      variant={
+                        isActive
+                          ? "active"
+                          : isCompleted
+                            ? "secondary"
+                            : "pending"
+                      }
+                      onPress={() => iniciarCuestionario(tipo)}
+                    />
+                  );
+                })}
+                <ElectionCardAdd
+                  label="+ Activar otra elección"
+                  onPress={() => navigation.navigate("GestionElecciones")}
+                />
+              </ScrollView>
             </View>
-          </>
-        ) : null}
+          )}
+
+          {mejoresMatches.length > 0 ? (
+            <View>
+              <SectionTitle title="Tus mejores matches" />
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.strip}
+                style={{ marginTop: spacing.sp3 }}
+              >
+                {mejoresMatches.map((item) => {
+                  const top = item.top_match!;
+                  const candidato = top.candidato;
+                  const nombre = `${candidato.nombre} ${candidato.apellido ?? ""}`.trim();
+                  return (
+                    <MatchSummaryCard
+                      key={item.tipo_eleccion_id}
+                      candidatoNombre={nombre}
+                      candidatoFotoUrl={candidato.profile_picture ?? null}
+                      tipoEleccionNombre={item.tipo_eleccion_nombre}
+                      matchPercent={Number(top.match_percentage)}
+                      preguntasConsideradas={top.preguntas_consideradas}
+                      totalPreguntas={item.total_preguntas}
+                      onVerPerfil={() =>
+                        navigation.navigate("DetalleCandidato", {
+                          candidatoId: candidato.id!,
+                          breakdown:
+                            (top.breakdown_por_eje as BreakdownPorEje | null) ??
+                            null,
+                          matchPct: Number(top.match_percentage),
+                          confianza: top.confianza ?? null,
+                        })
+                      }
+                    />
+                  );
+                })}
+              </ScrollView>
+            </View>
+          ) : null}
+
+          {novedades.length > 0 ? (
+            <>
+              <View style={styles.divider} />
+              <View>
+                <SectionTitle
+                  title="Novedades"
+                  actionLabel="Ver todas"
+                  onAction={() => navigation.navigate("Noticias")}
+                />
+                <View style={{ marginTop: spacing.sp3 }}>
+                  <NovedadesFeed items={novedades} />
+                </View>
+              </View>
+            </>
+          ) : null}
         </ScrollView>
       </AppShell>
 
