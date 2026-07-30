@@ -9,14 +9,10 @@
 import { test, expect } from "@playwright/test";
 
 import { apiLogin, apiRegister } from "../helpers/api";
-import { gotoApp, uiLogin } from "../helpers/ui";
+import { gotoApp, goToPerfil, uiLogin } from "../helpers/ui";
 import { makeTestUser } from "../helpers/users";
 
-// TODO: navegacion al TabBar (rol="tab", label="Config") no matchea con
-// getByRole("button", { name: /config/i }). Skippeado hasta migrar los tests
-// a getByRole("tab", { name: "Config" }) o crear helper goToConfigTab().
-// Ver e2e/README.md "Estado actual del run" > Fix A.
-test.describe.skip("Auth › Eliminar cuenta", () => {
+test.describe("Auth › Eliminar cuenta", () => {
   test("boton disabled sin la palabra magica ELIMINAR", async ({ page }) => {
     const user = makeTestUser("del_disabled");
     await apiRegister(user);
@@ -27,11 +23,8 @@ test.describe.skip("Auth › Eliminar cuenta", () => {
       page.getByRole("heading", { name: "Servel", level: 1 })
     ).toBeHidden({ timeout: 10_000 });
 
-    // Ir a Configuracion
-    await page
-      .getByRole("button", { name: /configuraci[oó]n|config|perfil/i })
-      .first()
-      .click();
+    // Ir a Perfil (Config tab -> Editar perfil)
+    await goToPerfil(page);
 
     // Abrir modal eliminar cuenta
     await page.getByRole("button", { name: /eliminar (mi )?cuenta/i }).click();
@@ -61,10 +54,7 @@ test.describe.skip("Auth › Eliminar cuenta", () => {
       page.getByRole("heading", { name: "Servel", level: 1 })
     ).toBeHidden({ timeout: 10_000 });
 
-    await page
-      .getByRole("button", { name: /configuraci[oó]n|config|perfil/i })
-      .first()
-      .click();
+    await goToPerfil(page);
 
     await page.getByRole("button", { name: /eliminar (mi )?cuenta/i }).click();
 

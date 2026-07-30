@@ -53,6 +53,12 @@ export async function gotoApp(page: Page): Promise<void> {
 
 /**
  * Realiza login desde la UI. Asume estar en /Login.
+ *
+ * Post-login, dismissa automáticamente cualquier coach mark que aparezca.
+ * Los tours de coach marks NO se persisten (ver store/coachMarks.ts), asi
+ * que cada usuario fresh en tests dispara el tour completo la primera vez
+ * que entra al screen destino. En tests eso sólo estorba: el modal bloquea
+ * clicks al contenido debajo.
  */
 export async function uiLogin(
   page: Page,
@@ -61,6 +67,7 @@ export async function uiLogin(
   await vLabel(page, "Nombre de usuario", { exact: true }).fill(user.username);
   await vLabel(page, "Contraseña", { exact: true }).fill(user.password);
   await vRole(page, "button", { name: /iniciar sesi[oó]n/i }).click();
+  await dismissCoachMarks(page);
 }
 
 /**
@@ -87,4 +94,57 @@ export async function gotoRegister(page: Page): Promise<void> {
  */
 export async function gotoPasswordReset(page: Page): Promise<void> {
   await vRole(page, "link", { name: /recuperar contrase/i }).click();
+}
+
+/**
+ * Click en el tab "Config" del BottomNav (autenticado).
+ * TabBarItem usa accessibilityRole="tab" + accessibilityLabel=label,
+ * y el label del APP_TABS es exactamente "Config" (no "Configuración").
+ *
+ * Defensivo: intenta dismissar coach marks antes por si aparecio uno nuevo
+ * al aterrizar en Home (los tours no se persisten entre sesiones).
+ */
+export async function goToConfigTab(page: Page): Promise<void> {
+  await dismissCoachMarks(page);
+  await vRole(page, "tab", { name: "Config" }).click();
+}
+
+/**
+ * Navega a PerfilScreen desde cualquier lugar autenticado:
+ * Tab Config -> boton "Editar perfil". Ahí viven los NavRows para cambiar
+ * contrasena, eliminar cuenta y cerrar sesion.
+ *
+ * Dismisses coach marks entre cada navegacion (cada screen puede tener su
+ * tour propio la primera vez).
+ */
+export async function goToPerfil(page: Page): Promise<void> {
+  await goToConfigTab(page);
+  await dismissCoachMarks(page);
+  await vRole(page, "button", { name: "Editar perfil" }).click();
+  await dismissCoachMarks(page);
+}
+
+/**
+ * Cierra cualquier coach mark visible haciendo click en el backdrop
+ * (que a su vez dispara skip/next segun sea single o multi-step).
+ *
+ * No-op si no hay coach mark. Timeout inicial de 3s: los tours aparecen
+ * asincronamente cuando la screen termina de montarse, y con backend/UI
+ * lentos pueden tardar en llegar. Cada retry adicional usa timeouts cortos.
+ */
+export async function dismissCoachMarks(page: Page): Promise<void> {
+  const backdrop = page.getByLabel("Cerrar coach mark").first();
+  const appeared = await backdrop
+    .isVisible({ timeout: 3_000 })
+    .catch(() => false);
+  if (!appeared) return;
+
+  // Puede haber tours multi-step: click hasta que desaparezca (con budget).
+  for (let i = 0; i < 8; i++) {
+    const stillThere = await backdrop
+      .isVisible({ timeout: 500 })
+      .catch(() => false);
+    if (!stillThere) return;
+    await backdrop.click({ timeout: 2_000 }).catch(() => {});
+  }
 }

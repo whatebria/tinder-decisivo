@@ -9,14 +9,10 @@
 import { test, expect } from "@playwright/test";
 
 import { apiRegister } from "../helpers/api";
-import { gotoApp, uiLogin } from "../helpers/ui";
+import { gotoApp, goToPerfil, uiLogin } from "../helpers/ui";
 import { makeTestUser } from "../helpers/users";
 
-// TODO: navegacion al TabBar (rol="tab", label="Config") no matchea con
-// getByRole("button", { name: /config/i }). Skippeado hasta migrar los tests
-// a getByRole("tab", { name: "Config" }) o crear helper goToConfigTab().
-// Ver e2e/README.md "Estado actual del run" > Fix A.
-test.describe.skip("Auth › Cambiar contrasena", () => {
+test.describe("Auth › Cambiar contrasena", () => {
   test("cambio exitoso permite login con nueva pass", async ({ page }) => {
     const user = makeTestUser("chpass_ok");
     await apiRegister(user);
@@ -27,14 +23,11 @@ test.describe.skip("Auth › Cambiar contrasena", () => {
       page.getByRole("heading", { name: "Servel", level: 1 })
     ).toBeHidden({ timeout: 10_000 });
 
-    // Ir a Configuracion (tab bar)
-    await page
-      .getByRole("button", { name: /configuraci[oó]n|config|perfil/i })
-      .first()
-      .click();
+    // Ir a Perfil (Config tab -> Editar perfil)
+    await goToPerfil(page);
 
-    // Abrir modal de cambio de contrasena
-    await page.getByRole("button", { name: /cambiar contrase/i }).click();
+    // Abrir modal de cambio de contrasena (NavRow "Cambiar mi contrasena")
+    await page.getByRole("button", { name: /cambiar mi contrase/i }).click();
 
     // Modal abierto: llenar campos
     const newPassword = `Nueva${Date.now()}!`;
@@ -49,10 +42,12 @@ test.describe.skip("Auth › Cambiar contrasena", () => {
       .click();
 
     // TODO: agregar assertion de toast de exito cuando confirme el copy exacto
-    // Por ahora esperamos que el modal cierre
-    await expect(page.getByLabel("Contrasena actual")).toBeHidden({
-      timeout: 8_000,
-    });
+    // Por ahora esperamos que el modal cierre (no queden inputs "Contrasena
+    // actual" visibles; puede haber otros ocultos en screens inactivos del
+    // Stack Navigator, por eso filtramos por visible antes de contar).
+    await expect(
+      page.getByLabel("Contrasena actual").filter({ visible: true })
+    ).toHaveCount(0, { timeout: 8_000 });
   });
 
   test("password actual incorrecta muestra error", async ({ page }) => {
@@ -65,12 +60,9 @@ test.describe.skip("Auth › Cambiar contrasena", () => {
       page.getByRole("heading", { name: "Servel", level: 1 })
     ).toBeHidden({ timeout: 10_000 });
 
-    await page
-      .getByRole("button", { name: /configuraci[oó]n|config|perfil/i })
-      .first()
-      .click();
+    await goToPerfil(page);
 
-    await page.getByRole("button", { name: /cambiar contrase/i }).click();
+    await page.getByRole("button", { name: /cambiar mi contrase/i }).click();
 
     const newPassword = `Nueva${Date.now()}!`;
     await page.getByLabel("Contrasena actual").fill("password-vieja-incorrecta");
