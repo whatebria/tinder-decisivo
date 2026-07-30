@@ -24,6 +24,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { Modal } from "./Modal";
 import { Button } from "../atoms/Button";
 import { Link } from "../atoms/Link";
+import { blurActiveElement } from "../../hooks/blurActiveElement";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
 
@@ -52,6 +53,18 @@ export function ConfirmModal({
 }: Props) {
   const c = useThemeColors();
 
+  // Blur al elemento con foco ANTES de que el padre haga setState(false).
+  // Sin esto, el boton apretado retiene foco cuando RNW aplica aria-hidden
+  // al Modal escondido -> warning WCAG 2.4.3. Ver hooks/blurActiveElement.
+  function handleConfirm() {
+    blurActiveElement();
+    onConfirm();
+  }
+  function handleCancel() {
+    blurActiveElement();
+    onCancel();
+  }
+
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -70,20 +83,20 @@ export function ConfirmModal({
   return (
     <Modal
       visible={visible}
-      onClose={onCancel}
+      onClose={handleCancel}
       title={title}
       dismissOnBackdrop={!loading}
       maxWidth={440}
       footer={
         <View style={styles.actions}>
           <Button
-            onPress={onConfirm}
+            onPress={handleConfirm}
             loading={loading}
             variant={variant === "danger" ? "danger" : "primary"}
           >
             {confirmLabel}
           </Button>
-          <Link block onPress={onCancel} disabled={loading}>
+          <Link block onPress={handleCancel} disabled={loading}>
             {cancelLabel}
           </Link>
         </View>

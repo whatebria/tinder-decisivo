@@ -15,6 +15,7 @@ import { Modal } from "./Modal";
 import { FormField } from "./FormField";
 import { Button } from "../atoms/Button";
 import { Link } from "../atoms/Link";
+import { blurActiveElement } from "../../hooks/blurActiveElement";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useIsDark, useThemeColors } from "../../theme/useTheme";
@@ -42,13 +43,17 @@ export function EliminarCuentaModal({
   const canSubmit =
     password.length > 0 && palabra === PALABRA_MAGICA && !loading;
 
+  // Blur al elemento con foco ANTES de que el padre haga setState(false).
+  // Ver hooks/blurActiveElement para contexto.
   function handleCancel() {
+    blurActiveElement();
     setPassword("");
     setPalabra("");
     onCancel();
   }
 
   function handleSubmit() {
+    blurActiveElement();
     onSubmit(password);
   }
 

@@ -20,6 +20,7 @@ import { Button } from "../atoms/Button";
 import { Link } from "../atoms/Link";
 import { Modal } from "./Modal";
 import { RadioGroup } from "./RadioGroup";
+import { blurActiveElement } from "../../hooks/blurActiveElement";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useIsDark, useThemeColors } from "../../theme/useTheme";
@@ -112,14 +113,22 @@ export function EditarRespuestaModal({
   const changed =
     opcionId !== respuesta.opcion_elegida || peso !== respuesta.peso;
 
+  // Blur al elemento con foco ANTES de que el padre haga setState(false).
+  // Ver hooks/blurActiveElement para contexto.
   function handleSubmit() {
-    if (opcionId != null) onSubmit(opcionId, peso);
+    if (opcionId == null) return;
+    blurActiveElement();
+    onSubmit(opcionId, peso);
+  }
+  function handleCancel() {
+    blurActiveElement();
+    onCancel();
   }
 
   return (
     <Modal
       visible={visible}
-      onClose={onCancel}
+      onClose={handleCancel}
       dismissOnBackdrop={!loading}
       maxWidth={560}
       footer={
@@ -131,7 +140,7 @@ export function EditarRespuestaModal({
           >
             Guardar cambios
           </Button>
-          <Link block onPress={onCancel} disabled={loading}>
+          <Link block onPress={handleCancel} disabled={loading}>
             Cancelar
           </Link>
         </View>

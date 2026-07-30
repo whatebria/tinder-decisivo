@@ -14,6 +14,7 @@ import { Modal } from "./Modal";
 import { FormField } from "./FormField";
 import { Button } from "../atoms/Button";
 import { Link } from "../atoms/Link";
+import { blurActiveElement } from "../../hooks/blurActiveElement";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
 
@@ -39,11 +40,15 @@ export function CambiarPasswordModal({
   const canSubmit =
     current.length > 0 && next.length >= 8 && passwordsMatch && !loading;
 
+  // Blur al elemento con foco ANTES de que el padre haga setState(false).
+  // Ver hooks/blurActiveElement para contexto.
   function handleSubmit() {
+    blurActiveElement();
     onSubmit(current, next);
   }
 
   function handleCancel() {
+    blurActiveElement();
     setCurrent("");
     setNext("");
     setConfirm("");
