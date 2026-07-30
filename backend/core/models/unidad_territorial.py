@@ -1,8 +1,8 @@
 """Modelo UnidadTerritorial: catalogo polimorfico de unidades electorales.
 
-Reemplaza el zoologico de FKs especificas (Candidato.comuna, Candidato.distrito,
-futuro Candidato.region para senadores, Candidato.provincia para CORE) con un
-unico FK a UnidadTerritorial.
+Un unico FK `Candidato.unidad_territorial` soporta todos los niveles
+(comunal para alcaldes, distrital para diputados, regional para senadores,
+provincial para CORE, nacional para presidenciales).
 
 Ventajas:
 - Agregar un nuevo nivel electoral = crear filas en UnidadTerritorial. Cero
@@ -14,7 +14,6 @@ Ventajas:
 Convivencia con modelos concretos:
 - Region, Distrito, Comuna siguen existiendo (utiles para queries especificas
   y admin). Se sincronizan via signals con la UnidadTerritorial correspondiente.
-- Los FKs Candidato.comuna/distrito quedan como DEPRECATED pero funcionales.
 """
 
 from django.db import models

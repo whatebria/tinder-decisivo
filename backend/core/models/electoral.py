@@ -87,8 +87,9 @@ class Candidato(models.Model):
 
 
 # NOTA: no hay signal Candidato.pre_save para sincronizar unidad_territorial.
-# Los seeds setean el FK explicitamente. Si creas un Candidato manualmente
-# con solo comuna/distrito, corre `sync_candidatos_ut` para actualizar UT.
+# Los seeds y los importers setean el FK explicitamente. Si se crea un
+# Candidato manualmente desde el admin sin UT, queda con
+# `alcance_territorial="nacional"`.
 
 
 # ----------------------------------------------------------------------------

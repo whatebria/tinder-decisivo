@@ -25,7 +25,7 @@ from pathlib import Path
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from core.models import OpcionRespuesta, Pregunta, TipoEleccion
+from core.models import Eje, OpcionRespuesta, Pregunta, TipoEleccion
 
 REQUIRED_COLUMNS = {"texto", "tipo_eleccion", "eje_tematico"}
 
@@ -38,7 +38,12 @@ OPCIONES_ESTANDAR = [
     ("No se / Prefiero no responder", 0, True),
 ]
 
-EJES_VALIDOS = {choice[0] for choice in Pregunta.EJES_CHOICES}
+EJES_VALIDOS_STATIC = {choice[0] for choice in Pregunta.EJES_CHOICES}
+
+
+def ejes_validos() -> set[str]:
+    """Union entre choices hardcoded del modelo y el catalogo dinamico Eje."""
+    return EJES_VALIDOS_STATIC | set(Eje.objects.values_list("codigo", flat=True))
 
 
 class Command(BaseCommand):
@@ -97,8 +102,9 @@ class Command(BaseCommand):
 
         if not (texto and tipo_nombre and eje):
             raise ValueError("texto, tipo_eleccion y eje_tematico son obligatorios")
-        if eje not in EJES_VALIDOS:
-            raise ValueError(f"eje_tematico invalido: {eje}. Validos: {sorted(EJES_VALIDOS)}")
+        validos = ejes_validos()
+        if eje not in validos:
+            raise ValueError(f"eje_tematico invalido: {eje}. Validos: {sorted(validos)}")
 
         tipo, _ = TipoEleccion.objects.get_or_create(nombre=tipo_nombre)
 

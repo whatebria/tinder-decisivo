@@ -174,6 +174,13 @@ PASSWORD_RESET_URL_BASE = config(
 # ExpiringTokenAuthentication (fuerza re-login). Configurable via env.
 TOKEN_TTL_DAYS = config("TOKEN_TTL_DAYS", default=30, cast=int)
 
+# Desactiva throttling completamente. Solo para tests E2E (Playwright)
+# donde crear 15 users seguidos supera el rate limit de 10/hour.
+# NUNCA activar en produccion.
+DRF_THROTTLE_DISABLED = config(
+    "DRF_THROTTLE_DISABLED", default=False, cast=bool
+)
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         # Reemplaza TokenAuthentication default para agregar expiracion.
@@ -184,18 +191,37 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     # Throttling: limita brute-force en endpoints sensibles.
-    "DEFAULT_THROTTLE_CLASSES": [
-        "rest_framework.throttling.AnonRateThrottle",
-        "rest_framework.throttling.UserRateThrottle",
-        "rest_framework.throttling.ScopedRateThrottle",
-    ],
-    "DEFAULT_THROTTLE_RATES": {
-        "anon": "60/min",              # requests anonimos genericos
-        "user": "300/min",             # requests autenticados genericos
-        "login": "5/min",              # scope custom para login (brute-force)
-        "register": "10/hour",         # scope custom para registro
-        "password_reset": "3/hour",    # scope custom para reset password
-    },
+    # En tests E2E se puede desactivar con DRF_THROTTLE_DISABLED=1.
+    "DEFAULT_THROTTLE_CLASSES": (
+        []
+        if DRF_THROTTLE_DISABLED
+        else [
+            "rest_framework.throttling.AnonRateThrottle",
+            "rest_framework.throttling.UserRateThrottle",
+            "rest_framework.throttling.ScopedRateThrottle",
+        ]
+    ),
+    "DEFAULT_THROTTLE_RATES": (
+        # Modo tests E2E: rates enormes en TODOS los scopes (incluidos los
+        # hardcodeados en views con ScopedRateThrottle). Un {} vacio rompe
+        # con ImproperlyConfigured porque las views siguen pidiendo la rate
+        # del scope aun sin clases globales. Ver core/views/auth.py.
+        {
+            "anon": "100000/hour",
+            "user": "100000/hour",
+            "login": "100000/hour",
+            "register": "100000/hour",
+            "password_reset": "100000/hour",
+        }
+        if DRF_THROTTLE_DISABLED
+        else {
+            "anon": "60/min",              # requests anonimos genericos
+            "user": "300/min",             # requests autenticados genericos
+            "login": "5/min",              # scope custom para login (brute-force)
+            "register": "10/hour",         # scope custom para registro
+            "password_reset": "3/hour",    # scope custom para reset password
+        }
+    ),
 }
 
 # ------------------------------------------------------------

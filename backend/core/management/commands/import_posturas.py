@@ -52,6 +52,16 @@ class Command(BaseCommand):
             action="store_true",
             help="Si la postura ya existe, la sobreescribe. Si no, ignora duplicados.",
         )
+        parser.add_argument(
+            "--tipo-eleccion",
+            type=str,
+            default=None,
+            help=(
+                "Nombre del TipoEleccion para filtrar preguntas al mapear por 'orden'. "
+                "Obligatorio cuando existen preguntas de multiples tipos que comparten "
+                "valores de 'orden' (evita que las posturas caigan en la pregunta equivocada)."
+            ),
+        )
 
     def handle(self, *args, **opts):
         path = Path(opts["csv_path"])
@@ -69,10 +79,36 @@ class Command(BaseCommand):
             rows = list(reader)
 
         # Cache de lookups
-        candidatos_by_apellido = {
-            c.apellido.strip().lower(): c for c in Candidato.objects.all()
+        # Dos mapas para manejar apellidos duplicados sin perder posturas:
+        #   * by_apellido_nombre: (apellido_lower, nombre_lower) -> Candidato
+        #     (desambiguacion cuando el CSV trae la columna opcional 'candidato_nombre')
+        #   * by_apellido_unico:  apellido_lower -> Candidato SOLO si es unico
+        #     (fallback para CSVs viejos sin nombre; falla explicito si hay ambiguedad)
+        candidatos_all = list(Candidato.objects.all())
+        by_apellido_nombre: dict[tuple[str, str], Candidato] = {}
+        apellido_counts: dict[str, int] = {}
+        for c in candidatos_all:
+            ap = c.apellido.strip().lower()
+            no = c.nombre.strip().lower()
+            by_apellido_nombre[(ap, no)] = c
+            apellido_counts[ap] = apellido_counts.get(ap, 0) + 1
+        by_apellido_unico: dict[str, Candidato] = {
+            c.apellido.strip().lower(): c
+            for c in candidatos_all
+            if apellido_counts[c.apellido.strip().lower()] == 1
         }
-        preguntas_by_orden = {p.orden: p for p in Pregunta.objects.all()}
+        ambiguos = {ap for ap, n in apellido_counts.items() if n > 1}
+        preguntas_qs = Pregunta.objects.all()
+        tipo_nombre = opts.get("tipo_eleccion")
+        if tipo_nombre:
+            preguntas_qs = preguntas_qs.filter(tipo_eleccion__nombre=tipo_nombre)
+            if not preguntas_qs.exists():
+                raise CommandError(
+                    f"No hay preguntas para tipo_eleccion={tipo_nombre!r}. "
+                    "Importa primero las preguntas de ese tipo."
+                )
+        preguntas_by_orden = {p.orden: p for p in preguntas_qs}
+        csv_has_nombre = "candidato_nombre" in (reader.fieldnames or [])
 
         stats = {"creadas": 0, "actualizadas": 0, "saltadas_vacias": 0, "duplicadas": 0, "errores": 0}
         errores_detalle = []
@@ -86,7 +122,14 @@ class Command(BaseCommand):
 
                 try:
                     self._procesar_fila(
-                        row, candidatos_by_apellido, preguntas_by_orden, stats, update
+                        row,
+                        by_apellido_nombre,
+                        by_apellido_unico,
+                        ambiguos,
+                        csv_has_nombre,
+                        preguntas_by_orden,
+                        stats,
+                        update,
                     )
                 except ValueError as e:
                     stats["errores"] += 1
@@ -112,11 +155,35 @@ class Command(BaseCommand):
         elif stats["errores"]:
             self.stdout.write(self.style.ERROR("Rollback: hubo errores, no se guardo nada."))
 
-    def _procesar_fila(self, row, candidatos_map, preguntas_map, stats, update):
+    def _procesar_fila(
+        self,
+        row,
+        by_apellido_nombre,
+        by_apellido_unico,
+        ambiguos,
+        csv_has_nombre,
+        preguntas_map,
+        stats,
+        update,
+    ):
         apellido = row["candidato_apellido"].strip().lower()
-        candidato = candidatos_map.get(apellido)
-        if not candidato:
-            raise ValueError(f"candidato '{apellido}' no existe")
+        nombre_csv = (row.get("candidato_nombre") or "").strip().lower() if csv_has_nombre else ""
+
+        if nombre_csv:
+            candidato = by_apellido_nombre.get((apellido, nombre_csv))
+            if not candidato:
+                raise ValueError(
+                    f"candidato '{nombre_csv} {apellido}' no existe (match por nombre+apellido)"
+                )
+        else:
+            if apellido in ambiguos:
+                raise ValueError(
+                    f"apellido '{apellido}' es ambiguo (hay varios candidatos); "
+                    "agrega la columna 'candidato_nombre' al CSV para desambiguar"
+                )
+            candidato = by_apellido_unico.get(apellido)
+            if not candidato:
+                raise ValueError(f"candidato '{apellido}' no existe")
 
         try:
             orden = int(row["pregunta_orden"])
