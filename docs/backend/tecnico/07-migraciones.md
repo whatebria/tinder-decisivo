@@ -206,7 +206,6 @@ uv run pytest core/                            # asegurate que los tests pasan
 Los campos "viejos" que fueron reemplazados por otros **no se borran** de
 inmediato. Se dejan como deprecated pero funcionales:
 
-- `Candidato.comuna` / `Candidato.distrito` -> deprecated en favor de `unidad_territorial`.
 - `Pregunta.eje_tematico` (string) -> convive con `Pregunta.eje` (FK).
 - `UserProfile.comuna` -> convive con `UserProfile.unidad_territorial`.
 

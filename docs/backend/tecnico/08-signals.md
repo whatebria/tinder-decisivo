@@ -161,16 +161,15 @@ query extra. Con 1200 candidatos en seeds, sumaba mucho.
 crear candidatos (pre-indexan la UT correspondiente y la pasan al constructor).
 
 **Consecuencia**: si creas un `Candidato` a mano en shell/admin sin setear
-`unidad_territorial`, quedara en None. Para poblarlo despues, usa:
+`unidad_territorial`, quedara en None (equivale a `alcance_territorial="nacional"`).
+Para poblarlo despues:
 
 ```python
 from core.models import Candidato, UnidadTerritorial
 c = Candidato.objects.get(id=x)
-c.unidad_territorial = UnidadTerritorial.objects.get(codigo=f"COM-{c.comuna.codigo}")
+c.unidad_territorial = UnidadTerritorial.objects.get(codigo="COM-13120")  # Nunoa
 c.save()
 ```
-
-O un mgmt command `sync_candidatos_ut` (por hacer si lo necesitamos).
 
 ### Postura/Respuesta -> recalcular Match
 

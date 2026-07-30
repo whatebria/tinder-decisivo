@@ -3,9 +3,19 @@
 Guia completa del backend Django/DRF de Tinder Decisivo (Servel).
 
 Esta carpeta contiene docs **especificas del backend**, en detalle y separadas
-por tema. Hay dos series paralelas segun tu audiencia:
+por tema. Hay tres vistas paralelas segun tu audiencia y proposito:
 
-## Serie tecnica (`tecnico/`)
+## Referencia exhaustiva archivo por archivo (raiz de esta carpeta)
+
+Para quien quiere una descripcion literal de TODO el codigo (cada archivo, cada campo, cada endpoint) sin narrativa ni interpretacion.
+
+- [`BACKEND_COMPLETO.md`](BACKEND_COMPLETO.md) - Secciones 1-7: config, modelos, serializers, services, views/URLs, admin/auth/apps/pagination/conftest, management commands.
+- [`08_migraciones.md`](08_migraciones.md) - las 38 migraciones + squash.
+- [`09_tests.md`](09_tests.md) - los 25 archivos de test descritos por su docstring.
+- [`10_fixtures.md`](10_fixtures.md) - CSVs de fixtures + README de importers.
+- [`11_docs_internos.md`](11_docs_internos.md) - el plan de migracion territorial + drift detectado.
+
+## Serie tecnica narrativa (`tecnico/`)
 
 Para devs, revisores tecnicos, tesis capitulo de implementacion.
 
