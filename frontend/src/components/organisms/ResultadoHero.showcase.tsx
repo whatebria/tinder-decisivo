@@ -9,20 +9,20 @@ type ShowcaseEntry = Pick<
 >;
 
 const ejeScoresMock = {
-  Educacion: 82,
-  Salud: 75,
-  Economia: 60,
-  Seguridad: 45,
-  "Medio ambiente": 88,
-  Cultural: 70,
+  ECONOMIA: 82,
+  SOCIEDAD: 75,
+  AMBIENTE: 60,
+  SEGURIDAD: 45,
+  DDHH: 88,
+  INTERNACIONAL: 70,
 };
 
 const showcase: ShowcaseEntry = {
   description:
-    "Card hero para el top match del ranking. Avatar XL + nombre + partido + % grande + radar chart + CTA.",
+    "Card hero para el top match del ranking. Responsive: en mobile (<720px) es vertical estilo RankingCard XL (info + radar + %match + CTA en columna); en desktop/tablet (>=720px) es un split 2-col (info + CTA a la izquierda, radar 220px a la derecha). Prop 'layout' fuerza uno especifico.",
   variants: [
     {
-      label: "completo (top match)",
+      label: "vertical (mobile/auto en <720px)",
       render: () => (
         <View style={{ maxWidth: 360 }}>
           <ResultadoHero
@@ -36,8 +36,45 @@ const showcase: ShowcaseEntry = {
             confianzaSubtext="10 preguntas coinciden"
             ctaLabel="Ver perfil completo"
             onCta={() => {}}
+            layout="vertical"
           />
         </View>
+      ),
+    },
+    {
+      label: "horizontal (desktop/tablet)",
+      render: () => (
+        <View style={{ maxWidth: 720 }}>
+          <ResultadoHero
+            nombre="Gabriel"
+            apellido="Boric"
+            partido="Frente Amplio"
+            matchPct={87}
+            ejeScores={ejeScoresMock}
+            confianzaLabel="Confianza alta"
+            confianzaVariant="success"
+            confianzaSubtext="10 preguntas coinciden"
+            ctaLabel="Ver perfil completo"
+            onCta={() => {}}
+            layout="horizontal"
+          />
+        </View>
+      ),
+    },
+    {
+      label: "auto (responsive al viewport)",
+      render: () => (
+        <ResultadoHero
+          nombre="Jose Antonio"
+          apellido="Kast"
+          partido="Republicanos"
+          matchPct={62}
+          ejeScores={ejeScoresMock}
+          confianzaLabel="Confianza media"
+          confianzaVariant="warning"
+          confianzaSubtext="7 preguntas coinciden"
+          onCta={() => {}}
+        />
       ),
     },
   ],
@@ -53,6 +90,7 @@ const showcase: ShowcaseEntry = {
     { name: "confianzaSubtext", type: "string", description: "Texto contextual al lado del chip." },
     { name: "ctaLabel", type: "string", defaultValue: "\"Ver perfil completo\"" },
     { name: "onCta", type: "() => void" },
+    { name: "layout", type: "\"auto\" | \"vertical\" | \"horizontal\"", defaultValue: "\"auto\"", description: "Layout responsive. Auto usa window width (>=720px = horizontal)." },
   ],
   snippet: `import { ResultadoHero } from "@/components";
 
@@ -62,6 +100,9 @@ const showcase: ShowcaseEntry = {
   partido={top.partido}
   matchPct={top.matchPercent}
   ejeScores={top.scoresByEje}
+  confianzaLabel="Confianza alta"
+  confianzaVariant="success"
+  confianzaSubtext="10 preguntas coinciden"
   onCta={() => navigate("DetalleCandidato", { id: top.id })}
 />`,
 };

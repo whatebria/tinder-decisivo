@@ -1144,7 +1144,7 @@ Piezas complejas que resuelven un caso de uso.
 * `NovedadesFeed` — feed vertical de `NovedadFeedItem[]`.
 
 **Resultados:**
-* `ResultadoHero` — hero con el top match, match% + confianza + radar 180px con labels.
+* `ResultadoHero` — card hero para el top match. **Responsive**: en mobile (<720px) es un layout vertical estilo `RankingCard` XL (info + radar 200px + %match + confianza + CTA en columna); en tablet/desktop (>=720px) se abre a un **split 2 columnas** (info + CTA a la izquierda, radar 220px a la derecha). Prop `layout="auto" | "vertical" | "horizontal"` para forzar uno en showcases o contextos con ancho controlado.
 * `RankingRow` — fila horizontal del ranking (posición + candidato + radar mini + match%). Contexto denso.
 * `RankingCard` — card vertical del ranking optimizada para grid 2-col (radar 140px con labels + %match grande + cobertura). Se usa en `ResultadosScreen` para dar visibilidad al breakdown por eje.
 
@@ -1349,7 +1349,7 @@ Pantalla de celebración post-submit. Recibe param `mode`:
 
 Ranking de candidatos ordenados por match desc.
 
-* `ResultadoHero` con el top match (radar 180px con labels).
+* `ResultadoHero` con el top match. **Responsive interno**: layout vertical estilo card en mobile (<720px), split 2-col en tablet/desktop (>=720px). El breakpoint 720 se comparte con el grid del ranking para transicionar coherentemente.
 * Ranking en **grid responsive** de `RankingCard` (radar 140px con labels + %match + cobertura). Breakpoints: 1 col en <400px, 2 col en <720px, 3 col en <1000px, 4 col arriba. El grid usa `flexWrap` + `flexBasis` calculado con `useWindowDimensions().width`.
 * Botones favorito / descartar (usa `useToggleFavorito`, `useToggleDescartado`).
 * En guest, dispara `useMatchAnonimo` con respuestas del store.

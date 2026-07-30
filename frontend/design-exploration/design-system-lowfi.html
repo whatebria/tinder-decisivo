@@ -1226,7 +1226,7 @@
   <div class="wf-section-head">
     <div class="kicker">Template · 9</div>
     <h2>Resultados</h2>
-    <p>Post-cuestionario, para la elección en foco. Card hero con top match + % + <strong>confianza del match</strong> (Alta/Media/Baja según cuántas preguntas respondió el candidato de las que tú contestaste). Radar chart grande. En el ranking, cada candidato lleva su <strong>radar mediano (140px con labels)</strong> en un <strong>grid 2 columnas</strong> (o más en tablets) para que la comparación visual entre candidatos sea inmediata — no un thumbnail decorativo. Debajo del %, la cantidad de <strong>preguntas coincidentes</strong> como cobertura sana del score.</p>
+    <p>Post-cuestionario, para la elección en foco. <strong>Hero responsive</strong>: en mobile es una card vertical (avatar XL + nombre + partido + radar 200px + %match + confianza + CTA); en tablet/desktop (&gt;=720px) se abre a un <strong>split 2 columnas</strong> (info + CTA a la izquierda, radar 220px a la derecha) para aprovechar el ancho. Confianza del match (Alta/Media/Baja según cuántas preguntas respondió el candidato de las que tú contestaste) siempre visible. En el ranking, cada candidato lleva su <strong>radar mediano (140px con labels)</strong> en un <strong>grid 2 columnas</strong> (o más en tablets) para que la comparación visual entre candidatos sea inmediata — no un thumbnail decorativo. Debajo del %, la cantidad de <strong>preguntas coincidentes</strong> como cobertura sana del score.</p>
   </div>
   <div class="wf-frames">
     <div class="wf-frame">
@@ -1244,13 +1244,13 @@
         <div class="wf-avatar xl"></div>
         <div class="wf-line title" style="width:50%"></div>
         <div class="wf-line short"></div>
+        <!-- Radar ANTES del %match: matchea el layout de las RankingCard (info -> radar -> footer con score). -->
+        <div class="wf-img" style="aspect-ratio:1; max-height:200px; margin-top:8px; width:200px">Radar 200</div>
         <div class="wf-line title" style="width:80px; height:32px; margin:8px 0"></div>
         <div class="wf-row" style="gap:6px; align-items:center; margin-bottom:4px">
           <span class="wf-chip active" style="padding:2px 8px; font-size:10px; gap:6px">Confianza alta <button class="wf-info-btn">?</button></span>
           <span class="wf-text" style="font-size:10px">10 de 12 preguntas coinciden</span>
         </div>
-        <span class="wf-label">Compatibilidad</span>
-        <div class="wf-img" style="aspect-ratio:1; max-height:180px; margin-top:8px; width:180px">Radar</div>
         <button type="button" class="wf-btn primary wide" style="margin-top:12px">Ver perfil completo</button>
       </div>
       <div class="wf-col" style="gap:8px">
