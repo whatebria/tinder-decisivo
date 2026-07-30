@@ -65,16 +65,16 @@ e2e/
 
 ## Estado actual del run
 
-Ultimo run (2026-07-29): **13 pass, 2 skip, 0 fail** en ~57s.
+Ultimo run (2026-07-29): **14 pass, 1 skip, 0 fail** en ~80s.
 
-### Pasando (13)
-- Login: 3/4 (exito, error, regresion "email en campo username").
+### Pasando (14)
+- **Login: 4/4 (Fix C aplicado)** — exito, error, regresion "email en username", logout desde perfil.
 - Register: 3/4 (exito, boton disabled, username duplicado).
-- Cambiar password: 2/2 (Fix A) — cambio exitoso + error con pass actual invalida.
-- Eliminar cuenta: 2/2 (Fix A) — palabra magica ELIMINAR + eliminacion completa.
-- **Password reset: 3/3 (Fix B aplicado)** — flujo completo, token invalido, boton disabled.
+- Cambiar password: 2/2 (Fix A).
+- Eliminar cuenta: 2/2 (Fix A).
+- Password reset: 3/3 (Fix B).
 
-### Skippeado (2) — pendientes
+### Skippeado (1) — pendiente
 
 **Fix D — Register trim** (1 test: `auth-register.spec.ts` > `trim de espacios...`)
 
@@ -83,12 +83,13 @@ con `trace.zip`. Hipotesis: register falla silent (el test no chequea toast de e
 o `UserAttributeSimilarityValidator` de Django rechaza el password (similitud
 marginal 0.67 vs threshold 0.7, potencialmente flaky).
 
-**Fix C — Logout** (1 test, `auth-login.spec.ts` > `logout desde perfil...`)
-
-Ahora que existe `goToPerfil(page)`, el fix es click a "Cerrar sesion" (NavRow
-en PerfilScreen) + assert de volver al heading "Servel" del Login.
-
 ### Fixes aplicados 2026-07-29
+
+**Fix C — Logout desde perfil** (`auth-login.spec.ts`):
+- Reemplazado el `test.skip(...)` vacio con implementacion real.
+- Usa `goToPerfil(page)` + click al NavRow `"Cerrar sesión"` (con acento).
+- Assert de vuelta a Login via `LOGIN_SUBTITLE` visible.
+- Pasa al primer intento en ~11s.
 
 **Fix B — Password reset** (`auth-password-reset.spec.ts`):
 - Migrados TODOS los `page.getBy*` a `vLabel`/`vRole` de `helpers/ui.ts` que

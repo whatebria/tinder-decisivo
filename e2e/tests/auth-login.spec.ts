@@ -11,7 +11,7 @@
 import { test, expect } from "@playwright/test";
 
 import { apiRegister } from "../helpers/api";
-import { gotoApp, uiLogin } from "../helpers/ui";
+import { gotoApp, goToPerfil, uiLogin, vRole } from "../helpers/ui";
 import { makeTestUser } from "../helpers/users";
 
 const LOGIN_SUBTITLE = /ingresa a tu cuenta para encontrar tu candidato/i;
@@ -72,8 +72,25 @@ test.describe("Auth › Login", () => {
     ).toBeVisible();
   });
 
-  // TODO: logout desde perfil. Requiere localizar el TabBar y el boton de
-  // Cerrar sesion en ConfiguracionScreen. Habilitar cuando definamos los
-  // accessibilityLabel del TabBar.
-  test.skip("logout desde perfil vuelve a login", async () => {});
+  test("logout desde perfil vuelve a login", async ({ page }) => {
+    const user = makeTestUser("logout");
+    await apiRegister(user);
+
+    await gotoApp(page);
+    await uiLogin(page, user);
+
+    // Post-login: ya no estamos en el screen de Login
+    await expect(
+      page.getByText(LOGIN_SUBTITLE).filter({ visible: true })
+    ).toBeHidden({ timeout: 10_000 });
+
+    // Ir a Perfil (Config tab -> Editar perfil) y hacer logout
+    await goToPerfil(page);
+    await vRole(page, "button", { name: /cerrar sesi[oó]n/i }).click();
+
+    // Volvemos al Login (subtitle vuelve a ser visible)
+    await expect(
+      page.getByText(LOGIN_SUBTITLE).filter({ visible: true })
+    ).toBeVisible({ timeout: 10_000 });
+  });
 });
