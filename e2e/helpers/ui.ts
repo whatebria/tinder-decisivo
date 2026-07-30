@@ -105,8 +105,19 @@ export async function gotoPasswordReset(page: Page): Promise<void> {
  * al aterrizar en Home (los tours no se persisten entre sesiones).
  */
 export async function goToConfigTab(page: Page): Promise<void> {
-  await dismissCoachMarks(page);
-  await vRole(page, "tab", { name: "Config" }).click();
+  // Retry loop porque los coach marks pueden aparecer async post-login
+  // y taparse el tab bar. Ver dismissCoachMarks + issue documentado en
+  // LEARNINGS.md "Race con coach marks post-login".
+  const tab = vRole(page, "tab", { name: "Config" });
+  for (let i = 0; i < 5; i++) {
+    await dismissCoachMarks(page);
+    try {
+      await tab.click({ timeout: 3_000 });
+      return;
+    } catch (e) {
+      if (i === 4) throw e;
+    }
+  }
 }
 
 /**
@@ -120,7 +131,16 @@ export async function goToConfigTab(page: Page): Promise<void> {
 export async function goToPerfil(page: Page): Promise<void> {
   await goToConfigTab(page);
   await dismissCoachMarks(page);
-  await vRole(page, "button", { name: "Editar perfil" }).click();
+  const editarBtn = vRole(page, "button", { name: "Editar perfil" });
+  for (let i = 0; i < 5; i++) {
+    await dismissCoachMarks(page);
+    try {
+      await editarBtn.click({ timeout: 3_000 });
+      break;
+    } catch (e) {
+      if (i === 4) throw e;
+    }
+  }
   await dismissCoachMarks(page);
 }
 
@@ -141,10 +161,23 @@ export async function enterGuestMode(page: Page): Promise<void> {
  * TabBarItem usa accessibilityRole="tab" + accessibilityLabel="Noticias".
  *
  * Dismisses coach marks al aterrizar (tourId="noticias" existe).
+ *
+ * Race condition conocida (autenticado): el coach mark del Home aparece
+ * async post-login y puede interceptar el click al tab. Solucion: retry
+ * loop con dismiss + click hasta 5 veces.
  */
 export async function goToNoticias(page: Page): Promise<void> {
-  await dismissCoachMarks(page);
-  await vRole(page, "tab", { name: "Noticias" }).click();
+  const tab = vRole(page, "tab", { name: "Noticias" });
+  for (let i = 0; i < 5; i++) {
+    await dismissCoachMarks(page);
+    try {
+      await tab.click({ timeout: 3_000 });
+      break;
+    } catch (e) {
+      if (i === 4) throw e;
+      // Otro coach mark intercepto o el tab todavia no aparecio; reintenta.
+    }
+  }
   await dismissCoachMarks(page);
 }
 

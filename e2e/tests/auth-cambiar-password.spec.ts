@@ -42,12 +42,15 @@ test.describe("Auth › Cambiar contrasena", () => {
       .click();
 
     // TODO: agregar assertion de toast de exito cuando confirme el copy exacto
-    // Por ahora esperamos que el modal cierre (no queden inputs "Contrasena
-    // actual" visibles; puede haber otros ocultos en screens inactivos del
-    // Stack Navigator, por eso filtramos por visible antes de contar).
+    // Esperamos el toast de exito (mas robusto que esperar el modal cierre,
+    // que puede tardar con backend lento). El handler emite
+    // toast.success("Contrasena actualizada", "Tu nueva contrasena ya esta activa.").
     await expect(
-      page.getByLabel("Contrasena actual").filter({ visible: true })
-    ).toHaveCount(0, { timeout: 8_000 });
+      page
+        .getByText(/contrasena actualizada/i)
+        .filter({ visible: true })
+        .first()
+    ).toBeVisible({ timeout: 15_000 });
   });
 
   test("password actual incorrecta muestra error", async ({ page }) => {
