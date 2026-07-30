@@ -148,10 +148,15 @@ frontend/
     │   └── dimensiones.test.ts
     │
     ├── hooks/                 ← hooks compartidos (no de API)
+    │   ├── blurActiveElement.ts       ← helper puro para blur en web
     │   ├── useBlurBeforeClose.ts
+    │   ├── useBlurringPress.ts        ← wrap onPress con blur automatico
     │   ├── useCoachMarkTour.ts
     │   ├── useDimensionColors.ts
     │   └── useModalDimensions.ts
+    │
+    ├── utils/                 ← utilidades globales (no React)
+    │   └── installAriaHiddenFocusGuard.ts  ← monkey-patch setAttribute (web)
     │
     ├── navigation/
     │   ├── AppNavigator.tsx   ← stacks + swap auth/main
@@ -1178,9 +1183,28 @@ Exporta también la constante `SIDEBAR_BREAKPOINT = 900`.
 
 Ubicación: `src/hooks/` (los hooks de la API viven en `src/api/hooks.ts`, ver §7.5).
 
-### 13.1. `useBlurBeforeClose`
+### 13.1. Focus management en overlays (`blurActiveElement` + `useBlurBeforeClose` + `useBlurringPress`)
 
-Al hacer keyboard-blur antes de cerrar un modal, evita jump visual. Tiene 6 tests.
+Trilogia de helpers para evitar el warning WCAG 2.4.3 ("Blocked aria-hidden
+on an element because its descendant retained focus") cuando se cierran
+modals o se navega entre screens en web.
+
+Ver `docs/accesibilidad.md` §10 para el contrato completo, patron y
+checklist de PR. Resumen tecnico:
+
+| Helper | Uso |
+|---|---|
+| `blurActiveElement()` | Helper puro. Llamalo inline en callbacks manuales (`handleConfirm`, `handleSubmit`) que van a disparar cierre de overlay. |
+| `useBlurBeforeClose(onClose)` | Hook que envuelve el `onClose` de un modal. 6 tests. Consumido por `Modal` y `BottomSheet`. |
+| `useBlurringPress(onPress)` | Hook que envuelve el `onPress` de un `Pressable` para blurear antes del handler. 4 tests. Consumido por `Button`, `Link`, `IconButton`, `NavRow`, `TabBarItem`. |
+
+Complemento no-React: `src/utils/installAriaHiddenFocusGuard.ts` — se
+instala una vez desde `App.tsx` (solo web) y actua como safety net global
+via monkey-patch de `Element.prototype.setAttribute`. Atrapa cualquier
+caso que se escape a los hooks.
+
+**Regla de PR**: todo `<Pressable>` directo en un atomo nuevo debe
+usar `useBlurringPress`, salvo toggles con estado (Radio/Checkbox/Toggle).
 
 ### 13.2. `useCoachMarkTour(tourId)`
 
@@ -1517,6 +1541,7 @@ Tests actualmente en el repo:
 * `src/domain/eleccion.test.ts` — 21 tests.
 * `src/domain/dimensiones.test.ts` — verifica contraste WCAG.
 * `src/services/*.test.ts` — comparar, cuestionario, matching, share (4 archivos).
+* `src/hooks/blurActiveElement.test.ts` — 4 tests del helper puro.
 * `src/hooks/useBlurBeforeClose.test.ts` — 6 tests.
 * `src/hooks/useModalDimensions.test.ts` — 9 tests (6 de modal + 3 de sheet).
 * Tests puntuales de helpers en `components/molecules/` (ej. `deriveIniciales` en

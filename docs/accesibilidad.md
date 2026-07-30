@@ -1,7 +1,7 @@
 # Accesibilidad - Tinder-Decisivo
 
 > Requisitos WCAG 2.2 Nivel AA por componente y por pantalla.
-> Documento vivo. Ultima revision: 2026-07-26.
+> Documento vivo. Ultima revision: 2026-07-28.
 > Complementa: `docs/mapa-navegacion.md` (flujos) y `frontend/design-exploration/design-system-lowfi.html` (wireframes con landmarks/aria ya aplicados).
 
 ---
@@ -444,4 +444,191 @@ Para no reinventar patrones de a11y:
 
 ## 9. Cambio log
 
+- **2026-07-28** - v1.1 - Focus management en overlays (seccion 10). Fix del warning WCAG 2.4.3 "Blocked aria-hidden on an element because its descendant retained focus". Trilogia de helpers (`blurActiveElement`, `useBlurringPress`, `installAriaHiddenFocusGuard`), patron backdrop-no-button para modals, y guia para escribir componentes overlay-safe.
 - **2026-07-26** - v1.0 - Documento inicial. Recoge Tanda 1 (CSS quick wins) y Tanda 2 (semantica HTML) ya aplicadas al lowfi. Documenta requisitos para Tanda 3 (implementacion en produccion).
+
+---
+
+## 10. Focus management en overlays (WCAG 2.4.3)
+
+> Seccion agregada en v1.1 despues del fix sistematico de aria-hidden. Es el
+> contrato que TODOS los componentes clickeables y overlays del proyecto
+> deben respetar.
+
+### 10.1. El problema
+
+Chromium emite el warning
+
+```
+Blocked aria-hidden on an element because its descendant retained focus.
+The focus must not be hidden from assistive technology users.
+```
+
+cada vez que `setAttribute('aria-hidden', 'true')` se aplica en un elemento
+que contiene al `document.activeElement`. Es violacion directa de WCAG 2.4.3
+(Focus Order): un lector de pantalla se pierde si el foco esta en un nodo
+que acaba de declararse invisible.
+
+En React Native Web esto pasa **muy seguido** de forma implicita:
+
+| Situacion | Quien aplica aria-hidden |
+|---|---|
+| Cambio de screen | React Navigation esconde la screen saliente |
+| Cierre de `<Modal>` | RN Web esconde el portal |
+| `BottomSheet` cerrandose | Wrapper del modal nativo |
+| `Toast` que desaparece | Portal del toast |
+| `Tooltip` que se dismissea | Portal del tooltip |
+| Cualquier overlay futuro | Idem |
+
+Fixear componente por componente (blur explicito en cada `onPress`) es
+insostenible: siempre queda alguno afuera y cada `<Pressable>` nuevo
+reintroduce el bug.
+
+### 10.2. Defense in depth (3 capas)
+
+El proyecto usa **tres helpers coordinados**, del mas quirurgico al mas
+general:
+
+#### Capa 1 - `blurActiveElement()` (helper puro)
+
+Ubicacion: `frontend/src/hooks/blurActiveElement.ts`.
+
+Funcion sincrona sin dependencias que hace `document.activeElement.blur()`
+si hay un elemento activo distinto de `<body>`. En native es no-op
+(no existe `document`).
+
+Usala **inline** cuando escribas manualmente un callback que va a disparar
+un cambio de aria-hidden (cerrar modal, confirmar accion, submit).
+
+```ts
+import { blurActiveElement } from "@/hooks/blurActiveElement";
+
+function handleConfirm() {
+  blurActiveElement();
+  onConfirm();  // cierra el modal via setState en el padre
+}
+```
+
+Casos actuales que la usan asi: `ConfirmModal`, `EditarRespuestaModal`,
+`CambiarPasswordModal`, `EliminarCuentaModal`.
+
+#### Capa 2 - `useBlurringPress(onPress)` (hook para atomos)
+
+Ubicacion: `frontend/src/hooks/useBlurringPress.ts`.
+
+Envuelve un handler de `Pressable` con blur automatico. Ideal para atomos
+clickeables reutilizables.
+
+```tsx
+import { useBlurringPress } from "@/hooks/useBlurringPress";
+
+export function MyButton({ onPress, ...rest }: Props) {
+  const handlePress = useBlurringPress(onPress);
+  return <Pressable {...rest} onPress={handlePress} />;
+}
+```
+
+Atomos que ya la usan: `Button`, `Link`, `IconButton`, `NavRow`, `TabBarItem`.
+
+**Regla**: **todo atomo clickeable nuevo** debe usar este hook. Si esta
+revisando un PR y ves un `<Pressable>` directo sin `useBlurringPress`,
+pedir el cambio (salvo Radio/Checkbox/Toggle, ver §10.4).
+
+#### Capa 3 - `installAriaHiddenFocusGuard()` (safety net global)
+
+Ubicacion: `frontend/src/utils/installAriaHiddenFocusGuard.ts`.
+
+Monkey-patch de `Element.prototype.setAttribute` que se instala **una sola
+vez** desde `App.tsx` (solo en web). Cuando cualquier codigo aplica
+`aria-hidden="true"` a un elemento que contiene al `activeElement`,
+bluerea el activeElement ANTES de dejar pasar el `setAttribute` original.
+
+Es el backstop que atrapa cualquier caso que se escape a las capas 1 y 2:
+componentes de terceros, futuros overlays, o descuidos.
+
+**No hace falta llamarlo manualmente**. Ya esta instalado. Si alguien
+renombra o borra el archivo por accidente, el warning va a reaparecer
+en los flows de navegacion.
+
+### 10.3. Patron backdrop de modals (NO botones anidados)
+
+HTML no permite un `<button>` dentro de otro `<button>`. En RN Web, poner
+`accessibilityRole="button"` a un `<Pressable>` lo renderiza como
+`<button>`. Entonces, **los backdrops de modals que dismissean al tocar
+afuera NO deben tener `accessibilityRole="button"`**, porque el contenido
+del modal casi siempre incluye un IconButton "Cerrar" u otros botones.
+
+Antes (bug):
+
+```tsx
+<Pressable
+  style={styles.backdrop}
+  onPress={handleClose}
+  accessibilityRole="button"       // <- rompe HTML validity
+  accessibilityLabel="Cerrar"
+>
+  <IconButton onPress={handleClose} ... />  // <- button dentro de button
+</Pressable>
+```
+
+Despues (correcto):
+
+```tsx
+<Pressable
+  style={styles.backdrop}
+  onPress={handleClose}
+  // Sin accessibilityRole="button": es un backdrop, no un boton.
+>
+  <IconButton onPress={handleClose} ... />
+</Pressable>
+```
+
+La accesibilidad del cierre esta cubierta por:
+1. `RNModal.onRequestClose` -> tecla Escape
+2. El `IconButton` "Cerrar" visible en el header
+
+Este es el patron WAI-ARIA canonico para `dialog`.
+
+Caso actual que lo aplica: `BottomSheet.tsx` (fix aplicado en 2026-07-28).
+
+### 10.4. Excepciones - cuando NO blurear
+
+Algunos atomos son toggles con estado visual (radio button, checkbox,
+switch). En estos, mantener el foco tras el press es correcto: el usuario
+esta editando un valor, no navegando. Por eso:
+
+- `Radio`, `Checkbox`, `Toggle` -> NO usan `useBlurringPress`
+- Botones dentro de `<form>` que quieren dejar el foco en el proximo
+  input -> manejar con `useRef` explicito, no con blur
+
+### 10.5. Checklist para PR de componente nuevo
+
+- [ ] Si es un atomo clickeable que dispara navegacion o cierre de overlay
+      -> usa `useBlurringPress`
+- [ ] Si escribiste un handler manual (`onConfirm`, `handleSubmit`) que
+      dispara aria-hidden -> llama `blurActiveElement()` al inicio
+- [ ] Si tu componente tiene un backdrop dismisseable -> `<Pressable>` del
+      backdrop SIN `accessibilityRole="button"` ni `accessibilityLabel`
+- [ ] Si es un toggle con estado (radio/check/switch) -> NO uses
+      `useBlurringPress`
+- [ ] Corriste `npm test` -> los 4 tests de `blurActiveElement.test.ts`
+      y los 6 de `useBlurBeforeClose.test.ts` siguen en verde
+
+### 10.6. Diagnostico rapido
+
+Si el warning reaparece en algun flow:
+
+1. Reproduci el warning en DevTools. Anota el `activeElement` (clases CSS
+   del elemento que quedo focused).
+2. Identifica el componente. Los `r-cursor-1loqt21` + `r-touchAction` son
+   `<Pressable>` de RN Web. Las clases con `borderRadius` y `minHeight`
+   te dan pistas del atomo (Button md = minHeight 48).
+3. Si es un `<Pressable>` directo (no atomo del design system) -> mudar
+   a Button/Link/IconButton, o wrappear el `onPress` con
+   `useBlurringPress`.
+4. Si el guard global no lo esta agarrando -> chequear que
+   `installAriaHiddenFocusGuard()` sigue instalado en `App.tsx`.
+5. Si el warning viene de un cambio de screen y el atomo YA usa
+   `useBlurringPress` -> revisar si React Navigation esta esperando un
+   `beforeRemove` o un focus custom.
+
