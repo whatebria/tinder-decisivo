@@ -3,6 +3,10 @@
 Tests end-to-end para Servel (Tinder Decisivo). Aislados del frontend/backend
 para no contaminar sus deps.
 
+> **Antes de escribir un spec nuevo, leer [LEARNINGS.md](./LEARNINGS.md)**.
+> Doc con todos los patrones, gotchas de RN Web + Playwright, y helpers
+> disponibles. Ahorra tiempo evitando los mismos errores dos veces.
+
 ## Requisitos
 
 - Backend Django corriendo o disponible en :8010 con `DEBUG=True`.
