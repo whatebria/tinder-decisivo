@@ -1,0 +1,13 @@
+texto,tipo_eleccion,eje_tematico,orden
+"El Estado debe garantizar un ingreso minimo universal a todas las personas.",Presidencial,ECONOMIA,1
+"Chile debe reducir los impuestos a las empresas para incentivar la inversion.",Presidencial,ECONOMIA,2
+"La educacion superior deberia ser gratuita para todos los estudiantes.",Presidencial,SOCIEDAD,3
+"El aborto libre debe ser legal en todos los casos hasta las 14 semanas.",Presidencial,SOCIEDAD,4
+"Chile debe cerrar todas las centrales termoelectricas a carbon antes de 2030.",Presidencial,AMBIENTE,5
+"Se debe permitir la mineria en zonas de glaciares con regulacion estricta.",Presidencial,AMBIENTE,6
+"Es necesario aumentar la presencia militar en La Araucania.",Presidencial,SEGURIDAD,7
+"Los delitos de robo con violencia deben tener penas mas duras.",Presidencial,SEGURIDAD,8
+"El Estado debe reconocer constitucionalmente a los pueblos originarios.",Presidencial,DDHH,9
+"Chile debe recibir migrantes con procedimientos regularizados.",Presidencial,DDHH,10
+"Chile debe salir de la Alianza del Pacifico.",Presidencial,INTERNACIONAL,11
+"Es prioritario impulsar una nueva Constitucion.",Presidencial,INSTITUCIONAL,12

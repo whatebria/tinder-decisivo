@@ -1,0 +1,18 @@
+texto,tipo_eleccion,eje_tematico,orden
+"El municipio debe cobrar una sobretasa a las comunas ricas del pais para financiar transferencias a comunas con menor recaudacion propia.",Alcaldes 2024,ECONOMIA,1
+"Los servicios municipales de aseo, ornato y mantenimiento deben ser provistos directamente por el municipio, sin externalizacion a privados.",Alcaldes 2024,ECONOMIA,2
+"El municipio debe construir directamente viviendas sociales en terrenos municipales, en vez de derivar la demanda al subsidio habitacional del Estado.",Alcaldes 2024,SOCIEDAD,3
+"La educacion escolar publica debe seguir bajo administracion municipal, deteniendo el traspaso a los Servicios Locales de Educacion.",Alcaldes 2024,SOCIEDAD,4
+"El municipio debe prohibir la tala o traslado de arboles nativos maduros en propiedad privada sin permiso ambiental especifico.",Alcaldes 2024,AMBIENTE,5
+"El reciclaje domiciliario debe ser obligatorio en la comuna, con multas efectivas para hogares que no separen residuos.",Alcaldes 2024,AMBIENTE,6
+"Los guardias municipales de seguridad ciudadana deben poder portar armas letales para responder a delitos flagrantes.",Alcaldes 2024,SEGURIDAD,7
+"El municipio debe instalar camaras con reconocimiento facial en espacios publicos para identificar personas con ordenes de detencion.",Alcaldes 2024,SEGURIDAD,8
+"El municipio debe asignar cupos preferentes a migrantes en programas sociales locales (subsidios, cursos, atencion primaria).",Alcaldes 2024,DDHH,9
+"El municipio debe destinar por ley al menos el 5% de su presupuesto anual a presupuestos participativos decididos por los vecinos.",Alcaldes 2024,INSTITUCIONAL,10
+"Los alcaldes deben poder ser reelectos indefinidamente si los vecinos asi lo deciden, sin limite de periodos consecutivos.",Alcaldes 2024,INSTITUCIONAL,11
+"El municipio debe regularizar tomas de terreno consolidadas, entregando titulos de dominio en vez de desalojar.",Alcaldes 2024,OTRO,12
+"El comercio ambulante en el espacio publico debe estar prohibido en el casco urbano central, con fiscalizacion permanente.",Alcaldes 2024,OTRO,13
+"Los permisos de ferias libres deben ampliarse y flexibilizarse, aunque impliquen mayor uso del espacio publico y menor recaudacion municipal.",Alcaldes 2024,OTRO,14
+"Los proyectos inmobiliarios que soliciten permiso de edificacion en la comuna deben ceder al menos un 20% del terreno para areas verdes publicas.",Alcaldes 2024,AMBIENTE,15
+"El municipio debe realizar consulta indigena vinculante antes de aprobar proyectos comunales que afecten territorios ancestrales de pueblos originarios.",Alcaldes 2024,PUEBLOS_ORIGINARIOS,16
+"El municipio debe hacer obligatoria la accesibilidad universal (rampas, ascensores, senaletica braille) en todos los edificios municipales y veredas del casco urbano, con financiamiento estatal complementario.",Alcaldes 2024,DISCAPACIDAD,17
