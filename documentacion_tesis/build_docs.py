@@ -14,11 +14,14 @@ from pathlib import Path
 
 import markdown
 from docx import Document
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.shared import Pt, RGBColor, Inches
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from docx.shared import Pt, RGBColor, Inches, Cm
 
 BASE_DIR = Path(__file__).parent
 FILES = [
+    ("documentacion_narrativa.md", "Documentación Narrativa Académica"),
     ("documentacion_tecnica.md", "Documentación Técnica"),
     ("documentacion_simple.md", "Documentación para Todo Público"),
 ]
@@ -33,6 +36,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>{title}</title>
 <style>
 :root {{
@@ -45,7 +49,37 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   --text-muted: #5A5A5A;
   --border: #E1DED6;
   --code-bg: #F2F0EA;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }}
+
+@media (prefers-color-scheme: dark) {{
+  :root:not([data-theme="light"]) {{
+    --primary: #4DBAB9;
+    --primary-dark: #7FD4D3;
+    --accent: #FF8B5C;
+    --bg: #1A1A1A;
+    --bg-soft: #242424;
+    --text: #E8E6E1;
+    --text-muted: #A8A5A0;
+    --border: #3A3A3A;
+    --code-bg: #2A2A2A;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }}
+}}
+
+[data-theme="dark"] {{
+  --primary: #4DBAB9;
+  --primary-dark: #7FD4D3;
+  --accent: #FF8B5C;
+  --bg: #1A1A1A;
+  --bg-soft: #242424;
+  --text: #E8E6E1;
+  --text-muted: #A8A5A0;
+  --border: #3A3A3A;
+  --code-bg: #2A2A2A;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}}
+
 * {{ box-sizing: border-box; }}
 html, body {{ margin: 0; padding: 0; }}
 body {{
@@ -57,6 +91,48 @@ body {{
   max-width: 820px;
   margin: 0 auto;
   padding: 48px 32px 96px;
+  transition: background 0.2s ease, color 0.2s ease;
+}}
+
+.theme-toggle {{
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}}
+.theme-toggle:hover {{
+  transform: scale(1.08);
+  border-color: var(--primary);
+}}
+.theme-toggle:focus-visible {{
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}}
+.theme-toggle .icon-sun,
+.theme-toggle .icon-moon {{ display: block; }}
+.theme-toggle .icon-sun {{ display: none; }}
+[data-theme="dark"] .theme-toggle .icon-sun {{ display: block; }}
+[data-theme="dark"] .theme-toggle .icon-moon {{ display: none; }}
+@media (prefers-color-scheme: dark) {{
+  :root:not([data-theme="light"]) .theme-toggle .icon-sun {{ display: block; }}
+  :root:not([data-theme="light"]) .theme-toggle .icon-moon {{ display: none; }}
+}}
+@media print {{
+  .theme-toggle {{ display: none; }}
 }}
 h1, h2, h3, h4 {{
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -91,6 +167,7 @@ code {{
   padding: 2px 6px;
   border-radius: 3px;
   color: var(--primary-dark);
+  border: 1px solid var(--border);
 }}
 pre {{
   background: var(--code-bg);
@@ -105,6 +182,7 @@ pre code {{
   background: transparent;
   padding: 0;
   color: var(--text);
+  border: none;
 }}
 blockquote {{
   border-left: 4px solid var(--accent);
@@ -161,7 +239,33 @@ hr {{
 </style>
 </head>
 <body>
+<button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema claro/oscuro" title="Alternar tema claro/oscuro">
+  <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+  <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>
+</button>
 {body}
+<script>
+(function () {{
+  var STORAGE_KEY = 'servel-docs-theme';
+  var root = document.documentElement;
+  var btn = document.getElementById('themeToggle');
+  var stored = null;
+  try {{ stored = localStorage.getItem(STORAGE_KEY); }} catch (e) {{}}
+  if (stored === 'light' || stored === 'dark') {{
+    root.setAttribute('data-theme', stored);
+  }}
+  function currentEffectiveTheme() {{
+    var attr = root.getAttribute('data-theme');
+    if (attr === 'light' || attr === 'dark') return attr;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }}
+  btn.addEventListener('click', function () {{
+    var next = currentEffectiveTheme() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try {{ localStorage.setItem(STORAGE_KEY, next); }} catch (e) {{}}
+  }});
+}})();
+</script>
 </body>
 </html>
 """
@@ -187,8 +291,89 @@ BODY_COLOR = RGBColor(0x1A, 0x1A, 0x1A)
 CODE_COLOR = RGBColor(0x33, 0x33, 0x33)
 MUTED_COLOR = RGBColor(0x5A, 0x5A, 0x5A)
 
+# Academic formatting defaults (APA-style)
+BODY_FONT = "Times New Roman"
+BODY_FONT_SIZE = 12  # pt
+MARGIN_CM = 3.0      # 3 cm on all sides
 
-def _set_font(run, name: str = "Calibri", size: int = 11,
+
+def _insert_toc_field(doc: Document) -> None:
+    """Insert a native Word TOC field. User can right-click > Update Field."""
+    p = doc.add_paragraph()
+    run = p.add_run()
+    fld_begin = OxmlElement("w:fldChar")
+    fld_begin.set(qn("w:fldCharType"), "begin")
+    instr = OxmlElement("w:instrText")
+    instr.set(qn("xml:space"), "preserve")
+    instr.text = 'TOC \\o "1-3" \\h \\z \\u'
+    fld_sep = OxmlElement("w:fldChar")
+    fld_sep.set(qn("w:fldCharType"), "separate")
+    placeholder = OxmlElement("w:t")
+    placeholder.text = (
+        "Tabla de contenidos: click derecho > Actualizar campos para poblar."
+    )
+    fld_end = OxmlElement("w:fldChar")
+    fld_end.set(qn("w:fldCharType"), "end")
+    run._r.append(fld_begin)
+    run._r.append(instr)
+    run._r.append(fld_sep)
+    run._r.append(placeholder)
+    run._r.append(fld_end)
+
+
+def _add_page_number_footer(section, doc_title: str) -> None:
+    """Center 'Titulo | Pagina N' in the footer of a section."""
+    footer = section.footer
+    p = footer.paragraphs[0]
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    prefix = p.add_run(f"{doc_title}  |  Página ")
+    prefix.font.name = BODY_FONT
+    prefix.font.size = Pt(9)
+    prefix.font.italic = True
+    prefix.font.color.rgb = MUTED_COLOR
+    run = p.add_run()
+    run.font.name = BODY_FONT
+    run.font.size = Pt(9)
+    run.font.color.rgb = MUTED_COLOR
+    fld_begin = OxmlElement("w:fldChar")
+    fld_begin.set(qn("w:fldCharType"), "begin")
+    instr = OxmlElement("w:instrText")
+    instr.set(qn("xml:space"), "preserve")
+    instr.text = "PAGE"
+    fld_end = OxmlElement("w:fldChar")
+    fld_end.set(qn("w:fldCharType"), "end")
+    run._r.append(fld_begin)
+    run._r.append(instr)
+    run._r.append(fld_end)
+
+
+def _configure_document(doc: Document, doc_title: str) -> None:
+    """Apply academic formatting: margins, Normal style, header/footer."""
+    for section in doc.sections:
+        section.top_margin = Cm(MARGIN_CM)
+        section.bottom_margin = Cm(MARGIN_CM)
+        section.left_margin = Cm(MARGIN_CM)
+        section.right_margin = Cm(MARGIN_CM)
+        _add_page_number_footer(section, doc_title)
+    normal = doc.styles["Normal"]
+    normal.font.name = BODY_FONT
+    normal.font.size = Pt(BODY_FONT_SIZE)
+    normal.paragraph_format.line_spacing_rule = WD_LINE_SPACING.ONE_POINT_FIVE
+    normal.paragraph_format.space_after = Pt(6)
+    # Ensure Heading styles inherit Times New Roman (Word usually applies Calibri).
+    for level in (1, 2, 3, 4):
+        try:
+            style = doc.styles[f"Heading {level}"]
+            style.font.name = BODY_FONT
+            style.font.color.rgb = HEADING_COLOR
+            style.paragraph_format.space_before = Pt(18 if level <= 2 else 12)
+            style.paragraph_format.space_after = Pt(6)
+            style.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+        except KeyError:
+            pass
+
+
+def _set_font(run, name: str = BODY_FONT, size: int = BODY_FONT_SIZE,
               bold: bool = False, italic: bool = False,
               color: RGBColor = BODY_COLOR) -> None:
     run.font.name = name
@@ -199,12 +384,16 @@ def _set_font(run, name: str = "Calibri", size: int = 11,
 
 
 def _add_heading(doc: Document, text: str, level: int) -> None:
-    sizes = {1: 22, 2: 17, 3: 14, 4: 12}
-    p = doc.add_paragraph()
-    p.paragraph_format.space_before = Pt(18 if level <= 2 else 12)
+    """Add heading using native Word 'Heading N' styles so TOC field detects it."""
+    sizes = {1: 18, 2: 14, 3: 12, 4: 12}
+    safe_level = min(max(level, 1), 4)
+    p = doc.add_paragraph(style=f"Heading {safe_level}")
+    p.paragraph_format.space_before = Pt(18 if safe_level <= 2 else 12)
     p.paragraph_format.space_after = Pt(6)
+    p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
     run = p.add_run(text)
-    _set_font(run, size=sizes.get(level, 12), bold=True, color=HEADING_COLOR)
+    _set_font(run, name=BODY_FONT, size=sizes[safe_level], bold=True,
+              color=HEADING_COLOR)
 
 
 INLINE_CODE_RE = re.compile(r"`([^`]+)`")
@@ -313,17 +502,13 @@ def _parse_table(lines: list[str], start: int) -> tuple[list[str], list[list[str
 
 def md_to_docx(md_path: Path, out_path: Path, title: str) -> None:
     doc = Document()
+    _configure_document(doc, title)
 
-    # Global defaults
-    style = doc.styles["Normal"]
-    style.font.name = "Calibri"
-    style.font.size = Pt(11)
-
-    # Cover / title
+    # Cover title (first page, above the metadata block from the markdown).
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run = p.add_run(title)
-    _set_font(run, size=26, bold=True, color=HEADING_COLOR)
+    _set_font(run, size=24, bold=True, color=HEADING_COLOR)
     doc.add_paragraph()
 
     text = md_path.read_text(encoding="utf-8")
@@ -335,6 +520,25 @@ def md_to_docx(md_path: Path, out_path: Path, title: str) -> None:
 
     while i < len(lines):
         line = lines[i]
+
+        # Special HTML-comment markers
+        stripped = line.strip()
+        if stripped == "<!--PAGE_BREAK-->":
+            doc.add_page_break()
+            i += 1
+            continue
+        if stripped == "<!--WORD_TOC-->":
+            _insert_toc_field(doc)
+            doc.add_paragraph()
+            i += 1
+            continue
+
+        # Skip raw HTML tags (portada uses <div align="center">, <br>, etc.)
+        # These are rendered fine in HTML but would print as literal text in DOCX.
+        if (stripped.startswith("<") and stripped.endswith(">")
+                and not stripped.startswith("<!--")):
+            i += 1
+            continue
 
         # Fenced code blocks
         if line.strip().startswith("```"):
@@ -444,8 +648,12 @@ def main() -> None:
         html_path = BASE_DIR / f"{stem}.html"
         docx_path = BASE_DIR / f"{stem}.docx"
 
-        md_to_html(md_path, html_path, title)
-        md_to_docx(md_path, docx_path, title)
+        try:
+            md_to_html(md_path, html_path, title)
+            md_to_docx(md_path, docx_path, title)
+        except PermissionError as e:
+            print(f"AVISO: {stem}.docx está abierto en Word, se salta. ({e})")
+            continue
 
     print("\nListo. Archivos en:", BASE_DIR)
 

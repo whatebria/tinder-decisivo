@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>Documentación Técnica</title>
 <style>
 :root {
@@ -15,7 +16,37 @@
   --text-muted: #5A5A5A;
   --border: #E1DED6;
   --code-bg: #F2F0EA;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --primary: #4DBAB9;
+    --primary-dark: #7FD4D3;
+    --accent: #FF8B5C;
+    --bg: #1A1A1A;
+    --bg-soft: #242424;
+    --text: #E8E6E1;
+    --text-muted: #A8A5A0;
+    --border: #3A3A3A;
+    --code-bg: #2A2A2A;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+}
+
+[data-theme="dark"] {
+  --primary: #4DBAB9;
+  --primary-dark: #7FD4D3;
+  --accent: #FF8B5C;
+  --bg: #1A1A1A;
+  --bg-soft: #242424;
+  --text: #E8E6E1;
+  --text-muted: #A8A5A0;
+  --border: #3A3A3A;
+  --code-bg: #2A2A2A;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 body {
@@ -27,6 +58,48 @@ body {
   max-width: 820px;
   margin: 0 auto;
   padding: 48px 32px 96px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.theme-toggle:hover {
+  transform: scale(1.08);
+  border-color: var(--primary);
+}
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.theme-toggle .icon-sun,
+.theme-toggle .icon-moon { display: block; }
+.theme-toggle .icon-sun { display: none; }
+[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle .icon-sun { display: block; }
+  :root:not([data-theme="light"]) .theme-toggle .icon-moon { display: none; }
+}
+@media print {
+  .theme-toggle { display: none; }
 }
 h1, h2, h3, h4 {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -61,6 +134,7 @@ code {
   padding: 2px 6px;
   border-radius: 3px;
   color: var(--primary-dark);
+  border: 1px solid var(--border);
 }
 pre {
   background: var(--code-bg);
@@ -75,6 +149,7 @@ pre code {
   background: transparent;
   padding: 0;
   color: var(--text);
+  border: none;
 }
 blockquote {
   border-left: 4px solid var(--accent);
@@ -131,54 +206,379 @@ hr {
 </style>
 </head>
 <body>
-<h1 id="diseno-e-implementacion-de-tinder-decisivo">Diseño e Implementación de Tinder Decisivo</h1>
-<p><strong>Una aplicación móvil de asesoramiento electoral (VAA) para el contexto chileno</strong></p>
-<p><em>Documentación técnica del proyecto — versión 1.0 — 2026-07-25</em></p>
+<button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema claro/oscuro" title="Alternar tema claro/oscuro">
+  <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+  <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>
+</button>
+<hr />
+<div align="center">
+
+**[NOMBRE DE LA UNIVERSIDAD]**
+
+**Facultad de [Ingeniería / Ciencias / etc.]**
+
+**Carrera de Ingeniería en Informática**
+
+<br><br><br><br><br>
+
+# Diseño e Implementación de matchVote
+
+## Una aplicación móvil multi-elección de asesoramiento electoral (VAA) para el contexto chileno
+
+<br><br><br><br>
+
+**Autora:** Jenifer Castillo
+
+**Profesor(a) guía:** [Nombre del profesor(a) guía]
+
+**Comisión evaluadora:** [Nombres de la comisión]
+
+<br><br><br><br>
+
+*Tesis presentada para optar al grado de Ingeniera en Informática*
+
+<br><br><br>
+
+**[Ciudad], [País]**
+
+**[Mes], 2026**
+
+</div>
+
+<!--PAGE_BREAK-->
+
+<hr />
+<h2 id="dedicatoria">Dedicatoria</h2>
+<p><br><br></p>
+<div align="center">
+
+*[Aquí va tu dedicatoria personal. Reemplaza este texto por lo que quieras dedicar.]*
+
+*A mi familia, por el apoyo incondicional en cada etapa de este camino.*
+
+*A quienes creyeron en este proyecto desde el primer día.*
+
+*A los votantes que aún buscan información honesta antes de decidir.*
+
+</div>
+
+<!--PAGE_BREAK-->
+
+<hr />
+<h2 id="agradecimientos">Agradecimientos</h2>
+<p><br></p>
+<p>Quiero expresar mi más sincero agradecimiento a <strong>[Nombre del profesor(a) guía]</strong>, por su orientación, paciencia y valiosos aportes durante el desarrollo de este trabajo.</p>
+<p>Agradezco a los miembros de la comisión evaluadora, <strong>[Nombres]</strong>, por dedicar su tiempo a revisar y enriquecer esta tesis con sus comentarios.</p>
+<p>A mis compañeros y compañeras de carrera, con quienes compartí discusiones, dudas y aprendizajes a lo largo de estos años.</p>
+<p>A mi familia, por el apoyo emocional y material que hizo posible dedicarme a este proyecto.</p>
+<p>A la comunidad de software libre, cuyas herramientas y documentación abierta hicieron técnicamente viable un proyecto ciudadano con recursos limitados.</p>
+<p>Finalmente, a las organizaciones chilenas que han insistido durante años en la necesidad de mejores herramientas de información electoral —<em>Fast Check CL</em>, <em>Mala Espina Check</em> y equipos académicos que han estudiado el problema—, cuyo trabajo sirvió de contexto y motivación para este proyecto.</p>
+<!--PAGE_BREAK-->
+
+<hr />
+<h2 id="resumen">Resumen</h2>
+<p>El presente trabajo describe el diseño e implementación de <em>matchVote</em>, una aplicación web progresiva (PWA) y móvil multiplataforma que actúa como Voting Advice Application (VAA) para el contexto electoral chileno. La aplicación permite al votante comparar sus preferencias políticas con las de los candidatos en competencia mediante un algoritmo transparente, exposición al usuario de las posturas asignadas a cada candidato y soporte simultáneo para múltiples procesos electorales (presidencial, parlamentaria, municipal). A diferencia de los intentos previos en Chile —entre ellos <em>Votamos Todos</em> (Zismo, 2021-2022, limitada al plebiscito constitucional), <em>Decide Chile</em>, <em>Vota Inteligente</em> e <em>Infovecino</em>, ninguna consolidada como VAA multi-elección con matching algorítmico documentado—, la solución propuesta publica su algoritmo de matching en la propia documentación del proyecto, expone al usuario las posturas asignadas a cada candidato y filtra automáticamente candidaturas según la comuna del votante mediante un modelo territorial polimórfico que representa las 16 regiones, 28 distritos y 346 comunas del país. El backend fue implementado en Django + Django REST Framework y el frontend en React Native + Expo, con contrato API bajo OpenAPI 3.1 auto-generado. El algoritmo de afinidad utiliza una fórmula cuadrática que penaliza con mayor severidad las diferencias extremas, incorpora ponderación declarada por el usuario, maneja explícitamente respuesta, entrega un nivel de confianza según el número de preguntas efectivamente consideradas y provee explicación pregunta-a-pregunta del resultado. La aplicación cumple con las pautas WCAG 2.2 nivel AA. Se aplicó metodología iterativa con siete fases y se ejecutó testing automatizado con 25 archivos de pruebas backend. El sistema se empaqueta con Docker para despliegue reproducible.</p>
+<p><strong>Palabras clave:</strong> Voting Advice Application; asesoramiento electoral; algoritmo de matching; modelo polimórfico jerárquico; desinformación electoral; accesibilidad WCAG; aplicaciones multiplataforma; Chile; Django; React Native.</p>
+<!--PAGE_BREAK-->
+
+<hr />
+<h2 id="abstract">Abstract</h2>
+<p>This work describes the design and implementation of <em>matchVote</em>, a Progressive Web App (PWA) and cross-platform mobile application that acts as a Voting Advice Application (VAA) for the Chilean electoral context. The application allows voters to compare their political preferences with those of competing candidates through a transparent algorithm, transparent exposure of the postures assigned to each candidate and simultaneous support for multiple electoral processes (presidential, parliamentary, municipal). Unlike previous efforts in Chile —including <em>Votamos Todos</em> (Zismo, 2021-2022, limited to the constitutional plebiscite), <em>Decide Chile</em>, <em>Vota Inteligente</em>, and <em>Infovecino</em>, none of which consolidated as a multi-election VAA with a documented matching algorithm—, the proposed solution publishes its matching algorithm in the project documentation, transparently exposes to the user the postures assigned to each candidate and automatically filters candidates according to the voter's municipality through a polymorphic territorial model representing the country's 16 regions, 28 electoral districts, and 346 municipalities. The backend was implemented in Django and Django REST Framework, and the frontend in React Native and Expo, with an auto-generated OpenAPI 3.1 API contract. The affinity algorithm uses a quadratic formula that penalizes extreme differences more heavily, incorporates user-declared weighting, explicitly handles "Don't know" answers, provides a confidence level based on the number of questions actually considered, and offers a question-by-question explanation of the result. The application complies with WCAG 2.2 Level AA accessibility guidelines. An iterative methodology was applied through seven phases, and automated testing was executed with 25 backend test files. The system is packaged with Docker for reproducible deployment.</p>
+<p><strong>Keywords:</strong> Voting Advice Application; electoral guidance; matching algorithm; polymorphic hierarchical model; electoral disinformation; WCAG accessibility; cross-platform applications; Chile; Django; React Native.</p>
+<!--PAGE_BREAK-->
+
 <hr />
 <h2 id="tabla-de-contenidos">Tabla de contenidos</h2>
+<!--WORD_TOC-->
+
 <ol>
-<li><a href="#1-contexto">Contexto</a></li>
+<li><a href="#1-introduccion">Introducción</a></li>
 <li><a href="#2-definicion-del-problema">Definición del problema</a></li>
-<li><a href="#3-problemas-encontrados">Problemas encontrados</a></li>
-<li><a href="#4-sintomas-e-impacto">Síntomas e impacto</a></li>
-<li><a href="#5-objetivos">Objetivos</a></li>
-<li><a href="#6-justificacion">Justificación</a></li>
-<li><a href="#7-beneficios">Beneficios</a></li>
-<li><a href="#8-metodologia">Metodología</a></li>
-<li><a href="#9-marco-teorico">Marco teórico</a></li>
-<li><a href="#10-flujo-del-usuario">Flujo del usuario</a></li>
-<li><a href="#11-diseno-e-implementacion">Diseño e implementación</a></li>
-<li><a href="#12-conclusiones">Conclusiones</a></li>
-<li><a href="#13-bibliografia">Bibliografía</a></li>
+<li><a href="#3-marco-conceptual">Marco conceptual</a></li>
+<li><a href="#4-propuesta-de-solucion">Propuesta de solución</a></li>
+<li><a href="#5-validacion-de-la-solucion">Validación de la solución</a></li>
+<li><a href="#6-conclusiones">Conclusiones</a></li>
+<li><a href="#7-bibliografia">Bibliografía</a></li>
+<li><a href="#8-anexos">Anexos</a></li>
 </ol>
+<h2 id="indice-de-figuras">Índice de figuras</h2>
+<ul>
+<li><strong>Figura 1.</strong> Diagrama de flujo del usuario principal — sección 4.9</li>
+<li><strong>Figura 2.</strong> Arquitectura general del sistema (backend y frontend) — sección 4.13</li>
+<li><strong>Figura 3.</strong> Estructura de directorios del backend — sección 4.13</li>
+<li><strong>Figura 4.</strong> Estructura de directorios del frontend — sección 4.14</li>
+<li><strong>Figura 5.</strong> Carta Gantt del proyecto por fases y sprints — sección 4.8</li>
+</ul>
+<h2 id="indice-de-tablas">Índice de tablas</h2>
+<ul>
+<li><strong>Tabla 1.</strong> Alcances del proyecto — sección 1.7</li>
+<li><strong>Tabla 2.</strong> Limitaciones del proyecto — sección 1.7</li>
+<li><strong>Tabla 3.</strong> Problemas de la oferta actual de información electoral — sección 2.4</li>
+<li><strong>Tabla 4.</strong> Problemas de las VAAs previas en Chile — sección 2.4</li>
+<li><strong>Tabla 5.</strong> Problemas técnicos identificados en soluciones análogas — sección 2.4</li>
+<li><strong>Tabla 6.</strong> Cronograma de fases y sprints — sección 4.8</li>
+<li><strong>Tabla 7.</strong> Stack tecnológico del backend — sección 4.10</li>
+<li><strong>Tabla 8.</strong> Stack tecnológico del frontend — sección 4.10</li>
+<li><strong>Tabla 9.</strong> Scores por diferencia en escala Likert 1-5 — sección 4.12</li>
+<li><strong>Tabla 10.</strong> Niveles de confianza según preguntas consideradas — sección 4.12</li>
+<li><strong>Tabla 11.</strong> Ejemplo numérico del cálculo de matching pregunta a pregunta — sección 4.12</li>
+<li><strong>Tabla 12.</strong> Endpoints principales de la API — sección 4.16</li>
+<li><strong>Tabla 13.</strong> Casos de prueba del algoritmo de matching — sección 5.3</li>
+<li><strong>Tabla 14.</strong> Anexo A. Ejes temáticos del cuestionario — Anexo A</li>
+<li><strong>Tabla 15.</strong> Anexo B. Preguntas base ilustrativas — Anexo B</li>
+<li><strong>Tabla 16.</strong> Anexo C. Comparativa con VAAs internacionales — Anexo C</li>
+</ul>
+<!--PAGE_BREAK-->
+
 <hr />
-<h2 id="1-contexto">1. Contexto</h2>
-<p>Chile es una democracia representativa con una de las agendas electorales más frecuentes de América Latina. En un ciclo típico de diez años, un ciudadano chileno enfrenta decisiones sobre elecciones presidenciales, parlamentarias (senadores y diputados), municipales (alcaldes y concejales), regionales (gobernadores y consejeros), y plebiscitos constitucionales. Cada uno de estos procesos implica evaluar candidaturas, plataformas programáticas y trayectorias políticas, con un volumen de información que supera la capacidad de análisis del votante promedio.</p>
-<p>El Servicio Electoral de Chile (SERVEL) mantiene un registro público de candidaturas y resultados en <code>servel.cl</code>, y publica datasets abiertos en <code>opendata.servel.cl</code>. Sin embargo, esta información se distribuye en formatos administrativos (CSV, XLSX, PDF) orientados al escrutinio y no al votante. No existe, al momento de este trabajo, una API pública oficial que exponga las posturas programáticas de los candidatos en formato consumible por aplicaciones.</p>
-<p>En paralelo, en el ecosistema internacional han proliferado desde 1989 las llamadas <strong>Voting Advice Applications (VAA)</strong>: herramientas digitales que comparan las posiciones políticas declaradas por un votante con las de partidos o candidatos, y ofrecen un ranking de afinidad. Los VAAs más consolidados —StemWijzer (Países Bajos), Wahl-O-Mat (Alemania), Smartvote (Suiza) y Kieskompas— reciben millones de usos por elección y, según literatura politológica, influyen entre 2% y 6% del voto en países con alta penetración.</p>
-<p>En Chile, los intentos de replicar este modelo han sido intermitentes: <em>Voto Informado</em> opera solo en periodo electoral y sin algoritmo formal de matching, y <em>Decide Chile</em> (activo entre 2017 y 2021) se encuentra discontinuado. <strong>No existe actualmente en Chile una VAA activa, con algoritmo transparente, código abierto y datos verificables</strong>. Este vacío es el punto de partida de <em>Tinder Decisivo</em>.</p>
+<h2 id="1-introduccion">1. Introducción</h2>
+<h3 id="11-que-es-matchvote">1.1 Qué es matchVote</h3>
+<p><em>matchVote</em> es una aplicación web progresiva (PWA) y móvil multiplataforma que actúa como <strong>Voting Advice Application (VAA)</strong> para el contexto electoral chileno. En términos simples, es una herramienta que le pregunta al votante su opinión sobre políticas públicas concretas —economía, salud, educación, seguridad, ambiente, derechos humanos, política internacional y reforma institucional— y compara esas respuestas con las posturas declaradas y verificadas de los candidatos en competencia, entregando un ranking de afinidad ordenado, un desglose por eje temático y una explicación pregunta-a-pregunta del resultado.</p>
+<p>La aplicación soporta simultáneamente múltiples procesos electorales activos (presidencial, parlamentaria y municipal) mediante un modelo territorial que filtra automáticamente a los candidatos según la comuna del votante, evitando que compare candidaturas que no aparecerán en su cédula. El nombre "matchVote" refiere metafóricamente al mecanismo de comparación individualizada, pero el producto no replica el flujo de swipe característico de la plataforma homónima: se estructura como un cuestionario ponderable con explicación algorítmica.</p>
+<h3 id="12-que-busca">1.2 Qué busca</h3>
+<p>El proyecto busca <strong>reducir la asimetría de información</strong> que enfrenta el votante chileno en cada ciclo electoral, entregando una herramienta que cumpla simultáneamente con cinco características que hoy no están reunidas en ninguna solución existente en el país:</p>
+<ol>
+<li>Algoritmo de matching documentado y transparente, publicado en la propia documentación del proyecto.</li>
+<li>Exposición al usuario de las posturas asignadas a cada candidato de manera clara y consultable dentro de la propia aplicación.</li>
+<li>Cobertura multi-nivel territorial (nacional, distrital y comunal).</li>
+<li>Accesibilidad conforme a WCAG 2.2 nivel AA (W3C, 2023).</li>
+<li>Continuidad operativa entre elecciones.</li>
+</ol>
+<p>En términos de resultado esperado, el proyecto entrega un producto funcional multiplataforma, un cuestionario estructurado en torno a ejes temáticos amplios de la política pública chilena, una arquitectura reutilizable para otros países con estructura territorial comparable, y documentación técnica y accesible que permite la reproducibilidad de las decisiones de diseño.</p>
+<h3 id="13-cuando-se-ocuparia">1.3 Cuándo se ocuparía</h3>
+<p>La aplicación fue diseñada para tres momentos del ciclo electoral chileno:</p>
+<ul>
+<li><strong>Antes de la elección</strong> (uso principal): el votante ingresa a la aplicación durante el período de campaña, responde el cuestionario correspondiente al proceso electoral activo y obtiene un ranking de afinidad que puede consultar tantas veces como necesite hasta el día de la votación.</li>
+<li><strong>Durante períodos no electorales</strong> (uso educativo): la aplicación permanece disponible para consulta educativa sobre los ejes temáticos de la política pública chilena, sirve como referencia para investigadores y periodistas, y permite a los votantes explorar retroactivamente las posturas de electos vigentes.</li>
+<li><strong>Entre ciclos electorales</strong> (uso comparativo): el usuario puede consultar el histórico de sus respuestas, comparar coherencia entre elecciones sucesivas y observar la evolución de las posturas de candidatos que participan en más de un proceso.</li>
+</ul>
+<p>El diseño multi-elección permite que un mismo votante utilice la aplicación en una sola sesión para las tres elecciones simultáneas típicas de un ciclo chileno (por ejemplo, presidencial + diputados por distrito + alcalde por comuna), reutilizando las respuestas de las <strong>preguntas base</strong> transversales de valores.</p>
+<h3 id="14-cuando-pasa-el-problema">1.4 Cuándo pasa el problema</h3>
+<p>El problema al que responde <em>matchVote</em> se manifiesta principalmente durante los <strong>períodos de campaña electoral</strong>, cuando el votante enfrenta una avalancha de información fragmentada, sesgada y en ocasiones deliberadamente falsa. Este período crítico se agudiza en las últimas tres a cuatro semanas antes de cada elección, cuando la circulación de contenido en redes sociales y aplicaciones de mensajería alcanza sus picos históricos, según reportan verificadores independientes como Fast Check CL (2024) y Mala Espina Check (2024).</p>
+<p>Sin embargo, el problema tiene una dimensión estructural que trasciende el período de campaña: la ausencia de herramientas civiles o institucionales de comparación programática es permanente. En Chile, incluso fuera de períodos electorales, un ciudadano interesado en comparar sistemáticamente las posturas de sus representantes electos vigentes con las suyas propias no dispone de una plataforma para hacerlo.</p>
+<h3 id="15-por-que-es-importante">1.5 Por qué es importante</h3>
+<p>En una democracia representativa, la calidad de las decisiones colectivas depende de la calidad de las decisiones individuales, y estas a su vez de la información disponible al momento de decidir. Cuando la información es asimétrica, fragmentada o está contaminada por desinformación, el resultado agregado no refleja las preferencias reales del electorado sobre políticas públicas concretas, sino su reacción a los estímulos comunicacionales dominantes del ciclo.</p>
+<p>La importancia del proyecto se sostiene en tres dimensiones:</p>
+<ul>
+<li><strong>Cívica</strong>: entrega una herramienta que devuelve al debate público el foco sobre propuestas concretas, en un contexto donde el debate está dominado por controversias personales y encuestas de intención de voto (Cedroni &amp; Garzia, 2010).</li>
+<li><strong>Tecnológica</strong>: demuestra que es viable construir infraestructura cívica de calidad profesional con recursos limitados, aprovechando el estado del arte en desarrollo multiplataforma (Meta Platforms, 2024), APIs auto-documentadas (OpenAPI Initiative, 2021) y containerización (Docker Inc., 2024).</li>
+<li><strong>Académica</strong>: constituye un caso de estudio integral que aplica principios sólidos de ingeniería de software (Martin, 2017; Hunt &amp; Thomas, 1999; Beck, 1999), diseño de interfaces (Frost, 2016), estándares de accesibilidad (W3C, 2023) y modelos de dominio complejos.</li>
+</ul>
+<h3 id="16-objetivos">1.6 Objetivos</h3>
+<p><strong>Objetivo general.</strong> Diseñar e implementar una aplicación web progresiva (PWA) y móvil multiplataforma de asesoramiento electoral (VAA) para el contexto chileno, con algoritmo de matching transparente y documentado, arquitectura modular, soporte para múltiples elecciones simultáneas con scope territorial, y cumplimiento de estándares de accesibilidad WCAG 2.2 nivel AA (W3C, 2023).</p>
+<p><strong>Objetivos específicos.</strong></p>
+<ol>
+<li>Implementar un algoritmo de matching robusto que incorpore penalización cuadrática, ponderación declarada, manejo explícito de "No sé", nivel de confianza, breakdown por eje temático y filtrado territorial polimórfico.</li>
+<li>Diseñar un sistema territorial polimórfico que soporte scopes nacional, distrital y comunal sin migraciones de schema para nuevos niveles.</li>
+<li>Soportar múltiples elecciones simultáneas con reutilización de preguntas transversales de valores.</li>
+<li>Aplicar principios SOLID (Martin, 2017), DRY (Hunt &amp; Thomas, 1999) y YAGNI (Beck, 1999) en la arquitectura.</li>
+<li>Exponer la API bajo el estándar OpenAPI 3.1 (OpenAPI Initiative, 2021).</li>
+<li>Exponer al usuario las posturas asignadas a cada candidato de manera transparente y consultable dentro de la propia aplicación.</li>
+<li>Mantener suite de pruebas automatizadas sobre backend y frontend.</li>
+<li>Cumplir WCAG 2.2 nivel AA (W3C, 2023).</li>
+<li>Entregar la aplicación en web, iOS y Android desde un único codebase mediante React Native + Expo (Meta Platforms, 2024; Expo, 2024).</li>
+<li>Empaquetar el sistema con Docker para despliegue reproducible (Docker Inc., 2024).</li>
+</ol>
+<h3 id="17-alcances-y-limitaciones">1.7 Alcances y limitaciones</h3>
+<p><strong>Tabla 1</strong></p>
+<p><em>Alcances del proyecto</em></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Dimensión</th>
+<th>Alcance del proyecto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A1</td>
+<td>Cobertura electoral</td>
+<td>Presidencial, parlamentaria (diputados por distrito) y municipal (alcaldes por comuna) del ciclo 2024-2025.</td>
+</tr>
+<tr>
+<td>A2</td>
+<td>Cobertura territorial</td>
+<td>Las 16 regiones, 28 distritos electorales y 346 comunas de Chile.</td>
+</tr>
+<tr>
+<td>A3</td>
+<td>Plataformas de entrega</td>
+<td>Web (PWA responsive), iOS y Android desde un único codebase React Native.</td>
+</tr>
+<tr>
+<td>A4</td>
+<td>Idioma</td>
+<td>Español chileno como idioma principal de la interfaz y del contenido.</td>
+</tr>
+<tr>
+<td>A5</td>
+<td>Algoritmo de matching</td>
+<td>Fórmula cuadrática con ponderación declarada, manejo de "No sé", confianza por número de preguntas, breakdown por eje y filtrado territorial polimórfico.</td>
+</tr>
+<tr>
+<td>A6</td>
+<td>Modelo de datos</td>
+<td>19 entidades organizadas en 10 submódulos, con signals para consistencia derivada.</td>
+</tr>
+<tr>
+<td>A7</td>
+<td>Contrato API</td>
+<td>25+ endpoints REST bajo OpenAPI 3.1, auto-documentados y con tipos TypeScript generados.</td>
+</tr>
+<tr>
+<td>A8</td>
+<td>Accesibilidad</td>
+<td>Cumplimiento de WCAG 2.2 nivel AA en todas las pantallas de la aplicación.</td>
+</tr>
+<tr>
+<td>A9</td>
+<td>Testing</td>
+<td>Suite de 25 archivos de pruebas backend.</td>
+</tr>
+<tr>
+<td>A10</td>
+<td>Documentación</td>
+<td>20+ documentos técnicos y accesibles, guía de accesibilidad y mapa de navegación.</td>
+</tr>
+<tr>
+<td>A11</td>
+<td>Despliegue</td>
+<td>Empaquetado con Docker, con instrucciones de deploy productivo.</td>
+</tr>
+<tr>
+<td>A12</td>
+<td>Transparencia interna</td>
+<td>Exposición al usuario de las posturas asignadas a cada candidato de manera clara y consultable dentro de la propia aplicación.</td>
+</tr>
+<tr>
+<td>A13</td>
+<td>Modo guest</td>
+<td>Servicio backend <code>calcular_match_anonimo</code> operativo (interfaz frontend en roadmap).</td>
+</tr>
+<tr>
+<td>A14</td>
+<td>Dataset del alcance de tesis</td>
+<td>Los candidatos incorporados corresponden a los últimos participantes de cada elección del ciclo cuando la información pública lo permite, o a datos ficticios didácticos en caso contrario. Las posturas asignadas son ilustrativas, construidas a partir de referencias generales de posicionamiento político existente, no como resultado de verificación formal contra fuentes primarias. El sistema soporta la migración a un dataset verificado en despliegue productivo sin modificaciones estructurales.</td>
+</tr>
+</tbody>
+</table>
+<p><em>Nota.</em> Elaboración propia. Todos los alcances declarados están implementados en el proyecto entregado.</p>
+<p><strong>Tabla 2</strong></p>
+<p><em>Limitaciones del proyecto</em></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Limitación</th>
+<th>Descripción y motivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L1</td>
+<td>Dataset ilustrativo, no operativo</td>
+<td>El presente trabajo prueba el diseño del sistema, no la curaduría de datos operativos. Las posturas asignadas a cada candidato son ilustrativas y no fueron sometidas a un proceso de verificación formal contra fuentes primarias documentadas. La curaduría formal es trabajo curatorial masivo que corresponde a la etapa posterior de despliegue productivo.</td>
+</tr>
+<tr>
+<td>L2</td>
+<td>Sin senadores ni consejeros regionales en el MVP</td>
+<td>El modelo territorial polimórfico soporta estos niveles sin cambios de schema, pero los seeds no forman parte de esta entrega.</td>
+</tr>
+<tr>
+<td>L3</td>
+<td>Sin cobertura de plebiscitos</td>
+<td>Los procesos plebiscitarios tienen un modelo pregunta/respuesta distinto que requeriría adaptación.</td>
+</tr>
+<tr>
+<td>L4</td>
+<td>Base de datos SQLite en desarrollo</td>
+<td>Producción requiere migración a PostgreSQL. Documentada pero no ejecutada.</td>
+</tr>
+<tr>
+<td>L5</td>
+<td>Sin autenticación mediante ClaveÚnica</td>
+<td>La integración con el sistema de identidad estatal chileno queda fuera del scope.</td>
+</tr>
+<tr>
+<td>L6</td>
+<td>Sin verificación de correo electrónico</td>
+<td>El registro genera cuenta activa sin verificar dominio.</td>
+</tr>
+<tr>
+<td>L7</td>
+<td>Sin rate limiting productivo</td>
+<td>Endpoints sensibles (login, reset) sin límites de velocidad.</td>
+</tr>
+<tr>
+<td>L8</td>
+<td>Sin CI/CD automatizado</td>
+<td>Las pruebas se ejecutan localmente.</td>
+</tr>
+<tr>
+<td>L9</td>
+<td>Sin análisis empírico de uso</td>
+<td>No incluye pruebas con usuarios reales ni medición del impacto electoral.</td>
+</tr>
+<tr>
+<td>L10</td>
+<td>Migración territorial en fase 2 de 3</td>
+<td>Los FKs legacy conviven con el nuevo <code>unidad_territorial</code>.</td>
+</tr>
+<tr>
+<td>L11</td>
+<td>Sin auditoría externa de seguridad</td>
+<td>Dos rondas de auditoría interna, sin auditoría de tercero especializado.</td>
+</tr>
+<tr>
+<td>L12</td>
+<td>Sin compartir resultado como imagen</td>
+<td>Feature deseable no implementada.</td>
+</tr>
+<tr>
+<td>L13</td>
+<td>Sin componente académico empírico</td>
+<td>Trabajo de diseño e implementación; no incluye componente hipotético-deductivo.</td>
+</tr>
+<tr>
+<td>L14</td>
+<td>Sin evaluación de accesibilidad con usuarios</td>
+<td>WCAG 2.2 AA verificado con auditoría técnica automatizada y revisión manual, no con pruebas con personas usuarias con discapacidad.</td>
+</tr>
+</tbody>
+</table>
+<p><em>Nota.</em> Elaboración propia. Cada limitación queda registrada como deuda técnica priorizada.</p>
+<!--PAGE_BREAK-->
+
 <hr />
 <h2 id="2-definicion-del-problema">2. Definición del problema</h2>
-<h3 id="21-enunciado">2.1 Enunciado</h3>
+<h3 id="21-enunciado-general">2.1 Enunciado general</h3>
 <p>El votante chileno enfrenta un problema estructural de <strong>asimetría de información</strong> al momento de decidir su voto: dispone de tiempo limitado, canales de información fragmentados y polarizados, y ninguna herramienta institucional o civil que le permita comparar de forma sistemática y transparente las posturas de los candidatos frente a políticas públicas concretas.</p>
-<p>Este problema se agrava por tres factores concurrentes:</p>
-<ol>
-<li>
-<p><strong>Desinformación electoral</strong>: en Chile, especialmente desde el plebiscito constitucional de 2022, se ha documentado un crecimiento sostenido de campañas de desinformación en redes sociales, cadenas de mensajería instantánea (WhatsApp, Telegram) y medios afines a candidaturas. Iniciativas como <em>Fast Check CL</em>, <em>Mala Espina Check</em> y el observatorio de la Universidad Diego Portales han reportado un volumen creciente de contenido falso o descontextualizado circulando durante los periodos de campaña.</p>
-</li>
-<li>
-<p><strong>Ausencia de una VAA chilena consolidada</strong>: mientras Alemania cuenta con Wahl-O-Mat operado por la Agencia Federal para la Educación Cívica (bpb), y Países Bajos con StemWijzer sostenido por la fundación ProDemos, en Chile ninguna institución pública ni universidad ha logrado sostener una VAA activa entre elecciones. El resultado es que el votante chileno no tiene un equivalente local a estas herramientas.</p>
-</li>
-<li>
-<p><strong>Guías electorales tradicionales inadecuadas</strong>: los formatos existentes fallan por dos extremos opuestos. Por un lado, los programas oficiales de candidaturas publicados en el SERVEL son documentos extensos (habitualmente entre 80 y 200 páginas por candidatura) que exigen horas de lectura. Por otro, las coberturas mediáticas breves reducen la comparación a etiquetas de partido o eslóganes, sin permitir un contraste por política pública.</p>
-</li>
-</ol>
-<h3 id="22-formalizacion">2.2 Formalización</h3>
-<p>El problema puede formalizarse como una <strong>decisión bajo información incompleta</strong>: dado un conjunto <code>C = {c1, c2, ..., cn}</code> de candidaturas y un conjunto <code>P = {p1, p2, ..., pm}</code> de políticas públicas relevantes, el votante <code>v</code> requiere estimar una función de afinidad <code>f(v, ci)</code> que le permita ordenar <code>C</code> por proximidad ideológica. Sin instrumentos que faciliten este cálculo, el votante recurre a heurísticas de baja calidad (imagen del candidato, adhesión partidaria histórica, opinión de círculo cercano) o simplemente se abstiene.</p>
-<hr />
-<h2 id="3-problemas-encontrados">3. Problemas encontrados</h2>
-<p>Durante la fase de investigación y análisis del estado del arte se identificaron los siguientes problemas concretos que motivaron el diseño de la solución:</p>
-<h3 id="31-problemas-de-la-oferta-actual-de-informacion-electoral">3.1 Problemas de la oferta actual de información electoral</h3>
+<p>Este problema puede formalizarse como una <strong>decisión multi-nivel bajo información incompleta</strong>: dado un conjunto <code>C = {c_1, c_2, ..., c_n}</code> de candidaturas compitiendo en un proceso electoral <code>E</code> de un nivel territorial dado, y un conjunto <code>P = {p_1, p_2, ..., p_m}</code> de políticas públicas relevantes, el votante <code>v</code> requiere estimar una función de afinidad <code>f(v, c_i)</code> que le permita ordenar <code>C</code> por proximidad ideológica. La complejidad es multiplicativa porque el votante decide simultáneamente sobre varias elecciones activas con distintos niveles de scope territorial.</p>
+<h3 id="22-quien-tiene-el-problema">2.2 Quién tiene el problema</h3>
+<p>El problema afecta principalmente a <strong>los votantes chilenos habilitados</strong>, con distintos niveles de intensidad según su perfil:</p>
+<ul>
+<li><strong>Votantes con interés activo por comparar propuestas</strong>, pero sin tiempo material para leer los programas oficiales completos de cada candidatura. Este segmento reconoce el problema y busca soluciones, pero no las encuentra.</li>
+<li><strong>Votantes desconfiados del sistema político</strong>, que abandonan la búsqueda activa de información programatica por saturación o cinismo. Terminan votando por adhesión partidaria heredada, por imagen o por rechazo.</li>
+<li><strong>Votantes nuevos</strong> (jóvenes que votan por primera vez, especialmente relevantes desde la reintroducción del voto obligatorio en Chile) que carecen del capital político previo para orientar su decisión.</li>
+<li><strong>Votantes con discapacidad</strong>, para quienes las guias electorales tradicionales presentan barreras adicionales de acceso.</li>
+<li><strong>Votantes fuera de los grandes centros urbanos</strong>, cuya oferta de candidaturas locales recibe menos cobertura mediática.</li>
+</ul>
+<p>Secundariamente, el problema afecta al ecosistema democrático completo: <strong>periodistas, investigadores, docentes, organizaciones de sociedad civil y las propias candidaturas</strong> operan sin infraestructura comparativa transparente.</p>
+<h3 id="23-quien-se-puede-ver-beneficiado-por-resolverlo">2.3 Quién se puede ver beneficiado por resolverlo</h3>
+<p>Resolver el problema beneficia a los siguientes actores:</p>
+<ul>
+<li><strong>Al votante individual</strong>: reduce el costo cognitivo de comparar, entrega criterios explícitos y devuelve tiempo.</li>
+<li><strong>A la ciudadanía organizada</strong>: dispone de una fuente común auditable para conversaciones familiares, laborales o educativas sobre la elección.</li>
+<li><strong>A investigadores y periodistas</strong>: acceden a un modelo comparativo estructurado que permite análisis agregados sobre coherencia programática.</li>
+<li><strong>A candidaturas y equipos programáticos</strong>: reciben retroalimentación sobre coherencia programática y un incentivo a explicitar posturas de manera clara y consultable por el electorado.</li>
+<li><strong>Al ecosistema tecnológico chileno</strong>: se demuestra que es posible construir infraestructura cívica de calidad profesional con recursos limitados, entregando una base de código reutilizable para otras iniciativas GovTech.</li>
+<li><strong>A las instituciones democráticas</strong>: se mejora la representatividad al reducir la brecha entre las mayorías programáticas del electorado y los electos.</li>
+</ul>
+<h3 id="24-que-problema-hay">2.4 Qué problema hay</h3>
+<p>El problema tiene múltiples manifestaciones concretas identificadas durante la investigación. Se agrupan en tres categorías: problemas de la oferta actual de información, problemas de las VAAs previas en Chile y problemas técnicos identificados en soluciones análogas internacionales.</p>
+<p><strong>Tabla 3</strong></p>
+<p><em>Problemas de la oferta actual de información electoral</em></p>
 <table>
 <thead>
 <tr>
@@ -213,9 +613,16 @@ hr {
 <td>Falta de trazabilidad</td>
 <td>Cuando un medio o influencer afirma "el candidato X propone Y", raramente se cita la fuente primaria verificable.</td>
 </tr>
+<tr>
+<td>P6</td>
+<td>Complejidad multi-elección</td>
+<td>El votante debe decidir simultáneamente sobre presidencial, diputados por distrito, alcalde por comuna y otras, cada una con listas distintas de candidatos.</td>
+</tr>
 </tbody>
 </table>
-<h3 id="32-problemas-de-las-vaas-previas-en-chile">3.2 Problemas de las VAAs previas en Chile</h3>
+<p><em>Nota.</em> Elaboración propia a partir de la revisión de literatura y observación del ecosistema electoral chileno.</p>
+<p><strong>Tabla 4</strong></p>
+<p><em>Problemas de las VAAs previas en Chile</em></p>
 <table>
 <thead>
 <tr>
@@ -226,29 +633,35 @@ hr {
 </thead>
 <tbody>
 <tr>
-<td>P6</td>
+<td>P7</td>
 <td>Discontinuidad operativa</td>
-<td><em>Decide Chile</em> y otros intentos se activaron solo en un ciclo electoral y luego fueron abandonados, perdiendo datos históricos.</td>
+<td>Los intentos previos en Chile se activaron solo en un ciclo electoral y luego fueron abandonados.</td>
 </tr>
 <tr>
-<td>P7</td>
+<td>P8</td>
 <td>Algoritmos opacos</td>
 <td>Las herramientas existentes no publican su fórmula de matching, imposibilitando auditoría independiente.</td>
 </tr>
 <tr>
-<td>P8</td>
-<td>Ausencia de código abierto</td>
-<td>Ninguna VAA chilena previa liberó su código bajo licencia libre, impidiendo forks, correcciones colaborativas y continuidad.</td>
+<td>P9</td>
+<td>Sin documentación abierta del algoritmo</td>
+<td>Ninguna VAA chilena previa publicó la fórmula ni el detalle del cálculo de matching en formato consultable por terceros.</td>
 </tr>
 <tr>
-<td>P9</td>
-<td>Datos no verificables</td>
-<td>Las posturas asignadas a candidatos no incluían URL de fuente primaria ni justificación textual auditable.</td>
+<td>P10</td>
+<td>Sin transparencia sobre las posturas asignadas</td>
+<td>Las posturas asignadas a candidatos no se exponían al usuario de manera clara y consultable dentro de la propia herramienta.</td>
+</tr>
+<tr>
+<td>P11</td>
+<td>Sin cobertura territorial</td>
+<td>Herramientas previas cubrían solo elecciones nacionales, ignorando la dimensión distrital y comunal.</td>
 </tr>
 </tbody>
 </table>
-<h3 id="33-problemas-tecnicos-identificados-en-soluciones-analogas">3.3 Problemas técnicos identificados en soluciones análogas</h3>
-<p>Del análisis comparativo (ver <code>docs/comparacion-vaas.md</code>) surgieron limitaciones técnicas comunes que la solución busca evitar:</p>
+<p><em>Nota.</em> Elaboración propia a partir del análisis de las VAAs chilenas identificadas.</p>
+<p><strong>Tabla 5</strong></p>
+<p><em>Problemas técnicos identificados en soluciones análogas</em></p>
 <table>
 <thead>
 <tr>
@@ -259,303 +672,313 @@ hr {
 </thead>
 <tbody>
 <tr>
-<td>P10</td>
+<td>P12</td>
 <td>Algoritmos lineales simplistas</td>
 <td>La mayoría de VAAs promedian diferencias sin penalizar más fuerte las diferencias extremas.</td>
 </tr>
 <tr>
-<td>P11</td>
-<td>Ausencia de opción "No sé" honesta</td>
-<td>Los VAAs suelen forzar al usuario a una posición neutral cuando en realidad no tiene opinión, distorsionando el cálculo.</td>
-</tr>
-<tr>
-<td>P12</td>
-<td>Sin nivel de confianza</td>
-<td>Un match del 80% basado en 3 preguntas se presenta con la misma autoridad que uno basado en 30, generando falsa precisión.</td>
-</tr>
-<tr>
 <td>P13</td>
-<td>Sin explicabilidad por dimensión</td>
-<td>La mayoría entrega un porcentaje global sin desglose por eje temático, impidiendo entender <em>por qué</em> el match es alto o bajo.</td>
+<td>Ausencia de opción "No sé" honesta</td>
+<td>Los VAAs suelen forzar al usuario a una posición neutral cuando en realidad no tiene opinión.</td>
 </tr>
 <tr>
 <td>P14</td>
+<td>Sin nivel de confianza</td>
+<td>Un match del 80% basado en 3 preguntas se presenta con la misma autoridad que uno basado en 30.</td>
+</tr>
+<tr>
+<td>P15</td>
+<td>Sin explicabilidad por dimensión</td>
+<td>La mayoría entrega un porcentaje global sin desglose por eje temático.</td>
+</tr>
+<tr>
+<td>P16</td>
+<td>Sin explicabilidad pregunta-a-pregunta</td>
+<td>El usuario no puede ver qué preguntas contribuyeron más o menos al resultado final.</td>
+</tr>
+<tr>
+<td>P17</td>
 <td>Ausencia de accesibilidad</td>
-<td>Pocas VAAs cumplen con las directrices WCAG (Web Content Accessibility Guidelines), excluyendo a votantes con discapacidad visual, motora o cognitiva.</td>
+<td>Pocas VAAs cumplen con las directrices WCAG (W3C, 2023).</td>
 </tr>
 </tbody>
 </table>
-<hr />
-<h2 id="4-sintomas-e-impacto">4. Síntomas e impacto</h2>
-<p>Los problemas descritos se manifiestan en el sistema electoral chileno a través de síntomas medibles y con consecuencias sobre la calidad democrática.</p>
-<h3 id="41-sintomas-observables">4.1 Síntomas observables</h3>
+<p><em>Nota.</em> Elaboración propia a partir de la revisión de nueve VAAs internacionales.</p>
+<h3 id="25-donde-esta-el-problema">2.5 Dónde está el problema</h3>
+<p>El problema tiene una localización <strong>nacional en Chile</strong>, pero con dimensiones específicas que lo hacen distinto de contextos comparables:</p>
+<ul>
+<li><strong>Nivel institucional</strong>: no existe una institución pública ni universidad chilena que mantenga una VAA activa entre elecciones. Contrasta con Alemania (Wahl-O-Mat de la <em>bpb</em>), Países Bajos (StemWijzer de ProDemos) o Suiza (Smartvote de Politools).</li>
+<li><strong>Nivel mediático</strong>: los medios chilenos han publicado cuestionarios electorales puntuales durante campañas específicas, sin sostenerlos entre ciclos.</li>
+<li><strong>Nivel territorial</strong>: incluso las iniciativas puntuales han cubierto solo la elección presidencial, ignorando las decisiones distritales y comunales donde el votante enfrenta candidatos diferentes según su ubicación geográfica.</li>
+<li><strong>Nivel digital</strong>: la información electoral oficial existe (SERVEL, 2024), pero se distribuye en formatos administrativos (CSV, XLSX, PDF) orientados al escrutinio y no al votante; no hay API pública que exponga posturas programáticas en formato consumible por aplicaciones.</li>
+<li><strong>Nivel de confianza</strong>: la circulación de desinformación en redes sociales y aplicaciones de mensajería (WhatsApp, Telegram) documentada por verificadores como Fast Check CL (2024) y Mala Espina Check (2024) erosiona la confianza en las fuentes disponibles.</li>
+</ul>
+<h3 id="26-en-que-proceso-esta-el-problema">2.6 En qué proceso está el problema</h3>
+<p>El problema se manifiesta a lo largo del <strong>ciclo completo de decisión del votante</strong>, con distintas intensidades por etapa:</p>
 <ol>
-<li>
-<p><strong>Voto por imagen o adhesión partidaria heredada</strong>: encuestas del Centro de Estudios Públicos (CEP) y del Latinobarómetro muestran que un porcentaje significativo del electorado chileno declara no conocer las propuestas específicas de los candidatos por los que vota.</p>
-</li>
-<li>
-<p><strong>Alta volatilidad electoral entre ciclos</strong>: la fragmentación del voto y los cambios abruptos entre elecciones sucesivas sugieren decisiones tomadas con información limitada.</p>
-</li>
-<li>
-<p><strong>Desafección política creciente</strong>: mediciones de confianza en instituciones políticas muestran caídas sostenidas en Chile durante la última década.</p>
-</li>
-<li>
-<p><strong>Circulación viral de contenido falso</strong>: verificadores independientes han documentado un aumento de piezas de desinformación en cada proceso electoral desde 2020.</p>
-</li>
-<li>
-<p><strong>Abstención en elecciones voluntarias históricas</strong>: antes del retorno al voto obligatorio, las tasas de participación cayeron por debajo del 50%.</p>
-</li>
+<li><strong>Etapa de exposición inicial</strong> (varios meses antes de la elección): el votante empieza a percibir a los candidatos por cobertura mediática y redes sociales, sin criterio programático organizado.</li>
+<li><strong>Etapa de búsqueda activa</strong> (semanas antes): el votante interesado intenta comparar posturas, choca con la fragmentación de fuentes y la falta de una herramienta comparativa transparente.</li>
+<li><strong>Etapa de decisión final</strong> (días antes o durante el voto): el votante decide con la información parcial acumulada, en muchos casos por adhesión partidaria previa, imagen o rechazo antes que por convergencia programática.</li>
+<li><strong>Etapa posterior al voto</strong> (post-elección): sin herramienta de trazabilidad, el votante pierde la capacidad de contrastar retrospectivamente si el electo cumple las posturas que declaró.</li>
 </ol>
-<h3 id="42-impacto">4.2 Impacto</h3>
-<p>El impacto de estos síntomas se distribuye en tres niveles:</p>
-<p><strong>Nivel individual</strong>: el votante toma decisiones que no reflejan sus preferencias reales sobre políticas públicas. Elige candidatos con quienes discrepa en temas que declararía como prioritarios si se le preguntara explícitamente.</p>
-<p><strong>Nivel institucional</strong>: se erosiona la representatividad del sistema. Los electos no siempre reflejan las mayorías programáticas del electorado, sino las mayorías mediáticas o de imagen. Esto retroalimenta la desconfianza institucional.</p>
-<p><strong>Nivel democrático</strong>: la deliberación pública se degrada cuando el debate se centra en personajes en lugar de propuestas. El espacio para acuerdos programáticos entre sectores se reduce, y la polarización afectiva reemplaza a la discusión política sustantiva.</p>
+<p>El proyecto se enfoca principalmente en las etapas 2 y 3, entregando una herramienta que reduce el costo de la búsqueda activa y aporta criterios explícitos para la decisión final.</p>
+<h3 id="27-como-se-resuelve-actualmente">2.7 Cómo se resuelve actualmente</h3>
+<p>Actualmente, el problema se resuelve (de forma parcial e insatisfactoria) mediante los siguientes canales:</p>
+<ul>
+<li><strong>Lectura directa de programas oficiales</strong> publicados en el portal del SERVEL (SERVEL, 2024). Requiere horas por candidato y no ofrece comparación sistemática.</li>
+<li><strong>Cobertura mediática</strong> de programas de televisión, radios y prensa escrita. Ofrece síntesis pero suele privilegiar controversias sobre propuestas.</li>
+<li><strong>Conversaciones informales</strong> con familia, amistades o colegas. Sesgadas por la burbuja social.</li>
+<li><strong>Redes sociales</strong> de los propios candidatos y de terceros. Alto ruido informacional, con presencia de desinformación verificada por Fast Check CL (2024) y Mala Espina Check (2024).</li>
+<li><strong>Iniciativas puntuales chilenas</strong> que se han acercado parcialmente al problema:</li>
+<li><strong>Votamos Todos</strong> (Zismo, 2021-2022) fue creada para el plebiscito constitucional con un cuestionario de 70 preguntas y matching contra las respuestas de los candidatos. Es el antecedente más cercano al modelo VAA propiamente tal, pero limitada al plebiscito y actualmente discontinuada.</li>
+<li><strong>Decide Chile</strong> ofrece información electoral, predicción de resultados y componentes lúdicos, sin matching personalizado.</li>
+<li><strong>Vota Inteligente</strong> difunde propuestas de candidaturas, sin componente algorítmico de matching.</li>
+<li><strong>Infovecino</strong> entrega información personalizada por comuna, sin matching.</li>
+<li><strong>Voto Informado del INE</strong> (México) y <strong>Voto Informado del JNE</strong> (Perú) son ejemplos regionales relacionados, orientados a directorio institucional más que a matching algorítmico personalizado. Ninguna disponible para el contexto chileno.</li>
+</ul>
+<p>Esta oferta no cumple simultáneamente con las seis características identificadas en la sección 1.2, lo que motiva el desarrollo del presente proyecto.</p>
+<h3 id="28-por-que-es-un-problema">2.8 Por qué es un problema</h3>
+<p>Es un problema porque las decisiones colectivas tomadas con información asimétrica generan tres consecuencias observables:</p>
+<ul>
+<li><strong>A nivel individual</strong>: el votante toma decisiones que no reflejan sus preferencias reales sobre políticas públicas. Encuestas del CEP y Latinobarómetro muestran que un porcentaje significativo del electorado chileno declara no conocer las propuestas específicas de los candidatos por los que vota.</li>
+<li><strong>A nivel institucional</strong>: se erosiona la representatividad. Los electos no siempre reflejan las mayorías programáticas del electorado, sino las mayorías de reacción a los estímulos comunicacionales.</li>
+<li><strong>A nivel democrático</strong>: la deliberación pública se degrada. El debate se centra en personajes en lugar de propuestas. La polarización afectiva reemplaza a la discusión política sustantiva, patrón documentado en la literatura politológica internacional (Garzia &amp; Marschall, 2014).</li>
+</ul>
+<p>Adicionalmente, es un problema tecnológicamente resoluble: el estado del arte en desarrollo móvil multiplataforma (Meta Platforms, 2024), APIs auto-documentadas (OpenAPI Initiative, 2021), y containerización (Docker Inc., 2024) permite construir la solución con recursos limitados. No hay barrera técnica que justifique su ausencia; es una brecha institucional y de asignación de esfuerzo.</p>
+<!--PAGE_BREAK-->
+
 <hr />
-<h2 id="5-objetivos">5. Objetivos</h2>
-<h3 id="51-objetivo-general">5.1 Objetivo general</h3>
-<p>Diseñar e implementar una aplicación móvil multiplataforma de asesoramiento electoral (VAA) para el contexto chileno, con algoritmo de matching transparente, datos verificables con fuentes primarias, arquitectura modular y código abierto, que permita al votante contrastar sus posturas frente a políticas públicas con las de los candidatos en competencia.</p>
-<h3 id="52-objetivos-especificos">5.2 Objetivos específicos</h3>
-<ol>
-<li>
-<p><strong>Algoritmo de matching robusto</strong>: implementar un algoritmo de cálculo de afinidad que supere las limitaciones de los promedios lineales, incorporando (a) penalización cuadrática para diferencias extremas, (b) ponderación declarada por el usuario según importancia percibida de cada tema, (c) manejo explícito de respuestas "No sé" mediante exclusión del cálculo, y (d) nivel de confianza asociado al número de preguntas efectivamente consideradas.</p>
-</li>
-<li>
-<p><strong>Arquitectura modular y escalable</strong>: aplicar principios SOLID, DRY y YAGNI en la separación de capas backend (modelos, vistas, serializadores, servicios) y frontend (atomic design con átomos, moléculas, organismos y pantallas), permitiendo evolución independiente de cada capa.</p>
-</li>
-<li>
-<p><strong>Contrato API tipado y auto-documentado</strong>: exponer la API REST bajo el estándar OpenAPI 3.1 mediante <code>drf-spectacular</code>, y generar automáticamente los tipos TypeScript del frontend desde el schema, eliminando el drift entre backend y frontend.</p>
-</li>
-<li>
-<p><strong>Transparencia de datos</strong>: enforzar a nivel de código y de importadores que cada postura asignada a un candidato incluya (a) URL de fuente primaria pública, (b) justificación textual auditable, y (c) nivel de confianza declarado (<code>ALTA</code>, <code>MEDIA</code>, <code>BAJA</code>).</p>
-</li>
-<li>
-<p><strong>Cobertura de pruebas</strong>: mantener una suite de pruebas automatizadas (unitarias e integración) sobre backend (algoritmo, importadores, permisos, endpoints) y frontend (servicios puros, hooks) que permita refactorizaciones seguras.</p>
-</li>
-<li>
-<p><strong>Accesibilidad WCAG 2.2 nivel AA</strong>: cumplir con las pautas del World Wide Web Consortium para accesibilidad web, incluyendo contraste de color, navegación por teclado, targets táctiles mínimos y compatibilidad con lectores de pantalla.</p>
-</li>
-<li>
-<p><strong>Multiplataforma con un solo código base</strong>: entregar la aplicación en formato web (PWA), iOS y Android desde un único codebase mediante React Native con Expo.</p>
-</li>
-</ol>
-<hr />
-<h2 id="6-justificacion">6. Justificación</h2>
-<p>La justificación de este proyecto se sostiene en cuatro dimensiones:</p>
-<h3 id="61-justificacion-civica">6.1 Justificación cívica</h3>
-<p>En una democracia representativa, la calidad del voto depende de la calidad de la información disponible al votante. Cuando esta información es asimétrica, fragmentada o está contaminada por desinformación, la deliberación democrática se degrada. Una VAA transparente contribuye a reducir esta asimetría, entregando una herramienta comparativa sistemática que devuelve al debate político el foco sobre propuestas concretas.</p>
-<h3 id="62-justificacion-tecnologica">6.2 Justificación tecnológica</h3>
-<p>El estado del arte en desarrollo móvil multiplataforma (React Native + Expo), APIs auto-documentadas (OpenAPI 3.1 + drf-spectacular) y bases de datos livianas para MVP (SQLite con path claro de migración a PostgreSQL) permite construir un sistema completo con recursos limitados. La existencia de estas herramientas maduras hace viable un proyecto que hace una década habría requerido presupuestos institucionales.</p>
-<h3 id="63-justificacion-academica">6.3 Justificación académica</h3>
-<p>Este trabajo se enmarca en una tesis de pregrado en desarrollo de aplicaciones móviles. Constituye un caso de estudio integral que cubre: diseño de arquitecturas modulares, aplicación de patrones de diseño (atomic design, arquitectura en capas), diseño de algoritmos numéricos, integración de contratos API tipados, testing automatizado, cumplimiento de estándares de accesibilidad, y despliegue multiplataforma. Como tal, ejemplifica la aplicación integrada de los contenidos curriculares de la carrera.</p>
-<h3 id="64-justificacion-de-codigo-abierto">6.4 Justificación de código abierto</h3>
-<p>La elección de licenciar el proyecto bajo AGPL-3.0 responde a una convicción explícita: la tecnología electoral es infraestructura de interés público. Los ciudadanos deben poder auditar el algoritmo que les recomienda candidaturas, y cualquier despliegue público modificado debe compartir sus cambios. Esta decisión distingue al proyecto de las VAAs comerciales y de las de código cerrado.</p>
-<hr />
-<h2 id="7-beneficios">7. Beneficios</h2>
-<h3 id="71-para-el-votante">7.1 Para el votante</h3>
-<ul>
-<li>Reducción significativa del tiempo requerido para comparar candidaturas: de horas de lectura de programas a 5-10 minutos de cuestionario.</li>
-<li>Ranking objetivo con criterios explícitos y auditables.</li>
-<li>Desglose por eje temático que permite decisiones matizadas (por ejemplo, priorizar afinidad económica sobre social, o viceversa).</li>
-<li>Trazabilidad: cada postura asignada a un candidato viene con justificación y URL de fuente, permitiendo verificación independiente.</li>
-<li>Acceso multiplataforma sin costo, sin publicidad y sin extracción de datos personales.</li>
-</ul>
-<h3 id="72-para-la-ciudadania-informada">7.2 Para la ciudadanía informada</h3>
-<ul>
-<li>Contribución a la reducción de la desinformación mediante una fuente única, auditable y con fuentes primarias explícitas.</li>
-<li>Herramienta educativa que expone los ejes temáticos de la política pública chilena.</li>
-<li>Contenido educativo dentro de la app (repercusiones y explicación de cada pregunta).</li>
-</ul>
-<h3 id="73-para-investigadores-y-periodistas">7.3 Para investigadores y periodistas</h3>
-<ul>
-<li>Dataset público de posturas de candidatos con fuentes verificables.</li>
-<li>Código auditable del algoritmo, permitiendo réplica y validación académica.</li>
-<li>Posibilidad de fork y adaptación para otras elecciones (parlamentarias, municipales, regionales) o para otros países latinoamericanos.</li>
-</ul>
-<h3 id="74-para-candidaturas-y-equipos-programaticos">7.4 Para candidaturas y equipos programáticos</h3>
-<ul>
-<li>Retroalimentación sobre coherencia programática: qué preguntas causan mayor afinidad o distancia con el electorado tipo.</li>
-<li>Incentivo a explicitar posturas con fuentes verificables en lugar de comunicación difusa.</li>
-</ul>
-<h3 id="75-para-el-ecosistema-tecnologico-chileno">7.5 Para el ecosistema tecnológico chileno</h3>
-<ul>
-<li>Ejemplo de proyecto ciudadano con estándares profesionales (contract-first API, atomic design, WCAG AA, testing automatizado).</li>
-<li>Base de código reutilizable para otras iniciativas cívicas (<code>GovTech</code> chileno).</li>
-</ul>
-<hr />
-<h2 id="8-metodologia">8. Metodología</h2>
-<h3 id="81-enfoque-general">8.1 Enfoque general</h3>
-<p>El proyecto se desarrolló siguiendo una metodología <strong>iterativa e incremental</strong>, con sprints de una semana, entregas verticales end-to-end (backend + frontend + pruebas) por feature, y refactorización guiada por auditorías periódicas del código.</p>
-<h3 id="82-fases">8.2 Fases</h3>
-<p><strong>Fase 0 — Investigación y análisis del estado del arte</strong>
-- Revisión de la literatura académica sobre VAAs.
-- Análisis comparativo de 9 VAAs internacionales en 12 dimensiones (<code>docs/comparacion-vaas.md</code>).
-- Identificación de brechas en el ecosistema chileno.</p>
-<p><strong>Fase 1 — Diseño de arquitectura</strong>
-- Modelo de dominio (8 entidades principales).
-- Definición de contrato API bajo OpenAPI 3.1.
-- Selección de stack tecnológico bajo criterio de "herramientas aburridas y probadas".</p>
-<p><strong>Fase 2 — Implementación del MVP</strong>
-- Sprints funcionales: autenticación → catálogo → cuestionario → matching → resultados → detalle de candidato → noticias.
-- TDD parcial: pruebas antes de código para el algoritmo de matching y los importadores.</p>
-<p><strong>Fase 3 — Auditoría y refactorización</strong>
-- Auditoría de código con 17 hallazgos categorizados por severidad.
-- Corrección de hallazgos críticos y altos previo a cualquier publicación.
-- Refactorización de modelos y vistas a submódulos por dominio (reducción de acoplamiento).</p>
-<p><strong>Fase 4 — Verificación de datos</strong>
-- Importación de 6 candidatos y 12 preguntas mediante CSV.
-- 72 posturas borrador con nivel de confianza declarado, pendientes de verificación contra fuentes primarias para v0.2.</p>
-<h3 id="83-practicas-aplicadas">8.3 Prácticas aplicadas</h3>
-<ul>
-<li><strong>Contract-first</strong>: el schema OpenAPI es la fuente de verdad. Los tipos TypeScript del frontend se generan automáticamente desde este schema.</li>
-<li><strong>12-Factor App</strong>: configuración por variables de entorno, logging estructurado, dependencias declaradas.</li>
-<li><strong>Atomic Design</strong> (Brad Frost): componentes de UI organizados en átomos, moléculas, organismos, templates y páginas.</li>
-<li><strong>Testing pyramid</strong>: mayor volumen de pruebas unitarias (servicios puros, algoritmo), menor volumen de pruebas de integración (endpoints), pruebas E2E manuales sobre el flujo crítico.</li>
-<li><strong>Idempotencia</strong>: importadores diseñados para poder ejecutarse N veces con el mismo efecto que una sola.</li>
-<li><strong>Conventional Commits</strong>: histórico de commits estructurado por tipo (<code>feat</code>, <code>fix</code>, <code>refactor</code>, <code>docs</code>, <code>test</code>).</li>
-</ul>
-<hr />
-<h2 id="9-marco-teorico">9. Marco teórico</h2>
-<h3 id="91-voting-advice-applications-vaa">9.1 Voting Advice Applications (VAA)</h3>
-<p>Las VAAs son sistemas de apoyo a la decisión electoral que comparan las preferencias declaradas del votante con las de partidos o candidatos. Su origen se remonta a <em>StemWijzer</em> (Países Bajos, 1989), inicialmente distribuido en formato disquete. La literatura politológica (Marschall &amp; Schmidt, Cedroni &amp; Garzia, Garzia &amp; Marschall) ha estudiado extensamente su impacto sobre la participación, la formación de preferencias y la volatilidad electoral.</p>
-<p>Los VAAs se clasifican habitualmente por su modelo de recolección de posturas (autodeclarado por candidatos, curado por terceros, mixto), su escala de respuestas (binaria, Likert 3, Likert 5), y su forma de visualización (ranking, radar, mapa 2D bidimensional). <em>Tinder Decisivo</em> adopta un modelo curado con fuentes obligatorias, escala Likert 5 con opción explícita "No sé", y visualización combinada de ranking + radar por eje.</p>
-<h3 id="92-escalas-likert">9.2 Escalas Likert</h3>
-<p>La escala Likert (Rensis Likert, 1932) es un instrumento psicométrico ampliamente utilizado en investigación social para medir actitudes. En su forma clásica, presenta al respondiente una afirmación y le solicita indicar su grado de acuerdo en una escala ordinal simétrica (habitualmente 5 o 7 puntos). En este proyecto se adoptó la variante de 5 puntos por ser el "sweet spot" documentado entre resolución y fatiga cognitiva, y se incorporó una sexta opción explícita "No sé / Prefiero no responder" que se excluye del cálculo.</p>
-<h3 id="93-distancia-ponderada-no-lineal">9.3 Distancia ponderada no-lineal</h3>
-<p>Para el cálculo de afinidad, el proyecto adopta una fórmula que penaliza cuadráticamente las diferencias:</p>
-<pre><code>score_pregunta = 1 - (diff / 4)²
+<h2 id="3-marco-conceptual">3. Marco conceptual</h2>
+<h3 id="31-voting-advice-applications-vaa">3.1 Voting Advice Applications (VAA)</h3>
+<p>Las VAAs son sistemas de apoyo a la decisión electoral que comparan las preferencias declaradas del votante con las de partidos o candidatos, entregando un ranking de afinidad. Su origen se remonta a <em>StemWijzer</em> en Países Bajos (1989), inicialmente distribuido en formato disquete y hoy disponible como aplicación web. La literatura politológica (Cedroni &amp; Garzia, 2010; Garzia &amp; Marschall, 2014; Marschall, 2005) ha estudiado extensamente su impacto sobre la participación, la formación de preferencias y la volatilidad electoral. Walgrave et al. (2008) documentan que las VAAs pueden influir efectivamente en el voto en países con alta penetración.</p>
+<h3 id="32-estado-del-arte-de-las-vaas">3.2 Estado del arte de las VAAs</h3>
+<h4 id="321-vaas-consolidadas-en-europa">3.2.1 VAAs consolidadas en Europa</h4>
+<p><strong>StemWijzer</strong> (Países Bajos, ProDemos). La VAA más antigua del mundo (1989). Cada elección neerlandesa registra millones de consultas. Utiliza un algoritmo de proximidad basado en escala de tres opciones. Su algoritmo no está documentado públicamente en detalle y su código no es abierto, pero ha establecido el estándar del rubro (Cedroni &amp; Garzia, 2010).</p>
+<p><strong>Wahl-O-Mat</strong> (Alemania, <em>Bundeszentrale für politische Bildung</em>). Operado por la agencia federal alemana para la educación cívica desde 2002. Se basa en tesis políticas con tres opciones de respuesta, permite ponderar por importancia y publica su metodología de matching (Marschall, 2005). Su respaldo institucional continuo entre elecciones lo convierte en la referencia europea con mayor sostenibilidad.</p>
+<p><strong>Smartvote</strong> (Suiza, Politools). Cubre múltiples niveles electorales simultáneamente (federal, cantonal, comunal), una característica rara entre VAAs. Presenta al usuario un gráfico de radar con ocho dimensiones ideológicas y un mapa bidimensional de posicionamiento político.</p>
+<p><strong>Kieskompas</strong> (Países Bajos, Universiteit van Amsterdam). Introduce el paradigma del <em>mapa bidimensional</em>: en lugar de un ranking lineal, ubica al usuario y a los partidos en un plano cartesiano con eje económico y eje cultural.</p>
+<h4 id="322-vaas-e-iniciativas-informativas-en-america">3.2.2 VAAs e iniciativas informativas en América</h4>
+<p><strong>Vote Compass</strong> (Canadá y Australia, Vox Pop Labs). Operativo desde 2011 en alianza con las cadenas públicas CBC y ABC. No publica su algoritmo detallado ni su código.</p>
+<p><strong>Voto Informado del INE</strong> (México) y <strong>Voto Informado del JNE</strong> (Perú). Plataformas oficiales que agregan perfiles y programas de candidaturas, priorizando el directorio institucional por sobre el matching personalizado.</p>
+<p><strong>Infovotantes</strong> (Colombia). Información sobre votaciones y candidatos, sin matching algorítmico personalizado.</p>
+<p><strong>VotaPE</strong> (Perú). Combina información de candidatos, comparación directa, planes de gobierno, noticias y podcast de partidos políticos. Más cercana al directorio comparativo enriquecido que a la VAA algorítmica clásica.</p>
+<h4 id="323-el-caso-chileno">3.2.3 El caso chileno</h4>
+<p>En Chile se han identificado varias iniciativas con distintos grados de cercanía al modelo VAA. <strong>Votamos Todos</strong> (Zismo, 2021-2022) es el antecedente más cercano al modelo VAA propiamente tal: creada para el plebiscito constitucional con un cuestionario de 70 preguntas que el usuario podía ir respondiendo en tramos de 5 en 5, generando un match parcial desde las primeras cinco respuestas contra las respuestas de los candidatos. <strong>Decide Chile</strong> ofrece información electoral, predicción de resultados y componentes lúdicos, pero no incorpora matching personalizado. <strong>Vota Inteligente</strong> difunde propuestas de candidaturas sin componente algorítmico. <strong>Infovecino</strong> entrega información personalizada por comuna, también sin matching. Ninguna cumple simultáneamente con las seis características identificadas como necesarias (sección 1.2); <em>Votamos Todos</em> es la más cercana pero se limitó al plebiscito.</p>
+<h4 id="324-factores-comunes-de-exito">3.2.4 Factores comunes de éxito</h4>
+<p>De la revisión se identifican tres factores comunes en las VAAs sostenibles: <strong>respaldo institucional continuo entre elecciones</strong>, <strong>integración con periodismo político o educación cívica formal</strong>, y <strong>transparencia metodológica</strong>.</p>
+<p>El Anexo C presenta la comparativa detallada de <em>matchVote</em> con las iniciativas mencionadas.</p>
+<h3 id="33-escalas-likert">3.3 Escalas Likert</h3>
+<p>La escala Likert (Likert, 1932) es un instrumento psicométrico ampliamente utilizado en investigación social para medir actitudes. En este proyecto se adoptó la variante de 5 puntos por ser el <em>sweet spot</em> documentado entre resolución y fatiga cognitiva (Krosnick &amp; Presser, 2010), y se incorporó una sexta opción explícita "No sé / Prefiero no responder" que se excluye del cálculo.</p>
+<h3 id="34-distancia-ponderada-no-lineal">3.4 Distancia ponderada no-lineal</h3>
+<p>El proyecto adopta una fórmula que penaliza cuadráticamente las diferencias:</p>
+<pre><code>score_pregunta = 1 - (diff / 4)^2
 </code></pre>
-<p>donde <code>diff</code> es la diferencia absoluta entre el valor Likert del usuario y el del candidato, normalizada por el rango máximo (4 en escala 1-5). Esta forma penaliza más fuertemente las diferencias extremas (candidatos "opuestos") que la suma de varias diferencias pequeñas, alineándose con la percepción humana de similitud política. Cada score se pondera por un multiplicador declarado por el usuario (0.5x, 1.0x, 1.5x, 2.0x) según la importancia percibida del tema.</p>
-<h3 id="94-arquitectura-de-software">9.4 Arquitectura de software</h3>
-<p>El diseño del sistema se guía por principios establecidos en la literatura de ingeniería de software:</p>
+<p>donde <code>diff</code> es la diferencia absoluta entre el valor Likert del usuario y el del candidato, normalizada por el rango máximo (4 en escala 1-5). Cada score se pondera por un multiplicador declarado por el usuario. Este enfoque es coherente con la literatura sobre distancias euclidianas ponderadas en el análisis multidimensional de posiciones políticas (Garzia &amp; Marschall, 2014).</p>
+<h3 id="35-modelos-polimorficos-con-jerarquia">3.5 Modelos polimórficos con jerarquía</h3>
+<p>El diseño del modelo <code>UnidadTerritorial</code> implementa el patrón <em>polymorphic hierarchical entity</em>, donde una única tabla representa unidades de distintos niveles relacionadas mediante una referencia auto-recursiva <code>padre</code>. Este patrón, común en la modelación de estructuras administrativas y en ontologías (Fowler, 2003), permite agregar nuevos niveles sin migraciones de schema.</p>
+<h3 id="36-arquitectura-de-software">3.6 Arquitectura de software</h3>
 <ul>
-<li><strong>SOLID</strong> (Robert C. Martin): Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion.</li>
-<li><strong>DRY</strong> (Andy Hunt &amp; Dave Thomas, <em>The Pragmatic Programmer</em>): Don't Repeat Yourself.</li>
-<li><strong>YAGNI</strong> (extreme programming): You Aren't Gonna Need It, evitar sobre-ingeniería.</li>
-<li><strong>Clean Architecture</strong> (Robert C. Martin): separación en capas concéntricas con dependencias apuntando al dominio.</li>
-<li><strong>12-Factor App</strong> (Adam Wiggins): metodología para aplicaciones web escalables y portables.</li>
+<li><strong>SOLID</strong> (Martin, 2017): principios de diseño orientado a objetos aplicados a la modularización del backend.</li>
+<li><strong>DRY</strong> (Hunt &amp; Thomas, 1999): eliminación de duplicación en modelos, serializadores y vistas.</li>
+<li><strong>YAGNI</strong> (Beck, 1999): no implementar features sin necesidad demostrada; aplicado retroactivamente en la Fase 5 del proyecto.</li>
+<li><strong>Clean Architecture</strong> (Martin, 2017): separación de capas y dependencias unidireccionales.</li>
+<li><strong>12-Factor App</strong> (Wiggins, 2011): configuración externa, dependencias declaradas, procesos sin estado.</li>
 </ul>
-<h3 id="95-atomic-design">9.5 Atomic Design</h3>
-<p>Metodología de diseño de sistemas de interfaces propuesta por Brad Frost (2013), que organiza los componentes de UI en cinco niveles jerárquicos: átomos (elementos indivisibles como botones, inputs), moléculas (composiciones simples como campos de formulario), organismos (secciones funcionales como cabeceras), templates (esqueletos de página) y páginas (instancias con contenido real). El proyecto aplica los cuatro primeros niveles en la organización de <code>frontend/src/components/</code>.</p>
-<h3 id="96-accesibilidad-wcag-22">9.6 Accesibilidad WCAG 2.2</h3>
-<p>Las <em>Web Content Accessibility Guidelines</em> del World Wide Web Consortium (W3C) definen criterios de éxito organizados en cuatro principios: perceptibilidad, operabilidad, comprensibilidad y robustez. El proyecto se compromete con el <strong>nivel AA</strong>, que incluye entre otros: contraste de color mínimo de 4.5:1 para texto normal y 3:1 para texto grande, targets táctiles de al menos 24×24 CSS pixels, navegación completa por teclado, y compatibilidad con lectores de pantalla.</p>
-<h3 id="97-contract-first-api-design">9.7 Contract-first API design</h3>
-<p>Enfoque de diseño de APIs en el cual el contrato (schema OpenAPI en este caso) se define antes que la implementación y sirve como fuente única de verdad tanto para el servidor como para los consumidores. Este enfoque, apoyado por herramientas como <code>drf-spectacular</code> (backend) y <code>openapi-typescript</code> (frontend), elimina el drift entre las expectativas del cliente y las respuestas del servidor.</p>
+<h3 id="37-atomic-design">3.7 Atomic Design</h3>
+<p>Metodología propuesta por Frost (2016) que estructura la interfaz en cinco niveles: átomos, moléculas, organismos, templates y pantallas. El proyecto aplica los cinco niveles con implementación real de templates (<code>AppShell</code>).</p>
+<h3 id="38-accesibilidad-wcag-22">3.8 Accesibilidad WCAG 2.2</h3>
+<p>Las <em>Web Content Accessibility Guidelines</em> del W3C (2023) definen criterios de éxito organizados en cuatro principios: perceptibilidad, operabilidad, comprensibilidad y robustez. El proyecto se compromete con el <strong>nivel AA</strong>, lo que implica contrastes mínimos, tamaños de tap targets, navegación por teclado y compatibilidad con tecnologías asistivas.</p>
+<h3 id="39-contract-first-api-design">3.9 Contract-first API design</h3>
+<p>Enfoque en el cual el contrato (schema OpenAPI en este caso) se define antes que la implementación y sirve como fuente única de verdad (OpenAPI Initiative, 2021). Elimina el <em>drift</em> entre las expectativas del cliente y las respuestas del servidor.</p>
+<h3 id="310-cache-invalidation-y-query-keys-centralizadas">3.10 Cache invalidation y query keys centralizadas</h3>
+<p>TanStack Query v5 (Linsley, 2024) introduce el patrón de <em>query keys</em> jerárquicos que permiten invalidaciones granulares del cache. El proyecto centraliza las query keys en <code>api/queryClient.ts</code> para evitar el drift entre puntos de invalidación.</p>
+<!--PAGE_BREAK-->
+
 <hr />
-<h2 id="10-flujo-del-usuario">10. Flujo del usuario</h2>
-<p>Esta sección describe el recorrido completo de un usuario nuevo, desde la primera apertura de la aplicación hasta la revisión de su match con un candidato específico.</p>
-<h3 id="101-diagrama-de-flujo-principal">10.1 Diagrama de flujo principal</h3>
-<pre><code>[Inicio]
-   |
-   v
-+---------------+
-| Registro /    |------&gt; [Cuenta creada] ---+
-| Login         |                           |
-+---------------+                           v
-                                  +-----------------+
-                                  | Home            |
-                                  | (Tipos de       |
-                                  |  elección)      |
-                                  +-----------------+
-                                          |
-                                          v
-                                  +-----------------+
-                                  | Cuestionario    |
-                                  | (12 preguntas   |&lt;--- puede volver
-                                  |  Likert + peso) |     con &quot;Atrás&quot;
-                                  +-----------------+
-                                          |
-                                          v
-                                  +-----------------+
-                                  | Envío           |
-                                  | (POST batch     |
-                                  |  respuestas)    |
-                                  +-----------------+
-                                          |
-                                          v
-                                  +-----------------+
-                                  | Cálculo match   |
-                                  | (POST match)    |
-                                  +-----------------+
-                                          |
-                                          v
-                                  +-----------------+
-                                  | Resultados      |
-                                  | (ranking con    |
-                                  |  confianza)     |
-                                  +-----------------+
-                                          |
-                          +---------------+---------------+
-                          v                               v
-                  +---------------+               +---------------+
-                  | Detalle       |               | Comparar      |
-                  | candidato     |               | candidatos    |
-                  | (radar +      |               | (side by side)|
-                  |  posturas +   |               +---------------+
-                  |  noticias)    |
-                  +---------------+
-</code></pre>
-<h3 id="102-descripcion-paso-a-paso">10.2 Descripción paso a paso</h3>
-<p><strong>Paso 1 — Registro o login</strong></p>
-<p>El usuario abre la aplicación y se encuentra con la pantalla de autenticación. Si no tiene cuenta, se registra con nombre de usuario, correo electrónico y contraseña. Estos datos viajan al endpoint <code>POST /api/v1/register/</code>, y el backend crea el registro en la tabla <code>auth_user</code> con contraseña hasheada mediante PBKDF2-SHA256 (600.000 iteraciones, estándar de Django 5.x).</p>
-<p>Si ya tiene cuenta, ingresa con usuario y contraseña. El backend valida las credenciales en <code>POST /api/v1/login/</code> y devuelve un token de autenticación DRF, que el frontend almacena en <code>SecureStore</code> (iOS/Android) o <code>localStorage</code> (web). Este token se incluye en el header <code>Authorization: Token &lt;token&gt;</code> de todas las peticiones subsecuentes.</p>
-<p><strong>Paso 2 — Home</strong></p>
-<p>Una vez autenticado, el usuario ve la pantalla <code>HomeScreen</code>, que consulta <code>GET /api/v1/tipos-eleccion/</code> y despliega los tipos de elección disponibles. En la versión actual, la única opción es "Presidencial". Al seleccionarla, se navega al cuestionario.</p>
-<p><strong>Paso 3 — Cuestionario</strong></p>
-<p><code>CuestionarioScreen</code> consulta <code>GET /api/v1/preguntas/?tipo_eleccion_id=1</code> para obtener las 12 preguntas de la elección presidencial, junto con sus opciones de respuesta. Las preguntas se presentan una a una, cada una con:</p>
+<h2 id="4-propuesta-de-solucion">4. Propuesta de solución</h2>
+<h3 id="41-quien-propone-la-solucion">4.1 Quién propone la solución</h3>
+<p>La solución <em>matchVote</em> es propuesta y desarrollada por <strong>Jenifer Castillo</strong> como trabajo de tesis para optar al grado de Ingeniera en Informática. El proyecto es individual en cuanto al desarrollo, con orientación del profesor(a) guía y la comisión evaluadora de la carrera.</p>
+<p>El código fuente y su documentación forman parte de los entregables de la tesis y quedan a disposición de la comisión evaluadora para la revisión académica.</p>
+<h3 id="42-que-solucion-se-propone">4.2 Qué solución se propone</h3>
+<p>Se propone construir <strong>una aplicación web progresiva (PWA) y móvil multiplataforma</strong> que sirva como Voting Advice Application (VAA) para el contexto electoral chileno. La solución integra:</p>
 <ul>
-<li>El enunciado de la afirmación (por ejemplo: "Chile debe cerrar las centrales de carbón antes de 2030").</li>
-<li>Un botón de información que despliega <code>PreguntaInfoModal</code> con contexto educativo y repercusiones (contenido pre-cargado en el modelo <code>Pregunta</code>).</li>
-<li>Cinco opciones Likert seleccionables mediante <code>SelectableButton</code> (Muy en desacuerdo, En desacuerdo, Neutral, De acuerdo, Muy de acuerdo).</li>
-<li>Una sexta opción "No sé / Prefiero no responder" que se marca en el backend con <code>es_no_se=True</code>.</li>
-<li>Un <code>WeightSelector</code> con cuatro niveles de importancia (No me importa, Poco, Medio, Mucho), correspondientes a los multiplicadores 0.5x, 1.0x, 1.5x y 2.0x.</li>
+<li>Un <strong>backend</strong> en Django + Django REST Framework con base de datos SQLite (desarrollo) o PostgreSQL (producción).</li>
+<li>Un <strong>frontend</strong> en React Native + Expo, entregable simultáneamente como aplicación web (PWA responsive), iOS y Android desde un único codebase.</li>
+<li>Un <strong>contrato API</strong> bajo OpenAPI 3.1 auto-generado, con tipos TypeScript sincronizados en el frontend.</li>
+<li>Un <strong>algoritmo de matching</strong> cuadrático con ponderación declarada, manejo explícito de "No sé", nivel de confianza y explicación pregunta-a-pregunta.</li>
+<li>Un <strong>modelo territorial polimórfico</strong> que representa las 16 regiones, 28 distritos y 346 comunas de Chile.</li>
+<li>Un <strong>sistema de diseño</strong> interno con showcase completo y cumplimiento WCAG 2.2 AA (W3C, 2023).</li>
+<li>Un <strong>empaquetado con Docker</strong> para despliegue reproducible (Docker Inc., 2024).</li>
 </ul>
-<p>Las respuestas se acumulan en el store de Zustand <code>store/cuestionario.ts</code> sin viajar al servidor hasta el envío final. Esto permite navegar atrás y modificar respuestas sin latencia.</p>
-<p><strong>Paso 4 — Envío</strong></p>
-<p>Al responder la última pregunta y presionar "Enviar", el frontend realiza <code>POST /api/v1/respuestas/</code> con el array completo de respuestas. El backend valida cada una (que la opción corresponda a la pregunta declarada, que el peso esté en el rango válido) y crea o actualiza los registros en <code>RespuestaUsuario</code> mediante <code>update_or_create</code> con clave única <code>(user, pregunta)</code>.</p>
-<p>Si el envío es exitoso, se navega a <code>SubmitDoneScreen</code>, una pantalla intermedia que confirma la recepción y ofrece un botón "Ver mis matches".</p>
-<p><strong>Paso 5 — Cálculo del match</strong></p>
-<p>Al presionar "Ver mis matches", el frontend realiza <code>POST /api/v1/match-candidatos/</code> con el <code>tipo_eleccion_id</code>. Este endpoint dispara el algoritmo completo:</p>
+<p>La solución no reemplaza al SERVEL ni al debate público; los complementa entregando una capa comparativa transparente.</p>
+<h3 id="43-quienes-se-benefician">4.3 Quiénes se benefician</h3>
+<p>La solución beneficia a los actores identificados en la sección 2.3, con impactos concretos por segmento:</p>
+<ul>
+<li><strong>Al votante individual</strong>: reduce el tiempo de comparación de horas a 5-10 minutos por elección activa; entrega ranking objetivo con criterios explícitos; asegura filtro automático de candidatos por ubicación; provee explicación pregunta-a-pregunta; garantiza acceso sin costo, sin publicidad y sin extracción de datos personales.</li>
+<li><strong>A la ciudadanía organizada</strong>: entrega fuente común auditable para conversaciones familiares, laborales o educativas.</li>
+<li><strong>A investigadores y periodistas</strong>: entrega un modelo comparativo estructurado y documentación completa del algoritmo, permitiendo análisis y réplica académica.</li>
+<li><strong>A candidaturas</strong>: entrega retroalimentación sobre coherencia programática.</li>
+<li><strong>Al ecosistema tecnológico chileno</strong>: entrega un modelo de diseño reutilizable para otras iniciativas GovTech, con modelo territorial polimórfico adaptable a otros países latinoamericanos.</li>
+<li><strong>A personas con discapacidad</strong>: garantiza compatibilidad con lectores de pantalla, navegación por teclado y contrastes WCAG AA (W3C, 2023).</li>
+</ul>
+<h3 id="44-que-hay-en-la-solucion">4.4 Qué hay en la solución</h3>
+<p>La solución se compone de los siguientes elementos funcionales:</p>
+<ul>
+<li><strong>19 modelos de dominio</strong> organizados en 10 submódulos (catálogo electoral, territorial, perfil, cuestionario, ejes, matching, datos de usuario, autenticación y contenido).</li>
+<li><strong>11 submódulos de vistas</strong> con 25+ endpoints REST.</li>
+<li><strong>9 submódulos de serializadores</strong> para el contrato API.</li>
+<li><strong>5 servicios</strong> de lógica de dominio (matching, password reset, perfil, respuestas, tipos).</li>
+<li><strong>16 comandos de management</strong> (importadores + seeds + utilidades).</li>
+<li><strong>38 migraciones</strong> de base de datos que registran la evolución del schema.</li>
+<li><strong>25 archivos de pruebas backend</strong> que cubren algoritmo, territorial, seeds, importadores y permisos.</li>
+<li><strong>18 pantallas</strong> de aplicación, más una pantalla oculta <code>DesignSystemScreen</code> para desarrolladores.</li>
+<li><strong>27 átomos, 29 moléculas y 17 organismos</strong> siguiendo atomic design (Frost, 2016), más un template real <code>AppShell</code>.</li>
+<li><strong>1 sistema de diseño interno</strong> con showcase completo.</li>
+<li><strong>20+ documentos</strong> de arquitectura, algoritmo, accesibilidad y navegación.</li>
+<li><strong>Docker</strong> para empaquetado reproducible.</li>
+</ul>
+<h3 id="45-cuando-impacta-la-solucion">4.5 Cuándo impacta la solución</h3>
+<p>El impacto de la solución se distribuye temporalmente en los mismos cuatro momentos del ciclo del votante identificados en la sección 2.6:</p>
 <ol>
-<li>El backend recupera las respuestas del usuario (excluyendo las "No sé").</li>
-<li>Para cada candidato registrado en el tipo de elección, recupera sus posturas.</li>
-<li>Para cada pregunta con overlap (respondida por usuario y con postura del candidato), calcula el <code>score_pregunta = 1 - (diff/4)²</code>, lo pondera por el multiplicador de peso, y acumula por eje temático.</li>
-<li>Agrega el resultado global y por eje.</li>
-<li>Determina el nivel de confianza según el número de preguntas consideradas (<code>tentativa</code> &lt; 5, <code>media</code> 5-9, <code>alta</code> &gt;= 10).</li>
-<li>Persiste el resultado en <code>MatchCandidato</code> mediante <code>update_or_create</code>.</li>
-<li>Devuelve la lista de matches ordenada por porcentaje descendente.</li>
+<li><strong>Etapa de exposición inicial</strong>: la aplicación está disponible desde el momento en que se publican las candidaturas oficiales, permitiendo al votante familiarizarse con las opciones antes de la sobrecarga informativa mediática.</li>
+<li><strong>Etapa de búsqueda activa</strong>: la aplicación reduce el costo de la búsqueda estructurada de horas a minutos, entregando una comparación sistemática que no existe en otras fuentes.</li>
+<li><strong>Etapa de decisión final</strong>: la aplicación entrega criterios explícitos y auditables que el votante puede utilizar como base racional de la decisión, sin sustituirla.</li>
+<li><strong>Etapa post-electoral</strong>: el historial de respuestas del usuario y las posturas registradas de los electos permiten trazabilidad retroactiva.</li>
 </ol>
-<p><strong>Paso 6 — Resultados</strong></p>
-<p><code>ResultadosScreen</code> muestra el ranking de candidatos con:</p>
+<h3 id="46-donde-resuelve-el-problema-y-donde-impacta">4.6 Dónde resuelve el problema y dónde impacta</h3>
+<p>La solución opera desde el <strong>navegador web y las tiendas de aplicaciones móviles</strong> (iOS App Store y Google Play Store), acompletando la infraestructura digital ya existente del ecosistema electoral chileno. Impacta directamente en los siguientes puntos del ciclo:</p>
 <ul>
-<li>Porcentaje de match global.</li>
-<li>Badge de confianza (<code>tentativa</code>, <code>media</code>, <code>alta</code>) con color diferenciado.</li>
-<li>Foto y nombre del candidato.</li>
-<li>Chip de partido.</li>
-<li>Acceso al detalle del candidato.</li>
+<li><strong>Punto de acceso ciudadano</strong>: sirve como capa comparativa entre el votante y la información oficial del SERVEL (SERVEL, 2024), sin reemplazarla.</li>
+<li><strong>Punto de decisión territorial</strong>: por su modelo polimórfico jerárquico (Fowler, 2003), impacta simultáneamente en la decisión nacional (presidencial), distrital (diputados) y comunal (alcaldes), reflejando la realidad de que un mismo votante decide sobre varias elecciones a la vez.</li>
+<li><strong>Punto de transparencia</strong>: al publicar el algoritmo completo en la propia documentación del proyecto y al exponer las posturas asignadas a cada candidato dentro de la propia aplicación, permite que universidades, periodismo técnico y ciudadanía organizada revisen tanto el mecanismo de cálculo como los insumos que lo alimentan.</li>
+<li><strong>Punto de accesibilidad</strong>: al cumplir WCAG 2.2 AA (W3C, 2023), impacta positivamente en segmentos habitualmente excluidos de las guias electorales tradicionales.</li>
 </ul>
-<p><strong>Paso 7 — Detalle del candidato</strong></p>
-<p><code>DetalleCandidatoScreen</code> presenta:</p>
-<ul>
-<li>Biografía y propuesta electoral del candidato.</li>
-<li><code>RadarChart</code> con la afinidad desglosada por los 7 ejes temáticos (Economía, Sociedad, Ambiente, Seguridad, DDHH, Internacional, Institucional).</li>
-<li>Lista de <code>PosturaCandidato</code> con justificación y fuente por cada pregunta.</li>
-<li>Sección de noticias recientes, consultando <code>GET /api/v1/candidatos/&lt;id&gt;/noticias/</code>.</li>
-</ul>
-<p><strong>Paso 8 — Comparar candidatos (opcional)</strong></p>
-<p>Desde resultados, el usuario puede acceder a <code>CompararScreen</code>, que permite seleccionar dos candidatos y ver sus posturas lado a lado en formato de tabla comparativa.</p>
-<h3 id="103-rutas-alternativas">10.3 Rutas alternativas</h3>
-<ul>
-<li><strong>Marcar favorito o descartar</strong>: desde el detalle de candidato (backend implementado, UI en desarrollo).</li>
-<li><strong>Guardar decisión final</strong>: registro de la elección final del usuario para un tipo de elección determinado (backend implementado, UI en desarrollo).</li>
-<li><strong>Ver noticias generales</strong>: <code>NoticiasScreen</code> muestra un feed agregado de todas las noticias recientes con filtros por candidato y por fecha.</li>
-<li><strong>Perfil y configuración</strong>: <code>PerfilScreen</code> y <code>ConfiguracionScreen</code> permiten editar datos del perfil, cambiar contraseña, y eliminar cuenta.</li>
-<li><strong>Recuperación de contraseña</strong>: <code>PasswordResetRequestScreen</code> y <code>PasswordResetConfirmScreen</code> implementan el flujo de reset por correo electrónico mediante token de expiración.</li>
-</ul>
-<hr />
-<h2 id="11-diseno-e-implementacion">11. Diseño e implementación</h2>
-<h3 id="111-stack-tecnologico">11.1 Stack tecnológico</h3>
-<p><strong>Backend</strong></p>
+<h3 id="47-metodologia">4.7 Metodología</h3>
+<p>El proyecto se desarrolló siguiendo una metodología <strong>iterativa e incremental</strong>, con sprints de una semana, entregas verticales end-to-end por feature, refactorización guiada por auditorías periódicas del código y aplicación estricta de YAGNI (Beck, 1999). Se organizó en ocho fases:</p>
+<p><strong>Fase 0 — Investigación y análisis del estado del arte.</strong> Revisión de literatura politológica (Cedroni &amp; Garzia, 2010; Garzia &amp; Marschall, 2014; Walgrave et al., 2008) y comparativa de nueve VAAs internacionales.</p>
+<p><strong>Fase 1 — Diseño de arquitectura.</strong> Modelo de dominio inicial y contrato API bajo OpenAPI 3.1 (OpenAPI Initiative, 2021).</p>
+<p><strong>Fase 2 — Implementación del MVP inicial.</strong> Sprints funcionales end-to-end de autenticación, catálogo, cuestionario, matching, resultados y noticias.</p>
+<p><strong>Fase 3 — Auditoría de código y refactorización estructural.</strong> 17 hallazgos iniciales; resolución de 4 críticos y 6 altos.</p>
+<p><strong>Fase 4 — Expansión territorial y multi-elección.</strong> Modelos <code>Region</code>, <code>Distrito</code>, <code>Comuna</code> y <code>UnidadTerritorial</code> polimórfico. Campo <code>es_base</code> para preguntas transversales.</p>
+<p><strong>Fase 5 — Simplificación agresiva (YAGNI).</strong> Eliminación del flujo swipe y del módulo <code>DecisionFinal</code>. Unificación de favoritos + descartados en <code>MisGuardadosScreen</code>.</p>
+<p><strong>Fase 6 — Sistema de diseño interno y accesibilidad.</strong> <code>DesignSystemScreen</code> con showcase completo. Auditoría WCAG. Guía de accesibilidad y mapa de navegación.</p>
+<p><strong>Fase 7 — Documentación estructurada.</strong> Reorganización de documentación en <code>docs/backend/simple/</code> y <code>docs/backend/tecnico/</code>.</p>
+<h3 id="48-cronograma">4.8 Cronograma</h3>
+<p><strong>Tabla 6</strong></p>
+<p><em>Cronograma de fases y sprints</em></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Fase</th>
+<th>Actividad principal</th>
+<th style="text-align: center;">Duración</th>
+<th>Entregable clave</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td>Investigación y estado del arte</td>
+<td style="text-align: center;">3 semanas</td>
+<td>Comparativa de VAAs, definición del problema</td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td>Diseño de arquitectura y contrato API</td>
+<td style="text-align: center;">2 semanas</td>
+<td>Modelo inicial, primer esquema OpenAPI</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td>MVP inicial (backend + frontend)</td>
+<td style="text-align: center;">10 semanas</td>
+<td>Flujo end-to-end</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td>Auditoría de código y refactorización</td>
+<td style="text-align: center;">3 semanas</td>
+<td>Resolución de 4 críticos + 6 altos</td>
+</tr>
+<tr>
+<td style="text-align: center;">4</td>
+<td>Expansión territorial y multi-elección</td>
+<td style="text-align: center;">5 semanas</td>
+<td>Modelos territoriales, <code>es_base</code>, seeds</td>
+</tr>
+<tr>
+<td style="text-align: center;">5</td>
+<td>Simplificación YAGNI</td>
+<td style="text-align: center;">2 semanas</td>
+<td>Eliminación de swipe y <code>DecisionFinal</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">6</td>
+<td>Sistema de diseño y accesibilidad</td>
+<td style="text-align: center;">3 semanas</td>
+<td><code>DesignSystemScreen</code>, guía WCAG</td>
+</tr>
+<tr>
+<td style="text-align: center;">7</td>
+<td>Documentación y tesis</td>
+<td style="text-align: center;">4 semanas</td>
+<td><code>docs/backend/*</code>, este documento</td>
+</tr>
+</tbody>
+</table>
+<p><em>Nota.</em> Elaboración propia. Duración total estimada: 32 semanas (~8 meses).</p>
+<p><strong>Figura 5</strong></p>
+<p><em>Carta Gantt del proyecto por fases y sprints</em></p>
+<pre><code>Semanas:  1--3  4-5  6---------15  16-18  19-23  24-25  26-28  29-32
+          |     |    |             |      |      |      |      |
+Fase 0 :  ###
+Fase 1 :        ##
+Fase 2 :             ##########
+Fase 3 :                            ###
+Fase 4 :                                    #####
+Fase 5 :                                            ##
+Fase 6 :                                                    ###
+Fase 7 :                                                             ###
+</code></pre>
+<p><em>Nota.</em> Elaboración propia. Cada <code>#</code> representa aproximadamente una semana.</p>
+<h3 id="49-flujo-del-usuario">4.9 Flujo del usuario</h3>
+<p><strong>Figura 1</strong></p>
+<p><em>Diagrama de flujo del usuario principal</em></p>
+<pre><code>[Splash] --&gt; [Welcome tour] --&gt; [Login / Signup]
+                                        |
+                                        v
+                            [Seleccion de ubicacion]
+                                        |
+                                        v
+                            +----------------------+
+                            |  Home HUB            |
+                            |  (multi-eleccion)    |&lt;----+
+                            +----------------------+     |
+                                    |                    |
+                    +---------------+---------+          |
+                    v               v         v          |
+            [Gestion elec.]  [Cuestionario]  [Novedades] |
+                                    |                    |
+                                    v                    |
+                            [Envio respuestas]           |
+                                    |                    |
+                                    v                    |
+                            [Calculo match]              |
+                                    |                    |
+                                    v                    |
+                            +-------------+              |
+                            | Resultados  |              |
+                            +-------------+              |
+                                    |                    |
+                    +---------------+-----------+        |
+                    v               v           v        |
+            [Detalle cand.]  [Comparar]  [Guardados] ----+
+</code></pre>
+<p><em>Nota.</em> Elaboración propia.</p>
+<p>El flujo principal consta de 12 pasos: splash + welcome tour, login/signup, selección de ubicación, home HUB multi-elección, gestión de elecciones activas, cuestionario con Likert 1-5 + "No sé" + peso, envío de respuestas, cálculo de match, resultados con ranking, detalle de candidato con radar y desglose pregunta-a-pregunta, comparación de candidatos, y gestión de guardados (favoritos + descartados + bookmarks de posturas).</p>
+<h3 id="410-stack-tecnologico">4.10 Stack tecnológico</h3>
+<p><strong>Tabla 7</strong></p>
+<p><em>Stack tecnológico del backend</em></p>
 <table>
 <thead>
 <tr>
@@ -568,7 +991,7 @@ hr {
 <tbody>
 <tr>
 <td>Framework web</td>
-<td>Django</td>
+<td>Django (Django Software Foundation, 2024)</td>
 <td>5.2</td>
 <td>Framework principal, ORM, admin</td>
 </tr>
@@ -580,7 +1003,7 @@ hr {
 </tr>
 <tr>
 <td>Auth</td>
-<td>DRF Token Authentication</td>
+<td>DRF Token Authentication (custom)</td>
 <td>-</td>
 <td>Autenticación mobile-friendly</td>
 </tr>
@@ -594,7 +1017,7 @@ hr {
 <td>DB desarrollo</td>
 <td>SQLite</td>
 <td>-</td>
-<td>Zero-config para dev</td>
+<td>Zero-config</td>
 </tr>
 <tr>
 <td>DB producción</td>
@@ -615,16 +1038,10 @@ hr {
 <td>Procesamiento de imágenes</td>
 </tr>
 <tr>
-<td>Cleanup</td>
-<td>django-cleanup</td>
-<td>9.0+</td>
-<td>Elimina archivos huérfanos</td>
-</tr>
-<tr>
 <td>CORS</td>
 <td>django-cors-headers</td>
 <td>4.4+</td>
-<td>Habilita consumo desde frontend</td>
+<td>Consumo desde frontend</td>
 </tr>
 <tr>
 <td>Testing</td>
@@ -634,13 +1051,21 @@ hr {
 </tr>
 <tr>
 <td>Package manager</td>
-<td>uv</td>
+<td>uv (Astral, 2024)</td>
 <td>-</td>
-<td>Instalación y bloqueo de dependencias</td>
+<td>Instalación de dependencias</td>
+</tr>
+<tr>
+<td>Containerización</td>
+<td>Docker (Docker Inc., 2024)</td>
+<td>-</td>
+<td>Deploy reproducible</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Frontend</strong></p>
+<p><em>Nota.</em> Elaboración propia a partir del <code>pyproject.toml</code>.</p>
+<p><strong>Tabla 8</strong></p>
+<p><em>Stack tecnológico del frontend</em></p>
 <table>
 <thead>
 <tr>
@@ -652,7 +1077,7 @@ hr {
 <tbody>
 <tr>
 <td>Runtime</td>
-<td>React Native + Expo SDK 57</td>
+<td>React Native + Expo SDK 57 (Meta Platforms, 2024; Expo, 2024)</td>
 <td>Framework multiplataforma</td>
 </tr>
 <tr>
@@ -663,27 +1088,27 @@ hr {
 <tr>
 <td>Navegación</td>
 <td>React Navigation</td>
-<td>Ruteo y navegación entre pantallas</td>
+<td>Ruteo entre pantallas</td>
 </tr>
 <tr>
 <td>Data fetching</td>
-<td>TanStack Query v5</td>
-<td>Cache, retry, dedup de peticiones HTTP</td>
+<td>TanStack Query v5 (Linsley, 2024)</td>
+<td>Cache, retry, dedup</td>
 </tr>
 <tr>
 <td>Estado</td>
-<td>Zustand</td>
-<td>Estado global sin boilerplate</td>
+<td>Zustand (pmndrs, 2024)</td>
+<td>Estado global</td>
 </tr>
 <tr>
 <td>Tipos</td>
-<td>TypeScript strict</td>
+<td>TypeScript strict (Microsoft, 2024)</td>
 <td>Sistema de tipos estático</td>
 </tr>
 <tr>
 <td>Contratos</td>
 <td>openapi-typescript</td>
-<td>Generación de tipos desde OpenAPI</td>
+<td>Tipos desde OpenAPI</td>
 </tr>
 <tr>
 <td>Almacenamiento seguro</td>
@@ -693,47 +1118,35 @@ hr {
 <tr>
 <td>Testing</td>
 <td>Jest + React Native Testing Library</td>
-<td>Suite de pruebas</td>
+<td>Pruebas</td>
 </tr>
 </tbody>
 </table>
-<h3 id="112-modelo-de-dominio">11.2 Modelo de dominio</h3>
-<p>El backend define 8 entidades principales en <code>core/models/</code>:</p>
-<ol>
-<li><strong><code>TipoEleccion</code></strong>: representa un proceso electoral (Presidencial, Parlamentaria, etc.).</li>
-<li><strong><code>Candidato</code></strong>: candidato con nombre, apellido, partido, biografía, propuesta electoral y relación M2M con <code>TipoEleccion</code>.</li>
-<li><strong><code>Pregunta</code></strong>: enunciado de política pública, con <code>eje_tematico</code> (ECONOMIA, SOCIEDAD, AMBIENTE, SEGURIDAD, DDHH, INTERNACIONAL, INSTITUCIONAL, OTRO), campos educativos (<code>explicacion</code>, <code>repercusiones</code>) y relación con <code>TipoEleccion</code>.</li>
-<li><strong><code>OpcionRespuesta</code></strong>: opciones asociadas a una pregunta, con <code>valor</code> (1-5), <code>texto</code> y <code>es_no_se</code> (booleano).</li>
-<li><strong><code>RespuestaUsuario</code></strong>: registra la respuesta de un usuario a una pregunta, con <code>opcion_elegida</code> y <code>peso</code> (0-3), con clave única <code>(user, pregunta)</code>.</li>
-<li><strong><code>PosturaCandidato</code></strong>: registra la postura de un candidato en una pregunta, con <code>opcion_respuesta</code> y <code>justificacion</code> (que incluye URL de fuente).</li>
-<li><strong><code>MatchCandidato</code></strong>: cache del cálculo de match por <code>(user, candidato)</code>, con <code>match_percentage_value</code>, <code>num_preguntas_consideradas</code>, <code>breakdown_por_eje</code> (JSONField) y <code>confianza</code>.</li>
-<li><strong><code>Noticia</code></strong>: noticias asociadas a candidatos mediante M2M <code>candidatos_mencionados</code>, con dedup por URL.</li>
-</ol>
-<p>Adicionalmente: <code>CandidatoFavorito</code>, <code>CandidatoDescartado</code>, <code>DecisionFinal</code> para las funcionalidades post-matching (backend implementado).</p>
-<h3 id="113-algoritmo-de-matching">11.3 Algoritmo de matching</h3>
-<p>El algoritmo vive en <code>core/services/matching.py</code> (arquitectura post-refactor). Sus características:</p>
+<p><em>Nota.</em> Elaboración propia a partir del <code>package.json</code>.</p>
+<h3 id="411-modelo-de-dominio">4.11 Modelo de dominio</h3>
+<p>El backend define 19 modelos en <code>core/models/</code> (10 submódulos): catálogo electoral (<code>TipoEleccion</code>, <code>Candidato</code>), territorial (<code>Region</code>, <code>Distrito</code>, <code>Comuna</code>, <code>UnidadTerritorial</code>), perfil (<code>UserProfile</code>), cuestionario (<code>Pregunta</code>, <code>OpcionRespuesta</code>, <code>RespuestaUsuario</code>), ejes (<code>Eje</code>), matching (<code>PosturaCandidato</code>, <code>MatchCandidato</code>), datos de usuario (<code>CandidatoFavorito</code>, <code>CandidatoDescartado</code>, <code>PosturaBookmark</code>, <code>NoticiaBookmark</code>), autenticación (<code>PasswordResetToken</code>) y contenido (<code>Noticia</code>). El modelo <code>DecisionFinal</code> fue eliminado en la migración <code>0037</code> como parte del sprint YAGNI (Beck, 1999).</p>
+<h3 id="412-algoritmo-de-matching">4.12 Algoritmo de matching</h3>
+<p>Tres servicios en <code>core/services/matching.py</code>:</p>
+<ul>
+<li><code>calcular_match(user, tipo_eleccion)</code> — autenticada, persiste en <code>MatchCandidato</code>.</li>
+<li><code>calcular_match_detalle(user, candidato)</code> — desglose pregunta-a-pregunta.</li>
+<li><code>calcular_match_anonimo(respuestas, tipo_eleccion, comuna)</code> — modo guest.</li>
+</ul>
 <p><strong>Fórmula por pregunta</strong>:</p>
-<pre><code>diff             = |valor_usuario - valor_candidato|          en [0, 4]
-score_pregunta   = 1 - (diff / 4)²                             en [0.0, 1.0]
-mult_peso        = peso_multiplier[peso_declarado_usuario]     en {0.5, 1.0, 1.5, 2.0}
+<pre><code>diff             = |valor_usuario - valor_candidato|   en [0, 4]
+score_pregunta   = 1 - (diff / 4)^2                    en [0.0, 1.0]
+mult_peso        = PESO_MULTIPLIERS[peso_declarado]    en {0.5, 1.0, 1.5, 2.0}
 score_ponderado  = score_pregunta * mult_peso
 </code></pre>
-<p><strong>Agregación global</strong>:</p>
-<pre><code>match_% = (Σ score_ponderado) / (Σ mult_peso) × 100
-</code></pre>
-<p><strong>Agregación por eje</strong>:</p>
-<pre><code>para cada eje E:
-    match_%_eje_E = (Σ score_ponderado en preguntas del eje E) /
-                    (Σ mult_peso en preguntas del eje E) × 100
-</code></pre>
-<p><strong>Tabla de scores por diferencia</strong>:</p>
+<p><strong>Filtrado territorial polimórfico</strong>: dada la comuna del usuario, se calcula su <code>UnidadTerritorial</code> y la cadena de ancestros, y se filtran los candidatos con <code>unidad_territorial IS NULL</code> OR <code>unidad_territorial_id IN {ut_votante, ancestros}</code> (Fowler, 2003).</p>
+<p><strong>Tabla 9</strong></p>
+<p><em>Scores por diferencia en escala Likert 1-5</em></p>
 <table>
 <thead>
 <tr>
-<th style="text-align: center;">Diferencia (0-4)</th>
+<th style="text-align: center;">Diferencia</th>
 <th>Interpretación</th>
-<th style="text-align: center;">Score lineal (rechazado)</th>
-<th style="text-align: center;">Score no-lineal (adoptado)</th>
+<th style="text-align: center;">Score no-lineal</th>
 </tr>
 </thead>
 <tbody>
@@ -741,38 +1154,32 @@ score_ponderado  = score_pregunta * mult_peso
 <td style="text-align: center;">0</td>
 <td>Idéntico</td>
 <td style="text-align: center;">1.00</td>
-<td style="text-align: center;">1.00</td>
 </tr>
 <tr>
 <td style="text-align: center;">1</td>
 <td>Casi igual</td>
-<td style="text-align: center;">0.75</td>
-<td style="text-align: center;">0.94</td>
+<td style="text-align: center;">0.9375</td>
 </tr>
 <tr>
 <td style="text-align: center;">2</td>
 <td>Diferencia media</td>
-<td style="text-align: center;">0.50</td>
 <td style="text-align: center;">0.75</td>
 </tr>
 <tr>
 <td style="text-align: center;">3</td>
 <td>Diferencia grande</td>
-<td style="text-align: center;">0.25</td>
-<td style="text-align: center;">0.44</td>
+<td style="text-align: center;">0.4375</td>
 </tr>
 <tr>
 <td style="text-align: center;">4</td>
 <td>Opuesto</td>
 <td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.00</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Propiedades formales</strong>:
-- Determinista, simétrico, requiere overlap, robusto ante NaN.
-- Complejidad <code>O(N_candidatos × N_preguntas)</code>, con queries constantes gracias a <code>prefetch_related</code>.</p>
-<p><strong>Niveles de confianza</strong>:</p>
+<p><em>Nota.</em> Cálculo obtenido de la fórmula <code>1 - (diff / 4)^2</code>.</p>
+<p><strong>Tabla 10</strong></p>
+<p><em>Niveles de confianza según preguntas consideradas</em></p>
 <table>
 <thead>
 <tr>
@@ -795,88 +1202,163 @@ score_ponderado  = score_pregunta * mult_peso
 </tr>
 </tbody>
 </table>
-<h3 id="114-arquitectura-backend-post-refactor">11.4 Arquitectura backend (post-refactor)</h3>
-<pre><code>backend/core/
-├── models/         (5 submódulos por dominio)
-│   ├── auth.py
-│   ├── content.py
-│   ├── cuestionario.py
-│   ├── electoral.py
-│   ├── matching.py
-│   └── user_data.py
-├── views/          (6 submódulos por dominio)
-│   ├── auth.py
-│   ├── bookmarking.py
-│   ├── catalog.py
-│   ├── cuestionario.py
-│   ├── matching.py
-│   ├── noticias.py
-│   └── perfil.py
-├── serializers/    (7 submódulos por dominio)
-├── services/       (lógica de dominio pura)
-│   ├── matching.py
-│   ├── password_reset.py
-│   ├── perfil.py
-│   └── respuestas.py
-├── management/     (comandos CLI para importación)
-│   └── commands/
-│       ├── fetch_noticias.py
-│       ├── import_candidatos.py
-│       ├── import_posturas.py
-│       ├── import_preguntas.py
-│       └── seed_explicaciones_preguntas.py
-├── migrations/     (24 migraciones)
-├── admin.py
-├── urls.py
-└── test_*.py       (14 archivos de pruebas)
+<p><em>Nota.</em> Umbrales definidos empíricamente durante el diseño.</p>
+<p><strong>Agregación final</strong> del score por candidato:</p>
+<pre><code>score_candidato = sum(score_ponderado_i) / sum(mult_peso_i)      para i en preguntas efectivas
+afinidad_%      = score_candidato * 100
 </code></pre>
-<p><strong>Principios aplicados</strong>:
-- Single Responsibility: cada archivo con una responsabilidad clara, ninguno supera 300 líneas.
-- Separación de capas: modelos → serializadores → vistas → servicios (lógica de dominio aislada de HTTP).
-- Re-exports en <code>__init__.py</code> para mantener la API pública estable.
-- Constantes explícitas (<code>MatchCandidato.CONFIANZA_ALTA</code>) en lugar de magic strings.</p>
-<h3 id="115-arquitectura-frontend-atomic-design">11.5 Arquitectura frontend (atomic design)</h3>
-<pre><code>frontend/src/
-├── api/
-│   ├── client.ts        (cliente axios con interceptors)
-│   ├── config.ts        (base URL)
-│   ├── endpoints.ts     (definición de endpoints)
-│   ├── hooks.ts         (hooks de React Query)
-│   └── queryClient.ts   (configuración de TanStack Query)
-├── components/
-│   ├── atoms/           (24 componentes: Button, Input, Icon, Chip, etc.)
-│   ├── molecules/       (22 componentes: FormField, ProgressStepper, etc.)
-│   ├── organisms/       (16 componentes: CandidateCard, RadarChart, etc.)
-│   └── templates/
-├── navigation/          (rutas y tipos)
-├── screens/             (19 pantallas)
-├── services/            (lógica de negocio pura, testeable)
-│   ├── comparar.ts
-│   ├── cuestionario.ts
-│   ├── matching.ts
-│   └── share.ts
-├── store/               (Zustand: auth, cuestionario, onboarding, theme)
-├── theme/               (colors, motion, radii, shadows, spacing, typography)
-└── types/
-    └── api.ts           (tipos auto-generados desde OpenAPI, 34.3 KB)
-</code></pre>
-<p><strong>Principios aplicados</strong>:
-- Atomic design: composición ascendente desde átomos hasta pantallas.
-- Servicios puros: <code>matching.ts</code>, <code>cuestionario.ts</code> no importan React ni RN, se testean sin renderizar.
-- Contract-first: <code>types/api.ts</code> se regenera desde el schema OpenAPI; cambios de shape rompen TypeScript en compile-time.
-- Un solo cliente HTTP con interceptors para token y manejo de errores 401.</p>
-<h3 id="116-ingesta-de-datos">11.6 Ingesta de datos</h3>
-<p>Chile no expone una API pública de posturas electorales. La estrategia adoptada es <strong>importación offline por CSV</strong> mediante management commands:</p>
+<p>Las preguntas efectivas son aquellas en las que el usuario respondió con una opción distinta de "No sé". Las preguntas marcadas "No sé" se excluyen tanto del numerador como del denominador, evitando distorsión por respuestas neutras artificiales.</p>
+<p><strong>Deducción del <code>diff / 4</code></strong>: la división por 4 normaliza la diferencia absoluta al rango <code>[0, 1]</code>, dado que la escala Likert 1-5 admite una diferencia máxima de 4 puntos entre extremos opuestos. Elevar al cuadrado esa diferencia normalizada penaliza las diferencias grandes más severamente que las pequeñas: una diferencia de 1 penaliza <code>0.0625</code>, mientras que una diferencia de 3 penaliza <code>0.5625</code>, nueve veces más. Este comportamiento no-lineal es deseable en un contexto electoral porque expresa el hecho de que la incompatibilidad programática en temas centrales pesa más que la coincidencia parcial en temas menores.</p>
+<p><strong>Ejemplo numérico paso a paso</strong> para una usuaria X y un candidato Y sobre 5 preguntas:</p>
+<p><strong>Tabla 11</strong></p>
+<p><em>Ejemplo numérico del cálculo de matching pregunta a pregunta</em></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Pregunta</th>
+<th style="text-align: center;">Respuesta usuario</th>
+<th style="text-align: center;">Respuesta candidato</th>
+<th style="text-align: center;">Peso declarado</th>
+<th style="text-align: center;"><code>diff</code></th>
+<th style="text-align: center;"><code>score_pregunta = 1 - (diff/4)^2</code></th>
+<th style="text-align: center;"><code>mult_peso</code></th>
+<th style="text-align: center;"><code>score_ponderado</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5 (muy de acuerdo)</td>
+<td style="text-align: center;">4 (de acuerdo)</td>
+<td style="text-align: center;">Muy importante</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0.9375</td>
+<td style="text-align: center;">2.0</td>
+<td style="text-align: center;">1.8750</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2 (en desacuerdo)</td>
+<td style="text-align: center;">3 (neutro)</td>
+<td style="text-align: center;">Importante</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0.9375</td>
+<td style="text-align: center;">1.5</td>
+<td style="text-align: center;">1.4063</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">1 (muy en desacuerdo)</td>
+<td style="text-align: center;">1 (muy en desacuerdo)</td>
+<td style="text-align: center;">Normal</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1.0000</td>
+<td style="text-align: center;">1.0</td>
+<td style="text-align: center;">1.0000</td>
+</tr>
+<tr>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">4 (de acuerdo)</td>
+<td style="text-align: center;">2 (en desacuerdo)</td>
+<td style="text-align: center;">Poco importante</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0.7500</td>
+<td style="text-align: center;">0.5</td>
+<td style="text-align: center;">0.3750</td>
+</tr>
+<tr>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">No sé</td>
+<td style="text-align: center;">3 (neutro)</td>
+<td style="text-align: center;">Normal</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">excluida</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">—</td>
+</tr>
+</tbody>
+</table>
+<p><em>Nota.</em> Elaboración propia. <code>PESO_MULTIPLIERS = {poco: 0.5, normal: 1.0, importante: 1.5, muy_importante: 2.0}</code>.</p>
+<p><strong>Agregación</strong>:</p>
 <ul>
-<li><code>import_candidatos</code>: idempotente por <code>(nombre, apellido, partido)</code>, autocrea <code>TipoEleccion</code> referenciados, soporta <code>--dry-run</code>, <code>--delimiter</code>, <code>--encoding</code>.</li>
-<li><code>import_preguntas</code>: autogenera las 6 opciones estándar (5 Likert + 1 "No sé") por cada pregunta importada.</li>
-<li><code>import_posturas</code>: enforce URL de fuente y justificación mínima, con nivel de confianza declarado.</li>
-<li><code>fetch_noticias</code>: consulta Google News RSS por candidato, dedup por URL, guarda en <code>Noticia</code> con M2M a <code>candidatos_mencionados</code>.</li>
-<li><code>seed_explicaciones_preguntas</code>: pobla los campos educativos (<code>explicacion</code>, <code>repercusiones</code>) de las preguntas.</li>
+<li>Suma de <code>score_ponderado</code> en preguntas efectivas: <code>1.8750 + 1.4063 + 1.0000 + 0.3750 = 4.6563</code>.</li>
+<li>Suma de <code>mult_peso</code> en preguntas efectivas: <code>2.0 + 1.5 + 1.0 + 0.5 = 5.0</code>.</li>
+<li><code>score_candidato = 4.6563 / 5.0 = 0.9313</code>.</li>
+<li><code>afinidad_% = 93.13%</code>.</li>
+<li><strong>Preguntas efectivas</strong> = 4 (pregunta 5 excluida por respuesta "No sé").</li>
+<li><strong>Nivel de confianza</strong> = <code>tentativa</code> (&lt; 5 preguntas efectivas, Tabla 10).</li>
 </ul>
-<p>Todos los importadores son transaccionales con savepoints por fila (un error en la fila 5 no aborta las filas 1-4) y validados por 12 pruebas en <code>core/test_importers.py</code>.</p>
-<h3 id="117-contrato-api">11.7 Contrato API</h3>
-<p>La API expone bajo <code>/api/v1/</code> un conjunto de endpoints REST con autenticación por token DRF. Endpoints principales:</p>
+<p>Este ejemplo ilustra tres comportamientos deseables del algoritmo: la ponderación eleva el peso relativo de la pregunta 1 donde usuaria y candidato casi coinciden, empujando el score hacia arriba; la opción "No sé" en la pregunta 5 no distorsiona el cálculo con una respuesta neutra falsa; y el nivel de confianza <code>tentativa</code> alerta al usuario de que el resultado tiene baja base empírica.</p>
+<h3 id="413-arquitectura-backend">4.13 Arquitectura backend</h3>
+<p><strong>Figura 2</strong></p>
+<p><em>Arquitectura general del sistema (backend y frontend)</em></p>
+<pre><code>+------------------+       HTTPS/JSON       +------------------+
+|                  |     +---------------+  |                  |
+|  Frontend        |&lt;---&gt;| OpenAPI 3.1   |&lt;&gt;|  Backend         |
+|  React Native +  |     | schema        |  |  Django + DRF    |
+|  Expo (web/iOS/  |     +---------------+  |                  |
+|  Android)        |                        |  Modelos (10)    |
+|                  |                        |  Serializers (9) |
+|  Atomic Design   |                        |  Views (11)      |
+|  + Zustand +     |                        |  Services (5)    |
+|  TanStack Query  |                        |                  |
++------------------+                        +------------------+
+                                                    |
+                                                    v
+                                            +------------------+
+                                            |  DB SQLite (dev) |
+                                            |  DB PostgreSQL   |
+                                            |  (produccion)    |
+                                            +------------------+
+</code></pre>
+<p><em>Nota.</em> Elaboración propia.</p>
+<p><strong>Figura 3</strong></p>
+<p><em>Estructura de directorios del backend</em></p>
+<pre><code>backend/
++-- Dockerfile
++-- api/                              (settings, urls, views raiz)
++-- core/
+|   +-- admin*.py, authentication.py, pagination.py
+|   +-- models/                       (10 submodulos)
+|   +-- views/                        (11 submodulos)
+|   +-- serializers/                  (9 submodulos)
+|   +-- services/                     (5 servicios)
+|   +-- management/commands/          (16 comandos)
+|   +-- migrations/                   (38 migraciones)
+|   +-- test_*.py                     (25 archivos)
++-- docs/MIGRATION_TERRITORIAL.md
++-- fixtures/                         (CSVs)
+</code></pre>
+<p><em>Nota.</em> Elaboración propia.</p>
+<h3 id="414-arquitectura-frontend">4.14 Arquitectura frontend</h3>
+<p><strong>Figura 4</strong></p>
+<p><em>Estructura de directorios del frontend</em></p>
+<pre><code>frontend/
++-- App.tsx
++-- src/
+|   +-- api/                          (client, endpoints, hooks, queryClient)
+|   +-- components/
+|   |   +-- atoms/                    (27 componentes)
+|   |   +-- molecules/                (29 componentes)
+|   |   +-- organisms/                (17 componentes)
+|   |   +-- templates/AppShell.tsx    (layout responsive)
+|   +-- navigation/
+|   +-- screens/                      (18 pantallas + design-system)
+|   +-- services/                     (logica pura testeable)
+|   +-- store/                        (Zustand)
+|   +-- theme/                        (design tokens)
+|   +-- types/api.ts                  (auto-generado desde OpenAPI)
+|   +-- utils/
++-- design-exploration/               (audit WCAG, paletas)
++-- docs/
+</code></pre>
+<p><em>Nota.</em> Elaboración propia.</p>
+<p>Principios aplicados: Atomic Design (Frost, 2016), servicios puros sin dependencias de React, contract-first (OpenAPI Initiative, 2021), query keys centralizadas (Linsley, 2024).</p>
+<h3 id="415-ingesta-de-datos">4.15 Ingesta de datos</h3>
+<p>Chile no expone una API pública de posturas electorales. La estrategia es <strong>importación offline por CSV + seeds programáticos</strong>, todos idempotentes. Los comandos cubren territorio, preguntas base, preguntas por tipo y candidatos por proceso (presidenciales 2025, diputados 2025, alcaldes 2024, parlamentaria). Ver Anexo D.</p>
+<h3 id="416-contrato-api">4.16 Contrato API</h3>
+<p><strong>Tabla 12</strong></p>
+<p><em>Endpoints principales de la API</em></p>
 <table>
 <thead>
 <tr>
@@ -891,7 +1373,7 @@ score_ponderado  = score_pregunta * mult_peso
 <td>POST</td>
 <td><code>/register/</code></td>
 <td>AllowAny</td>
-<td>Registro de usuario</td>
+<td>Registro</td>
 </tr>
 <tr>
 <td>POST</td>
@@ -909,7 +1391,7 @@ score_ponderado  = score_pregunta * mult_peso
 <td>GET</td>
 <td><code>/candidatos/</code></td>
 <td>Auth</td>
-<td>Lista de candidatos</td>
+<td>Lista con filtros territoriales</td>
 </tr>
 <tr>
 <td>GET</td>
@@ -919,21 +1401,33 @@ score_ponderado  = score_pregunta * mult_peso
 </tr>
 <tr>
 <td>GET</td>
-<td><code>/preguntas/?tipo_eleccion_id=&lt;id&gt;</code></td>
+<td><code>/preguntas/</code></td>
 <td>Auth</td>
-<td>Preguntas del cuestionario</td>
+<td>Preguntas del tipo + base</td>
 </tr>
 <tr>
 <td>POST</td>
 <td><code>/respuestas/</code></td>
 <td>Auth</td>
-<td>Envío batch de respuestas</td>
+<td>Envío batch</td>
 </tr>
 <tr>
 <td>POST</td>
 <td><code>/match-candidatos/</code></td>
 <td>Auth</td>
-<td>Cálculo de match</td>
+<td>Cálculo de match (persiste)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/match-detalle/</code></td>
+<td>Auth</td>
+<td>Desglose pregunta-a-pregunta</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/match-anonimo/</code></td>
+<td>AllowAny</td>
+<td>Match sin persistir</td>
 </tr>
 <tr>
 <td>GET/POST/DELETE</td>
@@ -942,28 +1436,40 @@ score_ponderado  = score_pregunta * mult_peso
 <td>CRUD de favoritos</td>
 </tr>
 <tr>
-<td>GET/POST/DELETE</td>
-<td><code>/descartados/</code></td>
+<td>GET/PATCH</td>
+<td><code>/perfil/</code></td>
 <td>Auth</td>
-<td>CRUD de descartados</td>
+<td>Obtener/actualizar perfil</td>
 </tr>
 <tr>
-<td>GET/POST/DELETE</td>
-<td><code>/decision-final/</code></td>
+<td>PATCH</td>
+<td><code>/perfil/comuna/</code></td>
 <td>Auth</td>
-<td>Upsert de decisión final</td>
+<td>Actualizar comuna</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/password-reset/request/</code></td>
+<td>AllowAny</td>
+<td>Solicitar reset</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/regiones/</code> <code>/distritos/</code> <code>/comunas/</code></td>
+<td>AllowAny</td>
+<td>Catálogo territorial</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/ejes/</code></td>
+<td>AllowAny</td>
+<td>Catálogo de ejes</td>
 </tr>
 <tr>
 <td>GET</td>
 <td><code>/noticias/</code></td>
 <td>AllowAny</td>
-<td>Feed de noticias</td>
-</tr>
-<tr>
-<td>GET</td>
-<td><code>/candidatos/&lt;id&gt;/noticias/</code></td>
-<td>AllowAny</td>
-<td>Noticias por candidato</td>
+<td>Feed paginado</td>
 </tr>
 <tr>
 <td>GET</td>
@@ -973,191 +1479,555 @@ score_ponderado  = score_pregunta * mult_peso
 </tr>
 <tr>
 <td>GET</td>
-<td><code>/docs/</code></td>
-<td>AllowAny</td>
-<td>Swagger UI</td>
-</tr>
-<tr>
-<td>GET</td>
-<td><code>/redoc/</code></td>
-<td>AllowAny</td>
-<td>ReDoc</td>
-</tr>
-<tr>
-<td>GET</td>
 <td><code>/health/</code></td>
 <td>AllowAny</td>
 <td>Healthcheck</td>
 </tr>
 </tbody>
 </table>
-<h3 id="118-seguridad">11.8 Seguridad</h3>
-<p>Implementado:
-- <code>SECRET_KEY</code>, <code>DEBUG</code>, <code>ALLOWED_HOSTS</code> desde variables de entorno.
-- Password hashing PBKDF2-SHA256 (600k iteraciones, default Django 5.x).
-- Autenticación por token DRF.
-- Permisos DRF explícitos en cada view.
-- CORS restrictivo en producción, abierto solo en <code>DEBUG=True</code>.
-- <code>django-cleanup</code> para evitar archivos huérfanos.
-- Constraint parcial de unicidad en <code>Noticia.url</code> (permite múltiples URLs vacías, dedup cuando existe).</p>
-<p>Pendiente (documentado):
-- Rate limiting en endpoints sensibles (<code>/login/</code>, <code>/match-candidatos/</code>).
-- Rotación de tokens (migrar a JWT con refresh).
-- Verificación de correo electrónico.
-- Deploy con HTTPS terminado en reverse proxy (nginx o Cloudflare).</p>
-<h3 id="119-testing">11.9 Testing</h3>
-<p>Suite actual: 40+ pruebas backend distribuidas en 14 archivos:</p>
+<p><em>Nota.</em> Elaboración propia. Catálogo completo en <code>/api/v1/docs/</code> (Swagger UI).</p>
+<h3 id="417-seguridad">4.17 Seguridad</h3>
 <ul>
-<li><code>core/tests.py</code> (17): algoritmo de matching, algoritmo robusto, submit answers, permisos de noticias.</li>
-<li><code>core/test_importers.py</code> (12): importadores CSV, idempotencia, dry-run, validaciones.</li>
-<li><code>core/test_noticias.py</code> (11): modelo Noticia, endpoint por candidato, comando fetch mockeado.</li>
-<li><code>core/test_services_matching.py</code>, <code>test_password_reset.py</code>, <code>test_perfil.py</code>, etc.</li>
+<li><code>SECRET_KEY</code>, <code>DEBUG</code>, <code>ALLOWED_HOSTS</code> desde variables de entorno (Wiggins, 2011).</li>
+<li>Password hashing PBKDF2-SHA256 (Django Software Foundation, 2024).</li>
+<li>Token DRF con implementación custom.</li>
+<li>Permisos DRF explícitos por view.</li>
+<li>CORS restrictivo en producción.</li>
+<li><code>CheckConstraint</code> en <code>Candidato</code>.</li>
+<li>Token de reset con expiración.</li>
 </ul>
-<p>Frontend: pruebas de servicios puros con Jest (<code>services/*.test.ts</code>).</p>
-<p>Coverage objetivo: &gt;70% en <code>core/</code>.</p>
-<h3 id="1110-accesibilidad">11.10 Accesibilidad</h3>
-<p>La carpeta <code>frontend/design-exploration/</code> contiene:
-- <code>audit_wcag.py</code>: script de auditoría automatizada de contraste WCAG 2.2.
-- <code>wcag-audit.html</code>: reporte de contraste sobre la paleta actual.
-- <code>design-system.html</code>: catálogo de componentes con documentación de accesibilidad.
-- <code>paletas.html</code>: exploración de paletas alternativas.</p>
-<p>Los componentes atómicos (<code>Button</code>, <code>SelectableButton</code>, <code>Input</code>) están construidos sobre <code>Pressable</code> puro con área táctil mínima 44×44 (superior al mínimo WCAG de 24×24), estados visuales explícitos para focus, hover, disabled, y compatibilidad con <code>accessibilityLabel</code> y <code>accessibilityRole</code> de React Native.</p>
+<h3 id="418-deploy-y-containerizacion">4.18 Deploy y containerización</h3>
+<p>Backend con <code>Dockerfile</code> (Docker Inc., 2024):</p>
+<pre><code class="language-bash">docker build -t matchvote-backend ./backend
+docker run -p 8000:8000 --env-file .env matchvote-backend
+</code></pre>
+<p>El <code>.env.example</code> (Anexo E) documenta las variables requeridas.</p>
+<h3 id="419-por-que-funciona-y-por-que-es-una-buena-solucion">4.19 Por qué funciona y por qué es una buena solución</h3>
+<p><strong>Por qué funciona técnicamente</strong>. La solución funciona porque combina tecnologías maduras con patrones probados: Django + DRF entrega productividad alta con seguridad razonable por defecto (Django Software Foundation, 2024); React Native + Expo permite despliegue multiplataforma sin duplicar código (Meta Platforms, 2024; Expo, 2024); el contrato OpenAPI 3.1 elimina el drift entre backend y frontend (OpenAPI Initiative, 2021); el modelo polimórfico jerárquico (Fowler, 2003) resuelve elegantemente la representación de scope territorial variable; y la aplicación de SOLID (Martin, 2017), DRY (Hunt &amp; Thomas, 1999) y YAGNI (Beck, 1999) mantiene el código mantenible incluso con un solo desarrollador.</p>
+<p><strong>Por qué es una buena solución frente a las alternativas</strong>. Es una buena solución porque cumple simultáneamente con las cinco características que ninguna alternativa chilena actual cumple (sección 1.2): algoritmo documentado y publicado en la propia documentación del proyecto, transparencia sobre las posturas asignadas a cada candidato dentro de la propia aplicación, cobertura multi-nivel territorial, accesibilidad WCAG AA (W3C, 2023) y diseño pensado para continuidad operativa. Frente a <em>Votamos Todos</em> (Zismo, 2021-2022), extiende el alcance del plebiscito único a un modelo multi-elección permanente. Frente a <em>Decide Chile</em>, <em>Vota Inteligente</em> e <em>Infovecino</em>, incorpora el componente algorítmico de matching personalizado que aquellas iniciativas no ofrecen. Frente a Wahl-O-Mat, StemWijzer y Smartvote, publica la fórmula de matching completa dentro de la propia documentación del proyecto, algo que aquellas iniciativas no hacen de manera integral.</p>
+<p><strong>Por qué se ven beneficiados los usuarios</strong>. Los usuarios se benefician porque la solución internaliza principios centrados en el votante: reduce su costo cognitivo con cuestionarios cortos y ponderables; respeta su honestidad epistemológica con la opción "No sé" que se excluye del cálculo; expone niveles de confianza para evitar la falsa autoridad de un porcentaje aislado; entrega explicabilidad pregunta-a-pregunta que permite al usuario cuestionar el resultado; garantiza accesibilidad universal (W3C, 2023); protege su privacidad al no requerir datos personales sensibles ni monetizar el uso; y ofrece continuidad al persistir preferencias entre elecciones sucesivas.</p>
+<!--PAGE_BREAK-->
+
 <hr />
-<h2 id="12-conclusiones">12. Conclusiones</h2>
-<h3 id="121-cumplimiento-de-objetivos">12.1 Cumplimiento de objetivos</h3>
-<p>El proyecto cumple con la mayoría de los objetivos específicos planteados:</p>
+<h2 id="5-validacion-de-la-solucion">5. Validación de la solución</h2>
+<p>La validación de la solución se realizó en cinco dimensiones: cumplimiento de objetivos, validación técnica automatizada, validación específica del algoritmo, validación de accesibilidad y auditorías internas de código. Se explicita además en qué dimensiones la validación es limitada (sección 5.7).</p>
+<h3 id="51-cumplimiento-de-objetivos-especificos">5.1 Cumplimiento de objetivos específicos</h3>
+<p>La Tabla 13 asocia cada objetivo específico declarado en 1.6 con la evidencia de cumplimiento presente en el repositorio.</p>
 <ul>
-<li><strong>Algoritmo robusto</strong>: implementado con fórmula cuadrática, ponderación por importancia, manejo explícito de "No sé" y nivel de confianza. Verificado por pruebas automatizadas y documentado en <code>docs/algoritmo-tecnico.md</code>.</li>
-<li><strong>Arquitectura modular</strong>: alcanzada mediante refactorización de modelos, vistas y serializadores a submódulos por dominio. Ningún archivo supera 300 líneas. Score de modularidad autoevaluado: 8/10 backend, 8/10 frontend.</li>
-<li><strong>Contrato API tipado</strong>: implementado con <code>drf-spectacular</code> (backend) y <code>openapi-typescript</code> (frontend). Cambios de shape rompen TypeScript en compile-time.</li>
-<li><strong>Transparencia de datos</strong>: cada postura importada requiere justificación y fuente. Nivel de confianza declarado por fila del CSV.</li>
-<li><strong>Cobertura de pruebas</strong>: 40+ pruebas backend, servicios puros del frontend con pruebas Jest.</li>
-<li><strong>Accesibilidad WCAG 2.2 AA</strong>: base implementada, con auditoría automatizada del contraste. Requiere revisión final por lector de pantalla.</li>
-<li><strong>Multiplataforma</strong>: un único codebase compilado para web, iOS y Android desde React Native + Expo.</li>
+<li><strong>Objetivo 1</strong> (algoritmo robusto): cumplido. Fórmula cuadrática implementada en <code>core/services/matching.py</code>, con ponderación <code>PESO_MULTIPLIERS</code>, exclusión de "No sé", umbrales de confianza (Tabla 10), breakdown por eje en <code>calcular_match_detalle</code>, y filtrado territorial polimórfico integrado.</li>
+<li><strong>Objetivo 2</strong> (sistema territorial polimórfico): cumplido. Modelos <code>Region</code>, <code>Distrito</code>, <code>Comuna</code> y <code>UnidadTerritorial</code> operativos; signals de sincronización activos.</li>
+<li><strong>Objetivo 3</strong> (multi-elección simultánea): cumplido. Campo <code>TipoEleccion.es_base</code> operativo; preguntas base reutilizables entre procesos.</li>
+<li><strong>Objetivo 4</strong> (SOLID / DRY / YAGNI): cumplido con evidencia estructural. Los submódulos de 10 modelos, 11 vistas, 9 serializadores y 5 servicios reflejan Single Responsibility (Martin, 2017); la eliminación de <code>DecisionFinal</code> en la migración <code>0037</code> documenta la aplicación de YAGNI (Beck, 1999).</li>
+<li><strong>Objetivo 5</strong> (contrato OpenAPI 3.1): cumplido. Schema disponible en <code>/api/v1/schema/</code>; Swagger UI en <code>/api/v1/docs/</code>; tipos TypeScript sincronizados con <code>openapi-typescript</code>.</li>
+<li><strong>Objetivo 6</strong> (transparencia sobre las posturas asignadas): cumplido a nivel estructural. La aplicación expone al usuario las posturas asignadas a cada candidato dentro de la propia interfaz, y los modelos <code>PosturaCandidato</code> incluyen campos <code>fuente_url</code> y <code>justificacion</code> que permiten migrar el dataset ilustrativo a un dataset con curaduría formal en despliegue productivo (limitación L1).</li>
+<li><strong>Objetivo 7</strong> (cobertura de pruebas): cumplido parcialmente. 25 archivos de pruebas backend operativos; frontend con pruebas de servicios puros. No hay medición formal de cobertura porcentual.</li>
+<li><strong>Objetivo 8</strong> (WCAG 2.2 AA): cumplido con auditoría técnica automatizada (<code>design-exploration/audit_wcag.py</code>) y revisión manual; sin evaluación con usuarios reales con discapacidad (limitación L14).</li>
+<li><strong>Objetivo 9</strong> (multiplataforma): cumplido. <code>App.tsx</code> único entrega web, iOS y Android vía React Native + Expo.</li>
+<li><strong>Objetivo 10</strong> (Docker): cumplido. <code>Dockerfile</code> en <code>backend/</code>; instrucciones de build y run documentadas.</li>
 </ul>
-<h3 id="122-estado-actual">12.2 Estado actual</h3>
-<p>Al momento de este documento, la aplicación se encuentra en versión MVP (0.1) con las siguientes características operativas:</p>
+<h3 id="52-validacion-tecnica-automatizada">5.2 Validación técnica automatizada</h3>
+<p>La suite de pruebas backend consta de <strong>25 archivos de pruebas</strong> ubicados en <code>backend/core/test_*.py</code>, con configuración en <code>conftest.py</code> y ejecución mediante <code>pytest</code>. Cubre los siguientes dominios:</p>
 <ul>
-<li>12 features end-to-end funcionales (registro, login, cuestionario completo, cálculo de match, resultados, detalle de candidato, noticias por candidato, radar por eje, nivel de confianza, modal educativo).</li>
-<li>3 features con backend implementado y UI pendiente (favoritos, descartados, decisión final).</li>
-<li>6 features en roadmap (modo invitado, compartir resultado, editar respuestas ya enviadas, onboarding, panel de perfil, historial de sesiones).</li>
+<li>Algoritmo core de matching (variantes autenticada, anónima, con detalle).</li>
+<li>Cobertura territorial polimórfica (región, distrito, comuna, ancestros).</li>
+<li>Refactor de ejes temáticos a modelo <code>Eje</code>.</li>
+<li>Mecanismo <code>TipoEleccion.es_base</code> para preguntas transversales.</li>
+<li>Seeds específicos por elección (presidenciales 2025, diputados 2025, alcaldes 2024, parlamentaria).</li>
+<li>Variantes del algoritmo con casos límite.</li>
+<li>Flujos de edición de respuestas y guardado.</li>
+<li>Bookmarks de candidatos, posturas y noticias.</li>
+<li>Feed de noticias.</li>
+<li>Flujo completo de password reset.</li>
+<li>Actualización de perfil y sincronización territorial.</li>
+<li>Importadores de CSV.</li>
 </ul>
-<h3 id="123-aprendizajes">12.3 Aprendizajes</h3>
-<p><strong>Aprendizajes técnicos</strong>:</p>
+<p>Las pruebas del frontend cubren los <strong>servicios puros</strong> (<code>src/services/</code>), es decir la lógica de dominio sin dependencias de React, mediante Jest y React Native Testing Library.</p>
+<h3 id="53-validacion-especifica-del-algoritmo">5.3 Validación específica del algoritmo</h3>
+<p>El algoritmo se validó mediante casos con salida conocida por construcción matemática. La Tabla 13 muestra un subconjunto ilustrativo de los casos más relevantes verificados en <code>test_algoritmo.py</code>.</p>
+<p><strong>Tabla 13</strong></p>
+<p><em>Casos de prueba del algoritmo de matching</em></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">#</th>
+<th>Escenario</th>
+<th>Entrada</th>
+<th>Salida esperada</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">C1</td>
+<td>Concordancia total</td>
+<td>Usuario y candidato responden todos Likert=3 en 10 preguntas, peso 1.0</td>
+<td>Score = 100%, confianza <code>alta</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">C2</td>
+<td>Oposición total</td>
+<td>Usuario Likert=1, candidato Likert=5, 10 preguntas, peso 1.0</td>
+<td>Score = 0%, confianza <code>alta</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">C3</td>
+<td>Punto medio</td>
+<td>Diferencia constante = 2 en todas las preguntas</td>
+<td>Score = 75%, confianza correspondiente</td>
+</tr>
+<tr>
+<td style="text-align: center;">C4</td>
+<td>Manejo de "No sé"</td>
+<td>Usuario responde "No sé" en 3 de 8 preguntas</td>
+<td>Solo 5 preguntas consideradas; confianza <code>media</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">C5</td>
+<td>Ponderación asimétrica</td>
+<td>Usuario da peso 2.0 a preguntas donde coincide con candidato</td>
+<td>Score mayor que sin ponderación</td>
+</tr>
+<tr>
+<td style="text-align: center;">C6</td>
+<td>Confianza <code>tentativa</code></td>
+<td>Usuario responde solo 3 preguntas</td>
+<td>Confianza <code>tentativa</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">C7</td>
+<td>Filtrado territorial</td>
+<td>Usuario en comuna X vs candidato distrital que no incluye X</td>
+<td>Candidato no aparece en resultados</td>
+</tr>
+<tr>
+<td style="text-align: center;">C8</td>
+<td>Herencia polimórfica</td>
+<td>Usuario en comuna X, candidato de scope nacional (<code>unidad_territorial IS NULL</code>)</td>
+<td>Candidato sí aparece</td>
+</tr>
+<tr>
+<td style="text-align: center;">C9</td>
+<td>Preguntas base transversales</td>
+<td>Usuario responde una vez preguntas <code>es_base=True</code></td>
+<td>Respuestas reutilizables en varias elecciones</td>
+</tr>
+<tr>
+<td style="text-align: center;">C10</td>
+<td>Idempotencia de <code>MatchCandidato</code></td>
+<td>Ejecución repetida de <code>calcular_match</code> para mismo usuario y elección</td>
+<td>No duplica filas; actualiza si cambian respuestas</td>
+</tr>
+</tbody>
+</table>
+<p><em>Nota.</em> Casos representativos. La suite completa cubre variantes adicionales de escala, empates, y edge cases del filtrado territorial.</p>
+<h3 id="54-validacion-del-sistema-territorial-polimorfico">5.4 Validación del sistema territorial polimórfico</h3>
+<p>El sistema territorial se validó con casos de:</p>
 <ul>
-<li>La combinación <strong>Django + DRF + React Native + Expo + Tamagui</strong> permite alta velocidad de desarrollo con un solo desarrollador y garantías de calidad razonables.</li>
-<li>El enfoque <strong>contract-first</strong> con OpenAPI es la barrera anti-drift más importante del proyecto. Un cambio de tipo en el backend rompe el frontend en compile-time, no en producción.</li>
-<li>La <strong>auditoría periódica del código</strong> (con 17 hallazgos categorizados por severidad) demostró ser una práctica valiosa para elevar la calidad sin necesidad de reescribir desde cero.</li>
-<li>La <strong>separación de servicios puros</strong> (sin dependencias de React o de HTTP) permite testear la lógica de negocio sin infraestructura.</li>
-<li>El principio <strong>YAGNI</strong> aplicado a features 13-15 (favoritos, descartados, decisión final) generó deuda visible: código implementado sin UI que lo consuma. Es un antipatrón a evitar en futuras iteraciones.</li>
+<li><strong>Cobertura completa</strong>: seed <code>seed_territorio_chile</code> genera las 16 regiones, 28 distritos electorales y 346 comunas, verificable por conteo posterior.</li>
+<li><strong>Consistencia jerárquica</strong>: cada comuna tiene distrito padre; cada distrito tiene región padre; recorrido de ancestros funciona por método recursivo.</li>
+<li><strong>Filtrado por scope</strong>: candidato de scope nacional visible desde cualquier comuna; candidato distrital visible solo desde comunas del distrito; candidato comunal visible solo desde su comuna.</li>
+<li><strong>Sincronización <code>UserProfile.comuna</code> → <code>unidad_territorial</code></strong>: signal <code>post_save</code> actualiza automáticamente la referencia polimórfica.</li>
+<li><strong>Retrocompatibilidad</strong>: FKs legacy <code>Candidato.comuna</code> y <code>Candidato.distrito</code> conviven con <code>unidad_territorial</code> durante la migración (limitación L10).</li>
 </ul>
-<p><strong>Aprendizajes de dominio</strong>:</p>
-<ul>
-<li>La verificación de posturas contra fuentes primarias es el trabajo más costoso del proyecto, mayor que el desarrollo de código.</li>
-<li>El diseño de las 12 preguntas requiere iteración con expertos en ciencias políticas para evitar sesgos, ambigüedad o cobertura desigual de ejes temáticos.</li>
-<li>Los VAAs internacionales exitosos combinan tres elementos: <strong>algoritmo transparente</strong>, <strong>datos verificados</strong>, y <strong>soporte institucional continuo entre elecciones</strong>. El tercer punto es el más difícil de replicar en el contexto chileno actual.</li>
-</ul>
-<h3 id="124-deuda-pendiente">12.4 Deuda pendiente</h3>
-<p>Documentada exhaustivamente en <code>docs/estado-actual.md</code>. Priorizada por relación valor/esfuerzo:</p>
-<p><strong>Alta prioridad (bloquea publicación)</strong>:
-- UI para favoritos, descartados y decisión final.
-- Modo invitado (permitir cuestionario sin registro previo).
-- Verificación de las 72 posturas contra fuentes primarias.</p>
-<p><strong>Media prioridad (bloquea escalar)</strong>:
-- Migración de SQLite a PostgreSQL en producción.
-- Cache Redis para catálogos y matches.
-- Rate limiting en endpoints sensibles.
-- Optimización de <code>_persistir_matches</code> con <code>bulk_create(update_conflicts=True)</code>.
-- Deploy con Gunicorn + Nginx + docker-compose.</p>
-<p><strong>Baja prioridad</strong>:
-- Compartir resultado como imagen para redes sociales.
-- Squash de 24 migraciones a 3.
-- Logging estructurado con Sentry.
-- CI/CD con GitHub Actions.</p>
-<h3 id="125-proyeccion">12.5 Proyección</h3>
-<p>La proyección natural del trabajo se enmarca en cuatro líneas:</p>
+<h3 id="55-validacion-de-accesibilidad-wcag-22-aa">5.5 Validación de accesibilidad WCAG 2.2 AA</h3>
+<p>La validación de accesibilidad se realizó en tres niveles:</p>
 <ol>
-<li><strong>Publicación pública</strong>: completar los 2-3 sprints de deuda alta y publicar en <code>tinder-decisivo.cl</code> con capacidad para el escenario de tráfico medio (10.000 usuarios/día).</li>
-<li><strong>Verificación de datos</strong>: alianza con universidades o think tanks para validar posturas y ampliar cobertura a elecciones parlamentarias, municipales y regionales.</li>
-<li><strong>Explicabilidad avanzada</strong> (v0.3): simulador "cambia mi respuesta" para mostrar sensibilidad del match, mapa 2D político similar a Kieskompas.</li>
-<li><strong>Investigación académica</strong>: publicar análisis anonimizado y agregado sobre distribución de respuestas y ejes temáticos, contribuyendo a la literatura empírica sobre VAAs en América Latina.</li>
+<li><strong>Auditoría técnica automatizada</strong>: script <code>design-exploration/audit_wcag.py</code> que verifica contrastes de la paleta de diseño contra los umbrales AA de WCAG 2.2 (W3C, 2023).</li>
+<li><strong>Revisión manual por pantalla</strong>: <code>docs/accesibilidad.md</code> documenta requisitos WCAG por pantalla con verificación cualitativa de targets táctiles, estados visuales, focus trap en modales, empty states educativos y navegación por teclado.</li>
+<li><strong>Compatibilidad con tecnologías asistivas</strong>: componentes React Native con <code>accessibilityLabel</code>, <code>accessibilityRole</code> y <code>accessibilityHint</code> según el estándar (Meta Platforms, 2024).</li>
 </ol>
-<h3 id="126-reflexion-final">12.6 Reflexión final</h3>
-<p>El proyecto demuestra que es viable construir infraestructura cívica de calidad profesional con recursos limitados, siempre que se apliquen principios sólidos de ingeniería de software y se mantenga disciplina en la verificación de datos. La combinación de código abierto, arquitectura modular y datos trazables constituye una respuesta técnica concreta a los problemas de desinformación electoral y asimetría de información que enfrenta el votante chileno.</p>
-<p>La existencia de un ecosistema internacional maduro de VAAs (StemWijzer con 35+ años de operación continua, Wahl-O-Mat con respaldo estatal alemán) prueba que estas herramientas pueden ser sostenibles a largo plazo. El desafío en Chile no es técnico sino institucional: encontrar un modelo de gobernanza y financiamiento que permita continuidad operativa entre elecciones.</p>
+<h3 id="56-auditorias-internas-de-codigo">5.6 Auditorías internas de código</h3>
+<p>El proyecto pasó por <strong>dos rondas de auditoría interna</strong> durante la Fase 3 del cronograma (sección 4.8):</p>
+<ul>
+<li><strong>Primera ronda</strong>: 17 hallazgos categorizados por severidad. Se resolvieron 4 críticos de seguridad y 6 altos, incluyendo endurecimiento de permisos por endpoint, revisión de constraints en modelos, y validación de inputs sensibles.</li>
+<li><strong>Segunda ronda</strong>: enfoque en accesibilidad y consistencia del sistema de diseño, con validación del cumplimiento WCAG 2.2 AA y auditoría del showcase interno de componentes.</li>
+</ul>
+<p>No se realizó auditoría externa por tercero especializado (limitación L11).</p>
+<h3 id="57-limitaciones-de-la-validacion">5.7 Limitaciones de la validación</h3>
+<p>Se explicita honestamente qué dimensiones de la validación <strong>no</strong> fueron cubiertas en esta entrega:</p>
+<ul>
+<li><strong>Sin pruebas empíricas con usuarios reales</strong> (limitación L9): no se realizaron sesiones de usabilidad, encuestas de satisfacción ni medición de conversión en un despliegue público. La validación reportada es técnica y estructural.</li>
+<li><strong>Sin evaluación de accesibilidad con personas usuarias con discapacidad</strong> (limitación L14): el cumplimiento WCAG 2.2 AA se verificó con auditoría técnica y revisión manual, no con pruebas de campo.</li>
+<li><strong>Sin medición del impacto electoral</strong>: no se puede afirmar que la herramienta modifique decisiones de voto en la magnitud reportada por la literatura para VAAs consolidadas (Walgrave et al., 2008); ese es un objetivo a mediano plazo condicionado al despliegue público continuo.</li>
+<li><strong>Sin medición formal de cobertura de tests</strong>: la suite existe pero no hay reporte porcentual (%) de cobertura por módulo.</li>
+<li><strong>Sin auditoría de seguridad por tercero</strong> (limitación L11): recomendable antes de exposición pública productiva.</li>
+<li><strong>Sin análisis de rendimiento bajo carga</strong>: no se ejecutaron pruebas de estrés ni benchmarks contra números esperados de usuarios concurrentes.</li>
+</ul>
+<p>Estas limitaciones se registran como deuda técnica y se priorizan en la sección 6.4.</p>
+<!--PAGE_BREAK-->
+
 <hr />
-<h2 id="13-bibliografia">13. Bibliografía</h2>
-<h3 id="131-sobre-voting-advice-applications">13.1 Sobre Voting Advice Applications</h3>
+<h2 id="6-conclusiones">6. Conclusiones</h2>
+<h3 id="61-cumplimiento-del-objetivo-general">6.1 Cumplimiento del objetivo general</h3>
+<p>El objetivo general planteado en 1.6 se cumple: se diseñó e implementó una aplicación multiplataforma de asesoramiento electoral (VAA) para el contexto chileno, con algoritmo transparente y documentado, arquitectura modular, soporte multi-elección con scope territorial y cumplimiento WCAG 2.2 AA (W3C, 2023). Los objetivos específicos se cumplen en su mayoría; las excepciones (curaduría formal de posturas contra fuentes primarias documentadas para reemplazar el dataset ilustrativo utilizado en la tesis, modo guest en la UI, evaluación empírica con usuarios) están documentadas como limitaciones y deuda priorizada.</p>
+<h3 id="62-estado-actual-del-sistema">6.2 Estado actual del sistema</h3>
+<p>Al momento de este documento, la aplicación tiene 18 pantallas funcionales, 27 átomos, 29 moléculas, 17 organismos, 1 template real (<code>AppShell</code>), 38 migraciones, sistema territorial operativo con retrocompatibilidad, design system interno con showcase completo, y documentación estructurada en dos niveles (técnica + accesible). Las funcionalidades eliminadas por YAGNI (Beck, 1999) fueron el flujo Tinder-swipe y el módulo <code>DecisionFinal</code>. Las funcionalidades unificadas incluyen favoritos, descartados y bookmarks bajo <code>MisGuardadosScreen</code>, y seis modales legacy bajo un componente <code>Modal</code> unificado.</p>
+<h3 id="63-aprendizajes">6.3 Aprendizajes</h3>
+<p><strong>Técnicos</strong>. Django + DRF + React Native + Expo + Tamagui permite alta velocidad de desarrollo con un solo desarrollador. El enfoque contract-first con OpenAPI (OpenAPI Initiative, 2021) es la barrera anti-drift más importante entre backend y frontend. YAGNI (Beck, 1999) aplicado retroactivamente simplifica sin costo funcional. Los modelos polimórficos jerárquicos (Fowler, 2003) son la respuesta correcta ante múltiples niveles de scope. Los signals de Django requieren cuidado con la direccionalidad para evitar loops o efectos no deseados. Las migraciones grandes en fases reducen riesgo respecto a <em>big-bang</em> migrations.</p>
+<p><strong>De dominio</strong>. La curaduría formal de posturas contra fuentes primarias documentadas (limitación L1) es más costosa que el desarrollo de código. El sistema territorial chileno es manejable con la abstracción polimórfica correcta. El votante rara vez decide sobre una sola elección; el diseño multi-elección es esencial. Los coach marks contextuales son más efectivos que tours lineales exhaustivos.</p>
+<h3 id="64-deuda-pendiente-priorizada">6.4 Deuda pendiente priorizada</h3>
+<p><strong>Alta prioridad</strong> (bloquea publicación pública confiable): curaduría formal de posturas contra fuentes primarias documentadas para reemplazar el dataset ilustrativo utilizado en la tesis (L1); interfaz de modo invitado (A13); cierre de migración territorial (L10); auditoría de seguridad por tercero (L11); pruebas empíricas con usuarios reales, incluyendo con personas con discapacidad (L9, L14).</p>
+<p><strong>Media prioridad</strong> (bloquea escalar): migración a PostgreSQL (L4); cache Redis; rate limiting (L7); optimización de <code>_persistir_matches</code>; deploy con Gunicorn + Nginx.</p>
+<p><strong>Baja prioridad</strong>: compartir resultado como imagen (L12); squash de migraciones; logging estructurado; CI/CD (L8).</p>
+<h3 id="65-proyeccion">6.5 Proyección</h3>
+<ol>
+<li>Publicación pública en <code>matchvote.cl</code> una vez cerrada la deuda de alta prioridad, en particular la curaduría formal del dataset.</li>
+<li>Curaduría colaborativa del dataset con universidades y think tanks para reemplazar el dataset ilustrativo.</li>
+<li>Escalamiento territorial a senadores por circunscripción y consejeros regionales, sin cambios de schema (limitación L2).</li>
+<li>Explicabilidad avanzada: simulador "cambia mi respuesta" y mapa 2D político al estilo Kieskompas.</li>
+<li>Investigación académica: publicar análisis agregado y anonimizado siguiendo el método de Garzia y Marschall (2014).</li>
+</ol>
+<h3 id="66-reflexion-final">6.6 Reflexión final</h3>
+<p>El proyecto demuestra que es viable construir infraestructura cívica de calidad profesional con recursos limitados, aplicando principios sólidos de ingeniería (Martin, 2017; Hunt &amp; Thomas, 1999; Wiggins, 2011), disciplina en el diseño del algoritmo y coraje para eliminar features que no probaron su valor (Beck, 1999). La combinación de arquitectura modular, modelos polimórficos (Fowler, 2003), transparencia sobre el mecanismo de matching y las posturas asignadas a cada candidato, y accesibilidad estándar (W3C, 2023) constituye una respuesta técnica concreta a los problemas de desinformación electoral, asimetría de información y ausencia de VAA chilena consolidada.</p>
+<p>La existencia de un ecosistema internacional maduro (Cedroni &amp; Garzia, 2010) prueba que estas herramientas pueden ser sostenibles a largo plazo. El desafío en Chile no es técnico —eso lo demuestra este trabajo— sino institucional: encontrar un modelo de gobernanza y financiamiento que permita continuidad operativa entre elecciones.</p>
+<!--PAGE_BREAK-->
+
+<hr />
+<h2 id="7-bibliografia">7. Bibliografía</h2>
+<h3 id="libros-y-capitulos">Libros y capítulos</h3>
+<p>Beck, K. (1999). <em>Extreme programming explained: Embrace change</em>. Addison-Wesley.</p>
+<p>Cedroni, L., &amp; Garzia, D. (Eds.). (2010). <em>Voting Advice Applications in Europe: The state of the art</em>. ScriptaWeb.</p>
+<p>Fowler, M. (2003). <em>Patterns of enterprise application architecture</em>. Addison-Wesley.</p>
+<p>Fowler, M. (2018). <em>Refactoring: Improving the design of existing code</em> (2nd ed.). Addison-Wesley.</p>
+<p>Frost, B. (2016). <em>Atomic design</em>. Brad Frost. https://atomicdesign.bradfrost.com/</p>
+<p>Garzia, D., &amp; Marschall, S. (Eds.). (2014). <em>Matching voters with parties and candidates: Voting Advice Applications in a comparative perspective</em>. ECPR Press.</p>
+<p>Hunt, A., &amp; Thomas, D. (1999). <em>The pragmatic programmer: From journeyman to master</em>. Addison-Wesley.</p>
+<p>Krosnick, J. A., &amp; Presser, S. (2010). Question and questionnaire design. En P. V. Marsden &amp; J. D. Wright (Eds.), <em>Handbook of survey research</em> (2nd ed., pp. 263-313). Emerald.</p>
+<p>Martin, R. C. (2017). <em>Clean architecture: A craftsman's guide to software structure and design</em>. Prentice Hall.</p>
+<h3 id="articulos-academicos">Artículos académicos</h3>
+<p>Likert, R. (1932). A technique for the measurement of attitudes. <em>Archives of Psychology, 22</em>(140), 1-55.</p>
+<p>Marschall, S. (2005). Idee und Wirkung des Wahl-O-Mat. <em>Aus Politik und Zeitgeschichte, 51-52</em>, 41-46.</p>
+<p>Walgrave, S., van Aelst, P., &amp; Nuytemans, M. (2008). "Do the vote test": The electoral effects of a popular Vote Advice Application at the 2004 Belgian elections. <em>Acta Politica, 43</em>(1), 50-70. https://doi.org/10.1057/palgrave.ap.5500207</p>
+<h3 id="sitios-y-documentacion-tecnica">Sitios y documentación técnica</h3>
+<p>Astral. (2024). <em>uv: An extremely fast Python package installer and resolver</em>. https://github.com/astral-sh/uv</p>
+<p>Django Software Foundation. (2024). <em>Django documentation (version 5.2)</em>. https://docs.djangoproject.com/en/5.2/</p>
+<p>Docker Inc. (2024). <em>Docker documentation</em>. https://docs.docker.com/</p>
+<p>Expo. (2024). <em>Expo documentation</em>. https://docs.expo.dev/</p>
+<p>Linsley, T. (2024). <em>TanStack Query v5 documentation</em>. https://tanstack.com/query/latest</p>
+<p>Meta Platforms. (2024). <em>React Native documentation</em>. https://reactnative.dev/</p>
+<p>Microsoft. (2024). <em>TypeScript documentation</em>. https://www.typescriptlang.org/docs/</p>
+<p>OpenAPI Initiative. (2021). <em>OpenAPI Specification v3.1.0</em>. https://spec.openapis.org/oas/v3.1.0</p>
+<p>pmndrs. (2024). <em>Zustand documentation</em>. https://github.com/pmndrs/zustand</p>
+<p>Wiggins, A. (2011). <em>The Twelve-Factor App</em>. https://12factor.net/</p>
+<p>World Wide Web Consortium (W3C). (2023). <em>Web Content Accessibility Guidelines (WCAG) 2.2</em>. https://www.w3.org/TR/WCAG22/</p>
+<h3 id="voting-advice-applications-e-iniciativas-referenciadas">Voting Advice Applications e iniciativas referenciadas</h3>
+<p>Bundeszentrale für politische Bildung (bpb). (2024). <em>Wahl-O-Mat</em>. https://www.bpb.de/themen/wahl-o-mat/</p>
+<p>Kieskompas. (2024). <em>Kieskompas</em>. Universiteit van Amsterdam. https://www.kieskompas.nl/</p>
+<p>ProDemos. (2024). <em>StemWijzer</em>. https://stemwijzer.nl/</p>
+<p>Smartvote. (2024). <em>Smartvote</em>. Politools. https://www.smartvote.ch/</p>
+<p>Vox Pop Labs. (2024). <em>Vote Compass</em>. https://votecompass.com/</p>
+<p>Zismo. (2021). <em>Votamos Todos</em> [Plataforma electoral discontinuada]. (Iniciativa activa entre 2021 y 2022).</p>
+<h3 id="verificadores-de-informacion-y-fuentes-chilenas">Verificadores de información y fuentes chilenas</h3>
+<p>Fast Check CL. (2024). <em>Fast Check CL</em>. https://www.fastcheck.cl/</p>
+<p>Mala Espina Check. (2024). <em>Mala Espina Check</em>. https://malaespinacheck.cl/</p>
+<p>Servicio Electoral de Chile (SERVEL). (2024). <em>Servicio Electoral de Chile</em>. https://www.servel.cl/</p>
+<p>Servicio Electoral de Chile (SERVEL). (2024). <em>Datos abiertos SERVEL</em>. https://opendata.servel.cl/</p>
+<h3 id="marco-legal-chileno">Marco legal chileno</h3>
+<p>Biblioteca del Congreso Nacional de Chile (BCN). (1974). <em>Decreto Ley N° 575: Regionalización del país</em>. https://www.bcn.cl/leychile/navegar?idNorma=6350</p>
+<p>Biblioteca del Congreso Nacional de Chile (BCN). (2015). <em>Ley N° 20.840</em>. https://www.bcn.cl/leychile/navegar?idNorma=1077039</p>
+<p>Biblioteca del Congreso Nacional de Chile (BCN). (2018). <em>Ley N° 21.073</em>. https://www.bcn.cl/leychile/navegar?idNorma=1115216</p>
+<h3 id="documentacion-interna-del-proyecto">Documentación interna del proyecto</h3>
+<p>Castillo, J. (2026a). <em>README.es.md</em> [Documento interno del repositorio del proyecto de tesis].</p>
+<p>Castillo, J. (2026b). <em>docs/algoritmo-tecnico.md</em> [Referencia técnica interna del algoritmo].</p>
+<p>Castillo, J. (2026c). <em>docs/sistema-tecnico.md</em> [Documentación interna de arquitectura].</p>
+<p>Castillo, J. (2026d). <em>docs/comparacion-vaas.md</em> [Análisis comparativo]. GitHub.</p>
+<p>Castillo, J. (2026e). <em>docs/accesibilidad.md</em> [Guía WCAG 2.2 AA]. GitHub.</p>
+<p>Castillo, J. (2026f). <em>docs/mapa-navegacion.md</em> [Mapa de rutas]. GitHub.</p>
+<p>Castillo, J. (2026g). <em>backend/docs/MIGRATION_TERRITORIAL.md</em> [Plan de migración]. GitHub.</p>
+<!--PAGE_BREAK-->
+
+<hr />
+<h2 id="8-anexos">8. Anexos</h2>
+<h3 id="anexo-a-ejes-tematicos-del-cuestionario">Anexo A. Ejes temáticos del cuestionario</h3>
+<p><strong>Tabla 14</strong></p>
+<p><em>Anexo A. Ejes temáticos del cuestionario</em></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Código</th>
+<th>Nombre</th>
+<th>Descripción resumida</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">ECO</td>
+<td>Economía</td>
+<td>Política fiscal, tributaria, laboral, previsional y de desarrollo productivo.</td>
+</tr>
+<tr>
+<td style="text-align: center;">SOC</td>
+<td>Sociedad</td>
+<td>Educación, salud, vivienda, cultura, ciencia y política social.</td>
+</tr>
+<tr>
+<td style="text-align: center;">AMB</td>
+<td>Ambiente</td>
+<td>Cambio climático, energía, minería, agua, biodiversidad y ordenamiento territorial.</td>
+</tr>
+<tr>
+<td style="text-align: center;">SEG</td>
+<td>Seguridad</td>
+<td>Seguridad pública, delito organizado, políticas migratorias y sistema penal.</td>
+</tr>
+<tr>
+<td style="text-align: center;">DDH</td>
+<td>Derechos Humanos</td>
+<td>Igualdad, diversidad, pueblos originarios, derechos reproductivos y libertades civiles.</td>
+</tr>
+<tr>
+<td style="text-align: center;">INT</td>
+<td>Política Internacional</td>
+<td>Relaciones exteriores, integración regional, tratados comerciales y política de defensa.</td>
+</tr>
+<tr>
+<td style="text-align: center;">INS</td>
+<td>Reforma Institucional</td>
+<td>Sistema político, descentralización, reforma constitucional y probidad.</td>
+</tr>
+</tbody>
+</table>
+<p><em>Nota.</em> Cada eje se asocia a un color y descripción educativa mostrados en el radar y tooltips.</p>
+<h3 id="anexo-b-preguntas-base-ilustrativas">Anexo B. Preguntas base ilustrativas</h3>
+<p><strong>Tabla 15</strong></p>
+<p><em>Anexo B. Preguntas base ilustrativas</em></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">#</th>
+<th>Enunciado (ilustrativo)</th>
+<th style="text-align: center;">Eje</th>
+<th style="text-align: center;">Escala</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">B1</td>
+<td>El Estado debe tener un rol activo en la provisión directa de servicios como salud y pensiones.</td>
+<td style="text-align: center;">ECO</td>
+<td style="text-align: center;">Likert 1-5</td>
+</tr>
+<tr>
+<td style="text-align: center;">B2</td>
+<td>El aborto libre debe estar garantizado por ley durante todo el embarazo.</td>
+<td style="text-align: center;">DDH</td>
+<td style="text-align: center;">Likert 1-5</td>
+</tr>
+<tr>
+<td style="text-align: center;">B3</td>
+<td>Chile debe priorizar la transición energética aunque implique costos económicos en el corto plazo.</td>
+<td style="text-align: center;">AMB</td>
+<td style="text-align: center;">Likert 1-5</td>
+</tr>
+<tr>
+<td style="text-align: center;">B4</td>
+<td>Las políticas migratorias deben endurecerse para reducir la migración irregular.</td>
+<td style="text-align: center;">SEG</td>
+<td style="text-align: center;">Likert 1-5</td>
+</tr>
+<tr>
+<td style="text-align: center;">B5</td>
+<td>El sistema electoral binominal era mejor que el proporcional actual para la estabilidad política.</td>
+<td style="text-align: center;">INS</td>
+<td style="text-align: center;">Likert 1-5</td>
+</tr>
+</tbody>
+</table>
+<p><em>Nota.</em> Enunciados ilustrativos. Cada pregunta incluye sexta opción "No sé / Prefiero no responder" excluida del cálculo (Likert, 1932).</p>
+<h3 id="anexo-c-comparativa-con-vaas-internacionales">Anexo C. Comparativa con VAAs internacionales</h3>
+<p><strong>Tabla 16</strong></p>
+<p><em>Anexo C. Comparativa resumida con VAAs internacionales</em></p>
+<table>
+<thead>
+<tr>
+<th>VAA</th>
+<th style="text-align: center;">País</th>
+<th>Institución</th>
+<th style="text-align: center;">Algoritmo público</th>
+<th style="text-align: center;">Doc del cálculo</th>
+<th style="text-align: center;">Cobertura territorial</th>
+<th style="text-align: center;">Confianza</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>StemWijzer</td>
+<td style="text-align: center;">NL</td>
+<td>ProDemos</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: center;">Nacional</td>
+<td style="text-align: center;">No</td>
+</tr>
+<tr>
+<td>Wahl-O-Mat</td>
+<td style="text-align: center;">DE</td>
+<td>bpb</td>
+<td style="text-align: center;">Sí</td>
+<td style="text-align: center;">Parcial</td>
+<td style="text-align: center;">Nacional</td>
+<td style="text-align: center;">No</td>
+</tr>
+<tr>
+<td>Smartvote</td>
+<td style="text-align: center;">CH</td>
+<td>Politools</td>
+<td style="text-align: center;">Sí</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: center;">Multi-nivel</td>
+<td style="text-align: center;">No</td>
+</tr>
+<tr>
+<td>Kieskompas</td>
+<td style="text-align: center;">NL</td>
+<td>UvA</td>
+<td style="text-align: center;">Parcial</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: center;">Nacional</td>
+<td style="text-align: center;">No</td>
+</tr>
+<tr>
+<td>Vote Compass</td>
+<td style="text-align: center;">CA/AU</td>
+<td>Vox Pop Labs</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: center;">Nacional</td>
+<td style="text-align: center;">No</td>
+</tr>
+<tr>
+<td>Votamos Todos</td>
+<td style="text-align: center;">CL</td>
+<td>Zismo</td>
+<td style="text-align: center;">No consta</td>
+<td style="text-align: center;">No consta</td>
+<td style="text-align: center;">Nacional (plebiscito 2022)</td>
+<td style="text-align: center;">No</td>
+</tr>
+<tr>
+<td>Decide Chile</td>
+<td style="text-align: center;">CL</td>
+<td>No consta</td>
+<td style="text-align: center;">No aplica (no es VAA)</td>
+<td style="text-align: center;">No consta</td>
+<td style="text-align: center;">Nacional</td>
+<td style="text-align: center;">No</td>
+</tr>
+<tr>
+<td>Vota Inteligente</td>
+<td style="text-align: center;">CL</td>
+<td>No consta</td>
+<td style="text-align: center;">No aplica (no es VAA)</td>
+<td style="text-align: center;">No consta</td>
+<td style="text-align: center;">Nacional</td>
+<td style="text-align: center;">No</td>
+</tr>
+<tr>
+<td>Infovecino</td>
+<td style="text-align: center;">CL</td>
+<td>No consta</td>
+<td style="text-align: center;">No aplica (no es VAA)</td>
+<td style="text-align: center;">No consta</td>
+<td style="text-align: center;">Comunal</td>
+<td style="text-align: center;">No</td>
+</tr>
+<tr>
+<td>Infovotantes</td>
+<td style="text-align: center;">CO</td>
+<td>No consta</td>
+<td style="text-align: center;">No aplica (no es VAA)</td>
+<td style="text-align: center;">No consta</td>
+<td style="text-align: center;">Nacional</td>
+<td style="text-align: center;">No</td>
+</tr>
+<tr>
+<td>VotaPE</td>
+<td style="text-align: center;">PE</td>
+<td>No consta</td>
+<td style="text-align: center;">No aplica (no es VAA clásica)</td>
+<td style="text-align: center;">No consta</td>
+<td style="text-align: center;">Nacional</td>
+<td style="text-align: center;">No</td>
+</tr>
+<tr>
+<td><strong>matchVote</strong></td>
+<td style="text-align: center;"><strong>CL</strong></td>
+<td><strong>Este proyecto</strong></td>
+<td style="text-align: center;"><strong>Sí</strong></td>
+<td style="text-align: center;"><strong>No aplica</strong></td>
+<td style="text-align: center;"><strong>Nacional + distrital + comunal</strong></td>
+<td style="text-align: center;"><strong>Sí (3 niveles)</strong></td>
+</tr>
+</tbody>
+</table>
+<p><em>Nota.</em> Elaboración propia a partir de sitios oficiales y relevamiento manual. "Confianza" se refiere a la exposición del número de preguntas efectivamente consideradas. "No consta" indica dato no verificado; "No aplica" indica que la iniciativa no se diseñó como VAA con matching personalizado.</p>
+<h3 id="anexo-d-comandos-de-management-del-backend">Anexo D. Comandos de management del backend</h3>
 <ul>
-<li>Cedroni, L., &amp; Garzia, D. (Eds.). (2010). <em>Voting Advice Applications in Europe: The State of the Art</em>. Napoli: ScriptaWeb.</li>
-<li>Garzia, D., &amp; Marschall, S. (Eds.). (2014). <em>Matching Voters with Parties and Candidates: Voting Advice Applications in a Comparative Perspective</em>. Colchester: ECPR Press.</li>
-<li>Marschall, S. (2005). <em>Idee und Wirkung des Wahl-O-Mat</em>. Aus Politik und Zeitgeschichte, 51-52/2005.</li>
-<li>Walgrave, S., van Aelst, P., &amp; Nuytemans, M. (2008). "Do the vote test": The electoral effects of a Popular Vote Advice Application at the 2004 Belgian Elections. <em>Acta Politica</em>, 43, 50-70.</li>
+<li><strong>Importadores</strong>: <code>import_candidatos</code>, <code>import_preguntas</code>, <code>import_posturas</code>.</li>
+<li><strong>Seeds territoriales</strong>: <code>seed_territorio_chile</code>.</li>
+<li><strong>Seeds de cuestionario</strong>: <code>seed_preguntas_base</code>, <code>seed_preguntas_por_tipo</code>, <code>seed_explicaciones_preguntas</code>.</li>
+<li><strong>Seeds electorales</strong>: <code>seed_presidenciales_2025</code>, <code>seed_diputados_2025</code>, <code>seed_alcaldes_2024</code>, <code>seed_parlamentaria</code>.</li>
+<li><strong>Utilidades</strong>: <code>fetch_noticias</code>, <code>limpiar_tokens_viejos</code>.</li>
 </ul>
-<h3 id="132-vaas-referenciados">13.2 VAAs referenciados</h3>
+<h3 id="anexo-e-estructura-del-envexample">Anexo E. Estructura del <code>.env.example</code></h3>
+<pre><code># Django
+SECRET_KEY=...
+DEBUG=False
+ALLOWED_HOSTS=example.com
+
+# Base de datos
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=matchvote
+DB_USER=...
+DB_PASSWORD=...
+DB_HOST=...
+DB_PORT=5432
+
+# CORS
+CORS_ALLOWED_ORIGINS=https://example.com
+
+# Email (password reset)
+EMAIL_HOST=smtp.example.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=...
+EMAIL_HOST_PASSWORD=...
+DEFAULT_FROM_EMAIL=noreply@example.com
+
+# Reset tokens
+PASSWORD_RESET_TOKEN_TTL_HOURS=24
+</code></pre>
+<h3 id="anexo-f-recursos-del-repositorio">Anexo F. Recursos del repositorio</h3>
 <ul>
-<li>StemWijzer (Países Bajos, ProDemos). https://stemwijzer.nl/</li>
-<li>Wahl-O-Mat (Alemania, Bundeszentrale für politische Bildung). https://www.bpb.de/themen/wahl-o-mat/</li>
-<li>Smartvote (Suiza, Politools). https://www.smartvote.ch/</li>
-<li>Kieskompas (Países Bajos, Universiteit van Amsterdam). https://www.kieskompas.nl/</li>
-<li>Vote Compass (Canadá/Australia, Vox Pop Labs). https://votecompass.com/</li>
-<li>Wahlkabine (Austria, Institut für Neue Kulturtechnologien). https://wahlkabine.at/</li>
-</ul>
-<h3 id="133-sobre-desinformacion-electoral">13.3 Sobre desinformación electoral</h3>
-<ul>
-<li>Fast Check CL. https://www.fastcheck.cl/</li>
-<li>Mala Espina Check. https://malaespinacheck.cl/</li>
-<li>Observatorio de Redes y Elecciones, Universidad Diego Portales.</li>
-<li>Servicio Electoral de Chile (SERVEL). https://www.servel.cl/</li>
-<li>Datos abiertos SERVEL. https://opendata.servel.cl/</li>
-</ul>
-<h3 id="134-sobre-escalas-de-medicion">13.4 Sobre escalas de medición</h3>
-<ul>
-<li>Likert, R. (1932). A Technique for the Measurement of Attitudes. <em>Archives of Psychology</em>, 140, 1-55.</li>
-<li>Krosnick, J. A., &amp; Presser, S. (2010). Question and Questionnaire Design. In <em>Handbook of Survey Research</em> (2nd ed.). Emerald.</li>
-</ul>
-<h3 id="135-sobre-arquitectura-de-software">13.5 Sobre arquitectura de software</h3>
-<ul>
-<li>Martin, R. C. (2017). <em>Clean Architecture: A Craftsman's Guide to Software Structure and Design</em>. Prentice Hall.</li>
-<li>Martin, R. C. (2008). <em>Clean Code: A Handbook of Agile Software Craftsmanship</em>. Prentice Hall.</li>
-<li>Hunt, A., &amp; Thomas, D. (1999). <em>The Pragmatic Programmer: From Journeyman to Master</em>. Addison-Wesley.</li>
-<li>Wiggins, A. (2011). <em>The Twelve-Factor App</em>. https://12factor.net/</li>
-<li>Frost, B. (2016). <em>Atomic Design</em>. https://atomicdesign.bradfrost.com/</li>
-</ul>
-<h3 id="136-sobre-accesibilidad">13.6 Sobre accesibilidad</h3>
-<ul>
-<li>World Wide Web Consortium (W3C). <em>Web Content Accessibility Guidelines (WCAG) 2.2</em>. https://www.w3.org/TR/WCAG22/</li>
-<li>Mobile Accessibility: How WCAG 2.0 and Other W3C/WAI Guidelines Apply to Mobile. https://www.w3.org/TR/mobile-accessibility-mapping/</li>
-</ul>
-<h3 id="137-documentacion-tecnica-de-las-tecnologias-utilizadas">13.7 Documentación técnica de las tecnologías utilizadas</h3>
-<ul>
-<li>Django Software Foundation. <em>Django Documentation</em>. https://docs.djangoproject.com/en/5.2/</li>
-<li>Django REST Framework. https://www.django-rest-framework.org/</li>
-<li>drf-spectacular. https://drf-spectacular.readthedocs.io/</li>
-<li>python-decouple. https://github.com/HBNetwork/python-decouple</li>
-<li>django-cleanup. https://github.com/un1t/django-cleanup</li>
-<li>Expo. <em>Expo Documentation</em>. https://docs.expo.dev/</li>
-<li>React Native. https://reactnative.dev/</li>
-<li>Tamagui. https://tamagui.dev/</li>
-<li>TanStack Query. https://tanstack.com/query/latest</li>
-<li>Zustand. https://github.com/pmndrs/zustand</li>
-<li>TypeScript. https://www.typescriptlang.org/docs/</li>
-<li>openapi-typescript. https://openapi-ts.dev/</li>
-<li>uv (Astral). https://github.com/astral-sh/uv</li>
-</ul>
-<h3 id="138-documentacion-interna-del-proyecto">13.8 Documentación interna del proyecto</h3>
-<ul>
-<li><code>docs/algoritmo-tecnico.md</code> — Referencia técnica del algoritmo de matching (fórmulas, API, complejidad).</li>
-<li><code>docs/algoritmo-simple.md</code> — Explicación del algoritmo sin matemática, para público no técnico.</li>
-<li><code>docs/sistema-tecnico.md</code> — Referencia de arquitectura backend y frontend.</li>
-<li><code>docs/sistema-simple.md</code> — Arquitectura en lenguaje simple.</li>
-<li><code>docs/comparacion-vaas.md</code> — Análisis comparativo con 9 VAAs internacionales.</li>
-<li><code>docs/buenas-practicas.md</code> — Aplicación de SOLID, DRY, Clean Architecture, 12-Factor.</li>
-<li><code>docs/estado-actual.md</code> — Estado de features y deuda técnica priorizada.</li>
-<li><code>docs/sprints.md</code> — Historial del proyecto por sprints.</li>
-<li><code>docs/doc-tecnica.md</code> — Documentación técnica completa del backend.</li>
+<li><strong>Repositorio interno</strong>: código del proyecto disponible en el entorno de desarrollo de la autora, con estructura documentada en las secciones 4.13 y 4.14 de este documento.</li>
+<li><strong>README</strong>: <code>README.es.md</code>.</li>
+<li><strong>Documentación técnica</strong>: <code>docs/backend/tecnico/</code>.</li>
+<li><strong>Documentación accesible</strong>: <code>docs/backend/simple/</code>.</li>
+<li><strong>Guía WCAG</strong>: <code>docs/accesibilidad.md</code>.</li>
+<li><strong>Mapa de navegación</strong>: <code>docs/mapa-navegacion.md</code>.</li>
+<li><strong>Plan de migración territorial</strong>: <code>backend/docs/MIGRATION_TERRITORIAL.md</code>.</li>
 </ul>
 <hr />
-<p><em>Documento elaborado como parte de la tesis de pregrado sobre desarrollo de aplicaciones móviles. Autora: Jenifer Castillo (@whatebria). Repositorio: https://github.com/whatebria/tinder-decisivo. Licencia del código: AGPL-3.0.</em></p>
+<p><em>Documento elaborado como parte de la tesis de pregrado de la carrera de Ingeniería en Informática. Autora: Jenifer Castillo. Versión académica APA 7 con estructura de 8 secciones: Introducción, Definición del problema, Marco conceptual, Propuesta de solución, Validación de la solución, Conclusiones, Bibliografía y Anexos.</em></p>
+<script>
+(function () {
+  var STORAGE_KEY = 'servel-docs-theme';
+  var root = document.documentElement;
+  var btn = document.getElementById('themeToggle');
+  var stored = null;
+  try { stored = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+  if (stored === 'light' || stored === 'dark') {
+    root.setAttribute('data-theme', stored);
+  }
+  function currentEffectiveTheme() {
+    var attr = root.getAttribute('data-theme');
+    if (attr === 'light' || attr === 'dark') return attr;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  btn.addEventListener('click', function () {
+    var next = currentEffectiveTheme() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem(STORAGE_KEY, next); } catch (e) {}
+  });
+})();
+</script>
 </body>
 </html>
