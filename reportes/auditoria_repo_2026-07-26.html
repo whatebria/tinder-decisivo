@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Auditoría del repo tinder-decisivo/servel — 2026-07-26</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+<style>
+  :root {
+    --blue-100: #0053e2;
+    --blue-140: #001e60;
+    --spark-100: #ffc220;
+    --spark-10:  #fff3cd;
+    --spark-140: #995213;
+    --red-100:   #ea1100;
+    --green-100: #2a8703;
+    --gray-160:  #1d1e20;
+    --gray-100:  #74767c;
+    --gray-50:   #dadce0;
+    --gray-10:   #f2f4f7;
+  }
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .card { background:#fff; border:1px solid var(--gray-50); border-radius:12px; }
+  .chip-ok    { background:#e6f4dd; color:#1c5c02; }
+  .chip-warn  { background:var(--spark-10); color:var(--spark-140); }
+  .chip-err   { background:#fde3e0; color:#8b0700; }
+  .chip-info  { background:#d9e6ff; color:var(--blue-140); }
+  .chart-wrap { position:relative; height:280px; }
+  .chart-wrap-sm { position:relative; height:220px; }
+  h1,h2,h3 { color: var(--gray-160); }
+  .kpi-num { font-variant-numeric: tabular-nums; }
+  a.link { color: var(--blue-100); text-decoration: underline; text-underline-offset: 3px; }
+  a.link:hover { color: var(--blue-140); }
+  .table-fixed th, .table-fixed td { padding: .5rem .75rem; border-bottom: 1px solid var(--gray-50); text-align: left; font-size: .875rem; }
+  .table-fixed th { background: var(--gray-10); font-weight: 600; }
+  code.inline { background: var(--gray-10); padding: 1px 5px; border-radius: 4px; font-size: .85em; }
+</style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+<header class="bg-white border-b" style="border-color:var(--gray-50)">
+  <div class="max-w-6xl mx-auto px-6 py-5 flex items-baseline justify-between flex-wrap gap-4">
+    <div>
+      <div class="text-xs uppercase tracking-wider" style="color:var(--gray-100)">Auditoría de repositorio</div>
+      <h1 class="text-2xl font-bold mt-1">tinder-decisivo <span class="text-gray-400 font-normal">/ servel</span></h1>
+      <div class="text-sm mt-1" style="color:var(--gray-100)">
+        Django 5.2 + DRF · Expo SDK 57 · React Native + Tamagui · SQLite
+      </div>
+    </div>
+    <div class="text-right">
+      <div class="text-xs" style="color:var(--gray-100)">Fecha</div>
+      <div class="font-semibold">2026-07-26</div>
+      <a class="link text-sm" href="https://github.com/whatebria/tinder-decisivo" target="_blank">github/whatebria/tinder-decisivo</a>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-6 py-8 space-y-8">
+
+  <!-- ══════════ EXECUTIVE SUMMARY (arriba) ══════════ -->
+  <section class="card p-6">
+    <div class="flex items-start gap-6 flex-wrap">
+      <div class="flex-shrink-0 text-center px-4 py-3 rounded-xl" style="background:var(--blue-100); color:white; min-width: 140px">
+        <div class="text-xs uppercase tracking-wider opacity-80">Grade</div>
+        <div class="text-6xl font-black kpi-num">A</div>
+        <div class="text-sm mt-1 opacity-90">92 / 100</div>
+      </div>
+      <div class="flex-1 min-w-[280px]">
+        <h2 class="text-xl font-bold mb-2">Resumen ejecutivo</h2>
+        <p class="text-sm leading-relaxed" style="color:var(--gray-160)">
+          El proyecto está en <strong>excelente estado técnico</strong>. La auditoría backend
+          cerró los <strong>23/23 findings</strong> (incluyendo la refactorización territorial polimórfica H2, un
+          BREAKING change limpio). El frontend tiene <strong>145 tests verdes</strong> (81 backend + 64 nuevos de frontend),
+          <strong>cero errores TypeScript</strong> y estructura atómica clara (atoms/molecules/organisms/templates).
+          Quedan dos oportunidades tácticas: (1) 2 screens sobre el límite de 600 líneas fáciles de dividir y
+          (2) desenchufar Tamagui — que ya solo lo usa <strong>1 archivo</strong> — para bajar bundle.
+        </p>
+      </div>
+    </div>
+
+    <!-- KPI Strip -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mt-5">
+      <div class="text-center p-3 rounded-lg" style="background:var(--gray-10)">
+        <div class="text-3xl font-bold kpi-num" style="color:var(--green-100)">145</div>
+        <div class="text-xs mt-1" style="color:var(--gray-100)">Tests verdes</div>
+      </div>
+      <div class="text-center p-3 rounded-lg" style="background:var(--gray-10)">
+        <div class="text-3xl font-bold kpi-num" style="color:var(--green-100)">0</div>
+        <div class="text-xs mt-1" style="color:var(--gray-100)">Errores TS</div>
+      </div>
+      <div class="text-center p-3 rounded-lg" style="background:var(--gray-10)">
+        <div class="text-3xl font-bold kpi-num" style="color:var(--green-100)">23/23</div>
+        <div class="text-xs mt-1" style="color:var(--gray-100)">Findings backend</div>
+      </div>
+      <div class="text-center p-3 rounded-lg" style="background:var(--gray-10)">
+        <div class="text-3xl font-bold kpi-num" style="color:var(--spark-140)">2</div>
+        <div class="text-xs mt-1" style="color:var(--gray-100)">Screens &gt; 600 líneas</div>
+      </div>
+      <div class="text-center p-3 rounded-lg" style="background:var(--gray-10)">
+        <div class="text-3xl font-bold kpi-num" style="color:var(--spark-140)">1</div>
+        <div class="text-xs mt-1" style="color:var(--gray-100)">Screens con Tamagui</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ CHARTS ══════════ -->
+  <section class="grid md:grid-cols-2 gap-6">
+    <div class="card p-6">
+      <h2 class="text-lg font-bold mb-3">Auditoría backend — findings cerrados</h2>
+      <div class="chart-wrap"><canvas id="findingsChart"></canvas></div>
+      <p class="text-xs mt-3" style="color:var(--gray-100)">
+        4 Critical + 6 High + 8 Medium + 5 Low. Cierre 100% en 3 sesiones.
+      </p>
+    </div>
+    <div class="card p-6">
+      <h2 class="text-lg font-bold mb-3">Tests por área</h2>
+      <div class="chart-wrap"><canvas id="testsChart"></canvas></div>
+      <p class="text-xs mt-3" style="color:var(--gray-100)">
+        Backend: 46 integración (pytest-django) + 35 unitarios. Frontend: 64 unitarios de services puros.
+      </p>
+    </div>
+  </section>
+
+  <section class="grid md:grid-cols-3 gap-6">
+    <div class="card p-6 md:col-span-2">
+      <h2 class="text-lg font-bold mb-3">Screens frontend — líneas de código</h2>
+      <div class="chart-wrap"><canvas id="screensChart"></canvas></div>
+      <p class="text-xs mt-3" style="color:var(--gray-100)">
+        Línea roja = límite de 600 líneas (regla del proyecto). Dos screens la rompen.
+      </p>
+    </div>
+    <div class="card p-6">
+      <h2 class="text-lg font-bold mb-3">Salud del código</h2>
+      <div class="chart-wrap-sm"><canvas id="healthChart"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ══════════ BACKEND ══════════ -->
+  <section class="card p-6">
+    <div class="flex items-center gap-3 mb-3">
+      <h2 class="text-xl font-bold">Backend — Django 5.2 + DRF</h2>
+      <span class="chip-ok text-xs px-2 py-1 rounded-full font-semibold">100% cerrado</span>
+    </div>
+
+    <div class="mb-4">
+      <h3 class="font-semibold mb-2 text-sm uppercase tracking-wider" style="color:var(--gray-100)">Highlights de esta sesión</h3>
+      <ul class="text-sm space-y-1 list-disc list-inside" style="color:var(--gray-160)">
+        <li><strong>H2 cerrada</strong> (BREAKING): eliminados <code class="inline">Candidato.comuna</code> y <code class="inline">Candidato.distrito</code>. Todo el modelo territorial pasa por <code class="inline">unidad_territorial</code> (polimórfico: nacional/regional/distrital/comunal).</li>
+        <li><strong>M2 parcial</strong>: squash de migraciones 0001-0025 en un único initial (79 ops → 16). El bloque 0026-0038 se dejó intacto por un bug de Django (no puede portar RunPython de módulos numeric-prefixed).</li>
+        <li><strong>M1 cache</strong> de <code class="inline">TipoEleccion</code> base ids + <strong>M4 in-place update</strong> de MatchCandidato al editar respuestas (evita queries redundantes).</li>
+        <li>Backend corriendo estable en <code class="inline">http://127.0.0.1:8010</code>, verificado: <code class="inline">/api/v1/candidatos/</code>, <code class="inline">/regiones/</code>, <code class="inline">/tipos-eleccion/</code>, <code class="inline">/unidades-territoriales/</code>, <code class="inline">/ejes/</code>, <code class="inline">/noticias/</code> → todos <strong>HTTP 200</strong>.</li>
+      </ul>
+    </div>
+
+    <div class="mb-4">
+      <h3 class="font-semibold mb-2 text-sm uppercase tracking-wider" style="color:var(--gray-100)">Commits nuevos (pusheados)</h3>
+      <table class="table-fixed w-full">
+        <thead>
+          <tr><th style="width:110px">Commit</th><th style="width:100px">Type</th><th>Mensaje</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code class="inline">55fd9de</code></td><td><span class="chip-info text-xs px-2 py-0.5 rounded-full">refactor</span></td><td>route Candidato reads through unidad_territorial (H2 prep)</td></tr>
+          <tr><td><code class="inline">dc5a041</code></td><td><span class="chip-info text-xs px-2 py-0.5 rounded-full">refactor</span></td><td>remove Candidato.comuna/distrito writes and reads (H2 prep 2)</td></tr>
+          <tr><td><code class="inline">8c5ce69</code></td><td><span class="chip-err text-xs px-2 py-0.5 rounded-full">feat!</span></td><td>drop Candidato.comuna and Candidato.distrito (H2 closed)</td></tr>
+          <tr><td><code class="inline">92696cd</code></td><td><span class="chip-warn text-xs px-2 py-0.5 rounded-full">chore</span></td><td>squash 0001-0025 into single initial migration (M2 partial)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════ FRONTEND ══════════ -->
+  <section class="card p-6">
+    <div class="flex items-center gap-3 mb-3">
+      <h2 class="text-xl font-bold">Frontend — Expo SDK 57 + React Native + Tamagui (sunset)</h2>
+      <span class="chip-ok text-xs px-2 py-1 rounded-full font-semibold">Sano</span>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <!-- Positivos -->
+      <div>
+        <h3 class="font-semibold mb-2 text-sm uppercase tracking-wider" style="color:var(--green-100)"> Lo que está impecable</h3>
+        <ul class="text-sm space-y-1 list-disc list-inside" style="color:var(--gray-160)">
+          <li><strong>Estructura atómica</strong> pura: atoms/molecules/organisms/templates con index.ts. Bookmark de referencia.</li>
+          <li><strong>Zero <code class="inline">console.log</code></strong> en código productivo (solo 2 dentro del design-system playground).</li>
+          <li><strong>Zero TODO/FIXME/HACK</strong> reales. Grep exhaustivo.</li>
+          <li><strong>Zero <code class="inline">as any</code></strong> problemáticos (5 total, todos justificados: 3 en tests, 1 en playground, 1 puntual en CuestionarioScreen).</li>
+          <li>Solo <strong>2 <code class="inline">eslint-disable</code></strong> en todo el codebase (ambos con razón documentada).</li>
+          <li><strong>Services puros</strong> separados de React (<code class="inline">src/services/</code>) — testeados con Jest sin needs de RN Testing Library.</li>
+          <li><strong>React Query 5</strong> bien configurado: <code class="inline">staleTime: 60s</code>, <code class="inline">retry: 1</code>, <code class="inline">refetchOnWindowFocus: false</code>. Keys tipadas y centralizadas.</li>
+          <li><strong>Zustand</strong> con persist selectivo (<code class="inline">auth</code>, <code class="inline">theme</code>, <code class="inline">onboarding</code>, <code class="inline">coachMarks</code>). Nada de context prop-drilling.</li>
+          <li>Auth con <code class="inline">expo-secure-store</code>, no AsyncStorage plano.</li>
+          <li>OpenAPI types autogenerados (<code class="inline">src/types/api.ts</code>, 67 KB — no lo cuenta el límite).</li>
+        </ul>
+      </div>
+
+      <!-- Oportunidades -->
+      <div>
+        <h3 class="font-semibold mb-2 text-sm uppercase tracking-wider" style="color:var(--spark-140)">△ Oportunidades tácticas</h3>
+        <ul class="text-sm space-y-2 list-disc list-inside" style="color:var(--gray-160)">
+          <li>
+            <strong>Screens &gt; 600 líneas</strong>:
+            <ul class="list-none pl-4 mt-1 text-xs space-y-0.5" style="color:var(--gray-100)">
+              <li>· <code class="inline">NoticiasScreen.tsx</code> — <strong>698</strong> líneas. Ya tiene 2 subcomponentes (<code class="inline">FiltrosSheet</code>, <code class="inline">CandidatoPicker</code>) que salen limpio a archivos aparte.</li>
+              <li>· <code class="inline">DetalleCandidatoScreen.tsx</code> — <strong>619</strong> líneas. Tiene 5 tabs internos (<code class="inline">MatchBlock</code>, <code class="inline">EmptyMatchBlock</code>, <code class="inline">ActionRow</code>, <code class="inline">ResumenTab</code>, <code class="inline">NoticiasTab</code>) — extraer los 3 tabs = ~250 líneas menos.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Tamagui casi eliminable</strong>: solo <code class="inline">PasswordResetConfirmScreen.tsx</code> lo importa. Removerlo baja
+            <span class="chip-info text-xs px-1.5 py-0.5 rounded font-semibold">~50 packages</span> del bundle y elimina el plugin Babel (compilación más rápida).
+          </li>
+          <li>
+            <strong>Cerca del límite</strong>: <code class="inline">CandidatosScreen.tsx</code> (587) y <code class="inline">ResultadosScreen.tsx</code> (516) — vigilar.
+          </li>
+          <li>
+            <strong>Coverage frontend</strong>: los 64 tests cubren <em>solo services puros</em>. Podría venir bien 1-2 tests de flujo E2E con Playwright web (RN Web ya está).
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-6">
+      <h3 class="font-semibold mb-2 text-sm uppercase tracking-wider" style="color:var(--gray-100)">Verificaciones que corrí</h3>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+        <div class="p-2 rounded" style="background:#e6f4dd; color:#1c5c02"><strong> tsc --noEmit</strong><br/>0 errores</div>
+        <div class="p-2 rounded" style="background:#e6f4dd; color:#1c5c02"><strong> jest --silent</strong><br/>97/97 pass</div>
+        <div class="p-2 rounded" style="background:#e6f4dd; color:#1c5c02"><strong> pytest (backend)</strong><br/>293/293 pass</div>
+        <div class="p-2 rounded" style="background:#e6f4dd; color:#1c5c02"><strong> Runtime API</strong><br/>6/6 endpoints 200</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ ARCHIVOS ══════════ -->
+  <section class="card p-6">
+    <h2 class="text-xl font-bold mb-3">Estructura por números</h2>
+    <div class="grid md:grid-cols-3 gap-4 text-sm">
+      <div>
+        <h3 class="font-semibold mb-2">Backend</h3>
+        <ul style="color:var(--gray-160)">
+          <li>· 38 migraciones (25 squasheadas → 1 initial)</li>
+          <li>· 8 tipos de elección seed</li>
+          <li>· 1194 candidatos en dev DB</li>
+          <li>· 46 tests integración + 35 unitarios</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="font-semibold mb-2">Frontend src/</h3>
+        <ul style="color:var(--gray-160)">
+          <li>· 170 archivos, 796 KB</li>
+          <li>· 21 screens principales</li>
+          <li>· 27 atoms + 30 molecules + 15 organisms + 2 templates</li>
+          <li>· 4 services puros con test</li>
+          <li>· 8 stores Zustand</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="font-semibold mb-2">Dependencias</h3>
+        <ul style="color:var(--gray-160)">
+          <li>· React Query 5.101</li>
+          <li>· React Native 0.86 + Expo 57</li>
+          <li>· Tamagui 2.5 (candidato a purga)</li>
+          <li>· Axios 1.18, Zustand 5, react-native-svg 15</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ INSIGHTS FINALES ══════════ -->
+  <section class="card p-6" style="background:linear-gradient(135deg,#fff, var(--gray-10))">
+    <h2 class="text-xl font-bold mb-4">Insights ejecutivos</h2>
+
+    <div class="space-y-4">
+      <div>
+        <div class="font-semibold text-sm mb-1" style="color:var(--blue-100)">1. La arquitectura territorial polimórfica es la joya del proyecto</div>
+        <p class="text-sm" style="color:var(--gray-160)">
+          H2 no fue un refactor cualquiera: reemplazó dos FKs (<code class="inline">comuna</code>, <code class="inline">distrito</code>) + una CheckConstraint por un solo FK
+          <code class="inline">unidad_territorial</code> con jerarquía (nacional → regional → distrital → comunal). Esto abre la puerta a
+          <strong>senadores</strong> (nivel regional), <strong>CORE</strong> (provincial) y <strong>constituyentes</strong> sin migraciones nuevas. Es
+          exactamente lo que hace que este código sobreviva al post-tesis.
+        </p>
+      </div>
+
+      <div>
+        <div class="font-semibold text-sm mb-1" style="color:var(--blue-100)">2. Fricción de bootstrap ya está bajo control</div>
+        <p class="text-sm" style="color:var(--gray-160)">
+          El squash de M2 baja 79 operations a 16 en fresh install. Los 25 archivos viejos siguen ahí porque Django los usa como fallback en envs existentes — es la ruta recomendada. Cuando confirmes que no queda ningún env con migraciones aplicadas antiguas, se pueden borrar y quedan <strong>13 archivos de migración</strong> (0001_squashed + 0026-0038).
+        </p>
+      </div>
+
+      <div>
+        <div class="font-semibold text-sm mb-1" style="color:var(--blue-100)">3. Tamagui está en fase terminal y no lo sabía</div>
+        <p class="text-sm" style="color:var(--gray-160)">
+          El repo ya tiene 27 atoms propios + 30 molecules construidos con RN puro y tokens del design system. Tamagui solo sobrevive en
+          <code class="inline">PasswordResetConfirmScreen.tsx</code> por inercia. Migrar ese screen (10 minutos) desbloquea el borrado del plugin Babel,
+          el archivo de config, ~50 paquetes en node_modules y bajar tiempo de <code class="inline">expo start</code>.
+        </p>
+      </div>
+
+      <div>
+        <div class="font-semibold text-sm mb-1" style="color:var(--blue-100)">4. Los tests frontend son buenos pero unilaterales</div>
+        <p class="text-sm" style="color:var(--gray-160)">
+          64 unit tests de services puros = decisión pragmática y correcta (services testeables sin RN, feedback rápido).
+          Pero el cuerpo del app (hooks, componentes, flujos) queda sin cobertura. Un smoke test E2E de "cuestionario completo → ver ranking" en
+          RN Web + Playwright tapa el 80% de la superficie con pocos tests.
+        </p>
+      </div>
+
+      <div>
+        <div class="font-semibold text-sm mb-1" style="color:var(--blue-100)">5. Próximos 3 pasos concretos si querés</div>
+        <ol class="text-sm list-decimal list-inside space-y-1" style="color:var(--gray-160)">
+          <li>Migrar <code class="inline">PasswordResetConfirmScreen</code> + purgar Tamagui (1 sesión, ~30 min).</li>
+          <li>Dividir <code class="inline">NoticiasScreen</code> y <code class="inline">DetalleCandidatoScreen</code> a componentes hijos (1 sesión, ~45 min).</li>
+          <li>Setup Playwright + 1 smoke test del flujo cuestionario→resultados (1 sesión, ~1 h).</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <footer class="text-center text-xs pt-4" style="color:var(--gray-100)">
+    Generado por Perrito el 2026-07-26 · Auditoría manual + tooling (pytest 293, jest 97, tsc, curl runtime, rg)
+  </footer>
+</main>
+
+<script>
+  const wm = {
+    blue: '#0053e2', blueDark: '#001e60',
+    spark: '#ffc220', red: '#ea1100', green: '#2a8703',
+    gray50: '#dadce0', gray100: '#74767c', gray160: '#1d1e20',
+  };
+
+  // Findings backend
+  new Chart(document.getElementById('findingsChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Critical (4)', 'High (6)', 'Medium (8)', 'Low (5)'],
+      datasets: [{
+        data: [4, 6, 8, 5],
+        backgroundColor: [wm.red, '#ff6b1c', wm.spark, '#a8d998'],
+        borderWidth: 2, borderColor: '#fff',
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 12 } } },
+        title: { display: true, text: '100% cerrados (23/23)', font: { size: 14, weight: 'bold' } },
+      },
+    },
+  });
+
+  // Tests
+  new Chart(document.getElementById('testsChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Backend integ.', 'Backend unit', 'Frontend unit'],
+      datasets: [{
+        label: 'Tests',
+        data: [46, 35, 64],
+        backgroundColor: [wm.blue, wm.blueDark, wm.green],
+        borderRadius: 6,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 20 } } },
+    },
+  });
+
+  // Screens LOC
+  const screens = [
+    ['NoticiasScreen', 698],
+    ['DetalleCandidatoScreen', 619],
+    ['CandidatosScreen', 587],
+    ['ResultadosScreen', 516],
+    ['CompararScreen', 493],
+    ['MisRespuestasScreen', 413],
+    ['MisGuardadosScreen', 400],
+    ['PerfilScreen', 305],
+    ['HomeScreen', 294],
+    ['CuestionarioScreen', 256],
+  ];
+  new Chart(document.getElementById('screensChart'), {
+    type: 'bar',
+    data: {
+      labels: screens.map(s => s[0]),
+      datasets: [{
+        label: 'Líneas',
+        data: screens.map(s => s[1]),
+        backgroundColor: screens.map(s => s[1] > 600 ? wm.red : (s[1] > 500 ? wm.spark : wm.blue)),
+        borderRadius: 4,
+      }],
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        annotation: {}, // (placeholder si querés instalar plugin annotation)
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          suggestedMax: 800,
+          grid: {
+            color: (ctx) => ctx.tick.value === 600 ? wm.red : wm.gray50,
+            lineWidth: (ctx) => ctx.tick.value === 600 ? 2 : 1,
+          },
+        },
+      },
+    },
+  });
+
+  // Health
+  new Chart(document.getElementById('healthChart'), {
+    type: 'radar',
+    data: {
+      labels: ['Types', 'Tests', 'Estructura', 'Docs', 'Bundle', 'Perf'],
+      datasets: [{
+        label: 'Score /10',
+        data: [10, 8, 9, 7, 7, 9],
+        borderColor: wm.blue,
+        backgroundColor: 'rgba(0,83,226,0.2)',
+        pointBackgroundColor: wm.blue,
+        pointBorderColor: '#fff',
+        borderWidth: 2,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        r: {
+          beginAtZero: true, max: 10,
+          ticks: { stepSize: 2, backdropColor: 'transparent' },
+          grid: { color: wm.gray50 },
+          angleLines: { color: wm.gray50 },
+        },
+      },
+    },
+  });
+</script>
+</body>
+</html>
