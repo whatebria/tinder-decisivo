@@ -3,7 +3,8 @@
 
 Documento vivo con todos los hallazgos, patrones y gotchas descubiertos
 mientras se armo la suite E2E de servel. Consultar antes de escribir un
-spec nuevo. Ultima update: 2026-07-29 (post Noticias flow, 20/0/0 verde).
+spec nuevo. Ultima update: 2026-07-29 (post cobertura Bookmarks +
+Cuestionario + Resultados + Candidatos + Comparar + Onboarding, 31/0/0 verde).
 
 ---
 
@@ -364,6 +365,35 @@ Suite inicial con 9 tests skippeados por triage.
 - Nuevos helpers: `enterGuestMode`, `goToNoticias`.
 - 3 aprendizajes de RN Web: heading vs tab conflict, CollapsibleFilterSection
   colapsada, NewsCard es link no button.
+
+### Cobertura full: 31/0/0
+- +11 tests nuevos en 6 archivos: bookmarks (dentro noticias), cuestionario,
+  resultados, candidatos, comparar, onboarding.
+- Nuevos helpers API: `apiGetPreguntas`, `apiCompletarCuestionario` (bulk
+  POST /respuestas/ para skipppear cuestionario UI en tests downstream).
+- Fix regresion `goToConfigTab`/`goToPerfil`: agregado retry loop igual
+  que `goToNoticias` porque los coach marks post-login son async y pueden
+  aparecer despues de `dismissCoachMarks` return.
+- Fix cambiar-password test: en vez de esperar modal cierre (lento, 8s+
+  con backend loaded), esperar toast de exito `Contrasena actualizada`.
+- Aprendizajes nuevos:
+  1. `filter({ hasText })` mira TEXTO VISIBLE, no `accessibleName`. Para
+     matchear un `accessibilityLabel` que no aparece como texto visible
+     (ej. "Nombre, Partido, match N%" donde el DOM muestra las palabras
+     sin comas), usar `getByRole("button", { name: /.../ })`.
+  2. En ScrollView horizontal (RN Web), TODOS los slides estan renderizados
+     simultaneamente en el DOM. Playwright los ve como "visible" aunque
+     esten fuera de viewport. Para saber que slide esta activo, buscar
+     senales del render condicional (ej. Onboarding: boton `Siguiente`
+     solo existe si `!isLastSlide`; loop hasta que desaparezca).
+  3. Race condition coach marks post-login: aparecen async DESPUES de que
+     `dismissCoachMarks` retorna. Todo helper que haga click a un tab o
+     button post-login necesita retry pattern (5 intentos con
+     dismissCoachMarks entre cada uno). Aplicado en: `goToConfigTab`,
+     `goToPerfil`, `goToNoticias`, `goToComparar`, `goToCandidatos`.
+  4. Modal cierre post-submit puede tardar (backend + toast anim).
+     Estrategia robusta: assert el toast de exito directo, no el modal
+     desaparecer.
 
 ---
 
