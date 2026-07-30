@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gap #2: Framework Etico EGTAI para matchVote | Jenny - Tesis</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          bg: '#0B1120', bgSoft: '#111827', bgCard: '#1E293B', bgHover: '#334155',
+          border: '#334155', borderSoft: '#1E293B',
+          text: '#E2E8F0', textMuted: '#94A3B8', textDim: '#64748B',
+          scholar: '#60A5FA', scholarSoft: '#1E3A8A', scholarHover: '#2563EB',
+          accent: '#34D399', accentSoft: '#064E3B',
+          warn: '#FBBF24', warnSoft: '#78350F',
+          crit: '#F87171', critSoft: '#7F1D1D',
+          neutral: '#94A3B8', neutralSoft: '#334155'
+        },
+        fontFamily: { serif: ['Georgia', 'Cambria', 'serif'] }
+      }
+    }
+  }
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  .hdr-serif { font-family: Georgia, Cambria, serif; }
+  .anchor-offset { scroll-margin-top: 5rem; }
+  .req-card { transition: all 0.2s; }
+  .req-card:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(96,165,250,0.15); }
+  .status-ok { background: #34D399; color: #0B1120; }
+  .status-partial { background: #FBBF24; color: #0B1120; }
+  .status-fail { background: #F87171; color: #0B1120; }
+  .status-na { background: #64748B; color: #E2E8F0; }
+  ::selection { background: #1E3A8A; color: #E2E8F0; }
+  .theme-toggle {
+    background: transparent; border: 1px solid #334155; color: #E2E8F0;
+    padding: 0.4rem 0.7rem; border-radius: 0.5rem; font-size: 0.8rem;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .theme-toggle:hover { background: #1E293B; border-color: #60A5FA; }
+  .quote-block {
+    border-left: 4px solid #60A5FA; background: #1E293B;
+    padding: 1rem 1.5rem; font-style: italic; color: #E2E8F0;
+    border-radius: 0 0.5rem 0.5rem 0;
+  }
+  .chart-container { position: relative; height: 340px; }
+  @media print {
+    .no-print { display: none; }
+    html.dark { background: white !important; color: black !important; }
+    body { color: black !important; }
+  }
+  html:not(.dark) body { background: #F8FAFC; color: #0F172A; }
+  html:not(.dark) .bg-bg { background: #F8FAFC; }
+  html:not(.dark) .bg-bgSoft { background: #FFFFFF; }
+  html:not(.dark) .bg-bgCard { background: #FFFFFF; }
+  html:not(.dark) .bg-bgHover { background: #F1F5F9; }
+  html:not(.dark) .text-text { color: #0F172A; }
+  html:not(.dark) .text-textMuted { color: #475569; }
+  html:not(.dark) .text-textDim { color: #64748B; }
+  html:not(.dark) .border-border { border-color: #E2E8F0; }
+  html:not(.dark) .text-scholar { color: #1E40AF; }
+  html:not(.dark) .bg-scholarSoft { background: #DBEAFE; }
+  html:not(.dark) .text-accent { color: #059669; }
+  html:not(.dark) .bg-accentSoft { background: #D1FAE5; }
+  html:not(.dark) .text-warn { color: #B45309; }
+  html:not(.dark) .bg-warnSoft { background: #FEF3C7; }
+  html:not(.dark) .text-crit { color: #B91C1C; }
+  html:not(.dark) .bg-critSoft { background: #FEE2E2; }
+  html:not(.dark) .quote-block { background: #F1F5F9; color: #0F172A; border-left-color: #1E40AF; }
+</style>
+</head>
+<body class="bg-bg text-text">
+
+<!-- Nav -->
+<nav class="no-print sticky top-0 z-40 bg-bgSoft/95 backdrop-blur border-b border-border shadow-lg">
+  <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <a href="cross_reference_matchvote_bibliografia.html" class="text-textMuted hover:text-scholar text-sm" title="Volver">&larr;</a>
+      <span class="text-scholar font-bold text-lg hdr-serif">Gap #2: Framework Etico EGTAI</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="hidden md:flex items-center gap-1 text-sm">
+        <a href="#problema" class="px-3 py-1.5 rounded hover:bg-bgHover text-text">Problema</a>
+        <a href="#egtai" class="px-3 py-1.5 rounded hover:bg-bgHover text-text">EGTAI</a>
+        <a href="#auditoria" class="px-3 py-1.5 rounded hover:bg-bgHover text-text">Auditoria</a>
+        <a href="#score" class="px-3 py-1.5 rounded hover:bg-bgHover text-text">Score</a>
+        <a href="#plan" class="px-3 py-1.5 rounded hover:bg-bgHover text-text">Plan</a>
+      </div>
+      <button id="themeToggle" class="theme-toggle" aria-label="Cambiar tema">
+        <span id="themeIcon">Oscuro</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<header class="bg-gradient-to-br from-slate-900 via-slate-800 to-red-950 border-b border-border">
+  <div class="max-w-7xl mx-auto px-6 py-16">
+    <div class="mb-4 flex items-center gap-2 flex-wrap">
+      <span class="bg-critSoft text-crit text-xs px-2 py-1 rounded uppercase tracking-wider font-semibold">Gap Critico #2</span>
+      <span class="bg-scholarSoft text-scholar text-xs px-2 py-1 rounded font-semibold">Stockinger et al. 2024 - Ethics IT</span>
+    </div>
+    <h1 class="text-4xl md:text-5xl font-bold hdr-serif mb-4 leading-tight text-white">Sin framework etico explicito</h1>
+    <p class="text-lg text-slate-300 max-w-3xl mb-6">La documentacion de matchVote menciona transparencia como principio, pero no aplica un framework academico estandarizado. Stockinger et al. (2024) auditaron 7 VAAs europeas usando <strong class="text-scholar">EGTAI</strong> (Ethics Guidelines for Trustworthy AI de la Comision Europea) y encontraron que <strong class="text-crit">ninguna supera el 70% de compliance</strong>. Este documento aplica el mismo framework a matchVote.</p>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+      <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-4 backdrop-blur">
+        <div class="text-3xl font-bold text-scholar">7</div>
+        <div class="text-sm text-slate-400">requisitos EGTAI</div>
+      </div>
+      <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-4 backdrop-blur">
+        <div class="text-3xl font-bold text-warn">50</div>
+        <div class="text-sm text-slate-400">sub-requisitos evaluables</div>
+      </div>
+      <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-4 backdrop-blur">
+        <div class="text-3xl font-bold text-accent">17</div>
+        <div class="text-sm text-slate-400">acciones concretas propuestas</div>
+      </div>
+      <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-4 backdrop-blur">
+        <div class="text-3xl font-bold text-crit">~35%</div>
+        <div class="text-sm text-slate-400">compliance estimado actual</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- El problema -->
+<section id="problema" class="anchor-offset max-w-7xl mx-auto px-6 py-12">
+  <h2 class="text-3xl font-bold hdr-serif text-scholar mb-4">Por que este gap es critico</h2>
+
+  <div class="grid md:grid-cols-2 gap-6 mb-8">
+    <div class="bg-bgCard border border-border rounded-lg p-6">
+      <h3 class="font-bold text-lg mb-3 text-crit">Lo que dice el paper</h3>
+      <div class="quote-block mb-3">
+        "None of the VAAs under investigation scored highly. R6 (societal well-being) and R7 (accountability) are the worst-fulfilled requirements across all applications."
+      </div>
+      <p class="text-sm text-textMuted">Stockinger et al. 2024 evaluaron StemWijzer, Wahl-O-Mat, Smartvote, Kieskompas, Aftonbladets, HS Vaalikone y SVT valkompass. Todas fallan en las mismas areas. La documentacion publica orientada al usuario final es sistematicamente insuficiente.</p>
+    </div>
+
+    <div class="bg-bgCard border border-border rounded-lg p-6">
+      <h3 class="font-bold text-lg mb-3 text-warn">Por que aplica a matchVote</h3>
+      <ul class="text-sm text-text space-y-2">
+        <li>&bull; matchVote no tiene <strong>disclaimer explicito</strong> sobre la subjetividad del algoritmo.</li>
+        <li>&bull; No hay <strong>mecanismo publico</strong> para reportar bias o errores.</li>
+        <li>&bull; No hay <strong>documentacion de diversidad</strong> de stakeholders en el diseño de las 12 preguntas.</li>
+        <li>&bull; No hay <strong>auditoria externa</strong> ni pentest documentado.</li>
+        <li>&bull; La documentacion tecnica es rica pero <strong>no accesible al usuario comun</strong>.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="bg-bgCard border-l-4 border-scholar rounded-r-lg p-6 shadow-lg">
+    <h3 class="font-bold text-lg mb-2 text-scholar">La oportunidad para la tesis</h3>
+    <p class="text-sm text-text">Aplicar EGTAI a matchVote y publicar la auto-auditoria es un <strong class="text-accent">aporte metodologico serio</strong>. Segun Stockinger et al., ninguno de los 7 VAAs europeos hace esto - solo Kieskompas tiene auditoria anual (pero privada). Ser el primer VAA latinoamericano en publicar su compliance EGTAI seria un diferencial academico. Ademas, es una <strong>seccion completa nueva de la tesis</strong>.</p>
+  </div>
+</section>
+
+<!-- Framework EGTAI -->
+<section id="egtai" class="anchor-offset bg-bgSoft border-y border-border">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <h2 class="text-3xl font-bold hdr-serif text-scholar mb-2">Que es EGTAI</h2>
+    <p class="text-textMuted mb-6">Ethics Guidelines for Trustworthy AI - Comision Europea, 2019. Marco normativo oficial europeo para evaluar sistemas de IA. Los autores del paper 04 lo adaptaron especificamente para VAAs.</p>
+
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <h3 class="font-bold text-lg mb-3 text-accent">4 principios fundamentales</h3>
+        <ol class="text-sm text-text space-y-2 list-decimal list-inside">
+          <li><strong>Respeto a la autonomia humana</strong> - el sistema no debe manipular ni suplantar decision humana</li>
+          <li><strong>Fairness</strong> - trato equitativo, sin discriminacion</li>
+          <li><strong>Explicabilidad</strong> - el usuario debe poder entender por que recibe una recomendacion</li>
+          <li><strong>Prevencion de dano</strong> - salvaguardas contra daño individual, social y ambiental</li>
+        </ol>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <h3 class="font-bold text-lg mb-3 text-scholar">7 requisitos operacionalizados</h3>
+        <div class="text-sm text-text space-y-1">
+          <div class="flex justify-between border-b border-borderSoft py-1"><span><strong>R1</strong> Human agency &amp; oversight</span><span class="text-textDim text-xs">4 sub-reqs</span></div>
+          <div class="flex justify-between border-b border-borderSoft py-1"><span><strong>R2</strong> Technical robustness &amp; safety</span><span class="text-textDim text-xs">8 sub-reqs</span></div>
+          <div class="flex justify-between border-b border-borderSoft py-1"><span><strong>R3</strong> Privacy &amp; data governance</span><span class="text-textDim text-xs">3 sub-reqs</span></div>
+          <div class="flex justify-between border-b border-borderSoft py-1"><span><strong>R4</strong> Transparency</span><span class="text-textDim text-xs">11 sub-reqs</span></div>
+          <div class="flex justify-between border-b border-borderSoft py-1"><span><strong>R5</strong> Diversity, non-discrimination, fairness</span><span class="text-textDim text-xs">11 sub-reqs</span></div>
+          <div class="flex justify-between border-b border-borderSoft py-1"><span><strong>R6</strong> Societal &amp; environmental well-being</span><span class="text-textDim text-xs">6 sub-reqs</span></div>
+          <div class="flex justify-between py-1"><span><strong>R7</strong> Accountability</span><span class="text-textDim text-xs">7 sub-reqs</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-bgCard border border-border rounded-lg p-5">
+      <h3 class="font-bold text-lg mb-3 text-scholar">Metodologia del paper (aplicable a matchVote)</h3>
+      <ul class="text-sm text-text space-y-2">
+        <li><strong>1. Restriccion metodologica deliberada</strong>: los autores <em>solo</em> revisan informacion publica facilmente accesible al usuario final (websites de las VAAs). No consultan documentacion academica ni codigo fuente. Razon: el usuario comun no la lee.</li>
+        <li><strong>2. Scoring</strong>: cada sub-requisito puntuado 0-n, normalizado a [0,1]. Score final por requisito = puntos alcanzados / totales.</li>
+        <li><strong>3. Escaneo de seguridad</strong>: Qualys + Pentest Tools para R2.5-R2.6.</li>
+        <li><strong>Consecuencia</strong>: si matchVote se auto-audita bajo este metodo, la tesis misma no cuenta como documentacion. Hay que producir docs orientadas al usuario final.</li>
+      </ul>
+      <p class="text-xs text-textDim mt-3 italic">Codigo del framework publico: <code>github.com/ethz-coss/vaa-egtai-compliance</code></p>
+    </div>
+  </div>
+</section>
+
+<!-- Auto-auditoria -->
+<section id="auditoria" class="anchor-offset max-w-7xl mx-auto px-6 py-12">
+  <h2 class="text-3xl font-bold hdr-serif text-scholar mb-2">Auto-auditoria de matchVote bajo EGTAI</h2>
+  <p class="text-textMuted mb-6">Aplicacion sub-requisito por sub-requisito a la version documentada de matchVote (fuente: <code>documentacion_narrativa.md</code>).</p>
+
+  <div class="flex flex-wrap gap-3 mb-6 text-xs">
+    <span class="flex items-center gap-2"><span class="status-ok w-4 h-4 rounded"></span> Cumple</span>
+    <span class="flex items-center gap-2"><span class="status-partial w-4 h-4 rounded"></span> Parcial</span>
+    <span class="flex items-center gap-2"><span class="status-fail w-4 h-4 rounded"></span> No cumple</span>
+    <span class="flex items-center gap-2"><span class="status-na w-4 h-4 rounded"></span> No aplica</span>
+  </div>
+
+  <!-- R1 -->
+  <div class="req-card bg-bgCard border border-border rounded-lg mb-4 overflow-hidden">
+    <div class="bg-bgHover border-b border-border px-5 py-3 flex items-center justify-between flex-wrap gap-3">
+      <div class="flex items-center gap-3">
+        <span class="bg-scholar text-slate-900 font-bold px-3 py-1 rounded">R1</span>
+        <h3 class="font-bold text-text">Human agency and oversight</h3>
+      </div>
+      <span class="text-sm text-warn font-semibold">Score estimado: 40%</span>
+    </div>
+    <div class="p-5">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-textDim text-xs uppercase border-b border-borderSoft">
+            <th class="text-left py-2 pr-2">Sub-req</th>
+            <th class="text-left py-2 pr-2 w-24">Estado</th>
+            <th class="text-left py-2">Evidencia y gap</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-borderSoft">
+          <tr><td class="py-2 pr-2 align-top font-medium">R1.1 Human rights impact assessment</td><td class="align-top"><span class="status-fail text-xs px-2 py-1 rounded font-semibold">No cumple</span></td><td class="py-2 text-textMuted">No hay HRIA documentado. Accion: agregar seccion breve al README y a la tesis analizando impactos potenciales sobre derechos electorales.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R1.2 Autonomia del usuario</td><td class="align-top"><span class="status-ok text-xs px-2 py-1 rounded font-semibold">Cumple</span></td><td class="py-2 text-textMuted">El usuario controla sus respuestas y puede descartarlas. Es su decision final.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R1.3 Human oversight</td><td class="align-top"><span class="status-partial text-xs px-2 py-1 rounded font-semibold">Parcial</span></td><td class="py-2 text-textMuted">Jenny es la mantenedora unica. No hay comite ni consejo asesor. Accion: considerar consejo asesor con politologo y ONG.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R1.4 Medidas contra overreliance</td><td class="align-top"><span class="status-partial text-xs px-2 py-1 rounded font-semibold">Parcial</span></td><td class="py-2 text-textMuted">Hay algo de "no somos la ultima palabra" implicito. <strong class="text-warn">Debil</strong>. Accion: disclaimer explicito antes y despues del resultado. "Esta recomendacion es un insumo, no un veredicto".</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- R2 -->
+  <div class="req-card bg-bgCard border border-border rounded-lg mb-4 overflow-hidden">
+    <div class="bg-bgHover border-b border-border px-5 py-3 flex items-center justify-between flex-wrap gap-3">
+      <div class="flex items-center gap-3">
+        <span class="bg-scholar text-slate-900 font-bold px-3 py-1 rounded">R2</span>
+        <h3 class="font-bold text-text">Technical robustness and safety</h3>
+      </div>
+      <span class="text-sm text-warn font-semibold">Score estimado: 45%</span>
+    </div>
+    <div class="p-5">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-textDim text-xs uppercase border-b border-borderSoft">
+            <th class="text-left py-2 pr-2">Sub-req</th>
+            <th class="text-left py-2 pr-2 w-24">Estado</th>
+            <th class="text-left py-2">Evidencia y gap</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-borderSoft">
+          <tr><td class="py-2 pr-2 align-top font-medium">R2.1 Placement verificado independientemente</td><td class="align-top"><span class="status-fail text-xs px-2 py-1 rounded font-semibold">No cumple</span></td><td class="py-2 text-textMuted"><strong class="text-crit">CRITICO</strong>. Segun doc narrativa, los datos de candidatos parecen venir de Servel + ingesta propia. No hay verificacion independiente ni auditoria de las posiciones asignadas a candidatos.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R2.2 Robustez del algoritmo</td><td class="align-top"><span class="status-ok text-xs px-2 py-1 rounded font-semibold">Cumple</span></td><td class="py-2 text-textMuted">Algoritmo deterministico y bien documentado (seccion 4.8 narrativa).</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R2.3 Testing automatizado</td><td class="align-top"><span class="status-partial text-xs px-2 py-1 rounded font-semibold">Parcial</span></td><td class="py-2 text-textMuted">Doc menciona tests automatizados (seccion 11.7 simple). Verificar cobertura. Accion: publicar % de cobertura.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R2.4 Evaluacion ante ataques adversarios</td><td class="align-top"><span class="status-fail text-xs px-2 py-1 rounded font-semibold">No cumple</span></td><td class="py-2 text-textMuted">No hay pentest documentado. Accion: correr Snyk o similar. Documentar en README que se hace.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R2.5 Sin vulnerabilidades conocidas en libs</td><td class="align-top"><span class="status-partial text-xs px-2 py-1 rounded font-semibold">Parcial</span></td><td class="py-2 text-textMuted">Depende del stack Django + React Native. Accion: `pip audit` + `npm audit` periodico.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R2.6 Fallback en errores</td><td class="align-top"><span class="status-partial text-xs px-2 py-1 rounded font-semibold">Parcial</span></td><td class="py-2 text-textMuted">Verificar comportamiento cuando backend cae. Accion: revisar.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R2.7 Reproducibilidad</td><td class="align-top"><span class="status-ok text-xs px-2 py-1 rounded font-semibold">Cumple</span></td><td class="py-2 text-textMuted">Docker + seed data (seccion 4.18 tecnica). Bien.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R2.8 Monitoreo en produccion</td><td class="align-top"><span class="status-fail text-xs px-2 py-1 rounded font-semibold">No cumple</span></td><td class="py-2 text-textMuted">No mencionado. Accion: si va a produccion, agregar logs + metricas basicas.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- R3 -->
+  <div class="req-card bg-bgCard border border-border rounded-lg mb-4 overflow-hidden">
+    <div class="bg-bgHover border-b border-border px-5 py-3 flex items-center justify-between flex-wrap gap-3">
+      <div class="flex items-center gap-3">
+        <span class="bg-accent text-slate-900 font-bold px-3 py-1 rounded">R3</span>
+        <h3 class="font-bold text-text">Privacy and data governance</h3>
+      </div>
+      <span class="text-sm text-accent font-semibold">Score estimado: 85%</span>
+    </div>
+    <div class="p-5">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-textDim text-xs uppercase border-b border-borderSoft">
+            <th class="text-left py-2 pr-2">Sub-req</th>
+            <th class="text-left py-2 pr-2 w-24">Estado</th>
+            <th class="text-left py-2">Evidencia y gap</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-borderSoft">
+          <tr><td class="py-2 pr-2 align-top font-medium">R3.1 Minimizacion de datos personales</td><td class="align-top"><span class="status-ok text-xs px-2 py-1 rounded font-semibold">Cumple</span></td><td class="py-2 text-textMuted">Autenticacion minima. No se recolecta PII sensible. Bien.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R3.2 No monetizacion de datos</td><td class="align-top"><span class="status-ok text-xs px-2 py-1 rounded font-semibold">Cumple</span></td><td class="py-2 text-textMuted">Proyecto no comercial, sin ads. <strong class="text-accent">Diferencial fuerte</strong> vs Aftonbladets valkompass y HS Vaalikone que si monetizan.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R3.3 Privacy by default</td><td class="align-top"><span class="status-partial text-xs px-2 py-1 rounded font-semibold">Parcial</span></td><td class="py-2 text-textMuted">Verificar politica de privacidad publicada. Accion: si no existe, redactar una corta y publica.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- R4 -->
+  <div class="req-card bg-bgCard border border-border rounded-lg mb-4 overflow-hidden">
+    <div class="bg-bgHover border-b border-border px-5 py-3 flex items-center justify-between flex-wrap gap-3">
+      <div class="flex items-center gap-3">
+        <span class="bg-scholar text-slate-900 font-bold px-3 py-1 rounded">R4</span>
+        <h3 class="font-bold text-text">Transparency</h3>
+      </div>
+      <span class="text-sm text-warn font-semibold">Score estimado: 50%</span>
+    </div>
+    <div class="p-5">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-textDim text-xs uppercase border-b border-borderSoft">
+            <th class="text-left py-2 pr-2">Sub-req</th>
+            <th class="text-left py-2 pr-2 w-24">Estado</th>
+            <th class="text-left py-2">Evidencia y gap</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-borderSoft">
+          <tr><td class="py-2 pr-2 align-top font-medium">R4.1 Trazabilidad de decisiones</td><td class="align-top"><span class="status-partial text-xs px-2 py-1 rounded font-semibold">Parcial</span></td><td class="py-2 text-textMuted">Algoritmo documentado. Falta breakdown por usuario ("por que me toco este candidato").</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R4.2 Usuario puede ver respuestas de candidatos</td><td class="align-top"><span class="status-partial text-xs px-2 py-1 rounded font-semibold">Parcial</span></td><td class="py-2 text-textMuted">Verificar en UI. Si no existe, agregar vista "posturas de X candidato".</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R4.3-R4.7 Explicabilidad tecnica</td><td class="align-top"><span class="status-ok text-xs px-2 py-1 rounded font-semibold">Cumple</span></td><td class="py-2 text-textMuted">Documentacion narrativa + tecnica + simple cubren estos puntos. <strong class="text-accent">Fortaleza real</strong>.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R4.8 Explicacion accesible al usuario final</td><td class="align-top"><span class="status-fail text-xs px-2 py-1 rounded font-semibold">No cumple</span></td><td class="py-2 text-textMuted"><strong class="text-crit">CRITICO</strong>. La doc esta en carpeta de tesis, no en la app. Accion: crear vista "Como funciona el match" en 5 parrafos legibles dentro de la app.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R4.9 Reconocer subjetividad del algoritmo</td><td class="align-top"><span class="status-fail text-xs px-2 py-1 rounded font-semibold">No cumple</span></td><td class="py-2 text-textMuted"><strong class="text-crit">CRITICO</strong>. Recomendacion #1 del paper. Accion: banner "Este resultado es una guia, no una respuesta objetiva. Otros algoritmos darian distinto".</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R4.10 Fuente de las preguntas documentada</td><td class="align-top"><span class="status-partial text-xs px-2 py-1 rounded font-semibold">Parcial</span></td><td class="py-2 text-textMuted">Falta explicitar quien y como diseño las 12 preguntas por eleccion.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R4.11 Usuario sabe que interactua con sistema algoritmico</td><td class="align-top"><span class="status-ok text-xs px-2 py-1 rounded font-semibold">Cumple</span></td><td class="py-2 text-textMuted">El nombre "matchVote" y "Tinder Decisivo" lo dejan claro.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- R5 -->
+  <div class="req-card bg-bgCard border border-border rounded-lg mb-4 overflow-hidden">
+    <div class="bg-bgHover border-b border-border px-5 py-3 flex items-center justify-between flex-wrap gap-3">
+      <div class="flex items-center gap-3">
+        <span class="bg-scholar text-slate-900 font-bold px-3 py-1 rounded">R5</span>
+        <h3 class="font-bold text-text">Diversity, non-discrimination, fairness</h3>
+      </div>
+      <span class="text-sm text-warn font-semibold">Score estimado: 30%</span>
+    </div>
+    <div class="p-5">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-textDim text-xs uppercase border-b border-borderSoft">
+            <th class="text-left py-2 pr-2">Sub-req</th>
+            <th class="text-left py-2 pr-2 w-24">Estado</th>
+            <th class="text-left py-2">Evidencia y gap</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-borderSoft">
+          <tr><td class="py-2 pr-2 align-top font-medium">R5.1 Evaluacion de bias</td><td class="align-top"><span class="status-fail text-xs px-2 py-1 rounded font-semibold">No cumple</span></td><td class="py-2 text-textMuted">No documentada. Accion: analizar si el algoritmo cuadratico favorece sistematicamente a candidatos moderados vs extremos.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R5.2 Stakeholder diversity en diseño</td><td class="align-top"><span class="status-fail text-xs px-2 py-1 rounded font-semibold">No cumple</span></td><td class="py-2 text-textMuted"><strong class="text-crit">Recomendacion #2 del paper</strong>. Diseñado principalmente por Jenny. Accion: consultar con ONGs (jovenes, mujeres, pueblos indigenas, LGBTQ+, adultos mayores, personas con discapacidad).</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R5.3 Cobertura de temas relevantes para minorias</td><td class="align-top"><span class="status-partial text-xs px-2 py-1 rounded font-semibold">Parcial</span></td><td class="py-2 text-textMuted">12 preguntas cubren ejes principales (ECO, SOC, AMB, SEG, DDH). Verificar si hay temas indigenas / genero / discapacidad.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R5.4 Consulta con expertos externos</td><td class="align-top"><span class="status-fail text-xs px-2 py-1 rounded font-semibold">No cumple</span></td><td class="py-2 text-textMuted">Accion: comite asesor politologico documentado.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R5.5-R5.9 Igualdad de trato entre candidatos</td><td class="align-top"><span class="status-ok text-xs px-2 py-1 rounded font-semibold">Cumple</span></td><td class="py-2 text-textMuted">Todos los candidatos elegibles se procesan con el mismo algoritmo y misma escala. Sin favoritismo tecnico.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R5.10 Accesibilidad para discapacidad</td><td class="align-top"><span class="status-partial text-xs px-2 py-1 rounded font-semibold">Parcial</span></td><td class="py-2 text-textMuted">WCAG 2.2 AA declarado. Falta test real con screen reader (NVDA/JAWS) y con usuarios reales.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R5.11 Multi-idioma</td><td class="align-top"><span class="status-fail text-xs px-2 py-1 rounded font-semibold">No cumple</span></td><td class="py-2 text-textMuted">Solo español. Accion: considerar mapudungun (pueblos originarios) e ingles (extranjeros residentes).</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- R6 -->
+  <div class="req-card bg-bgCard border border-border rounded-lg mb-4 overflow-hidden">
+    <div class="bg-bgHover border-b border-border px-5 py-3 flex items-center justify-between flex-wrap gap-3">
+      <div class="flex items-center gap-3">
+        <span class="bg-crit text-slate-900 font-bold px-3 py-1 rounded">R6</span>
+        <h3 class="font-bold text-text">Societal and environmental well-being</h3>
+      </div>
+      <span class="text-sm text-crit font-semibold">Score estimado: 20%</span>
+    </div>
+    <div class="p-5">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-textDim text-xs uppercase border-b border-borderSoft">
+            <th class="text-left py-2 pr-2">Sub-req</th>
+            <th class="text-left py-2 pr-2 w-24">Estado</th>
+            <th class="text-left py-2">Evidencia y gap</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-borderSoft">
+          <tr><td class="py-2 pr-2 align-top font-medium">R6.1 Impacto en outcomes electorales</td><td class="align-top"><span class="status-fail text-xs px-2 py-1 rounded font-semibold">No cumple</span></td><td class="py-2 text-textMuted">Ningun VAA del corpus lo mide. Accion realista: al menos DECLARAR que no se mide y por que.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R6.2 Impacto en polarizacion</td><td class="align-top"><span class="status-fail text-xs px-2 py-1 rounded font-semibold">No cumple</span></td><td class="py-2 text-textMuted">Ningun estudio. Accion: seccion "impactos potenciales" en la tesis discutiendo tanto beneficios (informacion) como riesgos (echo chamber).</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R6.3 Impacto en participacion electoral</td><td class="align-top"><span class="status-partial text-xs px-2 py-1 rounded font-semibold">Parcial</span></td><td class="py-2 text-textMuted">La tesis puede citar Garzia 2019 (+2-12pp turnout) como impacto esperado.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R6.4 Impacto ambiental (carbono)</td><td class="align-top"><span class="status-na text-xs px-2 py-1 rounded font-semibold">No aplica</span></td><td class="py-2 text-textMuted">App liviana, sin LLM. Bajo impacto energetico. Bien.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R6.5 Contribucion a democracia</td><td class="align-top"><span class="status-partial text-xs px-2 py-1 rounded font-semibold">Parcial</span></td><td class="py-2 text-textMuted">Motivacion declarada pero no medida. Ok para tesis.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R6.6 Educacion civica complementaria</td><td class="align-top"><span class="status-fail text-xs px-2 py-1 rounded font-semibold">No cumple</span></td><td class="py-2 text-textMuted">La app no linkea a recursos educativos. Accion: seccion "aprende mas sobre las elecciones chilenas" con links a Servel y ONGs.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- R7 -->
+  <div class="req-card bg-bgCard border border-border rounded-lg mb-4 overflow-hidden">
+    <div class="bg-bgHover border-b border-border px-5 py-3 flex items-center justify-between flex-wrap gap-3">
+      <div class="flex items-center gap-3">
+        <span class="bg-crit text-slate-900 font-bold px-3 py-1 rounded">R7</span>
+        <h3 class="font-bold text-text">Accountability</h3>
+      </div>
+      <span class="text-sm text-crit font-semibold">Score estimado: 25%</span>
+    </div>
+    <div class="p-5">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-textDim text-xs uppercase border-b border-borderSoft">
+            <th class="text-left py-2 pr-2">Sub-req</th>
+            <th class="text-left py-2 pr-2 w-24">Estado</th>
+            <th class="text-left py-2">Evidencia y gap</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-borderSoft">
+          <tr><td class="py-2 pr-2 align-top font-medium">R7.1 Codigo abierto / auditables</td><td class="align-top"><span class="status-partial text-xs px-2 py-1 rounded font-semibold">Parcial</span></td><td class="py-2 text-textMuted">Verificar si el repo es publico. Si es privado, considerar hacerlo publico post-tesis.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R7.2 Mecanismo publico de reporte de bugs / bias</td><td class="align-top"><span class="status-fail text-xs px-2 py-1 rounded font-semibold">No cumple</span></td><td class="py-2 text-textMuted">No hay email de contacto ni form. Accion: mailto en footer + issues abiertos en GitHub.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R7.3 Politica de correccion</td><td class="align-top"><span class="status-fail text-xs px-2 py-1 rounded font-semibold">No cumple</span></td><td class="py-2 text-textMuted">Definir SLA para reportes de bias (ej. 7 dias) y publicarlo.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R7.4 Responsables identificados</td><td class="align-top"><span class="status-partial text-xs px-2 py-1 rounded font-semibold">Parcial</span></td><td class="py-2 text-textMuted">Jenny como autora. Accion: seccion "About" con foto, afiliacion y contacto.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R7.5 Auditoria externa</td><td class="align-top"><span class="status-fail text-xs px-2 py-1 rounded font-semibold">No cumple</span></td><td class="py-2 text-textMuted">Solo Kieskompas la tiene entre los 7 VAAs del paper. Accion: buscar revisor externo para la tesis misma sirve como proxy.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R7.6 Registro de decisiones de diseño</td><td class="align-top"><span class="status-ok text-xs px-2 py-1 rounded font-semibold">Cumple</span></td><td class="py-2 text-textMuted">Documentacion narrativa cumple este rol. <strong class="text-accent">Fortaleza fuerte</strong>.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium">R7.7 Changelog publico</td><td class="align-top"><span class="status-fail text-xs px-2 py-1 rounded font-semibold">No cumple</span></td><td class="py-2 text-textMuted">Accion: mantener CHANGELOG.md con cada release.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</section>
+
+<!-- Score y comparacion -->
+<section id="score" class="anchor-offset bg-bgSoft border-y border-border">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <h2 class="text-3xl font-bold hdr-serif text-scholar mb-2">Score global y comparacion con las 7 VAAs europeas</h2>
+    <p class="text-textMuted mb-6">Estimacion de compliance de matchVote (barras claras) vs promedio de los 7 VAAs europeos evaluados por Stockinger et al. 2024 (barras oscuras). <strong class="text-warn">Advertencia</strong>: los valores de matchVote son estimacion propia sujeta a verificacion contra el codigo real. Los de las VAAs europeas son aproximaciones a partir del texto del paper (los autores no publican tabla numerica exacta).</p>
+
+    <div class="grid md:grid-cols-2 gap-6 mb-6">
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <h3 class="font-bold text-lg mb-3 text-text">Score por requisito</h3>
+        <div class="chart-container">
+          <canvas id="scoreChart"></canvas>
+        </div>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <h3 class="font-bold text-lg mb-3 text-text">Distribucion de sub-requisitos por estado</h3>
+        <div class="chart-container">
+          <canvas id="statusChart"></canvas>
+        </div>
+        <div class="mt-4 text-sm text-textMuted">
+          <div class="grid grid-cols-2 gap-2">
+            <div><span class="inline-block w-3 h-3 bg-accent rounded mr-2"></span> 12 Cumple (24%)</div>
+            <div><span class="inline-block w-3 h-3 bg-warn rounded mr-2"></span> 12 Parcial (24%)</div>
+            <div><span class="inline-block w-3 h-3 bg-crit rounded mr-2"></span> 25 No cumple (50%)</div>
+            <div><span class="inline-block w-3 h-3 bg-neutral rounded mr-2"></span> 1 No aplica (2%)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-bgCard border-l-4 border-scholar rounded-r-lg p-6">
+      <h3 class="font-bold text-lg mb-3 text-scholar">Interpretacion del score global (~35%)</h3>
+      <ul class="text-sm text-text space-y-2">
+        <li>&bull; <strong>matchVote esta en el rango medio-bajo</strong>, similar al peor cuartil de los VAAs europeos evaluados.</li>
+        <li>&bull; <strong>Fortalezas reales</strong>: R3 (privacy - proyecto sin ads) y varias sub-partes de R2 (algoritmo determinista) y R4 (documentacion tecnica exhaustiva).</li>
+        <li>&bull; <strong>Debilidades sistematicas</strong>: R6 y R7 - las mismas que Stockinger identifica como universales en el corpus VAA. matchVote no es la excepcion.</li>
+        <li>&bull; <strong>La mayoria de gaps son documentales, no tecnicos</strong>. Se resuelven con updates al README, disclaimers en UI y un CHANGELOG. No requieren refactorizar el algoritmo.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Plan de accion -->
+<section id="plan" class="anchor-offset max-w-7xl mx-auto px-6 py-12">
+  <h2 class="text-3xl font-bold hdr-serif text-scholar mb-2">Plan de accion priorizado</h2>
+  <p class="text-textMuted mb-8">17 acciones concretas divididas por esfuerzo (bajo = documental, alto = tecnico o requiere terceros) y por impacto en el score EGTAI.</p>
+
+  <div class="grid md:grid-cols-3 gap-6">
+
+    <!-- Quick wins -->
+    <div class="bg-bgCard border border-border rounded-lg overflow-hidden">
+      <div class="bg-accent text-slate-900 px-4 py-2 font-bold">Quick wins (1-2 dias)</div>
+      <div class="p-5 space-y-3">
+        <div>
+          <div class="text-sm font-semibold text-text">1. Disclaimer de subjetividad</div>
+          <p class="text-xs text-textMuted">Banner en UI: "Esta recomendacion es una guia, no una respuesta objetiva". <span class="text-scholar">R4.9</span></p>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-text">2. Mailto en footer</div>
+          <p class="text-xs text-textMuted">Contacto publico para reportar bias o bugs. <span class="text-scholar">R7.2</span></p>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-text">3. Pagina "About" con autoria</div>
+          <p class="text-xs text-textMuted">Nombre, afiliacion, foto opcional. <span class="text-scholar">R7.4</span></p>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-text">4. Fortalecer disclaimer overreliance</div>
+          <p class="text-xs text-textMuted">Texto explicito antes y despues del resultado. <span class="text-scholar">R1.4</span></p>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-text">5. CHANGELOG.md publico</div>
+          <p class="text-xs text-textMuted">Registro de cambios entre versiones. <span class="text-scholar">R7.7</span></p>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-text">6. Politica de privacidad breve</div>
+          <p class="text-xs text-textMuted">Pagina publica corta, no legal boilerplate. <span class="text-scholar">R3.3</span></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Medio -->
+    <div class="bg-bgCard border border-border rounded-lg overflow-hidden">
+      <div class="bg-warn text-slate-900 px-4 py-2 font-bold">Esfuerzo medio (1-2 semanas)</div>
+      <div class="p-5 space-y-3">
+        <div>
+          <div class="text-sm font-semibold text-text">7. Vista "Como funciona el match"</div>
+          <p class="text-xs text-textMuted">Explicacion accesible dentro de la app, 5 parrafos. <span class="text-scholar">R4.8</span></p>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-text">8. Vista "Posturas de X candidato"</div>
+          <p class="text-xs text-textMuted">Usuario ve respuestas de candidatos pregunta por pregunta. <span class="text-scholar">R4.2</span></p>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-text">9. Trazabilidad por usuario</div>
+          <p class="text-xs text-textMuted">"Por que me toco este candidato": breakdown del calculo personal. <span class="text-scholar">R4.1</span></p>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-text">10. Snyk / pip-audit / npm-audit en CI</div>
+          <p class="text-xs text-textMuted">Automatizar chequeos de vulnerabilidades. <span class="text-scholar">R2.4, R2.5</span></p>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-text">11. Test con screen reader real</div>
+          <p class="text-xs text-textMuted">Validar accesibilidad con NVDA/JAWS/VoiceOver. <span class="text-scholar">R5.10</span></p>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-text">12. Analisis de bias del algoritmo cuadratico</div>
+          <p class="text-xs text-textMuted">Simular: favorece la cuadratica a candidatos moderados sistematicamente? <span class="text-scholar">R5.1</span></p>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-text">13. Seccion "Educacion civica"</div>
+          <p class="text-xs text-textMuted">Links a Servel, ONGs y recursos educativos. <span class="text-scholar">R6.6</span></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alto -->
+    <div class="bg-bgCard border border-border rounded-lg overflow-hidden">
+      <div class="bg-crit text-slate-900 px-4 py-2 font-bold">Alto esfuerzo (post-tesis)</div>
+      <div class="p-5 space-y-3">
+        <div>
+          <div class="text-sm font-semibold text-text">14. Consejo asesor externo</div>
+          <p class="text-xs text-textMuted">Politologo + ONG + representante estudiantil. <span class="text-scholar">R1.3, R5.4</span></p>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-text">15. Consulta con minorias en diseño</div>
+          <p class="text-xs text-textMuted">Workshops con ONGs de mujeres, pueblos originarios, LGBTQ+, discapacidad. <span class="text-scholar">R5.2, R5.3</span></p>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-text">16. Multi-idioma (mapudungun + ingles)</div>
+          <p class="text-xs text-textMuted">Requiere traduccion profesional. <span class="text-scholar">R5.11</span></p>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-text">17. Auditoria externa formal</div>
+          <p class="text-xs text-textMuted">Buscar review academico o de organizacion de transparencia digital. <span class="text-scholar">R7.5</span></p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="mt-8 bg-bgCard border-l-4 border-accent rounded-r-lg p-6">
+    <h3 class="font-bold text-lg mb-2 text-accent">Impacto esperado del plan</h3>
+    <p class="text-sm text-text">Ejecutando las 6 <strong class="text-accent">quick wins</strong> se estima subir el score de ~35% a ~50%. Sumando los 7 items de <strong class="text-warn">esfuerzo medio</strong>, se llega a ~70% - <strong>por encima del top de los VAAs europeos evaluados</strong>. Los 4 items de alto esfuerzo son opcionales para la tesis pero deseables para un lanzamiento publico real.</p>
+  </div>
+</section>
+
+<!-- Cita textual + recomendaciones del paper -->
+<section class="bg-bgSoft border-t border-border">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <h2 class="text-3xl font-bold hdr-serif text-scholar mb-6">Cita clave para la tesis</h2>
+
+    <div class="quote-block text-lg mb-4">
+      "The foundations of liberal society depend on the idea that some concepts will be fundamentally contestable and will shift over time. To set them in stone - or in code - is to pick sides."
+    </div>
+    <p class="text-sm text-textMuted mb-8">Selbst et al. 2019, citado por Stockinger et al. 2024. Esta cita capta el corazon del argumento etico: cualquier VAA <em>necesariamente</em> toma partido al codificar politica. La honestidad esta en reconocerlo, no en negarlo.</p>
+
+    <h3 class="text-2xl font-bold hdr-serif text-scholar mb-4">Las 4 recomendaciones del paper aplicadas a matchVote</h3>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <div class="text-xs font-semibold text-scholar uppercase mb-2">Recomendacion 1</div>
+        <h4 class="font-bold text-text mb-2">Transparencia sobre la subjetividad</h4>
+        <p class="text-sm text-textMuted">Reconocer explicitamente que las VAAs NO dan respuestas objetivas. <strong class="text-text">Traduccion para matchVote</strong>: banner permanente en la app + parrafo en tesis reconociendo que Manhattan vs cuadratica daria distinto resultado.</p>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <div class="text-xs font-semibold text-scholar uppercase mb-2">Recomendacion 2</div>
+        <h4 class="font-bold text-text mb-2">Diversidad de stakeholders</h4>
+        <p class="text-sm text-textMuted">Incluir minorias (culturales, economicas, LGBTQ+, geograficas) en el diseño del cuestionario. <strong class="text-text">Para matchVote</strong>: workshops con ONGs antes de finalizar las 12 preguntas de cada eleccion futura.</p>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <div class="text-xs font-semibold text-scholar uppercase mb-2">Recomendacion 3</div>
+        <h4 class="font-bold text-text mb-2">Documentacion centrada en el usuario</h4>
+        <p class="text-sm text-textMuted">Si el algoritmo esta en GitHub pero solo lo entienden 3 personas, no cuenta. <strong class="text-text">Para matchVote</strong>: la documentacion tecnica (86 KB) y narrativa (106 KB) son excelentes para tesis PERO ninguna es accesible al usuario. Falta un doc de 500 palabras dentro de la app.</p>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <div class="text-xs font-semibold text-scholar uppercase mb-2">Recomendacion 4</div>
+        <h4 class="font-bold text-text mb-2">Disclosure de valores y supuestos</h4>
+        <p class="text-sm text-textMuted">Reconocer que las VAAs asumen "social choice theory" y que hay otros modelos de democracia (deliberativa, agonistica de Mouffe). <strong class="text-text">Para matchVote</strong>: parrafo en la tesis discutiendo por que se eligio el paradigma proximity-matching y no una alternativa deliberativa.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-slate-950 text-slate-400 border-t border-border">
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+      <div>
+        <div class="font-bold text-text hdr-serif text-lg">Gap #2: Framework Etico EGTAI</div>
+        <div class="text-sm text-textMuted mt-1">Aplicacion de Stockinger et al. 2024 a matchVote. Cross-reference deep dive.</div>
+      </div>
+      <div class="text-xs text-textMuted max-w-md">
+        <p><strong class="text-warn">Advertencia honesta</strong>: los scores estimados de matchVote son interpretacion propia sujeta a verificacion contra el codigo real. Los scores de las 7 VAAs europeas son aproximaciones a partir del texto (Stockinger no publica tabla numerica exacta). Antes de citar en la tesis, revisar caso por caso.</p>
+      </div>
+    </div>
+    <div class="border-t border-border mt-6 pt-4 text-xs text-textDim flex justify-between items-center">
+      <a href="cross_reference_matchvote_bibliografia.html" class="text-scholar hover:underline">&larr; Volver al cross-reference general</a>
+      <span>Modo oscuro - Perrito</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Toggle tema
+  (function() {
+    const html = document.documentElement;
+    const btn = document.getElementById('themeToggle');
+    const icon = document.getElementById('themeIcon');
+    const saved = localStorage.getItem('theme');
+    if (saved === 'light') { html.classList.remove('dark'); icon.textContent = 'Claro'; }
+    btn.addEventListener('click', function() {
+      html.classList.toggle('dark');
+      const isDark = html.classList.contains('dark');
+      icon.textContent = isDark ? 'Oscuro' : 'Claro';
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+  })();
+
+  // Charts
+  const isDark = () => document.documentElement.classList.contains('dark');
+  const textColor = () => isDark() ? '#E2E8F0' : '#0F172A';
+  const gridColor = () => isDark() ? '#334155' : '#E2E8F0';
+
+  Chart.defaults.color = textColor();
+  Chart.defaults.borderColor = gridColor();
+
+  // Score chart
+  const scoreCtx = document.getElementById('scoreChart').getContext('2d');
+  new Chart(scoreCtx, {
+    type: 'bar',
+    data: {
+      labels: ['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7'],
+      datasets: [
+        {
+          label: 'matchVote (estimacion)',
+          data: [40, 45, 85, 50, 30, 20, 25],
+          backgroundColor: '#60A5FA',
+          borderColor: '#2563EB',
+          borderWidth: 1
+        },
+        {
+          label: 'Promedio VAAs europeos (aprox)',
+          data: [45, 55, 55, 60, 40, 15, 30],
+          backgroundColor: '#94A3B8',
+          borderColor: '#64748B',
+          borderWidth: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true, max: 100, ticks: { color: textColor(), callback: v => v + '%' }, grid: { color: gridColor() } },
+        x: { ticks: { color: textColor() }, grid: { color: gridColor() } }
+      },
+      plugins: {
+        legend: { labels: { color: textColor() } },
+        tooltip: { callbacks: { label: c => c.dataset.label + ': ' + c.parsed.y + '%' } }
+      }
+    }
+  });
+
+  // Status chart
+  const statusCtx = document.getElementById('statusChart').getContext('2d');
+  new Chart(statusCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Cumple', 'Parcial', 'No cumple', 'No aplica'],
+      datasets: [{
+        data: [12, 12, 25, 1],
+        backgroundColor: ['#34D399', '#FBBF24', '#F87171', '#94A3B8'],
+        borderColor: isDark() ? '#1E293B' : '#F8FAFC',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: textColor(), padding: 12 } },
+        tooltip: { callbacks: { label: c => c.label + ': ' + c.parsed + ' sub-reqs' } }
+      }
+    }
+  });
+
+  console.log('Gap #2 EGTAI deep dive cargado - Perrito');
+</script>
+
+</body>
+</html>

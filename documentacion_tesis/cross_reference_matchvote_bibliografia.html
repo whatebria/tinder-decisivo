@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cross-reference matchVote x Bibliografia | Jenny - Tesis</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          // Modo oscuro (default)
+          bg: '#0B1120',
+          bgSoft: '#111827',
+          bgCard: '#1E293B',
+          bgHover: '#334155',
+          border: '#334155',
+          borderSoft: '#1E293B',
+          text: '#E2E8F0',
+          textMuted: '#94A3B8',
+          textDim: '#64748B',
+          // Acentos - contrastes AA sobre bg oscuro
+          scholar: '#60A5FA',        // blue-400 -> 8.5:1 sobre #0B1120
+          scholarSoft: '#1E3A8A',    // blue-900 para bg de badges
+          scholarHover: '#2563EB',   // blue-600
+          accent: '#34D399',         // emerald-400 -> 9.5:1
+          accentSoft: '#064E3B',     // emerald-900
+          warn: '#FBBF24',           // amber-400 -> 10.4:1
+          warnSoft: '#78350F',       // amber-900
+          crit: '#F87171',           // red-400 -> 6.6:1
+          critSoft: '#7F1D1D'        // red-900
+        },
+        fontFamily: {
+          serif: ['Georgia', 'Cambria', 'serif']
+        }
+      }
+    }
+  }
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  .hdr-serif { font-family: Georgia, Cambria, serif; }
+  .anchor-offset { scroll-margin-top: 5rem; }
+  .matrix-cell { transition: transform 0.15s ease; }
+  .matrix-cell:hover { transform: scale(1.15); z-index: 10; position: relative; }
+  .paper-chip { transition: all 0.2s; }
+  .paper-chip:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(96,165,250,0.15); }
+  .connector { border-left: 3px solid #60A5FA; padding-left: 1rem; }
+  ::selection { background: #1E3A8A; color: #E2E8F0; }
+  .theme-toggle {
+    background: transparent;
+    border: 1px solid #334155;
+    color: #E2E8F0;
+    padding: 0.4rem 0.7rem;
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .theme-toggle:hover { background: #1E293B; border-color: #60A5FA; }
+  .print-only { display: none; }
+  @media print {
+    .no-print { display: none; }
+    .print-only { display: block; }
+    html.dark { background: white !important; color: black !important; }
+    body { font-size: 11pt; color: black !important; }
+    .bg-bg, .bg-bgSoft, .bg-bgCard { background: white !important; }
+    .text-text, .text-textMuted { color: black !important; }
+  }
+
+  /* MODO CLARO (opcional, activado por toggle) */
+  html:not(.dark) body { background: #F8FAFC; color: #0F172A; }
+  html:not(.dark) .bg-bg { background: #F8FAFC; }
+  html:not(.dark) .bg-bgSoft { background: #FFFFFF; }
+  html:not(.dark) .bg-bgCard { background: #FFFFFF; }
+  html:not(.dark) .bg-bgHover { background: #F1F5F9; }
+  html:not(.dark) .text-text { color: #0F172A; }
+  html:not(.dark) .text-textMuted { color: #475569; }
+  html:not(.dark) .text-textDim { color: #64748B; }
+  html:not(.dark) .border-border { border-color: #E2E8F0; }
+  html:not(.dark) .border-borderSoft { border-color: #F1F5F9; }
+  html:not(.dark) .text-scholar { color: #1E40AF; }
+  html:not(.dark) .bg-scholarSoft { background: #DBEAFE; }
+  html:not(.dark) .text-accent { color: #059669; }
+  html:not(.dark) .bg-accentSoft { background: #D1FAE5; }
+  html:not(.dark) .text-warn { color: #B45309; }
+  html:not(.dark) .bg-warnSoft { background: #FEF3C7; }
+  html:not(.dark) .text-crit { color: #B91C1C; }
+  html:not(.dark) .bg-critSoft { background: #FEE2E2; }
+  html:not(.dark) .connector { border-left-color: #1E40AF; }
+</style>
+</head>
+<body class="bg-bg text-text">
+
+<!-- Sticky nav -->
+<nav class="no-print sticky top-0 z-40 bg-bgSoft/95 backdrop-blur border-b border-border shadow-lg">
+  <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <span class="text-scholar font-bold text-lg hdr-serif">matchVote x Bibliografia</span>
+      <span class="text-xs text-textMuted hidden sm:inline">Cross-reference documentacion tecnica &harr; corpus academico</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="hidden md:flex items-center gap-1 text-sm">
+        <a href="#resumen" class="px-3 py-1.5 rounded hover:bg-bgHover text-text">Resumen</a>
+        <a href="#papers" class="px-3 py-1.5 rounded hover:bg-bgHover text-text">Papers</a>
+        <a href="#features" class="px-3 py-1.5 rounded hover:bg-bgHover text-text">Features</a>
+        <a href="#matriz" class="px-3 py-1.5 rounded hover:bg-bgHover text-text">Matriz</a>
+        <a href="#gaps" class="px-3 py-1.5 rounded hover:bg-bgHover text-text">Gaps</a>
+        <a href="#citas" class="px-3 py-1.5 rounded hover:bg-bgHover text-text">Citas</a>
+      </div>
+      <button id="themeToggle" class="theme-toggle" title="Cambiar tema" aria-label="Cambiar entre modo claro y oscuro">
+        <span id="themeIcon">Oscuro</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<header class="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 text-white border-b border-border">
+  <div class="max-w-7xl mx-auto px-6 py-16">
+    <div class="mb-4 flex items-center gap-2 flex-wrap">
+      <span class="bg-scholarSoft text-scholar text-xs px-2 py-1 rounded uppercase tracking-wider font-semibold">Tesis - Voting Advice Applications</span>
+      <span class="bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">Chile 2025-2026</span>
+    </div>
+    <h1 class="text-4xl md:text-5xl font-bold hdr-serif mb-4 leading-tight">Cross-reference: matchVote &harr; corpus academico</h1>
+    <p class="text-lg text-slate-300 max-w-3xl mb-6">Mapeo honesto entre las decisiones de diseno documentadas en <code class="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-slate-200">documentacion_narrativa.md</code> y los 8 papers de la carpeta <code class="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-slate-200">Bibliografia/</code>. Cada feature de la app apunta a los papers que la respaldan (o la contradicen), y cada paper indica que aporta a la tesis.</p>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+      <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-4 backdrop-blur">
+        <div class="text-3xl font-bold text-scholar">8</div>
+        <div class="text-sm text-slate-400">papers en el corpus</div>
+      </div>
+      <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-4 backdrop-blur">
+        <div class="text-3xl font-bold text-accent">12</div>
+        <div class="text-sm text-slate-400">features mapeadas</div>
+      </div>
+      <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-4 backdrop-blur">
+        <div class="text-3xl font-bold text-crit">3</div>
+        <div class="text-sm text-slate-400">gaps criticos</div>
+      </div>
+      <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-4 backdrop-blur">
+        <div class="text-3xl font-bold text-warn">6</div>
+        <div class="text-sm text-slate-400">secciones de tesis con citas sugeridas</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Resumen ejecutivo -->
+<section id="resumen" class="anchor-offset max-w-7xl mx-auto px-6 py-12">
+  <h2 class="text-3xl font-bold hdr-serif text-scholar mb-4">Resumen ejecutivo</h2>
+  <div class="grid md:grid-cols-3 gap-6">
+
+    <div class="bg-bgCard border-l-4 border-accent rounded-r-lg p-5 shadow-lg">
+      <h3 class="font-bold text-lg mb-2 text-accent">Alineaciones fuertes</h3>
+      <ul class="text-sm space-y-2 text-text">
+        <li><strong>Estado del arte</strong> de matchVote (seccion 3.2) esta bien respaldado por Garzia &amp; Marschall 2019 (StemWijzer, Wahl-O-Mat, smartvote).</li>
+        <li><strong>Filosofia de transparencia algoritmica</strong> resuena con la advertencia de Louwerse &amp; Rosema (citada en paper 06): 90% de usuarios reciben distinto match con distinto algoritmo.</li>
+        <li><strong>Hero card "coincides en X de Y"</strong> del Home HUB rediseñado alinea con Bachmann 2026 (interface Estimated + representative deficit de Alvarez et al. 2014).</li>
+      </ul>
+    </div>
+
+    <div class="bg-bgCard border-l-4 border-warn rounded-r-lg p-5 shadow-lg">
+      <h3 class="font-bold text-lg mb-2 text-warn">Decisiones que se apartan del canon</h3>
+      <ul class="text-sm space-y-2 text-text">
+        <li><strong>Formula cuadratica</strong> vs Manhattan (mas comun segun Garzia 2019 y usado en Altinget/Dinamarca segun Tromborg 2023). matchVote justifica esta decision en 4.8.2 pero no la contrasta con literatura.</li>
+        <li><strong>12 preguntas</strong> vs 25-50 (rango tipico segun Garzia 2019) o 75 (Smartvote segun Bachmann 2026). Requiere justificacion explicita en la tesis.</li>
+        <li><strong>Sin comunicacion de certeza</strong> del match (no hay CRA visible). Bachmann 2026 muestra que preview de stable recs aumenta engagement.</li>
+      </ul>
+    </div>
+
+    <div class="bg-bgCard border-l-4 border-crit rounded-r-lg p-5 shadow-lg">
+      <h3 class="font-bold text-lg mb-2 text-crit">Gaps criticos</h3>
+      <ul class="text-sm space-y-2 text-text">
+        <li><strong>Sin validacion empirica</strong> del efecto de matchVote en votantes (turnout, vote switching). Tromborg 2023 seria el gold standard metodologico.</li>
+        <li><strong>Sin framework etico explicito</strong>. Stockinger 2024 (EGTAI) tiene 7 dimensiones aplicables.</li>
+        <li><strong>Sin analisis de dropout</strong> ni certainty. Bachmann 2026: 76% de Smartvote users no completan.</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- Papers -->
+<section id="papers" class="anchor-offset bg-bgSoft border-y border-border">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <h2 class="text-3xl font-bold hdr-serif text-scholar mb-2">Los 8 papers del corpus</h2>
+    <p class="text-textMuted mb-8">Ordenados por numero de MD. Los 3 papers destacados (bordes brillantes) son los mas relevantes para la tesis.</p>
+
+    <div class="grid md:grid-cols-2 gap-4">
+
+      <!-- Paper 01 -->
+      <div class="paper-chip bg-bgCard border border-border rounded-lg p-5">
+        <div class="flex justify-between items-start mb-2">
+          <span class="text-xs bg-scholarSoft text-scholar font-semibold px-2 py-1 rounded">01 - EDITORIAL</span>
+          <span class="text-xs text-textDim">PaG 14 - 2026</span>
+        </div>
+        <h3 class="font-bold text-text mb-1">Garzia &amp; Marschall (2026)</h3>
+        <p class="text-sm text-textMuted mb-2 italic">Editorial del issue tematico "VAAs: Methodological Innovations, Behavioural Effects, and Research Perspectives"</p>
+        <div class="text-sm text-text"><strong>Aporta:</strong> encuadre del corpus 2026, agenda de investigacion actual del campo VAA.</div>
+      </div>
+
+      <!-- Paper 02 -->
+      <div class="paper-chip bg-bgCard border border-border rounded-lg p-5">
+        <div class="flex justify-between items-start mb-2">
+          <span class="text-xs bg-scholarSoft text-scholar font-semibold px-2 py-1 rounded">02 - RCT LLM</span>
+          <span class="text-xs text-textDim">PNAS - 2025</span>
+        </div>
+        <h3 class="font-bold text-text mb-1">Velez, Green &amp; Sevi (2025)</h3>
+        <p class="text-sm text-textMuted mb-2 italic">Chatbot VAAs (LLM+RAG) informan pero raramente influencian a jovenes no-alineados.</p>
+        <div class="text-sm text-text"><strong>Aporta:</strong> contraste - matchVote NO usa LLM, algoritmo determinista. Justifica esa decision de transparencia.</div>
+      </div>
+
+      <!-- Paper 03 -->
+      <div class="paper-chip bg-bgCard border border-border rounded-lg p-5">
+        <div class="flex justify-between items-start mb-2">
+          <span class="text-xs bg-scholarSoft text-scholar font-semibold px-2 py-1 rounded">03 - BERT</span>
+          <span class="text-xs text-textDim">Frontiers AI - 2024</span>
+        </div>
+        <h3 class="font-bold text-text mb-1">Buryakov et al. (2024)</h3>
+        <p class="text-sm text-textMuted mb-2 italic">BERT language model para mejorar el diseno de statements en VAAs.</p>
+        <div class="text-sm text-text"><strong>Aporta:</strong> metodologia de validacion de wording de las 12 preguntas de matchVote. Extension futura.</div>
+      </div>
+
+      <!-- Paper 04 -->
+      <div class="paper-chip bg-bgCard border border-border rounded-lg p-5">
+        <div class="flex justify-between items-start mb-2">
+          <span class="text-xs bg-scholarSoft text-scholar font-semibold px-2 py-1 rounded">04 - ETICA</span>
+          <span class="text-xs text-textDim">Ethics IT - 2024</span>
+        </div>
+        <h3 class="font-bold text-text mb-1">Stockinger (2024)</h3>
+        <p class="text-sm text-textMuted mb-2 italic">Framework EGTAI aplicado a 7 VAAs europeas. 7 dimensiones eticas.</p>
+        <div class="text-sm text-text"><strong>Aporta:</strong> checklist etico completo para matchVote. Cita clave para justificar principio de transparencia (seccion 6.4 del simple).</div>
+      </div>
+
+      <!-- Paper 05 -->
+      <div class="paper-chip bg-bgCard border border-border rounded-lg p-5">
+        <div class="flex justify-between items-start mb-2">
+          <span class="text-xs bg-scholarSoft text-scholar font-semibold px-2 py-1 rounded">05 - RCT SUIZO</span>
+          <span class="text-xs text-textDim">Acta Politica - 2022</span>
+        </div>
+        <h3 class="font-bold text-text mb-1">Stadelmann &amp; Steffen (2022)</h3>
+        <p class="text-sm text-textMuted mb-2 italic">RCT en referendum suizo, efectos causales de VAAs en votacion directa.</p>
+        <div class="text-sm text-text"><strong>Aporta:</strong> evidencia causal de efecto de VAAs en toma de decision. Relevante para justificar impacto potencial.</div>
+      </div>
+
+      <!-- Paper 06 - Destacado -->
+      <div class="paper-chip bg-bgCard border-2 border-scholar rounded-lg p-5 shadow-lg shadow-blue-950/30">
+        <div class="flex justify-between items-start mb-2">
+          <span class="text-xs bg-scholar text-slate-900 font-bold px-2 py-1 rounded">06 - REVIEW CANONICO</span>
+          <span class="text-xs text-textDim">Oxford Enc - 2019</span>
+        </div>
+        <h3 class="font-bold text-text mb-1">Garzia &amp; Marschall (2019)</h3>
+        <p class="text-sm text-textMuted mb-2 italic">Review foundational del campo VAA. Historia, diseno, efectos.</p>
+        <div class="text-sm text-text"><strong>Aporta:</strong> definicion de VAA (seccion 3.1), estado del arte (3.2), taxonomia de algoritmos, evidencia de turnout +2-12pp. <strong class="text-scholar">Cita canonica #1</strong>.</div>
+      </div>
+
+      <!-- Paper 07 - Destacado -->
+      <div class="paper-chip bg-bgCard border-2 border-scholar rounded-lg p-5 shadow-lg shadow-blue-950/30">
+        <div class="flex justify-between items-start mb-2">
+          <span class="text-xs bg-scholar text-slate-900 font-bold px-2 py-1 rounded">07 - CANDIDATE VAA</span>
+          <span class="text-xs text-textDim">EPSR - 2023</span>
+        </div>
+        <h3 class="font-bold text-text mb-1">Tromborg &amp; Albertsen (2023)</h3>
+        <p class="text-sm text-textMuted mb-2 italic">Within-subject design en Dinamarca 2019. Framework ecological rationality.</p>
+        <div class="text-sm text-text"><strong>Aporta:</strong> es EL referente para VAAs de candidatos (matchVote Presidencial). +3.7% del electorado cambio voto. Gold standard metodologico.</div>
+      </div>
+
+      <!-- Paper 08 - Destacado en verde -->
+      <div class="paper-chip bg-bgCard border-2 border-accent rounded-lg p-5 shadow-lg shadow-emerald-950/30">
+        <div class="flex justify-between items-start mb-2">
+          <span class="text-xs bg-accent text-slate-900 font-bold px-2 py-1 rounded">08 - CERTAINTY</span>
+          <span class="text-xs text-textDim">PaG 14 - 2026</span>
+        </div>
+        <h3 class="font-bold text-text mb-1">Bachmann et al. (2026)</h3>
+        <p class="text-sm text-textMuted mb-2 italic">Algoritmo CRA + experimento con 5 interfaces. Universidad de Zurich.</p>
+        <div class="text-sm text-text"><strong>Aporta:</strong> el paper MAS relevante para el Home HUB rediseñado. 76% de users no completan. Preview de stable recs aumenta engagement. Simplicidad &gt; precision.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section id="features" class="anchor-offset max-w-7xl mx-auto px-6 py-12">
+  <h2 class="text-3xl font-bold hdr-serif text-scholar mb-2">Features de matchVote y su respaldo academico</h2>
+  <p class="text-textMuted mb-8">12 decisiones de diseno documentadas en <code class="text-sm bg-bgCard border border-border px-1 rounded">documentacion_narrativa.md</code>, cada una con los papers del corpus que la respaldan (verde), la contrastan (amarillo) o no la respaldan (gris).</p>
+
+  <div class="space-y-6">
+
+    <!-- Feature 1 -->
+    <div class="bg-bgCard border border-border rounded-lg overflow-hidden shadow-lg">
+      <div class="bg-bgHover border-b border-border px-5 py-3 flex items-center gap-3">
+        <span class="bg-scholar text-slate-900 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">1</span>
+        <h3 class="font-bold text-text">Multi-eleccion (Presidencial + Diputados + Municipal)</h3>
+      </div>
+      <div class="p-5 grid md:grid-cols-2 gap-4">
+        <div class="connector">
+          <p class="text-sm text-text mb-2"><strong>En la app:</strong> arquitectura multi-eleccion con filtrado territorial polimorfico (seccion 4.11 tecnica). Home HUB muestra las 3 elecciones en cards separadas.</p>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-textMuted uppercase mb-2">Respaldo academico</div>
+          <div class="flex flex-wrap gap-2">
+            <span class="bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">06 - Garzia 2019</span>
+            <span class="bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">07 - Tromborg 2023</span>
+          </div>
+          <p class="text-xs text-textMuted mt-2">Garzia 2019 documenta VAAs multi-nivel (Wahl-O-Mat federal + Land). Tromborg 2023 estudia VAA parlamentaria de candidatos (Dinamarca 175 MPs, 10 distritos), justo el paradigma que aplica matchVote en Parlamentarias.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature 2 -->
+    <div class="bg-bgCard border border-border rounded-lg overflow-hidden shadow-lg">
+      <div class="bg-bgHover border-b border-border px-5 py-3 flex items-center gap-3">
+        <span class="bg-scholar text-slate-900 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">2</span>
+        <h3 class="font-bold text-text">Escala Likert de 5 puntos</h3>
+      </div>
+      <div class="p-5 grid md:grid-cols-2 gap-4">
+        <div class="connector">
+          <p class="text-sm text-text mb-2"><strong>En la app:</strong> escala Likert de 5 opciones (muy en desacuerdo &rarr; muy de acuerdo) con opcion "no se" que excluye la pregunta del calculo (seccion 3.3 tecnica).</p>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-textMuted uppercase mb-2">Respaldo academico</div>
+          <div class="flex flex-wrap gap-2">
+            <span class="bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">06 - Garzia 2019</span>
+            <span class="bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">07 - Tromborg 2023</span>
+          </div>
+          <p class="text-xs text-textMuted mt-2">Garzia 2019 documenta que la mayoria usa 3 opciones pero crece adopcion de Likert 5 + "no opinion". Tromborg 2023 usa Likert 5 en Altinget con categoria intermedia oculta - identica decision. <em>Rosema &amp; Louwerse 2016 (citado por Bachmann 2026)</em> compara escalas.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature 3 -->
+    <div class="bg-bgCard border border-border rounded-lg overflow-hidden shadow-lg">
+      <div class="bg-bgHover border-b border-border px-5 py-3 flex items-center gap-3">
+        <span class="bg-warn text-slate-900 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">3</span>
+        <h3 class="font-bold text-text">Formula cuadratica ponderada (no Manhattan)</h3>
+      </div>
+      <div class="p-5 grid md:grid-cols-2 gap-4">
+        <div class="connector">
+          <p class="text-sm text-text mb-2"><strong>En la app:</strong> <code class="text-xs bg-bgHover border border-border px-1 rounded text-scholar">score = 1 - (|diff|/4)^2</code>, luego multiplicado por peso 0.5/1.0/1.5/2.0 (seccion 4.8 narrativa). La eleccion cuadratica es <strong>intencional</strong> - penaliza mas diferencias grandes.</p>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-textMuted uppercase mb-2">Respaldo / contraste</div>
+          <div class="flex flex-wrap gap-2 mb-2">
+            <span class="bg-warnSoft text-warn text-xs px-2 py-1 rounded font-semibold">06 - Garzia 2019 (contrasta)</span>
+            <span class="bg-warnSoft text-warn text-xs px-2 py-1 rounded font-semibold">07 - Tromborg 2023 (contrasta)</span>
+          </div>
+          <p class="text-xs text-textMuted mt-2"><strong>Contraste:</strong> Garzia 2019 documenta que Manhattan/city-block es el mas usado. Altinget (Tromborg 2023) tambien Manhattan. <strong>Louwerse &amp; Rosema 2014</strong> (citado en Garzia 2019): 90% de users reciben distinto match con distinto algoritmo. matchVote debe justificar la eleccion cuadratica citando este trabajo.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature 4 -->
+    <div class="bg-bgCard border border-border rounded-lg overflow-hidden shadow-lg">
+      <div class="bg-bgHover border-b border-border px-5 py-3 flex items-center gap-3">
+        <span class="bg-scholar text-slate-900 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">4</span>
+        <h3 class="font-bold text-text">Pesos por importancia (0.5, 1.0, 1.5, 2.0)</h3>
+      </div>
+      <div class="p-5 grid md:grid-cols-2 gap-4">
+        <div class="connector">
+          <p class="text-sm text-text mb-2"><strong>En la app:</strong> usuario declara importancia de cada pregunta (poco / neutro / importante / critico). Se multiplica por el score. Preguntas con peso 0 no se dejan (todas al menos 0.5).</p>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-textMuted uppercase mb-2">Respaldo academico</div>
+          <div class="flex flex-wrap gap-2">
+            <span class="bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">06 - Garzia 2019</span>
+          </div>
+          <p class="text-xs text-textMuted mt-2">Garzia 2019: "casi todas las VAAs permiten ponderar por importancia". Bachmann 2026 (limitaciones): reconoce que su modelo PCA+LR NO capta el weighing y lo marca como debilidad - matchVote SI lo hace.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature 5 -->
+    <div class="bg-bgCard border border-border rounded-lg overflow-hidden shadow-lg">
+      <div class="bg-bgHover border-b border-border px-5 py-3 flex items-center gap-3">
+        <span class="bg-warn text-slate-900 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">5</span>
+        <h3 class="font-bold text-text">12 preguntas por eleccion</h3>
+      </div>
+      <div class="p-5 grid md:grid-cols-2 gap-4">
+        <div class="connector">
+          <p class="text-sm text-text mb-2"><strong>En la app:</strong> cuestionario corto de 12 preguntas por tipo de eleccion. Optimizado para completacion movil.</p>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-textMuted uppercase mb-2">Contraste con literatura</div>
+          <div class="flex flex-wrap gap-2 mb-2">
+            <span class="bg-warnSoft text-warn text-xs px-2 py-1 rounded font-semibold">06 - Garzia 2019 (bajo rango)</span>
+            <span class="bg-warnSoft text-warn text-xs px-2 py-1 rounded font-semibold">08 - Bachmann 2026 (bajo rango)</span>
+          </div>
+          <p class="text-xs text-textMuted mt-2">Garzia 2019: rango tipico 25-50 statements. Tromborg 2023 (Altinget): 30. Bachmann 2026 (Smartvote): 75. matchVote con 12 esta en el extremo bajo. <strong>Requiere justificacion explicita</strong>: menor cognitive load y mayor completion rate (vinculable al hallazgo de Bachmann 2026 sobre dropout).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature 6 -->
+    <div class="bg-bgCard border border-border rounded-lg overflow-hidden shadow-lg">
+      <div class="bg-bgHover border-b border-border px-5 py-3 flex items-center gap-3">
+        <span class="bg-scholar text-slate-900 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">6</span>
+        <h3 class="font-bold text-text">Opcion "no se" que excluye la pregunta</h3>
+      </div>
+      <div class="p-5 grid md:grid-cols-2 gap-4">
+        <div class="connector">
+          <p class="text-sm text-text mb-2"><strong>En la app:</strong> respuesta "no se" NO se penaliza ni suma al denominador. Score final es promedio solo de preguntas efectivamente respondidas.</p>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-textMuted uppercase mb-2">Respaldo academico</div>
+          <div class="flex flex-wrap gap-2">
+            <span class="bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">06 - Garzia 2019</span>
+          </div>
+          <p class="text-xs text-textMuted mt-2">Garzia 2019: "crece el uso de Likert de 5 puntos + 'no opinion'". Es el patron estandar en Wahl-O-Mat y smartvote. Bachmann 2026 no lo aborda explicitamente pero sus datos incluyen respuestas neutrales.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature 7 -->
+    <div class="bg-bgCard border border-border rounded-lg overflow-hidden shadow-lg">
+      <div class="bg-bgHover border-b border-border px-5 py-3 flex items-center gap-3">
+        <span class="bg-scholar text-slate-900 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">7</span>
+        <h3 class="font-bold text-text">Filtrado territorial polimorfico</h3>
+      </div>
+      <div class="p-5 grid md:grid-cols-2 gap-4">
+        <div class="connector">
+          <p class="text-sm text-text mb-2"><strong>En la app:</strong> jerarquia comuna &rarr; distrito &rarr; circunscripcion &rarr; nacional. Se filtran candidatos elegibles segun ubicacion del usuario (seccion 4.8.5 narrativa).</p>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-textMuted uppercase mb-2">Respaldo academico</div>
+          <div class="flex flex-wrap gap-2">
+            <span class="bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">07 - Tromborg 2023</span>
+          </div>
+          <p class="text-xs text-textMuted mt-2">Tromborg 2023: Altinget muestra "5 candidatos mas congruentes de <strong>su distrito</strong>". Mismo patron. Garzia 2019 no lo aborda explicitamente. <strong>Es una fortaleza tecnica de matchVote no comun en literatura VAA</strong>.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature 8 -->
+    <div class="bg-bgCard border border-border rounded-lg overflow-hidden shadow-lg">
+      <div class="bg-bgHover border-b border-border px-5 py-3 flex items-center gap-3">
+        <span class="bg-scholar text-slate-900 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">8</span>
+        <h3 class="font-bold text-text">Ranking de candidatos (no grafico 2D)</h3>
+      </div>
+      <div class="p-5 grid md:grid-cols-2 gap-4">
+        <div class="connector">
+          <p class="text-sm text-text mb-2"><strong>En la app:</strong> resultado presentado como ranking ordenado, no como grafico bidimensional politico. Home HUB muestra hero card con % del top match.</p>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-textMuted uppercase mb-2">Respaldo academico</div>
+          <div class="flex flex-wrap gap-2">
+            <span class="bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">06 - Garzia 2019</span>
+            <span class="bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">08 - Bachmann 2026</span>
+          </div>
+          <p class="text-xs text-textMuted mt-2">Garzia 2019 lista dos formatos: ranking 1D o mapa 2D. Bachmann 2026: su interfaz "Estimated" (que gano en engagement y comprension) muestra <strong>nombres + partido sin porcentajes</strong>. Consistente con el hero card. <strong>Germann &amp; Mendez 2016</strong> (citado en Garzia 2019) critica propiedades psicometricas de mapas 2D - argumento adicional para no usarlos.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature 9 -->
+    <div class="bg-bgCard border border-border rounded-lg overflow-hidden shadow-lg">
+      <div class="bg-bgHover border-b border-border px-5 py-3 flex items-center gap-3">
+        <span class="bg-accent text-slate-900 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">9</span>
+        <h3 class="font-bold text-text">Hero card "coincides en X de Y" (Home HUB rediseñado)</h3>
+      </div>
+      <div class="p-5 grid md:grid-cols-2 gap-4">
+        <div class="connector">
+          <p class="text-sm text-text mb-2"><strong>En la app:</strong> seccion "Tus mejores matches" en Home HUB con hero card (avatar + nombre + % gigante + "coincides en 10 de 12"). Añadido en rediseño reciente.</p>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-textMuted uppercase mb-2">Respaldo academico fuerte</div>
+          <div class="flex flex-wrap gap-2">
+            <span class="bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">08 - Bachmann 2026</span>
+            <span class="bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">06 - Garzia 2019 (Alvarez)</span>
+          </div>
+          <p class="text-xs text-textMuted mt-2">Bachmann 2026: interfaz "Estimated" (preview de recomendaciones) fue la mas entendida y con mayor engagement (68 vs 56 preguntas promedio). Alvarez et al. 2014 (via Garzia 2019): "representative deficit" - mostrar cuan cerca esta el match del ideal. <strong class="text-accent">La decision de diseno actual esta perfectamente alineada con la evidencia mas reciente</strong>.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature 10 -->
+    <div class="bg-bgCard border border-border rounded-lg overflow-hidden shadow-lg">
+      <div class="bg-bgHover border-b border-border px-5 py-3 flex items-center gap-3">
+        <span class="bg-scholar text-slate-900 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">10</span>
+        <h3 class="font-bold text-text">Transparencia algoritmica</h3>
+      </div>
+      <div class="p-5 grid md:grid-cols-2 gap-4">
+        <div class="connector">
+          <p class="text-sm text-text mb-2"><strong>En la app:</strong> algoritmo publicado en documentacion, formula matematica explicita, sin uso de LLM/black box (seccion 6.4 simple).</p>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-textMuted uppercase mb-2">Respaldo academico</div>
+          <div class="flex flex-wrap gap-2">
+            <span class="bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">04 - Stockinger 2024</span>
+            <span class="bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">02 - Velez 2025</span>
+            <span class="bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">06 - Garzia 2019</span>
+          </div>
+          <p class="text-xs text-textMuted mt-2">Stockinger 2024 (EGTAI) tiene "transparencia" como dimension etica clave. Velez 2025 muestra que LLM+RAG chatbots "informan pero no persuaden" - matchVote apuesta por lo contrario. Garzia 2019 lista transparencia entre las cuestiones abiertas del campo.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature 11 -->
+    <div class="bg-bgCard border border-border rounded-lg overflow-hidden shadow-lg">
+      <div class="bg-bgHover border-b border-border px-5 py-3 flex items-center gap-3">
+        <span class="bg-scholar text-slate-900 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">11</span>
+        <h3 class="font-bold text-text">Accesibilidad WCAG 2.2 AA</h3>
+      </div>
+      <div class="p-5 grid md:grid-cols-2 gap-4">
+        <div class="connector">
+          <p class="text-sm text-text mb-2"><strong>En la app:</strong> cumplimiento WCAG 2.2 nivel AA como principio de diseño (seccion 3.6 narrativa + 11.8 simple).</p>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-textMuted uppercase mb-2">Respaldo academico</div>
+          <div class="flex flex-wrap gap-2">
+            <span class="bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">04 - Stockinger 2024</span>
+          </div>
+          <p class="text-xs text-textMuted mt-2">Stockinger 2024 (EGTAI) incluye "accesibilidad" en su framework etico. Ningun otro paper del corpus la aborda explicitamente. <strong>Es un diferencial tecnico de matchVote</strong> - vale la pena destacarlo en la tesis como aporte concreto.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature 12 -->
+    <div class="bg-bgCard border border-border rounded-lg overflow-hidden shadow-lg">
+      <div class="bg-bgHover border-b border-border px-5 py-3 flex items-center gap-3">
+        <span class="bg-textDim text-slate-900 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">12</span>
+        <h3 class="font-bold text-text">Atomic Design + arquitectura contract-first</h3>
+      </div>
+      <div class="p-5 grid md:grid-cols-2 gap-4">
+        <div class="connector">
+          <p class="text-sm text-text mb-2"><strong>En la app:</strong> frontend estructurado en atomos-moleculas-organismos (Frost 2016). Backend con schema OpenAPI 3.1 como single source of truth.</p>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-textMuted uppercase mb-2">Sin respaldo en corpus VAA</div>
+          <div class="flex flex-wrap gap-2">
+            <span class="bg-bgHover text-textMuted text-xs px-2 py-1 rounded font-semibold">Ninguno</span>
+          </div>
+          <p class="text-xs text-textMuted mt-2">Es una decision de ingenieria de software, no de investigacion VAA. Frost 2016 (Atomic Design) y Martin 2017 (SOLID) - citados en la doc tecnica - son bibliografia complementaria, no del corpus VAA. Correcto separarlos.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Matriz visual -->
+<section id="matriz" class="anchor-offset bg-bgSoft border-y border-border">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <h2 class="text-3xl font-bold hdr-serif text-scholar mb-2">Matriz visual feature x paper</h2>
+    <p class="text-textMuted mb-6">Vista rapida de que paper respalda cada feature. Verde = respaldo directo. Amarillo = contraste (obliga a justificar). Gris = no aborda.</p>
+
+    <div class="overflow-x-auto bg-bgCard border border-border rounded-lg shadow-lg">
+      <table class="w-full text-xs md:text-sm">
+        <thead>
+          <tr class="bg-bgHover border-b border-border">
+            <th class="text-left px-3 py-2 sticky left-0 bg-bgHover z-10 text-text">Feature matchVote</th>
+            <th class="px-2 py-2 text-textMuted" title="Editorial PaG 14 2026">01</th>
+            <th class="px-2 py-2 text-textMuted" title="Velez 2025 PNAS">02</th>
+            <th class="px-2 py-2 text-textMuted" title="Buryakov 2024 BERT">03</th>
+            <th class="px-2 py-2 text-textMuted" title="Stockinger 2024 EGTAI">04</th>
+            <th class="px-2 py-2 text-textMuted" title="Stadelmann 2022 RCT">05</th>
+            <th class="px-2 py-2 bg-scholarSoft text-scholar" title="Garzia 2019 review">06</th>
+            <th class="px-2 py-2 bg-scholarSoft text-scholar" title="Tromborg 2023 candidate">07</th>
+            <th class="px-2 py-2 bg-accentSoft text-accent" title="Bachmann 2026 certainty">08</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-borderSoft">
+          <tr class="hover:bg-bgHover/50 transition">
+            <td class="px-3 py-2 sticky left-0 bg-bgCard font-medium text-text">1. Multi-eleccion</td>
+            <td></td><td></td><td></td><td></td><td></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-accent text-slate-900 text-xs leading-6 font-bold" title="Respalda">S</span></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-accent text-slate-900 text-xs leading-6 font-bold" title="Respalda">S</span></td>
+            <td></td>
+          </tr>
+          <tr class="hover:bg-bgHover/50 transition">
+            <td class="px-3 py-2 sticky left-0 bg-bgCard font-medium text-text">2. Escala Likert 5</td>
+            <td></td><td></td><td></td><td></td><td></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-accent text-slate-900 text-xs leading-6 font-bold">S</span></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-accent text-slate-900 text-xs leading-6 font-bold">S</span></td>
+            <td></td>
+          </tr>
+          <tr class="hover:bg-bgHover/50 transition">
+            <td class="px-3 py-2 sticky left-0 bg-bgCard font-medium text-text">3. Formula cuadratica</td>
+            <td></td><td></td><td></td><td></td><td></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-warn text-slate-900 text-xs leading-6 font-bold" title="Contrasta">!</span></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-warn text-slate-900 text-xs leading-6 font-bold" title="Contrasta">!</span></td>
+            <td></td>
+          </tr>
+          <tr class="hover:bg-bgHover/50 transition">
+            <td class="px-3 py-2 sticky left-0 bg-bgCard font-medium text-text">4. Pesos importancia</td>
+            <td></td><td></td><td></td><td></td><td></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-accent text-slate-900 text-xs leading-6 font-bold">S</span></td>
+            <td></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-warn text-slate-900 text-xs leading-6 font-bold" title="Reconoce como limitacion propia">L</span></td>
+          </tr>
+          <tr class="hover:bg-bgHover/50 transition">
+            <td class="px-3 py-2 sticky left-0 bg-bgCard font-medium text-text">5. 12 preguntas</td>
+            <td></td><td></td><td></td><td></td><td></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-warn text-slate-900 text-xs leading-6 font-bold" title="Contrasta - rango bajo">!</span></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-warn text-slate-900 text-xs leading-6 font-bold" title="Contrasta - rango bajo">!</span></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-warn text-slate-900 text-xs leading-6 font-bold" title="Contrasta - rango bajo">!</span></td>
+          </tr>
+          <tr class="hover:bg-bgHover/50 transition">
+            <td class="px-3 py-2 sticky left-0 bg-bgCard font-medium text-text">6. Opcion "no se"</td>
+            <td></td><td></td><td></td><td></td><td></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-accent text-slate-900 text-xs leading-6 font-bold">S</span></td>
+            <td></td><td></td>
+          </tr>
+          <tr class="hover:bg-bgHover/50 transition">
+            <td class="px-3 py-2 sticky left-0 bg-bgCard font-medium text-text">7. Filtro territorial polim.</td>
+            <td></td><td></td><td></td><td></td><td></td>
+            <td></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-accent text-slate-900 text-xs leading-6 font-bold">S</span></td>
+            <td></td>
+          </tr>
+          <tr class="hover:bg-bgHover/50 transition">
+            <td class="px-3 py-2 sticky left-0 bg-bgCard font-medium text-text">8. Ranking (no 2D)</td>
+            <td></td><td></td><td></td><td></td><td></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-accent text-slate-900 text-xs leading-6 font-bold">S</span></td>
+            <td></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-accent text-slate-900 text-xs leading-6 font-bold">S</span></td>
+          </tr>
+          <tr class="hover:bg-bgHover/50 transition">
+            <td class="px-3 py-2 sticky left-0 bg-bgCard font-medium text-text">9. Hero card top match</td>
+            <td></td><td></td><td></td><td></td><td></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-accent text-slate-900 text-xs leading-6 font-bold">S</span></td>
+            <td></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-accent text-slate-900 text-xs leading-6 font-bold">S</span></td>
+          </tr>
+          <tr class="hover:bg-bgHover/50 transition">
+            <td class="px-3 py-2 sticky left-0 bg-bgCard font-medium text-text">10. Transparencia algoritmica</td>
+            <td></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-accent text-slate-900 text-xs leading-6 font-bold">S</span></td>
+            <td></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-accent text-slate-900 text-xs leading-6 font-bold">S</span></td>
+            <td></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-accent text-slate-900 text-xs leading-6 font-bold">S</span></td>
+            <td></td><td></td>
+          </tr>
+          <tr class="hover:bg-bgHover/50 transition">
+            <td class="px-3 py-2 sticky left-0 bg-bgCard font-medium text-text">11. WCAG 2.2 AA</td>
+            <td></td><td></td><td></td>
+            <td class="text-center"><span class="matrix-cell inline-block w-6 h-6 rounded-full bg-accent text-slate-900 text-xs leading-6 font-bold">S</span></td>
+            <td></td><td></td><td></td><td></td>
+          </tr>
+          <tr class="hover:bg-bgHover/50 transition">
+            <td class="px-3 py-2 sticky left-0 bg-bgCard font-medium text-text">12. Atomic Design / OpenAPI</td>
+            <td colspan="8" class="text-center text-textDim text-xs py-2 italic">Sin respaldo en corpus VAA (bibliografia de software eng aparte)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-4 flex flex-wrap gap-4 text-xs text-textMuted">
+      <span class="flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-accent"></span> Respalda directamente</span>
+      <span class="flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-warn"></span> Contrasta / obliga a justificar</span>
+      <span class="flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-slate-600"></span> No aborda</span>
+      <span class="flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-warn"></span><strong>L</strong> = reconoce limitacion propia (matchVote resuelve mejor)</span>
+    </div>
+  </div>
+</section>
+
+<!-- Gaps -->
+<section id="gaps" class="anchor-offset max-w-7xl mx-auto px-6 py-12">
+  <h2 class="text-3xl font-bold hdr-serif text-scholar mb-2">Gaps identificados</h2>
+  <p class="text-textMuted mb-8">Cosas del corpus academico que <strong>no</strong> estan implementadas/documentadas en matchVote, y features de matchVote que <strong>no</strong> tienen respaldo en el corpus.</p>
+
+  <div class="grid md:grid-cols-2 gap-6">
+
+    <div class="bg-bgCard border-l-4 border-crit rounded-r-lg p-6 shadow-lg">
+      <h3 class="font-bold text-lg mb-3 text-crit">Gaps criticos - hallazgos del corpus no implementados</h3>
+
+      <div class="space-y-4">
+        <div>
+          <div class="font-semibold text-sm text-text mb-1">GAP #1: Sin validacion empirica de efecto</div>
+          <p class="text-xs text-textMuted">matchVote no tiene mediciones de su efecto sobre turnout ni vote switching. Tromborg 2023 (paper 07) muestra 3.7% de electorado dañes cambio voto. <strong>Sugerencia</strong>: incluir en la tesis una seccion "Validacion empirica futura" con propuesta de diseño within-subject a la Tromborg.</p>
+        </div>
+        <div>
+          <div class="font-semibold text-sm text-text mb-1">GAP #2: Sin framework etico explicito</div>
+          <p class="text-xs text-textMuted">La documentacion menciona transparencia como principio pero no aplica un framework academico. Stockinger 2024 (EGTAI) tiene 7 dimensiones (transparencia, accesibilidad, fairness, accountability, robustez, privacidad, sostenibilidad). <strong>Sugerencia</strong>: agregar tabla EGTAI en la seccion de etica.</p>
+        </div>
+        <div>
+          <div class="font-semibold text-sm text-text mb-1">GAP #3: Sin analisis de dropout ni comunicacion de certeza</div>
+          <p class="text-xs text-textMuted">Bachmann 2026 (paper 08): 76% de users no completa Smartvote. matchVote no reporta metricas de completacion. Tampoco muestra certeza cuando el user esta a mitad del cuestionario. <strong>Sugerencia</strong>: agregar telemetria basica y considerar dropdown TENTATIVA/MEDIA/ALTA basado en % de preguntas respondidas.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-bgCard border-l-4 border-warn rounded-r-lg p-6 shadow-lg">
+      <h3 class="font-bold text-lg mb-3 text-warn">Features de matchVote sin respaldo directo</h3>
+
+      <div class="space-y-4">
+        <div>
+          <div class="font-semibold text-sm text-text mb-1">Formula cuadratica</div>
+          <p class="text-xs text-textMuted">Ningun paper del corpus la usa. Todos usan Manhattan (Altinget, Wahl-O-Mat, Smartvote). matchVote debe <strong>defender</strong> esta decision, no asumirla.</p>
+        </div>
+        <div>
+          <div class="font-semibold text-sm text-text mb-1">12 preguntas</div>
+          <p class="text-xs text-textMuted">Muy por debajo del rango tipico. Argumento defendible: mobile-first + reduccion de dropout (Bachmann 2026 valida el problema). Pero no hay VAA que use tan pocas preguntas en el corpus.</p>
+        </div>
+        <div>
+          <div class="font-semibold text-sm text-text mb-1">Filtro territorial jerarquico</div>
+          <p class="text-xs text-textMuted">Tromborg 2023 lo hace parcialmente (filtro por distrito). Pero la jerarquia comuna &rarr; distrito &rarr; circunscripcion &rarr; nacional es especifica del sistema chileno y no tiene equivalente estudiado en el corpus. <strong class="text-accent">Aporte propio</strong>.</p>
+        </div>
+        <div>
+          <div class="font-semibold text-sm text-text mb-1">Multi-eleccion simultanea (Presidencial + Parlamentaria + Municipal)</div>
+          <p class="text-xs text-textMuted">Wahl-O-Mat separa VAAs por eleccion (federal / Land). matchVote las combina en una sola app. <strong class="text-accent">Aporte propio</strong> con potencial de investigacion (transferencia entre elecciones, correlacion de matches).</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Citas por seccion -->
+<section id="citas" class="anchor-offset bg-bgSoft border-t border-border">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <h2 class="text-3xl font-bold hdr-serif text-scholar mb-2">Citas sugeridas por seccion de tesis</h2>
+    <p class="text-textMuted mb-8">Mapeo directo: en cada seccion de <code class="text-sm bg-bgCard border border-border px-1 rounded">documentacion_narrativa.md</code>, que papers deberian aparecer.</p>
+
+    <div class="space-y-4">
+
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <div class="flex items-baseline gap-3 mb-2 flex-wrap">
+          <span class="text-lg font-bold text-scholar">Seccion 1 - Introduccion</span>
+          <span class="text-sm text-textMuted">1.1 Que es matchVote y que busca</span>
+        </div>
+        <div class="text-sm text-text mb-2">Definir VAA + establecer relevancia global.</div>
+        <div class="flex flex-wrap gap-2">
+          <span class="bg-scholarSoft text-scholar text-xs px-2 py-1 rounded font-semibold">06 Garzia 2019 (definicion)</span>
+          <span class="bg-scholarSoft text-scholar text-xs px-2 py-1 rounded font-semibold">01 Garzia 2026 (agenda actual)</span>
+        </div>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <div class="flex items-baseline gap-3 mb-2">
+          <span class="text-lg font-bold text-scholar">Seccion 1.3 - Por que es importante</span>
+        </div>
+        <div class="text-sm text-text mb-2">Evidencia de efectos comprobados de VAAs sobre turnout y vote choice.</div>
+        <div class="flex flex-wrap gap-2">
+          <span class="bg-scholarSoft text-scholar text-xs px-2 py-1 rounded font-semibold">06 Garzia 2019 (turnout +2-12pp)</span>
+          <span class="bg-scholarSoft text-scholar text-xs px-2 py-1 rounded font-semibold">07 Tromborg 2023 (3.7% cambio voto)</span>
+          <span class="bg-scholarSoft text-scholar text-xs px-2 py-1 rounded font-semibold">05 Stadelmann 2022 (RCT suizo)</span>
+        </div>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <div class="flex items-baseline gap-3 mb-2">
+          <span class="text-lg font-bold text-scholar">Seccion 3.1 - Voting Advice Applications</span>
+        </div>
+        <div class="text-sm text-text mb-2">Marco conceptual foundational.</div>
+        <div class="flex flex-wrap gap-2">
+          <span class="bg-scholarSoft text-scholar text-xs px-2 py-1 rounded font-semibold">06 Garzia 2019 (CITA CANONICA)</span>
+        </div>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <div class="flex items-baseline gap-3 mb-2">
+          <span class="text-lg font-bold text-scholar">Seccion 3.2 - Estado del arte</span>
+        </div>
+        <div class="text-sm text-text mb-2">VAAs consolidadas: StemWijzer, Wahl-O-Mat, smartvote, Kieskompas + comparacion candidate-based vs party-based.</div>
+        <div class="flex flex-wrap gap-2">
+          <span class="bg-scholarSoft text-scholar text-xs px-2 py-1 rounded font-semibold">06 Garzia 2019 (historia + tipologia)</span>
+          <span class="bg-scholarSoft text-scholar text-xs px-2 py-1 rounded font-semibold">07 Tromborg 2023 (Altinget Dinamarca)</span>
+          <span class="bg-scholarSoft text-scholar text-xs px-2 py-1 rounded font-semibold">03 Buryakov 2024 (statement design)</span>
+          <span class="bg-scholarSoft text-scholar text-xs px-2 py-1 rounded font-semibold">02 Velez 2025 (LLM VAAs)</span>
+        </div>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <div class="flex items-baseline gap-3 mb-2">
+          <span class="text-lg font-bold text-scholar">Seccion 3.3 - Fundamentos tecnicos del algoritmo</span>
+        </div>
+        <div class="text-sm text-text mb-2">Escalas Likert + eleccion de algoritmo cuadratica vs lineal.</div>
+        <div class="flex flex-wrap gap-2">
+          <span class="bg-scholarSoft text-scholar text-xs px-2 py-1 rounded font-semibold">06 Garzia 2019 (algoritmos VAA)</span>
+          <span class="bg-warnSoft text-warn text-xs px-2 py-1 rounded font-semibold">Louwerse &amp; Rosema 2014 (via Garzia)</span>
+        </div>
+        <p class="text-xs text-textDim mt-2 italic">Louwerse &amp; Rosema (90% users reciben distinto match) es cita OBLIGATORIA para defender la eleccion cuadratica.</p>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <div class="flex items-baseline gap-3 mb-2">
+          <span class="text-lg font-bold text-scholar">Seccion 3.6 - Fundamentos del diseño de interfaz</span>
+        </div>
+        <div class="text-sm text-text mb-2">Home HUB, ranking, hero card, comunicacion de certeza.</div>
+        <div class="flex flex-wrap gap-2">
+          <span class="bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">08 Bachmann 2026 (CITA CLAVE)</span>
+          <span class="bg-scholarSoft text-scholar text-xs px-2 py-1 rounded font-semibold">06 Garzia 2019 (ranking vs 2D)</span>
+        </div>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <div class="flex items-baseline gap-3 mb-2">
+          <span class="text-lg font-bold text-scholar">Seccion 4.8 - Algoritmo de matching</span>
+        </div>
+        <div class="text-sm text-text mb-2">Justificar formula cuadratica y pesos.</div>
+        <div class="flex flex-wrap gap-2">
+          <span class="bg-warnSoft text-warn text-xs px-2 py-1 rounded font-semibold">06 Garzia 2019 (contraste con Manhattan)</span>
+          <span class="bg-warnSoft text-warn text-xs px-2 py-1 rounded font-semibold">07 Tromborg 2023 (Altinget usa Manhattan)</span>
+        </div>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <div class="flex items-baseline gap-3 mb-2">
+          <span class="text-lg font-bold text-scholar">Seccion nueva sugerida - Etica</span>
+        </div>
+        <div class="text-sm text-text mb-2">Framework EGTAI aplicado a matchVote.</div>
+        <div class="flex flex-wrap gap-2">
+          <span class="bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">04 Stockinger 2024 (CITA CLAVE)</span>
+          <span class="bg-scholarSoft text-scholar text-xs px-2 py-1 rounded font-semibold">02 Velez 2025 (LLM vs determinista)</span>
+        </div>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <div class="flex items-baseline gap-3 mb-2">
+          <span class="text-lg font-bold text-scholar">Seccion 6 - Conclusiones + trabajo futuro</span>
+        </div>
+        <div class="text-sm text-text mb-2">Validacion empirica propuesta + extensiones.</div>
+        <div class="flex flex-wrap gap-2">
+          <span class="bg-scholarSoft text-scholar text-xs px-2 py-1 rounded font-semibold">07 Tromborg 2023 (within-subject design)</span>
+          <span class="bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">08 Bachmann 2026 (CRA para incompletos)</span>
+          <span class="bg-scholarSoft text-scholar text-xs px-2 py-1 rounded font-semibold">03 Buryakov 2024 (BERT para statements)</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-slate-950 text-slate-400 border-t border-border">
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+      <div>
+        <div class="font-bold text-text hdr-serif text-lg">Cross-reference matchVote x Bibliografia</div>
+        <div class="text-sm text-textMuted mt-1">Generado a partir de <code>documentacion_narrativa.md</code> y los 8 MDs de <code>Bibliografia/</code>.</div>
+      </div>
+      <div class="text-xs text-textMuted max-w-md">
+        <p><strong class="text-warn">Advertencia honesta</strong>: las interpretaciones "esto respalda X" son lectura del generador. Antes de citar en la tesis, verifica cada afirmacion contra el paper original.</p>
+      </div>
+    </div>
+    <div class="border-t border-border mt-6 pt-4 text-xs text-textDim flex justify-between items-center">
+      <span>Tesis Jenny - matchVote - 2026</span>
+      <span>WCAG 2.2 AA - Modo oscuro - Perrito</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Toggle de tema: dark por default, respeta preferencia guardada del usuario
+  (function() {
+    const html = document.documentElement;
+    const btn = document.getElementById('themeToggle');
+    const icon = document.getElementById('themeIcon');
+
+    const saved = localStorage.getItem('theme');
+    if (saved === 'light') {
+      html.classList.remove('dark');
+      icon.textContent = 'Claro';
+    } else {
+      html.classList.add('dark');
+      icon.textContent = 'Oscuro';
+    }
+
+    btn.addEventListener('click', function() {
+      html.classList.toggle('dark');
+      const isDark = html.classList.contains('dark');
+      icon.textContent = isDark ? 'Oscuro' : 'Claro';
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+  })();
+
+  console.log('Cross-ref matchVote x Bibliografia cargado - modo oscuro por default - Perrito');
+</script>
+
+</body>
+</html>
