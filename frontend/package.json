@@ -40,7 +40,12 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "catalog:generate": "node scripts/generate-catalog.js",
+    "catalog:generate:strict": "node scripts/generate-catalog.js --strict",
+    "catalog:verify-props": "node scripts/verify-props.js",
+    "catalog:check": "node scripts/generate-catalog.js --strict && node scripts/verify-props.js",
+    "test:catalog": "jest --testPathPattern=\"(catalog-completeness|props-diff)\""
   },
   "private": true
 }
