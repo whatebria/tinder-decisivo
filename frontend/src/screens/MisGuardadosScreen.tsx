@@ -37,6 +37,7 @@ import {
   BookmarkButton,
   Button,
   Chip,
+  CoachMarkTour,
   EmptyState,
   ScreenTopBar,
   Spinner,
@@ -373,6 +374,7 @@ export function MisGuardadosScreen({
   })();
 
   return (
+    <>
     <AppShell active={null} navigation={navigation}>
       <ScreenTopBar
         title="Mis guardados"
@@ -421,5 +423,8 @@ export function MisGuardadosScreen({
         {currentBody}
       </ScrollView>
     </AppShell>
+
+      <CoachMarkTour tourId="guardados" />
+    </>
   );
 }

@@ -43,6 +43,12 @@ export function AppNavigator() {
   const showMainStack = isAuthenticated || isGuest;
   const showOnboarding = !hasSeenOnboarding && !showMainStack;
 
+  // Consume la intención "quiero registrarme" que el OnboardingScreen setea
+  // antes de terminar. Al mostrar el auth stack, arrancamos en la screen que
+  // el usuario eligió. Cae a `undefined` (=> initialRouteName default = Login)
+  // cuando no hay intención explícita o venimos de un logout normal.
+  const authInitialRoute = useOnboardingStore((s) => s.pendingAuthTarget);
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {showOnboarding ? (
@@ -69,9 +75,21 @@ export function AppNavigator() {
           ) : null}
         </>
       ) : (
-        <>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Group
+          navigationKey={authInitialRoute ?? "default"}
+          screenOptions={{}}
+        >
+          {authInitialRoute === "Register" ? (
+            <>
+              <Stack.Screen name="Register" component={RegisterScreen} />
+              <Stack.Screen name="Login" component={LoginScreen} />
+            </>
+          ) : (
+            <>
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen name="Register" component={RegisterScreen} />
+            </>
+          )}
           <Stack.Screen
             name="PasswordResetRequest"
             component={PasswordResetRequestScreen}
@@ -80,7 +98,7 @@ export function AppNavigator() {
             name="PasswordResetConfirm"
             component={PasswordResetConfirmScreen}
           />
-        </>
+        </Stack.Group>
       )}
     </Stack.Navigator>
   );

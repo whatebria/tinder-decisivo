@@ -60,6 +60,7 @@ import {
   ShareModal,
   Spinner,
   Tabs,
+  CoachMarkTour,
   useToast,
   type NoticiaDetail,
 } from "../components";
@@ -161,6 +162,7 @@ export function DetalleCandidatoScreen({
   const shareText = buildShareText(candidato, matchPct);
 
   return (
+    <>
     <ScreenChrome>
       <ScrollView contentContainerStyle={styles.scroll}>
         <ScreenTopBar
@@ -265,6 +267,9 @@ export function DetalleCandidatoScreen({
         </Text>
       </Modal>
     </ScreenChrome>
+
+      <CoachMarkTour tourId="perfilCandidato" />
+    </>
   );
 }
 

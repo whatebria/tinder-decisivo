@@ -32,6 +32,7 @@ import {
   Button,
   Chip,
   ChipActivo,
+  CoachMarkTour,
   CollapsibleFilterSection,
   EmptyState,
   HomeTopBar,
@@ -200,6 +201,7 @@ export function NoticiasScreen({
     : `${totalNoticias} resultado${totalNoticias === 1 ? "" : "s"}`;
 
   return (
+    <>
     <AppShell active="noticias" navigation={navigation}>
       <View style={[styles.container, { backgroundColor: c.bg }]}>
         <HomeTopBar brand="Noticias" style={styles.topBar} />
@@ -353,6 +355,9 @@ export function NoticiasScreen({
         bookmarkLoading={toggleBookmark.isPending}
       />
     </AppShell>
+
+      <CoachMarkTour tourId="noticias" />
+    </>
   );
 }
 

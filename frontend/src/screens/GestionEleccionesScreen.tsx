@@ -10,7 +10,7 @@ import React, { useMemo } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useTiposEleccion } from "../api/hooks";
-import { AppShell, Icon, ScreenTopBar, Spinner, Toggle } from "../components";
+import { AppShell, CoachMarkTour, Icon, ScreenTopBar, Spinner, Toggle } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import {
   partitionTipos,
@@ -144,6 +144,7 @@ export function GestionEleccionesScreen({
   }
 
   return (
+    <>
     <AppShell active="home" navigation={navigation}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
       {/* TopBar breadcrumb */}
@@ -220,5 +221,8 @@ export function GestionEleccionesScreen({
       </View>
     </ScrollView>
     </AppShell>
+
+      <CoachMarkTour tourId="gestionElecciones" />
+    </>
   );
 }
