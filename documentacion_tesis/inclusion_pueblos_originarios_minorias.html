@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inclusion de Pueblos Originarios y Minorias | matchVote - Tesis</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: { extend: {
+      colors: {
+        bg: '#0B1120', bgSoft: '#111827', bgCard: '#1E293B', bgHover: '#334155',
+        border: '#334155', borderSoft: '#1E293B',
+        text: '#E2E8F0', textMuted: '#94A3B8', textDim: '#64748B',
+        scholar: '#60A5FA', scholarSoft: '#1E3A8A',
+        accent: '#34D399', accentSoft: '#064E3B',
+        warn: '#FBBF24', warnSoft: '#78350F',
+        crit: '#F87171', critSoft: '#7F1D1D',
+        neutral: '#94A3B8'
+      }
+    }}
+  }
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  .hdr-serif { font-family: Georgia, Cambria, serif; }
+  .anchor-offset { scroll-margin-top: 5rem; }
+  .status-ok { background: #34D399; color: #0B1120; }
+  .status-partial { background: #FBBF24; color: #0B1120; }
+  .status-fail { background: #F87171; color: #0B1120; }
+  ::selection { background: #1E3A8A; color: #E2E8F0; }
+  .theme-toggle { background: transparent; border: 1px solid #334155; color: #E2E8F0; padding: 0.4rem 0.7rem; border-radius: 0.5rem; font-size: 0.8rem; cursor: pointer; }
+  .theme-toggle:hover { background: #1E293B; border-color: #60A5FA; }
+  .quote-block { border-left: 4px solid #60A5FA; background: #1E293B; padding: 1rem 1.5rem; font-style: italic; color: #E2E8F0; border-radius: 0 0.5rem 0.5rem 0; }
+  .chart-container { position: relative; height: 340px; }
+  .card-question { background: #1E293B; border: 1px solid #334155; border-radius: 0.5rem; padding: 1.25rem; }
+  .card-question .label { font-size: 0.75rem; color: #60A5FA; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+  .card-question .question-text { color: #E2E8F0; font-weight: 500; margin-bottom: 0.75rem; font-size: 0.95rem; line-height: 1.4; }
+  .card-question .likert { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.25rem; margin-bottom: 0.5rem; }
+  .card-question .likert-opt { text-align: center; padding: 0.25rem; background: #0F172A; border-radius: 0.25rem; font-size: 0.65rem; color: #94A3B8; }
+  .group-card { transition: transform 0.15s; }
+  .group-card:hover { transform: translateY(-2px); }
+  html:not(.dark) body { background: #F8FAFC; color: #0F172A; }
+  html:not(.dark) .bg-bg { background: #F8FAFC; }
+  html:not(.dark) .bg-bgSoft { background: #FFFFFF; }
+  html:not(.dark) .bg-bgCard { background: #FFFFFF; }
+  html:not(.dark) .bg-bgHover { background: #F1F5F9; }
+  html:not(.dark) .text-text { color: #0F172A; }
+  html:not(.dark) .text-textMuted { color: #475569; }
+  html:not(.dark) .text-textDim { color: #64748B; }
+  html:not(.dark) .border-border { border-color: #E2E8F0; }
+  html:not(.dark) .text-scholar { color: #1E40AF; }
+  html:not(.dark) .bg-scholarSoft { background: #DBEAFE; }
+  html:not(.dark) .text-accent { color: #059669; }
+  html:not(.dark) .bg-accentSoft { background: #D1FAE5; }
+  html:not(.dark) .text-warn { color: #B45309; }
+  html:not(.dark) .bg-warnSoft { background: #FEF3C7; }
+  html:not(.dark) .text-crit { color: #B91C1C; }
+  html:not(.dark) .bg-critSoft { background: #FEE2E2; }
+  html:not(.dark) .quote-block { background: #F1F5F9; color: #0F172A; border-left-color: #1E40AF; }
+  html:not(.dark) .card-question { background: #FFFFFF; border-color: #CBD5E1; }
+  html:not(.dark) .card-question .question-text { color: #0F172A; }
+  html:not(.dark) .card-question .likert-opt { background: #F1F5F9; color: #475569; }
+</style>
+</head>
+<body class="bg-bg text-text">
+
+<nav class="sticky top-0 z-40 bg-bgSoft/95 backdrop-blur border-b border-border shadow-lg">
+  <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <a href="gap2_framework_etico_egtai_v2.html" class="text-textMuted hover:text-scholar text-sm">&larr;</a>
+      <span class="text-scholar font-bold text-lg hdr-serif">Pueblos Originarios + Minorias</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="hidden md:flex items-center gap-1 text-sm">
+        <a href="#panorama" class="px-3 py-1.5 rounded hover:bg-bgHover">Panorama</a>
+        <a href="#legal" class="px-3 py-1.5 rounded hover:bg-bgHover">Marco legal</a>
+        <a href="#grupos" class="px-3 py-1.5 rounded hover:bg-bgHover">Grupos</a>
+        <a href="#estrategias" class="px-3 py-1.5 rounded hover:bg-bgHover">Estrategias</a>
+        <a href="#preguntas" class="px-3 py-1.5 rounded hover:bg-bgHover">Preguntas</a>
+        <a href="#roadmap" class="px-3 py-1.5 rounded hover:bg-bgHover">Roadmap</a>
+      </div>
+      <button id="themeToggle" class="theme-toggle" aria-label="Cambiar tema">
+        <span id="themeIcon">Oscuro</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<header class="bg-gradient-to-br from-slate-900 via-purple-950 to-emerald-950 border-b border-border">
+  <div class="max-w-7xl mx-auto px-6 py-16">
+    <div class="mb-4 flex items-center gap-2 flex-wrap">
+      <span class="bg-accentSoft text-accent text-xs px-2 py-1 rounded uppercase tracking-wider font-semibold">R5 EGTAI - Diversity</span>
+      <span class="bg-scholarSoft text-scholar text-xs px-2 py-1 rounded font-semibold">Plan de inclusion concreto</span>
+    </div>
+    <h1 class="text-4xl md:text-5xl font-bold hdr-serif mb-4 leading-tight text-white">Incluir a quienes casi ningun VAA incluye</h1>
+    <p class="text-lg text-slate-300 max-w-3xl mb-6">R5 (Diversity, non-discrimination, fairness) es donde matchVote tiene el gap mas grande frente al ideal EGTAI. Este documento propone un plan concreto para incluir <strong class="text-accent">pueblos originarios y minorias</strong> en el diseno de matchVote: marco legal chileno, grupos a considerar, 5 estrategias, 5 preguntas nuevas propuestas y un roadmap con lo que se puede hoy vs lo que requiere consulta real con stakeholders.</p>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+      <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-4">
+        <div class="text-3xl font-bold text-warn">45%</div>
+        <div class="text-sm text-slate-400">R5 score actual</div>
+      </div>
+      <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-4">
+        <div class="text-3xl font-bold text-accent">10</div>
+        <div class="text-sm text-slate-400">pueblos originarios en Chile</div>
+      </div>
+      <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-4">
+        <div class="text-3xl font-bold text-accent">5</div>
+        <div class="text-sm text-slate-400">preguntas propuestas</div>
+      </div>
+      <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-4">
+        <div class="text-3xl font-bold text-scholar">6</div>
+        <div class="text-sm text-slate-400">stakeholders a consultar</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="panorama" class="anchor-offset max-w-7xl mx-auto px-6 py-12">
+  <h2 class="text-3xl font-bold hdr-serif text-scholar mb-4">Panorama actual: donde estamos</h2>
+
+  <div class="grid md:grid-cols-2 gap-6 mb-6">
+    <div class="bg-bgCard border-l-4 border-warn rounded-r-lg p-6">
+      <h3 class="font-bold text-lg mb-3 text-warn">Gaps R5 identificados en la auditoria EGTAI</h3>
+      <ul class="text-sm text-text space-y-2">
+        <li>&bull; <strong>R5.1 Evaluacion de bias</strong>: sin analisis del algoritmo cuadratico. <span class="status-fail text-xs px-2 py-0.5 rounded">No cumple</span></li>
+        <li>&bull; <strong>R5.2 Stakeholder diversity</strong>: diseno solo por Jenifer. <span class="status-fail text-xs px-2 py-0.5 rounded">No cumple</span></li>
+        <li>&bull; <strong>R5.3 Cobertura de minorias</strong>: 7 ejes (ECO, SOC, AMB, SEG, DDH, INT, INSTITUC) sin eje explicito para pueblos originarios ni discapacidad. <span class="status-partial text-xs px-2 py-0.5 rounded">Parcial</span></li>
+        <li>&bull; <strong>R5.4 Consulta con expertos externos</strong>: falta comite asesor. <span class="status-fail text-xs px-2 py-0.5 rounded">No cumple</span></li>
+        <li>&bull; <strong>R5.11 Multi-idioma</strong>: solo español hoy; Mapuzugun+Aymara en roadmap v1.0. <span class="status-partial text-xs px-2 py-0.5 rounded">Parcial</span></li>
+      </ul>
+    </div>
+
+    <div class="bg-bgCard border-l-4 border-accent rounded-r-lg p-6">
+      <h3 class="font-bold text-lg mb-3 text-accent">Lo que SI existe hoy y ayuda</h3>
+      <ul class="text-sm text-text space-y-2">
+        <li>&bull; <strong>Eje DDH</strong> (Derechos Humanos) - puede alojar preguntas sobre minorias sin reestructurar.</li>
+        <li>&bull; <strong>Filtro territorial</strong> polimorfico - permitiria filtrar candidatos por presencia en territorios indigenas.</li>
+        <li>&bull; <strong>Modal educativo con 5 dimensiones</strong> - agregar dimension "cultural / identidad" es incremental.</li>
+        <li>&bull; <strong>Accesibilidad WCAG 2.2 AA</strong> ya documentada - cubre parte de la inclusion de personas con discapacidad.</li>
+        <li>&bull; <strong>Guest mode</strong> baja la barrera para votantes que no confian en registrarse.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="bg-bgCard border-l-4 border-scholar rounded-r-lg p-6">
+    <p class="text-sm text-text"><strong class="text-scholar">Insight</strong>: no hace falta reestructurar la app para incluir minorias. La infraestructura existe. Lo que falta es <strong>contenido especifico</strong> (preguntas, contexto educativo, traducciones) y <strong>consulta con quienes viven las realidades</strong> que se representan.</p>
+  </div>
+</section>
+
+<section id="legal" class="anchor-offset bg-bgSoft border-y border-border">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <h2 class="text-3xl font-bold hdr-serif text-scholar mb-2">Marco legal chileno relevante</h2>
+    <p class="text-textMuted mb-8">Base legal que legitima el foco en pueblos originarios y minorias. Citas utiles para el capitulo de marco teorico de la tesis.</p>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <div class="text-xs text-scholar font-semibold mb-1">1993</div>
+        <h3 class="font-bold text-text mb-2">Ley 19.253 - Ley Indigena</h3>
+        <p class="text-sm text-textMuted">Reconoce a los pueblos indigenas de Chile y crea CONADI. Establece los pueblos originarios oficialmente reconocidos y protege sus tierras, cultura y lenguas.</p>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <div class="text-xs text-scholar font-semibold mb-1">2008 (Chile)</div>
+        <h3 class="font-bold text-text mb-2">Convenio 169 OIT</h3>
+        <p class="text-sm text-textMuted">Chile ratifica en 2008. Obliga a consulta previa, libre e informada ante medidas que afecten a pueblos indigenas. Marco de derecho internacional aplicable.</p>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <div class="text-xs text-scholar font-semibold mb-1">2012</div>
+        <h3 class="font-bold text-text mb-2">Ley 20.609 - Ley Zamudio</h3>
+        <p class="text-sm text-textMuted">Antidiscriminacion. Prohibe discriminacion arbitraria por raza, sexo, orientacion sexual, identidad de genero, religion, discapacidad, entre otros.</p>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <div class="text-xs text-scholar font-semibold mb-1">2017</div>
+        <h3 class="font-bold text-text mb-2">Ley 21.015 - Inclusion Laboral</h3>
+        <p class="text-sm text-textMuted">Empresas con 100+ empleados deben tener al menos 1% de personas con discapacidad. Base concreta para preguntas Likert sobre este tema.</p>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <div class="text-xs text-scholar font-semibold mb-1">2019</div>
+        <h3 class="font-bold text-text mb-2">Ley 21.151 - Pueblo Tribal Afrodescendiente</h3>
+        <p class="text-sm text-textMuted">Reconoce al pueblo tribal afrodescendiente chileno. Especialmente relevante en Arica y Parinacota. Historicamente invisibilizado.</p>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-5">
+        <div class="text-xs text-scholar font-semibold mb-1">2021</div>
+        <h3 class="font-bold text-text mb-2">Ley 21.325 - Ley de Migraciones</h3>
+        <p class="text-sm text-textMuted">Regula el ingreso y permanencia. Marco legal para preguntas sobre derechos de migrantes con residencia regular.</p>
+      </div>
+    </div>
+
+    <div class="mt-6 bg-bgCard border-l-4 border-warn rounded-r-lg p-6">
+      <h3 class="font-bold text-lg mb-2 text-warn">Nota constitucional</h3>
+      <p class="text-sm text-text">Chile <strong>no</strong> reconoce constitucionalmente a los pueblos originarios ni al Estado como plurinacional. Los procesos constituyentes 2022 y 2023 fracasaron. El tema sigue abierto y es <strong>eje real de division politica</strong> - por eso es candidato natural a pregunta en una VAA.</p>
+    </div>
+  </div>
+</section>
+
+<section id="grupos" class="anchor-offset max-w-7xl mx-auto px-6 py-12">
+  <h2 class="text-3xl font-bold hdr-serif text-scholar mb-2">Grupos a considerar en Chile</h2>
+  <p class="text-textMuted mb-8">Segun Censo 2017 y datos SENADIS/INE. Cifras aproximadas. No todos requieren pregunta dedicada - algunos entran por eje transversal.</p>
+
+  <div class="grid md:grid-cols-3 gap-4">
+    <div class="group-card bg-bgCard border-l-4 border-accent rounded-r-lg p-5">
+      <h3 class="font-bold text-text mb-1">Pueblos originarios</h3>
+      <div class="text-2xl font-bold text-accent mb-1">12.8%</div>
+      <p class="text-xs text-textDim mb-2">~2.1M personas</p>
+      <p class="text-sm text-textMuted">10 pueblos reconocidos: Mapuche (~1.7M), Aymara, Rapa Nui, Atacameño (Likan Antai), Quechua, Colla, Diaguita, Kaweskar, Yagan, Chango.</p>
+    </div>
+
+    <div class="group-card bg-bgCard border-l-4 border-accent rounded-r-lg p-5">
+      <h3 class="font-bold text-text mb-1">Personas con discapacidad</h3>
+      <div class="text-2xl font-bold text-accent mb-1">17.6%</div>
+      <p class="text-xs text-textDim mb-2">~2.8M personas (ENDISC 2015)</p>
+      <p class="text-sm text-textMuted">Discapacidad severa: 8.3%. Grupo mas grande pero historicamente subrepresentado politicamente.</p>
+    </div>
+
+    <div class="group-card bg-bgCard border-l-4 border-accent rounded-r-lg p-5">
+      <h3 class="font-bold text-text mb-1">Migrantes</h3>
+      <div class="text-2xl font-bold text-accent mb-1">8.8%</div>
+      <p class="text-xs text-textDim mb-2">~1.6M personas (INE 2022)</p>
+      <p class="text-sm text-textMuted">Principales origenes: Venezuela, Peru, Haiti, Colombia, Bolivia. Los con residencia definitiva pueden votar en municipales.</p>
+    </div>
+
+    <div class="group-card bg-bgCard border-l-4 border-accent rounded-r-lg p-5">
+      <h3 class="font-bold text-text mb-1">Comunidad LGBTIQ+</h3>
+      <div class="text-2xl font-bold text-accent mb-1">~8%</div>
+      <p class="text-xs text-textDim mb-2">Estimacion (no hay dato oficial)</p>
+      <p class="text-sm text-textMuted">Avances: matrimonio igualitario 2022, ley identidad de genero 2019. Debate abierto sobre educacion sexual y derechos NNA.</p>
+    </div>
+
+    <div class="group-card bg-bgCard border-l-4 border-accent rounded-r-lg p-5">
+      <h3 class="font-bold text-text mb-1">Afrodescendientes</h3>
+      <div class="text-2xl font-bold text-accent mb-1">~0.5%</div>
+      <p class="text-xs text-textDim mb-2">Concentrado Arica-Parinacota</p>
+      <p class="text-sm text-textMuted">Reconocidos legalmente en 2019. Comunidad pequena pero historicamente invisibilizada. Requiere reconocimiento explicito.</p>
+    </div>
+
+    <div class="group-card bg-bgCard border-l-4 border-accent rounded-r-lg p-5">
+      <h3 class="font-bold text-text mb-1">Mujeres en politica</h3>
+      <div class="text-2xl font-bold text-accent mb-1">51%</div>
+      <p class="text-xs text-textDim mb-2">Poblacion, pero subrepresentadas</p>
+      <p class="text-sm text-textMuted">No es minoria demografica pero SI politica. Ley de cuotas 2015. Debate abierto sobre paridad efectiva.</p>
+    </div>
+  </div>
+</section>
+
+<section id="estrategias" class="anchor-offset bg-bgSoft border-y border-border">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <h2 class="text-3xl font-bold hdr-serif text-scholar mb-2">5 estrategias concretas</h2>
+    <p class="text-textMuted mb-8">Ordenadas de menor a mayor esfuerzo. Las primeras 3 se pueden ejecutar antes de defender la tesis.</p>
+
+    <div class="space-y-4">
+
+      <div class="bg-bgCard border border-border rounded-lg p-6">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="bg-accent text-slate-900 font-bold w-8 h-8 rounded-full flex items-center justify-center text-sm">1</span>
+          <h3 class="text-xl font-bold text-text">Preguntas dedicadas en ejes existentes</h3>
+          <span class="ml-auto bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">1 semana</span>
+        </div>
+        <p class="text-sm text-textMuted mb-3">No agregar un 8vo eje "Minorias" - eso diluye el analisis y las guettea. Mejor: <strong>5 preguntas nuevas repartidas en DDH, SOC e INSTITUC</strong>. Ver seccion "Preguntas propuestas" abajo.</p>
+        <div class="text-xs text-scholar">Impacto: R5.3 pasa de Parcial a <strong>Cumple</strong>. R5.11 sin cambio.</div>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-6">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="bg-accent text-slate-900 font-bold w-8 h-8 rounded-full flex items-center justify-center text-sm">2</span>
+          <h3 class="text-xl font-bold text-text">Modal educativo enriquecido</h3>
+          <span class="ml-auto bg-accentSoft text-accent text-xs px-2 py-1 rounded font-semibold">2-3 dias</span>
+        </div>
+        <p class="text-sm text-textMuted mb-3">El modal actual tiene 5 dimensiones (economico, social, cultural, ambiental, institucional). <strong>Agregar 6ta dimension "identidad y minorias"</strong> - o expandir "cultural" para incluir explicitamente esto. Cada pregunta nueva de minorias trae contexto en esta dimension.</p>
+        <div class="text-xs text-scholar">Impacto: R6.6 se refuerza. Mejora explicabilidad para votantes no familiarizados con temas de minorias.</div>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-6">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="bg-warn text-slate-900 font-bold w-8 h-8 rounded-full flex items-center justify-center text-sm">3</span>
+          <h3 class="text-xl font-bold text-text">Consulta con stakeholders</h3>
+          <span class="ml-auto bg-warnSoft text-warn text-xs px-2 py-1 rounded font-semibold">3-4 semanas</span>
+        </div>
+        <p class="text-sm text-textMuted mb-3">Workshop de 60 min con representantes de organizaciones. Objetivo: validar las 5 preguntas propuestas + detectar puntos ciegos. <strong>Documenta cumplimiento de R5.2 y R5.4</strong>.</p>
+        <div class="grid md:grid-cols-2 gap-3 mt-3">
+          <ul class="text-sm text-textMuted space-y-1">
+            <li>&bull; <strong>CONADI</strong> - pueblos originarios</li>
+            <li>&bull; <strong>INDH</strong> - derechos humanos</li>
+            <li>&bull; <strong>Fundacion Descubreme</strong> - discapacidad</li>
+          </ul>
+          <ul class="text-sm text-textMuted space-y-1">
+            <li>&bull; <strong>MOVILH / Iguales</strong> - LGBTIQ+</li>
+            <li>&bull; <strong>SJM (Servicio Jesuita a Migrantes)</strong> - migrantes</li>
+            <li>&bull; <strong>Red por Definicion Legal Afro</strong> - afrodescendientes</li>
+          </ul>
+        </div>
+        <div class="text-xs text-scholar mt-3">Impacto: R5.2 y R5.4 pasan de No cumple a <strong>Parcial/Cumple</strong>.</div>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-6">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="bg-warn text-slate-900 font-bold w-8 h-8 rounded-full flex items-center justify-center text-sm">4</span>
+          <h3 class="text-xl font-bold text-text">Mapuzugun + Aymara adelantado</h3>
+          <span class="ml-auto bg-warnSoft text-warn text-xs px-2 py-1 rounded font-semibold">6-8 semanas</span>
+        </div>
+        <p class="text-sm text-textMuted mb-3">Ya estan en roadmap v1.0. <strong>Adelantar a v0.3</strong> con foco solo en las 12 preguntas presidenciales + resultados. Requiere traduccion profesional (CONADI puede referir). Alternativa low-cost: piloto con 4 preguntas clave subtituladas en video.</p>
+        <div class="text-xs text-scholar">Impacto: R5.11 pasa de Parcial a <strong>Cumple parcial fuerte</strong>. Diferencial narrativo enorme.</div>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg p-6">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="bg-crit text-slate-900 font-bold w-8 h-8 rounded-full flex items-center justify-center text-sm">5</span>
+          <h3 class="text-xl font-bold text-text">Mapa de representatividad opcional</h3>
+          <span class="ml-auto bg-critSoft text-crit text-xs px-2 py-1 rounded font-semibold">Post-tesis</span>
+        </div>
+        <p class="text-sm text-textMuted mb-3">Pantalla nueva: "Como se representan tus temas en el Congreso actual". Muestra: cuantos escanos hay reservados a pueblos originarios (hoy 0 permanentes), cuantas mujeres, cuantas personas con discapacidad, distribucion por comuna. Requiere data externa (INE, Servicio Electoral, SENADIS).</p>
+        <div class="text-xs text-scholar">Impacto: no mueve score EGTAI pero es aporte propio fuerte para la tesis (aporte a la democracia).</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="preguntas" class="anchor-offset max-w-7xl mx-auto px-6 py-12">
+  <h2 class="text-3xl font-bold hdr-serif text-scholar mb-2">5 preguntas propuestas (borrador)</h2>
+  <p class="text-textMuted mb-8">Todas en formato Likert 5 con opcion "no se". Escritas para ser <strong>concretas, medibles y polemicas</strong> (una pregunta que todos responden igual no discrimina candidatos). Requieren validacion con stakeholders antes de publicar.</p>
+
+  <div class="grid md:grid-cols-2 gap-4">
+    <div class="card-question">
+      <div class="label">Pregunta 1 / eje DDH / autonomia indigena</div>
+      <div class="question-text">Los pueblos originarios deben tener representacion garantizada en el Congreso mediante escaños reservados.</div>
+      <div class="likert">
+        <div class="likert-opt">Muy en desacuerdo</div>
+        <div class="likert-opt">En desacuerdo</div>
+        <div class="likert-opt">Neutral</div>
+        <div class="likert-opt">De acuerdo</div>
+        <div class="likert-opt">Muy de acuerdo</div>
+      </div>
+      <div class="text-xs text-textDim mt-2"><strong class="text-scholar">Racional</strong>: Convencion Constitucional 2021-2022 tuvo 17 escaños reservados. Hoy no hay. Debate abierto y polarizante.</div>
+    </div>
+
+    <div class="card-question">
+      <div class="label">Pregunta 2 / eje INSTITUC / plurinacionalidad</div>
+      <div class="question-text">El Estado debe reconocer constitucionalmente a Chile como plurinacional e intercultural.</div>
+      <div class="likert">
+        <div class="likert-opt">Muy en desacuerdo</div>
+        <div class="likert-opt">En desacuerdo</div>
+        <div class="likert-opt">Neutral</div>
+        <div class="likert-opt">De acuerdo</div>
+        <div class="likert-opt">Muy de acuerdo</div>
+      </div>
+      <div class="text-xs text-textDim mt-2"><strong class="text-scholar">Racional</strong>: fue tema central en proyecto constitucional 2022 (rechazado). Sigue en debate.</div>
+    </div>
+
+    <div class="card-question">
+      <div class="label">Pregunta 3 / eje SOC / inclusion laboral</div>
+      <div class="question-text">Las empresas de mas de 100 empleados deben tener al menos 5% de personas con discapacidad en su plantilla (hoy la ley exige 1%).</div>
+      <div class="likert">
+        <div class="likert-opt">Muy en desacuerdo</div>
+        <div class="likert-opt">En desacuerdo</div>
+        <div class="likert-opt">Neutral</div>
+        <div class="likert-opt">De acuerdo</div>
+        <div class="likert-opt">Muy de acuerdo</div>
+      </div>
+      <div class="text-xs text-textDim mt-2"><strong class="text-scholar">Racional</strong>: Ley 21.015 base concreta. Pregunta especifica sobre expandir. Poblacion afectada: 17.6% del pais.</div>
+    </div>
+
+    <div class="card-question">
+      <div class="label">Pregunta 4 / eje SOC / educacion intercultural</div>
+      <div class="question-text">El Estado debe garantizar educacion intercultural bilingue en zonas con presencia significativa de pueblos originarios.</div>
+      <div class="likert">
+        <div class="likert-opt">Muy en desacuerdo</div>
+        <div class="likert-opt">En desacuerdo</div>
+        <div class="likert-opt">Neutral</div>
+        <div class="likert-opt">De acuerdo</div>
+        <div class="likert-opt">Muy de acuerdo</div>
+      </div>
+      <div class="text-xs text-textDim mt-2"><strong class="text-scholar">Racional</strong>: Convenio 169 OIT obliga. Cumplimiento actual desigual. Politica educativa concreta.</div>
+    </div>
+
+    <div class="card-question">
+      <div class="label">Pregunta 5 / eje DDH / migrantes</div>
+      <div class="question-text">Los migrantes con residencia regular deben tener acceso pleno a salud publica y educacion en igualdad de condiciones con los chilenos.</div>
+      <div class="likert">
+        <div class="likert-opt">Muy en desacuerdo</div>
+        <div class="likert-opt">En desacuerdo</div>
+        <div class="likert-opt">Neutral</div>
+        <div class="likert-opt">De acuerdo</div>
+        <div class="likert-opt">Muy de acuerdo</div>
+      </div>
+      <div class="text-xs text-textDim mt-2"><strong class="text-scholar">Racional</strong>: Ley 21.325 marco. Discriminacion real documentada en salud. Tema polarizante 2024-2025.</div>
+    </div>
+
+    <div class="card-question border-l-4 border-warn">
+      <div class="label" style="color: #FBBF24;">Bonus opcional / eje SOC / genero</div>
+      <div class="question-text">Los espacios de decision publica (Congreso, alcaldias, directorios) deben tener paridad de genero obligatoria por ley.</div>
+      <div class="likert">
+        <div class="likert-opt">Muy en desacuerdo</div>
+        <div class="likert-opt">En desacuerdo</div>
+        <div class="likert-opt">Neutral</div>
+        <div class="likert-opt">De acuerdo</div>
+        <div class="likert-opt">Muy de acuerdo</div>
+      </div>
+      <div class="text-xs text-textDim mt-2"><strong class="text-warn">Nota</strong>: la Convencion 2021 fue paritaria por ley. Hoy la ley de cuotas exige 40/60 pero no paridad. Si se agrega, hay que revisar si desbalancea el conteo por eje.</div>
+    </div>
+  </div>
+
+  <div class="mt-8 bg-bgCard border-l-4 border-warn rounded-r-lg p-6">
+    <h3 class="font-bold text-lg mb-2 text-warn">Consideracion importante sobre balance</h3>
+    <p class="text-sm text-text">Si se agregan estas 5 preguntas, el cuestionario pasa de 12 a 17. Puede sentirse largo. Alternativas:</p>
+    <ul class="text-sm text-textMuted mt-2 space-y-1">
+      <li>&bull; <strong>Reemplazar</strong> 5 preguntas actuales por estas 5 nuevas (mantener 12 totales) - requiere elegir cuales sacar.</li>
+      <li>&bull; <strong>Preguntas opcionales</strong>: cuestionario base de 12 + 5 opcionales "profundizar en inclusion" con toggle.</li>
+      <li>&bull; <strong>Segmento por interes</strong>: al inicio, preguntar "que temas te importan mas?" y personalizar el subset (pero esto puede sesgar el match).</li>
+    </ul>
+    <p class="text-sm text-textMuted mt-2">Mi recomendacion: <strong>opcion 2 (opcionales con toggle)</strong>. Mantiene el flow rapido para el usuario medio, permite profundizar a quien quiera, no obliga a nadie a responder temas que no le interesan.</p>
+  </div>
+</section>
+
+<section id="roadmap" class="anchor-offset bg-bgSoft border-y border-border">
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <h2 class="text-3xl font-bold hdr-serif text-scholar mb-2">Roadmap por horizonte</h2>
+    <p class="text-textMuted mb-8">Que se puede documentar para la tesis vs que requiere ejecucion real.</p>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-bgCard border border-border rounded-lg overflow-hidden">
+        <div class="bg-accent text-slate-900 px-4 py-2 font-bold">Pre-defensa (1-2 semanas)</div>
+        <div class="p-5 space-y-3">
+          <div>
+            <div class="text-sm font-semibold text-text">1. Capitulo tesis</div>
+            <p class="text-xs text-textMuted">Seccion "Consideraciones de inclusion" con las 5 preguntas propuestas, marco legal, grupos, estrategia. Documenta la <strong>intencion</strong> aunque no este implementado.</p>
+          </div>
+          <div>
+            <div class="text-sm font-semibold text-text">2. Contactar 2-3 stakeholders</div>
+            <p class="text-xs text-textMuted">Aunque sea consulta breve por email (CONADI + INDH + Descubreme). Documenta el intercambio.</p>
+          </div>
+          <div>
+            <div class="text-sm font-semibold text-text">3. Reforzar accesibilidad</div>
+            <p class="text-xs text-textMuted">Ejecutar el testing plan de <code>accesibilidad.md</code> con al menos 1 usuario de screen reader real.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg overflow-hidden">
+        <div class="bg-warn text-slate-900 px-4 py-2 font-bold">Sprint siguiente (1-2 meses)</div>
+        <div class="p-5 space-y-3">
+          <div>
+            <div class="text-sm font-semibold text-text">4. Workshop stakeholders</div>
+            <p class="text-xs text-textMuted">Sesion 60 min con las 6 organizaciones. Validar preguntas. Detectar puntos ciegos.</p>
+          </div>
+          <div>
+            <div class="text-sm font-semibold text-text">5. Implementar preguntas opcionales</div>
+            <p class="text-xs text-textMuted">Backend: nuevas preguntas + tag "inclusion". Frontend: toggle "profundizar en inclusion" en cuestionario.</p>
+          </div>
+          <div>
+            <div class="text-sm font-semibold text-text">6. Modal educativo 6ta dimension</div>
+            <p class="text-xs text-textMuted">Agregar "identidad y minorias" en el modal. Contenido curado con stakeholders.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-bgCard border border-border rounded-lg overflow-hidden">
+        <div class="bg-crit text-slate-900 px-4 py-2 font-bold">Post-lanzamiento (v1.0+)</div>
+        <div class="p-5 space-y-3">
+          <div>
+            <div class="text-sm font-semibold text-text">7. Traducciones Mapuzugun/Aymara</div>
+            <p class="text-xs text-textMuted">Traduccion profesional. Piloto con 4 preguntas + resultados. Grabaciones audio para lectoescritura oral.</p>
+          </div>
+          <div>
+            <div class="text-sm font-semibold text-text">8. Comite asesor formal</div>
+            <p class="text-xs text-textMuted">Politologo + CONADI + INDH + ONG discapacidad. Revision anual del contenido.</p>
+          </div>
+          <div>
+            <div class="text-sm font-semibold text-text">9. Mapa de representatividad</div>
+            <p class="text-xs text-textMuted">Pantalla opcional. Data del Servicio Electoral + SENADIS + INE. Aporte fuerte a la democracia.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 bg-bgCard border-l-4 border-accent rounded-r-lg p-6">
+      <h3 class="font-bold text-lg mb-2 text-accent">Impacto en R5 EGTAI proyectado</h3>
+      <p class="text-sm text-text">Ejecutando <strong>pre-defensa (items 1-3)</strong>: R5 sube de 45% a ~55% (documentacion mas 1 test de accesibilidad).</p>
+      <p class="text-sm text-text mt-2">Sumando <strong>sprint siguiente (items 4-6)</strong>: R5 sube a ~70% (preguntas nuevas + consulta stakeholders documentada).</p>
+      <p class="text-sm text-text mt-2">Sumando <strong>post-lanzamiento (items 7-9)</strong>: R5 llega a ~85% (multi-idioma real + comite formal + mapa).</p>
+    </div>
+  </div>
+</section>
+
+<section class="max-w-7xl mx-auto px-6 py-12">
+  <h2 class="text-3xl font-bold hdr-serif text-scholar mb-6">Mensaje para la tesis</h2>
+
+  <div class="quote-block text-lg mb-4">
+    "La inclusion de minorias en un VAA no es una decision estetica ni de compliance. Es una decision sobre <em>quien</em> es considerado un participante legitimo de la democracia representada por la app."
+  </div>
+  <p class="text-sm text-textMuted mb-8">Frase de cierre para el capitulo. Contextualiza que agregar estas preguntas no es "diversidad decorativa" - es reconocer que hay realidades politicas concretas que estaban invisibilizadas.</p>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="bg-bgCard border-l-4 border-accent rounded-r-lg p-6">
+      <h3 class="font-bold text-lg mb-3 text-accent">Diferencial vs los 7 VAAs europeos</h3>
+      <ul class="text-sm text-text space-y-2">
+        <li>&bull; Ninguno de los 7 aborda explicitamente pueblos originarios (los paises evaluados no tienen ese fenomeno con la escala de Chile).</li>
+        <li>&bull; Ninguno tiene preguntas dedicadas a discapacidad como grupo politico.</li>
+        <li>&bull; Solo Wahl-O-Mat toca migracion, pero desde perspectiva de politica de fronteras, no de derechos de migrantes ya presentes.</li>
+        <li>&bull; matchVote puede <strong>aportar un modelo</strong> aplicable a otros paises latinoamericanos con pueblos originarios (Bolivia, Peru, Ecuador, Colombia, Mexico).</li>
+      </ul>
+    </div>
+
+    <div class="bg-bgCard border-l-4 border-warn rounded-r-lg p-6">
+      <h3 class="font-bold text-lg mb-3 text-warn">Reconocer honestamente</h3>
+      <ul class="text-sm text-text space-y-2">
+        <li>&bull; No hay consulta previa con pueblos originarios en el diseno actual (violacion de espiritu del Convenio 169 si se pretendiera VAA oficial).</li>
+        <li>&bull; Las 5 preguntas propuestas requieren <strong>validacion</strong> con las comunidades antes de publicar.</li>
+        <li>&bull; El multi-idioma es un compromiso a mediano plazo, no algo listo.</li>
+        <li>&bull; El equipo de una sola persona es un limite estructural para R5.2 - se resuelve con contribuciones externas.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer class="bg-slate-950 text-slate-400 border-t border-border">
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+      <div>
+        <div class="font-bold text-text hdr-serif text-lg">Inclusion de Pueblos Originarios y Minorias</div>
+        <div class="text-sm text-textMuted mt-1">Plan concreto para R5 EGTAI - marco legal, grupos, 5 estrategias, 5 preguntas propuestas, roadmap.</div>
+      </div>
+    </div>
+    <div class="border-t border-border mt-6 pt-4 text-xs text-textDim flex justify-between items-center flex-wrap gap-2">
+      <a href="gap2_framework_etico_egtai_v2.html" class="text-scholar hover:underline">&larr; Volver al Gap #2 EGTAI</a>
+      <a href="analisis_robustez.html" class="text-scholar hover:underline">Ver analisis de robustez</a>
+      <span>Modo oscuro - Perrito</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function() {
+    const html = document.documentElement;
+    const btn = document.getElementById('themeToggle');
+    const icon = document.getElementById('themeIcon');
+    const saved = localStorage.getItem('theme');
+    if (saved === 'light') { html.classList.remove('dark'); icon.textContent = 'Claro'; }
+    btn.addEventListener('click', function() {
+      html.classList.toggle('dark');
+      const isDark = html.classList.contains('dark');
+      icon.textContent = isDark ? 'Oscuro' : 'Claro';
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+  })();
+  console.log('Pueblos originarios y minorias - Perrito');
+</script>
+
+</body>
+</html>
