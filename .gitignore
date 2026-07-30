@@ -92,3 +92,7 @@ yarn-error.log*
 # ============ OS ============
 Thumbs.db
 Desktop.ini
+
+# ============ Security (NUNCA pushear a repo publico) ============
+security-review/
+issues/
