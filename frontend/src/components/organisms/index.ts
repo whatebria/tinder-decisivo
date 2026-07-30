@@ -37,6 +37,7 @@ export { NovedadesFeed, type NovedadesFeedProps, type NovedadFeedItem } from "./
 // Nuevos (Fase 5 — Resultados wireframe)
 export { ResultadoHero, type ResultadoHeroProps } from "./ResultadoHero";
 export { RankingRow, type RankingRowProps } from "./RankingRow";
+export { RankingCard, type RankingCardProps } from "./RankingCard";
 
 // Nuevos (Fase 5 - BottomNav wireframe)
 export { BottomNav, type BottomNavProps, type BottomNavTab } from "./BottomNav";

@@ -83,13 +83,14 @@ import showcase_organisms_MatchExplanation_70 from "../../../components/organism
 import showcase_organisms_NovedadesFeed_71 from "../../../components/organisms/NovedadesFeed.showcase";
 import showcase_organisms_ProfileHero_72 from "../../../components/organisms/ProfileHero.showcase";
 import showcase_organisms_QuestionCard_73 from "../../../components/organisms/QuestionCard.showcase";
-import showcase_organisms_RankingRow_74 from "../../../components/organisms/RankingRow.showcase";
-import showcase_organisms_ResultadoHero_75 from "../../../components/organisms/ResultadoHero.showcase";
-import showcase_organisms_ShareOptions_76 from "../../../components/organisms/ShareOptions.showcase";
-import showcase_organisms_Sidebar_77 from "../../../components/organisms/Sidebar.showcase";
-import showcase_organisms_TopNav_78 from "../../../components/organisms/TopNav.showcase";
-import showcase_templates_AppShell_79 from "../../../components/templates/AppShell.showcase";
-import showcase_templates_ScreenChrome_80 from "../../../components/templates/ScreenChrome.showcase";
+import showcase_organisms_RankingCard_74 from "../../../components/organisms/RankingCard.showcase";
+import showcase_organisms_RankingRow_75 from "../../../components/organisms/RankingRow.showcase";
+import showcase_organisms_ResultadoHero_76 from "../../../components/organisms/ResultadoHero.showcase";
+import showcase_organisms_ShareOptions_77 from "../../../components/organisms/ShareOptions.showcase";
+import showcase_organisms_Sidebar_78 from "../../../components/organisms/Sidebar.showcase";
+import showcase_organisms_TopNav_79 from "../../../components/organisms/TopNav.showcase";
+import showcase_templates_AppShell_80 from "../../../components/templates/AppShell.showcase";
+import showcase_templates_ScreenChrome_81 from "../../../components/templates/ScreenChrome.showcase";
 
 export const generatedCatalog: CatalogEntry[] = [
   {
@@ -611,52 +612,59 @@ export const generatedCatalog: CatalogEntry[] = [
     ...showcase_organisms_QuestionCard_73,
   },
   {
+    name: "RankingCard",
+    category: "organisms",
+    path: "organisms/RankingCard",
+    sourcePath: "src/components/organisms/RankingCard.tsx",
+    ...showcase_organisms_RankingCard_74,
+  },
+  {
     name: "RankingRow",
     category: "organisms",
     path: "organisms/RankingRow",
     sourcePath: "src/components/organisms/RankingRow.tsx",
-    ...showcase_organisms_RankingRow_74,
+    ...showcase_organisms_RankingRow_75,
   },
   {
     name: "ResultadoHero",
     category: "organisms",
     path: "organisms/ResultadoHero",
     sourcePath: "src/components/organisms/ResultadoHero.tsx",
-    ...showcase_organisms_ResultadoHero_75,
+    ...showcase_organisms_ResultadoHero_76,
   },
   {
     name: "ShareOptions",
     category: "organisms",
     path: "organisms/ShareOptions",
     sourcePath: "src/components/organisms/ShareOptions.tsx",
-    ...showcase_organisms_ShareOptions_76,
+    ...showcase_organisms_ShareOptions_77,
   },
   {
     name: "Sidebar",
     category: "organisms",
     path: "organisms/Sidebar",
     sourcePath: "src/components/organisms/Sidebar.tsx",
-    ...showcase_organisms_Sidebar_77,
+    ...showcase_organisms_Sidebar_78,
   },
   {
     name: "TopNav",
     category: "organisms",
     path: "organisms/TopNav",
     sourcePath: "src/components/organisms/TopNav.tsx",
-    ...showcase_organisms_TopNav_78,
+    ...showcase_organisms_TopNav_79,
   },
   {
     name: "AppShell",
     category: "templates",
     path: "templates/AppShell",
     sourcePath: "src/components/templates/AppShell.tsx",
-    ...showcase_templates_AppShell_79,
+    ...showcase_templates_AppShell_80,
   },
   {
     name: "ScreenChrome",
     category: "templates",
     path: "templates/ScreenChrome",
     sourcePath: "src/components/templates/ScreenChrome.tsx",
-    ...showcase_templates_ScreenChrome_80,
+    ...showcase_templates_ScreenChrome_81,
   },
 ];

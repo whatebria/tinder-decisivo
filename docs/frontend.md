@@ -1144,8 +1144,9 @@ Piezas complejas que resuelven un caso de uso.
 * `NovedadesFeed` — feed vertical de `NovedadFeedItem[]`.
 
 **Resultados:**
-* `ResultadoHero` — hero con el top match, match% + confianza.
-* `RankingRow` — fila del ranking con posición + candidato + match%.
+* `ResultadoHero` — hero con el top match, match% + confianza + radar 180px con labels.
+* `RankingRow` — fila horizontal del ranking (posición + candidato + radar mini + match%). Contexto denso.
+* `RankingCard` — card vertical del ranking optimizada para grid 2-col (radar 140px con labels + %match grande + cobertura). Se usa en `ResultadosScreen` para dar visibilidad al breakdown por eje.
 
 ### 12.4. Templates (2 componentes)
 
@@ -1348,8 +1349,8 @@ Pantalla de celebración post-submit. Recibe param `mode`:
 
 Ranking de candidatos ordenados por match desc.
 
-* `ResultadoHero` con el top match.
-* Lista de `RankingRow` con paginación local.
+* `ResultadoHero` con el top match (radar 180px con labels).
+* Ranking en **grid responsive** de `RankingCard` (radar 140px con labels + %match + cobertura). Breakpoints: 1 col en <400px, 2 col en <720px, 3 col en <1000px, 4 col arriba. El grid usa `flexWrap` + `flexBasis` calculado con `useWindowDimensions().width`.
 * Botones favorito / descartar (usa `useToggleFavorito`, `useToggleDescartado`).
 * En guest, dispara `useMatchAnonimo` con respuestas del store.
 * En auth, consume `useMatchesQuery(tipoId)`.

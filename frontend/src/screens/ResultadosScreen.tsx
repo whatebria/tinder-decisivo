@@ -6,8 +6,9 @@
  *   1. ScreenTopBar (back + eleccion + "Tus resultados")
  *   2. Guest CTA (si corresponde) + shortcuts (descartados, decision)
  *   3. Filtro por partido (chips) - opcional
- *   4. ResultadoHero (top match)
- *   5. Ranking (RankingRow desde #2 en adelante) + BookmarkActions
+ *   4. ResultadoHero (top match) con radar grande + labels
+ *   5. Ranking en GRID (RankingCard desde #2 en adelante) con radar mediano.
+ *      Grid responsive: 1 columna en pantallas <400px, 2+ arriba.
  *   6. Footer: compartir, comparar, volver
  *
  * En modo auth:  POST /match-candidatos/ (persiste).
@@ -15,7 +16,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 
 import { getErrorMessage } from "../api/client";
 import { breakdownToChartData, type BreakdownPorEje } from "../api/endpoints";
@@ -38,7 +39,7 @@ import {
   Chip,
   CoachMarkTour,
   Link,
-  RankingRow,
+  RankingCard,
   ResultadoHero,
   ScreenTopBar,
   ShareModal,
@@ -72,6 +73,13 @@ export function ResultadosScreen({
   navigation,
 }: RootStackScreenProps<"Resultados">) {
   const c = useThemeColors();
+  const { width: screenWidth } = useWindowDimensions();
+  // Grid del ranking: 1 col en pantallas apretadas (iPhone SE-ish),
+  // 2 col en telefonos normales, 3 en tablets, 4 en desktop. Los
+  // breakpoints son intencionalmente conservadores (>=1000 recien tres
+  // columnas) porque cada card lleva un radar 140px + labels; con menos
+  // ancho la card se aprieta y el radar pierde legibilidad.
+  const rankingCols = screenWidth < 400 ? 1 : screenWidth < 720 ? 2 : screenWidth < 1000 ? 3 : 4;
   const isGuest = useAuthStore((s) => s.isGuest);
   const exitGuestMode = useAuthStore((s) => s.exitGuestMode);
   const perfilQ = usePerfil();
@@ -263,6 +271,11 @@ export function ResultadosScreen({
         },
         chipRow: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sp1 },
         rankList: { gap: spacing.sp2 },
+        rankGrid: {
+          flexDirection: "row",
+          flexWrap: "wrap",
+          gap: spacing.sp2,
+        },
         emptyText: {
           ...typography.small,
           color: c.textSecondary,
@@ -468,7 +481,7 @@ export function ResultadosScreen({
         {rest.length > 0 ? (
           <View style={{ gap: spacing.sp2 }}>
             <Text style={styles.sectionLabel}>Ranking completo</Text>
-            <View style={styles.rankList}>
+            <View style={styles.rankGrid}>
               {rest.map((r, idx) => {
                 const pct = Number(r.match_percentage);
                 const scoreCol = getMatchColor(pct, c);
@@ -478,8 +491,17 @@ export function ResultadosScreen({
                 const candidato = r.candidato_data;
                 const candId = candidato.id!;
                 const isFav = favoritoIds.has(candId);
+                // Width del card: distribuye el ancho disponible entre las
+                // columnas del grid dejando espacio para los gaps horizontales.
+                // En 1-col ocupa el 100% (flexBasis con string es OK en RN Web,
+                // en RN nativo tomamos numero calculado con screenWidth).
+                const gapTotal = (rankingCols - 1) * spacing.sp2;
+                const cardFlexBasis =
+                  rankingCols === 1
+                    ? ("100%" as unknown as number)
+                    : (screenWidth - gapTotal - spacing.sp4 * 2) / rankingCols;
                 return (
-                  <RankingRow
+                  <RankingCard
                     key={r.id ?? candId}
                     rank={idx + 2}
                     nombre={candidato.nombre}
@@ -489,7 +511,9 @@ export function ResultadosScreen({
                     matchPct={pct}
                     matchColor={scoreCol}
                     ejeScores={chartData}
+                    preguntasConsideradas={r.preguntas_consideradas}
                     onPress={() => goToDetalle(r)}
+                    style={{ flexBasis: cardFlexBasis, flexGrow: 1, minWidth: 0 }}
                     actions={
                       !isGuest ? (
                         <BookmarkActions
