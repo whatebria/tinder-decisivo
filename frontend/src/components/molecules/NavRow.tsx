@@ -30,6 +30,7 @@ import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { typography } from "../../theme/typography";
 import { useThemeColors } from "../../theme/useTheme";
+import { useBlurringPress } from "../../hooks/useBlurringPress";
 import { Icon } from "../atoms/Icon";
 
 export type NavRowVariant = "default" | "danger";
@@ -49,9 +50,13 @@ export function NavRow({
   subtitle,
   variant = "default",
   accessibilityLabel,
+  onPress,
   ...pressable
 }: NavRowProps) {
   const c = useThemeColors();
+  // Blur antes de navegar -> evita warning aria-hidden WCAG 2.4.3 en web.
+  // Ver hooks/useBlurringPress.
+  const handlePress = useBlurringPress(onPress);
 
   const styles = useMemo(() => {
     const isDanger = variant === "danger";
@@ -95,6 +100,7 @@ export function NavRow({
       accessibilityLabel={accessibilityLabel ?? label}
       style={({ pressed }) => [styles.row, { opacity: pressed ? 0.7 : 1 }]}
       {...pressable}
+      onPress={handlePress}
     >
       <View style={styles.textCol}>
         <Text style={styles.label}>{label}</Text>

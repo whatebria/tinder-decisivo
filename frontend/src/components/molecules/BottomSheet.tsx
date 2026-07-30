@@ -75,10 +75,14 @@ export function BottomSheet({
       <Pressable
         style={styles.backdrop}
         onPress={dismissOnBackdrop ? handleClose : undefined}
-        accessibilityRole={dismissOnBackdrop ? "button" : undefined}
-        accessibilityLabel={dismissOnBackdrop ? "Cerrar" : undefined}
+        // NO ponemos accessibilityRole="button" aca: RN Web lo renderizaria
+        // como <button>, y adentro del sheet hay otros <button> (IconButton
+        // Cerrar, chips, etc) -> HTML no permite botones anidados. La
+        // accesibilidad del cierre esta cubierta por RNModal.onRequestClose
+        // (tecla Escape) + el IconButton "Cerrar" visible del header.
       >
-        {/* Evita que el press-in del sheet cierre el backdrop */}
+        {/* Evita que el press-in del sheet cierre el backdrop. Sin role
+            explicito por la misma razon que el backdrop. */}
         <Pressable
           onPress={() => {}}
           style={[

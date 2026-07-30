@@ -13,6 +13,7 @@ import {
 
 import { radii } from "../../theme/radii";
 import { useThemeColors } from "../../theme/useTheme";
+import { useBlurringPress } from "../../hooks/useBlurringPress";
 
 export type IconButtonVariant = "soft" | "ghost" | "solid";
 export type IconButtonSize = "sm" | "md" | "lg";
@@ -37,9 +38,13 @@ export function IconButton({
   size = "md",
   disabled,
   style,
+  onPress,
   ...rest
 }: IconButtonProps) {
   const c = useThemeColors();
+  // Blur antes de disparar la accion -> evita warning aria-hidden WCAG 2.4.3
+  // en web (comun en botones de cerrar modal). Ver hooks/useBlurringPress.
+  const handlePress = useBlurringPress(onPress);
 
   const styles = useMemo(() => {
     const VARIANTS = {
@@ -64,6 +69,7 @@ export function IconButton({
   return (
     <Pressable
       {...rest}
+      onPress={handlePress}
       disabled={disabled}
       accessibilityRole="button"
       style={(state) => [

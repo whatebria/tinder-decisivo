@@ -17,6 +17,7 @@ import {
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
+import { useBlurringPress } from "../../hooks/useBlurringPress";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "success";
 export type ButtonSize = "sm" | "md" | "lg";
@@ -42,10 +43,15 @@ export function Button({
   rightIcon,
   disabled,
   style,
+  onPress,
   ...rest
 }: ButtonProps) {
   const c = useThemeColors();
   const isDisabled = disabled || loading;
+  // Blur en web antes de invocar onPress -> evita warning aria-hidden WCAG
+  // 2.4.3 cuando el press dispara navigate() o cierre de modal. Ver
+  // hooks/useBlurringPress.
+  const handlePress = useBlurringPress(onPress);
 
   const { variantStyle, sizeStyle, styles } = useMemo(() => {
     const VARIANTS = {
@@ -101,6 +107,7 @@ export function Button({
   return (
     <Pressable
       {...rest}
+      onPress={handlePress}
       disabled={isDisabled}
       accessibilityRole="button"
       style={(state) => [

@@ -30,6 +30,16 @@ import { useElectionsPrefsStore } from "./src/store/electionsPrefs";
 import { useOnboardingStore } from "./src/store/onboarding";
 import { useThemeStore } from "./src/store/theme";
 import { colors, colorsDark } from "./src/theme/colors";
+import { installAriaHiddenFocusGuard } from "./src/utils/installAriaHiddenFocusGuard";
+
+// Web-only: instala el guard global que evita el warning WCAG 2.4.3
+// ("Blocked aria-hidden on an element because its descendant retained
+// focus") interceptando toda aplicacion de aria-hidden="true" en el DOM.
+// Se instala a nivel modulo (antes de que React renderice) para pescar
+// tambien overlays que se abren durante el mount inicial.
+if (Platform.OS === "web") {
+  installAriaHiddenFocusGuard();
+}
 
 export default function App() {
   const hydrateAuth = useAuthStore((s) => s.hydrate);

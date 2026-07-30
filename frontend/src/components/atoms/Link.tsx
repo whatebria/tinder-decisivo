@@ -22,6 +22,7 @@ import {
 } from "react-native";
 
 import { useThemeColors } from "../../theme/useTheme";
+import { useBlurringPress } from "../../hooks/useBlurringPress";
 
 export interface LinkProps extends Omit<PressableProps, "children" | "style"> {
   children: string;
@@ -41,10 +42,14 @@ export function Link({
   block = false,
   disabled,
   textStyle,
+  onPress,
   ...rest
 }: LinkProps) {
   const c = useThemeColors();
   const finalColor = color ?? c.primary;
+  // Blur antes de navegar/cerrar overlays -> evita warning aria-hidden WCAG
+  // 2.4.3 en web. Ver hooks/useBlurringPress.
+  const handlePress = useBlurringPress(onPress);
 
   const styles = useMemo(
     () =>
@@ -74,6 +79,7 @@ export function Link({
   return (
     <Pressable
       {...rest}
+      onPress={handlePress}
       disabled={disabled}
       accessibilityRole="link"
       style={(s) => [
