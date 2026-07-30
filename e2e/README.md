@@ -65,16 +65,28 @@ e2e/
 
 ## Estado actual del run
 
-Ultimo run (2026-07-29): **15 pass, 0 skip, 0 fail** en ~90s. Suite 100% verde.
+Ultimo run (2026-07-29): **20 pass, 0 skip, 0 fail** en ~100s. Suite 100% verde.
 
-### Pasando (15)
-- Login: 4/4 — exito, error, regresion "email en username", logout desde perfil.
-- Register: 4/4 — exito, boton disabled, username duplicado, **trim de espacios (Fix D)**.
-- Cambiar password: 2/2 (Fix A).
-- Eliminar cuenta: 2/2 (Fix A).
-- Password reset: 3/3 (Fix B).
+### Pasando (20)
+- Auth: 15/15 (Login, Register, Cambiar/Eliminar password, Password reset).
+- **Noticias: 5/5 (nuevo)** — feed guest, filtro por fecha, filtro por busqueda, empty state, detalle sheet.
 
 ### Fixes aplicados 2026-07-29
+
+**Noticias flow — 5 tests nuevos (`noticias.spec.ts`)**:
+- Todos corren en **modo invitado** (link "Probar sin cuenta" del Login) para no depender del throttle de register.
+- Nuevos helpers: `enterGuestMode(page)` y `goToNoticias(page)` en `ui.ts`.
+- Cobertura: `feed carga`, `filtro por fecha genera chip removible`,
+  `filtro por busqueda cambia el contador`, `empty state con query imposible`,
+  `click en NewsCard abre bottom sheet de detalle`.
+- Aprendizajes:
+  * El H1 "Noticias" comparte texto con el tab del BottomNav y con el brand
+    del HomeTopBar. Usar `vRole("heading", { name: "Noticias" })` para evitar
+    strict-mode violation.
+  * `CollapsibleFilterSection` "Fecha" arranca colapsada cuando el rango es
+    "todo" (default). Hay que expandirla antes de clickear el chip "7 dias".
+  * NewsCard usa `accessibilityRole="link"` con label
+    `Noticia: {headline}. Fuente {source}.` — no es role button.
 
 **Fix D — Register trim** (`auth-register.spec.ts` > `trim de espacios...`):
 - Solo requiso remover el `test.skip`. El test ya estaba escrito correctamente

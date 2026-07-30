@@ -125,6 +125,30 @@ export async function goToPerfil(page: Page): Promise<void> {
 }
 
 /**
+ * Entra al MainStack en modo invitado desde el Login screen.
+ * Link con accessibilityLabel="Probar sin cuenta" (texto visible
+ * "Probar sin cuenta →"). Skippea el paso de auth para tests de flows
+ * publicos (Noticias, Candidatos, Comparar).
+ */
+export async function enterGuestMode(page: Page): Promise<void> {
+  await vRole(page, "link", { name: /probar sin cuenta/i }).click();
+  await dismissCoachMarks(page);
+}
+
+/**
+ * Navega a NoticiasScreen desde cualquier lugar autenticado o guest.
+ * NoticiasScreen es publica (guest ok) y tiene su tab en el BottomNav.
+ * TabBarItem usa accessibilityRole="tab" + accessibilityLabel="Noticias".
+ *
+ * Dismisses coach marks al aterrizar (tourId="noticias" existe).
+ */
+export async function goToNoticias(page: Page): Promise<void> {
+  await dismissCoachMarks(page);
+  await vRole(page, "tab", { name: "Noticias" }).click();
+  await dismissCoachMarks(page);
+}
+
+/**
  * Cierra cualquier coach mark visible haciendo click en el backdrop
  * (que a su vez dispara skip/next segun sea single o multi-step).
  *
