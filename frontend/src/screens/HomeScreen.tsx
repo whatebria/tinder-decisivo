@@ -135,14 +135,18 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
     [progresoItems],
   );
 
-  // Lista de hero cards "Tus mejores matches": solo items del user con top_match
-  // resuelto, filtrados por elecciones activas. Se pinta en orden natural del
-  // backend (por id de tipo). activeIds=null significa "todas activas" (default
-  // pre-primera edicion del user).
+  // Lista de hero cards "Tus mejores matches": solo items del user con
+  // cuestionario COMPLETO y top_match resuelto, filtrados por elecciones
+  // activas. El backend ya filtra los top_match por completitud (ver
+  // mi_progreso.py), pero repetimos el chequeo aca como defense in depth:
+  // si algun dev toca el endpoint sin cuidado, la UI no vuelve a mostrar
+  // "matches fantasma" en cuestionarios no contestados. activeIds=null
+  // significa "todas activas" (default pre-primera edicion del user).
   const mejoresMatches = useMemo(() => {
     if (!progresoItems) return [];
     return progresoItems.filter(
       (it) =>
+        it.completa === true &&
         it.top_match !== null &&
         (electionsActiveIds === null ||
           electionsActiveIds.includes(it.tipo_eleccion_id)),

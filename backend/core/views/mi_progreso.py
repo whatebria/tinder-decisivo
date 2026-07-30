@@ -110,11 +110,34 @@ class MiProgresoView(APIView):
             .count()
         )
 
+        # Materializamos tipos no-base una sola vez y calculamos completitud
+        # arriba, porque el set de tipos completos es input tanto del loop
+        # de items como del filtro de top matches (ver siguiente bloque).
+        tipos = list(TipoEleccion.objects.exclude(es_base=True).order_by("id"))
+
+        def _es_completa(tipo_id: int) -> bool:
+            propias = preguntas_por_tipo.get(tipo_id, 0)
+            total = propias + base_count
+            respondidas = respuestas_por_tipo.get(tipo_id, 0) + respuestas_base
+            return total > 0 and respondidas >= total
+
+        tipos_completos: set[int] = {t.id for t in tipos if _es_completa(t.id)}
+
         # Top match por tipo: el MatchCandidato con mayor porcentaje del user.
         # Candidato.tipos_eleccion es M2M -> un candidato puede pertenecer a
-        # varios tipos (raro pero posible: base + especifico). Iteramos los
-        # matches ordenados desc y para cada tipo del candidato guardamos el
-        # primero visto = el mejor. prefetch_related asegura 2 queries totales.
+        # varios tipos (raro pero posible: base + especifico, o candidato
+        # cross-eleccion).
+        #
+        # IMPORTANTE: solo poblamos top_match para tipos donde el user YA
+        # completo el cuestionario. Sin este filtro, un candidato que
+        # pertenece a los tipos [Presidencial, Diputados] hace leakear el
+        # match calculado en Presidencial al slot Diputados aunque el user
+        # no haya contestado ni una pregunta de Diputados. Ese numero seria
+        # engañoso al 100%: es el % de Presidencial, mal atribuido.
+        #
+        # El fix vive aca (no en el frontend) para que cualquier consumer
+        # del endpoint (mobile nativo, tests, integraciones futuras) reciba
+        # datos limpios sin tener que replicar la logica.
         top_matches = list(
             MatchCandidato.objects.filter(user=user)
             .select_related("candidato")
@@ -124,21 +147,22 @@ class MiProgresoView(APIView):
         top_match_por_tipo: dict[int, MatchCandidato] = {}
         for m in top_matches:
             for tipo in m.candidato.tipos_eleccion.all():
-                if tipo.id not in top_match_por_tipo:
+                if (
+                    tipo.id in tipos_completos
+                    and tipo.id not in top_match_por_tipo
+                ):
                     top_match_por_tipo[tipo.id] = m
 
         # Arma el resultado tipo por tipo. Excluye base (no tienen candidatos).
-        tipos = TipoEleccion.objects.exclude(es_base=True).order_by("id")
         items = []
         for tipo in tipos:
             propias = preguntas_por_tipo.get(tipo.id, 0)
             total = propias + base_count
             respondidas = respuestas_por_tipo.get(tipo.id, 0) + respuestas_base
-            # "completa" = respondio todas las preguntas del tipo + base.
-            # El match se calcula perezosamente al llegar a Resultados, asi que
+            completa = tipo.id in tipos_completos
             # top_match puede estar None aunque completa=True hasta el primer
-            # calculo. HomeScreen debe ser tolerante a eso.
-            completa = total > 0 and respondidas >= total
+            # calculo (matching perezoso al llegar a Resultados). HomeScreen
+            # debe ser tolerante a eso.
             items.append(
                 {
                     "tipo_eleccion_id": tipo.id,

@@ -82,6 +82,22 @@ def escenario(db):
     }
 
 
+def _completar_presidencial(user, escenario):
+    """Responde las 5 preguntas de Presidencial (2 base + 3 pres) con valor=5.
+
+    Precondicion necesaria para que el endpoint devuelva top_match: desde el
+    fix contra 'matches fantasma', top_match solo se puebla si completa=True
+    para ese tipo.
+    """
+    preguntas = [
+        escenario["base_1"], escenario["base_2"],
+        escenario["pres_1"], escenario["pres_2"], escenario["pres_3"],
+    ]
+    for p in preguntas:
+        op = OpcionRespuesta.objects.get(pregunta=p, valor=5)
+        RespuestaUsuario.objects.create(user=user, pregunta=p, opcion_elegida=op)
+
+
 class TestMiProgreso:
     def test_requiere_auth(self, escenario):
         anon = APIClient()
@@ -146,9 +162,11 @@ class TestMiProgreso:
         assert by_nombre["Municipal"]["completa"] is False
 
     def test_top_match_poblado_cuando_existe(self, api, user, escenario):
-        """Si hay MatchCandidato del user para un candidato del tipo, top_match
-        viene con los datos del candidato + porcentaje + confianza.
+        """Si hay MatchCandidato del user para un candidato del tipo (y el
+        cuestionario esta completo), top_match viene con los datos del
+        candidato + porcentaje + confianza.
         """
+        _completar_presidencial(user, escenario)
         MatchCandidato.objects.create(
             user=user, candidato=escenario["ada"],
             match_percentage_value=87.5, num_preguntas_consideradas=5,
@@ -166,6 +184,7 @@ class TestMiProgreso:
 
     def test_top_match_es_el_mayor_porcentaje(self, api, user, escenario):
         """Con 2 candidatos del mismo tipo, top_match = el de mayor %."""
+        _completar_presidencial(user, escenario)
         bob = Candidato.objects.create(
             nombre="Bob", apellido="Diaz", partido="Y", propuesta_electoral="...",
         )
@@ -188,6 +207,7 @@ class TestMiProgreso:
         navegar al DetalleCandidato con el radar chart listo (sin round-trip
         extra).
         """
+        _completar_presidencial(user, escenario)
         MatchCandidato.objects.create(
             user=user, candidato=escenario["ada"],
             match_percentage_value=75.0, num_preguntas_consideradas=5,
@@ -217,3 +237,48 @@ class TestMiProgreso:
         muni = next(i for i in resp.data if i["tipo_eleccion_nombre"] == "Municipal")
         assert muni["completa"] is True
         assert muni["top_match"] is None
+
+    def test_top_match_no_leakea_por_candidato_multi_tipo(self, api, user, escenario):
+        """Regresion: si un candidato pertenece a varios tipos (M2M) y el user
+        solo completo el cuestionario de UN tipo, el top_match NO debe aparecer
+        en los otros tipos aunque haya un MatchCandidato calculado.
+
+        Escenario del bug original:
+          - Ada esta en Presidencial y Municipal (candidato cross-eleccion).
+          - User completa SOLO Presidencial y se calcula match con Ada.
+          - Sin el fix, el endpoint devolvia top_match de Municipal = ese
+            mismo match (el 85% de Presidencial, mal atribuido a Municipal).
+          - Con el fix, top_match de Municipal debe ser None porque
+            completa=False.
+        """
+        # Ada tambien candidata en Municipal (ademas de Presidencial).
+        escenario["ada"].tipos_eleccion.add(escenario["tipo_muni"])
+
+        # User responde SOLO Presidencial (2 base + 3 pres = 5 preguntas).
+        # Municipal queda con respondidas=2 (solo las base) y total=4.
+        for p in [
+            escenario["base_1"], escenario["base_2"],
+            escenario["pres_1"], escenario["pres_2"], escenario["pres_3"],
+        ]:
+            op = OpcionRespuesta.objects.get(pregunta=p, valor=5)
+            RespuestaUsuario.objects.create(user=user, pregunta=p, opcion_elegida=op)
+
+        # Match calculado (simula el resultado del matching post-Presidencial).
+        MatchCandidato.objects.create(
+            user=user, candidato=escenario["ada"],
+            match_percentage_value=85.0, num_preguntas_consideradas=5,
+        )
+
+        resp = api.get(reverse("mi-progreso"))
+        by_nombre = {i["tipo_eleccion_nombre"]: i for i in resp.data}
+
+        # Presidencial: completo -> top_match poblado (comportamiento correcto).
+        assert by_nombre["Presidencial"]["completa"] is True
+        assert by_nombre["Presidencial"]["top_match"] is not None
+        assert float(by_nombre["Presidencial"]["top_match"]["match_percentage"]) == 85.0
+
+        # Municipal: incompleto -> top_match debe ser None aunque Ada este
+        # en tipos_eleccion de Municipal y tenga un MatchCandidato calculado.
+        # ESTE ES EL CORE DEL FIX.
+        assert by_nombre["Municipal"]["completa"] is False
+        assert by_nombre["Municipal"]["top_match"] is None

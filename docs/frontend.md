@@ -1310,6 +1310,8 @@ trae `{tipo_eleccion_id, tipo_eleccion_nombre, total_preguntas, respondidas, com
 top_match: {...breakdown_por_eje...}}` por cada tipo activo. Cubre todos los tipos en
 un único request.
 
+**Filtro "Tus mejores matches"**: se muestran solo items con `completa === true && top_match !== null`. El backend ya filtra `top_match` por completitud (ver `views/mi_progreso.py`), pero la UI repite el chequeo como *defense in depth* contra futuros cambios del endpoint que pudieran reintroducir "matches fantasma" (candidato en M2M con varios tipos leakeando su match hacia tipos no contestados).
+
 **Modo guest**: no llama `useMisElecciones` (enabled sólo si isAuth). Muestra catálogo +
 CTA para responder + match anónimo.
 
