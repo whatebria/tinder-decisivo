@@ -45,10 +45,12 @@ export default function App() {
   const hydrateAuth = useAuthStore((s) => s.hydrate);
   const authHydrated = useAuthStore((s) => s.isHydrated);
   const authToken = useAuthStore((s) => s.token);
+  const authUserId = useAuthStore((s) => s.userId);
   const authIsGuest = useAuthStore((s) => s.isGuest);
   const hydrateOnboarding = useOnboardingStore((s) => s.hydrate);
   const onboardingHydrated = useOnboardingStore((s) => s.isHydrated);
-  const resetCoachMarks = useCoachMarksStore((s) => s.resetAll);
+  const hydrateCoachMarks = useCoachMarksStore((s) => s.hydrateFor);
+  const coachMarksHydrated = useCoachMarksStore((s) => s.isHydrated);
   const hydrateElections = useElectionsPrefsStore((s) => s.hydrate);
   const hydrateTheme = useThemeStore((s) => s.hydrate);
   const themeHydrated = useThemeStore((s) => s.isHydrated);
@@ -61,13 +63,15 @@ export default function App() {
     hydrateTheme();
   }, [hydrateAuth, hydrateOnboarding, hydrateElections, hydrateTheme]);
 
-  // Los coach marks están ligados a la sesión: cada vez que cambia la
-  // identidad (login, logout, entrada/salida del modo invitado) volvemos a
-  // mostrar los tours una vez por pantalla. En modo invitado esto significa
-  // que cada nueva entrada como guest los ve de nuevo.
+  // Coach marks: persistidos por identidad (userId autenticado o "guest").
+  // Esperamos a que auth termine de hidratar para saber si hay userId, y
+  // cargamos la lista de tours vistos de esa identidad. Cada cambio de
+  // identidad (login, logout, entrar/salir de guest) re-hidrata desde la
+  // key correspondiente. Ver src/store/coachMarks.ts.
   useEffect(() => {
-    resetCoachMarks();
-  }, [authToken, authIsGuest, resetCoachMarks]);
+    if (!authHydrated) return;
+    hydrateCoachMarks(authToken ? authUserId : null);
+  }, [authHydrated, authToken, authUserId, authIsGuest, hydrateCoachMarks]);
 
   // Web: sincroniza el bg del <body> y <html> con el tema activo para evitar
   // que se vea blanco cuando el contenido es mas corto que el viewport.
@@ -121,7 +125,8 @@ export default function App() {
     };
   }, [effective]);
 
-  const ready = authHydrated && onboardingHydrated && themeHydrated;
+  const ready =
+    authHydrated && onboardingHydrated && themeHydrated && coachMarksHydrated;
   const loadingBg = effective === "dark" ? colorsDark.bg : colors.bg;
 
   return (

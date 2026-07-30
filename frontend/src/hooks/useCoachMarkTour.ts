@@ -3,11 +3,13 @@
  *
  * Responsabilidad única: exponer la máquina de estado (paso actual, avanzar,
  * retroceder, saltar) y decidir cuándo el overlay debe estar visible en base
- * al store de sesión. NO renderiza UI — eso vive en <CoachMark />.
+ * al store persistido. NO renderiza UI — eso vive en <CoachMark />.
  *
- * El store NO persiste entre ejecuciones del proceso (ver `store/coachMarks.ts`),
- * así que al reiniciar la app o cambiar de sesión (login/logout/guest) los
- * tours vuelven a aparecer una vez por pantalla.
+ * El store esta persistido por identidad (userId o "guest") en secureStorage
+ * (ver `store/coachMarks.ts`), asi que un tour visto queda visto entre
+ * refreshes y reinicios de la app. Se re-muestra cuando:
+ *   - Se hace `resetAll()` desde Config -> Ayuda
+ *   - El user cambia de identidad y en esa identidad todavia no lo vio
  *
  * Uso típico:
  *
@@ -44,25 +46,31 @@ export interface UseCoachMarkTourResult {
 
 export function useCoachMarkTour(tourId: TourId): UseCoachMarkTourResult {
   const tour = COACH_TOURS[tourId];
+  const isHydrated = useCoachMarksStore((s) => s.isHydrated);
   const alreadySeen = useCoachMarksStore((s) => s.seen[tourId] === true);
   const markSeen = useCoachMarksStore((s) => s.markSeen);
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Cuando el store se resetea (Config -> Ayuda o cambio de sesión), el paso
-  // actual debe volver a 0 para que el usuario vea el tour desde el inicio.
+  // Cuando el store se resetea (Config -> Ayuda o cambio de identidad), el
+  // paso actual debe volver a 0 para que el usuario vea el tour desde el
+  // inicio.
   useEffect(() => {
     if (!alreadySeen) setCurrentIndex(0);
   }, [alreadySeen]);
 
   const total = tour.steps.length;
   const isLast = currentIndex >= total - 1;
-  const visible = !alreadySeen;
+  // Safety net: si el store todavia no se hidrato, NO mostramos tours
+  // (evita flash del tour cuando el user ya lo vio en una sesion previa).
+  const visible = isHydrated && !alreadySeen;
   const step = visible ? tour.steps[currentIndex] : null;
 
   const next = useCallback(() => {
     if (isLast) {
-      markSeen(tourId);
+      // markSeen es async pero no necesitamos esperar: la UI ya reacciona
+      // al cambio del store.
+      void markSeen(tourId);
     } else {
       setCurrentIndex((i) => i + 1);
     }
@@ -73,7 +81,7 @@ export function useCoachMarkTour(tourId: TourId): UseCoachMarkTourResult {
   }, []);
 
   const skip = useCallback(() => {
-    markSeen(tourId);
+    void markSeen(tourId);
   }, [markSeen, tourId]);
 
   return useMemo(

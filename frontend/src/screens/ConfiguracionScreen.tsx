@@ -52,7 +52,7 @@ export function ConfiguracionScreen({
   const toast = useToast();
 
   async function handleReactivarTours() {
-    resetCoachMarks();
+    await resetCoachMarks();
     toast.info(
       "Tours reactivados",
       "Volver\u00e1n a aparecer en cada pantalla clave.",
