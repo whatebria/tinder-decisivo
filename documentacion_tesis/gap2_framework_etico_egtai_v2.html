@@ -96,14 +96,14 @@
       <span class="badge-upgraded">Diagnostico corregido</span>
     </div>
     <h1 class="text-4xl md:text-5xl font-bold hdr-serif mb-4 leading-tight text-white">La app estaba mejor de lo que asumi</h1>
-    <p class="text-lg text-slate-300 max-w-3xl mb-6">Con la documentacion real de <code class="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-slate-200">docs/</code> (34 archivos, 472 KB) + <code class="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-slate-200">README.md</code> + <code class="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-slate-200">09_tests.md</code>, matchVote scorea <strong class="text-accent">~63% en EGTAI</strong> - <strong class="text-accent">por encima del promedio de los 7 VAAs europeos</strong>. La primera auditoria (~35%) subestimo la app por trabajar solo con la doc de tesis. <em class="text-warn">Nota: el proyecto NO va a ser publicado como codigo abierto - decision intencional de la autora.</em></p>
+    <p class="text-lg text-slate-300 max-w-3xl mb-6">Con la documentacion real de <code class="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-slate-200">docs/</code> (34 archivos, 472 KB) + <code class="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-slate-200">README.md</code> + <code class="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-slate-200">09_tests.md</code>, matchVote scorea <strong class="text-accent">~65% en EGTAI</strong> - <strong class="text-accent">por encima del promedio de los 7 VAAs europeos</strong> y al nivel del mejor (Wahl-O-Mat ~65%). La primera auditoria (~35%) subestimo la app por trabajar solo con la doc de tesis.</p>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
       <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-4">
-        <div class="text-3xl font-bold text-accent">63%</div>
+        <div class="text-3xl font-bold text-accent">65%</div>
         <div class="text-sm text-slate-400">compliance (era 35%)</div>
       </div>
       <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-4">
-        <div class="text-3xl font-bold text-scholar">25</div>
+        <div class="text-3xl font-bold text-scholar">26</div>
         <div class="text-sm text-slate-400">sub-reqs cumplen (era 12)</div>
       </div>
       <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-4">
@@ -111,7 +111,7 @@
         <div class="text-sm text-slate-400">acciones pendientes (era 17)</div>
       </div>
       <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-4">
-        <div class="text-3xl font-bold text-accent">5</div>
+        <div class="text-3xl font-bold text-accent">6</div>
         <div class="text-sm text-slate-400">fortalezas diferenciales</div>
       </div>
     </div>
@@ -127,8 +127,12 @@
     <p class="text-sm text-textMuted">Ironia interesante para la tesis: <strong>matchVote incumple exactamente la Recomendacion #3 del paper</strong> (documentacion centrada en el usuario final). La brecha entre "lo que se hizo" y "lo que se ve" es EXACTAMENTE el problema sistemico que Stockinger identifica en los VAAs europeos.</p>
   </div>
 
-  <h3 class="text-2xl font-bold hdr-serif text-scholar mb-4">7 descubrimientos que cambiaron el score</h3>
+  <h3 class="text-2xl font-bold hdr-serif text-scholar mb-4">8 descubrimientos que cambiaron el score</h3>
   <div class="grid md:grid-cols-2 gap-4">
+    <div class="bg-bgCard border border-border rounded-lg p-5">
+      <div class="flex items-center gap-2 mb-2"><span class="badge-new">Nuevo</span><h4 class="font-bold text-text">Licencia AGPL-3.0 real</h4></div>
+      <p class="text-sm text-textMuted">README tiene badge AGPL-3.0 y seccion "License" explicando la eleccion: <em>"voter-tech is public-interest infrastructure and forks should stay open"</em>. Archivo <code>LICENSE</code> con texto oficial AGPL-3.0 en el root. Segun el propio paper de Stockinger, <strong class="text-accent">ningun VAA top-tier internacional publica su codigo completo</strong>. matchVote es la excepcion.</p>
+    </div>
     <div class="bg-bgCard border border-border rounded-lg p-5">
       <div class="flex items-center gap-2 mb-2"><span class="badge-new">Nuevo</span><h4 class="font-bold text-text">Autora identificada</h4></div>
       <p class="text-sm text-textMuted">Jenifer Castillo (<code>@whatebria</code>), afiliacion academica declarada ("undergraduate mobile-apps thesis, now growing into something real"). GitHub personal linkeado. R7.4 <strong class="text-accent">cumple</strong>.</p>
@@ -168,34 +172,41 @@
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
       <div class="bg-bgCard border border-accent rounded-lg p-5">
         <div class="text-xs text-accent font-semibold uppercase mb-2">Fortaleza #1</div>
+        <h3 class="font-bold text-text mb-2">Open source AGPL-3.0</h3>
+        <p class="text-sm text-textMuted">Stockinger: "None of the top-tier VAAs publish full source code". matchVote es la excepcion. AGPL fuerza que forks publicos compartan cambios.</p>
+        <div class="mt-2 text-xs text-accent">R7.1</div>
+      </div>
+
+      <div class="bg-bgCard border border-accent rounded-lg p-5">
+        <div class="text-xs text-accent font-semibold uppercase mb-2">Fortaleza #2</div>
         <h3 class="font-bold text-text mb-2">Confianza explicita del match</h3>
         <p class="text-sm text-textMuted">Unico VAA que separa "cuanto coinciden" (%) de "cuanto lo sabemos" (badge ALTA/MEDIA/TENTATIVA). Ningun VAA europeo lo hace. Resuena directamente con Bachmann 2026 (paper 08).</p>
         <div class="mt-2 text-xs text-accent">R4.9, R1.4</div>
       </div>
 
       <div class="bg-bgCard border border-accent rounded-lg p-5">
-        <div class="text-xs text-accent font-semibold uppercase mb-2">Fortaleza #2</div>
+        <div class="text-xs text-accent font-semibold uppercase mb-2">Fortaleza #3</div>
         <h3 class="font-bold text-text mb-2">Fuentes obligatorias por codigo</h3>
         <p class="text-sm text-textMuted">Cada postura requiere URL + justificacion, validado por <code>import_posturas</code>. Wahl-O-Mat y Smartvote lo piden pero no enforcean.</p>
         <div class="mt-2 text-xs text-accent">R4.10, R2.1</div>
       </div>
 
       <div class="bg-bgCard border border-accent rounded-lg p-5">
-        <div class="text-xs text-accent font-semibold uppercase mb-2">Fortaleza #3</div>
+        <div class="text-xs text-accent font-semibold uppercase mb-2">Fortaleza #4</div>
         <h3 class="font-bold text-text mb-2">Educacion civica por pregunta</h3>
         <p class="text-sm text-textMuted">Modal con 5 dimensiones de repercusiones. Solo Wahl-O-Mat tiene algo parecido pero mas basico. Aporte propio.</p>
         <div class="mt-2 text-xs text-accent">R6.6</div>
       </div>
 
       <div class="bg-bgCard border border-accent rounded-lg p-5">
-        <div class="text-xs text-accent font-semibold uppercase mb-2">Fortaleza #4</div>
+        <div class="text-xs text-accent font-semibold uppercase mb-2">Fortaleza #5</div>
         <h3 class="font-bold text-text mb-2">Zero PII sensible por diseño</h3>
         <p class="text-sm text-textMuted">No se guarda DNI, RUT, telefono ni geolocalizacion. Sin ads. Aftonbladets y HS Vaalikone monetizan - matchVote no.</p>
         <div class="mt-2 text-xs text-accent">R3.1, R3.2</div>
       </div>
 
       <div class="bg-bgCard border border-accent rounded-lg p-5">
-        <div class="text-xs text-accent font-semibold uppercase mb-2">Fortaleza #5</div>
+        <div class="text-xs text-accent font-semibold uppercase mb-2">Fortaleza #6</div>
         <h3 class="font-bold text-text mb-2">Accesibilidad WCAG 2.2 AA doc</h3>
         <p class="text-sm text-textMuted">docs/accesibilidad.md de 26 KB con checklist por criterio, 12 componentes, 5 pantallas, testing plan multi-screen-reader. Nivel superior al de cualquier VAA europeo evaluado.</p>
         <div class="mt-2 text-xs text-accent">R5.10</div>
@@ -223,7 +234,7 @@
             <tr class="hover:bg-bgHover/50">
               <td class="py-2 pr-2 text-text">Open source</td>
               <td class="text-center text-crit">No</td><td class="text-center text-warn">Data</td><td class="text-center text-warn">Parc</td><td class="text-center text-crit">No</td><td class="text-center text-crit">No</td><td class="text-center text-crit">No</td><td class="text-center text-crit">No</td>
-              <td class="text-center bg-critSoft text-crit font-bold">No (decision)</td>
+              <td class="text-center bg-accentSoft text-accent font-bold">AGPL-3.0</td>
             </tr>
             <tr class="hover:bg-bgHover/50">
               <td class="py-2 pr-2 text-text">Sin ads/monetizacion</td>
@@ -258,7 +269,7 @@
           </tbody>
         </table>
       </div>
-      <p class="text-xs text-textDim mt-3 italic">Kieskompas es el unico con auditoria externa. matchVote lidera en 5 de 7 aspectos (open source es decision consciente de mantener privado).</p>
+      <p class="text-xs text-textDim mt-3 italic">Kieskompas es el unico con auditoria externa. matchVote lidera en 6 de 7 aspectos.</p>
     </div>
   </div>
 </section>
@@ -411,12 +422,12 @@
         <span class="bg-scholar text-slate-900 font-bold px-3 py-1 rounded">R7</span>
         <h3 class="font-bold text-text">Accountability</h3>
       </div>
-      <span class="text-sm text-warn font-semibold">Score: 55% <span class="text-textDim">(era 25%)</span></span>
+      <span class="text-sm text-accent font-semibold">Score: 65% <span class="text-textDim">(era 25%)</span></span>
     </div>
     <div class="p-5">
       <table class="w-full text-sm">
         <tbody class="divide-y divide-borderSoft">
-          <tr><td class="py-2 pr-2 align-top font-medium w-1/3">R7.1 Codigo abierto <span class="badge-upgraded">Revisado</span></td><td class="align-top w-24"><span class="status-partial text-xs px-2 py-1 rounded font-semibold">Parcial</span></td><td class="py-2 text-textMuted"><strong class="text-warn">Decision consciente</strong>: el proyecto NO va a ser publicado como codigo abierto. Esta es una eleccion legitima - la mayoria de VAAs top-tier tampoco lo son (StemWijzer, Kieskompas, VC, iSideWith todos cerrados). El sub-req se marca parcial porque la app tiene otras formas de auditabilidad (docs exhaustivos, algoritmo publicado, fuentes por postura), pero el codigo en si no es inspeccionable por terceros. La autora puede compensar publicando el algoritmo detallado y ejemplos de calculo en la tesis.</td></tr>
+          <tr><td class="py-2 pr-2 align-top font-medium w-1/3">R7.1 Codigo abierto <span class="badge-upgraded">Upgrade</span></td><td class="align-top w-24"><span class="status-ok text-xs px-2 py-1 rounded font-semibold">Cumple</span></td><td class="py-2 text-textMuted"><strong class="text-accent">AGPL-3.0 declarado en README + archivo LICENSE en root</strong>. Repo publico en github.com/whatebria/tinder-decisivo. Unico VAA top-tier con codigo abierto real. AGPL fuerza que forks publicos compartan cambios.</td></tr>
           <tr><td class="py-2 pr-2 align-top font-medium">R7.2 Reporte bugs <span class="badge-upgraded">Upgrade</span></td><td class="align-top"><span class="status-ok text-xs px-2 py-1 rounded font-semibold">Cumple</span></td><td class="py-2 text-textMuted">README linkea a GitHub Issues.</td></tr>
           <tr><td class="py-2 pr-2 align-top font-medium">R7.3 Politica correccion</td><td class="align-top"><span class="status-partial text-xs px-2 py-1 rounded font-semibold">Parcial</span></td><td class="py-2 text-textMuted">Contributing section explica flow. Sin SLA formal.</td></tr>
           <tr><td class="py-2 pr-2 align-top font-medium">R7.4 Responsables <span class="badge-upgraded">Upgrade</span></td><td class="align-top"><span class="status-ok text-xs px-2 py-1 rounded font-semibold">Cumple</span></td><td class="py-2 text-textMuted"><strong class="text-accent">Jenifer Castillo (@whatebria)</strong>. Afiliacion academica declarada.</td></tr>
@@ -433,7 +444,7 @@
 <section id="score" class="anchor-offset bg-bgSoft border-y border-border">
   <div class="max-w-7xl mx-auto px-6 py-12">
     <h2 class="text-3xl font-bold hdr-serif text-scholar mb-2">Score corregido en contexto</h2>
-    <p class="text-textMuted mb-6">matchVote (~60%) queda <strong class="text-accent">por encima del promedio</strong> de los 7 VAAs europeos y a solo 5 puntos del mejor (Wahl-O-Mat ~65%).</p>
+    <p class="text-textMuted mb-6">matchVote (~65%) queda <strong class="text-accent">al nivel del mejor</strong> del corpus europeo (Wahl-O-Mat ~65%) y por encima del promedio (~50%).</p>
 
     <div class="grid md:grid-cols-2 gap-6 mb-6">
       <div class="bg-bgCard border border-border rounded-lg p-5">
@@ -458,8 +469,8 @@
           <canvas id="statusChart"></canvas>
         </div>
         <div class="mt-4 text-sm text-textMuted grid grid-cols-2 gap-2">
-          <div><span class="inline-block w-3 h-3 bg-accent rounded mr-2"></span> 25 Cumple (50%)</div>
-          <div><span class="inline-block w-3 h-3 bg-warn rounded mr-2"></span> 15 Parcial (30%)</div>
+          <div><span class="inline-block w-3 h-3 bg-accent rounded mr-2"></span> 26 Cumple (52%)</div>
+          <div><span class="inline-block w-3 h-3 bg-warn rounded mr-2"></span> 14 Parcial (28%)</div>
           <div><span class="inline-block w-3 h-3 bg-crit rounded mr-2"></span> 9 No cumple (18%)</div>
           <div><span class="inline-block w-3 h-3 bg-neutral rounded mr-2"></span> 1 No aplica (2%)</div>
         </div>
@@ -468,11 +479,11 @@
       <div class="bg-bgCard border-l-4 border-accent rounded-r-lg p-6">
         <h3 class="font-bold text-lg mb-3 text-accent">Contexto interpretativo</h3>
         <ul class="text-sm text-text space-y-2">
-          <li>&bull; <strong>Wahl-O-Mat</strong> (mejor del corpus europeo) ~65%. matchVote a 5 puntos.</li>
+          <li>&bull; <strong>Wahl-O-Mat</strong> (mejor del corpus europeo) ~65%. matchVote empata.</li>
           <li>&bull; <strong>Smartvote</strong> (mas famoso) ~55%. matchVote por encima.</li>
           <li>&bull; <strong>Aftonbladets, HS Vaalikone</strong> (con ads) ~40%. matchVote los supera claramente.</li>
           <li>&bull; <strong>R3 (privacy)</strong> es donde matchVote lidera con 90%.</li>
-          <li>&bull; La decision de mantener codigo privado <strong>no compromete criticamente el score</strong> (la mayoria del corpus tampoco es open source).</li>
+          <li>&bull; <strong>R7 (accountability)</strong> subio de 25% a 65% con AGPL-3.0 + repo publico.</li>
         </ul>
       </div>
     </div>
@@ -481,32 +492,36 @@
 
 <section id="plan" class="anchor-offset max-w-7xl mx-auto px-6 py-12">
   <h2 class="text-3xl font-bold hdr-serif text-scholar mb-2">Plan de accion reducido</h2>
-  <p class="text-textMuted mb-8">De 17 acciones originales, <strong class="text-accent">8 ya estaban hechas o no aplican</strong> (LICENSE removida por decision de codigo privado). Quedan 9 acciones concretas para pasar de 60% a ~80%.</p>
+  <p class="text-textMuted mb-8">De 17 acciones originales, <strong class="text-accent">12 ya estan hechas</strong> (LICENSE, CHANGELOG, PRIVACY, SECURITY, CONTRIBUTING agregados hoy). Quedan 5 acciones concretas para pasar de 65% a ~80%.</p>
 
   <div class="grid md:grid-cols-3 gap-6">
 
     <div class="bg-bgCard border border-border rounded-lg overflow-hidden">
-      <div class="bg-accent text-slate-900 px-4 py-2 font-bold">Quick wins (1-2 dias)</div>
+      <div class="bg-accent text-slate-900 px-4 py-2 font-bold">Quick wins (hechos)</div>
       <div class="p-5 space-y-3">
         <div>
-          <div class="text-sm font-semibold text-text">1. CHANGELOG.md</div>
-          <p class="text-xs text-textMuted">Extraer de sprints.md los hitos por version. Puede ser interno si el repo es privado. <span class="text-scholar">R7.7</span></p>
+          <div class="text-sm font-semibold text-text"><s>1. LICENSE en root</s> <span class="text-accent">HECHO</span></div>
+          <p class="text-xs text-textMuted">AGPL-3.0 oficial en el root. <span class="text-scholar">R7.1</span></p>
         </div>
         <div>
-          <div class="text-sm font-semibold text-text">2. PRIVACY.md corta</div>
-          <p class="text-xs text-textMuted">"No guardamos DNI, RUT, telefono, geolocalizacion". Un parrafo. Idealmente visible en la app. <span class="text-scholar">R3.3</span></p>
+          <div class="text-sm font-semibold text-text"><s>2. CHANGELOG.md</s> <span class="text-accent">HECHO</span></div>
+          <p class="text-xs text-textMuted">Keep a Changelog format. <span class="text-scholar">R7.7</span></p>
         </div>
         <div>
-          <div class="text-sm font-semibold text-text">3. SECURITY.md</div>
-          <p class="text-xs text-textMuted">Politica de vulnerabilidades + email de contacto. <span class="text-scholar">R7.3</span></p>
+          <div class="text-sm font-semibold text-text"><s>3. PRIVACY.md</s> <span class="text-accent">HECHO</span></div>
+          <p class="text-xs text-textMuted">Politica de privacidad clara en el root. <span class="text-scholar">R3.3</span></p>
         </div>
         <div>
-          <div class="text-sm font-semibold text-text">4. HRIA en tesis</div>
-          <p class="text-xs text-textMuted">Seccion breve sobre impactos en derechos electorales. <span class="text-scholar">R1.1</span></p>
+          <div class="text-sm font-semibold text-text"><s>4. SECURITY.md</s> <span class="text-accent">HECHO</span></div>
+          <p class="text-xs text-textMuted">Politica de vulnerabilidades + coordinacion de disclosure. <span class="text-scholar">R7.3</span></p>
         </div>
         <div>
-          <div class="text-sm font-semibold text-text">5. Actualizar README</div>
-          <p class="text-xs text-textMuted">Quitar badge AGPL-3.0 y seccion License. Aclarar que es proyecto de tesis privado. <span class="text-scholar">R4.9</span></p>
+          <div class="text-sm font-semibold text-text"><s>5. CONTRIBUTING.md</s> <span class="text-accent">HECHO</span></div>
+          <p class="text-xs text-textMuted">Guia de contribucion + code of conduct minimo. <span class="text-scholar">R5.2, R7.3</span></p>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-text">6. HRIA en tesis</div>
+          <p class="text-xs text-textMuted">Seccion breve sobre impactos en derechos electorales. Pendiente. <span class="text-scholar">R1.1</span></p>
         </div>
       </div>
     </div>
@@ -562,8 +577,8 @@
   </div>
 
   <div class="mt-8 bg-bgCard border-l-4 border-accent rounded-r-lg p-6">
-    <h3 class="font-bold text-lg mb-2 text-accent">Impacto esperado (sin AGPL)</h3>
-    <p class="text-sm text-text">Ejecutando las <strong class="text-accent">5 quick wins</strong>: score sube de 60% a ~72% (todos documentales, 1 dia total). Sumando <strong class="text-warn">5 items de esfuerzo medio</strong>: llega a ~80% - <strong>alcanza al mejor del corpus europeo (Wahl-O-Mat ~65%) y lo supera</strong>. Los items de alto esfuerzo son opcionales para tesis.</p>
+    <h3 class="font-bold text-lg mb-2 text-accent">Impacto esperado</h3>
+    <p class="text-sm text-text">Los 5 archivos root <strong class="text-accent">ya se agregaron hoy</strong>: LICENSE + CHANGELOG + PRIVACY + SECURITY + CONTRIBUTING. Score subio de 60% a <strong class="text-accent">65%</strong>. Sumando <strong class="text-warn">5 items de esfuerzo medio</strong>: llega a ~80% - <strong>por encima del mejor del corpus europeo (Wahl-O-Mat ~65%)</strong>. Los items de alto esfuerzo son opcionales para tesis.</p>
   </div>
 </section>
 
@@ -580,11 +595,11 @@
       <div class="bg-bgCard border-l-4 border-accent rounded-r-lg p-6">
         <h3 class="font-bold text-lg mb-3 text-accent">Lo que ya se puede afirmar en la tesis</h3>
         <ul class="text-sm text-text space-y-2">
-          <li>&bull; matchVote scorea <strong>~60% en EGTAI</strong>, superando al promedio (~45%) de 7 VAAs europeos consolidados.</li>
+          <li>&bull; matchVote scorea <strong>~65% en EGTAI</strong>, empatando al mejor de los 7 VAAs europeos consolidados (Wahl-O-Mat ~65%).</li>
+          <li>&bull; Es el <strong>unico VAA top-tier con codigo abierto real</strong> (AGPL-3.0) entre los evaluados.</li>
           <li>&bull; Es el <strong>unico VAA que comunica su confianza</strong> al usuario (ALTA/MEDIA/TENTATIVA).</li>
-          <li>&bull; Lidera en <strong>5 de 7 aspectos</strong> de la comparacion directa.</li>
+          <li>&bull; Lidera en <strong>6 de 7 aspectos</strong> de la comparacion directa.</li>
           <li>&bull; Cumple <strong>WCAG 2.2 AA</strong> con documentacion mas exhaustiva que cualquier VAA europeo.</li>
-          <li>&bull; <strong>Fuentes obligatorias por codigo</strong> en cada postura - patron unico del corpus.</li>
         </ul>
       </div>
 
@@ -647,7 +662,7 @@
       labels: ['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7'],
       datasets: [
         { label: 'v1 (solo doc tesis)', data: [40, 45, 85, 50, 30, 20, 25], backgroundColor: '#94A3B8' },
-        { label: 'v2 (con docs reales, sin AGPL)', data: [65, 78, 90, 80, 45, 40, 55], backgroundColor: '#34D399' }
+        { label: 'v2 (con docs reales + LICENSE)', data: [65, 78, 90, 80, 45, 40, 65], backgroundColor: '#34D399' }
       ]
     },
     options: {
@@ -665,7 +680,7 @@
     data: {
       labels: ['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7'],
       datasets: [
-        { label: 'matchVote v2', data: [65, 78, 90, 80, 45, 40, 55], backgroundColor: '#60A5FA' },
+        { label: 'matchVote v2', data: [65, 78, 90, 80, 45, 40, 65], backgroundColor: '#60A5FA' },
         { label: 'Promedio VAAs europeos', data: [45, 55, 55, 60, 40, 15, 30], backgroundColor: '#94A3B8' }
       ]
     },
@@ -684,7 +699,7 @@
     data: {
       labels: ['Cumple', 'Parcial', 'No cumple', 'No aplica'],
       datasets: [{
-        data: [25, 15, 9, 1],
+        data: [26, 14, 9, 1],
         backgroundColor: ['#34D399', '#FBBF24', '#F87171', '#94A3B8'],
         borderColor: isDark() ? '#1E293B' : '#F8FAFC', borderWidth: 2
       }]
