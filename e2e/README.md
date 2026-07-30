@@ -65,23 +65,16 @@ e2e/
 
 ## Estado actual del run
 
-Ultimo run (2026-07-29): **10 pass, 5 skip, 0 fail** en ~42s.
+Ultimo run (2026-07-29): **13 pass, 2 skip, 0 fail** en ~57s.
 
-### Pasando (10)
+### Pasando (13)
 - Login: 3/4 (exito, error, regresion "email en campo username").
 - Register: 3/4 (exito, boton disabled, username duplicado).
-- **Cambiar password: 2/2 (Fix A aplicado)** — cambio exitoso + error con pass actual invalida.
-- **Eliminar cuenta: 2/2 (Fix A aplicado)** — palabra magica ELIMINAR + eliminacion completa.
+- Cambiar password: 2/2 (Fix A) — cambio exitoso + error con pass actual invalida.
+- Eliminar cuenta: 2/2 (Fix A) — palabra magica ELIMINAR + eliminacion completa.
+- **Password reset: 3/3 (Fix B aplicado)** — flujo completo, token invalido, boton disabled.
 
-### Skippeado (5) — pendientes
-
-**Fix B — Password reset visibility** (3 tests: `auth-password-reset.spec.ts`)
-
-Tests no usan el helper `vRole()` que ya filtra por visibility. RN Stack Navigator
-monta todos los screens en el DOM, lo que causa multiples matches para
-`getByRole("link", { name: /ya tengo/i })` (matchea tanto "Ya tengo un token" del
-reset como "Ya tengo cuenta" del register). Fix: migrar todos los `page.getBy*` a
-`vRole()`/`vLabel()`.
+### Skippeado (2) — pendientes
 
 **Fix D — Register trim** (1 test: `auth-register.spec.ts` > `trim de espacios...`)
 
@@ -90,12 +83,24 @@ con `trace.zip`. Hipotesis: register falla silent (el test no chequea toast de e
 o `UserAttributeSimilarityValidator` de Django rechaza el password (similitud
 marginal 0.67 vs threshold 0.7, potencialmente flaky).
 
-**Fix C — Logout** (1 test, ya venia skippeado desde el primer commit del e2e)
+**Fix C — Logout** (1 test, `auth-login.spec.ts` > `logout desde perfil...`)
 
-Requiere mapear `accessibilityLabel` del TabBar para el tab de perfil.
+Ahora que existe `goToPerfil(page)`, el fix es click a "Cerrar sesion" (NavRow
+en PerfilScreen) + assert de volver al heading "Servel" del Login.
 
-### Fixes aplicados (Fix A) — 2026-07-29
+### Fixes aplicados 2026-07-29
 
+**Fix B — Password reset** (`auth-password-reset.spec.ts`):
+- Migrados TODOS los `page.getBy*` a `vLabel`/`vRole` de `helpers/ui.ts` que
+  filtran por visibilidad. Sin filter, el Stack Navigator monta multiples
+  screens con inputs "Email" o "Nueva contrasena" simultaneos — strict-mode
+  violation garantizado.
+- Assertions de toast usan `getByText(...).filter({ visible: true })` porque
+  el toast atom puede tener multiples instancias en el DOM (stack de toasts).
+- Heading "Revisa tu email" y "Servel" verificados via `vRole("heading")` con
+  `level: 1` — esto ya funciona post Fix 3 del atom `<Heading>`.
+
+**Fix A — Cambiar/Eliminar cuenta**:
 1. **Coach mark tour bloqueaba clicks**: los tests hacian click al tab Config pero
    `<CoachMarkTour />` (agregado post-login por otro puppy) interceptaba con un
    backdrop `aria-label="Cerrar coach mark"`. Fix: helper `dismissCoachMarks(page)`
@@ -110,8 +115,8 @@ Requiere mapear `accessibilityLabel` del TabBar para el tab de perfil.
 5. **Strict-mode violation en `getByLabel("Contrasena actual")`**: el Stack
    Navigator monta multiples screens; assertion cambiado a
    `toHaveCount(0, {timeout})` con `.filter({ visible: true })`.
-6. **Backend bug lateral (fixeado)**: `DRF_THROTTLE_DISABLED=1` vaciaba
-   `DEFAULT_THROTTLE_RATES` pero las views tienen `ScopedRateThrottle`
+6. **Backend bug lateral (fixeado en working tree)**: `DRF_THROTTLE_DISABLED=1`
+   vaciaba `DEFAULT_THROTTLE_RATES` pero las views tienen `ScopedRateThrottle`
    hardcodeado > `ImproperlyConfigured: No default throttle rate set for 'register'`.
    Fix en `backend/api/settings.py`: cuando disabled, dejar rates enormes
    (100000/hour) para todos los scopes.
