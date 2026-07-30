@@ -10,7 +10,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { login, register } from "../api/endpoints";
 import { getErrorMessage } from "../api/client";
-import { Button, FormField, Link, useToast } from "../components";
+import { Button, FormField, Heading, Link, useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
 import { spacing } from "../theme/spacing";
@@ -61,7 +61,6 @@ export function RegisterScreen({ navigation }: RootStackScreenProps<"Register">)
           flexGrow: 1,
           justifyContent: "center",
         },
-        title: { ...typography.h1, color: c.text },
         subtitle: { ...typography.body, color: c.textSecondary },
       }),
     [c],
@@ -73,7 +72,7 @@ export function RegisterScreen({ navigation }: RootStackScreenProps<"Register">)
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
-      <Text style={styles.title}>Crear cuenta</Text>
+      <Heading level={1}>Crear cuenta</Heading>
       <Text style={styles.subtitle}>Necesitamos algunos datos basicos.</Text>
 
       <View>

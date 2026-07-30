@@ -12,7 +12,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getErrorMessage } from "../api/client";
 import { useConfirmPasswordReset } from "../api/hooks";
-import { Button, FormField, Link, useToast } from "../components";
+import { Button, FormField, Heading, Link, useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
@@ -65,7 +65,6 @@ export function PasswordResetConfirmScreen({
           flexGrow: 1,
           justifyContent: "center",
         },
-        title: { ...typography.h1, color: c.text },
         subtitle: { ...typography.body, color: c.textSecondary },
       }),
     [c],
@@ -77,7 +76,7 @@ export function PasswordResetConfirmScreen({
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
-      <Text style={styles.title}>Nueva contrasena</Text>
+      <Heading level={1}>Nueva contrasena</Heading>
       <Text style={styles.subtitle}>
         Pega el token del email y elige una nueva contrasena.
       </Text>

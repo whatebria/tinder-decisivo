@@ -1,75 +1,82 @@
 /**
- * OnboardingScreen: 3 slides que explican el concepto.
+ * OnboardingScreen: welcome tour de 5 slides que se muestra la primera vez
+ * que el usuario abre la app (flag persistido en `useOnboardingStore`).
  *
- * Se muestra solo la primera vez que el user abre la app (flag persistido).
- * Al completar o saltar navega a Login.
+ * Al completar (o saltar), marca el flag y `AppNavigator` swappea al auth stack.
  *
- * Layout: pager horizontal simple con ScrollView + indicadores + botones.
+ * Slide 5 tiene 3 CTAs con **intenciones distintas**:
+ *   - "Crear cuenta"       → setea pendingAuthTarget="Register" → RegisterScreen
+ *   - "Ya tengo cuenta"    → sin target → LoginScreen (default)
+ *   - "Explorar sin cuenta"→ enterGuestMode → MainStack
+ *
+ * El copy vive en `content/welcomeTour.ts` (source of truth, testeable).
  */
 
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
-  Dimensions,
   NativeScrollEvent,
   NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from "react-native";
 
-import { Button } from "../components";
-import { Link } from "../components";
+import { Button, Heading, Link } from "../components";
+import { WELCOME_SLIDES } from "../content/welcomeTour";
 import type { RootStackScreenProps } from "../navigation/types";
+import { useAuthStore } from "../store/auth";
 import { useOnboardingStore } from "../store/onboarding";
+import { spacing } from "../theme/spacing";
+import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
 
-interface Slide {
-  title: string;
-  body: string;
-  emoji: string;
-}
+/**
+ * Los CTAs finales viven en el último slide de `WELCOME_SLIDES`. Los
+ * extraemos una vez a nivel de módulo para no depender del índice runtime.
+ */
+const FINAL_CTAS = WELCOME_SLIDES[WELCOME_SLIDES.length - 1].finalCtas;
 
-const SLIDES: Slide[] = [
-  {
-    emoji: "*",
-    title: "Bienvenido a Tinder Decisivo",
-    body: "Una app chilena para ayudarte a decidir tu voto informado. Sin propaganda, sin sesgos: solo tus valores comparados con las posturas reales de los candidatos.",
-  },
-  {
-    emoji: "?",
-    title: "Como funciona el match",
-    body: "Respondes preguntas sobre temas concretos (economia, medio ambiente, seguridad, etc). Cada respuesta la comparamos con la postura publica de cada candidato. Puedes dar mas o menos peso a los temas que te importan.",
-  },
-  {
-    emoji: "%",
-    title: "Como calculamos tus resultados",
-    body: "Sumamos los puntos de coincidencia y te mostramos un ranking con porcentajes. Tu perfil por eje tematico aparece en un grafico de radar. Todo transparente: puedes ver como se llego a cada numero.",
-  },
-];
-
-export function OnboardingScreen({
-  navigation,
-}: RootStackScreenProps<"Onboarding">) {
+export function OnboardingScreen(_: RootStackScreenProps<"Onboarding">) {
   const markSeen = useOnboardingStore((s) => s.markSeen);
-  const palette = useThemeColors();
+  const setPendingAuthTarget = useOnboardingStore((s) => s.setPendingAuthTarget);
+  const enterGuestMode = useAuthStore((s) => s.enterGuestMode);
+  const c = useThemeColors();
   const [index, setIndex] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
-  const width = Dimensions.get("window").width;
+  // useWindowDimensions() reactivo — importante en web (resize) y tablets (rotación).
+  const { width } = useWindowDimensions();
 
-  async function finish() {
+  const totalSlides = WELCOME_SLIDES.length;
+  const isLastSlide = index === totalSlides - 1;
+
+  /** Salta al auth stack aterrizando en Login (default). */
+  async function finishToLogin() {
+    setPendingAuthTarget(null);
     await markSeen();
-    // Ya no aparece mas: AppNavigator hara swap al Login stack automatico.
+  }
+
+  /** Salta al auth stack aterrizando directo en Register. */
+  async function finishToRegister() {
+    setPendingAuthTarget("Register");
+    await markSeen();
+  }
+
+  /** Entra al main stack en modo invitado. */
+  async function finishAsGuest() {
+    setPendingAuthTarget(null);
+    await markSeen();
+    enterGuestMode();
+  }
+
+  function goToSlide(next: number) {
+    scrollRef.current?.scrollTo({ x: next * width, animated: true });
+    setIndex(next);
   }
 
   function handleNext() {
-    if (index < SLIDES.length - 1) {
-      const next = index + 1;
-      scrollRef.current?.scrollTo({ x: next * width, animated: true });
-      setIndex(next);
-    } else {
-      void finish();
-    }
+    if (!isLastSlide) goToSlide(index + 1);
   }
 
   function handleScroll(e: NativeSyntheticEvent<NativeScrollEvent>) {
@@ -78,14 +85,72 @@ export function OnboardingScreen({
     if (i !== index) setIndex(i);
   }
 
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: { flex: 1, paddingTop: spacing.sp8, backgroundColor: c.bg },
+        topBar: {
+          flexDirection: "row",
+          justifyContent: "flex-end",
+          paddingHorizontal: spacing.sp5,
+          minHeight: 32,
+        },
+        slide: {
+          alignItems: "center",
+          justifyContent: "center",
+          paddingHorizontal: spacing.sp7,
+          gap: spacing.sp5,
+        },
+        stepChip: {
+          ...typography.overline,
+          color: c.primary,
+          fontWeight: "700",
+          letterSpacing: 1,
+        },
+        title: {
+          textAlign: "center",
+          fontWeight: "800",
+        },
+        body: {
+          ...typography.body,
+          color: c.textSecondary,
+          textAlign: "center",
+          maxWidth: 480,
+          lineHeight: 24,
+        },
+        dots: {
+          flexDirection: "row",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: 6,
+          paddingVertical: spacing.sp4,
+        },
+        dot: { height: 8, borderRadius: 4 },
+        cta: {
+          padding: spacing.sp5,
+          paddingBottom: spacing.sp7,
+          gap: spacing.sp3,
+        },
+      }),
+    [c],
+  );
+
   return (
-    <View style={[styles.container, { backgroundColor: palette.bg }]}>
-      {/* Skip button top-right */}
+    <View style={styles.container}>
+      {/* Skip arriba, oculto en slide final (los CTAs son la salida) */}
       <View style={styles.topBar}>
-        <Link block onPress={finish}>Saltar</Link>
+        {!isLastSlide ? (
+          <Link
+            block
+            onPress={finishToLogin}
+            accessibilityLabel="Saltar introducción"
+          >
+            Saltar
+          </Link>
+        ) : null}
       </View>
 
-      {/* Pager */}
+      {/* Pager horizontal */}
       <ScrollView
         ref={scrollRef}
         horizontal
@@ -95,30 +160,26 @@ export function OnboardingScreen({
         scrollEventThrottle={16}
         style={{ flex: 1 }}
       >
-        {SLIDES.map((slide, i) => (
-          <View key={i} style={[styles.slide, { width }]}>
-            <View style={[styles.emojiBox, { backgroundColor: palette.primary }]}>
-              <Text style={styles.emoji}>{slide.emoji}</Text>
-            </View>
-            <Text style={[styles.title, { color: palette.text }]}>
-              {slide.title}
+        {WELCOME_SLIDES.map((slide, i) => (
+          <View key={slide.id} style={[styles.slide, { width }]}>
+            <Text style={styles.stepChip}>
+              {i + 1} de {totalSlides}
             </Text>
-            <Text style={[styles.body, { color: palette.textSecondary }]}>
-              {slide.body}
-            </Text>
+                        <Heading level={1} style={styles.title}>{slide.title}</Heading>
+            <Text style={styles.body}>{slide.body}</Text>
           </View>
         ))}
       </ScrollView>
 
-      {/* Dots */}
+      {/* Indicadores */}
       <View style={styles.dots}>
-        {SLIDES.map((_, i) => (
+        {WELCOME_SLIDES.map((slide, i) => (
           <View
-            key={i}
+            key={slide.id}
             style={[
               styles.dot,
               {
-                backgroundColor: i === index ? palette.primary : palette.border,
+                backgroundColor: i === index ? c.primary : c.border,
                 width: i === index ? 24 : 8,
               },
             ]}
@@ -126,58 +187,37 @@ export function OnboardingScreen({
         ))}
       </View>
 
-      {/* CTA */}
+      {/* CTAs */}
       <View style={styles.cta}>
-        <Button onPress={handleNext}>
-          {index === SLIDES.length - 1 ? "Empezar" : "Siguiente"}
-        </Button>
+        {isLastSlide && FINAL_CTAS ? (
+          <>
+            <Button
+              onPress={finishToRegister}
+              accessibilityLabel={FINAL_CTAS.primary}
+            >
+              {FINAL_CTAS.primary}
+            </Button>
+            <Link
+              block
+              onPress={finishToLogin}
+              accessibilityLabel={FINAL_CTAS.secondary}
+            >
+              {FINAL_CTAS.secondary}
+            </Link>
+            <Link
+              block
+              onPress={finishAsGuest}
+              accessibilityLabel={FINAL_CTAS.tertiary}
+            >
+              {FINAL_CTAS.tertiary}
+            </Link>
+          </>
+        ) : (
+          <Button onPress={handleNext} accessibilityLabel="Siguiente">
+            Siguiente
+          </Button>
+        )}
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 40 },
-  topBar: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    paddingHorizontal: 20,
-    marginBottom: 8,
-  },
-  slide: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 32,
-    gap: 24,
-  },
-  emojiBox: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  emoji: { fontSize: 52, color: "#FFFFFF", fontWeight: "800" },
-  title: {
-    fontSize: 26,
-    fontWeight: "800",
-    textAlign: "center",
-    lineHeight: 32,
-  },
-  body: {
-    fontSize: 16,
-    lineHeight: 24,
-    textAlign: "center",
-    maxWidth: 480,
-  },
-  dots: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 6,
-    paddingVertical: 20,
-  },
-  dot: { height: 8, borderRadius: 4 },
-  cta: { padding: 20, paddingBottom: 32 },
-});

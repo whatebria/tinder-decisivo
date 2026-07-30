@@ -13,6 +13,7 @@ import { getErrorMessage } from "../api/client";
 import {
   Button,
   FormField,
+  Heading,
   Link,
   ThemeToggle,
   useToast,
@@ -59,7 +60,6 @@ export function LoginScreen({ navigation }: RootStackScreenProps<"Login">) {
           flexGrow: 1,
           justifyContent: "center",
         },
-        title: { ...typography.h1, color: c.text },
         subtitle: { ...typography.body, color: c.textSecondary },
         themeWrap: { alignItems: "center", marginTop: spacing.sp4 },
       }),
@@ -72,7 +72,7 @@ export function LoginScreen({ navigation }: RootStackScreenProps<"Login">) {
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
-      <Text style={styles.title}>Servel</Text>
+      <Heading level={1}>Servel</Heading>
       <Text style={styles.subtitle}>
         Ingresa a tu cuenta para encontrar tu candidato ideal.
       </Text>

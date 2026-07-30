@@ -10,7 +10,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getErrorMessage } from "../api/client";
 import { useRequestPasswordReset } from "../api/hooks";
-import { Button, FormField, Link, useToast } from "../components";
+import { Button, FormField, Heading, Link, useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
@@ -50,8 +50,6 @@ export function PasswordResetRequestScreen({
           flexGrow: 1,
           justifyContent: "center",
         },
-        titleSuccess: { ...typography.h1, color: c.success },
-        title: { ...typography.h1, color: c.text },
         body: { ...typography.body, color: c.text },
         subtle: { ...typography.small, color: c.textSecondary },
         subtitle: { ...typography.body, color: c.textSecondary },
@@ -83,7 +81,7 @@ export function PasswordResetRequestScreen({
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.titleSuccess}>Revisa tu email</Text>
+        <Heading level={1} color={c.success}>Revisa tu email</Heading>
         <Text style={styles.body}>
           Si esa direccion tiene una cuenta, te enviamos un link para
           restablecer tu contrasena. El link expira en 1 hora.
@@ -129,7 +127,7 @@ export function PasswordResetRequestScreen({
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
-      <Text style={styles.title}>Olvidaste tu contrasena?</Text>
+      <Heading level={1}>Olvidaste tu contrasena?</Heading>
       <Text style={styles.subtitle}>
         Ingresa el email con el que te registraste. Te enviaremos un link para
         crear una nueva.

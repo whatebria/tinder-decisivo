@@ -29,6 +29,7 @@ export { Link, type LinkProps } from "./Link";
 export { Tooltip, type TooltipProps } from "./Tooltip";
 export { Timeline, type TimelineProps, type TimelineItem } from "./Timeline";
 export { Icon, type IconProps, type IconName } from "./Icon";
+export { Heading, type HeadingProps, type HeadingLevel } from "./Heading";
 
 // Nuevos (Fase 5 — Home HUB wireframe)
 export { ElectionCard, type ElectionCardProps, type ElectionCardVariant } from "./ElectionCard";

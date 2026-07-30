@@ -15,7 +15,7 @@
 import React, { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import { Button, Link } from "../components";
+import { Button, Heading, Link } from "../components";
 import { useTiposEleccion } from "../api/hooks";
 import { useElectionsPrefsStore } from "../store/electionsPrefs";
 import { partitionTipos } from "../store/electionsPrefs";
@@ -80,10 +80,6 @@ export function SubmitDoneScreen({
           gap: spacing.sp4,
           backgroundColor: c.bg,
         },
-        title: {
-          ...typography.h1,
-          color: c.success,
-        },
         lead: {
           ...typography.body,
           fontSize: 17,
@@ -103,7 +99,7 @@ export function SubmitDoneScreen({
       : "Activar una eleccion";
     return (
       <View style={styles.root}>
-        <Text style={styles.title}>Listo!</Text>
+        <Heading level={1} color={c.success}>Listo!</Heading>
         <Text style={styles.lead}>Guardamos tus respuestas generales.</Text>
         <Text style={styles.subtle}>
           Estas respuestas se aplican automaticamente al match de todas las elecciones que
@@ -119,7 +115,7 @@ export function SubmitDoneScreen({
 
   return (
     <View style={styles.root}>
-      <Text style={styles.title}>Listo!</Text>
+      <Heading level={1} color={c.success}>Listo!</Heading>
       <Text style={styles.lead}>Guardamos tus respuestas.</Text>
       <Text style={styles.subtle}>
         Ahora puedes ver que candidatos coinciden mas con tu forma de pensar.
