@@ -65,31 +65,29 @@ e2e/
 
 ## Estado actual del run
 
-Ultimo run (2026-07-29): **14 pass, 1 skip, 0 fail** en ~80s.
+Ultimo run (2026-07-29): **15 pass, 0 skip, 0 fail** en ~90s. Suite 100% verde.
 
-### Pasando (14)
-- **Login: 4/4 (Fix C aplicado)** — exito, error, regresion "email en username", logout desde perfil.
-- Register: 3/4 (exito, boton disabled, username duplicado).
+### Pasando (15)
+- Login: 4/4 — exito, error, regresion "email en username", logout desde perfil.
+- Register: 4/4 — exito, boton disabled, username duplicado, **trim de espacios (Fix D)**.
 - Cambiar password: 2/2 (Fix A).
 - Eliminar cuenta: 2/2 (Fix A).
 - Password reset: 3/3 (Fix B).
 
-### Skippeado (1) — pendiente
-
-**Fix D — Register trim** (1 test: `auth-register.spec.ts` > `trim de espacios...`)
-
-Timeout esperando que "Crear cuenta" desaparezca. Causa exacta pendiente de debug
-con `trace.zip`. Hipotesis: register falla silent (el test no chequea toast de error)
-o `UserAttributeSimilarityValidator` de Django rechaza el password (similitud
-marginal 0.67 vs threshold 0.7, potencialmente flaky).
-
 ### Fixes aplicados 2026-07-29
+
+**Fix D — Register trim** (`auth-register.spec.ts` > `trim de espacios...`):
+- Solo requiso remover el `test.skip`. El test ya estaba escrito correctamente
+  y el frontend (RegisterScreen) ya hace `username.trim()` y `email.trim()`.
+- El fallo original era **efecto colateral del rate-limit del backend**: los
+  reintentos de Playwright quemaban el throttle `register: 10/hour` y despues
+  del limite el registro devolvia 429 > timeout esperando "Crear cuenta"
+  desaparecer. Con `DRF_THROTTLE_DISABLED=1` en el backend, pasa en 10s.
 
 **Fix C — Logout desde perfil** (`auth-login.spec.ts`):
 - Reemplazado el `test.skip(...)` vacio con implementacion real.
 - Usa `goToPerfil(page)` + click al NavRow `"Cerrar sesión"` (con acento).
 - Assert de vuelta a Login via `LOGIN_SUBTITLE` visible.
-- Pasa al primer intento en ~11s.
 
 **Fix B — Password reset** (`auth-password-reset.spec.ts`):
 - Migrados TODOS los `page.getBy*` a `vLabel`/`vRole` de `helpers/ui.ts` que
