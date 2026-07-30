@@ -20,14 +20,17 @@
 
 import { test, expect } from "@playwright/test";
 
+import { apiRegister } from "../helpers/api";
 import {
   dismissCoachMarks,
   enterGuestMode,
   goToNoticias,
   gotoApp,
+  uiLogin,
   vLabel,
   vRole,
 } from "../helpers/ui";
+import { makeTestUser } from "../helpers/users";
 
 test.describe("Noticias › Feed publico", () => {
   test.beforeEach(async ({ page }) => {
@@ -155,5 +158,45 @@ test.describe("Noticias › Feed publico", () => {
     await expect(
       vRole(page, "button", { name: "Cerrar" })
     ).toBeVisible({ timeout: 5_000 });
+  });
+});
+
+test.describe("Noticias › Bookmarks (autenticado)", () => {
+  test("toggle bookmark: guardar -> quitar", async ({ page }) => {
+    // Setup: user autenticado (via API para skippear el UI de register).
+    const user = makeTestUser("news_bm");
+    await apiRegister(user);
+    await gotoApp(page);
+    await uiLogin(page, user);
+    await goToNoticias(page);
+    await dismissCoachMarks(page);
+
+    // Encontrar el primer boton "Guardar noticia: ..." visible.
+    // NewsCard renderiza el BookmarkButton solo si onToggleBookmark y
+    // bookmarked estan definidos (o sea, no-guest).
+    const btnGuardar = vRole(page, "button", {
+      name: /^guardar noticia:/i,
+    }).first();
+    await expect(btnGuardar).toBeVisible({ timeout: 10_000 });
+    await btnGuardar.click();
+
+    // Post-click: el mismo boton cambia su label a "Quitar de guardadas: ..."
+    // Como no sabemos el headline exacto, chequeamos que aparezca al menos
+    // 1 boton "Quitar de guardadas: ..." visible.
+    await expect(
+      vRole(page, "button", { name: /^quitar de guardadas:/i }).first()
+    ).toBeVisible({ timeout: 8_000 });
+
+    // Toggle de vuelta: quitar
+    await vRole(page, "button", { name: /^quitar de guardadas:/i })
+      .first()
+      .click();
+
+    // Post-untoggle: no debe haber ningun boton "Quitar de guardadas:" visible
+    // (asumiendo que era la unica bookmark del user; podria haber otros si
+    // el user ya tenia bookmarks, pero como el user es fresh, no).
+    await expect(
+      vRole(page, "button", { name: /^quitar de guardadas:/i })
+    ).toHaveCount(0, { timeout: 8_000 });
   });
 });
