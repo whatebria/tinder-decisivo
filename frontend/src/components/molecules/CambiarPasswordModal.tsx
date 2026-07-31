@@ -17,6 +17,7 @@ import { Link } from "../atoms/Link";
 import { blurActiveElement } from "../../hooks/blurActiveElement";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
+import { PASSWORD_MIN_LENGTH, PASSWORD_MIN_LENGTH_MSG } from "../../constants/validation";
 
 interface Props {
   visible: boolean;
@@ -38,7 +39,7 @@ export function CambiarPasswordModal({
 
   const passwordsMatch = next.length > 0 && next === confirm;
   const canSubmit =
-    current.length > 0 && next.length >= 10 && passwordsMatch && !loading;
+    current.length > 0 && next.length >= PASSWORD_MIN_LENGTH && passwordsMatch && !loading;
 
   // Blur al elemento con foco ANTES de que el padre haga setState(false).
   // Ver hooks/blurActiveElement para contexto.
@@ -88,7 +89,7 @@ export function CambiarPasswordModal({
       }
     >
       <Text style={styles.message}>
-        Ingresa tu contraseña actual y luego la nueva (mínimo 10 caracteres).
+        Ingresa tu contraseña actual y luego la nueva ({PASSWORD_MIN_LENGTH_MSG.toLowerCase()})
       </Text>
 
       <View>
@@ -104,7 +105,7 @@ export function CambiarPasswordModal({
         />
         <FormField
           label="Nueva contraseña"
-          helper="Mínimo 10 caracteres."
+          helper={PASSWORD_MIN_LENGTH_MSG}
           value={next}
           onChangeText={setNext}
           secureTextEntry

@@ -16,6 +16,7 @@ import { useAuthStore } from "../store/auth";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
+import { PASSWORD_MIN_LENGTH, PASSWORD_MIN_LENGTH_MSG } from "../constants/validation";
 
 export function RegisterScreen({ navigation }: RootStackScreenProps<"Register">) {
   const c = useThemeColors();
@@ -29,7 +30,7 @@ export function RegisterScreen({ navigation }: RootStackScreenProps<"Register">)
   const canSubmit =
     username.length >= 3 &&
     email.includes("@") &&
-    password.length >= 10 &&
+    password.length >= PASSWORD_MIN_LENGTH &&
     !loading;
 
   async function handleRegister() {
@@ -101,7 +102,7 @@ export function RegisterScreen({ navigation }: RootStackScreenProps<"Register">)
         />
         <FormField
           label="Contraseña"
-          helper="Mínimo 10 caracteres."
+          helper={PASSWORD_MIN_LENGTH_MSG}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
