@@ -36,6 +36,7 @@ import {
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
 import { useCoachMarksStore } from "../store/coachMarks";
+import { useOnboardingStore } from "../store/onboarding";
 import { usePerfil } from "../api/hooks";
 import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
@@ -54,6 +55,7 @@ export function ConfiguracionScreen({
   const logout = useAuthStore((s) => s.logout);
   const exitGuestMode = useAuthStore((s) => s.exitGuestMode);
   const resetCoachMarks = useCoachMarksStore((s) => s.resetAll);
+  const resetOnboarding = useOnboardingStore((s) => s.reset);
   const toast = useToast();
 
   /**
@@ -201,6 +203,19 @@ export function ConfiguracionScreen({
         {__DEV__ ? (
           <View style={styles.section}>
             <SectionTitle title="Debug" />
+            <NavRow
+              label="Ver Onboarding"
+              subtitle="Preview del welcome tour sin efectos en la sesion"
+              onPress={() => navigation.navigate("OnboardingPreview")}
+            />
+            <NavRow
+              label="Resetear onboarding"
+              subtitle="La proxima vez que abras la app veran los slides de nuevo"
+              onPress={async () => {
+                await resetOnboarding();
+                toast.info("Onboarding reseteado", "Cierra sesion o recarga para verlo.");
+              }}
+            />
             <NavRow
               label="Design System"
               subtitle="Catalogo interno de atoms, molecules y organisms"

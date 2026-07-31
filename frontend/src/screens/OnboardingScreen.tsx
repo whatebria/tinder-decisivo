@@ -46,7 +46,12 @@ const DEMO_SLIDE_IDS = new Set(["welcome-2", "welcome-3", "welcome-4"]);
  */
 const FINAL_CTAS = WELCOME_SLIDES[WELCOME_SLIDES.length - 1].finalCtas;
 
-export function OnboardingScreen(_: RootStackScreenProps<"Onboarding">) {
+export function OnboardingScreen(_: RootStackScreenProps<"Onboarding"> | RootStackScreenProps<"OnboardingPreview">) {
+  // Acepta tanto la ruta normal como la ruta de preview dev.
+  // Necesitamos acceso a navigation.goBack() y route.name, asi que
+  // casteamos el prop al tipo base de React Navigation.
+  const props = _ as { navigation: { goBack: () => void }; route: { name: string } };
+  const isPreview = props.route.name === "OnboardingPreview";
   const markSeen = useOnboardingStore((s) => s.markSeen);
   const setPendingAuthTarget = useOnboardingStore((s) => s.setPendingAuthTarget);
   const enterGuestMode = useAuthStore((s) => s.enterGuestMode);
@@ -74,18 +79,21 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding">) {
 
   /** Salta al auth stack aterrizando en Login (default). */
   async function finishToLogin() {
+    if (isPreview) { props.navigation.goBack(); return; }
     setPendingAuthTarget(null);
     await markSeen();
   }
 
   /** Salta al auth stack aterrizando directo en Register. */
   async function finishToRegister() {
+    if (isPreview) { props.navigation.goBack(); return; }
     setPendingAuthTarget("Register");
     await markSeen();
   }
 
   /** Entra al main stack en modo invitado. */
   async function finishAsGuest() {
+    if (isPreview) { props.navigation.goBack(); return; }
     setPendingAuthTarget(null);
     await markSeen();
     enterGuestMode();
@@ -184,7 +192,7 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding">) {
             onPress={handleBack}
             accessibilityLabel="Volver al paso anterior"
           >
-            ← Atrás
+            Atras
           </Link>
         ) : (
           <View />
@@ -193,9 +201,9 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding">) {
           <Link
             block
             onPress={finishToLogin}
-            accessibilityLabel="Saltar introducción"
+            accessibilityLabel={isPreview ? "Cerrar preview" : "Saltar introduccion"}
           >
-            Saltar
+            {isPreview ? "Cerrar preview" : "Saltar"}
           </Link>
         ) : (
           <View />
