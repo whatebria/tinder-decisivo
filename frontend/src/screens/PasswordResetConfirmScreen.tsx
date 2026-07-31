@@ -46,10 +46,14 @@ export function PasswordResetConfirmScreen({
     try {
       await confirmReset.mutateAsync({ token, newPassword });
       toast.success(
-        "Contraseña actualizada",
-        "Ya puedes iniciar sesión con tu nueva contraseña."
+        "Contrasena actualizada",
+        "Ya puedes iniciar sesion con tu nueva contrasena."
       );
-      navigation.replace("Login");
+      // Reset completo del stack: elimina [Login, PasswordResetRequest, PasswordResetConfirm]
+      // y arranca desde [Login] limpio. Con navigation.replace() el stack
+      // acumulado causaba un race condition en el 401 interceptor al transicionar
+      // al main stack. BUG-005.
+      navigation.reset({ index: 0, routes: [{ name: "Login" }] });
     } catch (err) {
       toast.error("No pudimos cambiar tu contraseña", getErrorMessage(err));
     }
