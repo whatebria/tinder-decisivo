@@ -19,6 +19,7 @@
  * responder + calcular match anonimo.
  */
 
+import { SHOW_NOTICIAS } from "../constants/features";
 import React, { useMemo, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
@@ -237,7 +238,8 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
     });
   }
 
-  noticias.slice(0, 4).forEach((n) => {
+  if (SHOW_NOTICIAS) {
+    noticias.slice(0, 4).forEach((n) => {
     novedades.push({
       key: `noticia-${n.id}`,
       kind: "noticia",
@@ -254,7 +256,8 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
           }),
         ),
     });
-  });
+  }); // end noticias.slice
+  } // end if (SHOW_NOTICIAS)
 
   return (
     <>
@@ -262,7 +265,7 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
         <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
           <HomeTopBar
             brand="Tinder Decisivo"
-            onNotifications={() => navigation.navigate("Noticias")}
+            onNotifications={SHOW_NOTICIAS ? () => navigation.navigate("Noticias") : undefined}
           />
 
           <HomeGreeting
@@ -367,8 +370,8 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
               <View>
                 <SectionTitle
                   title="Novedades"
-                  actionLabel="Ver todas"
-                  onAction={() => navigation.navigate("Noticias")}
+                  actionLabel={SHOW_NOTICIAS ? "Ver todas" : undefined}
+                  onAction={SHOW_NOTICIAS ? () => navigation.navigate("Noticias") : undefined}
                 />
                 <View style={{ marginTop: spacing.sp3 }}>
                   <NovedadesFeed items={novedades} />

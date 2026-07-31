@@ -20,6 +20,7 @@ import React, { useMemo, useState } from "react";
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getErrorMessage } from "../api/client";
+import { SHOW_NOTICIAS } from "../constants/features";
 import {
   useDescartados,
   useFavoritos,
@@ -370,7 +371,7 @@ export function MisGuardadosScreen({
       case "posturas":
         return renderPosturas();
       case "noticias":
-        return renderNoticias();
+        return SHOW_NOTICIAS ? renderNoticias() : null;
     }
   })();
 
@@ -417,7 +418,9 @@ export function MisGuardadosScreen({
             { value: "favoritos", label: "Favoritos", count: favoritos.length },
             { value: "descartados", label: "Descartados", count: descartados.length },
             { value: "posturas", label: "Posturas", count: posturas.length },
-            { value: "noticias", label: "Noticias", count: noticias.length },
+            ...(SHOW_NOTICIAS
+              ? [{ value: "noticias" as const, label: "Noticias", count: noticias.length }]
+              : []),
           ]}
           value={tab}
           onChange={(v) => setTab(v)}

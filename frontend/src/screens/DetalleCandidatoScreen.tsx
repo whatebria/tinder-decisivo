@@ -75,6 +75,7 @@ import { useThemeColors } from "../theme/useTheme";
 import { iniciales, nombreCompleto } from "../utils/candidato";
 import { NoticiasTab } from "./DetalleCandidato/NoticiasTab";
 import { ResumenTab } from "./DetalleCandidato/ResumenTab";
+import { SHOW_NOTICIAS } from "../constants/features";
 
 type PerfilTab = "resumen" | "posturas" | "noticias";
 
@@ -220,7 +221,9 @@ export function DetalleCandidatoScreen({
           items={[
             { value: "resumen", label: "Resumen" },
             { value: "posturas", label: "Posturas", count: posturas.length },
-            { value: "noticias", label: "Noticias", count: noticias.length },
+            ...(SHOW_NOTICIAS
+              ? [{ value: "noticias" as const, label: "Noticias", count: noticias.length }]
+              : []),
           ]}
           style={styles.tabsStretch}
         />
@@ -239,9 +242,9 @@ export function DetalleCandidatoScreen({
             posturas={posturas}
             loading={posturasQ.isLoading}
           />
-        ) : (
+        ) : tab === "noticias" && SHOW_NOTICIAS ? (
           <NoticiasTab noticias={noticias} />
-        )}
+        ) : null}
       </ScrollView>
 
       <ShareModal

@@ -129,8 +129,8 @@ const GUARDADOS: CoachTour = {
       id: "guardados-1",
       title: "Aquí guardamos todo lo que te interesó",
       description:
-        "Candidatos que marcaste como favoritos, posturas que quieres recordar y noticias que dejaste pendientes. Cambia entre pestañas arriba para verlos.",
-      highlight: "Pestañas Favoritos / Posturas / Noticias",
+        "Candidatos que marcaste como favoritos y posturas que quieres recordar. Cambia entre pestañas arriba para verlos.",
+      highlight: "Pestañas Favoritos / Posturas",
     },
     {
       id: "guardados-2",
