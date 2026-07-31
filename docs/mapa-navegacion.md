@@ -42,15 +42,19 @@ Splash → Welcome tour (5 slides) → [Login | Signup]
 
 **Welcome tour** (`#tpl-onboarding`): 5 slides secuenciales presentando la app.
 
-| Slide | Foco |
-|---|---|
-| 1/5 | Que es (matching) |
-| 2/5 | Como funciona (12 preguntas) |
-| 3/5 | Multi-eleccion |
-| 4/5 | Transparencia (fuentes + confianza) |
-| 5/5 | CTAs finales (Crear cuenta / Ya tengo cuenta) |
+| Slide | Foco | Demo interactivo |
+|---|---|---|
+| 1/5 | Que es (matching electoral) | — (texto) |
+| 2/5 | Elecciones disponibles | 3 rows con Toggle activar/desactivar (estado local, decorativo) |
+| 3/5 | Cuestionario de preguntas | 1 pregunta Likert de ejemplo con RadioGroup interactivo |
+| 4/5 | Ranking de resultados | 3 candidatos ficticios con barra de match% |
+| 5/5 | CTAs finales | Crear cuenta / Ya tengo cuenta / Explorar sin cuenta |
 
-**Saltar** disponible en slides 1-4. Solo se muestra al primer arranque; se puede volver a ver desde Config → "Ver tour de nuevo".
+**Navegacion entre slides**: boton ← Atras en slides 2-5 (izquierda del topBar).
+**Saltar** disponible en slides 1-4 (derecha del topBar). Solo se muestra al primer arranque; se puede volver a ver desde Config → "Ver tour de nuevo".
+
+_Implementacion: `OnboardingScreen.tsx` + demos en `components/molecules/Onboarding*Demo.tsx`._
+_Actualizacion: 2026-07-30 (UX-008, UX-009)._
 
 ### 2.2 Pantallas raíz (con AppNav)
 

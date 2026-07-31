@@ -24,6 +24,9 @@ import {
 } from "react-native";
 
 import { Button, Heading, Link } from "../components";
+import { OnboardingEleccionesDemo } from "../components/molecules/OnboardingEleccionesDemo";
+import { OnboardingPreguntaDemo }   from "../components/molecules/OnboardingPreguntaDemo";
+import { OnboardingResultadosDemo } from "../components/molecules/OnboardingResultadosDemo";
 import { WELCOME_SLIDES } from "../content/welcomeTour";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
@@ -31,6 +34,9 @@ import { useOnboardingStore } from "../store/onboarding";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
+
+/** Slides que incluyen un demo interactivo debajo del body text. */
+const DEMO_SLIDE_IDS = new Set(["welcome-2", "welcome-3", "welcome-4"]);
 
 /**
  * Los CTAs finales viven en el último slide de `WELCOME_SLIDES`. Los
@@ -101,10 +107,20 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding">) {
           minHeight: 32,
         },
         slide: {
+          flex: 1,
           alignItems: "center",
           justifyContent: "center",
           paddingHorizontal: spacing.sp7,
           gap: spacing.sp5,
+        },
+        /** Slides con demo: top-aligned para que el contenido no quede cortado. */
+        slideWithDemo: {
+          alignItems: "center",
+          justifyContent: "flex-start",
+          paddingHorizontal: spacing.sp5,
+          paddingTop: spacing.sp4,
+          paddingBottom: spacing.sp6,
+          gap: spacing.sp4,
         },
         stepChip: {
           ...typography.overline,
@@ -178,25 +194,53 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding">) {
         scrollEventThrottle={16}
         style={{ flex: 1 }}
       >
-        {WELCOME_SLIDES.map((slide, i) => (
-          <View
-            key={slide.id}
-            style={[styles.slide, { width }]}
-            // A11y: solo el slide activo vive en el accessibility tree.
-            // Los inactivos siguen en el DOM para el scroll horizontal nativo,
-            // pero VoiceOver/NVDA/TalkBack los ignoran completamente.
-            // WCAG 2.2 AA: 1.3.1, 2.4.6, 4.1.2
-            accessibilityElementsHidden={i !== index}
-            importantForAccessibility={i === index ? "yes" : "no-hide-descendants"}
-            aria-hidden={i !== index}
-          >
-            <Text style={styles.stepChip}>
-              {i + 1} de {totalSlides}
-            </Text>
-            <Heading level={1} style={styles.title}>{slide.title}</Heading>
-            <Text style={styles.body}>{slide.body}</Text>
-          </View>
-        ))}
+        {WELCOME_SLIDES.map((slide, i) => {
+          const hasDemo = DEMO_SLIDE_IDS.has(slide.id);
+
+          // Contenido de texto comun a todos los slides
+          const textContent = (
+            <>
+              <Text style={styles.stepChip}>{i + 1} de {totalSlides}</Text>
+              <Heading level={1} style={styles.title}>{slide.title}</Heading>
+              <Text style={styles.body}>{slide.body}</Text>
+            </>
+          );
+
+          return (
+            <View
+              key={slide.id}
+              style={{ width, flex: 1 }}
+              // A11y: solo el slide activo vive en el accessibility tree.
+              // Los inactivos siguen en el DOM para el scroll horizontal nativo,
+              // pero VoiceOver/NVDA/TalkBack los ignoran completamente.
+              // WCAG 2.2 AA: 1.3.1, 2.4.6, 4.1.2
+              accessibilityElementsHidden={i !== index}
+              importantForAccessibility={i === index ? "yes" : "no-hide-descendants"}
+              aria-hidden={i !== index}
+            >
+              {hasDemo ? (
+                /**
+                 * Slides con demo: ScrollView vertical interno.
+                 * El pager externo es horizontal -- ejes distintos, sin conflicto.
+                 */
+                <ScrollView
+                  contentContainerStyle={styles.slideWithDemo}
+                  showsVerticalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled"
+                >
+                  {textContent}
+                  {slide.id === "welcome-2" && <OnboardingEleccionesDemo />}
+                  {slide.id === "welcome-3" && <OnboardingPreguntaDemo />}
+                  {slide.id === "welcome-4" && <OnboardingResultadosDemo />}
+                </ScrollView>
+              ) : (
+                <View style={styles.slide}>
+                  {textContent}
+                </View>
+              )}
+            </View>
+          );
+        })}
       </ScrollView>
 
       {/* Indicadores */}
