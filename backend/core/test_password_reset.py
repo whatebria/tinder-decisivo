@@ -60,10 +60,32 @@ class TestRequestReset:
         request_reset("JENNY@EXAMPLE.COM")
         assert PasswordResetToken.objects.filter(user=user).count() == 1
 
-    def test_multiple_requests_crean_tokens_distintos(self, user):
+    def test_segunda_solicitud_invalida_token_anterior(self, user):
+        """F2: el token anterior queda marcado como usado al pedir uno nuevo."""
         request_reset(user.email)
+        token_viejo = PasswordResetToken.objects.get(user=user)
+
         request_reset(user.email)
-        assert PasswordResetToken.objects.filter(user=user).count() == 2
+
+        token_viejo.refresh_from_db()
+        assert token_viejo.is_used, "El token anterior debe quedar marcado como usado"
+
+        # Solo el nuevo token esta activo
+        activos = PasswordResetToken.objects.filter(
+            user=user, used_at__isnull=True
+        )
+        assert activos.count() == 1
+        assert activos.first().token != token_viejo.token
+
+    def test_token_anterior_invalido_tras_nueva_solicitud(self, user):
+        """F2: usar el token viejo post-segunda-solicitud debe fallar."""
+        request_reset(user.email)
+        token_viejo = PasswordResetToken.objects.get(user=user)
+
+        request_reset(user.email)  # invalida el anterior
+
+        with pytest.raises(ResetError, match="ya fue usado"):
+            confirm_reset(token_viejo.token, "NuevaPass_Segura123!")
 
 
 # ---------------------------------------------------------------------------

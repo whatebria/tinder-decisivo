@@ -54,8 +54,8 @@ class ResetError(Exception):
 def request_reset(email: str) -> ResetRequestResult:
     """Genera un token de reset y envia el email.
 
-    Es idempotente por email: cada llamada crea un token nuevo. Los anteriores
-    quedan huerfanos (expiran solos).
+    Invalida todos los tokens pendientes anteriores del mismo user antes de
+    crear el nuevo (F2: un solo token activo por usuario en cualquier momento).
 
     NO revela si el email existe o no. Siempre retorna email_sent=True para
     evitar user enumeration attacks.
@@ -70,6 +70,10 @@ def request_reset(email: str) -> ResetRequestResult:
     if user is None:
         logger.info("Reset solicitado para email inexistente: %s", normalized)
         return ResetRequestResult(email_sent=True)
+
+    # F2: un solo token activo por usuario. Los pendientes anteriores quedan
+    # marcados como usados (no borrados, para conservar auditoria).
+    _invalidate_pending_tokens(user)
 
     token = _create_token(user)
     link = _build_reset_link(token.token)
@@ -131,6 +135,20 @@ def confirm_reset(token_str: str, new_password: str) -> User:
 # ---------------------------------------------------------------------------
 # Helpers privados
 # ---------------------------------------------------------------------------
+def _invalidate_pending_tokens(user: User) -> None:
+    """Marca como usados todos los tokens de reset pendientes del usuario.
+
+    Se llama antes de crear un token nuevo. Garantiza que en todo momento
+    hay un unico token activo por usuario (F2).
+    Usa used_at en lugar de delete() para preservar trazabilidad de auditoria.
+    """
+    PasswordResetToken.objects.filter(
+        user=user,
+        used_at__isnull=True,
+        expires_at__gt=timezone.now(),
+    ).update(used_at=timezone.now())
+
+
 def _create_token(user: User) -> PasswordResetToken:
     """Crea un token seguro de 64 chars hex."""
     raw = secrets.token_urlsafe(48)  # ~64 chars base64 url-safe
