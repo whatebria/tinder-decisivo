@@ -35,7 +35,7 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web",
+    "web": "expo start --web --port 8081",
     "types:gen": "cd ../backend && uv run python manage.py spectacular --file ../frontend/schema.yml && cd ../frontend && openapi-typescript schema.yml -o src/types/api.ts",
     "typecheck": "tsc --noEmit",
     "test": "jest",
