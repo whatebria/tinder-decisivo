@@ -375,12 +375,14 @@ export function MisGuardadosScreen({
 
   return (
     <>
-    <AppShell active="guardados" navigation={navigation}>
-      <ScreenTopBar
-        title="Mis guardados"
-        subtitle="Todo lo que guardaste en un solo lugar."
-        onBack={() => navigation.goBack()}
-      />
+    <AppShell active={null} navigation={navigation}>
+      <View style={styles.topBarWrapper}>
+        <ScreenTopBar
+          title="Mis guardados"
+          subtitle="Todo lo que guardaste en un solo lugar."
+          onBack={() => navigation.goBack()}
+        />
+      </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         {/* Filtro por eleccion (chips). Por ahora "Todas" es la unica funcional. */}
