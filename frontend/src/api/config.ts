@@ -11,10 +11,15 @@
 
 import { Platform } from "react-native";
 
+// IMPORTANTE: En web, usar `localhost` (NO `127.0.0.1`) para que la cookie
+// httpOnly de autenticacion sea same-site con el origen del frontend.
+// Con SameSite=Lax, el browser NO envia cookies de `127.0.0.1` en requests
+// XHR desde `localhost` — son sitios distintos a pesar de resolverse igual.
+// Ref: BUG-005 (glitch post-login: 401 en mi-progreso y perfil).
 const DEFAULT_BASE = Platform.select({
   android: "http://10.0.2.2:8010/api/v1",
   ios: "http://127.0.0.1:8010/api/v1",
-  default: "http://127.0.0.1:8010/api/v1",
+  default: "http://localhost:8010/api/v1", // web: localhost == same-site con frontend
 });
 
 export const API_BASE_URL =
