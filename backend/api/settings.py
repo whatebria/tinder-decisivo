@@ -59,6 +59,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "api.middleware.ContentSecurityPolicyMiddleware",  # F5: CSP header
     "corsheaders.middleware.CorsMiddleware",  # antes de CommonMiddleware
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",

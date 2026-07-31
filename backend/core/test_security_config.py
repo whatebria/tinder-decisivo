@@ -1,5 +1,6 @@
-"""Tests para F17 + F18.
+"""Tests para configuracion de seguridad (F5, F17, F18).
 
+F5:  Content-Security-Policy middleware.
 F17: guards de configuracion en settings.py (DEBUG en produccion + custom 404).
 F18: login response no incluye email.
 """
@@ -7,6 +8,42 @@ F18: login response no incluye email.
 import pytest
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
+
+
+# ---------------------------------------------------------------------------
+# F5: Content-Security-Policy header
+# ---------------------------------------------------------------------------
+
+
+class TestCSPMiddleware:
+    def test_csp_header_ausente_en_debug(self, db, settings):
+        """En DEBUG=True el CSP no se aplica para no entorpecer el desarrollo."""
+        settings.DEBUG = True
+        client = APIClient()
+        resp = client.get("/api/v1/health/")
+        assert "Content-Security-Policy" not in resp
+
+    def test_csp_api_en_produccion(self, db, settings):
+        """En DEBUG=False las rutas /api/* reciben la politica maxima."""
+        settings.DEBUG = False
+        client = APIClient()
+        resp = client.get("/api/v1/health/")
+        csp = resp.get("Content-Security-Policy", "")
+        assert csp, "CSP header debe estar presente en prod"
+        assert "default-src 'none'" in csp
+        assert "frame-ancestors 'none'" in csp
+
+    def test_csp_admin_en_produccion(self, db, settings):
+        """Las rutas /admin/* reciben politica menos restrictiva (necesitan JS inline)."""
+        settings.DEBUG = False
+        client = APIClient()
+        # El admin redirige a login -- nos importa el header, no el status
+        resp = client.get("/admin/")
+        csp = resp.get("Content-Security-Policy", "")
+        assert csp, "CSP header debe estar presente para el admin en prod"
+        assert "default-src 'self'" in csp
+        assert "script-src 'self' 'unsafe-inline'" in csp
+        assert "frame-ancestors 'none'" in csp
 
 
 # ---------------------------------------------------------------------------
