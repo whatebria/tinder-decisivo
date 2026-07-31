@@ -136,7 +136,7 @@ const GUARDADOS: CoachTour = {
       id: "guardados-2",
       title: "¿Cómo guardo cosas?",
       description:
-        "Toca la estrella en un candidato para hacerlo favorito, o el marcador en una postura o noticia para guardarla. Aparecerán acá al toque.",
+        "Toca la estrella en un candidato para hacerlo favorito, o el marcador en una postura para guardarla. Aparecerán acá al toque.",
       highlight: "Botones estrella y marcador",
     },
   ],

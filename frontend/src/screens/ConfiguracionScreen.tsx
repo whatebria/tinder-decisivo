@@ -162,7 +162,7 @@ export function ConfiguracionScreen({
             <SectionTitle title="Mis datos" />
             <NavRow
               label="Mis guardados"
-              subtitle="Favoritos, descartados, posturas y noticias guardadas"
+              subtitle="Favoritos, descartados y posturas guardadas"
               onPress={() => navigation.navigate("MisGuardados")}
             />
             <NavRow
