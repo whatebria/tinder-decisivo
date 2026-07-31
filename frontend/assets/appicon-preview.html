@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>AppIcon preview — tinder-decisivo</title>
+  <title>AppIcon preview</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link rel="icon" type="image/png" sizes="48x48" href="favicon.png"/>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -13,7 +15,7 @@
     h2  { font-size: 11px; font-weight: 700; letter-spacing: .1em;
           text-transform: uppercase; color: #8A9199; margin-bottom: 16px; }
     .section { margin-bottom: 44px; }
-    .row { display: flex; flex-wrap: wrap; gap: 0; align-items: flex-end; }
+    .row  { display: flex; flex-wrap: wrap; gap: 0; align-items: flex-end; }
     .tile { display: flex; flex-direction: column; align-items: center;
             gap: 8px; padding: 20px 24px; }
     .tile span { font-size: 11px; }
@@ -24,216 +26,161 @@
     /* HomeTopBar mockup */
     .topbar {
       display: flex; align-items: center; gap: 8px;
-      background: #FFFFFF; border: 1px solid #DDE4E1;
       border-radius: 12px; padding: 10px 16px;
-      box-shadow: 0 1px 4px rgba(0,0,0,.06);
-      max-width: 320px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06); max-width: 320px;
     }
-    .topbar-dark {
-      background: #1B2830; border-color: #2A3B44;
-    }
-    .brand-text { font-size: 15px; font-weight: 700; color: #1A2B33; flex: 1; }
-    .brand-text-d { color: #E8EEEA; }
+    .topbar-l { background: #FFFFFF; border: 1px solid #DDE4E1; }
+    .topbar-d { background: #1B2830; border: 1px solid #2A3B44; }
+    .brand-l  { font-size: 15px; font-weight: 700; color: #1A2B33; flex: 1; }
+    .brand-d  { font-size: 15px; font-weight: 700; color: #E8EEEA; flex: 1; }
+    .mode-label { font-size: 11px; color: #8A9199; display: block; margin-top: 8px; }
   </style>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="icon" type="image/png" sizes="48x48" href="favicon.png" />
 </head>
 <body>
 
-<h1>AppIcon — in-app preview</h1>
-<p>viewBox 24x24 · solid colors · sin Mask · sin gradiente en stroke</p>
+<h1>AppIcon preview</h1>
+<p>Diseno filled: pentagon solido + persona en color contraste. Mismo diseno que favicon.svg.</p>
 
-<!-- Sprite SVG de defs compartidos -->
+<!-- Sprite de defs compartidos -->
 <svg style="position:absolute;width:0;height:0;overflow:hidden" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- LIGHT symbol -->
-    <symbol id="appicon-light" viewBox="0 0 24 24">
-      <!-- Pentagon -->
-      <polygon points="12.000,2.000 21.511,8.910 17.963,20.090 6.037,20.090 2.489,8.910"
-        fill="#2E5F7E" fill-opacity="0.07" stroke="#2E5F7E" stroke-width="1.5" stroke-linejoin="round"/>
-      <!-- Person head -->
-      <circle cx="12" cy="9.5" r="2" fill="none" stroke="#2E5F7E" stroke-width="1.4"/>
-      <!-- Person shoulders -->
+    <!-- Light / small (sin data polygon) -->
+    <symbol id="api-l" viewBox="0 0 24 24">
+      <polygon points="12,2 21.511,8.910 17.963,20.090 6.037,20.090 2.489,8.910"
+        fill="#2E5F7E" stroke="none"/>
+      <circle cx="12" cy="9.5" r="2" fill="none" stroke="#FFFFFF" stroke-width="1.4"/>
       <path d="M 8,15 C 8,12 16,12 16,15"
-        fill="none" stroke="#2E5F7E" stroke-width="1.4" stroke-linecap="round"/>
+        fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round"/>
     </symbol>
 
-    <!-- LIGHT + data polygon (size>=32) -->
-    <symbol id="appicon-light-lg" viewBox="0 0 24 24">
-      <polygon points="12.000,2.000 21.511,8.910 17.963,20.090 6.037,20.090 2.489,8.910"
-        fill="#2E5F7E" fill-opacity="0.07" stroke="#2E5F7E" stroke-width="1.5" stroke-linejoin="round"/>
-      <!-- Data polygon -->
-      <polygon
-        points="12.000,2.850 20.001,9.419 16.688,19.279 7.037,18.945 2.916,9.491"
-        fill="#2E5F7E" fill-opacity="0.18"
-        stroke="#2E5F7E" stroke-opacity="0.65" stroke-width="1" stroke-linejoin="round"/>
-      <circle cx="12" cy="9.5" r="2" fill="none" stroke="#2E5F7E" stroke-width="1.4"/>
+    <!-- Light / large (con data polygon) -->
+    <symbol id="api-l-lg" viewBox="0 0 24 24">
+      <polygon points="12,2 21.511,8.910 17.963,20.090 6.037,20.090 2.489,8.910"
+        fill="#2E5F7E" stroke="none"/>
+      <polygon points="12,2.85 20.001,9.419 16.688,19.279 7.037,18.945 2.916,9.491"
+        fill="#5A87A5" fill-opacity="0.35"
+        stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="0.6" stroke-linejoin="round"/>
+      <circle cx="12" cy="9.5" r="2" fill="none" stroke="#FFFFFF" stroke-width="1.4"/>
       <path d="M 8,15 C 8,12 16,12 16,15"
-        fill="none" stroke="#2E5F7E" stroke-width="1.4" stroke-linecap="round"/>
+        fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round"/>
     </symbol>
 
-    <!-- DARK symbol -->
-    <symbol id="appicon-dark" viewBox="0 0 24 24">
-      <polygon points="12.000,2.000 21.511,8.910 17.963,20.090 6.037,20.090 2.489,8.910"
-        fill="#7BB5D4" fill-opacity="0.12" stroke="#7BB5D4" stroke-width="1.5" stroke-linejoin="round"/>
-      <circle cx="12" cy="9.5" r="2" fill="none" stroke="#7BB5D4" stroke-width="1.4"/>
+    <!-- Dark / small -->
+    <symbol id="api-d" viewBox="0 0 24 24">
+      <polygon points="12,2 21.511,8.910 17.963,20.090 6.037,20.090 2.489,8.910"
+        fill="#7BB5D4" stroke="none"/>
+      <circle cx="12" cy="9.5" r="2" fill="none" stroke="#0B1418" stroke-width="1.4"/>
       <path d="M 8,15 C 8,12 16,12 16,15"
-        fill="none" stroke="#7BB5D4" stroke-width="1.4" stroke-linecap="round"/>
+        fill="none" stroke="#0B1418" stroke-width="1.4" stroke-linecap="round"/>
     </symbol>
 
-    <!-- DARK + data polygon -->
-    <symbol id="appicon-dark-lg" viewBox="0 0 24 24">
-      <polygon points="12.000,2.000 21.511,8.910 17.963,20.090 6.037,20.090 2.489,8.910"
-        fill="#7BB5D4" fill-opacity="0.12" stroke="#7BB5D4" stroke-width="1.5" stroke-linejoin="round"/>
-      <polygon
-        points="12.000,2.850 20.001,9.419 16.688,19.279 7.037,18.945 2.916,9.491"
-        fill="#7BB5D4" fill-opacity="0.18"
-        stroke="#7BB5D4" stroke-opacity="0.65" stroke-width="1" stroke-linejoin="round"/>
-      <circle cx="12" cy="9.5" r="2" fill="none" stroke="#7BB5D4" stroke-width="1.4"/>
+    <!-- Dark / large -->
+    <symbol id="api-d-lg" viewBox="0 0 24 24">
+      <polygon points="12,2 21.511,8.910 17.963,20.090 6.037,20.090 2.489,8.910"
+        fill="#7BB5D4" stroke="none"/>
+      <polygon points="12,2.85 20.001,9.419 16.688,19.279 7.037,18.945 2.916,9.491"
+        fill="#9BC7DF" fill-opacity="0.35"
+        stroke="#0B1418" stroke-opacity="0.55" stroke-width="0.6" stroke-linejoin="round"/>
+      <circle cx="12" cy="9.5" r="2" fill="none" stroke="#0B1418" stroke-width="1.4"/>
       <path d="M 8,15 C 8,12 16,12 16,15"
-        fill="none" stroke="#7BB5D4" stroke-width="1.4" stroke-linecap="round"/>
+        fill="none" stroke="#0B1418" stroke-width="1.4" stroke-linecap="round"/>
     </symbol>
   </defs>
 </svg>
 
 <!-- HomeTopBar mockup -->
 <div class="section">
-  <h2>HomeTopBar — contexto real (size=22)</h2>
-  <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+  <h2>HomeTopBar - contexto real (size=22)</h2>
+  <div style="display:flex;gap:16px;flex-wrap:wrap">
     <div>
-      <div class="topbar">
-        <svg width="22" height="22"><use href="#appicon-light"/></svg>
-        <span class="brand-text">Tinder Decisivo</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A2B33" stroke-width="2" stroke-linecap="round">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-        </svg>
+      <div class="topbar topbar-l">
+        <svg width="22" height="22"><use href="#api-l"/></svg>
+        <span class="brand-l">Tinder Decisivo</span>
       </div>
-      <span style="font-size:11px;color:#8A9199;display:block;margin-top:8px">Light</span>
+      <span class="mode-label">Light</span>
     </div>
     <div>
-      <div class="topbar topbar-dark">
-        <svg width="22" height="22"><use href="#appicon-dark"/></svg>
-        <span class="brand-text brand-text-d">Tinder Decisivo</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E8EEEA" stroke-width="2" stroke-linecap="round">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-        </svg>
+      <div class="topbar topbar-d">
+        <svg width="22" height="22"><use href="#api-d"/></svg>
+        <span class="brand-d">Tinder Decisivo</span>
       </div>
-      <span style="font-size:11px;color:#8A9199;display:block;margin-top:8px">Dark</span>
+      <span class="mode-label">Dark</span>
     </div>
   </div>
 </div>
 
-<!-- Size ramp LIGHT -->
+<!-- Size ramp light -->
 <div class="section">
-  <h2>Size ramp — light</h2>
+  <h2>Size ramp - light</h2>
+  <div class="row bg-l">
+    <div class="tile on-l"><svg width="16"  height="16" ><use href="#api-l"/></svg>   <span>16</span></div>
+    <div class="tile on-l"><svg width="22"  height="22" ><use href="#api-l"/></svg>   <span>22</span></div>
+    <div class="tile on-l"><svg width="28"  height="28" ><use href="#api-l"/></svg>   <span>28</span></div>
+    <div class="tile on-l"><svg width="40"  height="40" ><use href="#api-l-lg"/></svg><span>40 +poly</span></div>
+    <div class="tile on-l"><svg width="56"  height="56" ><use href="#api-l-lg"/></svg><span>56 +poly</span></div>
+    <div class="tile on-l"><svg width="80"  height="80" ><use href="#api-l-lg"/></svg><span>80 +poly</span></div>
+    <div class="tile on-l"><svg width="120" height="120"><use href="#api-l-lg"/></svg><span>120 +poly</span></div>
+  </div>
+</div>
+
+<!-- Size ramp dark -->
+<div class="section">
+  <h2>Size ramp - dark</h2>
+  <div class="row bg-d">
+    <div class="tile on-d"><svg width="16"  height="16" ><use href="#api-d"/></svg>   <span>16</span></div>
+    <div class="tile on-d"><svg width="22"  height="22" ><use href="#api-d"/></svg>   <span>22</span></div>
+    <div class="tile on-d"><svg width="28"  height="28" ><use href="#api-d"/></svg>   <span>28</span></div>
+    <div class="tile on-d"><svg width="40"  height="40" ><use href="#api-d-lg"/></svg><span>40 +poly</span></div>
+    <div class="tile on-d"><svg width="56"  height="56" ><use href="#api-d-lg"/></svg><span>56 +poly</span></div>
+    <div class="tile on-d"><svg width="80"  height="80" ><use href="#api-d-lg"/></svg><span>80 +poly</span></div>
+    <div class="tile on-d"><svg width="120" height="120"><use href="#api-d-lg"/></svg><span>120 +poly</span></div>
+  </div>
+</div>
+
+<!-- vs heart -->
+<div class="section">
+  <h2>Comparacion vs heart (22px)</h2>
   <div class="row bg-l">
     <div class="tile on-l">
-      <svg width="16" height="16"><use href="#appicon-light"/></svg>
-      <span>16</span>
-    </div>
-    <div class="tile on-l">
-      <svg width="22" height="22"><use href="#appicon-light"/></svg>
-      <span>22</span>
-    </div>
-    <div class="tile on-l">
-      <svg width="28" height="28"><use href="#appicon-light"/></svg>
-      <span>28</span>
-    </div>
-    <div class="tile on-l">
-      <svg width="40" height="40"><use href="#appicon-light-lg"/></svg>
-      <span>40 +poly</span>
-    </div>
-    <div class="tile on-l">
-      <svg width="56" height="56"><use href="#appicon-light-lg"/></svg>
-      <span>56 +poly</span>
-    </div>
-    <div class="tile on-l">
-      <svg width="80" height="80"><use href="#appicon-light-lg"/></svg>
-      <span>80 +poly</span>
-    </div>
-    <div class="tile on-l">
-      <svg width="120" height="120"><use href="#appicon-light-lg"/></svg>
-      <span>120 +poly</span>
-    </div>
-  </div>
-</div>
-
-<!-- Size ramp DARK -->
-<div class="section">
-  <h2>Size ramp — dark</h2>
-  <div class="row bg-d">
-    <div class="tile on-d">
-      <svg width="16" height="16"><use href="#appicon-dark"/></svg>
-      <span>16</span>
-    </div>
-    <div class="tile on-d">
-      <svg width="22" height="22"><use href="#appicon-dark"/></svg>
-      <span>22</span>
-    </div>
-    <div class="tile on-d">
-      <svg width="28" height="28"><use href="#appicon-dark"/></svg>
-      <span>28</span>
-    </div>
-    <div class="tile on-d">
-      <svg width="40" height="40"><use href="#appicon-dark-lg"/></svg>
-      <span>40 +poly</span>
-    </div>
-    <div class="tile on-d">
-      <svg width="56" height="56"><use href="#appicon-dark-lg"/></svg>
-      <span>56 +poly</span>
-    </div>
-    <div class="tile on-d">
-      <svg width="80" height="80"><use href="#appicon-dark-lg"/></svg>
-      <span>80 +poly</span>
-    </div>
-    <div class="tile on-d">
-      <svg width="120" height="120"><use href="#appicon-dark-lg"/></svg>
-      <span>120 +poly</span>
-    </div>
-  </div>
-</div>
-
-<!-- vs Heart comparison -->
-<div class="section">
-  <h2>Comparacion con heart a mismo tamano (22px)</h2>
-  <div class="row bg-l" style="border-radius:16px">
-    <div class="tile on-l">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="#2E5F7E" stroke="#2E5F7E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      <svg width="22" height="22" viewBox="0 0 24 24"
+        fill="#2E5F7E" stroke="#2E5F7E" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06
+                 a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78
+                 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
       </svg>
       <span>heart (antes)</span>
     </div>
     <div class="tile on-l">
-      <svg width="22" height="22"><use href="#appicon-light"/></svg>
+      <svg width="22" height="22"><use href="#api-l"/></svg>
       <span>AppIcon (ahora)</span>
     </div>
   </div>
 </div>
 
-<!-- Favicon section -->
+<!-- Favicon -->
 <div class="section">
-  <h2>Favicon — browser tab (fondo solido, con/sin dark mode)</h2>
-  <p style="font-size:12px;color:#5A6B73;margin-bottom:12px">
-    La tab de este browser ya usa <code>favicon.svg</code>. Cambia tu OS a dark mode para ver el cambio.
+  <h2>Favicon - browser tab</h2>
+  <p style="margin-bottom:12px;font-size:12px">
+    La tab de este archivo ya usa favicon.svg con prefers-color-scheme.
+    Cambia tu OS a dark mode para ver el cambio automatico.
   </p>
-  <div style="display:flex;gap:24px;align-items:flex-end;flex-wrap:wrap">
+  <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-end">
     <div>
-      <div style="background:#F5F7F5;border:1px solid #DDE4E1;border-radius:8px;padding:12px 16px;
-                  display:flex;align-items:center;gap:8px;font-size:13px;color:#5A6B73">
-        <img src="favicon.svg" width="16" height="16" style="border-radius:2px"/>
+      <div style="background:#F5F7F5;border:1px solid #DDE4E1;border-radius:8px;
+                  padding:10px 14px;display:flex;align-items:center;gap:8px;font-size:13px;color:#5A6B73">
+        <img src="favicon.svg" width="16" height="16"/>
         Tinder Decisivo
       </div>
-      <span style="font-size:11px;color:#8A9199;display:block;margin-top:6px">browser tab — light</span>
+      <span class="mode-label">tab light</span>
     </div>
     <div>
-      <div style="background:#1B2830;border-radius:8px;padding:12px 16px;
-                  display:flex;align-items:center;gap:8px;font-size:13px;color:#A8B5AC">
-        <img src="favicon.svg" width="16" height="16" style="border-radius:2px"/>
+      <div style="background:#1B2830;border-radius:8px;
+                  padding:10px 14px;display:flex;align-items:center;gap:8px;font-size:13px;color:#A8B5AC">
+        <img src="favicon.svg" width="16" height="16"/>
         Tinder Decisivo
       </div>
-      <span style="font-size:11px;color:#8A9199;display:block;margin-top:6px">browser tab — dark (media query activa si OS = dark)</span>
+      <span class="mode-label">tab dark (media query activa si OS = dark)</span>
     </div>
     <div>
       <div style="display:flex;gap:8px;align-items:center">
@@ -241,7 +188,7 @@
         <img src="favicon.svg" width="32" height="32"/>
         <img src="favicon.svg" width="48" height="48"/>
       </div>
-      <span style="font-size:11px;color:#8A9199;display:block;margin-top:6px">16 / 32 / 48 px SVG</span>
+      <span class="mode-label">SVG 16 / 32 / 48</span>
     </div>
   </div>
 </div>

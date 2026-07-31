@@ -56,49 +56,52 @@ const HEAD_R  = 2;
 const SHOULDERS = "M 8,15 C 8,12 16,12 16,15";
 
 export function AppIcon({ size = 24 }: AppIconProps) {
-  const c      = useThemeColors();
+  const c = useThemeColors();
   const isDark = useIsDark();
 
-  // Colores exactos del preview aprobado (solid — sin gradientes en stroke)
-  // Light: primary #2E5F7E  |  Dark: primary #7BB5D4
-  const color = c.primary;
+  // Diseno filled: pentagon relleno = maximo contraste a cualquier tamano.
+  // Igual al favicon.svg aprobado.
+  // Light: pentagon #2E5F7E, persona #FFFFFF
+  // Dark:  pentagon #7BB5D4, persona #0B1418
+  const bg = c.primary;           // fondo del pentagon
+  const fg = c.textOnPrimary;     // persona sobre el fondo (#FFF / #0B1418)
 
-  // Data polygon solo visible en tamanos donde tiene sentido
+  // Data polygon: tono intermedio visible sobre el fondo
+  // Light: primary400 (#5A87A5) | Dark: primaryHover (#9BC7DF)
+  const polyColor = isDark ? c.primaryHover : c.primary400;
+
   const showDataPoly = size >= 32;
 
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
 
-      {/* Pentagon — marco del radar */}
+      {/* Pentagon relleno — chip de color solido */}
       <Polygon
         points={PENTAGON}
-        fill={color}
-        fillOpacity={isDark ? 0.12 : 0.07}
-        stroke={color}
-        strokeWidth={1.5}
-        strokeLinejoin="round"
+        fill={bg}
+        stroke="none"
       />
 
-      {/* Data polygon — solo en tamanos grandes */}
+      {/* Data polygon encima del fondo — solo en tamanos grandes */}
       {showDataPoly && (
         <Polygon
           points={DATA_POLY}
-          fill={color}
-          fillOpacity={0.18}
-          stroke={color}
-          strokeOpacity={0.65}
-          strokeWidth={1}
+          fill={polyColor}
+          fillOpacity={0.35}
+          stroke={fg}
+          strokeOpacity={0.55}
+          strokeWidth={0.6}
           strokeLinejoin="round"
         />
       )}
 
-      {/* Persona: cabeza */}
+      {/* Persona: cabeza — en blanco/oscuro sobre el fondo */}
       <Circle
         cx={HEAD_CX}
         cy={HEAD_CY}
         r={HEAD_R}
         fill="none"
-        stroke={color}
+        stroke={fg}
         strokeWidth={1.4}
       />
 
@@ -106,7 +109,7 @@ export function AppIcon({ size = 24 }: AppIconProps) {
       <Path
         d={SHOULDERS}
         fill="none"
-        stroke={color}
+        stroke={fg}
         strokeWidth={1.4}
         strokeLinecap="round"
       />
