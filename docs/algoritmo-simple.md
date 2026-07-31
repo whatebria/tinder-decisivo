@@ -13,7 +13,7 @@ cuatro anos. Tienes 6 postulantes. No los conoces.
 Podrias:
 
 - **Opcion A**: leer 6 curriculums de 40 paginas cada uno. Nadie hace eso.
-- **Opcion B**: guiarte por la cara o el partido. Poco confiable.
+- **Opcion B**: guiarte por la cara o su familia. Poco confiable.
 - **Opcion C**: preguntarles 12 cosas concretas ("¿que harias con las
   cuentas de la luz? ¿como manejarias el patio? ¿que reglas pondrias?")
   y ver quien coincide mas contigo.
