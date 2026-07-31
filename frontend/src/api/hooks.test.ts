@@ -94,7 +94,6 @@ beforeEach(() => {
   useAuthStore.setState({
     token: null,
     userId: null,
-    email: null,
     isGuest: false,
     isAuthenticated: false,
     isHydrated: true,

@@ -35,6 +35,7 @@ import {
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
 import { useCoachMarksStore } from "../store/coachMarks";
+import { usePerfil } from "../api/hooks";
 import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
@@ -44,7 +45,10 @@ export function ConfiguracionScreen({
   navigation,
 }: RootStackScreenProps<"Configuracion">) {
   const c = useThemeColors();
-  const email = useAuthStore((s) => s.email);
+  // F18: email ya no está en AuthState. Se obtiene de usePerfil() (misma fuente
+  // que HomeScreen / PerfilScreen). React Query lo cachea sin request adicional.
+  const perfilQ = usePerfil();
+  const email = perfilQ.data?.email ?? null;
   const isGuest = useAuthStore((s) => s.isGuest);
   const logout = useAuthStore((s) => s.logout);
   const exitGuestMode = useAuthStore((s) => s.exitGuestMode);

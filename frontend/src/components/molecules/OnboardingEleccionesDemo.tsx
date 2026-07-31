@@ -85,7 +85,7 @@ export function OnboardingEleccionesDemo() {
   return (
     <View
       style={styles.container}
-      accessibilityRole="group"
+      accessibilityRole="none"
       accessibilityLabel="Ejemplo de lista de elecciones"
     >
       <Text style={styles.demoTag} accessibilityElementsHidden>

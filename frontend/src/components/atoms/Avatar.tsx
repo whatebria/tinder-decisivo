@@ -35,6 +35,8 @@ export interface AvatarProps {
   /** Color del texto (solo para fallback initials). Default: textOnPrimary. */
   color?: string;
   style?: StyleProp<ViewStyle>;
+  /** Label de accesibilidad. Default: 'Avatar [INICIALES]'. Sobreescribir con el nombre completo cuando se conozca. */
+  accessibilityLabel?: string;
 }
 
 export function Avatar({
@@ -44,6 +46,7 @@ export function Avatar({
   backgroundColor,
   color,
   style,
+  accessibilityLabel,
 }: AvatarProps) {
   const c = useThemeColors();
   const dim = DIM[size];
@@ -75,7 +78,7 @@ export function Avatar({
   return (
     <View
       accessibilityRole="image"
-      accessibilityLabel={`Avatar ${shown}`}
+      accessibilityLabel={accessibilityLabel ?? `Avatar ${shown}`}
       style={[styles.base, style]}
     >
       {showImage ? (

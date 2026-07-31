@@ -121,7 +121,7 @@ export function OnboardingResultadosDemo() {
   return (
     <View
       style={styles.container}
-      accessibilityRole="group"
+      accessibilityRole="none"
       accessibilityLabel="Ejemplo de ranking de candidatos"
     >
       <Text style={styles.demoTag} accessibilityElementsHidden>

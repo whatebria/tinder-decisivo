@@ -74,7 +74,7 @@ export function OnboardingPreguntaDemo() {
   return (
     <View
       style={styles.card}
-      accessibilityRole="group"
+      accessibilityRole="none"
       accessibilityLabel="Ejemplo de pregunta del cuestionario"
     >
       <View style={styles.head}>
