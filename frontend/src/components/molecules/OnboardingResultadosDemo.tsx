@@ -1,155 +1,57 @@
 /**
- * OnboardingResultadosDemo: demo del ranking para slide 4 del welcome tour
- * ("Te mostramos quién se parece a ti").
+ * OnboardingResultadosDemo: demo del ranking para slide 4 del welcome tour.
  *
- * Muestra 3 candidatos ficticios con barra de match%, visualmente similar
- * a RankingRow. 100% estatico — datos inventados, zero API calls.
+ * Usa el componente real `RankingCard` con datos ficticios para que el
+ * usuario reconozca el patron visual cuando llegue a ResultadosScreen.
+ * Sin ejeScores -> sin radar, version compacta de la card que cabe en 2
+ * columnas dentro del slide sin requerir scroll (constraint UX-011).
  *
- * Paleta de match (alto → bajo): verde, ambar, rojo suave.
- * Los nombres son claramente ficticios para no confundir al usuario.
+ * BUG-007: reemplaza la implementacion custom anterior (barra horizontal
+ * propietaria) por el componente real del design system.
  */
 
-import React, { useMemo } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React from "react";
+import { View } from "react-native";
 
-import { Avatar } from "../atoms/Avatar";
-import { radii } from "../../theme/radii";
+import { RankingCard } from "../organisms/RankingCard";
 import { spacing } from "../../theme/spacing";
-import { typography } from "../../theme/typography";
 import { useThemeColors } from "../../theme/useTheme";
+import { getMatchColor } from "../../services/matching";
 
 interface DemoCandidato {
-  id: string;
-  iniciales: string;
+  rank: number;
   nombre: string;
+  apellido: string;
   partido: string;
   matchPct: number;
-  /** Color de la barra de match. */
-  barColor: string;
 }
 
-/** 2 candidatos para que el slide quepa sin scroll (UX-011). */
+/** Datos ficticios, claramente anonimizados. */
 const DEMO_CANDIDATOS: readonly DemoCandidato[] = [
-  {
-    id: "1",
-    iniciales: "CA",
-    nombre: "Candidata A",
-    partido: "Partido Ejemplo",
-    matchPct: 87,
-    barColor: "#22c55e",
-  },
-  {
-    id: "2",
-    iniciales: "CB",
-    nombre: "Candidato B",
-    partido: "Otro Partido",
-    matchPct: 61,
-    barColor: "#f59e0b",
-  },
+  { rank: 1, nombre: "Candidata", apellido: "A", partido: "Partido Ejemplo", matchPct: 87 },
+  { rank: 2, nombre: "Candidato", apellido: "B", partido: "Otro Partido",    matchPct: 61 },
 ];
 
 export function OnboardingResultadosDemo() {
   const c = useThemeColors();
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        container: { gap: spacing.sp2, width: "100%", maxWidth: 360 },
-        demoTag: {
-          ...typography.overline,
-          color: c.textSecondary,
-          textAlign: "center",
-          marginBottom: spacing.sp1,
-        },
-        row: {
-          flexDirection: "row",
-          alignItems: "center",
-          backgroundColor: c.card,
-          borderRadius: radii.rMd,
-          borderWidth: 1,
-          borderColor: c.border2,
-          paddingHorizontal: spacing.sp3,
-          paddingVertical: spacing.sp3,
-          gap: spacing.sp3,
-        },
-        rank: {
-          ...typography.overline,
-          color: c.textSecondary,
-          fontWeight: "700",
-          width: 18,
-          textAlign: "center",
-        },
-        info: { flex: 1, gap: 4 },
-        nombre: {
-          ...typography.body,
-          fontWeight: "600",
-          color: c.text,
-        },
-        partido: {
-          ...typography.small,
-          color: c.textSecondary,
-        },
-        barWrap: {
-          flexDirection: "row",
-          alignItems: "center",
-          gap: spacing.sp2,
-        },
-        barBg: {
-          flex: 1,
-          height: 6,
-          borderRadius: 3,
-          backgroundColor: c.border,
-        },
-        pctLabel: {
-          ...typography.small,
-          fontWeight: "700",
-          minWidth: 36,
-          textAlign: "right",
-        },
-      }),
-    [c],
-  );
-
   return (
     <View
-      style={styles.container}
+      style={{ flexDirection: "row", gap: spacing.sp2, width: "100%", maxWidth: 360 }}
       accessibilityRole="none"
       accessibilityLabel="Ejemplo de ranking de candidatos"
     >
-      <Text style={styles.demoTag} accessibilityElementsHidden>
-        EJEMPLO — candidatos ficticios
-      </Text>
-
-      {DEMO_CANDIDATOS.map((cand, idx) => (
-        <View key={cand.id} style={styles.row}>
-          <Text style={styles.rank}>#{idx + 1}</Text>
-
-          <Avatar
-            initials={cand.iniciales}
-            size="sm"
-            accessibilityLabel={cand.nombre}
-          />
-
-          <View style={styles.info}>
-            <Text style={styles.nombre}>{cand.nombre}</Text>
-            <Text style={styles.partido}>{cand.partido}</Text>
-            <View style={styles.barWrap}>
-              <View style={styles.barBg}>
-                <View
-                  style={{
-                    height: 6,
-                    borderRadius: 3,
-                    width: `${cand.matchPct}%`,
-                    backgroundColor: cand.barColor,
-                  }}
-                />
-              </View>
-              <Text style={[styles.pctLabel, { color: cand.barColor }]}>
-                {cand.matchPct}%
-              </Text>
-            </View>
-          </View>
-        </View>
+      {DEMO_CANDIDATOS.map((cand) => (
+        <RankingCard
+          key={cand.rank}
+          rank={cand.rank}
+          nombre={cand.nombre}
+          apellido={cand.apellido}
+          partido={cand.partido}
+          matchPct={cand.matchPct}
+          matchColor={getMatchColor(cand.matchPct, c)}
+          style={{ flex: 1, minWidth: 0 }}
+        />
       ))}
     </View>
   );
