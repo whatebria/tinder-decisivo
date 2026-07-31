@@ -2,10 +2,12 @@
  * Storage seguro cross-platform.
  *
  * - En iOS/Android: usa expo-secure-store (Keychain / KeyStore encriptado).
- * - En web: usa localStorage (no encriptado, pero suficiente para dev/demo).
+ * - En web: usa sessionStorage (F12 security review).
+ *   sessionStorage no sobrevive al cierre de tab ni entre sesiones del navegador,
+ *   reduciendo la ventana de exposicion frente a XSS vs localStorage.
  *
- * Para produccion web deberiamos migrar a cookies httpOnly desde el backend,
- * pero para MVP alcanza.
+ * Fix completo (TASK-003): migrar a cookies httpOnly desde el backend.
+ * Requiere endpoint Django + CSRF protection en rutas autenticadas.
  */
 
 import { Platform } from "react-native";
@@ -17,7 +19,7 @@ export const secureStorage = {
   async getItem(key: string): Promise<string | null> {
     if (isWeb) {
       try {
-        return globalThis.localStorage?.getItem(key) ?? null;
+        return globalThis.sessionStorage?.getItem(key) ?? null;
       } catch {
         return null;
       }
@@ -28,7 +30,7 @@ export const secureStorage = {
   async setItem(key: string, value: string): Promise<void> {
     if (isWeb) {
       try {
-        globalThis.localStorage?.setItem(key, value);
+        globalThis.sessionStorage?.setItem(key, value);
       } catch {
         /* noop */
       }
@@ -40,7 +42,7 @@ export const secureStorage = {
   async removeItem(key: string): Promise<void> {
     if (isWeb) {
       try {
-        globalThis.localStorage?.removeItem(key);
+        globalThis.sessionStorage?.removeItem(key);
       } catch {
         /* noop */
       }
