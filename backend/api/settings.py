@@ -185,7 +185,10 @@ PASSWORD_RESET_URL_BASE = config(
 # ------------------------------------------------------------
 # TTL de tokens en dias. Tokens mas viejos son rechazados por
 # ExpiringTokenAuthentication (fuerza re-login). Configurable via env.
-TOKEN_TTL_DAYS = config("TOKEN_TTL_DAYS", default=30, cast=int)
+# Security review F3: reducido de 30 a 7 dias. Para datos electorales
+# (posturas politicas del usuario), 30 dias es demasiado. Fix completo
+# requiere refresh-token flow (TASK-003).
+TOKEN_TTL_DAYS = config("TOKEN_TTL_DAYS", default=7, cast=int)
 
 # Desactiva throttling completamente. Solo para tests E2E (Playwright)
 # donde crear 15 users seguidos supera el rate limit de 10/hour.
