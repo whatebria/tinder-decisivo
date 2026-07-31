@@ -41,6 +41,8 @@ export function AppNavigator() {
   const isGuest = useAuthStore((s) => s.isGuest);
   const hasSeenOnboarding = useOnboardingStore((s) => s.hasSeen);
   const showMainStack = isAuthenticated || isGuest;
+  // Onboarding solo aparece en la primera apertura: sin sesion y sin haberlo visto.
+  // Es un flujo pre-auth, no post-registro. Ver BUG-009 (cerrado: by design).
   const showOnboarding = !hasSeenOnboarding && !showMainStack;
 
   // Consume la intención "quiero registrarme" que el OnboardingScreen setea
