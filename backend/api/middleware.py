@@ -6,11 +6,16 @@ Agrega el header CSP a todas las responses. Politica diferenciada:
 - Todo lo demas (JSON API): politica maxima -- default-src 'none'.
 
 No usa django-csp para evitar dependencia extra (YAGNI para este scope).
+Detecta la URL del admin desde la env var DJANGO_ADMIN_URL (F6).
 
 OWASP ASVS V14.4.3.
 """
 
+from decouple import config as env_config
 from django.conf import settings
+
+# Path del admin: puede ser /admin/ o cualquier cosa configurada en DJANGO_ADMIN_URL.
+_ADMIN_URL_PREFIX = "/" + env_config("DJANGO_ADMIN_URL", default="hidden-admin/")
 
 
 class ContentSecurityPolicyMiddleware:
@@ -51,7 +56,7 @@ class ContentSecurityPolicyMiddleware:
         # En prod (DEBUG=False) aplicamos la politica real.
         if not settings.DEBUG:
             path = request.path_info or ""
-            policy = self.CSP_ADMIN if path.startswith("/admin") else self.CSP_API
+            policy = self.CSP_ADMIN if path.startswith(_ADMIN_URL_PREFIX) else self.CSP_API
             response["Content-Security-Policy"] = policy
 
         return response

@@ -2,7 +2,7 @@
 
 Rutas:
 
-- /admin/                - Panel de Django admin
+- /<ADMIN_URL>/          - Panel de Django admin (path configurable via env, F6)
 - /api/health/           - Health check (fuera del versionado, para load balancers)
 - /api/v1/health/        - Alias versionado del health check
 - /api/v1/...            - API REST versionada v1
@@ -11,6 +11,8 @@ Rutas:
 - /api/v1/redoc/         - ReDoc
 - /media/...             - Archivos subidos (solo en DEBUG)
 """
+
+from decouple import config as env_config
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -24,13 +26,19 @@ from drf_spectacular.views import (
 
 from .views import health_check
 
+# F6: URL del admin configurable via env para reducir superficie de ataque.
+# El path por defecto ('hidden-admin/') ya no es el estandar '/admin/'.
+# En prod, usar un valor unico generado en el setup inicial.
+_ADMIN_URL = env_config("DJANGO_ADMIN_URL", default="hidden-admin/")
+
 # Handlers JSON personalizados (F17: no exponer lista de URLs en 404).
 # Activos incluso en DEBUG: la API siempre responde JSON, no HTML.
 handler404 = "core.views.errors.handler_404"
 handler500 = "core.views.errors.handler_500"
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    # F6: admin en URL no estandar. El path real viene de DJANGO_ADMIN_URL en .env.
+    path(_ADMIN_URL, admin.site.urls),
     # Health check fuera del versionado: siempre disponible en /api/health/
     # (usado por load balancers / uptime monitors que no deberian conocer versiones)
     path("api/health/", health_check, name="health-check"),

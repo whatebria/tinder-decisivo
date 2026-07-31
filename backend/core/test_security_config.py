@@ -34,11 +34,14 @@ class TestCSPMiddleware:
         assert "frame-ancestors 'none'" in csp
 
     def test_csp_admin_en_produccion(self, db, settings):
-        """Las rutas /admin/* reciben politica menos restrictiva (necesitan JS inline)."""
+        """Las rutas /admin/* o el admin customizado reciben politica menos restrictiva."""
         settings.DEBUG = False
         client = APIClient()
-        # El admin redirige a login -- nos importa el header, no el status
-        resp = client.get("/admin/")
+        # El admin redirige a login -- nos importa el header, no el status.
+        # Usamos la URL configurada en .env (hidden-admin/) o el fallback.
+        from decouple import config as env_config
+        admin_url = "/" + env_config("DJANGO_ADMIN_URL", default="hidden-admin/")
+        resp = client.get(admin_url)
         csp = resp.get("Content-Security-Policy", "")
         assert csp, "CSP header debe estar presente para el admin en prod"
         assert "default-src 'self'" in csp
