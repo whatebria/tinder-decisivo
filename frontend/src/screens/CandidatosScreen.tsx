@@ -40,13 +40,13 @@ import {
 import type { Candidato, MatchResult, TipoEleccion } from "../api/endpoints";
 import {
   AppShell,
-  BottomSheet,
   Button,
   CandidateCard,
   Chip,
   ChipActivo,
   CollapsibleFilterSection,
   EmptyState,
+  FilterBottomSheet,
   HomeTopBar,
   Icon,
   Input,
@@ -232,6 +232,20 @@ export function CandidatosScreen({
     setRegionSel(null);
   };
 
+  // -- Summaries para CollapsibleFilterSection ----------------------------
+
+  const partidoSummary =
+    partidosSel.size === 0
+      ? "Todos"
+      : partidosSel.size === 1
+        ? Array.from(partidosSel)[0]
+        : `${partidosSel.size} partidos`;
+  const tipoSummary =
+    tipoEleccionSel === null
+      ? "Todos"
+      : (tiposEleccion.find((t) => t.id === tipoEleccionSel)?.nombre ?? "Todos");
+  const regionSummary = regionSel ?? "Todas";
+
   // -- Handlers cards ---------------------------------------------------
 
   const openDetalle = (cand: Candidato) => {
@@ -392,210 +406,111 @@ export function CandidatosScreen({
         style={{ backgroundColor: c.bg }}
       />
 
-      <FiltrosSheet
+      <FilterBottomSheet
         visible={filtersOpen}
         onClose={() => setFiltersOpen(false)}
-        query={query}
-        onQueryChange={setQuery}
-        partidosSel={partidosSel}
-        onPartidoToggle={(p) =>
-          setPartidosSel((prev) => {
-            const next = new Set(prev);
-            if (next.has(p)) next.delete(p);
-            else next.add(p);
-            return next;
-          })
-        }
-        partidosDisponibles={partidosDisponibles}
-        tipoEleccionSel={tipoEleccionSel}
-        onTipoEleccionChange={setTipoEleccionSel}
-        tiposEleccion={tiposEleccion}
-        regionSel={regionSel}
-        onRegionChange={setRegionSel}
-        regionesDisponibles={regionesDisponibles}
-        onLimpiar={limpiarTodo}
         filtrosActivosCount={filtrosActivosCount}
         resultadosCount={total}
-      />
-    </AppShell>
-  );
-}
-
-// -- FiltrosSheet --------------------------------------------------------
-
-interface FiltrosSheetProps {
-  visible: boolean;
-  onClose: () => void;
-  query: string;
-  onQueryChange: (v: string) => void;
-  partidosSel: ReadonlySet<string>;
-  onPartidoToggle: (p: string) => void;
-  partidosDisponibles: string[];
-  tipoEleccionSel: number | null;
-  onTipoEleccionChange: (id: number | null) => void;
-  tiposEleccion: TipoEleccion[];
-  regionSel: string | null;
-  onRegionChange: (r: string | null) => void;
-  regionesDisponibles: string[];
-  onLimpiar: () => void;
-  filtrosActivosCount: number;
-  resultadosCount: number;
-}
-
-function FiltrosSheet({
-  visible,
-  onClose,
-  query,
-  onQueryChange,
-  partidosSel,
-  onPartidoToggle,
-  partidosDisponibles,
-  tipoEleccionSel,
-  onTipoEleccionChange,
-  tiposEleccion,
-  regionSel,
-  onRegionChange,
-  regionesDisponibles,
-  onLimpiar,
-  filtrosActivosCount,
-  resultadosCount,
-}: FiltrosSheetProps) {
-  const c = useThemeColors();
-
-  const trailing =
-    filtrosActivosCount > 0 ? (
-      <View style={[styles.contadorPill, { backgroundColor: c.primary }]}>
-        <Text style={[styles.contadorPillText, { color: c.textOnPrimary }]}>
-          {filtrosActivosCount} activo{filtrosActivosCount === 1 ? "" : "s"}
-        </Text>
-      </View>
-    ) : null;
-
-  const footer = (
-    <>
-      <View style={styles.footerBtnLimpiar}>
-        <Button variant="ghost" onPress={onLimpiar}>
-          Limpiar todo
-        </Button>
-      </View>
-      <View style={styles.footerBtnAplicar}>
-        <Button variant="primary" onPress={onClose}>
-          {`Aplicar (${resultadosCount})`}
-        </Button>
-      </View>
-    </>
-  );
-
-  const partidoSummary =
-    partidosSel.size === 0
-      ? "Todos"
-      : partidosSel.size === 1
-        ? Array.from(partidosSel)[0]
-        : `${partidosSel.size} partidos`;
-  const tipoSummary =
-    tipoEleccionSel === null
-      ? "Todos"
-      : (tiposEleccion.find((t) => t.id === tipoEleccionSel)?.nombre ?? "Todos");
-  const regionSummary = regionSel ?? "Todas";
-
-  return (
-    <BottomSheet
-      visible={visible}
-      onClose={onClose}
-      title="Filtros"
-      titleTrailing={trailing}
-      footer={footer}
-    >
-      <View style={styles.sheetSearchBlock}>
-        <Text style={[styles.sheetSectionLabel, { color: c.textSecondary }]}>
-          Buscar
-        </Text>
-        <Input
-          value={query}
-          onChangeText={onQueryChange}
-          placeholder="Nombre, apellido o partido..."
-          accessibilityLabel="Buscar candidatos"
-          returnKeyType="search"
-        />
-      </View>
-
-      <CollapsibleFilterSection
-        title="Partido"
-        summary={partidoSummary}
-        defaultExpanded={partidosSel.size > 0}
+        onLimpiar={limpiarTodo}
       >
-        {partidosDisponibles.length === 0 ? (
-          <Text style={{ color: c.textSecondary, fontSize: 13 }}>
-            Sin partidos disponibles.
+        <View style={styles.sheetSearchBlock}>
+          <Text style={[styles.sheetSectionLabel, { color: c.textSecondary }]}>
+            Buscar
           </Text>
-        ) : (
-          <View style={styles.chipsGrid}>
-            {partidosDisponibles.map((p) => (
-              <Chip
-                key={p}
-                active={partidosSel.has(p)}
-                onPress={() => onPartidoToggle(p)}
-              >
-                {p}
-              </Chip>
-            ))}
-          </View>
-        )}
-      </CollapsibleFilterSection>
-
-      <CollapsibleFilterSection
-        title="Tipo de eleccion"
-        summary={tipoSummary}
-        defaultExpanded={tipoEleccionSel !== null}
-      >
-        <View style={styles.chipsGrid}>
-          <Chip
-            active={tipoEleccionSel === null}
-            onPress={() => onTipoEleccionChange(null)}
-          >
-            Todos
-          </Chip>
-          {tiposEleccion.map((tipo) => (
-            <Chip
-              key={tipo.id}
-              active={tipoEleccionSel === tipo.id}
-              onPress={() =>
-                onTipoEleccionChange(tipoEleccionSel === tipo.id ? null : tipo.id)
-              }
-            >
-              {tipo.nombre}
-            </Chip>
-          ))}
+          <Input
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Nombre, apellido o partido..."
+            accessibilityLabel="Buscar candidatos"
+            returnKeyType="search"
+          />
         </View>
-      </CollapsibleFilterSection>
 
-      <CollapsibleFilterSection
-        title="Region"
-        summary={regionSummary}
-        defaultExpanded={regionSel !== null}
-      >
-        {regionesDisponibles.length === 0 ? (
-          <Text style={{ color: c.textSecondary, fontSize: 13 }}>
-            Sin regiones disponibles (todos los candidatos son nacionales).
-          </Text>
-        ) : (
+        <CollapsibleFilterSection
+          title="Partido"
+          summary={partidoSummary}
+          defaultExpanded={partidosSel.size > 0}
+        >
+          {partidosDisponibles.length === 0 ? (
+            <Text style={[{ color: c.textSecondary }, typography.small]}>
+              Sin partidos disponibles.
+            </Text>
+          ) : (
+            <View style={styles.chipsGrid}>
+              {partidosDisponibles.map((p) => (
+                <Chip
+                  key={p}
+                  active={partidosSel.has(p)}
+                  onPress={() =>
+                    setPartidosSel((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(p)) next.delete(p);
+                      else next.add(p);
+                      return next;
+                    })
+                  }
+                >
+                  {p}
+                </Chip>
+              ))}
+            </View>
+          )}
+        </CollapsibleFilterSection>
+
+        <CollapsibleFilterSection
+          title="Tipo de eleccion"
+          summary={tipoSummary}
+          defaultExpanded={tipoEleccionSel !== null}
+        >
           <View style={styles.chipsGrid}>
-            <Chip active={regionSel === null} onPress={() => onRegionChange(null)}>
-              Todas
+            <Chip
+              active={tipoEleccionSel === null}
+              onPress={() => setTipoEleccionSel(null)}
+            >
+              Todos
             </Chip>
-            {regionesDisponibles.map((r) => (
+            {tiposEleccion.map((tipo) => (
               <Chip
-                key={r}
-                active={regionSel === r}
-                onPress={() => onRegionChange(regionSel === r ? null : r)}
+                key={tipo.id}
+                active={tipoEleccionSel === tipo.id}
+                onPress={() =>
+                  setTipoEleccionSel(tipoEleccionSel === tipo.id ? null : tipo.id)
+                }
               >
-                {r}
+                {tipo.nombre}
               </Chip>
             ))}
           </View>
-        )}
-      </CollapsibleFilterSection>
-    </BottomSheet>
+        </CollapsibleFilterSection>
+
+        <CollapsibleFilterSection
+          title="Region"
+          summary={regionSummary}
+          defaultExpanded={regionSel !== null}
+        >
+          {regionesDisponibles.length === 0 ? (
+            <Text style={[{ color: c.textSecondary }, typography.small]}>
+              Sin regiones disponibles (todos los candidatos son nacionales).
+            </Text>
+          ) : (
+            <View style={styles.chipsGrid}>
+              <Chip active={regionSel === null} onPress={() => setRegionSel(null)}>
+                Todas
+              </Chip>
+              {regionesDisponibles.map((r) => (
+                <Chip
+                  key={r}
+                  active={regionSel === r}
+                  onPress={() => setRegionSel(regionSel === r ? null : r)}
+                >
+                  {r}
+                </Chip>
+              ))}
+            </View>
+          )}
+        </CollapsibleFilterSection>
+      </FilterBottomSheet>
+    </AppShell>
   );
 }
 

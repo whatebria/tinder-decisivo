@@ -28,13 +28,13 @@ import {
 } from "../api/hooks";
 import {
   AppShell,
-  BottomSheet,
   Button,
   Chip,
   ChipActivo,
   CoachMarkTour,
   CollapsibleFilterSection,
   EmptyState,
+  FilterBottomSheet,
   HomeTopBar,
   Input,
   NewsCard,
@@ -316,26 +316,81 @@ export function NoticiasScreen({
       </View>
 
       {/* Bottom sheet de filtros expandidos */}
-      <FiltrosSheet
+      <FilterBottomSheet
         visible={filtersOpen}
         onClose={() => setFiltersOpen(false)}
-        query={query}
-        onQueryChange={setQuery}
-        rangoId={rangoId}
-        onRangoChange={setRangoId}
-        candidatoId={candidatoId}
-        onCandidatoChange={setCandidatoId}
-        candidatos={candidatos}
-        tiposEleccion={tiposEleccion}
-        fuente={fuente}
-        onFuenteChange={setFuente}
-        fuentesDisponibles={fuentesDisponibles}
-        onLimpiar={limpiarTodo}
         filtrosActivosCount={filtrosActivosCount}
         resultadosCount={totalNoticias}
-        rangoLabel={rango.label}
-        candidatoNombre={candidatoNombre}
-      />
+        onLimpiar={limpiarTodo}
+      >
+        {/* Busqueda: no colapsable (input necesita estar siempre visible) */}
+        <View style={styles.sheetSearchBlock}>
+          <Text style={[styles.sheetSectionLabel, { color: c.textSecondary }]}>
+            Buscar
+          </Text>
+          <Input
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Buscar en titulo o descripcion..."
+            accessibilityLabel="Buscar noticias"
+            returnKeyType="search"
+          />
+        </View>
+
+        <CollapsibleFilterSection
+          title="Fecha"
+          summary={rangoId === "todo" ? "Todo" : rango.label}
+          defaultExpanded={rangoId !== "todo"}
+        >
+          <View style={styles.chipsGrid}>
+            {RANGOS_FECHA.map((r) => (
+              <Chip
+                key={r.id}
+                active={r.id === rangoId}
+                onPress={() => setRangoId(r.id)}
+              >
+                {r.label}
+              </Chip>
+            ))}
+          </View>
+        </CollapsibleFilterSection>
+
+        <CollapsibleFilterSection
+          title="Candidato"
+          summary={candidatoNombre ?? "Todos"}
+          defaultExpanded={candidatoId !== null}
+        >
+          <CandidatoPicker
+            candidatos={candidatos}
+            tiposEleccion={tiposEleccion}
+            selectedId={candidatoId}
+            onSelect={setCandidatoId}
+          />
+        </CollapsibleFilterSection>
+
+        {fuentesDisponibles.length > 0 ? (
+          <CollapsibleFilterSection
+            title="Fuente"
+            summary={fuente ?? "Todas"}
+            defaultExpanded={fuente !== null}
+          >
+            <View style={styles.chipsGrid}>
+              <Chip active={fuente === null} onPress={() => setFuente(null)}>
+                Todas
+              </Chip>
+              {fuentesDisponibles.map((f) => (
+                <Chip
+                  key={f}
+                  active={fuente === f}
+                  onPress={() => setFuente(f)}
+                >
+                  {f}
+                </Chip>
+              ))}
+            </View>
+          </CollapsibleFilterSection>
+        ) : null}
+      </FilterBottomSheet>
 
       {/* Preview de detalle de noticia (bottom sheet). */}
       <NoticiaDetailSheet
@@ -360,169 +415,6 @@ export function NoticiasScreen({
     </>
   );
 }
-
-// -- Sub-componentes locales ------------------------------------------------
-
-interface FiltrosSheetProps {
-  visible: boolean;
-  onClose: () => void;
-  query: string;
-  onQueryChange: (v: string) => void;
-  rangoId: string;
-  onRangoChange: (id: string) => void;
-  candidatoId: number | null;
-  onCandidatoChange: (id: number | null) => void;
-  candidatos: ReturnType<typeof useCandidatos>["data"];
-  tiposEleccion: ReturnType<typeof useTiposEleccion>["data"];
-  fuente: string | null;
-  onFuenteChange: (f: string | null) => void;
-  fuentesDisponibles: string[];
-  onLimpiar: () => void;
-  filtrosActivosCount: number;
-  resultadosCount: number;
-  rangoLabel: string;
-  candidatoNombre: string | null;
-}
-
-/**
- * Bottom sheet con filtros expandidos siguiendo tpl-filtros (Template 22):
- * secciones colapsables con summary del estado, footer sticky con
- * "Limpiar todo" + "Aplicar (N)" con contador de resultados en vivo.
- *
- * Los cambios se aplican en vivo (no draft/committed): tap en un chip
- * actualiza el fetch inmediatamente, y el contador del boton "Aplicar"
- * refleja ese cambio. "Aplicar" solo cierra el sheet.
- */
-function FiltrosSheet({
-  visible,
-  onClose,
-  query,
-  onQueryChange,
-  rangoId,
-  onRangoChange,
-  candidatoId,
-  onCandidatoChange,
-  candidatos,
-  tiposEleccion,
-  fuente,
-  onFuenteChange,
-  fuentesDisponibles,
-  onLimpiar,
-  filtrosActivosCount,
-  resultadosCount,
-  rangoLabel,
-  candidatoNombre,
-}: FiltrosSheetProps) {
-  const c = useThemeColors();
-
-  const trailing =
-    filtrosActivosCount > 0 ? (
-      <View
-        style={[styles.contadorPill, { backgroundColor: c.primary }]}
-      >
-        <Text style={[styles.contadorPillText, { color: c.textOnPrimary }]}>
-          {filtrosActivosCount} activo{filtrosActivosCount === 1 ? "" : "s"}
-        </Text>
-      </View>
-    ) : null;
-
-  const footer = (
-    <>
-      <View style={styles.footerBtnLimpiar}>
-        <Button variant="ghost" onPress={onLimpiar}>
-          Limpiar todo
-        </Button>
-      </View>
-      <View style={styles.footerBtnAplicar}>
-        <Button variant="primary" onPress={onClose}>
-          {`Aplicar (${resultadosCount})`}
-        </Button>
-      </View>
-    </>
-  );
-
-  return (
-    <BottomSheet
-      visible={visible}
-      onClose={onClose}
-      title="Filtros"
-      titleTrailing={trailing}
-      footer={footer}
-    >
-      {/* Busqueda: no colapsable (input necesita estar siempre visible) */}
-      <View style={styles.sheetSearchBlock}>
-        <Text style={[styles.sheetSectionLabel, { color: c.textSecondary }]}>
-          Buscar
-        </Text>
-        <Input
-          value={query}
-          onChangeText={onQueryChange}
-          placeholder="Buscar en titulo o descripcion..."
-          accessibilityLabel="Buscar noticias"
-          returnKeyType="search"
-        />
-      </View>
-
-      <CollapsibleFilterSection
-        title="Fecha"
-        summary={rangoId === "todo" ? "Todo" : rangoLabel}
-        defaultExpanded={rangoId !== "todo"}
-      >
-        <View style={styles.chipsGrid}>
-          {RANGOS_FECHA.map((r) => (
-            <Chip
-              key={r.id}
-              active={r.id === rangoId}
-              onPress={() => onRangoChange(r.id)}
-            >
-              {r.label}
-            </Chip>
-          ))}
-        </View>
-      </CollapsibleFilterSection>
-
-      <CollapsibleFilterSection
-        title="Candidato"
-        summary={candidatoNombre ?? "Todos"}
-        defaultExpanded={candidatoId !== null}
-      >
-        <CandidatoPicker
-          candidatos={candidatos ?? []}
-          tiposEleccion={tiposEleccion ?? []}
-          selectedId={candidatoId}
-          onSelect={onCandidatoChange}
-        />
-      </CollapsibleFilterSection>
-
-      {fuentesDisponibles.length > 0 ? (
-        <CollapsibleFilterSection
-          title="Fuente"
-          summary={fuente ?? "Todas"}
-          defaultExpanded={fuente !== null}
-        >
-          <View style={styles.chipsGrid}>
-            <Chip
-              active={fuente === null}
-              onPress={() => onFuenteChange(null)}
-            >
-              Todas
-            </Chip>
-            {fuentesDisponibles.map((f) => (
-              <Chip
-                key={f}
-                active={fuente === f}
-                onPress={() => onFuenteChange(f)}
-              >
-                {f}
-              </Chip>
-            ))}
-          </View>
-        </CollapsibleFilterSection>
-      ) : null}
-    </BottomSheet>
-  );
-}
-
 interface CandidatoPickerProps {
   candidatos: NonNullable<ReturnType<typeof useCandidatos>["data"]>;
   tiposEleccion: NonNullable<ReturnType<typeof useTiposEleccion>["data"]>;
@@ -728,20 +620,6 @@ const styles = StyleSheet.create({
     gap: spacing.sp2,
   },
 
-  contadorPill: {
-    paddingHorizontal: spacing.sp2,
-    paddingVertical: 2,
-    borderRadius: radii.rFull,
-  },
-  contadorPillText: {
-    ...typography.overline,
-    fontWeight: "700",
-    textTransform: "none",
-    letterSpacing: 0,
-  },
-
-  footerBtnLimpiar: { flex: 1 },
-  footerBtnAplicar: { flex: 2 },
 
   // CandidatoPicker
   pickerWrap: {

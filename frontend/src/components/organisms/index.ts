@@ -45,3 +45,9 @@ export { Sidebar, type SidebarProps } from "./Sidebar";
 
 // Nuevos (Sprint post-swipe: explicacion del match)
 export { MatchExplanation } from "./MatchExplanation";
+
+// Refactor: scaffold compartido para sheets de filtros (REFACTOR-001)
+export {
+  FilterBottomSheet,
+  type FilterBottomSheetProps,
+} from "./FilterBottomSheet";
