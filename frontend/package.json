@@ -47,5 +47,8 @@
     "catalog:check": "node scripts/generate-catalog.js --strict && node scripts/verify-props.js",
     "test:catalog": "jest --testPathPattern=\"(catalog-completeness|props-diff)\""
   },
-  "private": true
+  "private": true,
+  "overrides": {
+    "uuid": "^11.1.1"
+  }
 }
