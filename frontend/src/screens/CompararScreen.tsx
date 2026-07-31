@@ -273,7 +273,7 @@ export function CompararScreen({
       <CandidatoPickerModal
         visible={pickerOpen !== null}
         title={
-          pickerOpen === "A" ? "Elegir Candidato A" : "Elegir Candidato B"
+          pickerOpen === "A" ? "Elegir candidato A" : "Elegir candidato B"
         }
         candidatos={candidatos}
         excluirId={pickerOpen === "A" ? candidatoB?.id : candidatoA?.id}

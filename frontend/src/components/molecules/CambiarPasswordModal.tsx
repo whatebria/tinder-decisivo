@@ -38,7 +38,7 @@ export function CambiarPasswordModal({
 
   const passwordsMatch = next.length > 0 && next === confirm;
   const canSubmit =
-    current.length > 0 && next.length >= 8 && passwordsMatch && !loading;
+    current.length > 0 && next.length >= 10 && passwordsMatch && !loading;
 
   // Blur al elemento con foco ANTES de que el padre haga setState(false).
   // Ver hooks/blurActiveElement para contexto.
@@ -73,13 +73,13 @@ export function CambiarPasswordModal({
     <Modal
       visible={visible}
       onClose={handleCancel}
-      title="Cambiar contrasena"
+      title="Cambiar contraseña"
       dismissOnBackdrop={!loading}
       maxWidth={440}
       footer={
         <View style={styles.actions}>
           <Button onPress={handleSubmit} loading={loading} disabled={!canSubmit}>
-            Cambiar contrasena
+            Cambiar contraseña
           </Button>
           <Link block onPress={handleCancel} disabled={loading}>
             Cancelar
@@ -88,12 +88,12 @@ export function CambiarPasswordModal({
       }
     >
       <Text style={styles.message}>
-        Ingresa tu contrasena actual y luego la nueva (minimo 8 caracteres).
+        Ingresa tu contraseña actual y luego la nueva (mínimo 10 caracteres).
       </Text>
 
       <View>
         <FormField
-          label="Contrasena actual"
+          label="Contraseña actual"
           value={current}
           onChangeText={setCurrent}
           secureTextEntry
@@ -103,8 +103,8 @@ export function CambiarPasswordModal({
           textContentType="password"
         />
         <FormField
-          label="Nueva contrasena"
-          helper="Minimo 8 caracteres."
+          label="Nueva contraseña"
+          helper="Mínimo 10 caracteres."
           value={next}
           onChangeText={setNext}
           secureTextEntry
@@ -114,7 +114,7 @@ export function CambiarPasswordModal({
           textContentType="newPassword"
         />
         <FormField
-          label="Confirmar nueva contrasena"
+          label="Confirmar nueva contraseña"
           value={confirm}
           onChangeText={setConfirm}
           secureTextEntry
@@ -124,7 +124,7 @@ export function CambiarPasswordModal({
           textContentType="newPassword"
           error={
             confirm.length > 0 && !passwordsMatch
-              ? "Las contrasenas no coinciden."
+              ? "Las contraseñas no coinciden."
               : undefined
           }
         />

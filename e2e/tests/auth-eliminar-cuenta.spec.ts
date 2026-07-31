@@ -30,7 +30,7 @@ test.describe("Auth › Eliminar cuenta", () => {
     await page.getByRole("button", { name: /eliminar (mi )?cuenta/i }).click();
 
     // Solo password, sin la palabra magica
-    await page.getByLabel("Tu contrasena").fill(user.password);
+    await page.getByLabel("Tu contraseña").fill(user.password);
 
     const btn = page.getByRole("button", { name: /si.*eliminar mi cuenta/i });
     await expect(btn).toBeDisabled();
@@ -58,7 +58,7 @@ test.describe("Auth › Eliminar cuenta", () => {
 
     await page.getByRole("button", { name: /eliminar (mi )?cuenta/i }).click();
 
-    await page.getByLabel("Tu contrasena").fill(user.password);
+    await page.getByLabel("Tu contraseña").fill(user.password);
     await page.getByLabel(/escribe eliminar/i).fill("ELIMINAR");
     await page
       .getByRole("button", { name: /si.*eliminar mi cuenta/i })

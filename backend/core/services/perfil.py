@@ -41,7 +41,7 @@ def cambiar_password(user: User, current_password: str, new_password: str) -> No
             pasa los validators de Django.
     """
     if not user.check_password(current_password):
-        raise PerfilError("La contrasena actual es incorrecta.")
+        raise PerfilError("La contraseña actual es incorrecta.")
 
     try:
         validate_password(new_password, user=user)
@@ -49,7 +49,7 @@ def cambiar_password(user: User, current_password: str, new_password: str) -> No
         raise PerfilError(" ".join(e.messages)) from e
 
     if user.check_password(new_password):
-        raise PerfilError("La nueva contrasena debe ser distinta de la actual.")
+        raise PerfilError("La nueva contraseña debe ser distinta de la actual.")
 
     user.set_password(new_password)
     user.save(update_fields=["password"])
@@ -75,7 +75,7 @@ def eliminar_cuenta(user: User, password: str) -> None:
         PerfilError: si el password no coincide.
     """
     if not user.check_password(password):
-        raise PerfilError("La contrasena es incorrecta.")
+        raise PerfilError("La contraseña es incorrecta.")
 
     with transaction.atomic():
         user.delete()

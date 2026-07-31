@@ -77,12 +77,12 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
         newPassword: next,
       });
       toast.success(
-        "Contrasena actualizada",
-        "Tu nueva contrasena ya esta activa.",
+        "Contraseña actualizada",
+        "Tu nueva contraseña ya está activa.",
       );
       setPassOpen(false);
     } catch (err) {
-      toast.error("No pudimos cambiar la contrasena", getErrorMessage(err));
+      toast.error("No pudimos cambiar la contraseña", getErrorMessage(err));
     }
   }
 

@@ -34,24 +34,24 @@ export function PasswordResetConfirmScreen({
     newPassword.length > 0 && newPassword === confirmPassword;
   const canSubmit =
     token.length > 0 &&
-    newPassword.length >= 8 &&
+    newPassword.length >= 10 &&
     passwordsMatch &&
     !confirmReset.isPending;
 
   async function handleSubmit() {
     if (!passwordsMatch) {
-      toast.error("Las contrasenas no coinciden", "Revisa ambos campos.");
+      toast.error("Las contraseñas no coinciden", "Revisa ambos campos.");
       return;
     }
     try {
       await confirmReset.mutateAsync({ token, newPassword });
       toast.success(
-        "Contrasena actualizada",
-        "Ya puedes iniciar sesion con tu nueva contrasena."
+        "Contraseña actualizada",
+        "Ya puedes iniciar sesión con tu nueva contraseña."
       );
       navigation.replace("Login");
     } catch (err) {
-      toast.error("No pudimos cambiar tu contrasena", getErrorMessage(err));
+      toast.error("No pudimos cambiar tu contraseña", getErrorMessage(err));
     }
   }
 
@@ -76,9 +76,9 @@ export function PasswordResetConfirmScreen({
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
-      <Heading level={1}>Nueva contrasena</Heading>
+      <Heading level={1}>Nueva contraseña</Heading>
       <Text style={styles.subtitle}>
-        Pega el token del email y elige una nueva contrasena.
+        Pega el token del email y elige una nueva contraseña.
       </Text>
 
       <View>
@@ -91,8 +91,8 @@ export function PasswordResetConfirmScreen({
           autoCorrect={false}
         />
         <FormField
-          label="Nueva contrasena"
-          helper="Mínimo 8 caracteres."
+          label="Nueva contraseña"
+          helper="Mínimo 10 caracteres."
           value={newPassword}
           onChangeText={setNewPassword}
           secureTextEntry
@@ -102,7 +102,7 @@ export function PasswordResetConfirmScreen({
           textContentType="newPassword"
         />
         <FormField
-          label="Confirmar nueva contrasena"
+          label="Confirmar nueva contraseña"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
@@ -112,7 +112,7 @@ export function PasswordResetConfirmScreen({
           textContentType="newPassword"
           error={
             confirmPassword.length > 0 && !passwordsMatch
-              ? "Las contrasenas no coinciden."
+              ? "Las contraseñas no coinciden."
               : undefined
           }
         />
@@ -123,7 +123,7 @@ export function PasswordResetConfirmScreen({
         disabled={!canSubmit}
         loading={confirmReset.isPending}
       >
-        Cambiar contrasena
+        Cambiar contraseña
       </Button>
 
       <Link block onPress={() => navigation.replace("Login")}>

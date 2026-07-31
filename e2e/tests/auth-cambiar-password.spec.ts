@@ -12,7 +12,7 @@ import { apiRegister } from "../helpers/api";
 import { gotoApp, goToPerfil, uiLogin } from "../helpers/ui";
 import { makeTestUser } from "../helpers/users";
 
-test.describe("Auth › Cambiar contrasena", () => {
+test.describe("Auth › Cambiar contraseña", () => {
   test("cambio exitoso permite login con nueva pass", async ({ page }) => {
     const user = makeTestUser("chpass_ok");
     await apiRegister(user);
@@ -31,9 +31,9 @@ test.describe("Auth › Cambiar contrasena", () => {
 
     // Modal abierto: llenar campos
     const newPassword = `Nueva${Date.now()}!`;
-    await page.getByLabel("Contrasena actual").fill(user.password);
-    await page.getByLabel(/^nueva contrasena$/i).fill(newPassword);
-    await page.getByLabel(/confirmar nueva contrasena/i).fill(newPassword);
+    await page.getByLabel("Contraseña actual").fill(user.password);
+    await page.getByLabel(/^nueva contraseña$/i).fill(newPassword);
+    await page.getByLabel(/confirmar nueva contraseña/i).fill(newPassword);
 
     // Submit
     await page
@@ -41,13 +41,10 @@ test.describe("Auth › Cambiar contrasena", () => {
       .last() // el del modal, no el trigger
       .click();
 
-    // TODO: agregar assertion de toast de exito cuando confirme el copy exacto
-    // Esperamos el toast de exito (mas robusto que esperar el modal cierre,
-    // que puede tardar con backend lento). El handler emite
-    // toast.success("Contrasena actualizada", "Tu nueva contrasena ya esta activa.").
+    // El handler emite toast.success("Contraseña actualizada", ...).
     await expect(
       page
-        .getByText(/contrasena actualizada/i)
+        .getByText(/contraseña actualizada/i)
         .filter({ visible: true })
         .first()
     ).toBeVisible({ timeout: 15_000 });
@@ -68,9 +65,9 @@ test.describe("Auth › Cambiar contrasena", () => {
     await page.getByRole("button", { name: /cambiar mi contrase/i }).click();
 
     const newPassword = `Nueva${Date.now()}!`;
-    await page.getByLabel("Contrasena actual").fill("password-vieja-incorrecta");
-    await page.getByLabel(/^nueva contrasena$/i).fill(newPassword);
-    await page.getByLabel(/confirmar nueva contrasena/i).fill(newPassword);
+    await page.getByLabel("Contraseña actual").fill("password-vieja-incorrecta");
+    await page.getByLabel(/^nueva contraseña$/i).fill(newPassword);
+    await page.getByLabel(/confirmar nueva contraseña/i).fill(newPassword);
     await page
       .getByRole("button", { name: /^cambiar contrase/i })
       .last()
@@ -78,8 +75,8 @@ test.describe("Auth › Cambiar contrasena", () => {
 
     // Modal sigue abierto (no cerro por error) o aparece toast de error
     // Aceptamos cualquiera de las dos como signal de fallo:
-    const modalStillOpen = page.getByLabel("Contrasena actual");
-    const errorToast = page.getByText(/contrase.a.*incorrect|no pudimos/i);
+    const modalStillOpen = page.getByLabel("Contraseña actual");
+    const errorToast = page.getByText(/contraseña.*incorrect|no pudimos/i);
     await expect(modalStillOpen.or(errorToast)).toBeVisible({ timeout: 8_000 });
   });
 });

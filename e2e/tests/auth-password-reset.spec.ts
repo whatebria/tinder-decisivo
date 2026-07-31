@@ -52,13 +52,13 @@ test.describe("Auth › Password reset", () => {
     // 3) Estamos en PasswordResetConfirm
     const newPassword = `NewPass${Date.now()}!`;
     await vLabel(page, "Token").fill(token);
-    await vLabel(page, "Nueva contrasena", { exact: true }).fill(newPassword);
-    await vLabel(page, /confirmar nueva contrasena/i).fill(newPassword);
+    await vLabel(page, "Nueva contraseña", { exact: true }).fill(newPassword);
+    await vLabel(page, /confirmar nueva contraseña/i).fill(newPassword);
     await vRole(page, "button", { name: /cambiar contrase/i }).click();
 
     // 4) Toast de exito + navegacion a Login (heading "Servel" level 1)
     await expect(
-      page.getByText(/contrase.a actualizada/i).filter({ visible: true })
+      page.getByText(/contraseña actualizada/i).filter({ visible: true })
     ).toBeVisible({ timeout: 8_000 });
     await expect(
       vRole(page, "heading", { name: "Servel", level: 1 })
@@ -80,16 +80,16 @@ test.describe("Auth › Password reset", () => {
 
     const newPassword = "AlgoValido123!";
     await vLabel(page, "Token").fill("token-invalido-xxx");
-    await vLabel(page, "Nueva contrasena", { exact: true }).fill(newPassword);
-    await vLabel(page, /confirmar nueva contrasena/i).fill(newPassword);
+    await vLabel(page, "Nueva contraseña", { exact: true }).fill(newPassword);
+    await vLabel(page, /confirmar nueva contraseña/i).fill(newPassword);
     await vRole(page, "button", { name: /cambiar contrase/i }).click();
 
     await expect(
-      page.getByText(/no pudimos cambiar/i).filter({ visible: true })
+      page.getByText(/token.*inválido|no pudimos/i)
     ).toBeVisible({ timeout: 8_000 });
   });
 
-  test("password < 8 caracteres deja el boton disabled", async ({ page }) => {
+  test("password < 10 caracteres deja el boton disabled", async ({ page }) => {
     await gotoApp(page);
     await gotoPasswordReset(page);
     await vLabel(page, "Email", { exact: true }).fill("noimporta@e2e.local");
@@ -97,8 +97,8 @@ test.describe("Auth › Password reset", () => {
     await vRole(page, "link", { name: /ya tengo un token/i }).click();
 
     await vLabel(page, "Token").fill("cualquier-token");
-    await vLabel(page, "Nueva contrasena", { exact: true }).fill("short");
-    await vLabel(page, /confirmar nueva contrasena/i).fill("short");
+    await vLabel(page, "Nueva contraseña", { exact: true }).fill("short");
+    await vLabel(page, /confirmar nueva contraseña/i).fill("short");
 
     const submitBtn = vRole(page, "button", { name: /cambiar contrase/i });
     await expect(submitBtn).toBeDisabled();

@@ -106,7 +106,7 @@ export function EliminarCuentaModal({
 
       <View style={styles.form}>
         <FormField
-          label="Tu contrasena"
+          label="Tu contraseña"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
