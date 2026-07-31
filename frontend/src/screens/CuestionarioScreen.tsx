@@ -15,7 +15,8 @@
  */
 
 import React, { useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { getErrorMessage } from "../api/client";
 import { useTiposEleccion } from "../api/hooks";
@@ -48,6 +49,7 @@ export function CuestionarioScreen({
   navigation,
 }: RootStackScreenProps<"Cuestionario">) {
   const c = useThemeColors();
+  const insets = useSafeAreaInsets();
   const toast = useToast();
   const [infoOpen, setInfoOpen] = useState(false);
   const isGuest = useAuthStore((s) => s.isGuest);
@@ -79,12 +81,14 @@ export function CuestionarioScreen({
   const styles = useMemo(
     () =>
       StyleSheet.create({
+        root: { flex: 1 },
         scroll: { flex: 1, backgroundColor: c.bg },
         content: {
           padding: spacing.sp4,
-          paddingBottom: spacing.sp6,
+          // paddingBottom generoso para que el ultimo elemento (chips de peso)
+          // no quede tapado por el footer sticky al llegar al final del scroll.
+          paddingBottom: spacing.sp9,
           gap: spacing.sp4,
-          flexGrow: 1,
         },
         emptyBox: {
           flex: 1,
@@ -116,15 +120,21 @@ export function CuestionarioScreen({
           gap: spacing.sp2,
           flexWrap: "wrap",
         },
-        spacer: { flex: 1, minHeight: spacing.sp4 },
-        footerRow: {
+        // Footer sticky: siempre visible, nunca dentro del ScrollView.
+        footer: {
           flexDirection: "row",
           gap: spacing.sp2,
+          paddingHorizontal: spacing.sp4,
+          paddingTop: spacing.sp3,
+          // safe-area bottom: respeta el home indicator de iPhone.
+          // Math.max garantiza padding minimo incluso en Android (insets.bottom = 0).
+          paddingBottom: Math.max(insets.bottom, spacing.sp4),
+          backgroundColor: c.bg,
         },
         backSlot: { flex: 1 },
         primarySlot: { flex: 2 },
       }),
-    [c],
+    [c, insets.bottom],
   );
 
   if (!pregunta) {
@@ -174,6 +184,7 @@ export function CuestionarioScreen({
   return (
     <>
       <ScreenChrome>
+      <View style={styles.root}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <ScreenTopBar
           title={pregunta.tipo_eleccion_nombre ?? "Cuestionario"}
@@ -225,33 +236,35 @@ export function CuestionarioScreen({
             </View>
           </View>
         ) : null}
-
-        <View style={styles.spacer} />
-
-        <View style={styles.footerRow}>
-          <View style={styles.backSlot}>
-            <Button variant="secondary" onPress={prev} disabled={isFirst}>
-              Atrás
-            </Button>
-          </View>
-          <View style={styles.primarySlot}>
-            {isLast ? (
-              <Button
-                variant="success"
-                onPress={handleSubmit}
-                disabled={!canAdvance || submitting}
-                loading={submitting}
-              >
-                {submitting ? "Enviando…" : "Enviar"}
-              </Button>
-            ) : (
-              <Button onPress={next} disabled={!canAdvance}>
-                Siguiente
-              </Button>
-            )}
-          </View>
-        </View>
       </ScrollView>
+
+      {/* Footer fuera del ScrollView: siempre visible, sin necesidad de scrollear.
+           UX-014: mover aqui resuelve que los chips de peso empujen los botones
+           fuera de pantalla. */}
+      <View style={styles.footer}>
+        <View style={styles.backSlot}>
+          <Button variant="secondary" onPress={prev} disabled={isFirst}>
+            Atrás
+          </Button>
+        </View>
+        <View style={styles.primarySlot}>
+          {isLast ? (
+            <Button
+              variant="success"
+              onPress={handleSubmit}
+              disabled={!canAdvance || submitting}
+              loading={submitting}
+            >
+              {submitting ? "Enviando…" : "Enviar"}
+            </Button>
+          ) : (
+            <Button onPress={next} disabled={!canAdvance}>
+              Siguiente
+            </Button>
+          )}
+        </View>
+      </View>
+      </View>
       </ScreenChrome>
 
       <PreguntaInfoModal
