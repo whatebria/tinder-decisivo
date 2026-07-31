@@ -51,3 +51,9 @@ export {
   FilterBottomSheet,
   type FilterBottomSheetProps,
 } from "./FilterBottomSheet";
+
+// Refactor: picker de candidato extraido de NoticiasScreen (REFACTOR-002)
+export {
+  CandidatoPicker,
+  type CandidatoPickerProps,
+} from "./CandidatoPicker";
