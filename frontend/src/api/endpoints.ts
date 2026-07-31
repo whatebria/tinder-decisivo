@@ -66,17 +66,13 @@ export interface LoginInput {
 /**
  * Response de POST /login/.
  *
- * NOTA sobre schema drift: el backend responde `{token, user_id, email}`
- * (ver `backend/core/views/auth.py::CustomAuthToken`), pero el schema
- * OpenAPI declara solo `AuthToken { token }` porque hereda de
- * `ObtainAuthToken` sin decorar con `@extend_schema`. Cuando el backend
- * documente correctamente el response, migrar a `Schemas["AuthToken"]`
- * extendido (o al nuevo schema que definan).
+ * F18: `email` fue removido (privacy minimization). El frontend ahora
+ * obtiene el email via GET /api/v1/perfil/, que es la fuente autoritativa
+ * para los datos del usuario. Ver usePerfil() en hooks.ts.
  */
 export interface LoginResponse {
   token: string;
   user_id: number;
-  email: string;
 }
 
 export async function register(input: RegisterInput): Promise<RegisterResponse> {

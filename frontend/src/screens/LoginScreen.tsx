@@ -42,7 +42,9 @@ export function LoginScreen({ navigation }: RootStackScreenProps<"Login">) {
       // NO trimeamos la password (espacios pueden ser legitimos).
       const cleanUsername = username.trim();
       const res = await login({ username: cleanUsername, password });
-      await setSession(res.token, res.user_id, res.email);
+      // F18: email ya no viene en el login response (privacy minimization).
+      // Se obtiene via GET /perfil/ cuando se necesita (ej. HomeScreen saludo).
+      await setSession(res.token, res.user_id);
     } catch (err) {
       toast.error("No pudimos iniciar sesion", getErrorMessage(err));
     } finally {

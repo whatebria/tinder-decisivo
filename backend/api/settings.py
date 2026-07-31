@@ -24,6 +24,18 @@ ALLOWED_HOSTS = config(
     cast=Csv(),
 )
 
+# Guard temprano: previene que DEBUG=True llegue a produccion por accidente.
+# ENV={prod,production} -> fail fast, el servidor no arranca.
+# Usar DEBUG=False como proxy de produccion YA es seguro (default=False),
+# pero este check explicito da un mensaje de error claro si se combina mal.
+IS_PRODUCTION = config("ENV", default="dev") in ("prod", "production")
+if IS_PRODUCTION and DEBUG:
+    raise ImproperlyConfigured(
+        "DEBUG=True detectado con ENV=prod/production. "
+        "Esto expone stack traces completos, lista de URLs y estado interno. "
+        "Fija DEBUG=False (o elimina la variable del entorno de produccion)."
+    )
+
 
 # ------------------------------------------------------------
 # Apps

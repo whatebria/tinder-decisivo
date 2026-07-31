@@ -31,7 +31,7 @@ class RegisterUserView(generics.CreateAPIView):
 
 
 class CustomAuthToken(ObtainAuthToken):
-    """Login. Retorna token, user_id y email."""
+    """Login. Retorna token y user_id (sin email — F18 privacy minimization)."""
 
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
     throttle_classes = [ScopedRateThrottle]
@@ -44,7 +44,9 @@ class CustomAuthToken(ObtainAuthToken):
         # Rotamos el token en cada login para invalidar sesiones viejas.
         Token.objects.filter(user=user).delete()
         token = Token.objects.create(user=user)
-        return Response({"token": token.key, "user_id": user.pk, "email": user.email})
+        # F18: email removido de la response. El frontend lo obtiene via
+        # GET /api/v1/perfil/ que es el endpoint autoritativo para datos de usuario.
+        return Response({"token": token.key, "user_id": user.pk})
 
 
 class LogoutView(APIView):

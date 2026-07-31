@@ -24,6 +24,11 @@ from drf_spectacular.views import (
 
 from .views import health_check
 
+# Handlers JSON personalizados (F17: no exponer lista de URLs en 404).
+# Activos incluso en DEBUG: la API siempre responde JSON, no HTML.
+handler404 = "core.views.errors.handler_404"
+handler500 = "core.views.errors.handler_500"
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     # Health check fuera del versionado: siempre disponible en /api/health/

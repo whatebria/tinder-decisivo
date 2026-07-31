@@ -27,6 +27,7 @@ import { getErrorMessage } from "../api/client";
 import {
   useMisElecciones,
   useNoticiasFeed,
+  usePerfil,
   useReiniciarCuestionario,
   useTiposEleccion,
 } from "../api/hooks";
@@ -93,7 +94,11 @@ function indexProgresoByTipo(
 
 export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   const c = useThemeColors();
-  const email = useAuthStore((s) => s.email);
+  // F18: email ya no viene en el login response. Lo obtenemos de usePerfil().
+  // React Query lo cachea, asi que el GET /perfil/ que ya hace PerfilScreen
+  // alimenta este saludo sin request adicional en la mayoria de los casos.
+  const perfilQ = usePerfil();
+  const email = perfilQ.data?.email ?? null;
   const isGuest = useAuthStore((s) => s.isGuest);
   const activeTipoId = useCuestionarioStore((s) => s.tipoEleccionId);
   const loadForTipoEleccion = useCuestionarioStore((s) => s.loadForTipoEleccion);
