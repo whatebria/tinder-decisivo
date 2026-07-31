@@ -112,6 +112,7 @@ export function MisGuardadosScreen({
     () =>
       StyleSheet.create({
         scroll: { flex: 1, backgroundColor: c.bg },
+        topBarWrapper: { paddingHorizontal: spacing.sp4 },
         content: {
           paddingHorizontal: spacing.sp4,
           paddingBottom: spacing.sp7,

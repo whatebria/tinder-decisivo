@@ -6,11 +6,12 @@
  * de ventana es <900px.
  *
  * Screens que S1 usan AppShell (y por tanto tienen bottomnav):
- *   Home HUB, Gestion Elecciones, Resultados, Mis Guardados, Mis Respuestas,
+ *   Home HUB, Gestion Elecciones, Candidatos, Resultados, Mis Respuestas,
  *   Noticias, Perfil candidato, Perfil empty, Comparador, Config, Editar perfil.
  *
- * Screens que NO (full-focus o pre-app, renderizan sin AppShell):
- *   Splash, Onboarding, Ubicacion, Login, Signup, Cuestionario, Share modal.
+ * Screens que NO (full-focus o pre-app, sin nav visible):
+ *   Splash, Onboarding, Ubicacion, Login, Signup, Cuestionario, Share modal,
+ *   Mis Guardados (pantalla secundaria, acceso via drill-down).
  *
  * Estilos oficiales del DS:
  *   .app-nav.bottom { grid, 5 col, bg card, border-top, padding 6px 4px 8px,
