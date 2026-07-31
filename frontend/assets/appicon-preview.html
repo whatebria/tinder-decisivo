@@ -35,6 +35,8 @@
     .brand-text { font-size: 15px; font-weight: 700; color: #1A2B33; flex: 1; }
     .brand-text-d { color: #E8EEEA; }
   </style>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="icon" type="image/png" sizes="48x48" href="favicon.png" />
 </head>
 <body>
 
@@ -206,6 +208,40 @@
     <div class="tile on-l">
       <svg width="22" height="22"><use href="#appicon-light"/></svg>
       <span>AppIcon (ahora)</span>
+    </div>
+  </div>
+</div>
+
+<!-- Favicon section -->
+<div class="section">
+  <h2>Favicon — browser tab (fondo solido, con/sin dark mode)</h2>
+  <p style="font-size:12px;color:#5A6B73;margin-bottom:12px">
+    La tab de este browser ya usa <code>favicon.svg</code>. Cambia tu OS a dark mode para ver el cambio.
+  </p>
+  <div style="display:flex;gap:24px;align-items:flex-end;flex-wrap:wrap">
+    <div>
+      <div style="background:#F5F7F5;border:1px solid #DDE4E1;border-radius:8px;padding:12px 16px;
+                  display:flex;align-items:center;gap:8px;font-size:13px;color:#5A6B73">
+        <img src="favicon.svg" width="16" height="16" style="border-radius:2px"/>
+        Tinder Decisivo
+      </div>
+      <span style="font-size:11px;color:#8A9199;display:block;margin-top:6px">browser tab — light</span>
+    </div>
+    <div>
+      <div style="background:#1B2830;border-radius:8px;padding:12px 16px;
+                  display:flex;align-items:center;gap:8px;font-size:13px;color:#A8B5AC">
+        <img src="favicon.svg" width="16" height="16" style="border-radius:2px"/>
+        Tinder Decisivo
+      </div>
+      <span style="font-size:11px;color:#8A9199;display:block;margin-top:6px">browser tab — dark (media query activa si OS = dark)</span>
+    </div>
+    <div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <img src="favicon.svg" width="16" height="16"/>
+        <img src="favicon.svg" width="32" height="32"/>
+        <img src="favicon.svg" width="48" height="48"/>
+      </div>
+      <span style="font-size:11px;color:#8A9199;display:block;margin-top:6px">16 / 32 / 48 px SVG</span>
     </div>
   </div>
 </div>

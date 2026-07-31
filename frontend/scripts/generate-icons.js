@@ -130,8 +130,23 @@ console.log("\nGenerating app icons...\n");
 // icon.png — 1024x1024 on white (Expo main icon)
 write(renderPng(LIGHT_ON_WHITE_SVG, 1024), path.join(ASSETS, "icon.png"));
 
-// favicon.png — 48x48 transparent
-write(renderPng(LIGHT_SVG, 48), path.join(ASSETS, "favicon.png"));
+// favicon.png — 48x48 FILLED (fondo solido para maximo contraste en browser tab)
+// Diseño invertido: pentagon relleno primary + persona en blanco
+const FAVICON_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <polygon points="12,2 21.511,8.910 17.963,20.090 6.037,20.090 2.489,8.910"
+    fill="#2E5F7E" stroke="none"/>
+  <polygon
+    points="12,2.85 20.001,9.419 16.688,19.279 7.037,18.945 2.916,9.491"
+    fill="#5A87A5" fill-opacity="0.35"
+    stroke="white" stroke-opacity="0.55" stroke-width="0.6" stroke-linejoin="round"/>
+  <circle cx="12" cy="9.5" r="2"
+    fill="none" stroke="white" stroke-width="1.4"/>
+  <path d="M 8,15 C 8,12 16,12 16,15"
+    fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+</svg>`;
+
+write(renderPng(FAVICON_SVG, 48), path.join(ASSETS, "favicon.png"));
 
 // android-icon-foreground.png — 1024x1024 transparent (centered at 66%)
 // Per Android guidelines, artwork should occupy ~66% of the safe zone

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+    <!-- App name -->
+    <title>Tinder Decisivo</title>
+
+    <!--
+      Favicon stack:
+      1. SVG (Chrome 80+, Firefox 41+, Safari 9.1+) — soporta prefers-color-scheme
+      2. PNG 48px como fallback para browsers sin soporte SVG favicon
+    -->
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon.png" />
+    <link rel="apple-touch-icon" href="/assets/icon.png" />
+
+    <!-- PWA theme color por modo -->
+    <meta name="theme-color" content="#2E5F7E"
+          media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0B1418"
+          media="(prefers-color-scheme: dark)" />
+
+    <!--
+      Expo inyecta aqui sus scripts.
+      No agregar nada despues de este comentario — Expo lo sobreescribe al build.
+    -->
+    <%- htmlWebpackPlugin.tags.headTags %>
+  </head>
+  <body>
+    <div id="root"></div>
+    <%- htmlWebpackPlugin.tags.bodyTags %>
+  </body>
+</html>

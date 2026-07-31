@@ -23,12 +23,11 @@ import { useThemeColors, useThemeShadows } from "../../theme/useTheme";
 
 type LikertValue = 1 | 2 | 3 | 4 | 5;
 
+/** 3 opciones representativas para que la card quepa sin scroll (UX-011). */
 const DEMO_OPCIONES: ReadonlyArray<RadioOption<LikertValue>> = [
-  { value: 1, label: "Muy de acuerdo" },
-  { value: 2, label: "De acuerdo" },
+  { value: 1, label: "De acuerdo" },
   { value: 3, label: "Neutral" },
-  { value: 4, label: "En desacuerdo" },
-  { value: 5, label: "Muy en desacuerdo" },
+  { value: 5, label: "En desacuerdo" },
 ];
 
 const DEMO_PREGUNTA =
@@ -45,8 +44,8 @@ export function OnboardingPreguntaDemo() {
         card: {
           backgroundColor: c.card,
           borderRadius: radii.rLg,
-          padding: spacing.sp4,
-          gap: spacing.sp3,
+          padding: spacing.sp3,
+          gap: spacing.sp2,
           width: "100%",
           maxWidth: 360,
           ...shadows.shSm,

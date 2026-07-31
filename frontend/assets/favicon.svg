@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <style>
+    .bg   { fill: #2E5F7E; }
+    .fg   { stroke: #FFFFFF; fill: none; }
+    .poly { fill: #5A87A5; fill-opacity: 0.35; stroke: #FFFFFF; stroke-opacity: 0.55; }
+    @media (prefers-color-scheme: dark) {
+      .bg   { fill: #7BB5D4; }
+      .fg   { stroke: #0B1418; }
+      .poly { fill: #9BC7DF; fill-opacity: 0.30; stroke: #0B1418; }
+    }
+  </style>
+  <!-- Pentagon solido: fondo de color = contraste maximo a cualquier tamano -->
+  <polygon class="bg"
+    points="12,2 21.511,8.910 17.963,20.090 6.037,20.090 2.489,8.910"
+    stroke="none"/>
+  <!-- Data polygon sutil encima -->
+  <polygon class="poly"
+    points="12,2.85 20.001,9.419 16.688,19.279 7.037,18.945 2.916,9.491"
+    stroke-width="0.6" stroke-linejoin="round"/>
+  <!-- Persona: cabeza -->
+  <circle class="fg" cx="12" cy="9.5" r="2" stroke-width="1.4"/>
+  <!-- Persona: hombros -->
+  <path class="fg" d="M 8,15 C 8,12 16,12 16,15"
+    stroke-width="1.4" stroke-linecap="round"/>
+</svg>

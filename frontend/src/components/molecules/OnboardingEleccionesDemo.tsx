@@ -1,16 +1,18 @@
 /**
- * OnboardingEleccionesDemo: demo decorativo/interactivo para el slide 2
- * del welcome tour ("Sigue las elecciones que te importan").
+ * OnboardingEleccionesDemo: demo del slide 2 del welcome tour.
  *
- * Muestra 3 rows de eleccion con Toggle funcional (estado local),
- * visualmente identicas a GestionEleccionesScreen pero 100% estaticas.
- * Zero API calls.
+ * Componente presentacional puro — sin estado interno, sin API calls.
+ * El padre (OnboardingScreen) provee los datos reales del backend y el
+ * handler de toggle conectado a `useElectionsPrefsStore`.
  *
- * A11y: etiqueta visible "Ejemplo — no se guarda" y los toggles tienen
- * accessibilityLabel individuales. El contenedor tiene role="group".
+ * Muestra maximo 2 elecciones para garantizar que el slide quepa en
+ * pantalla sin scroll vertical (constraint UX-011).
+ *
+ * A11y: los toggles tienen accessibilityLabel individuales.
+ * El contenedor tiene role="none" para no fragmentar la a11y del slide.
  */
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { Toggle } from "../atoms/Toggle";
@@ -19,44 +21,48 @@ import { spacing } from "../../theme/spacing";
 import { typography } from "../../theme/typography";
 import { useThemeColors } from "../../theme/useTheme";
 
-interface DemoEleccion {
-  id: string;
+export interface OnboardingEleccionesDemoTipo {
+  id: number;
   nombre: string;
-  scope: string;
-  diasLabel: string;
 }
 
-const DEMO_ELECCIONES: readonly DemoEleccion[] = [
-  { id: "presidencial", nombre: "Presidencial 2025", scope: "Nacional", diasLabel: "42 días" },
-  { id: "alcaldes",     nombre: "Alcaldes 2024",     scope: "Comunal",  diasLabel: "120 días" },
-  { id: "diputados",    nombre: "Diputados 2025",    scope: "Distrital",diasLabel: "42 días" },
-];
+export interface OnboardingEleccionesDemoProps {
+  /** Lista de tipos de eleccion del backend. Se muestran maximo 2. */
+  tipos: OnboardingEleccionesDemoTipo[];
+  /**
+   * IDs actualmente activos. `null` = no configurado aun
+   * (todos activos por defecto — refleja el estado inicial del store).
+   */
+  activeIds: number[] | null;
+  /** Llama con el id del tipo que el usuario quiso cambiar. */
+  onToggle: (id: number) => void;
+}
 
-/** Toggles ON por defecto para que la demo se vea activa al aterrizar. */
-const INICIAL: Record<string, boolean> = {
-  presidencial: true,
-  alcaldes:     false,
-  diputados:    true,
-};
+/** Max items visibles para no requerir scroll (constraint UX-011). */
+const MAX_VISIBLE = 2;
 
-export function OnboardingEleccionesDemo() {
+export function OnboardingEleccionesDemo({
+  tipos,
+  activeIds,
+  onToggle,
+}: OnboardingEleccionesDemoProps) {
   const c = useThemeColors();
-  const [activos, setActivos] = useState<Record<string, boolean>>(INICIAL);
 
-  function toggle(id: string) {
-    setActivos((prev) => ({ ...prev, [id]: !prev[id] }));
+  // null = todos activos (primera visita). Resolvemos el Set de activos una sola vez.
+  const activeSet: Set<number> | null = useMemo(
+    () => (activeIds !== null ? new Set(activeIds) : null),
+    [activeIds],
+  );
+
+  function isActive(id: number): boolean {
+    // null = todos activos
+    return activeSet === null ? true : activeSet.has(id);
   }
 
   const styles = useMemo(
     () =>
       StyleSheet.create({
         container: { gap: spacing.sp2, width: "100%", maxWidth: 360 },
-        demoTag: {
-          ...typography.overline,
-          color: c.textSecondary,
-          textAlign: "center",
-          marginBottom: spacing.sp1,
-        },
         row: {
           flexDirection: "row",
           justifyContent: "space-between",
@@ -66,7 +72,7 @@ export function OnboardingEleccionesDemo() {
           borderWidth: 1,
           borderColor: c.border2,
           paddingHorizontal: spacing.sp4,
-          paddingVertical: spacing.sp3,
+          paddingVertical: spacing.sp2,
         },
         info: { flex: 1, gap: 2 },
         nombre: {
@@ -74,37 +80,33 @@ export function OnboardingEleccionesDemo() {
           fontWeight: "600",
           color: c.text,
         },
-        meta: {
-          ...typography.small,
-          color: c.textSecondary,
-        },
       }),
     [c],
   );
+
+  const visible = tipos.slice(0, MAX_VISIBLE);
 
   return (
     <View
       style={styles.container}
       accessibilityRole="none"
-      accessibilityLabel="Ejemplo de lista de elecciones"
+      accessibilityLabel="Elecciones disponibles"
     >
-      <Text style={styles.demoTag} accessibilityElementsHidden>
-        EJEMPLO — interactivo, no se guarda
-      </Text>
-
-      {DEMO_ELECCIONES.map((el) => (
-        <View key={el.id} style={styles.row}>
-          <View style={styles.info}>
-            <Text style={styles.nombre}>{el.nombre}</Text>
-            <Text style={styles.meta}>{el.scope} · {el.diasLabel}</Text>
+      {visible.map((tipo) => {
+        const activo = isActive(tipo.id);
+        return (
+          <View key={tipo.id} style={styles.row}>
+            <View style={styles.info}>
+              <Text style={styles.nombre}>{tipo.nombre}</Text>
+            </View>
+            <Toggle
+              value={activo}
+              onPress={() => onToggle(tipo.id)}
+              accessibilityLabel={`${activo ? "Desactivar" : "Activar"} ${tipo.nombre}`}
+            />
           </View>
-          <Toggle
-            value={activos[el.id] ?? false}
-            onPress={() => toggle(el.id)}
-            accessibilityLabel={`${activos[el.id] ? "Desactivar" : "Activar"} ${el.nombre}`}
-          />
-        </View>
-      ))}
+        );
+      })}
     </View>
   );
 }
