@@ -73,6 +73,10 @@ export function AppNavigator() {
           {__DEV__ ? (
             <Stack.Screen name="DesignSystem" component={DesignSystemScreen} />
           ) : null}
+          {/* Preview del onboarding desde Configuracion > Debug. */}
+          {__DEV__ ? (
+            <Stack.Screen name="OnboardingPreview" component={OnboardingScreen} />
+          ) : null}
         </>
       ) : (
         <Stack.Group

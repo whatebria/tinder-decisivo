@@ -38,6 +38,12 @@ export type RootStackParamList = {
    * cuando __DEV__ es true (dev builds). No accesible en produccion.
    */
   DesignSystem: undefined;
+  /**
+   * Preview del onboarding desde Configuracion > Debug.
+   * Solo disponible en dev builds. Los CTAs finales hacen goBack()
+   * en vez de swapear stacks — sin side effects sobre auth o store.
+   */
+  OnboardingPreview: undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> =
