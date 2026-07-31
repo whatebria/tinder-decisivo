@@ -14,7 +14,7 @@
  * anuncien, hit slop generoso en los botones y contraste WCAG AA verificado.
  */
 
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import {
   Modal as RNModal,
   Pressable,
@@ -61,6 +61,19 @@ export function CoachMark({
   const c = useThemeColors();
   const shadows = useThemeShadows();
 
+  // UX-001: deshabilitar el backdrop durante el fade-in (~500ms) para evitar
+  // que el overlay capture clicks del usuario antes de que sea consciente de
+  // que aparecio. Cuando visible pasa a false, se resetea para el proximo show.
+  const [interactive, setInteractive] = useState(false);
+  useEffect(() => {
+    if (!visible) {
+      setInteractive(false);
+      return;
+    }
+    const t = setTimeout(() => setInteractive(true), 500);
+    return () => clearTimeout(t);
+  }, [visible]);
+
   const styles = useMemo(() => buildStyles(c, shadows), [c, shadows]);
 
   if (!visible || !step) return null;
@@ -80,14 +93,17 @@ export function CoachMark({
       accessibilityViewIsModal
     >
       {/* Backdrop clickeable = skip (sin bloquear la pantalla completa). */}
+      {/* disabled=true los primeros 500ms (fade-in) para no interceptar clicks */}
       <Pressable
         style={styles.backdrop}
         onPress={showSkip ? onSkip : onNext}
         accessibilityLabel="Cerrar coach mark"
+        disabled={!interactive}
       >
         {/* Card centrada abajo — Pressable interno frena la propagación. */}
         <Pressable
           onPress={() => {}}
+          disabled={!interactive}
           style={styles.card}
           accessibilityRole="alert"
           accessibilityLabel={`${step.title}. ${step.description}`}

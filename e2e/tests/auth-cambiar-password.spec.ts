@@ -41,13 +41,15 @@ test.describe("Auth › Cambiar contraseña", () => {
       .last() // el del modal, no el trigger
       .click();
 
-    // El handler emite toast.success("Contraseña actualizada", ...).
+    // UX-002 fix: modal cierra rapido (<3s post-success) porque setPassOpen(false)
+    // ahora se llama ANTES del toast. Assertion mas estricta que el workaround anterior.
     await expect(
-      page
-        .getByText(/contraseña actualizada/i)
-        .filter({ visible: true })
-        .first()
-    ).toBeVisible({ timeout: 15_000 });
+      page.getByLabel("Contraseña actual").filter({ visible: true })
+    ).toHaveCount(0, { timeout: 5_000 });
+    // Bonus: verificar que el toast de exito tambien aparecio
+    await expect(
+      page.getByText(/contraseña actualizada/i).filter({ visible: true }).first()
+    ).toBeVisible({ timeout: 5_000 });
   });
 
   test("password actual incorrecta muestra error", async ({ page }) => {

@@ -76,11 +76,17 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
         currentPassword: current,
         newPassword: next,
       });
-      toast.success(
-        "Contraseña actualizada",
-        "Tu nueva contraseña ya está activa.",
-      );
+      // UX-002: cerrar el modal ANTES de emitir el toast.
+      // setPassOpen(false) arranca la animacion de close en el siguiente frame.
+      // El toast se encola despues de ese frame para no bloquear la animacion
+      // con las invalidaciones pesadas de React Query que vienen a continuacion.
       setPassOpen(false);
+      requestAnimationFrame(() => {
+        toast.success(
+          "Contraseña actualizada",
+          "Tu nueva contraseña ya está activa.",
+        );
+      });
     } catch (err) {
       toast.error("No pudimos cambiar la contraseña", getErrorMessage(err));
     }

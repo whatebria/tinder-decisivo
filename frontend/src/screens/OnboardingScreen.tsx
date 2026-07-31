@@ -161,11 +161,21 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding">) {
         style={{ flex: 1 }}
       >
         {WELCOME_SLIDES.map((slide, i) => (
-          <View key={slide.id} style={[styles.slide, { width }]}>
+          <View
+            key={slide.id}
+            style={[styles.slide, { width }]}
+            // A11y: solo el slide activo vive en el accessibility tree.
+            // Los inactivos siguen en el DOM para el scroll horizontal nativo,
+            // pero VoiceOver/NVDA/TalkBack los ignoran completamente.
+            // WCAG 2.2 AA: 1.3.1, 2.4.6, 4.1.2
+            accessibilityElementsHidden={i !== index}
+            importantForAccessibility={i === index ? "yes" : "no-hide-descendants"}
+            aria-hidden={i !== index}
+          >
             <Text style={styles.stepChip}>
               {i + 1} de {totalSlides}
             </Text>
-                        <Heading level={1} style={styles.title}>{slide.title}</Heading>
+            <Heading level={1} style={styles.title}>{slide.title}</Heading>
             <Text style={styles.body}>{slide.body}</Text>
           </View>
         ))}
