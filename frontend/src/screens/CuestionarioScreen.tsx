@@ -200,6 +200,12 @@ export function CuestionarioScreen({
     }
   }
 
+  /** Vuelve al tope del scroll al cambiar de pregunta. Sin animacion: el
+   *  contenido cambia instantaneamente, una transicion lenta se ve rara. */
+  function scrollToTop() {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }
+
   return (
     <>
       <ScreenChrome>
@@ -262,7 +268,7 @@ export function CuestionarioScreen({
            fuera de pantalla. */}
       <View style={styles.footer}>
         <View style={styles.backSlot}>
-          <Button variant="secondary" onPress={prev} disabled={isFirst}>
+          <Button variant="secondary" onPress={() => { prev(); scrollToTop(); }} disabled={isFirst}>
             Atrás
           </Button>
         </View>
@@ -277,7 +283,7 @@ export function CuestionarioScreen({
               {submitting ? "Enviando…" : "Enviar"}
             </Button>
           ) : (
-            <Button onPress={next} disabled={!canAdvance}>
+            <Button onPress={() => { next(); scrollToTop(); }} disabled={!canAdvance}>
               Siguiente
             </Button>
           )}
