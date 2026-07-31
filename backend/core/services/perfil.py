@@ -18,6 +18,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
+from rest_framework.authtoken.models import Token
 
 from core.models import Comuna, MatchCandidato, UserProfile
 
@@ -52,6 +53,11 @@ def cambiar_password(user: User, current_password: str, new_password: str) -> No
 
     user.set_password(new_password)
     user.save(update_fields=["password"])
+
+    # Invalida todas las sesiones activas (tokens) del usuario.
+    # Cualquier atacante que haya robado un token ya no puede usarlo.
+    # El usuario necesitara hacer login de nuevo.
+    Token.objects.filter(user=user).delete()
 
 
 def eliminar_cuenta(user: User, password: str) -> None:

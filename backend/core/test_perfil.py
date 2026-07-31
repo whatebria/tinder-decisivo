@@ -83,6 +83,19 @@ class TestCambiarPassword:
         with pytest.raises(PerfilError, match="distinta"):
             cambiar_password(user, "ActualPass123!", "ActualPass123!")
 
+    def test_cambiar_password_invalida_tokens_existentes(self, user):
+        """F15: los tokens de auth se deben borrar al cambiar password."""
+        token = Token.objects.create(user=user)
+        cambiar_password(user, "ActualPass123!", "NuevaPassV2_xyz!")
+        assert not Token.objects.filter(key=token.key).exists()
+
+    def test_cambiar_password_sin_token_previo_no_rompe(self, user):
+        """F15: si no habia token, cambiar_password no lanza excepcion."""
+        assert Token.objects.filter(user=user).count() == 0
+        # No debe lanzar error aunque no haya token que borrar.
+        cambiar_password(user, "ActualPass123!", "NuevaPassV2_xyz!")
+        assert Token.objects.filter(user=user).count() == 0
+
 
 # ---------------------------------------------------------------------------
 # Service: eliminar_cuenta

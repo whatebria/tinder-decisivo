@@ -47,7 +47,9 @@ class ActualizarComunaSerializer(serializers.Serializer):
 
 class CambiarPasswordSerializer(serializers.Serializer):
     current_password = serializers.CharField(write_only=True)
-    new_password = serializers.CharField(write_only=True, min_length=8)
+    # Sin min_length: la politica real la aplica validate_password() en
+    # services/perfil.py (fuente unica de verdad = AUTH_PASSWORD_VALIDATORS).
+    new_password = serializers.CharField(write_only=True)
 
 
 class EliminarCuentaSerializer(serializers.Serializer):

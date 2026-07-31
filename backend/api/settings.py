@@ -8,6 +8,7 @@ from pathlib import Path
 
 import dj_database_url
 from decouple import Csv, config
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -180,6 +181,16 @@ TOKEN_TTL_DAYS = config("TOKEN_TTL_DAYS", default=30, cast=int)
 DRF_THROTTLE_DISABLED = config(
     "DRF_THROTTLE_DISABLED", default=False, cast=bool
 )
+
+# Guard: DRF_THROTTLE_DISABLED en produccion expone brute-force ilimitado.
+# DEBUG=False es el proxy mas confiable de "entorno productivo".
+# Si DEBUG es False y throttling esta desactivado, el servidor no arranca.
+if DRF_THROTTLE_DISABLED and not DEBUG:
+    raise ImproperlyConfigured(
+        "DRF_THROTTLE_DISABLED solo esta permitido con DEBUG=True. "
+        "Activarlo en produccion deja el endpoint de login sin proteccion "
+        "contra brute-force. Revisa tu configuracion de entorno."
+    )
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [

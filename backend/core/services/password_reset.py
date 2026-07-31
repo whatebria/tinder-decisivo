@@ -23,6 +23,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.mail import send_mail
 from django.utils import timezone
+from rest_framework.authtoken.models import Token
 
 from ..models import PasswordResetToken
 
@@ -118,6 +119,10 @@ def confirm_reset(token_str: str, new_password: str) -> User:
 
     token.used_at = timezone.now()
     token.save(update_fields=["used_at"])
+
+    # Invalida todos los tokens de auth del usuario.
+    # Si un atacante habia robado el token, ya no puede usarlo.
+    Token.objects.filter(user=user).delete()
 
     logger.info("Password reseteada para user %s", user.username)
     return user

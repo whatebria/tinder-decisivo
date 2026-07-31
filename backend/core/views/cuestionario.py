@@ -91,6 +91,10 @@ class PreguntasPendientesView(APIView):
     },
 )
 class SubmitUserAnswersView(APIView):
+    # Declaracion explicita: no confiar en DEFAULT_PERMISSION_CLASSES.
+    # Si el default cambia, este endpoint NO se vuelve publico por accidente.
+    permission_classes = [permissions.IsAuthenticated]
+
     def post(self, request):
         serializer = RespuestaUsuarioCreateSerializer(
             data=request.data, many=True, context={"request": request}

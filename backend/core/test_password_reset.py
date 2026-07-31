@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.core import mail
 from django.urls import reverse
 from django.utils import timezone
+from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from core.models import PasswordResetToken
@@ -87,6 +88,17 @@ class TestConfirmReset:
 
         token.refresh_from_db()
         assert token.is_used
+
+    def test_confirm_reset_invalida_tokens_auth(self, user):
+        """F15: confirm_reset debe borrar los tokens de auth existentes."""
+        auth_token = Token.objects.create(user=user)
+        request_reset(user.email)
+        reset_token = PasswordResetToken.objects.get(user=user)
+
+        confirm_reset(reset_token.token, "MyNewSecure_Pass123!")
+
+        assert not Token.objects.filter(key=auth_token.key).exists()
+        assert Token.objects.filter(user=user).count() == 0
 
     def test_token_ya_usado_falla(self, user):
         request_reset(user.email)
