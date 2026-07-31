@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Icon Preview - Tinder Decisivo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #EEF0EE;
+      padding: 40px 24px;
+      color: #1A2B33;
+    }
+    h1  { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    p   { font-size: 14px; color: #5A6B73; margin-bottom: 40px; }
+    code { font-family: ui-monospace, monospace; font-size: 12px;
+           background: #DDE4E1; padding: 1px 5px; border-radius: 4px; }
+
+    .section { margin-bottom: 52px; }
+    .section-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: #8A9199; margin-bottom: 20px;
+    }
+
+    .bg-light  { background: #F5F7F5; border: 1px solid #DDE4E1; }
+    .bg-dark   { background: #0B1418; }
+    .bg-check  {
+      background-image:
+        linear-gradient(45deg,#CBD1CD 25%,transparent 25%),
+        linear-gradient(-45deg,#CBD1CD 25%,transparent 25%),
+        linear-gradient(45deg,transparent 75%,#CBD1CD 75%),
+        linear-gradient(-45deg,transparent 75%,#CBD1CD 75%);
+      background-size: 14px 14px;
+      background-position: 0 0, 0 7px, 7px -7px, -7px 0;
+      background-color: #E1E5E2;
+    }
+
+    .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 520px; }
+    .compare-card {
+      border-radius: 20px; padding: 32px 24px;
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+    }
+    .compare-card h3 { font-size: 13px; font-weight: 700; }
+    .compare-card p  { font-size: 11px; font-family: ui-monospace, monospace; margin: 0; }
+    .card-light { background: #F5F7F5; border: 1px solid #DDE4E1; color: #1A2B33; }
+    .card-dark  { background: #0B1418; color: #A8B5AC; }
+    .card-dark h3 { color: #E8EEEA; }
+
+    .ramp-row  {
+      display: inline-flex; align-items: flex-end;
+      border-radius: 20px; overflow: hidden;
+    }
+    .ramp-tile {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 10px; padding: 24px 28px;
+    }
+    .on-light span { font-size: 11px; color: #8A9199; }
+    .on-dark  span { font-size: 11px; color: #7C8A80; }
+  </style>
+</head>
+<body>
+
+<h1>App Icon - Tinder Decisivo</h1>
+<p>Paleta design-system. Transparent background. Dark mode via <code>prefers-color-scheme</code> in icon.svg.</p>
+
+<!--
+  SPRITE SVG — position:absolute instead of display:none.
+  display:none prevents the browser from resolving url(#id) references.
+  This technique keeps the defs rendered but invisible.
+
+  Two symbols:
+    #icon-light  — primary #2E5F7E, secondary #7BA098
+    #icon-dark   — primary #7BB5D4, secondary #9BC0B5
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     style="position:absolute;width:0;height:0;overflow:hidden">
+  <defs>
+
+    <!-- Light gradients -->
+    <linearGradient id="gL" x1="76" y1="66" x2="438" y2="410" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#5A87A5"/>
+      <stop offset="55%"  stop-color="#2E5F7E"/>
+      <stop offset="100%" stop-color="#7BA098"/>
+    </linearGradient>
+    <linearGradient id="g2L" x1="76" y1="66" x2="438" y2="410" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#82A6BF"/>
+      <stop offset="100%" stop-color="#9BC0B5"/>
+    </linearGradient>
+
+    <!-- Dark gradients -->
+    <linearGradient id="gD" x1="76" y1="66" x2="438" y2="410" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#9BC7DF"/>
+      <stop offset="55%"  stop-color="#7BB5D4"/>
+      <stop offset="100%" stop-color="#9BC0B5"/>
+    </linearGradient>
+    <linearGradient id="g2D" x1="76" y1="66" x2="438" y2="410" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#9BC7DF"/>
+      <stop offset="100%" stop-color="#9BC0B5"/>
+    </linearGradient>
+
+    <!-- Mask: white=show, black=hide. Cuts the person silhouette from the grid. -->
+    <mask id="mp">
+      <rect width="512" height="512" fill="white"/>
+      <circle cx="256" cy="224" r="42" fill="black"/>
+      <path d="M 196,306 C 196,254 316,254 316,306 Z" fill="black"/>
+    </mask>
+
+    <!-- LIGHT SYMBOL -->
+    <symbol id="icon-light" viewBox="0 0 512 512">
+      <!-- Spokes (masked) -->
+      <g mask="url(#mp)" stroke="url(#g2L)" stroke-width="5" stroke-linecap="round" opacity="0.45">
+        <line x1="256" y1="256" x2="256"   y2="66"/>
+        <line x1="256" y1="256" x2="436.7" y2="197.3"/>
+        <line x1="256" y1="256" x2="367.7" y2="409.7"/>
+        <line x1="256" y1="256" x2="144.3" y2="409.7"/>
+        <line x1="256" y1="256" x2="75.3"  y2="197.3"/>
+      </g>
+      <!-- Ring 35% (masked) -->
+      <polygon mask="url(#mp)"
+        points="256,189.5 319.2,235.5 295.1,309.8 216.9,309.8 192.8,235.5"
+        fill="none" stroke="url(#g2L)" stroke-width="4" stroke-linejoin="round" opacity="0.40"/>
+      <!-- Ring 60% (masked) -->
+      <polygon mask="url(#mp)"
+        points="256,142 364.4,220.8 323,348.2 189,348.2 147.6,220.8"
+        fill="none" stroke="url(#g2L)" stroke-width="5" stroke-linejoin="round" opacity="0.55"/>
+      <!-- Data polygon -->
+      <polygon points="256,94.5 391.5,212 356.5,394.3 183.4,355.9 111.4,209"
+        fill="none" stroke="url(#gL)" stroke-width="12" stroke-linejoin="round"/>
+      <!-- Outer pentagon -->
+      <polygon points="256,66 436.7,197.3 367.7,409.7 144.3,409.7 75.3,197.3"
+        fill="none" stroke="url(#gL)" stroke-width="15" stroke-linejoin="round"/>
+      <!-- Vertex dots -->
+      <g fill="url(#gL)">
+        <circle cx="256"   cy="94.5"  r="10"/>
+        <circle cx="391.5" cy="212"   r="10"/>
+        <circle cx="356.5" cy="394.3" r="10"/>
+        <circle cx="183.4" cy="355.9" r="10"/>
+        <circle cx="111.4" cy="209"   r="10"/>
+      </g>
+      <!-- Person -->
+      <g fill="none" stroke="#2E5F7E" stroke-linecap="round" stroke-linejoin="round" stroke-width="13">
+        <circle cx="256" cy="224" r="28"/>
+        <path d="M 208,294 C 208,270 304,270 304,294"/>
+      </g>
+    </symbol>
+
+    <!-- DARK SYMBOL -->
+    <symbol id="icon-dark" viewBox="0 0 512 512">
+      <!-- Spokes (masked) -->
+      <g mask="url(#mp)" stroke="url(#g2D)" stroke-width="5" stroke-linecap="round" opacity="0.55">
+        <line x1="256" y1="256" x2="256"   y2="66"/>
+        <line x1="256" y1="256" x2="436.7" y2="197.3"/>
+        <line x1="256" y1="256" x2="367.7" y2="409.7"/>
+        <line x1="256" y1="256" x2="144.3" y2="409.7"/>
+        <line x1="256" y1="256" x2="75.3"  y2="197.3"/>
+      </g>
+      <!-- Ring 35% (masked) -->
+      <polygon mask="url(#mp)"
+        points="256,189.5 319.2,235.5 295.1,309.8 216.9,309.8 192.8,235.5"
+        fill="none" stroke="url(#g2D)" stroke-width="4" stroke-linejoin="round" opacity="0.55"/>
+      <!-- Ring 60% (masked) -->
+      <polygon mask="url(#mp)"
+        points="256,142 364.4,220.8 323,348.2 189,348.2 147.6,220.8"
+        fill="none" stroke="url(#g2D)" stroke-width="5" stroke-linejoin="round" opacity="0.65"/>
+      <!-- Data polygon -->
+      <polygon points="256,94.5 391.5,212 356.5,394.3 183.4,355.9 111.4,209"
+        fill="none" stroke="url(#gD)" stroke-width="12" stroke-linejoin="round"/>
+      <!-- Outer pentagon -->
+      <polygon points="256,66 436.7,197.3 367.7,409.7 144.3,409.7 75.3,197.3"
+        fill="none" stroke="url(#gD)" stroke-width="15" stroke-linejoin="round"/>
+      <!-- Vertex dots -->
+      <g fill="url(#gD)">
+        <circle cx="256"   cy="94.5"  r="10"/>
+        <circle cx="391.5" cy="212"   r="10"/>
+        <circle cx="356.5" cy="394.3" r="10"/>
+        <circle cx="183.4" cy="355.9" r="10"/>
+        <circle cx="111.4" cy="209"   r="10"/>
+      </g>
+      <!-- Person -->
+      <g fill="none" stroke="#7BB5D4" stroke-linecap="round" stroke-linejoin="round" stroke-width="13">
+        <circle cx="256" cy="224" r="28"/>
+        <path d="M 208,294 C 208,270 304,270 304,294"/>
+      </g>
+    </symbol>
+
+  </defs>
+</svg>
+
+<!-- ================================================================
+     LIGHT vs DARK
+================================================================= -->
+<div class="section">
+  <div class="section-title">Light mode vs Dark mode</div>
+  <div class="compare">
+    <div class="compare-card card-light">
+      <h3>Light mode</h3>
+      <p>#2E5F7E / #7BA098</p>
+      <svg width="200" height="200"><use href="#icon-light"/></svg>
+    </div>
+    <div class="compare-card card-dark">
+      <h3>Dark mode</h3>
+      <p>#7BB5D4 / #9BC0B5</p>
+      <svg width="200" height="200"><use href="#icon-dark"/></svg>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     SIZE RAMP — LIGHT
+================================================================= -->
+<div class="section">
+  <div class="section-title">Size ramp — light</div>
+  <div class="ramp-row bg-light">
+    <div class="ramp-tile on-light">
+      <svg width="40"  height="40" ><use href="#icon-light"/></svg>
+      <span>40 px</span>
+    </div>
+    <div class="ramp-tile on-light">
+      <svg width="80"  height="80" ><use href="#icon-light"/></svg>
+      <span>80 px</span>
+    </div>
+    <div class="ramp-tile on-light">
+      <svg width="120" height="120"><use href="#icon-light"/></svg>
+      <span>120 px</span>
+    </div>
+    <div class="ramp-tile on-light">
+      <svg width="200" height="200"><use href="#icon-light"/></svg>
+      <span>200 px</span>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     SIZE RAMP — DARK
+================================================================= -->
+<div class="section">
+  <div class="section-title">Size ramp — dark</div>
+  <div class="ramp-row bg-dark">
+    <div class="ramp-tile on-dark">
+      <svg width="40"  height="40" ><use href="#icon-dark"/></svg>
+      <span>40 px</span>
+    </div>
+    <div class="ramp-tile on-dark">
+      <svg width="80"  height="80" ><use href="#icon-dark"/></svg>
+      <span>80 px</span>
+    </div>
+    <div class="ramp-tile on-dark">
+      <svg width="120" height="120"><use href="#icon-dark"/></svg>
+      <span>120 px</span>
+    </div>
+    <div class="ramp-tile on-dark">
+      <svg width="200" height="200"><use href="#icon-dark"/></svg>
+      <span>200 px</span>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     TRANSPARENTE
+================================================================= -->
+<div class="section">
+  <div class="section-title">Transparente — checkerboard</div>
+  <div class="bg-check" style="display:inline-block;padding:24px;border-radius:20px;">
+    <svg width="200" height="200"><use href="#icon-light"/></svg>
+  </div>
+</div>
+
+</body>
+</html>

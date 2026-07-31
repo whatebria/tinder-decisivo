@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <style>
+    :root {
+      --c-a: #5A87A5; --c-b: #2E5F7E; --c-c: #7BA098;
+      --c-d: #82A6BF; --c-e: #9BC0B5;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --c-a: #9BC7DF; --c-b: #7BB5D4; --c-c: #9BC0B5;
+        --c-d: #9BC7DF; --c-e: #9BC0B5;
+      }
+    }
+    .sa { stop-color: var(--c-a); } .sb { stop-color: var(--c-b); }
+    .sc { stop-color: var(--c-c); } .sd { stop-color: var(--c-d); }
+    .se { stop-color: var(--c-e); } .person { stroke: var(--c-b); }
+  </style>
+  <defs>
+    <linearGradient id="g" x1="76" y1="66" x2="438" y2="410" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" class="sa"/><stop offset="55%" class="sb"/><stop offset="100%" class="sc"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="76" y1="66" x2="438" y2="410" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" class="sd"/><stop offset="100%" class="se"/>
+    </linearGradient>
+    <mask id="mp">
+      <rect width="512" height="512" fill="white"/>
+      <circle cx="256" cy="224" r="42" fill="black"/>
+      <path d="M 196,306 C 196,254 316,254 316,306 Z" fill="black"/>
+    </mask>
+  </defs>
+  <g mask="url(#mp)" stroke="url(#g2)" stroke-width="5" stroke-linecap="round" opacity="0.45">
+    <line x1="256" y1="256" x2="256" y2="66"/>
+    <line x1="256" y1="256" x2="436.7" y2="197.3"/>
+    <line x1="256" y1="256" x2="367.7" y2="409.7"/>
+    <line x1="256" y1="256" x2="144.3" y2="409.7"/>
+    <line x1="256" y1="256" x2="75.3" y2="197.3"/>
+  </g>
+  <polygon mask="url(#mp)" points="256,189.5 319.2,235.5 295.1,309.8 216.9,309.8 192.8,235.5"
+    fill="none" stroke="url(#g2)" stroke-width="4" stroke-linejoin="round" opacity="0.40"/>
+  <polygon mask="url(#mp)" points="256,142 364.4,220.8 323,348.2 189,348.2 147.6,220.8"
+    fill="none" stroke="url(#g2)" stroke-width="5" stroke-linejoin="round" opacity="0.55"/>
+  <polygon points="256,94.5 391.5,212 356.5,394.3 183.4,355.9 111.4,209"
+    fill="none" stroke="url(#g)" stroke-width="12" stroke-linejoin="round"/>
+  <polygon points="256,66 436.7,197.3 367.7,409.7 144.3,409.7 75.3,197.3"
+    fill="none" stroke="url(#g)" stroke-width="15" stroke-linejoin="round"/>
+  <g fill="url(#g)">
+    <circle cx="256" cy="94.5" r="10"/><circle cx="391.5" cy="212" r="10"/>
+    <circle cx="356.5" cy="394.3" r="10"/><circle cx="183.4" cy="355.9" r="10"/>
+    <circle cx="111.4" cy="209" r="10"/>
+  </g>
+  <g class="person" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="13">
+    <circle cx="256" cy="224" r="28"/>
+    <path d="M 208,294 C 208,270 304,270 304,294"/>
+  </g>
+</svg>  

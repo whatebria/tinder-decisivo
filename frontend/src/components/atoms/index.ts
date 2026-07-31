@@ -15,6 +15,7 @@ export { StatBlock, type StatBlockProps, type StatVariant } from "./StatBlock";
 export { PageDots, type PageDotsProps } from "./PageDots";
 export { ThemeToggle, type ThemeToggleProps } from "./ThemeToggle";
 export { RadarChart } from "./RadarChart";
+export { AppIcon, type AppIconProps } from "./AppIcon";
 
 // Nuevos (Fase 1)
 export { Input, type InputProps } from "./Input";

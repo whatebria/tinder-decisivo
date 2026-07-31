@@ -1,5 +1,5 @@
 /**
- * HomeTopBar: barra superior del Home. Brand con ícono heart + notif button.
+ * HomeTopBar: barra superior del Home. Brand con AppIcon (radar+persona) + notif button.
  * Distinta a TopNav (que es para flujos multi-paso con progress).
  *
  * Ref: design-exploration/design-system.html · .topnav (dentro de Template Home)
@@ -8,6 +8,7 @@
 import React, { useMemo } from "react";
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
+import { AppIcon } from "../atoms/AppIcon";
 import { Icon } from "../atoms/Icon";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
@@ -69,7 +70,7 @@ export function HomeTopBar({ brand, onNotifications, style }: HomeTopBarProps) {
   return (
     <View style={[styles.bar, style]} accessibilityRole="header">
       <View style={styles.brand}>
-        <Icon name="heart" size={22} color={c.primary} fill={c.primary} />
+        <AppIcon size={22} />
         <Text style={styles.brandText}>{brand}</Text>
       </View>
       {onNotifications ? (
