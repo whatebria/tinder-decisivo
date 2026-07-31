@@ -41,7 +41,7 @@ import {
   useToggleDescartado,
   useToggleFavorito,
 } from "../api/hooks";
-import type { Candidato, Noticia, PosturaCandidatoDetalle } from "../api/endpoints";
+import type { Candidato, PosturaCandidatoDetalle } from "../api/endpoints";
 import type { Sentiment } from "../components";
 import {
   Button,
@@ -65,14 +65,16 @@ import {
   type NoticiaDetail,
 } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
-import { formatMatchPercentage, getMatchColor, getLikertColor } from "../services/matching";
+import { formatMatchPercentage, getMatchColor } from "../services/matching";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
 import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
-import { useIsDark, useThemeColors } from "../theme/useTheme";
+import { useThemeColors } from "../theme/useTheme";
 import { iniciales, nombreCompleto } from "../utils/candidato";
+import { NoticiasTab } from "./DetalleCandidato/NoticiasTab";
+import { ResumenTab } from "./DetalleCandidato/ResumenTab";
 
 type PerfilTab = "resumen" | "posturas" | "noticias";
 
@@ -392,177 +394,6 @@ function ActionRow({
   );
 }
 
-interface ResumenTabProps {
-  candidato: Candidato;
-  hasMatch: boolean;
-  chartData: Record<string, number>;
-  scoreCol: string;
-  posturas: PosturaCandidatoDetalle[];
-  isGuest: boolean;
-}
-
-function ResumenTab({
-  candidato,
-  hasMatch,
-  chartData,
-  scoreCol,
-  posturas,
-  isGuest,
-}: ResumenTabProps) {
-  const c = useThemeColors();
-  const isDark = useIsDark();
-  const posturasDestacadas = posturas.slice(0, 3);
-
-  return (
-    <View style={styles.tabBody}>
-      {candidato.bio ? (
-        <View style={styles.section}>
-          <Text style={[styles.sectionLabel, { color: c.textSecondary }]}>
-            Sobre el candidato
-          </Text>
-          <Text style={[styles.paragraph, { color: c.text }]}>
-            {candidato.bio}
-          </Text>
-        </View>
-      ) : null}
-
-      {candidato.propuesta_electoral ? (
-        <View style={styles.section}>
-          <Text style={[styles.sectionLabel, { color: c.textSecondary }]}>
-            Propuesta electoral
-          </Text>
-          <Text style={[styles.paragraph, { color: c.text }]}>
-            {candidato.propuesta_electoral}
-          </Text>
-        </View>
-      ) : null}
-
-      {hasMatch && Object.keys(chartData).length >= 3 ? (
-        <View style={styles.section}>
-          <Text style={[styles.sectionLabel, { color: c.textSecondary }]}>
-            Afinidad por eje tematico
-          </Text>
-          <View style={styles.radarWrap}>
-            <RadarChart data={chartData} size={260} color={scoreCol} />
-          </View>
-        </View>
-      ) : null}
-
-      {posturasDestacadas.length > 0 ? (
-        <View style={styles.section}>
-          <Text style={[styles.sectionLabel, { color: c.textSecondary }]}>
-            Posturas destacadas
-          </Text>
-          <View style={styles.posturasList}>
-            {posturasDestacadas.map((p) => (
-              <View
-                key={p.id}
-                style={[
-                  styles.posturaCard,
-                  { backgroundColor: c.card, borderColor: c.border },
-                ]}
-              >
-                <Text
-                  style={[styles.posturaPregunta, { color: c.text }]}
-                  numberOfLines={2}
-                >
-                  {p.pregunta_texto ?? "Pregunta"}
-                </Text>
-                <Text
-                  style={[styles.posturaRespuesta, {
-                    color: getLikertColor(p.opcion_respuesta_valor, c, isDark),
-                  }]}
-                >
-                  {p.opcion_respuesta_texto ?? ""}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </View>
-      ) : null}
-
-      {!isGuest && hasMatch ? (
-        <View style={styles.section}>
-          <MatchExplanation candidatoId={candidato.id} />
-        </View>
-      ) : null}
-    </View>
-  );
-}
-
-/** Mapea el modelo Noticia a NewsCard. Sin sentiment del backend usamos "neutral". */
-function noticiaToNewsCardProps(n: Noticia) {
-  const when = formatWhen(n);
-  const sentiment: Sentiment = "neutral";
-  return {
-    headline: n.titulo,
-    snippet: n.descripcion ?? "",
-    source: n.fuente ?? "Fuente",
-    when,
-    sentiment,
-  };
-}
-
-function formatWhen(n: Noticia): string {
-  const raw =
-    (n as unknown as { fecha_publicacion?: string; fecha?: string; created_at?: string })
-      .fecha_publicacion ??
-    (n as unknown as { fecha?: string }).fecha ??
-    (n as unknown as { created_at?: string }).created_at ??
-    "";
-  if (!raw) return "";
-  const d = new Date(raw);
-  if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("es-CL", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function NoticiasTab({ noticias }: { noticias: Noticia[] }) {
-  const c = useThemeColors();
-  const [selected, setSelected] = React.useState<NoticiaDetail | null>(null);
-
-  if (noticias.length === 0) {
-    return (
-      <Text style={[styles.empty, { color: c.textSecondary }]}>
-        Aun no hay noticias cargadas para este candidato.
-      </Text>
-    );
-  }
-  return (
-    <View style={styles.noticiasList}>
-      {noticias.map((n) => {
-        const cardProps = noticiaToNewsCardProps(n);
-        return (
-          <NewsCard
-            key={n.id}
-            {...cardProps}
-            onPress={() =>
-              setSelected({
-                id: n.id,
-                titulo: n.titulo,
-                descripcion: n.descripcion ?? "",
-                url: n.url,
-                fuente: n.fuente,
-                imagenUrl: (n as unknown as { imagen_url?: string | null }).imagen_url ?? null,
-                fechaFormateada: cardProps.when,
-                sentiment: cardProps.sentiment,
-              })
-            }
-          />
-        );
-      })}
-      <NoticiaDetailSheet
-        visible={selected !== null}
-        onClose={() => setSelected(null)}
-        noticia={selected}
-      />
-    </View>
-  );
-}
-
 // ---------- Helpers ----------
 
 function buildShareText(cand: Candidato, matchPct: number | null): string {
@@ -643,39 +474,10 @@ const styles = StyleSheet.create({
   // Tabs
   tabsStretch: { alignSelf: "stretch" },
 
-  // Tab body wrapper
-  tabBody: { gap: spacing.sp4, marginTop: spacing.sp1 },
-  section: { gap: spacing.sp2 },
-  sectionLabel: {
-    ...typography.overline,
-    fontWeight: "700",
-  },
-  paragraph: typography.small,
+  // Noticias tab — estilos en DetalleCandidato/NoticiasTab.tsx
+  // Resumen tab — estilos en DetalleCandidato/ResumenTab.tsx
 
-  radarWrap: {
-    alignItems: "center",
-    paddingVertical: spacing.sp2,
-  },
-
-  // Posturas destacadas (Resumen)
-  posturasList: { gap: spacing.sp4, marginTop: spacing.sp1 },
-  posturaCard: {
-    borderWidth: 1,
-    borderRadius: radii.rMd,
-    padding: spacing.sp3,
-    gap: spacing.sp1,
-  },
-  posturaPregunta: {
-    ...typography.small,
-    fontWeight: "700",
-  },
-  posturaRespuesta: typography.small,
-
-  // Noticias tab
-  noticiasList: { gap: spacing.sp3, marginTop: spacing.sp1 },
-  empty: {
-    padding: spacing.sp6,
-    textAlign: "center",
-    fontStyle: "italic",
-  },
+  // paragraph se mantiene aqui: usado en el modal de confianza y en el
+  // estado de error ("Candidato no encontrado").
+  paragraph: { ...typography.small },
 });
