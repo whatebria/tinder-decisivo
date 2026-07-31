@@ -373,7 +373,7 @@ export function CandidatosScreen({
   );
 
   return (
-    <AppShell active="candidatos" navigation={navigation}>
+    <AppShell active={null} navigation={navigation}>
       <FlatList
         data={candidatosFiltrados}
         keyExtractor={keyExtractor}

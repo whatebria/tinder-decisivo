@@ -29,7 +29,7 @@ export function RegisterScreen({ navigation }: RootStackScreenProps<"Register">)
   const canSubmit =
     username.length >= 3 &&
     email.includes("@") &&
-    password.length >= 8 &&
+    password.length >= 10 &&
     !loading;
 
   async function handleRegister() {
@@ -41,9 +41,11 @@ export function RegisterScreen({ navigation }: RootStackScreenProps<"Register">)
       const cleanUsername = username.trim();
       const cleanEmail = email.trim();
       await register({ username: cleanUsername, email: cleanEmail, password });
-      // Login automatico tras registro exitoso
+      // Login automatico tras registro exitoso.
+      // Nota: LoginResponse no incluye email (F18 - privacy minimization).
+      // El email se obtiene via GET /api/v1/perfil/ una vez autenticado.
       const loginRes = await login({ username: cleanUsername, password });
-      await setSession(loginRes.token, loginRes.user_id, loginRes.email);
+      await setSession(loginRes.token, loginRes.user_id);
     } catch (err) {
       toast.error("No pudimos crear tu cuenta", getErrorMessage(err));
     } finally {
@@ -99,7 +101,7 @@ export function RegisterScreen({ navigation }: RootStackScreenProps<"Register">)
         />
         <FormField
           label="Contraseña"
-          helper="Mínimo 8 caracteres."
+          helper="Mínimo 10 caracteres."
           value={password}
           onChangeText={setPassword}
           secureTextEntry

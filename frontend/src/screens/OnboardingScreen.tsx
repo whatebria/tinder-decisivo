@@ -79,6 +79,10 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding">) {
     if (!isLastSlide) goToSlide(index + 1);
   }
 
+  function handleBack() {
+    if (index > 0) goToSlide(index - 1);
+  }
+
   function handleScroll(e: NativeSyntheticEvent<NativeScrollEvent>) {
     const x = e.nativeEvent.contentOffset.x;
     const i = Math.round(x / width);
@@ -91,7 +95,8 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding">) {
         container: { flex: 1, paddingTop: spacing.sp8, backgroundColor: c.bg },
         topBar: {
           flexDirection: "row",
-          justifyContent: "flex-end",
+          justifyContent: "space-between",
+          alignItems: "center",
           paddingHorizontal: spacing.sp5,
           minHeight: 32,
         },
@@ -137,8 +142,19 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding">) {
 
   return (
     <View style={styles.container}>
-      {/* Skip arriba, oculto en slide final (los CTAs son la salida) */}
+      {/* Back (izquierda) + Skip (derecha). Placeholder <View /> para mantener
+           espacio cuando no hay elemento, asegurando que el layout sea simetrico. */}
       <View style={styles.topBar}>
+        {index > 0 ? (
+          <Link
+            onPress={handleBack}
+            accessibilityLabel="Volver al paso anterior"
+          >
+            ← Atrás
+          </Link>
+        ) : (
+          <View />
+        )}
         {!isLastSlide ? (
           <Link
             block
@@ -147,7 +163,9 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding">) {
           >
             Saltar
           </Link>
-        ) : null}
+        ) : (
+          <View />
+        )}
       </View>
 
       {/* Pager horizontal */}
