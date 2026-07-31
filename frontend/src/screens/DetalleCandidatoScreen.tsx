@@ -65,13 +65,13 @@ import {
   type NoticiaDetail,
 } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
-import { formatMatchPercentage, getMatchColor } from "../services/matching";
+import { formatMatchPercentage, getMatchColor, getLikertColor } from "../services/matching";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
 import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
-import { useThemeColors } from "../theme/useTheme";
+import { useIsDark, useThemeColors } from "../theme/useTheme";
 import { iniciales, nombreCompleto } from "../utils/candidato";
 
 type PerfilTab = "resumen" | "posturas" | "noticias";
@@ -410,6 +410,7 @@ function ResumenTab({
   isGuest,
 }: ResumenTabProps) {
   const c = useThemeColors();
+  const isDark = useIsDark();
   const posturasDestacadas = posturas.slice(0, 3);
 
   return (
@@ -467,7 +468,11 @@ function ResumenTab({
                 >
                   {p.pregunta_texto ?? "Pregunta"}
                 </Text>
-                <Text style={[styles.posturaRespuesta, { color: c.textSecondary }]}>
+                <Text
+                  style={[styles.posturaRespuesta, {
+                    color: getLikertColor(p.opcion_respuesta_valor, c, isDark),
+                  }]}
+                >
                   {p.opcion_respuesta_texto ?? ""}
                 </Text>
               </View>

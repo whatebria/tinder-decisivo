@@ -11,19 +11,13 @@ import React, { useMemo, useState } from "react";
 import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { PosturaCandidatoDetalle } from "../../api/endpoints";
+import { getLikertColor } from "../../services/matching";
 import { spacing } from "../../theme/spacing";
-import { useThemeColors } from "../../theme/useTheme";
+import { useIsDark, useThemeColors } from "../../theme/useTheme";
 
 interface Props {
   posturas: PosturaCandidatoDetalle[];
   loading?: boolean;
-}
-
-/** Color segun valor Likert (1=muy en desacuerdo -> 5=muy de acuerdo). */
-function colorForValor(valor: number, c: ReturnType<typeof useThemeColors>): string {
-  if (valor >= 4) return c.success;
-  if (valor <= 2) return c.danger;
-  return c.textSecondary;
 }
 
 /** Extrae URLs de la justificacion (formato "... (https://...)" comun en fixtures). */
@@ -35,6 +29,7 @@ function extractUrl(justificacion: string | null | undefined): string | null {
 
 export function CandidatoPosturas({ posturas, loading }: Props) {
   const c = useThemeColors();
+  const isDark = useIsDark();
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
 
   // Agrupa por eje tematico preservando orden por pregunta_orden dentro de cada eje.
@@ -85,7 +80,7 @@ export function CandidatoPosturas({ posturas, loading }: Props) {
           {g.items.map((p) => {
             const isOpen = expanded.has(p.id);
             const url = extractUrl(p.justificacion);
-            const respuestaColor = colorForValor(p.opcion_respuesta_valor, c);
+            const respuestaColor = getLikertColor(p.opcion_respuesta_valor, c, isDark);
 
             return (
               <Pressable
