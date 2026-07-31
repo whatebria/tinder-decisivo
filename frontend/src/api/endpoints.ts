@@ -85,6 +85,17 @@ export async function login(input: LoginInput): Promise<LoginResponse> {
   return data;
 }
 
+/**
+ * Invalida el token en el servidor y limpia la cookie httpOnly (TASK-003).
+ * Llamar ANTES de `useAuthStore.logout()` para que el browser reciba
+ * el header Set-Cookie que borra la cookie de autenticacion.
+ * Si el endpoint falla (ej. token ya expirado), ignorar: el estado local
+ * se limpia igual via `useAuthStore.logout()`.
+ */
+export async function logoutApi(): Promise<void> {
+  await apiClient.post("/logout/");
+}
+
 // ============================================================
 // Catalogos
 // ============================================================

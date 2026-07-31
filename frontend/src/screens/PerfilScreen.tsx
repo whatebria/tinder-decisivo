@@ -35,6 +35,7 @@ import {
   useToast,
 } from "../components";
 import type { ComunaInline } from "../api/endpoints";
+import { logoutApi } from "../api/endpoints";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
 import { radii } from "../theme/radii";
@@ -96,7 +97,8 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
     try {
       await eliminar.mutateAsync(password);
       toast.success("Cuenta eliminada", "Adios!");
-      // Al deslogear, AppNavigator swap a auth stack.
+      // Al eliminar la cuenta, tambien hay que limpiar la cookie web.
+      try { await logoutApi(); } catch { /* ignorar: cuenta ya eliminada */ }
       await logout();
     } catch (err) {
       toast.error("No pudimos eliminar la cuenta", getErrorMessage(err));

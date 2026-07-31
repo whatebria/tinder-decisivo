@@ -16,9 +16,9 @@
 
 import { create } from "zustand";
 
-import { secureStorage } from "./secureStorage";
+import { secureStorage, AUTH_TOKEN_STORAGE_KEY } from "./secureStorage";
 
-const TOKEN_KEY = "servel_auth_token";
+const TOKEN_KEY = AUTH_TOKEN_STORAGE_KEY; // re-export alias para claridad interna
 const USER_ID_KEY = "servel_user_id";
 
 interface AuthState {

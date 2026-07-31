@@ -1,15 +1,20 @@
 """Autenticacion custom: Token de DRF con expiracion configurable.
 
-El Token nativo de DRF es eterno hasta que se borra. Esta clase agrega TTL
-leyendo `settings.TOKEN_TTL_DAYS`. Tokens mas viejos son rechazados y
-borrados automaticamente para que el usuario deba re-loguearse.
+Clases:
+- ExpiringTokenAuthentication: Token nativo + TTL configurable.
+- CookieTokenAuthentication:   Lee el token desde una cookie httpOnly
+  en lugar del header Authorization. Usada en clientes web (TASK-003).
 
-Combinado con el endpoint POST /logout/ (que borra el token del user actual)
-esto da un ciclo de vida completo:
-- Login  -> crea/reusa token con `created` timestamp.
-- Uso    -> ExpiringTokenAuthentication valida edad en cada request.
-- Logout -> LogoutView borra el token (invalidacion inmediata).
-- Cron   -> `manage.py limpiar_tokens_viejos` limpia tokens > TTL.
+El flujo dual es:
+  1. Browser (web)  -> CookieTokenAuthentication  (cookie httpOnly, sin JS)
+  2. Mobile nativo  -> ExpiringTokenAuthentication (Authorization: Token header)
+
+Defensa CSRF: `SameSite=Lax` en la cookie auth_token impide que el browser
+envie la cookie en POST cross-site. Es la mitigacion primaria segun OWASP.
+No se implementa enforce_csrf() de DRF porque requeriria que el frontend
+maneje el CSRF token manualmente (y CSRF_COOKIE_HTTPONLY=True en prod
+impide leer el csrftoken desde JS). En caso de requerirlo a futuro,
+cambiar CSRF_COOKIE_HTTPONLY=False y agregar enforce_csrf() aqui.
 """
 
 from datetime import timedelta
@@ -18,6 +23,37 @@ from django.conf import settings
 from django.utils import timezone
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import AuthenticationFailed
+
+
+# Nombre de la cookie que guarda el token en clientes web.
+AUTH_COOKIE_NAME = "auth_token"
+
+
+def set_auth_cookie(response, token_key: str) -> None:
+    """Setea la cookie httpOnly de autenticacion en la respuesta.
+
+    Atributos:
+    - httponly: JavaScript no puede leer el valor (protege contra XSS).
+    - samesite=Lax: el browser no envia la cookie en POST cross-site (CSRF).
+    - secure: solo en produccion (DEBUG=False) para forzar HTTPS.
+    - max_age: sincronizado con TOKEN_TTL_DAYS para que cookie y token expiren juntos.
+    """
+    ttl_days = getattr(settings, "TOKEN_TTL_DAYS", 7)
+    is_secure = not getattr(settings, "DEBUG", False)
+    response.set_cookie(
+        AUTH_COOKIE_NAME,
+        token_key,
+        max_age=ttl_days * 24 * 60 * 60,  # segundos
+        httponly=True,
+        samesite="Lax",
+        secure=is_secure,
+        path="/",
+    )
+
+
+def clear_auth_cookie(response) -> None:
+    """Borra la cookie de autenticacion (logout web)."""
+    response.delete_cookie(AUTH_COOKIE_NAME, path="/", samesite="Lax")
 
 
 class ExpiringTokenAuthentication(TokenAuthentication):
@@ -35,3 +71,18 @@ class ExpiringTokenAuthentication(TokenAuthentication):
             raise AuthenticationFailed("Token expirado. Inicia sesion de nuevo.")
 
         return user, token
+
+
+class CookieTokenAuthentication(ExpiringTokenAuthentication):
+    """Lee el token desde la cookie httpOnly `auth_token` (clientes web).
+
+    Reutiliza la logica de expiracion de ExpiringTokenAuthentication.
+    Si la cookie no existe, devuelve None: DRF cae al siguiente backend
+    (ExpiringTokenAuthentication via Authorization header, para mobile).
+    """
+
+    def authenticate(self, request):
+        token_key = request.COOKIES.get(AUTH_COOKIE_NAME)
+        if not token_key:
+            return None  # No cookie -> DRF intenta el siguiente backend
+        return self.authenticate_credentials(token_key)

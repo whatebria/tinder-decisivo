@@ -210,7 +210,10 @@ if DRF_THROTTLE_DISABLED and not DEBUG:
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        # Reemplaza TokenAuthentication default para agregar expiracion.
+        # TASK-003: CookieTokenAuthentication primero (clientes web).
+        # Si no hay cookie auth_token, DRF cae a ExpiringTokenAuthentication
+        # (Authorization: Token header, para clientes mobile nativos).
+        "core.authentication.CookieTokenAuthentication",
         "core.authentication.ExpiringTokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
@@ -272,6 +275,10 @@ SPECTACULAR_SETTINGS = {
 # ------------------------------------------------------------
 # NUNCA acoplar CORS_ALLOW_ALL_ORIGINS a DEBUG: si un deploy accidental queda
 # con DEBUG=True, CORS se abre a todo internet. Siempre lista explicita.
+# TASK-003: necesario para que el browser envie cookies cross-origin (dev).
+# En prod, la app y la API deben ser del mismo dominio o subdominios confiables.
+CORS_ALLOW_CREDENTIALS = True
+
 # En dev, agregar en .env los origenes de Expo web (19006) y Metro (8081).
 # Para React Native nativo (iOS/Android) el request sale sin Origin, asi que
 # CORS no aplica; no hace falta agregar nada.

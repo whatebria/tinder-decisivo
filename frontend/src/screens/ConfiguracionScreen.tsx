@@ -21,6 +21,7 @@ import React, { useMemo } from "react";
 import { Linking, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { ADMIN_URL } from "../api/config";
+import { logoutApi } from "../api/endpoints";
 import {
   AppShell,
   Avatar,
@@ -54,6 +55,16 @@ export function ConfiguracionScreen({
   const exitGuestMode = useAuthStore((s) => s.exitGuestMode);
   const resetCoachMarks = useCoachMarksStore((s) => s.resetAll);
   const toast = useToast();
+
+  /**
+   * Primero invalida el token en el backend (limpia cookie httpOnly web).
+   * Luego limpia el estado local. Si la API falla, continuamos igual:
+   * el usuario queda deslogueado del frontend de todas formas.
+   */
+  async function handleLogout() {
+    try { await logoutApi(); } catch { /* ignorar: token ya expirado o red */ }
+    await logout();
+  }
 
   async function handleReactivarTours() {
     await resetCoachMarks();
@@ -227,7 +238,7 @@ export function ConfiguracionScreen({
         {/* 5. Cerrar sesion */}
         {!isGuest ? (
           <View style={styles.logoutWrap}>
-            <Button variant="secondary" onPress={logout}>
+            <Button variant="secondary" onPress={handleLogout}>
               Cerrar sesión
             </Button>
           </View>

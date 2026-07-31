@@ -18,6 +18,7 @@ from ..serializers import (
     UserSerializer,
 )
 from ..services.password_reset import ResetError, confirm_reset, request_reset
+from ..authentication import set_auth_cookie, clear_auth_cookie
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,11 @@ class CustomAuthToken(ObtainAuthToken):
         token = Token.objects.create(user=user)
         # F18: email removido de la response. El frontend lo obtiene via
         # GET /api/v1/perfil/ que es el endpoint autoritativo para datos de usuario.
-        return Response({"token": token.key, "user_id": user.pk})
+        response = Response({"token": token.key, "user_id": user.pk})
+        # TASK-003: ademas del JSON, setear cookie httpOnly para clientes web.
+        # Los clientes mobile ignoran la cookie y usan el token del body.
+        set_auth_cookie(response, token.key)
+        return response
 
 
 class LogoutView(APIView):
@@ -62,7 +67,10 @@ class LogoutView(APIView):
     )
     def post(self, request):
         Token.objects.filter(user=request.user).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        response = Response(status=status.HTTP_204_NO_CONTENT)
+        # TASK-003: limpiar la cookie httpOnly junto con el token.
+        clear_auth_cookie(response)
+        return response
 
 
 @extend_schema(
