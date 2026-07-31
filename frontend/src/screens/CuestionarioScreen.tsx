@@ -14,7 +14,7 @@
  * "base" hasta que exista el flag. Cuando llegue, cambiamos la partición aquí.
  */
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -51,6 +51,7 @@ export function CuestionarioScreen({
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
   const toast = useToast();
+  const scrollRef = useRef<ScrollView>(null);
   const [infoOpen, setInfoOpen] = useState(false);
   const isGuest = useAuthStore((s) => s.isGuest);
   const {
@@ -181,11 +182,29 @@ export function CuestionarioScreen({
     }
   }
 
+  /**
+   * Selecciona una opcion de respuesta y, si va a aparecer la seccion de
+   * importancia, hace scroll automatico para que sea visible sin que el
+   * usuario tenga que bajar manualmente.
+   *
+   * El delay de 150ms deja que React termine el re-render (y el layout
+   * recalcule la altura del ScrollView) antes de ejecutar el scroll.
+   */
+  function handleSelectRespuesta(opcionId: number) {
+    setRespuesta(pregunta.id, opcionId);
+    const vaAMostrarPeso = debeMostrarPeso(pregunta.opciones_respuesta, opcionId);
+    if (vaAMostrarPeso) {
+      setTimeout(() => {
+        scrollRef.current?.scrollToEnd({ animated: true });
+      }, 150);
+    }
+  }
+
   return (
     <>
       <ScreenChrome>
       <View style={styles.root}>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+      <ScrollView ref={scrollRef} style={styles.scroll} contentContainerStyle={styles.content}>
         <ScreenTopBar
           title={pregunta.tipo_eleccion_nombre ?? "Cuestionario"}
           subtitle={`${currentIndex + 1} de ${totalPreguntas} · base`}
@@ -214,7 +233,7 @@ export function CuestionarioScreen({
           <RadioGroup<number>
             options={opcionesLikert}
             value={respuesta?.opcionElegidaId ?? null}
-            onChange={(v) => setRespuesta(pregunta.id, v)}
+            onChange={handleSelectRespuesta}
             accessibilityLabel="Opciones de respuesta"
           />
         </View>
