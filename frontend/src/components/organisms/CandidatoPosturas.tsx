@@ -12,7 +12,9 @@ import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { PosturaCandidatoDetalle } from "../../api/endpoints";
 import { getLikertColor } from "../../services/matching";
+import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
+import { typography } from "../../theme/typography";
 import { useIsDark, useThemeColors } from "../../theme/useTheme";
 
 interface Props {
@@ -96,7 +98,7 @@ export function CandidatoPosturas({ posturas, loading }: Props) {
                 </Text>
 
                 {isOpen && p.justificacion ? (
-                  <View style={{ marginTop: 8, gap: 6 }}>
+                  <View style={{ marginTop: spacing.sp2, gap: spacing.sp2 }}>
                     <Text style={[styles.justif, { color: c.textSecondary }]}>
                       {p.justificacion}
                     </Text>
@@ -124,19 +126,39 @@ export function CandidatoPosturas({ posturas, loading }: Props) {
 
 const styles = StyleSheet.create({
   ejeTitulo: {
-    fontSize: 16,
+    // typography.body (16px) + bold + capitalize: cabecera de seccion por eje.
+    ...typography.body,
     fontWeight: "700",
     textTransform: "capitalize",
   },
   card: {
-    padding: 12,
-    borderRadius: 8,
+    padding: spacing.sp3,
+    borderRadius: radii.rMd,
     borderWidth: 1,
-    gap: 4,
+    gap: spacing.sp1,
   },
-  pregunta: { fontSize: 14, fontWeight: "600" },
-  respuesta: { fontSize: 14, fontWeight: "700" },
-  justif: { fontSize: 13, lineHeight: 18 },
-  fuente: { fontSize: 13, fontWeight: "600", textDecorationLine: "underline" },
-  hint: { fontSize: 11, marginTop: 6, fontStyle: "italic" },
+  pregunta: {
+    ...typography.small,
+    fontWeight: "600",
+  },
+  respuesta: {
+    ...typography.small,
+    fontWeight: "700",
+  },
+  justif: {
+    ...typography.small,
+  },
+  fuente: {
+    ...typography.small,
+    fontWeight: "600",
+    textDecorationLine: "underline",
+  },
+  hint: {
+    // overline sin uppercase ni letterSpacing exagerado: hint contextual discreto.
+    ...typography.overline,
+    textTransform: "none",
+    letterSpacing: 0,
+    marginTop: spacing.sp1,
+    fontStyle: "italic",
+  },
 });

@@ -7,6 +7,7 @@
 import {
   formatMatchPercentage,
   getConfianzaBadge,
+  getLikertColor,
   getMatchColor,
   getMatchTier,
   sortByMatchDesc,
@@ -114,6 +115,57 @@ describe("getConfianzaBadge", () => {
 
   test("valor invalido tambien defaultea a TENTATIVA", () => {
     expect(getConfianzaBadge("XYZ").label).toBe("Confianza tentativa");
+  });
+});
+
+describe("getLikertColor", () => {
+  // Escala Likert del backend: 1=muy en desacuerdo, 3=neutral, 5=muy de acuerdo.
+  // En light bg: extremos usan tints oscuros (mayor contraste).
+  // En dark  bg: extremos usan tints claros  (mayor contraste).
+
+  describe("light mode (isDark=false)", () => {
+    test("5 (muy de acuerdo) retorna verde fuerte", () => {
+      expect(getLikertColor(5, colors, false)).toBe(colors.success600);
+    });
+    test("4 (de acuerdo) retorna verde base", () => {
+      expect(getLikertColor(4, colors, false)).toBe(colors.success);
+    });
+    test("3 (neutral) retorna textSecondary", () => {
+      expect(getLikertColor(3, colors, false)).toBe(colors.textSecondary);
+    });
+    test("2 (en desacuerdo) retorna rojo base", () => {
+      expect(getLikertColor(2, colors, false)).toBe(colors.danger);
+    });
+    test("1 (muy en desacuerdo) retorna rojo fuerte", () => {
+      expect(getLikertColor(1, colors, false)).toBe(colors.danger600);
+    });
+  });
+
+  describe("dark mode (isDark=true)", () => {
+    test("5 usa tint claro success200 para contraste sobre bg oscuro", () => {
+      expect(getLikertColor(5, colors, true)).toBe(colors.success200);
+    });
+    test("4 usa success base (igual en ambos modos)", () => {
+      expect(getLikertColor(4, colors, true)).toBe(colors.success);
+    });
+    test("3 sigue siendo textSecondary", () => {
+      expect(getLikertColor(3, colors, true)).toBe(colors.textSecondary);
+    });
+    test("2 usa danger base (igual en ambos modos)", () => {
+      expect(getLikertColor(2, colors, true)).toBe(colors.danger);
+    });
+    test("1 usa tint claro danger200 para contraste sobre bg oscuro", () => {
+      expect(getLikertColor(1, colors, true)).toBe(colors.danger200);
+    });
+  });
+
+  describe("valores fuera de rango", () => {
+    test("0 defaultea a textSecondary (defensivo)", () => {
+      expect(getLikertColor(0, colors, false)).toBe(colors.textSecondary);
+    });
+    test("6 defaultea a textSecondary (defensivo)", () => {
+      expect(getLikertColor(6, colors, false)).toBe(colors.textSecondary);
+    });
   });
 });
 
