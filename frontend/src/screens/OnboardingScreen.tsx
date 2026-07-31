@@ -30,7 +30,9 @@ import { OnboardingResultadosDemo } from "../components/molecules/OnboardingResu
 import { WELCOME_SLIDES } from "../content/welcomeTour";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
+import { useElectionsPrefsStore } from "../store/electionsPrefs";
 import { useOnboardingStore } from "../store/onboarding";
+import { useTiposEleccion } from "../api/hooks";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
@@ -51,8 +53,21 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding">) {
   const c = useThemeColors();
   const [index, setIndex] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
-  // useWindowDimensions() reactivo — importante en web (resize) y tablets (rotación).
+  // useWindowDimensions() reactivo — importante en web (resize) y tablets (rotacion).
   const { width } = useWindowDimensions();
+
+  // Datos reales para slide 2 (UX-010).
+  // El query solo se dispara si estamos cerca del slide 2; Onboarding es
+  // pre-auth, pero useTiposEleccion no requiere autenticacion.
+  const tiposQ = useTiposEleccion();
+  const tipos = tiposQ.data ?? [];
+  const allTipoIds = tipos.map((t) => t.id).filter((id): id is number => id != null);
+  const activeIds = useElectionsPrefsStore((s) => s.activeIds);
+  const toggleEleccion = useElectionsPrefsStore((s) => s.toggle);
+
+  function handleToggleEleccion(id: number) {
+    toggleEleccion(id, allTipoIds);
+  }
 
   const totalSlides = WELCOME_SLIDES.length;
   const isLastSlide = index === totalSlides - 1;
@@ -113,13 +128,16 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding">) {
           paddingHorizontal: spacing.sp7,
           gap: spacing.sp5,
         },
-        /** Slides con demo: top-aligned para que el contenido no quede cortado. */
+        /** Slides con demo: flex-column sin scroll. El demo ocupa el espacio
+         *  sobrante despues del texto. Garantiza que no hay scroll vertical
+         *  en ningun dispositivo soportado (UX-011). */
         slideWithDemo: {
+          flex: 1,
           alignItems: "center",
-          justifyContent: "flex-start",
+          justifyContent: "center",
           paddingHorizontal: spacing.sp5,
-          paddingTop: spacing.sp4,
-          paddingBottom: spacing.sp6,
+          paddingTop: spacing.sp3,
+          paddingBottom: spacing.sp4,
           gap: spacing.sp4,
         },
         stepChip: {
@@ -220,19 +238,23 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding">) {
             >
               {hasDemo ? (
                 /**
-                 * Slides con demo: ScrollView vertical interno.
-                 * El pager externo es horizontal -- ejes distintos, sin conflicto.
+                 * Slides con demo: View flex:1 — el contenido se distribuye
+                 * verticalmente sin overflow. El ScrollView fue reemplazado
+                 * para garantizar que no haya scroll vertical (UX-011).
+                 * Los demos fueron compactados para caber en pantallas pequenas.
                  */
-                <ScrollView
-                  contentContainerStyle={styles.slideWithDemo}
-                  showsVerticalScrollIndicator={false}
-                  keyboardShouldPersistTaps="handled"
-                >
+                <View style={styles.slideWithDemo}>
                   {textContent}
-                  {slide.id === "welcome-2" && <OnboardingEleccionesDemo />}
+                  {slide.id === "welcome-2" && (
+                    <OnboardingEleccionesDemo
+                      tipos={tipos}
+                      activeIds={activeIds}
+                      onToggle={handleToggleEleccion}
+                    />
+                  )}
                   {slide.id === "welcome-3" && <OnboardingPreguntaDemo />}
                   {slide.id === "welcome-4" && <OnboardingResultadosDemo />}
-                </ScrollView>
+                </View>
               ) : (
                 <View style={styles.slide}>
                   {textContent}

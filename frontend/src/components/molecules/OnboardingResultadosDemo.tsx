@@ -28,7 +28,7 @@ interface DemoCandidato {
   barColor: string;
 }
 
-/** Porcentajes espaciados para que la diferencia visual sea clara. */
+/** 2 candidatos para que el slide quepa sin scroll (UX-011). */
 const DEMO_CANDIDATOS: readonly DemoCandidato[] = [
   {
     id: "1",
@@ -36,7 +36,7 @@ const DEMO_CANDIDATOS: readonly DemoCandidato[] = [
     nombre: "Candidata A",
     partido: "Partido Ejemplo",
     matchPct: 87,
-    barColor: "#22c55e", // green-500
+    barColor: "#22c55e",
   },
   {
     id: "2",
@@ -44,15 +44,7 @@ const DEMO_CANDIDATOS: readonly DemoCandidato[] = [
     nombre: "Candidato B",
     partido: "Otro Partido",
     matchPct: 61,
-    barColor: "#f59e0b", // amber-500
-  },
-  {
-    id: "3",
-    iniciales: "CC",
-    nombre: "Candidato C",
-    partido: "Tercer Partido",
-    matchPct: 34,
-    barColor: "#ef4444", // red-500
+    barColor: "#f59e0b",
   },
 ];
 
