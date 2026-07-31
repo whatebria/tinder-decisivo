@@ -19,6 +19,8 @@ class Pregunta(models.Model):
     EJE_INTERNACIONAL = "INTERNACIONAL"
     EJE_INSTITUCIONAL = "INSTITUCIONAL"
     EJE_OTRO = "OTRO"
+    EJE_PUEBLOS_ORIGINARIOS = "PUEBLOS_ORIGINARIOS"
+    EJE_DISCAPACIDAD = "DISCAPACIDAD"
     EJES_CHOICES = [
         (EJE_ECONOMIA, "Economia"),
         (EJE_SOCIEDAD, "Sociedad"),
@@ -28,6 +30,8 @@ class Pregunta(models.Model):
         (EJE_INTERNACIONAL, "Politica Internacional"),
         (EJE_INSTITUCIONAL, "Reforma Institucional"),
         (EJE_OTRO, "Otro"),
+        (EJE_PUEBLOS_ORIGINARIOS, "Pueblos Originarios"),
+        (EJE_DISCAPACIDAD, "Discapacidad"),
     ]
 
     texto = models.TextField()
@@ -36,7 +40,7 @@ class Pregunta(models.Model):
     )
     orden = models.IntegerField(default=0)
     eje_tematico = models.CharField(
-        max_length=20, choices=EJES_CHOICES, default=EJE_OTRO,
+        max_length=24, choices=EJES_CHOICES, default=EJE_OTRO,
         help_text="Categoria tematica de la pregunta. Sirve para el match por eje.",
     )
     # FK opcional al catalogo Eje. Se auto-popula desde eje_tematico via signal
