@@ -136,7 +136,7 @@ export function CoachMark({
             ) : showSkip ? (
               <View style={styles.actionSlot}>
                 <Button variant="ghost" size="md" onPress={onSkip}>
-                  Saltar tour
+                  Cerrar
                 </Button>
               </View>
             ) : null}
