@@ -31,6 +31,7 @@ import { useOnboardingStore } from "./src/store/onboarding";
 import { useThemeStore } from "./src/store/theme";
 import { colors, colorsDark } from "./src/theme/colors";
 import { installAriaHiddenFocusGuard } from "./src/utils/installAriaHiddenFocusGuard";
+import { installWebFavicon } from "./src/utils/installWebFavicon";
 
 // Web-only: instala el guard global que evita el warning WCAG 2.4.3
 // ("Blocked aria-hidden on an element because its descendant retained
@@ -39,6 +40,7 @@ import { installAriaHiddenFocusGuard } from "./src/utils/installAriaHiddenFocusG
 // tambien overlays que se abren durante el mount inicial.
 if (Platform.OS === "web") {
   installAriaHiddenFocusGuard();
+  installWebFavicon();
 }
 
 export default function App() {
@@ -72,31 +74,6 @@ export default function App() {
     if (!authHydrated) return;
     hydrateCoachMarks(authToken ? authUserId : null);
   }, [authHydrated, authToken, authUserId, authIsGuest, hydrateCoachMarks]);
-
-  // Web: inyecta favicon SVG (con soporte dark mode) en el <head>.
-  // Metro no incluye <link rel="icon"> en el HTML generado — lo hacemos
-  // manualmente una sola vez al montar. El SVG tiene prefers-color-scheme
-  // interno, asi que el browser lo cambia automaticamente con el OS.
-  useEffect(() => {
-    if (Platform.OS !== "web") return;
-    const doc = typeof document !== "undefined" ? document : null;
-    if (!doc) return;
-    // Evita duplicados si el efecto corre mas de una vez
-    if (doc.querySelector("link[data-appicon]")) return;
-    const svgLink = doc.createElement("link");
-    svgLink.rel  = "icon";
-    svgLink.type = "image/svg+xml";
-    svgLink.href = "/favicon.svg";
-    svgLink.setAttribute("data-appicon", "1");
-    doc.head.appendChild(svgLink);
-    // Fallback PNG para browsers sin soporte SVG favicon
-    const pngLink = doc.createElement("link");
-    pngLink.rel  = "icon";
-    pngLink.type = "image/png";
-    pngLink.setAttribute("sizes", "48x48");
-    pngLink.href = "/favicon.png";
-    doc.head.appendChild(pngLink);
-  }, []);
 
   // Web: sincroniza el bg del <body> y <html> con el tema activo para evitar
   // que se vea blanco cuando el contenido es mas corto que el viewport.

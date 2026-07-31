@@ -183,7 +183,6 @@ export function CompararScreen({
           <ScreenTopBar
             title="Comparar candidatos"
             subtitle={eleccionNombre}
-            onBack={() => navigation.goBack()}
           />
 
           <View style={[styles.candHeader, { backgroundColor: c.card }]}>
@@ -403,7 +402,9 @@ void badgeVariantNivel;
 // Reglas: TODOS los valores dimensionales vienen de tokens del DS.
 // Excepciones documentadas donde aplica.
 
-const RIGHT_GUTTER = spacing.sp7; // 32, compensa el back button del ScreenTopBar
+// Las columnas de candidatos se distribuyen simétricamente — sin gutter
+// de compensacion ya que Comparar es un tab primario sin back button.
+const RIGHT_GUTTER = 0;
 
 const styles = StyleSheet.create({
   scroll: {

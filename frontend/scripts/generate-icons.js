@@ -17,6 +17,10 @@ const path = require("path");
 const ROOT    = path.join(__dirname, "..");
 const ASSETS  = path.join(ROOT, "assets");
 const BRAND   = path.join(ASSETS, "branding");
+const PUBLIC  = path.join(ROOT, "public");  // Metro sirve esto en la raiz web
+
+// Garantiza que public/ exista (puede no estar en repos nuevos)
+if (!fs.existsSync(PUBLIC)) fs.mkdirSync(PUBLIC, { recursive: true });
 
 // ── SVG sources (hardcoded colors, no CSS vars) ──────────────────────────────
 
@@ -127,7 +131,7 @@ function write(buffer, dest) {
 
 console.log("\nGenerating app icons...\n");
 
-// icon.png — 1024x1024 on white (Expo main icon)
+// icon.png
 write(renderPng(LIGHT_ON_WHITE_SVG, 1024), path.join(ASSETS, "icon.png"));
 
 // favicon.png — 48x48 FILLED (fondo solido para maximo contraste en browser tab)
@@ -174,3 +178,24 @@ write(renderPng(LIGHT_SVG, 200), path.join(ASSETS, "splash-icon.png"));
 write(renderPng(LIGHT_SVG, 512), path.join(BRAND, "app-icon-512.png"));
 
 console.log("\nAll icons generated successfully.\n");
+
+// ── Sync public/ — Metro sirve esta carpeta en la raiz del dev server ────────
+// installWebFavicon.ts espera /favicon.svg y /favicon.png en la raiz.
+// generate-icons.js es la fuente de verdad — public/ se sincroniza aqui,
+// no se edita a mano.
+console.log("Syncing public/ for Metro web dev server...\n");
+
+const SVG_SRC = path.join(ASSETS, "favicon.svg");  // fuente SVG (en assets/)
+if (!fs.existsSync(SVG_SRC)) {
+  console.warn("  WARN  assets/favicon.svg not found — skipping public/ sync");
+} else {
+  fs.copyFileSync(SVG_SRC, path.join(PUBLIC, "favicon.svg"));
+  console.log("  OK  public/favicon.svg");
+  fs.copyFileSync(path.join(ASSETS, "favicon.png"), path.join(PUBLIC, "favicon.png"));
+  console.log("  OK  public/favicon.png");
+  // favicon.ico = copia del PNG (auto-discovery por browsers sin link tag)
+  fs.copyFileSync(path.join(ASSETS, "favicon.png"), path.join(PUBLIC, "favicon.ico"));
+  console.log("  OK  public/favicon.ico");
+}
+
+console.log("\nDone. Run \`expo start --web\` and hard-refresh the browser.\n");
