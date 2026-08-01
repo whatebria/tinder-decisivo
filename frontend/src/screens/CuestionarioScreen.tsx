@@ -304,7 +304,7 @@ export function CuestionarioScreen({
               disabled={submitting}
               loading={submitting}
             >
-              Ver resultados ({respondidas})
+              {`Ver resultados (${respondidas})`}
             </Button>
           </View>
         ) : null}

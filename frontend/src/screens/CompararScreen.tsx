@@ -42,7 +42,6 @@ import {
   CoachMarkTour,
   HomeTopBar,
   ScreenTopBar,
-  Toggle,
 } from "../components";
 import { CandidatoPickerModal } from "../components/molecules/CandidatoPickerModal";
 import type { RootStackScreenProps } from "../navigation/types";
@@ -136,11 +135,13 @@ export function CompararScreen({
   const posturasAQ = usePosturasCandidato(candidatoA?.id, tipoEleccionId);
   const posturasBQ = usePosturasCandidato(candidatoB?.id, tipoEleccionId);
 
-  const eleccionNombre = useMemo(() => {
-    if (!tipoEleccionId) return "Sin eleccion";
+  // eleccionNombre: ya no se usa en el header (HomeTopBar no muestra subtitulo de eleccion).
+  // Se mantiene como variable por si algun sub-componente lo necesita en el futuro (YAGNI off).
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _eleccionNombre = useMemo(() => {
+    if (!tipoEleccionId) return "";
     return (
-      (tiposQ.data ?? []).find((t) => t.id === tipoEleccionId)?.nombre ??
-      "Eleccion"
+      (tiposQ.data ?? []).find((t) => t.id === tipoEleccionId)?.nombre ?? ""
     );
   }, [tiposQ.data, tipoEleccionId]);
 
@@ -472,16 +473,20 @@ const styles = StyleSheet.create({
 
   toggleRow: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexWrap: "wrap",
+    gap: spacing.sp2,
     paddingHorizontal: spacing.sp1,
     paddingVertical: spacing.sp2,
   },
-  toggleLabel: {
-    ...typography.overline,
-    fontWeight: "500",
-    textTransform: "none",
-    letterSpacing: 0,
+  filterChip: {
+    paddingVertical: spacing.sp1,
+    paddingHorizontal: spacing.sp3,
+    borderRadius: radii.rFull,
+    borderWidth: 1,
+  },
+  filterChipText: {
+    fontSize: 12,
+    fontWeight: "600",
   },
 
   body: { gap: spacing.sp4 },
