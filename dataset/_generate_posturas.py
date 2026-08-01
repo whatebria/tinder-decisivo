@@ -1,10 +1,8 @@
-"""Genera posturas_diputados_2025.csv y posturas_senadores_2025.csv.
+"""Genera posturas_diputados_2025.csv y posturas_presidencial_2025.csv.
 
 Split honesto por tipo de eleccion:
   - Los 1,096 candidatos con tipos_eleccion='Diputados 2025' generan posturas
     contra las 15 preguntas de preguntas_diputados_2025.csv.
-  - Los 125 candidatos con tipos_eleccion='Senadores 2025' generan posturas
-    contra las 15 preguntas de preguntas_senadores_2025.csv.
 
 Cada bloque usa su propia matriz base + overrides + probabilidades de omision
 definidas en _posturas_base.py. Fuentes URL se comparten (son por lista).
@@ -22,14 +20,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from _posturas_base import (
     VECTOR_BASE_POR_LISTA,
-    VECTOR_BASE_SENADORES_POR_LISTA,
     VECTOR_PRESIDENCIAL_POR_CANDIDATO,
     OVERRIDES_DIPUTADOS,
-    OVERRIDES_SENADORES,
     FUENTES_URL_POR_LISTA,
     FUENTES_URL_POR_CANDIDATO_PRES,
     PROB_OMISION_DIPUTADOS,
-    PROB_OMISION_SENADORES,
     PROB_OMISION_PRESIDENCIAL,
 )
 
@@ -37,10 +32,8 @@ DATASET = Path(__file__).parent
 CANDIDATOS_CSV = DATASET / "candidatos_parlamentaria_2025.csv"
 CANDIDATOS_PRES_CSV = DATASET / "candidatos_presidencial_2025.csv"
 PREGUNTAS_DIP_CSV = DATASET / "preguntas_diputados_2025.csv"
-PREGUNTAS_SEN_CSV = DATASET / "preguntas_senadores_2025.csv"
 PREGUNTAS_PRES_CSV = DATASET / "preguntas_presidencial_2025.csv"
 OUT_DIP_CSV = DATASET / "posturas_diputados_2025.csv"
-OUT_SEN_CSV = DATASET / "posturas_senadores_2025.csv"
 OUT_PRES_CSV = DATASET / "posturas_presidencial_2025.csv"
 
 PROB_IGUAL = 0.60
@@ -323,17 +316,13 @@ def main() -> None:
     with CANDIDATOS_CSV.open("r", encoding="utf-8-sig", newline="") as f:
         todos = list(csv.DictReader(f))
     diputados = [c for c in todos if c["tipos_eleccion"] == "Diputados 2025"]
-    senadores = [c for c in todos if c["tipos_eleccion"] == "Senadores 2025"]
     print(f"Total candidatos: {len(todos):,}")
     print(f"  Diputados 2025: {len(diputados):,}")
-    print(f"  Senadores 2025: {len(senadores):,}")
 
     # Cargar cuestionarios
     with PREGUNTAS_DIP_CSV.open("r", encoding="utf-8-sig", newline="") as f:
         preg_dip = list(csv.DictReader(f))
-    with PREGUNTAS_SEN_CSV.open("r", encoding="utf-8-sig", newline="") as f:
-        preg_sen = list(csv.DictReader(f))
-    assert len(preg_dip) == 15 and len(preg_sen) == 15
+    assert len(preg_dip) == 15
 
     # Generar posturas diputados
     rows_dip, stats_dip, meta_dip = generar_bloque(
@@ -343,16 +332,7 @@ def main() -> None:
     )
     escribir_csv(OUT_DIP_CSV, rows_dip)
 
-    # Generar posturas senadores
-    rows_sen, stats_sen, meta_sen = generar_bloque(
-        senadores, preg_sen,
-        VECTOR_BASE_SENADORES_POR_LISTA, OVERRIDES_SENADORES, PROB_OMISION_SENADORES,
-        "Senadores 2025",
-    )
-    escribir_csv(OUT_SEN_CSV, rows_sen)
-
     imprimir_stats("DIPUTADOS 2025", stats_dip, meta_dip, PROB_OMISION_DIPUTADOS, 15)
-    imprimir_stats("SENADORES 2025", stats_sen, meta_sen, PROB_OMISION_SENADORES, 15)
 
     # Generar posturas presidenciales (vector por candidato, no por lista)
     with CANDIDATOS_PRES_CSV.open("r", encoding="utf-8-sig", newline="") as f:
@@ -368,7 +348,6 @@ def main() -> None:
 
     print(f"\nOutputs:")
     print(f"  {OUT_DIP_CSV}  ({OUT_DIP_CSV.stat().st_size:,} bytes)")
-    print(f"  {OUT_SEN_CSV}  ({OUT_SEN_CSV.stat().st_size:,} bytes)")
     print(f"  {OUT_PRES_CSV}  ({OUT_PRES_CSV.stat().st_size:,} bytes)")
 
 
