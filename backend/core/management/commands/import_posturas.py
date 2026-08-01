@@ -7,10 +7,16 @@ Formato esperado (formato largo, 1 fila = 1 postura):
 - candidato_apellido: apellido exacto (matchea case-insensitive, unico por eleccion)
 - pregunta_orden:     orden de la pregunta en el cuestionario (1..N)
 - valor:              1..5 (1=Muy en desacuerdo, 5=Muy de acuerdo)
-- justificacion:      texto que respalde la postura (obligatorio, min 20 chars)
-- fuente_url:         URL a declaracion publica, entrevista, ley, plataforma (obligatorio)
+- justificacion:      texto que respalde la postura (obligatorio en produccion, min 20 chars)
+- fuente_url:         URL a declaracion publica, entrevista, ley, plataforma (obligatorio en produccion)
 
 Filas con celdas vacias se saltan (permite CSV parcial mientras se investiga).
+
+MODO DEBUG (settings.DEBUG=True):
+  Las validaciones de justificacion y fuente_url se relajan automaticamente.
+  Los CSV pueden omitir esas columnas o dejarlas vacias. Util para cargar
+  datos de prueba sin tener que inventar fuentes.
+  NUNCA usar datos cargados en debug en una base de produccion.
 
 Uso:
     python manage.py import_posturas fixtures/posturas_2025.csv
@@ -22,17 +28,24 @@ from __future__ import annotations
 import csv
 from pathlib import Path
 
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from core.models import Candidato, OpcionRespuesta, PosturaCandidato, Pregunta
 
-REQUIRED_COLUMNS = {
+REQUIRED_COLUMNS_PROD = {
     "candidato_apellido",
     "pregunta_orden",
     "valor",
     "justificacion",
     "fuente_url",
+}
+# En debug solo los campos de datos son obligatorios; justificacion y fuente son opcionales.
+REQUIRED_COLUMNS_DEBUG = {
+    "candidato_apellido",
+    "pregunta_orden",
+    "valor",
 }
 MIN_JUSTIFICACION = 20
 
@@ -71,9 +84,18 @@ class Command(BaseCommand):
         dry = opts["dry_run"]
         update = opts["update"]
 
+        is_debug = settings.DEBUG
+        required_cols = REQUIRED_COLUMNS_DEBUG if is_debug else REQUIRED_COLUMNS_PROD
+
+        if is_debug:
+            self.stdout.write(self.style.WARNING(
+                "[DEBUG] Modo debug activo: justificacion y fuente_url son opcionales. "
+                "NO uses esta base en produccion."
+            ))
+
         with path.open(newline="", encoding="utf-8-sig") as fh:
             reader = csv.DictReader(fh)
-            missing = REQUIRED_COLUMNS - set(reader.fieldnames or [])
+            missing = required_cols - set(reader.fieldnames or [])
             if missing:
                 raise CommandError(f"Faltan columnas: {sorted(missing)}")
             rows = list(reader)
@@ -130,6 +152,7 @@ class Command(BaseCommand):
                         preguntas_by_orden,
                         stats,
                         update,
+                        is_debug=is_debug,
                     )
                 except ValueError as e:
                     stats["errores"] += 1
@@ -165,6 +188,7 @@ class Command(BaseCommand):
         preguntas_map,
         stats,
         update,
+        is_debug: bool = False,
     ):
         apellido = row["candidato_apellido"].strip().lower()
         nombre_csv = (row.get("candidato_nombre") or "").strip().lower() if csv_has_nombre else ""
@@ -201,13 +225,13 @@ class Command(BaseCommand):
             raise ValueError(f"valor debe estar en 1..5, no {valor}")
 
         justificacion = (row.get("justificacion") or "").strip()
-        if len(justificacion) < MIN_JUSTIFICACION:
+        if not is_debug and len(justificacion) < MIN_JUSTIFICACION:
             raise ValueError(
                 f"justificacion muy corta ({len(justificacion)} chars, min {MIN_JUSTIFICACION})"
             )
 
         fuente_url = (row.get("fuente_url") or "").strip()
-        if not fuente_url.startswith(("http://", "https://")):
+        if not is_debug and not fuente_url.startswith(("http://", "https://")):
             raise ValueError(f"fuente_url invalida: {fuente_url!r}")
 
         # Busca la opcion con ese valor para esta pregunta
@@ -217,8 +241,13 @@ class Command(BaseCommand):
         if not opcion:
             raise ValueError(f"pregunta orden={orden} no tiene opcion con valor={valor}")
 
-        # Guardamos la fuente como parte de la justificacion (el modelo no tiene campo aparte)
-        justificacion_final = f"{justificacion}\n\nFuente: {fuente_url}"
+        # Construir justificacion final segun modo
+        if is_debug:
+            justificacion_final = justificacion or "[DEBUG - sin justificacion]"
+            if fuente_url:
+                justificacion_final += f"\n\nFuente: {fuente_url}"
+        else:
+            justificacion_final = f"{justificacion}\n\nFuente: {fuente_url}"
 
         existente = PosturaCandidato.objects.filter(
             candidato=candidato, pregunta=pregunta

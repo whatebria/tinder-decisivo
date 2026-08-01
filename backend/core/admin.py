@@ -10,7 +10,8 @@ Convenciones:
 """
 
 from django.contrib import admin
-from django.db.models import Count
+from django.db.models import Count, OuterRef, Subquery
+from django.utils.html import format_html
 
 # Importa el admin territorial (regiones, distritos, comunas) para que Django lo
 # autoregistre. Vive en modulo aparte por cohesion, no por tamano.
@@ -96,8 +97,9 @@ class TipoEleccionAdmin(admin.ModelAdmin):
 @admin.register(Candidato)
 class CandidatoAdmin(admin.ModelAdmin):
     list_display = (
-        "nombre", "apellido", "partido", "alcance_territorial",
-        "unidad_territorial", "get_tipos_eleccion",
+        "nombre", "apellido", "partido",
+        "get_tipos_eleccion", "alcance_territorial", "unidad_territorial",
+        "posturas_cargadas", "preguntas_disponibles", "cobertura_bar",
     )
     list_filter = ("tipos_eleccion", "partido", "unidad_territorial__nivel")
     search_fields = (
@@ -108,6 +110,16 @@ class CandidatoAdmin(admin.ModelAdmin):
     autocomplete_fields = ("unidad_territorial",)
     ordering = ("apellido", "nombre")
 
+    def get_queryset(self, request):
+        """Anota num_posturas para evitar N+1. Precarga tipos_eleccion para
+        el conteo de preguntas disponibles (se hace en Python para evitar
+        un subquery complejo sobre M2M anidado)."""
+        return (
+            super().get_queryset(request)
+            .prefetch_related("tipos_eleccion", "tipos_eleccion__preguntas")
+            .annotate(_num_posturas=Count("posturas_candidato", distinct=True))
+        )
+
     @admin.display(description="Tipos de Eleccion")
     def get_tipos_eleccion(self, obj):
         return ", ".join(t.nombre for t in obj.tipos_eleccion.all())
@@ -115,6 +127,52 @@ class CandidatoAdmin(admin.ModelAdmin):
     @admin.display(description="Alcance", ordering="unidad_territorial__nivel")
     def alcance_territorial(self, obj):
         return obj.alcance_territorial
+
+    @admin.display(description="Posturas", ordering="_num_posturas")
+    def posturas_cargadas(self, obj):
+        return obj._num_posturas
+
+    @admin.display(description="Preguntas")
+    def preguntas_disponibles(self, obj):
+        """Total de preguntas disponibles para los tipos de eleccion del candidato.
+        Usa el prefetch (sin tocar DB extra)."""
+        ids_vistos = set()
+        total = 0
+        for tipo in obj.tipos_eleccion.all():
+            for p in tipo.preguntas.all():
+                if p.id not in ids_vistos:
+                    ids_vistos.add(p.id)
+                    total += 1
+        return total
+
+    @admin.display(description="Cobertura")
+    def cobertura_bar(self, obj):
+        """Barra de progreso coloreada segun cobertura (posturas / preguntas)."""
+        total = self.preguntas_disponibles(obj)
+        if total == 0:
+            return "-"
+        posturas = obj._num_posturas
+        pct = min(posturas / total * 100, 100)
+
+        if pct >= 80:
+            color = "#6B9B7A"   # success
+        elif pct >= 40:
+            color = "#C89B5C"   # warning
+        else:
+            color = "#B85C5C"   # danger
+
+        return format_html(
+            '<div style="display:flex;align-items:center;gap:6px;min-width:120px">'
+            '  <div style="flex:1;background:#E0E0E0;border-radius:4px;height:8px;">'
+            '    <div style="width:{pct}%;background:{color};border-radius:4px;height:8px;"></div>'
+            '  </div>'
+            '  <span style="font-size:11px;white-space:nowrap;color:{color};font-weight:600">{posturas}/{total}</span>'
+            '</div>',
+            pct=round(pct, 1),
+            color=color,
+            posturas=posturas,
+            total=total,
+        )
 
 
 # ---------------------------------------------------------------------------

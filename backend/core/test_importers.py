@@ -4,9 +4,11 @@ import io
 from pathlib import Path
 
 import pytest
+from django.conf import settings
 from django.core.management import CommandError, call_command
+from django.test import override_settings
 
-from core.models import Candidato, OpcionRespuesta, Pregunta, TipoEleccion
+from core.models import Candidato, OpcionRespuesta, PosturaCandidato, Pregunta, TipoEleccion
 
 
 # ------------------------------------------------------------
@@ -152,3 +154,96 @@ class TestFixtureCandidatosDelRepo:
         call_command("import_candidatos", str(csv_path))
         assert Candidato.objects.count() == 6  # los 6 candidatos historicos del ejemplo
         assert Candidato.objects.filter(nombre="Gabriel", apellido="Boric").exists()
+
+
+# ============================================================
+# import_posturas
+# ============================================================
+@pytest.fixture
+def escenario_posturas(db):
+    """Candidato + Pregunta + Opciones listos para importar posturas."""
+    tipo = TipoEleccion.objects.create(nombre="Presidencial")
+    candidato = Candidato.objects.create(
+        nombre="Ada", apellido="Perez", partido="A", propuesta_electoral="..."
+    )
+    candidato.tipos_eleccion.add(tipo)
+    from core.models import crear_opciones_acuerdo_desacuerdo
+    pregunta = Pregunta.objects.create(
+        texto="Aborto libre", tipo_eleccion=tipo, orden=1, eje_tematico="SOCIEDAD"
+    )
+    crear_opciones_acuerdo_desacuerdo(pregunta)
+    return {"tipo": tipo, "candidato": candidato, "pregunta": pregunta}
+
+
+class TestImportPosturas:
+    def test_produccion_requiere_justificacion_y_fuente(self, escenario_posturas, tmp_path):
+        """En modo produccion (DEBUG=False), el CSV sin justificacion/fuente falla."""
+        csv = (
+            "candidato_apellido,pregunta_orden,valor\n"
+            "Perez,1,5\n"
+        )
+        path = _write_csv(tmp_path, "p.csv", csv)
+        with override_settings(DEBUG=False):
+            with pytest.raises(CommandError, match="Faltan columnas"):
+                call_command("import_posturas", path)
+        assert PosturaCandidato.objects.count() == 0
+
+    def test_produccion_justificacion_corta_falla(self, escenario_posturas, tmp_path):
+        """En produccion, justificacion < 20 chars es un error por fila."""
+        csv = (
+            "candidato_apellido,pregunta_orden,valor,justificacion,fuente_url\n"
+            "Perez,1,5,corta,https://ejemplo.cl\n"
+        )
+        path = _write_csv(tmp_path, "p.csv", csv)
+        with override_settings(DEBUG=False):
+            call_command("import_posturas", path)
+        # La fila tiene error pero no lanza excepcion (rollback silencioso)
+        assert PosturaCandidato.objects.count() == 0
+
+    def test_produccion_fuente_invalida_falla(self, escenario_posturas, tmp_path):
+        """En produccion, fuente_url sin http falla la fila."""
+        csv = (
+            "candidato_apellido,pregunta_orden,valor,justificacion,fuente_url\n"
+            "Perez,1,5,Esta es una justificacion suficientemente larga,no-es-url\n"
+        )
+        path = _write_csv(tmp_path, "p.csv", csv)
+        with override_settings(DEBUG=False):
+            call_command("import_posturas", path)
+        assert PosturaCandidato.objects.count() == 0
+
+    @override_settings(DEBUG=True)
+    def test_debug_acepta_csv_sin_justificacion_ni_fuente(self, escenario_posturas, tmp_path):
+        """En modo debug, basta con apellido + orden + valor."""
+        csv = (
+            "candidato_apellido,pregunta_orden,valor\n"
+            "Perez,1,5\n"
+        )
+        path = _write_csv(tmp_path, "p.csv", csv)
+        call_command("import_posturas", path)
+        assert PosturaCandidato.objects.count() == 1
+        postura = PosturaCandidato.objects.get()
+        assert postura.opcion_respuesta.valor == 5
+        assert "[DEBUG" in postura.justificacion
+
+    @override_settings(DEBUG=True)
+    def test_debug_acepta_justificacion_corta(self, escenario_posturas, tmp_path):
+        """En modo debug, justificacion corta no es error."""
+        csv = (
+            "candidato_apellido,pregunta_orden,valor,justificacion,fuente_url\n"
+            "Perez,1,4,corta,\n"
+        )
+        path = _write_csv(tmp_path, "p.csv", csv)
+        call_command("import_posturas", path)
+        assert PosturaCandidato.objects.count() == 1
+
+    def test_produccion_carga_correcta(self, escenario_posturas, tmp_path):
+        """Happy path en produccion: postura con justificacion y fuente validas."""
+        csv = (
+            "candidato_apellido,pregunta_orden,valor,justificacion,fuente_url\n"
+            "Perez,1,5,Esta es una justificacion larga y descriptiva de la postura,https://ejemplo.cl\n"
+        )
+        path = _write_csv(tmp_path, "p.csv", csv)
+        with override_settings(DEBUG=False):
+            call_command("import_posturas", path)
+        assert PosturaCandidato.objects.count() == 1
+        assert PosturaCandidato.objects.get().opcion_respuesta.valor == 5
