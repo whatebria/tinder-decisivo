@@ -95,7 +95,14 @@ def _responder(user, pregunta, valor, peso=RespuestaUsuario.PESO_POCO):
 # Match: casos basicos
 # ============================================================
 class TestMatchAlgoritmo:
-    def test_match_perfecto_es_100(self, api, user, escenario_presidencial):
+    def test_match_perfecto_es_maximo(self, api, user, escenario_presidencial):
+        """Con 2 preguntas perfectas, el suavizado Bayesiano (ALPHA=2, PRIOR=0.5)
+        da (2+1)/(2+2)*100 = 75.00% para Ada y (0+1)/(2+2)*100 = 25.00% para Beto.
+
+        El suavizado previene que candidatos con pocas preguntas de overlap
+        dominen el ranking con 100% a partir de 1 sola respuesta (BUG-100%).
+        Ada sigue siendo #1 y el orden es correcto.
+        """
         for p in escenario_presidencial["preguntas"]:
             _responder(user, p, 5)
         resp = api.post(
@@ -106,11 +113,17 @@ class TestMatchAlgoritmo:
         assert resp.status_code == 200
         data = resp.json()
         assert data[0]["candidato_data"]["nombre"] == "Ada"
-        assert Decimal(data[0]["match_percentage"]) == Decimal("100.00")
-        assert Decimal(data[1]["match_percentage"]) == Decimal("0.00")
+        # Suavizado: (2.0 + 2*0.5) / (2.0 + 2) * 100 = 75.00
+        assert Decimal(data[0]["match_percentage"]) == Decimal("75.00")
+        # Beto: (0 + 1) / (2+2) * 100 = 25.00
+        assert Decimal(data[1]["match_percentage"]) == Decimal("25.00")
 
     def test_match_intermedio_no_lineal(self, api, user, escenario_presidencial):
-        """User responde 3 (medio). Con formula no-lineal: diff=2 -> score=1-(2/4)^2=0.75 -> 75%."""
+        """User responde 3 (medio). Con formula no-lineal: diff=2 -> score=0.75 por pregunta.
+        2 preguntas: score_total=1.5, peso_total=2.
+        Con suavizado Bayesiano: (1.5+1) / (2+2) * 100 = 62.50%.
+        Ada y Beto deben quedar empatados porque diff es simetrico.
+        """
         for p in escenario_presidencial["preguntas"]:
             _responder(user, p, 3)
         resp = api.post(
@@ -120,9 +133,10 @@ class TestMatchAlgoritmo:
         )
         assert resp.status_code == 200
         data = resp.json()
-        # antes con formula lineal daba 50%. Con no-lineal da 75%.
-        assert Decimal(data[0]["match_percentage"]) == Decimal("75.00")
-        assert Decimal(data[1]["match_percentage"]) == Decimal("75.00")
+        # Antes con formula lineal daba 50%. Con no-lineal raw da 75%, con
+        # suavizado Bayesiano (ALPHA=2, PRIOR=0.5): (1.5+1)/(2+2)*100 = 62.50.
+        assert Decimal(data[0]["match_percentage"]) == Decimal("62.50")
+        assert Decimal(data[1]["match_percentage"]) == Decimal("62.50")
 
     def test_sin_respuestas_devuelve_400(self, api, escenario_presidencial):
         resp = api.post(
@@ -175,7 +189,11 @@ class TestMatchAlgoritmo:
 # ============================================================
 class TestMatchRobusto:
     def test_no_se_se_excluye_del_calculo(self, api, user, escenario_presidencial):
-        """Si el user marca 'No se' en una pregunta, esa pregunta se ignora."""
+        """Si el user marca 'No se' en una pregunta, esa pregunta se ignora.
+
+        Con 1 sola pregunta considerada y score=1.0 (acuerdo total):
+        suavizado Bayesiano: (1.0 + 2*0.5) / (1.0 + 2) * 100 = 2/3*100 = 66.67%.
+        """
         p1, p2 = escenario_presidencial["preguntas"]
         # p1: 'No se'; p2: valor 5 (match perfecto con Ada)
         RespuestaUsuario.objects.create(
@@ -192,12 +210,18 @@ class TestMatchRobusto:
         )
         assert resp.status_code == 200
         ada = next(x for x in resp.json() if x["candidato_data"]["nombre"] == "Ada")
-        assert Decimal(ada["match_percentage"]) == Decimal("100.00")
+        # 1 pregunta con diff=0: score_total=1.0, peso_total=1.0
+        # smoothed = (1.0 + 1) / (1.0 + 2) * 100 = 66.67
+        assert Decimal(ada["match_percentage"]) == Decimal("66.67")
         assert ada["preguntas_consideradas"] == 1  # p1 se excluyo
 
     def test_peso_mucho_hace_dealbreaker(self, api, user, escenario_presidencial):
         """User responde igual a Ada en p1 (peso MUCHO) y opuesto en p2 (peso NO_IMPORTA).
-        Con peso equal daria 50%. Con pesos 2x vs 0.5x, Ada deberia salir mucho mas alto."""
+
+        score_total = 1.0*2.0 + 0.0*0.5 = 2.0, peso_total = 2.5.
+        Con suavizado: (2.0 + 1) / (2.5 + 2) * 100 = 3/4.5 * 100 = 66.67%.
+        Ada sigue superando a Beto (66.67 > 33.33), el peso pesado sigue importando.
+        """
         p1, p2 = escenario_presidencial["preguntas"]
         _responder(user, p1, 5, peso=RespuestaUsuario.PESO_MUCHO)     # igual a Ada
         _responder(user, p2, 1, peso=RespuestaUsuario.PESO_NO_IMPORTA)  # opuesto a Ada
@@ -208,9 +232,9 @@ class TestMatchRobusto:
             format="json",
         )
         ada = next(x for x in resp.json() if x["candidato_data"]["nombre"] == "Ada")
-        # score p1 = 1.0 * peso 2.0 = 2.0. score p2 = 0.0 * peso 0.5 = 0. suma pesos = 2.5
-        # match = 2.0 / 2.5 = 80%
-        assert Decimal(ada["match_percentage"]) == Decimal("80.00")
+        # score_total=2.0, peso_total=2.5
+        # smoothed = (2.0 + 2*0.5) / (2.5 + 2) * 100 = 3.0/4.5*100 = 66.67
+        assert Decimal(ada["match_percentage"]) == Decimal("66.67")
 
     def test_breakdown_por_eje_tiene_estructura_correcta(self, api, user, escenario_presidencial):
         for p in escenario_presidencial["preguntas"]:
@@ -237,6 +261,29 @@ class TestMatchRobusto:
             format="json",
         )
         ada = next(x for x in resp.json() if x["candidato_data"]["nombre"] == "Ada")
+        assert ada["confianza"] == MatchCandidato.CONFIANZA_TENTATIVA
+
+    def test_suavizado_bayesiano_previene_bug_100_porcento(self, api, user, escenario_presidencial):
+        """Regression test: BUG-100% -- candidato con 1 sola pregunta de overlap
+        no debe ser coronado con 100% de match en resultados parciales.
+
+        Antes del fix: 1 pregunta perfecta = 100.00%.
+        Con suavizado Bayesiano (ALPHA=2, PRIOR=0.5):
+          (1.0 + 1) / (1.0 + 2) * 100 = 66.67% -- no domina el ranking.
+        """
+        p1 = escenario_presidencial["preguntas"][0]
+        _responder(user, p1, 5)  # Solo responde 1 pregunta de 2 disponibles
+        resp = api.post(
+            reverse("match-candidatos"),
+            {"tipo_eleccion_id": escenario_presidencial["tipo"].id},
+            format="json",
+        )
+        assert resp.status_code == 200
+        ada = next(x for x in resp.json() if x["candidato_data"]["nombre"] == "Ada")
+        # Con 1 pregunta de overlap: score_total=1.0, peso=1.0
+        # smoothed = (1.0 + 1) / (1.0 + 2) * 100 = 66.67  (no 100%!)
+        assert Decimal(ada["match_percentage"]) == Decimal("66.67")
+        assert ada["preguntas_consideradas"] == 1
         assert ada["confianza"] == MatchCandidato.CONFIANZA_TENTATIVA
 
     def test_match_persiste_en_db(self, api, user, escenario_presidencial):

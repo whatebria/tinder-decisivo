@@ -51,6 +51,24 @@ PESO_MULTIPLIERS = {
 CONFIANZA_UMBRAL_MEDIA = 5
 CONFIANZA_UMBRAL_ALTA = 10
 
+# Suavizado Bayesiano (Laplace additive smoothing).
+#
+# Problema: si un candidato solo comparte 1 pregunta con el user y coinciden,
+# el match bruto es 100% -- informativamente vacio pero visualmente engañoso.
+#
+# Solucion: inyectar SMOOTHING_ALPHA pseudo-preguntas con score neutro (50%).
+#   smoothed = (score_total + ALPHA * PRIOR) / (peso_total + ALPHA) * 100
+#
+# Con ALPHA=2:
+#   n=1,  100% raw  --> 66.67%  (no domina el ranking)
+#   n=5,  100% raw  --> 85.71%
+#   n=12, 100% raw  --> 92.86%  (convergencia suave hacia el valor real)
+#
+# El prior 0.5 representa "sin opinion, 50% de acuerdo por defecto".
+# NO se aplica al breakdown_por_eje (solo al score global de ranking).
+SMOOTHING_ALPHA = Decimal("2")
+SMOOTHING_PRIOR = Decimal("0.5")
+
 
 def _tipo_ids_con_base(tipo_eleccion) -> list[int]:
     """Devuelve [tipo_eleccion.id, ...ids_de_tipos_base].
@@ -190,7 +208,13 @@ def _calcular_scores(
             acc[2] += 1
 
         if peso_total > 0:
-            porcentaje = (score_total / peso_total * 100).quantize(Decimal("0.01"))
+            # Suavizado Bayesiano: inyecta SMOOTHING_ALPHA pseudo-preguntas
+            # neutras (50%) para amortiguar scores extremos con baja cobertura.
+            # n=1, 100% -> 66.67%; n=12, 100% -> 92.86%.
+            # Ver constantes SMOOTHING_ALPHA / SMOOTHING_PRIOR en este modulo.
+            numerador = score_total + SMOOTHING_ALPHA * SMOOTHING_PRIOR
+            denominador = peso_total + SMOOTHING_ALPHA
+            porcentaje = (numerador / denominador * 100).quantize(Decimal("0.01"))
         else:
             porcentaje = Decimal("0.00")
 
@@ -342,6 +366,9 @@ def calcular_match_detalle(user, candidato) -> Optional[dict]:
     # Sort por contribucion descendente (mas influyentes arriba)
     items.sort(key=lambda x: (-x["contribucion"], x["pregunta_orden"]))
 
+    # La vista de detalle muestra el % RAW (sin suavizado Bayesiano) porque
+    # el usuario puede ver el breakdown pregunta a pregunta y evaluar la
+    # muestra por si mismo. El suavizado solo aplica al ranking global.
     porcentaje = (
         (score_total / peso_total * 100).quantize(Decimal("0.01"))
         if peso_total > 0 else Decimal("0.00")

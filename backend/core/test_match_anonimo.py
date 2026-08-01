@@ -84,7 +84,10 @@ class TestMatchAnonimo:
 
     def test_ranking_correcto(self, api, tipo_eleccion, preguntas_y_opciones, candidatos_con_posturas):
         c1, c2 = candidatos_con_posturas
-        # Usuario 100% de acuerdo en todas -> matchea c1 al 100%, c2 al 0%.
+        # Usuario 100% de acuerdo en todas -> matchea c1 mejor que c2.
+        # Con suavizado Bayesiano (ALPHA=2, PRIOR=0.5, n=3):
+        #   c1: (3 + 1) / (3 + 2) * 100 = 80.00%
+        #   c2: (0 + 1) / (3 + 2) * 100 = 20.00%
         respuestas = [
             {
                 "pregunta_id": p.id,
@@ -101,9 +104,9 @@ class TestMatchAnonimo:
         data = resp.json()
         assert len(data) == 2
         assert data[0]["candidato_data"]["nombre"] == "Ana"
-        assert float(data[0]["match_percentage"]) == 100.0
+        assert float(data[0]["match_percentage"]) == 80.0
         assert data[1]["candidato_data"]["nombre"] == "Beto"
-        assert float(data[1]["match_percentage"]) == 0.0
+        assert float(data[1]["match_percentage"]) == 20.0
 
     def test_no_persiste_nada(self, api, tipo_eleccion, preguntas_y_opciones, candidatos_con_posturas):
         from core.models import MatchCandidato, RespuestaUsuario
