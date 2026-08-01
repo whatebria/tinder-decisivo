@@ -24,11 +24,11 @@ import {
   Button,
   Chip,
   CoachMarkTour,
+  CuestionarioHeader,
   ScreenChrome,
-  ScreenTopBar,
   PreguntaInfoModal,
-  ProgressSplit,
   RadioGroup,
+  Spinner,
   useToast,
 } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
@@ -59,6 +59,7 @@ export function CuestionarioScreen({
     currentIndex,
     respuestas,
     submitting,
+    loading,
     tipoEleccionId,
     setRespuesta,
     setPeso,
@@ -140,6 +141,17 @@ export function CuestionarioScreen({
     [c, insets.bottom],
   );
 
+  if (loading) {
+    return (
+      <ScreenChrome>
+        <View style={styles.emptyBox}>
+          <Spinner size="large" />
+          <Text style={styles.emptyText}>Cargando preguntas...</Text>
+        </View>
+      </ScreenChrome>
+    );
+  }
+
   if (!pregunta) {
     return (
       <ScreenChrome>
@@ -218,23 +230,18 @@ export function CuestionarioScreen({
     <>
       <ScreenChrome>
       <View style={styles.root}>
-      <ScrollView ref={scrollRef} style={styles.scroll} contentContainerStyle={styles.content}>
-        <ScreenTopBar
+
+        {/* Header sticky fuera del ScrollView (UX-015 + UX-016) */}
+        <CuestionarioHeader
           title={pregunta.tipo_eleccion_nombre ?? "Cuestionario"}
           subtitle={`${currentIndex + 1} de ${totalPreguntas} · base`}
+          respondidas={respondidas}
+          totalPreguntas={totalPreguntas}
           onBack={() => navigation.goBack()}
           onInfo={() => setInfoOpen(true)}
         />
 
-        <ProgressSplit
-          baseDone={respondidas}
-          baseTotal={totalPreguntas}
-          extrasDone={0}
-          extrasTotal={0}
-          baseLabel={`Base (${totalPreguntas} preguntas)`}
-          extrasLabel="Extras (próximamente)"
-        />
-
+      <ScrollView ref={scrollRef} style={styles.scroll} contentContainerStyle={styles.content}>
         <View style={{ gap: spacing.sp2 }}>
           {pregunta.eje_tematico_display ? (
             <Text style={styles.ejeLabel}>{pregunta.eje_tematico_display}</Text>

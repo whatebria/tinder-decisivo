@@ -61,3 +61,9 @@ export {
 // Home HUB rediseno (Fase 10 — Sprint auditoría UX)
 export { HomeHeroSection, type HomeHeroSectionProps } from "./HomeHeroSection";
 
+// Cuestionario header sticky con fondo brand-primary (UX-015 + UX-016)
+export {
+  CuestionarioHeader,
+  type CuestionarioHeaderProps,
+} from "./CuestionarioHeader";
+

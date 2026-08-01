@@ -9,6 +9,7 @@ import { create } from "zustand";
 
 import { preguntasPendientes, submitRespuestas } from "../api/endpoints";
 import type { AnonRespuestaInput, Pregunta, RespuestaInput } from "../api/endpoints";
+import { DEFAULT_PESO } from "../services/cuestionario";
 
 type Peso = 0 | 1 | 2 | 3;
 
@@ -39,7 +40,6 @@ interface CuestionarioState {
   getRespuestasParaAnonimo: () => AnonRespuestaInput[];
 }
 
-const DEFAULT_PESO: Peso = 1; // PESO_POCO
 
 export const useCuestionarioStore = create<CuestionarioState>((set, get) => ({
   tipoEleccionId: null,
