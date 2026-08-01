@@ -58,6 +58,7 @@ def split_nombre(full: str) -> tuple[str, str, bool]:
 
 TIPO_ELECCION_POR_ELECCION = {
     "Diputado": "Diputados 2025",
+    "Senador": "Senadores 2025",
 }
 
 
