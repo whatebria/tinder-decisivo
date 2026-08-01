@@ -93,7 +93,8 @@ export function ProfileHero({
     <View style={[styles.card, style]}>
       <Avatar initials={initials} size="lg" />
       <View style={styles.partido}>
-        <Badge variant="info">{partido}</Badge>
+        {/* UX-042: variant neutral para identidad politica, no "info" (DS-04 semantica) */}
+        <Badge variant="neutral">{partido}</Badge>
       </View>
       <Text style={styles.name}>{name}</Text>
       <Text style={styles.subtitle}>{subtitle}</Text>

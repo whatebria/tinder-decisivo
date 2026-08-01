@@ -176,3 +176,24 @@ export function getDimensionColors(
     border: isDark ? d.border.dark : d.border.light,
   };
 }
+
+/**
+ * TASK-033: labels legibles de los ejes tematicos que usa el backend
+ * (codigos en mayusculas como "ECONOMIA", "SOCIEDAD").
+ *
+ * Unica fuente de verdad para etiquetas de ejes — RadarChart, buildA11yLabel
+ * y cualquier futuro consumidor deben importar de aqui, NO duplicar.
+ *
+ * Nota: estos codigos son distintos a DimensionKey (que usa minusculas como
+ * "economico"). Son el "EjeTematicoEnum" del backend (ver api.ts).
+ */
+export const EJE_LABELS: Record<string, string> = {
+  ECONOMIA:      "Economia",
+  SOCIEDAD:      "Sociedad",
+  AMBIENTE:      "Ambiente",
+  SEGURIDAD:     "Seguridad",
+  DDHH:          "DDHH",
+  INTERNACIONAL: "Internac.",
+  INSTITUCIONAL: "Institucional",
+  OTRO:          "Otro",
+} as const;

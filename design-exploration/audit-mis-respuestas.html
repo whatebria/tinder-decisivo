@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pantalla 11 -- Mis Respuestas -- 11 Fases</title>
+<link rel="stylesheet" href="ds-shared.css"/>
+<style>
+.audit-hero{background:var(--c-hero);padding:28px 36px 24px;color:#fff;margin:-40px -36px 32px;}
+.audit-hero h1{font-size:22px;font-weight:900;margin-bottom:4px;}
+.audit-hero p{font-size:12px;opacity:.65;max-width:700px;line-height:1.7;}
+.audit-hero .meta{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;}
+.audit-hero .meta-item{font-size:11px;opacity:.75;}
+
+.praise-banner{background:linear-gradient(135deg,#1B3D53,#2E5F7E);border-radius:12px;padding:16px 20px;color:#fff;margin-bottom:16px;display:flex;gap:14px;align-items:flex-start;}
+.praise-icon{font-size:24px;flex-shrink:0;margin-top:2px;}
+.praise-title{font-size:13px;font-weight:800;margin-bottom:4px;}
+.praise-body{font-size:11px;opacity:.8;line-height:1.7;}
+
+.sec-divider{display:flex;align-items:center;gap:12px;margin:32px 0 20px;}
+.sec-divider hr{flex:1;border:none;border-top:1px solid var(--c-border);}
+.sec-divider-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--c-text3);white-space:nowrap;}
+
+.sev{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.sev-crit{background:#FEE2E2;color:#991B1B;}
+.sev-high{background:#FEF3C7;color:#92400E;}
+.sev-med{background:#EFF6FF;color:#1E40AF;}
+.sev-low{background:var(--c-surface2);color:var(--c-text2);}
+
+.comp-card{border:1.5px solid var(--c-border);border-radius:12px;overflow:hidden;margin-bottom:10px;}
+.comp-head{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--c-surface);border-bottom:1px solid var(--c-border);}
+.comp-name{font-family:monospace;font-size:12px;font-weight:700;color:var(--c-primary);}
+.comp-path{font-size:9px;color:var(--c-text3);font-family:monospace;}
+.comp-body{padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;background:var(--c-bg);}
+.comp-col-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text3);margin-bottom:4px;}
+.comp-item{font-size:11px;color:var(--c-text2);line-height:1.6;padding-left:10px;border-left:2px solid var(--c-border);margin-bottom:3px;}
+.comp-item.ok{border-color:var(--c-success);}
+.comp-item.warn{border-color:var(--c-warning);}
+.comp-item.err{border-color:var(--c-danger);}
+
+.problem{border-radius:10px;padding:12px 14px;margin-bottom:8px;border-left:3px solid;}
+.problem.high{background:var(--c-warning-bg);border-color:var(--c-warning);}
+.problem.med{background:var(--c-info-bg);border-color:var(--c-info);}
+.problem.low{background:var(--c-surface2);border-color:var(--c-border);}
+.problem-title{font-size:12px;font-weight:700;color:var(--c-text);margin-bottom:3px;}
+.problem-desc{font-size:11px;color:var(--c-text2);line-height:1.6;}
+.problem-evidence{font-size:10px;font-family:monospace;color:var(--c-text3);margin-top:4px;}
+
+.bench-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px;}
+.bench-card{border:1.5px solid var(--c-border);border-radius:12px;padding:12px;background:var(--c-surface);}
+.bench-app{font-size:11px;font-weight:800;color:var(--c-primary);margin-bottom:3px;}
+.bench-pattern{font-size:10px;font-weight:700;color:var(--c-text);margin-bottom:4px;}
+.bench-desc{font-size:10px;color:var(--c-text2);line-height:1.6;}
+.bench-adapt{font-size:10px;color:var(--c-success);margin-top:6px;font-weight:600;}
+
+.wireframe{font-family:monospace;font-size:11px;line-height:1.9;color:var(--c-text2);background:var(--c-surface);border-radius:10px;padding:16px;border:1.5px solid var(--c-border);}
+
+/* Phone mockup */
+.phone-frame{width:230px;border-radius:32px;border:3px solid var(--c-border2);background:var(--c-bg);overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.12);flex-shrink:0;}
+.phone-status{height:32px;background:var(--c-bg);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--c-text3);}
+.mr-topbar{padding:10px 14px 8px;border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:8px;}
+.mr-back{font-size:18px;color:var(--c-primary);}
+.mr-title{font-size:13px;font-weight:700;color:var(--c-text);}
+.mr-sub{font-size:9px;color:var(--c-text2);}
+.mr-chips{display:flex;gap:4px;padding:6px 14px;}
+.mr-chip{padding:3px 10px;border-radius:20px;font-size:9px;font-weight:600;border:1px solid var(--c-border);color:var(--c-text2);background:var(--c-card);}
+.mr-chip.active{background:var(--c-primary);color:#fff;border-color:var(--c-primary);}
+.mr-intro-row{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;gap:8px;}
+.mr-intro-text{font-size:9px;color:var(--c-text2);flex:1;line-height:1.5;}
+.mr-reset-btn{padding:4px 10px;border-radius:6px;font-size:9px;font-weight:700;color:var(--c-danger);border:1px solid var(--c-danger);}
+.mr-section-title{font-size:11px;font-weight:700;color:var(--c-text);padding:4px 14px;}
+.mr-eje-label{font-size:9px;font-weight:800;text-transform:uppercase;color:var(--c-text2);padding:0 14px 2px;letter-spacing:.3px;}
+.mr-card{margin:0 14px 6px;background:var(--c-card);border:1px solid var(--c-border);border-radius:8px;padding:10px 12px;}
+.mr-card-q{font-size:11px;font-weight:600;color:var(--c-text);margin-bottom:4px;line-height:1.4;}
+.mr-card-meta{display:flex;gap:6px;align-items:center;}
+.mr-card-opcion{font-size:10px;font-weight:700;color:var(--c-primary);}
+.mr-card-sep{font-size:10px;color:var(--c-text3);}
+.mr-card-peso{font-size:10px;color:var(--c-text2);}
+.mr-card-hint{font-size:9px;color:var(--c-text3);margin-top:2px;}
+.mr-card-chevron{font-size:12px;color:var(--c-text3);margin-left:auto;}
+.mr-empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px 14px;text-align:center;}
+
+.diff-table{width:100%;border-collapse:collapse;}
+.diff-table th{background:var(--c-surface2);font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text2);padding:6px 10px;text-align:left;border-bottom:1px solid var(--c-border);}
+.diff-table td{padding:8px 10px;font-size:11px;vertical-align:top;border-bottom:1px solid var(--c-border2);}
+.diff-del{color:var(--c-danger);}
+.diff-add{color:var(--c-success);}
+
+.impact-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;}
+.impact-card{border-radius:10px;padding:12px;border:1.5px solid var(--c-border);}
+.impact-metric{font-size:11px;font-weight:700;color:var(--c-text);margin-bottom:4px;}
+.impact-before{font-size:10px;color:var(--c-danger);margin-bottom:2px;}
+.impact-after{font-size:10px;color:var(--c-success);}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-logo">VotoAfin DS</div>
+  <div class="sidebar-ver">v1.0 &middot; Agosto 2026</div>
+  <hr/>
+  <div class="sidebar-label">11 Fases</div>
+  <a href="#fase0">F0 &middot; Reverse Engineering</a>
+  <a href="#fase1">F1 &middot; Componentes</a>
+  <a href="#fase2">F2 &middot; Auditoria UX/UI</a>
+  <a href="#fase3">F3 &middot; Benchmarking</a>
+  <a href="#fase4">F4 &middot; Problemas</a>
+  <a href="#fase5">F5 &middot; Propuesta</a>
+  <a href="#fase7">F7 &middot; Sistema Visual</a>
+  <a href="#fase8">F8 &middot; Wireframe</a>
+  <a href="#fase9">F9 &middot; Mockup</a>
+  <a href="#fase11">F11 &middot; Justificacion</a>
+  <a href="#fase12">F12 &middot; Impacto</a>
+  <a href="#fase13">F13 &middot; Diff</a>
+  <hr/>
+  <div class="sidebar-label">Navegacion</div>
+  <a href="audit-mis-guardados.html">&#8592; Pantalla 10</a>
+  <div class="sidebar-bottom">
+    <button class="theme-btn" id="theme-btn">Dark mode</button>
+  </div>
+</nav>
+
+<div class="main"><div class="content">
+
+<div class="audit-hero">
+  <div style="opacity:.5;font-size:10px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">
+    Pantalla 11 / 11 &middot; ULTIMA PANTALLA &middot; 11 Fases (sin F6/F10)
+  </div>
+  <h1>MisRespuestasScreen &mdash; Mis Respuestas</h1>
+  <p>La pantalla mejor implementada del proyecto. Styles a nivel de modulo (sin useMemo), sub-componentes nombrados (TipoSeccion, RespuestaCard), logica tipoActivoParaReiniciar elegante, ConfirmModal para la accion destructiva. Los issues son menores: el boton Reiniciar usa variant="ghost" (neutro) para una accion destructiva, las RespuestaCard no tienen affordance visual de interactividad mas alla del hint textual, y los handlers carecen de useCallback.</p>
+  <div class="meta">
+    <div class="meta-item">MisRespuestasScreen.tsx &middot; 14.1 KB</div>
+    <div class="meta-item">TipoSeccion &middot; RespuestaCard &middot; EditarRespuestaModal &middot; ConfirmModal</div>
+    <div class="meta-item">4 hooks &middot; useQueries por tipo &middot; 2 handlers async</div>
+  </div>
+</div>
+
+<!-- Nota de calidad -->
+<div class="praise-banner">
+  <div class="praise-icon">&#127942;</div>
+  <div>
+    <div class="praise-title">Pantalla mejor implementada del proyecto</div>
+    <div class="praise-body">
+      Styles a nivel de modulo (no en useMemo) &mdash; el patron que todas las demas pantallas deberian seguir.<br/>
+      Sub-componentes nombrados como funciones propias, no como render functions inline.<br/>
+      tipoActivoParaReiniciar: logica que evita ambiguedad cuando hay multiples tipos de eleccion.<br/>
+      ConfirmModal con variant="danger" para la accion destructiva de reiniciar.<br/>
+      EmptyState con CTA contextual. isLoading correcto con .some() sobre useQueries.<br/>
+      <strong>Los issues que siguen son todos menores &mdash; ninguno critico.</strong>
+    </div>
+  </div>
+</div>
+
+<!-- F0 -->
+<div id="fase0" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 0 &middot; Reverse Engineering</div><hr/></div>
+
+<div class="g2" style="margin-bottom:16px;">
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Archivos y dependencias</div>
+    <div style="font-family:monospace;font-size:11px;line-height:1.9;color:var(--c-text2);">
+      screens/MisRespuestasScreen.tsx (14.1 KB)<br/>
+      api/hooks.ts (useTiposEleccion, useMisRespuestasMultiple,<br/>
+      &nbsp;&nbsp;useUpdateRespuesta, useReiniciarCuestionario)<br/>
+      components/organisms/EditarRespuestaModal<br/>
+      components/molecules/ConfirmModal<br/>
+      components/atoms/Chip, Button<br/>
+      components/organisms/EmptyState, SectionTitle
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Arbol de componentes</div>
+    <div style="font-family:monospace;font-size:11px;line-height:2;color:var(--c-text2);">
+      AppShell [active=null] &larr; correcto<br/>
+      &nbsp;&nbsp;ScrollView<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;ScreenTopBar [subtitle=conteo dinamico]<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;[if loading] Spinner<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;[if 0 resp.] EmptyState + CTA "Ir al inicio"<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;[else]<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ScrollView horizontal [Chips filtro por tipo]<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;introRow [texto + boton Reiniciar (ghost)]*<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TipoSeccion x N<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SectionTitle [nombre del tipo]<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gruposEje [por eje tematico]<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RespuestaCard (Pressable) x M<br/>
+      &nbsp;&nbsp;EditarRespuestaModal<br/>
+      &nbsp;&nbsp;ConfirmModal [variant="danger"] &larr; correcto<br/><br/>
+      * Boton Reiniciar solo visible cuando tipoActivoParaReiniciar != null
+    </div>
+  </div>
+</div>
+
+<div class="g2">
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Logica destacada</div>
+    <div style="font-size:11px;line-height:1.8;color:var(--c-text2);">
+      <strong>useMisRespuestasMultiple(tipoIds):</strong> useQueries en paralelo, 1 fetch por tipo<br/>
+      <strong>tipoActivoParaReiniciar:</strong> logica elegante que evita mostrar Reiniciar cuando hay ambiguedad (varios tipos visibles en modo "Todas")<br/>
+      <strong>tiposVisibles:</strong> filtra por chip Y por respuestas no vacias<br/>
+      <strong>PESO_LABELS:</strong> constante de modulo, no hardcode disperso<br/>
+      <strong>subtitle:</strong> pluralizacion correcta ("1 pregunta" vs "N preguntas")<br/>
+      <strong>TipoSeccion.grupos:</strong> agrupacion por eje con Map -- O(n), correcto
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Patrones correctos</div>
+    <div style="font-size:11px;line-height:1.8;color:var(--c-text2);">
+      &#10003; Styles a nivel de modulo (StyleSheet.create fuera del componente)<br/>
+      &#10003; Sub-componentes nombrados: TipoSeccion, RespuestaCard<br/>
+      &#10003; ConfirmModal para accion destructiva (reiniciar)<br/>
+      &#10003; EmptyState con CTA contextual<br/>
+      &#10003; isLoading correcto: .some(r =&gt; r.isLoading)<br/>
+      &#10003; AppShell active={null} -- sub-pantalla correcta<br/>
+      &#10003; Chips solo cuando tipos.length &gt; 1 -- no UI innecesaria<br/>
+      &#10003; accessibilityRole="button" en RespuestaCard<br/>
+      &#10003; accessibilityLabel dinamico con pregunta_texto
+    </div>
+  </div>
+</div>
+
+<!-- F1 -->
+<div id="fase1" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 1 &middot; Auditoria de Componentes Frontend</div><hr/></div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">RespuestaCard</div><div class="comp-path">MisRespuestasScreen.tsx L330-370 -- componente local</div></div>
+    <span class="sev sev-med" style="margin-left:auto;">Affordance debil</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Fortalezas</div>
+      <div class="comp-item ok">accessibilityRole="button" y accessibilityLabel con pregunta_texto</div>
+      <div class="comp-item ok">opacity:0.7 on press como feedback tactil</div>
+      <div class="comp-item ok">opActual busca por id en la lista de opciones -- robusto</div>
+      <div class="comp-item ok">Fallback "(opcion desconocida)" cuando opcion no encontrada</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Problemas</div>
+      <div class="comp-item warn">Sin indicador visual de interactividad mas alla del hint textual "Toca para editar". No hay chevron ni icono de lapiz. El usuario que no lee el hint podria no saber que la card es editable</div>
+      <div class="comp-item warn">Fallback "(opcion desconocida)" hardcodeado como string. Deberia ser una constante</div>
+      <div class="comp-item warn">PESO_LABELS[respuesta.peso] ?? `peso ${respuesta.peso}` -- el fallback expone datos crudos del backend al usuario</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">Boton "Reiniciar cuestionario" en introRow</div><div class="comp-path">MisRespuestasScreen.tsx L260-269</div></div>
+    <span class="sev sev-high" style="margin-left:auto;">Accion destructiva sin señal visual</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Problema</div>
+      <div class="comp-item err">El boton usa variant="ghost" (neutro, sin color) para iniciar una accion que borra todas las respuestas del usuario para ese tipo. La accion tiene consecuencias graves e irreversibles. El color neutro del boton no advierte al usuario del riesgo antes de que lo toque</div>
+      <div class="comp-item warn">El ConfirmModal si usa variant="danger" correctamente, pero el boton de entrada es neutro. El primer punto de contacto con la accion destructiva deberia ser "danger" para preparar al usuario</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Contexto positivo</div>
+      <div class="comp-item ok">tipoActivoParaReiniciar evita mostrar el boton cuando la accion seria ambigua</div>
+      <div class="comp-item ok">El ConfirmModal tiene variant="danger" y mensaje explicativo claro</div>
+      <div class="comp-item ok">El mensaje especifica cuantas respuestas se borraran y que se conservan favoritos y voto</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">handleSave + handleConfirmReiniciar</div><div class="comp-path">MisRespuestasScreen.tsx L129-170</div></div>
+    <span class="sev sev-med" style="margin-left:auto;">Sin useCallback</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Problema</div>
+      <div class="comp-item warn">handleSave y handleConfirmReiniciar son funciones async declaradas sin useCallback. Se recrean en cada render y se pasan como props a EditarRespuestaModal y ConfirmModal</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Contexto</div>
+      <div class="comp-item ok">El impacto es limitado porque los modales solo se renderizan cuando visible=true. El re-render innecesario ocurre, pero el usuario no lo percibe</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">PESO_LABELS + TipoSeccion.grupos</div><div class="comp-path">MisRespuestasScreen.tsx L59-64 / L290-308</div></div>
+    <span class="sev sev-low" style="margin-left:auto;">Bien implementado</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">PESO_LABELS</div>
+      <div class="comp-item ok">Constante de modulo bien definida -- no dispersa en el JSX</div>
+      <div class="comp-item warn">Sin test: si el backend cambia el rango de peso (0-3), el mapa falla silenciosamente con el fallback "peso N"</div>
+    </div>
+    <div>
+      <div class="comp-col-label">grupos (TipoSeccion)</div>
+      <div class="comp-item ok">Agrupacion por eje con Map -- O(n), sin sort innecesario</div>
+      <div class="comp-item ok">useMemo con [respuestas] -- dependencia correcta</div>
+      <div class="comp-item warn">El orden de los grupos depende del orden de insertion en el Map, que a su vez depende del orden de la API. No hay orden explicito garantizado</div>
+    </div>
+  </div>
+</div>
+
+<!-- F2 -->
+<div id="fase2" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 2 &middot; Auditoria UX / UI Profunda</div><hr/></div>
+
+<div class="g2">
+  <div>
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:10px;">UX</div>
+    <div class="ins ins-a" style="margin-bottom:8px;">
+      <strong>Boton "Reiniciar" neutro para accion destructiva:</strong> el boton de ghost (sin color) inicia el flujo de borrar todas las respuestas. El usuario que lo toca sin leer el texto del introRow podria no anticipar el impacto. El ConfirmModal es excelente, pero la señal de peligro deberia empezar antes -- en el boton mismo, con texto danger o borde danger.
+    </div>
+    <div class="ins ins-b" style="margin-bottom:8px;">
+      <strong>RespuestaCard: affordance solo textual:</strong> la unica senal de que la card es interactiva es el hint "Toca para editar" (typography.overline, c.textTertiary). No hay chevron ni icono de edicion. Para usuarios que no leen hints, la card parece contenido de solo lectura.
+    </div>
+    <div class="ins ins-r" style="margin-bottom:8px;">
+      <strong>Orden de grupos por eje no garantizado:</strong> el orden de los ejes tematicos en la pantalla depende del orden en que las respuestas llegan del backend. Si el backend cambia el orden, la pantalla cambia visualmente sin que el usuario lo controle.
+    </div>
+  </div>
+  <div>
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:10px;">UI / Design System</div>
+    <div class="ins ins-a" style="margin-bottom:8px;">
+      <strong>opActual en c.primary (azul):</strong> la opcion de respuesta elegida se muestra en c.primary. DS-11 especifica primary para CTAs de accion, no para contenido seleccionado. Para un estado "elegido" podria ser mas apropiado c.secondary (verde) o c.text con fontWeight distinguible.
+    </div>
+    <div class="ins ins-b" style="margin-bottom:8px;">
+      <strong>hint "Toca para editar" siempre visible:</strong> a diferencia del caso de BUG-017 (hint visible sin contenido disponible), en este caso el hint si es relevante siempre. Pero visualmente la card podria comunicar interactividad con un icono en lugar de texto, liberando espacio.
+    </div>
+    <div class="ins ins-r" style="margin-bottom:8px;">
+      <strong>introRow mezcla texto instructivo con accion destructiva:</strong> el texto "Toca cualquier pregunta para modificar tu respuesta" y el boton "Reiniciar cuestionario" estan en la misma fila horizontal. Son dos tipos de contenido muy distintos (instruccion vs accion peligrosa) en el mismo contenedor visual.
+    </div>
+  </div>
+</div>
+
+<!-- F3 -->
+<div id="fase3" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 3 &middot; Benchmarking</div><hr/></div>
+
+<div class="bench-grid">
+  <div class="bench-card">
+    <div class="bench-app">Duolingo</div>
+    <div class="bench-pattern">Boton de reset con color danger desde el principio</div>
+    <div class="bench-desc">El boton de "Reiniciar progreso" en Duolingo siempre es rojo desde que aparece en la UI, antes del dialogo de confirmacion. El usuario recibe la señal de riesgo desde el primer punto de contacto.</div>
+    <div class="bench-adapt">Adaptacion: cambiar Button variant="ghost" a variant="danger" (o un estilo de texto danger sin relleno) en el boton de Reiniciar.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">iOS Ajustes</div>
+    <div class="bench-pattern">Chevron como indicador universal de interactividad</div>
+    <div class="bench-desc">Cada fila interactiva de iOS Settings tiene un chevron (&rsaquo;) a la derecha. El usuario aprende rapidamente que chevron = hay mas, tap abre algo. Sin chevron = solo lectura.</div>
+    <div class="bench-adapt">Adaptacion: agregar un icono de lapiz o chevron a la RespuestaCard para que sea visualmente obvio que es editable.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Google Forms (respuestas)</div>
+    <div class="bench-pattern">Respuesta seleccionada con color semantico</div>
+    <div class="bench-desc">La opcion seleccionada se muestra con el color de marca del formulario, claramente diferenciada de las no seleccionadas. El color no es el de los CTAs de accion -- es un color de estado.</div>
+    <div class="bench-adapt">Adaptacion: usar c.secondary (verde) para opActual en lugar de c.primary (azul). Verde = seleccionado/confirmado, azul = accion.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Linear</div>
+    <div class="bench-pattern">Acciones destructivas separadas del contenido</div>
+    <div class="bench-desc">En Linear, las acciones de borrado o reset estan en una seccion propia al fondo de la pantalla, separadas visualmente del contenido de trabajo con un separador.</div>
+    <div class="bench-adapt">Adaptacion: mover el boton Reiniciar de la fila de intro a una seccion propia al final de la pantalla, con fondo danger-bg.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Notion</div>
+    <div class="bench-pattern">Orden explicito de secciones</div>
+    <div class="bench-desc">Las propiedades de una pagina en Notion se muestran siempre en el mismo orden, independientemente del orden en que se crearon o de la API. El usuario desarrolla un modelo mental del orden.</div>
+    <div class="bench-adapt">Adaptacion: ordenar los grupos de eje tematico con un orden fijo (por nombre alfabetico o por el orden del DS-11) en lugar de depender del orden de la API.</div>
+  </div>
+</div>
+
+<!-- F4 -->
+<div id="fase4" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 4 &middot; Problemas Detectados</div><hr/></div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-warning);margin-bottom:6px;">Alto</div>
+
+<div class="problem high">
+  <div class="problem-title">P-A01 &middot; Boton "Reiniciar cuestionario" usa variant="ghost" para accion destructiva</div>
+  <div class="problem-desc">El boton que inicia el flujo de reinicio usa variant="ghost" (texto sin relleno, color neutral). La accion borra todas las respuestas del usuario para ese tipo de eleccion -- irreversible. El ConfirmModal es correcto, pero la señal de peligro deberia comenzar en el boton, no en el modal. Un usuario que toca el boton sin leer el contexto no anticipa el riesgo.</div>
+  <div class="problem-evidence">MisRespuestasScreen.tsx L260: &lt;Button variant="ghost" size="sm"&gt;Reiniciar cuestionario&lt;/Button&gt;</div>
+</div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-info);margin-bottom:6px;margin-top:12px;">Medio</div>
+
+<div class="problem med">
+  <div class="problem-title">P-M01 &middot; RespuestaCard sin affordance visual de interactividad</div>
+  <div class="problem-desc">La unica senal visual de que la card es editable es el texto "Toca para editar" en typography.overline con c.textTertiary (muy tenue). No hay chevron ni icono de edicion. Usuarios que no leen hints pueden asumir que el contenido es solo lectura.</div>
+</div>
+
+<div class="problem med">
+  <div class="problem-title">P-M02 &middot; opActual en c.primary -- token de CTA para estado seleccionado</div>
+  <div class="problem-desc">La opcion de respuesta elegida se muestra en c.primary (azul). DS-04 asigna primary a CTAs de accion. Para un estado "seleccionado/elegido", el token mas correcto es c.secondary (verde = confirmado) o typography sin color especial pero con fontWeight diferencial.</div>
+  <div class="problem-evidence">MisRespuestasScreen.tsx L357: &lt;Text style={[styles.opActual, { color: c.primary }]}&gt;</div>
+</div>
+
+<div class="problem med">
+  <div class="problem-title">P-M03 &middot; handleSave y handleConfirmReiniciar sin useCallback</div>
+  <div class="problem-desc">Ambos handlers async se recrean en cada render y se pasan como props a EditarRespuestaModal y ConfirmModal. El impacto es limitado porque los modales solo se montan cuando estan visibles, pero el patron es inconsistente con las buenas practicas del proyecto.</div>
+</div>
+
+<div class="problem med">
+  <div class="problem-title">P-M04 &middot; Orden de grupos por eje dependiente del orden de la API</div>
+  <div class="problem-desc">El orden en que aparecen los grupos de eje tematico (Economia, Sociedad, etc.) depende del orden de insertion en el Map, que a su vez depende del orden de las respuestas en la API. Si el backend cambia el orden, la pantalla cambia visualmente sin una razon aparente para el usuario.</div>
+</div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:6px;margin-top:12px;">Bajo</div>
+
+<div class="problem low">
+  <div class="problem-title">P-L01 &middot; PESO_LABELS sin test -- fallback expone datos crudos</div>
+  <div class="problem-desc">Si el backend envia un peso fuera del rango 0-3, el fallback muestra "peso N" al usuario (dato crudo). Deberia ser un string mas amigable. Ademas, sin test, si el rango cambia, la UI falla silenciosamente.</div>
+  <div class="problem-evidence">MisRespuestasScreen.tsx L367: PESO_LABELS[respuesta.peso] ?? `peso ${respuesta.peso}`</div>
+</div>
+
+<div class="problem low">
+  <div class="problem-title">P-L02 &middot; Fallback "(opcion desconocida)" hardcodeado</div>
+  <div class="problem-desc">El string de fallback cuando no se encuentra la opcion elegida deberia ser una constante de modulo, no un string literal inline.</div>
+  <div class="problem-evidence">MisRespuestasScreen.tsx L354: opActual?.texto ?? "(opcion desconocida)"</div>
+</div>
+
+<!-- F5 -->
+<div id="fase5" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 5 &middot; Propuesta de Rediseno</div><hr/></div>
+
+<div class="g2">
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 1 &mdash; Boton Reiniciar con señal danger</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> variant="ghost" para accion destructiva<br/>
+      <strong>Cambio:</strong> Cambiar a un estilo de texto danger. Como Button no tiene variant="danger-ghost", se puede usar variant="ghost" con una prop textStyle={{color:c.danger}}, o agregar variant="danger-ghost" al componente Button.<br/>
+      <strong>Alternativa:</strong> Mover el boton Reiniciar a una seccion de DangerZone al final de la pantalla (mas limpio arquitecturalmente).<br/>
+      <strong>Beneficio:</strong> El primer contacto con la accion destructiva ya comunica peligro.
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 2 &mdash; RespuestaCard con chevron</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> affordance solo textual<br/>
+      <strong>Cambio:</strong> Agregar un icono chevron (&rsaquo;) o de edicion (lapiz) alineado a la derecha de la card. Esto convierte el hint textual en un indicador visual universal.<br/>
+      <strong>Beneficio:</strong> El usuario sabe que puede editar sin leer el hint.<br/>
+      <strong>Patron:</strong> iOS Settings, NavRow de la misma app
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 3 &mdash; opActual con c.secondary</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> c.primary (CTA) para estado seleccionado<br/>
+      <strong>Cambio:</strong> Reemplazar c.primary por c.secondary para la opcion elegida.<br/>
+      <strong>Beneficio:</strong> Verde = seleccionado/confirmado, semantica correcta.<br/>
+      <strong>Patron UX:</strong> DS-04 semantica de colores
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 4 &mdash; Orden explicito de grupos</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> orden dependiente del orden de la API<br/>
+      <strong>Cambio:</strong> Ordenar grupos.sort() por nombre de eje (alfabetico) o por un orden fijo definido en domain/dimensiones.ts.<br/>
+      <strong>Beneficio:</strong> El usuario desarrolla un modelo mental estable de la pantalla.
+    </div>
+  </div>
+</div>
+
+<!-- F7 -->
+<div id="fase7" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 7 &middot; Sistema Visual</div><hr/></div>
+
+<table class="sum-table" style="width:100%;">
+  <thead><tr><th>Elemento</th><th>Token actual</th><th>Token propuesto</th><th>Guideline DS</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Boton Reiniciar</td>
+      <td style="color:var(--c-danger);font-family:monospace;font-size:11px;">variant="ghost" (neutro)</td>
+      <td style="color:var(--c-success);font-family:monospace;font-size:11px;">variant="ghost" + color:c.danger o "danger-ghost"</td>
+      <td>DS-04: danger para acciones destructivas</td>
+    </tr>
+    <tr>
+      <td>opActual (opcion elegida)</td>
+      <td style="color:var(--c-danger);font-family:monospace;font-size:11px;">c.primary (CTA azul)</td>
+      <td style="color:var(--c-success);font-family:monospace;font-size:11px;">c.secondary (verde = confirmado)</td>
+      <td>DS-04: secondary para estados positivos/seleccionados</td>
+    </tr>
+    <tr>
+      <td>Hint "Toca para editar"</td>
+      <td style="font-family:monospace;font-size:11px;">c.textTertiary -- correcto para hints</td>
+      <td style="font-family:monospace;font-size:11px;">Mantener + agregar icono chevron</td>
+      <td>DS-10: doble affordance (icono + texto)</td>
+    </tr>
+    <tr>
+      <td>Pregunta texto</td>
+      <td style="font-family:monospace;font-size:11px;">c.text, typography.body bold -- correcto</td>
+      <td style="font-family:monospace;font-size:11px;">sin cambio</td>
+      <td>DS-10: primary text para contenido principal</td>
+    </tr>
+    <tr>
+      <td>Peso label</td>
+      <td style="font-family:monospace;font-size:11px;">c.textSecondary -- correcto</td>
+      <td style="font-family:monospace;font-size:11px;">sin cambio</td>
+      <td>DS-10: secondary para metadata</td>
+    </tr>
+    <tr>
+      <td>Grupo eje label</td>
+      <td style="font-family:monospace;font-size:11px;">c.textSecondary, overline -- correcto</td>
+      <td style="font-family:monospace;font-size:11px;">sin cambio</td>
+      <td>DS-10: overline para labels de seccion</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- F8 -->
+<div id="fase8" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 8 &middot; Wireframe</div><hr/></div>
+
+<div class="wireframe">
+&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;
+ TOPBAR
+  [&lt; Volver]   "Mis respuestas"   "47 preguntas respondidas"
+&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;
+ CHIPS (solo si tipos.length > 1)
+  [Todas] [Presidenciales] [Municipales]
+&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;
+ INTRO
+  "Toca cualquier pregunta para modificar tu respuesta."
+&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;
+ SECCION TIPO: Presidenciales 2025
+   ECONOMIA
+   [Reducir impuestos a PYMES                              &gt;]
+    De acuerdo  ·  Muy importante
+   [Sistema de pensiones privado                           &gt;]
+    En desacuerdo  ·  Importante
+
+   SOCIEDAD
+   [Educacion publica gratuita universitaria               &gt;]
+    De acuerdo  ·  Muy importante
+&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;
+ SECCION PELIGRO (propuesta: al fondo, separada)
+  [zona danger-bg]
+   Reiniciar cuestionario Presidenciales 2025
+   "Borra tus respuestas y tu ranking calculado."
+   [Reiniciar]  (texto danger)
+&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;
+</div>
+
+<!-- F9 -->
+<div id="fase9" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 9 &middot; Mockup de Alta Fidelidad</div><hr/></div>
+
+<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;justify-content:center;">
+
+<!-- Estado con respuestas -->
+<div>
+  <div style="font-size:10px;font-weight:700;text-align:center;color:var(--c-text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Con respuestas</div>
+  <div class="phone-frame">
+    <div class="phone-status">9:41</div>
+    <div class="mr-topbar">
+      <div class="mr-back">&lsaquo;</div>
+      <div><div class="mr-title">Mis respuestas</div><div class="mr-sub">47 preguntas respondidas</div></div>
+    </div>
+    <div class="mr-chips">
+      <div class="mr-chip active">Todas</div>
+      <div class="mr-chip">Presidenciales</div>
+      <div class="mr-chip">Municipales</div>
+    </div>
+    <div class="mr-intro-row">
+      <div class="mr-intro-text">Toca cualquier pregunta para modificar tu respuesta.</div>
+    </div>
+
+    <div class="mr-section-title">Presidenciales 2025</div>
+    <div class="mr-eje-label">Economia</div>
+
+    <div class="mr-card">
+      <div class="mr-card-q">Reducir impuestos a las PYMES</div>
+      <div class="mr-card-meta">
+        <!-- opActual con c.secondary (propuesto) -->
+        <div class="mr-card-opcion" style="color:#3A9E7A;">De acuerdo</div>
+        <div class="mr-card-sep">&middot;</div>
+        <div class="mr-card-peso">Muy importante</div>
+        <div class="mr-card-chevron">&rsaquo;</div>
+      </div>
+    </div>
+    <div class="mr-card">
+      <div class="mr-card-q">Sistema de pensiones privado</div>
+      <div class="mr-card-meta">
+        <div class="mr-card-opcion" style="color:#3A9E7A;">En desacuerdo</div>
+        <div class="mr-card-sep">&middot;</div>
+        <div class="mr-card-peso">Importante</div>
+        <div class="mr-card-chevron">&rsaquo;</div>
+      </div>
+    </div>
+
+    <div class="mr-eje-label" style="margin-top:4px;">Sociedad</div>
+    <div class="mr-card">
+      <div class="mr-card-q">Educacion publica gratuita universitaria</div>
+      <div class="mr-card-meta">
+        <div class="mr-card-opcion" style="color:#3A9E7A;">De acuerdo</div>
+        <div class="mr-card-sep">&middot;</div>
+        <div class="mr-card-peso">Muy importante</div>
+        <div class="mr-card-chevron">&rsaquo;</div>
+      </div>
+    </div>
+
+    <!-- DangerZone al fondo (propuesta) -->
+    <div style="margin:10px 14px 4px;border:1.5px solid var(--c-danger);border-radius:10px;overflow:hidden;background:var(--c-danger-bg);">
+      <div style="padding:6px 12px;border-bottom:1px solid var(--c-danger);font-size:9px;font-weight:800;text-transform:uppercase;color:var(--c-danger);letter-spacing:.4px;">Zona de peligro</div>
+      <div style="padding:10px 12px;">
+        <div style="font-size:11px;font-weight:600;color:var(--c-text);margin-bottom:4px;">Reiniciar cuestionario</div>
+        <div style="font-size:9px;color:var(--c-text2);margin-bottom:8px;line-height:1.5;">Borra tus respuestas y tu ranking calculado para Presidenciales 2025. Tus favoritos se mantienen.</div>
+        <div style="font-size:11px;font-weight:700;color:var(--c-danger);">Reiniciar &rsaquo;</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Estado vacio -->
+<div>
+  <div style="font-size:10px;font-weight:700;text-align:center;color:var(--c-text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Sin respuestas</div>
+  <div class="phone-frame">
+    <div class="phone-status">9:41</div>
+    <div class="mr-topbar">
+      <div class="mr-back">&lsaquo;</div>
+      <div><div class="mr-title">Mis respuestas</div><div class="mr-sub">Sin respuestas todavia</div></div>
+    </div>
+    <div class="mr-empty">
+      <div class="mr-empty-icon">&#9432;</div>
+      <div class="mr-empty-title">Todavia no respondiste ningun cuestionario</div>
+      <div class="mr-empty-desc">Completa un cuestionario desde el inicio para ver y editar tus respuestas aqui.</div>
+      <div style="background:var(--c-primary);color:#fff;border-radius:8px;padding:9px 20px;font-size:12px;font-weight:700;margin-top:4px;">Ir al inicio</div>
+    </div>
+  </div>
+</div>
+
+<!-- Card actual vs propuesta -->
+<div>
+  <div style="font-size:10px;font-weight:700;text-align:center;color:var(--c-text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Card actual vs. propuesta</div>
+  <div style="display:flex;flex-direction:column;gap:10px;max-width:230px;">
+    <div>
+      <div style="font-size:9px;font-weight:700;color:var(--c-text3);margin-bottom:4px;text-transform:uppercase;">Actual</div>
+      <div class="mr-card">
+        <div class="mr-card-q">Reducir impuestos a las PYMES</div>
+        <div class="mr-card-meta">
+          <div class="mr-card-opcion" style="color:var(--c-primary);">De acuerdo</div>
+          <div class="mr-card-sep">&middot;</div>
+          <div class="mr-card-peso">Muy importante</div>
+        </div>
+        <div class="mr-card-hint">Toca para editar</div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:9px;font-weight:700;color:var(--c-success);margin-bottom:4px;text-transform:uppercase;">Propuesto</div>
+      <div class="mr-card" style="border-color:var(--c-border2);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+          <div class="mr-card-q" style="flex:1;">Reducir impuestos a las PYMES</div>
+          <div style="font-size:14px;color:var(--c-text3);flex-shrink:0;">&rsaquo;</div>
+        </div>
+        <div class="mr-card-meta">
+          <!-- opActual en c.secondary -->
+          <div class="mr-card-opcion" style="color:#3A9E7A;">De acuerdo</div>
+          <div class="mr-card-sep">&middot;</div>
+          <div class="mr-card-peso">Muy importante</div>
+        </div>
+        <!-- sin hint textual -- el chevron es la affordance -->
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- F11 -->
+<div id="fase11" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 11 &middot; Justificacion UX / UI</div><hr/></div>
+
+<div class="g2">
+  <div class="ins ins-g" style="margin:0 0 10px;">
+    <strong>Boton Reiniciar con color danger</strong><br/>
+    <em>Problema:</em> variant="ghost" neutro para accion destructiva<br/>
+    <em>Beneficio:</em> señal de peligro desde el primer contacto<br/>
+    <em>Patron UX:</em> Error prevention (Nielsen #5) + Duolingo<br/>
+    <em>Friccion eliminada:</em> sorpresa del usuario al ver el ConfirmModal rojo tras un boton neutro<br/>
+    <em>Metrica:</em> -reinicio accidental por falta de señales previas
+  </div>
+  <div class="ins ins-g" style="margin:0 0 10px;">
+    <strong>Chevron en RespuestaCard</strong><br/>
+    <em>Problema:</em> affordance solo textual "Toca para editar"<br/>
+    <em>Beneficio:</em> el usuario sabe que puede editar sin leer el hint<br/>
+    <em>Patron UX:</em> Affordance visual (Norman) + iOS Settings<br/>
+    <em>Friccion eliminada:</em> contenido que parece solo lectura<br/>
+    <em>Metrica:</em> +tasa de edicion de respuestas
+  </div>
+  <div class="ins ins-g" style="margin:0 0 10px;">
+    <strong>opActual con c.secondary</strong><br/>
+    <em>Problema:</em> azul (CTA) para estado seleccionado<br/>
+    <em>Beneficio:</em> verde = confirmado/seleccionado, azul = accion<br/>
+    <em>Patron UX:</em> Consistent semantic color (DS-04)<br/>
+    <em>Friccion eliminada:</em> confusion entre "esto se puede tocar" y "esto esta seleccionado"<br/>
+    <em>Metrica:</em> +coherencia semantica de colores en toda la app
+  </div>
+  <div class="ins ins-g" style="margin:0 0 10px;">
+    <strong>Orden explicito de grupos por eje</strong><br/>
+    <em>Problema:</em> orden dependiente de la API<br/>
+    <em>Beneficio:</em> modelo mental estable para el usuario<br/>
+    <em>Patron UX:</em> Consistency (Nielsen #4) + Notion<br/>
+    <em>Friccion eliminada:</em> desorientacion cuando el orden cambia entre sesiones<br/>
+    <em>Metrica:</em> +estabilidad percibida de la UI
+  </div>
+</div>
+
+<!-- F12 -->
+<div id="fase12" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 12 &middot; Impacto Esperado</div><hr/></div>
+
+<div class="impact-grid">
+  <div class="impact-card" style="border-color:var(--c-warning);">
+    <div class="impact-metric">Señal de peligro en Reiniciar</div>
+    <div class="impact-before">Antes: variant="ghost" neutro</div>
+    <div class="impact-after">Despues: color danger desde el boton</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-success);">
+    <div class="impact-metric">Affordance de RespuestaCard</div>
+    <div class="impact-before">Antes: solo hint textual tenue</div>
+    <div class="impact-after">Despues: chevron + hint (o solo chevron)</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-success);">
+    <div class="impact-metric">Token opcion elegida</div>
+    <div class="impact-before">Antes: c.primary (azul CTA)</div>
+    <div class="impact-after">Despues: c.secondary (verde = confirmado)</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-warning);">
+    <div class="impact-metric">Orden de ejes tematicos</div>
+    <div class="impact-before">Antes: orden de la API</div>
+    <div class="impact-after">Despues: orden alfabetico o fijo</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-info);">
+    <div class="impact-metric">Fallback PESO_LABELS</div>
+    <div class="impact-before">Antes: "peso N" crudo</div>
+    <div class="impact-after">Despues: constante amigable</div>
+  </div>
+</div>
+
+<!-- F13 -->
+<div id="fase13" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 13 &middot; Diff Actual vs Propuesto</div><hr/></div>
+
+<div class="card" style="padding:0;overflow:hidden;">
+<table class="diff-table">
+  <thead><tr><th>Elemento</th><th class="diff-del">Actual</th><th class="diff-add">Propuesto</th><th>Motivo</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Boton Reiniciar</td>
+      <td class="diff-del">&lt;Button variant="ghost"&gt;Reiniciar cuestionario&lt;/Button&gt;</td>
+      <td class="diff-add">&lt;Button variant="ghost" style={{color:c.danger}}&gt; o mover a DangerZone al fondo</td>
+      <td>Señal danger desde el primer contacto</td>
+    </tr>
+    <tr>
+      <td>opActual color</td>
+      <td class="diff-del">color: c.primary</td>
+      <td class="diff-add">color: c.secondary</td>
+      <td>DS-04: secondary para estados seleccionados</td>
+    </tr>
+    <tr>
+      <td>RespuestaCard affordance</td>
+      <td class="diff-del">Solo "Toca para editar" en c.textTertiary</td>
+      <td class="diff-add">Chevron alineado a la derecha + mantener o quitar hint</td>
+      <td>Affordance visual universal</td>
+    </tr>
+    <tr>
+      <td>Orden grupos eje</td>
+      <td class="diff-del">Map insertion order (orden de la API)</td>
+      <td class="diff-add">Array.from(map.values()).sort((a,b) => a.display.localeCompare(b.display))</td>
+      <td>Orden estable independiente de la API</td>
+    </tr>
+    <tr>
+      <td>PESO_LABELS fallback</td>
+      <td class="diff-del">`peso ${respuesta.peso}` (dato crudo)</td>
+      <td class="diff-add">const PESO_UNKNOWN = "Importancia desconocida"</td>
+      <td>Texto amigable para el usuario</td>
+    </tr>
+    <tr>
+      <td>opActual fallback</td>
+      <td class="diff-del">"(opcion desconocida)" inline</td>
+      <td class="diff-add">const OPCION_DESCONOCIDA = "Opcion desconocida"</td>
+      <td>Constante de modulo, facil de cambiar</td>
+    </tr>
+    <tr>
+      <td>handleSave / handleConfirmReiniciar</td>
+      <td class="diff-del">async function sin useCallback</td>
+      <td class="diff-add">const handleX = useCallback(async () => ..., [deps])</td>
+      <td>Patron consistente con el resto del proyecto</td>
+    </tr>
+    <tr>
+      <td>Archivos afectados</td>
+      <td class="diff-del">MisRespuestasScreen.tsx</td>
+      <td class="diff-add">MisRespuestasScreen.tsx (todos los cambios en un mismo archivo)</td>
+      <td>Cambios quirurgicos, sin nueva arquitectura</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<!-- Cierre -->
+<div id="cierre" class="sec-divider"><hr/><div class="sec-divider-lbl">Auditoria Completa &middot; 11/11 Pantallas</div><hr/></div>
+
+<div class="praise-banner" style="background:linear-gradient(135deg,#1B4D3E,#3A9E7A);">
+  <div class="praise-icon">&#127881;</div>
+  <div>
+    <div class="praise-title">11 pantallas auditadas -- Auditoria completa</div>
+    <div class="praise-body">
+      Pantallas: Home, Cuestionario, Resultados, Candidatos, Comparar, Configuracion, DetalleCandidato, PerfilScreen, GestionElecciones, MisGuardados, MisRespuestas.<br/><br/>
+      Backlog total: ~140 issues documentados en match-private/issues/<br/>
+      Criticos/P1: ~22 issues &middot; Altos/P2: ~35 issues &middot; Medios/P3: ~50 issues &middot; Bajos: ~33 issues<br/><br/>
+      Proximos pasos recomendados: resolver los P1 en orden de impacto (BUG-018 logout, BUG-021 filtro guardados, BUG-020 AppShell, TASK-044 Toggle color) antes de continuar con features nuevas.
+    </div>
+  </div>
+</div>
+
+<div style="height:40px;"></div>
+</div></div>
+
+<script>
+const btn = document.getElementById('theme-btn');
+btn.addEventListener('click',()=>{
+  document.body.classList.toggle('dark');
+  btn.textContent=document.body.classList.contains('dark')?'Light mode':'Dark mode';
+});
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    e.preventDefault();
+    document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth'});
+  });
+});
+</script>
+</body>
+</html>

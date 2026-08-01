@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Auditoria -- CandidatosScreen -- Pantalla 4/11</title>
+<link rel="stylesheet" href="ds-shared.css"/>
+<style>
+/* ── page-specific ── */
+.audit-hero{background:var(--c-hero);padding:28px 36px 24px;color:#fff;margin:-40px -36px 32px;}
+.audit-hero h1{font-size:22px;font-weight:900;margin-bottom:4px;}
+.audit-hero p{font-size:12px;opacity:.65;max-width:600px;line-height:1.6;}
+.audit-hero .meta{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;}
+.audit-hero .meta-item{font-size:11px;opacity:.75;}
+
+.sev{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;
+  font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.sev-crit{background:#FEE2E2;color:#991B1B;}
+.sev-high{background:#FEF3C7;color:#92400E;}
+.sev-med{background:#EFF6FF;color:#1E40AF;}
+.sev-low{background:var(--c-surface2);color:var(--c-text2);}
+.dark .sev-crit{background:rgba(184,92,92,.2);color:#F9ABAB;}
+.dark .sev-high{background:rgba(200,155,92,.2);color:#E5C07B;}
+.dark .sev-med{background:rgba(92,138,184,.2);color:#93C5FD;}
+.dark .sev-low{background:var(--c-surface2);color:var(--c-text2);}
+
+.finding{border:1.5px solid var(--c-border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.finding-head{display:flex;align-items:center;gap:10px;padding:12px 16px;
+  background:var(--c-surface);border-bottom:1px solid var(--c-border);}
+.finding-id{font-family:monospace;font-size:11px;font-weight:800;color:var(--c-text2);}
+.finding-title{font-size:13px;font-weight:700;color:var(--c-text);flex:1;}
+.finding-body{padding:16px;background:var(--c-bg);display:flex;flex-direction:column;gap:14px;}
+.finding-body p{font-size:12px;color:var(--c-text2);line-height:1.7;}
+
+.diff{background:#0F1E2A;border-radius:10px;padding:14px;font-family:monospace;font-size:11px;
+  line-height:1.8;overflow-x:auto;}
+.diff-del{color:#F9ABAB;text-decoration:line-through;opacity:.7;}
+.diff-add{color:#86EFAC;}
+.diff-ctx{color:#A8C4CE;}
+.diff-file{color:#7BA098;font-size:9px;margin-bottom:6px;display:block;}
+.diff-comment{color:rgba(168,196,206,.4);}
+
+.count-box{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+.count-item{border-radius:10px;padding:10px 16px;display:flex;flex-direction:column;
+  align-items:center;gap:3px;min-width:72px;}
+.count-item.crit{background:var(--c-danger-bg);border:1.5px solid var(--c-danger);}
+.count-item.high{background:var(--c-warning-bg);border:1.5px solid var(--c-warning);}
+.count-item.med{background:var(--c-info-bg);border:1.5px solid var(--c-info);}
+.count-item.low{background:var(--c-surface2);border:1.5px solid var(--c-border);}
+.count-n{font-size:24px;font-weight:900;}
+.count-item.crit .count-n{color:var(--c-danger);}
+.count-item.high .count-n{color:var(--c-warning);}
+.count-item.med .count-n{color:var(--c-info);}
+.count-item.low .count-n{color:var(--c-text2);}
+.count-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text2);}
+
+.sec-divider{display:flex;align-items:center;gap:12px;margin:28px 0 18px;}
+.sec-divider hr{flex:1;border:none;border-top:1px solid var(--c-border);}
+.sec-divider-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;
+  color:var(--c-text3);white-space:nowrap;}
+
+/* ── Tier system comparison ── */
+.tier-systems{display:flex;gap:14px;flex-wrap:wrap;}
+.tier-sys-col{flex:1;min-width:160px;border:1.5px solid var(--c-border);border-radius:10px;overflow:hidden;}
+.tier-sys-head{padding:8px 12px;font-size:10px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.5px;border-bottom:1px solid var(--c-border);}
+.tier-sys-head.bad{background:var(--c-danger-bg);color:var(--c-danger);}
+.tier-sys-head.warn{background:var(--c-warning-bg);color:var(--c-warning);}
+.tier-sys-head.ok{background:var(--c-success-bg);color:var(--c-success);}
+.tier-sys-body{padding:10px 12px;display:flex;flex-direction:column;gap:6px;}
+.tier-row-item{display:flex;align-items:center;gap:7px;}
+.tier-swatch{width:22px;height:22px;border-radius:5px;flex-shrink:0;}
+.tier-row-info{flex:1;}
+.tier-row-pct{font-size:11px;font-weight:700;color:var(--c-text);}
+.tier-row-tok{font-size:9px;font-family:monospace;color:var(--c-text2);}
+.tier-mismatch{color:var(--c-danger);font-weight:700;}
+
+/* ── Badge comparison ── */
+.badge-compare{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;}
+.badge-col{flex:1;min-width:140px;}
+.badge-col-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+  margin-bottom:8px;padding:3px 7px;border-radius:4px;display:inline-block;}
+.badge-col-label.bad{background:var(--c-danger-bg);color:var(--c-danger);}
+.badge-col-label.ok{background:var(--c-success-bg);color:var(--c-success);}
+.badge-demo{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;
+  font-size:11px;font-weight:600;border-width:1px;border-style:solid;margin-bottom:6px;}
+
+/* ── Candidate card mini ── */
+.cand-card{background:var(--c-card);border-radius:12px;padding:12px;display:flex;
+  align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,.07);margin-bottom:8px;}
+.cand-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+.cand-info{flex:1;display:flex;flex-direction:column;gap:3px;}
+.cand-name{font-size:13px;font-weight:600;color:var(--c-text);}
+.cand-partido{font-size:11px;color:var(--c-text2);}
+.cand-tier{display:inline-flex;padding:2px 8px;border-radius:999px;font-size:10px;
+  font-weight:600;border:1px solid;margin-top:3px;align-self:flex-start;}
+.cand-pct{font-size:20px;font-weight:800;}
+.cand-chevron{color:var(--c-text3);font-size:14px;}
+
+/* ── Closure diagram ── */
+.closure-diagram{border-radius:10px;overflow:hidden;border:1.5px solid var(--c-border);}
+.closure-zone{display:flex;flex-wrap:wrap;gap:8px;padding:12px 14px;border-bottom:1px solid var(--c-border);}
+.closure-zone:last-child{border-bottom:none;}
+.closure-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+  padding:5px 14px;border-bottom:1px solid var(--c-border);color:var(--c-text2);}
+.closure-box{border-radius:7px;padding:6px 10px;font-family:monospace;font-size:10px;font-weight:600;}
+.closure-box.stable{background:var(--c-success-bg);color:var(--c-success);border:1px solid var(--c-success);}
+.closure-box.stale{background:var(--c-danger-bg);color:var(--c-danger);border:1px solid var(--c-danger);}
+.closure-box.neutral{background:var(--c-surface2);color:var(--c-text2);border:1px solid var(--c-border);}
+.closure-arrow{font-size:18px;color:var(--c-text3);align-self:center;}
+
+/* ── Banner comparison ── */
+.banner-compare{display:flex;gap:14px;flex-wrap:wrap;}
+.banner-demo{flex:1;min-width:200px;border-radius:10px;padding:12px 14px;
+  display:flex;align-items:center;gap:8px;border-width:1px;border-style:solid;}
+.banner-icon{width:20px;height:20px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+.banner-text{flex:1;font-size:12px;font-weight:500;}
+.banner-chevron{font-size:12px;opacity:.5;}
+.banner-col-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+  margin-bottom:6px;padding:3px 7px;border-radius:4px;display:inline-block;}
+.banner-col-label.bad{background:var(--c-danger-bg);color:var(--c-danger);}
+.banner-col-label.ok{background:var(--c-success-bg);color:var(--c-success);}
+.banner-wrap{flex:1;min-width:200px;}
+
+/* ── Summary table ── */
+.sum-table th{font-size:9px;}
+.sum-table td{font-size:11px;}
+
+/* ── normalizar location diagram ── */
+.loc-diagram{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.loc-file{border-radius:8px;padding:8px 12px;font-family:monospace;font-size:11px;font-weight:600;}
+.loc-file.wrong{background:var(--c-danger-bg);color:var(--c-danger);border:1.5px solid var(--c-danger);}
+.loc-file.right{background:var(--c-success-bg);color:var(--c-success);border:1.5px solid var(--c-success);}
+.loc-arrow{font-size:20px;color:var(--c-text3);}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-logo">VotoAfin DS</div>
+  <div class="sidebar-ver">v1.0 · Agosto 2026</div>
+  <hr/>
+  <div class="sidebar-label">Auditorias UX</div>
+  <a href="ds-11-screens.html">11 · Validacion por Pantalla</a>
+  <a href="audit-cuestionario.html">Auditoria · Pantalla 2</a>
+  <a href="audit-resultados.html">Auditoria · Pantalla 3</a>
+  <a href="audit-candidatos.html" class="active">Auditoria · Pantalla 4</a>
+  <hr/>
+  <div class="sidebar-label">Design System</div>
+  <a href="ds-index.html">Inicio DS</a>
+  <a href="ds-08-affinity.html">08 · Tiers de Afinidad</a>
+  <a href="ds-10-tokens.html">10 · Design Tokens</a>
+  <div class="sidebar-bottom">
+    <button class="theme-btn" id="theme-btn">Dark mode</button>
+  </div>
+</nav>
+
+<div class="main"><div class="content">
+
+<div class="audit-hero">
+  <div style="opacity:.5;font-size:10px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">
+    Pantalla 4 / 11 · Sprint Auditoria UX
+  </div>
+  <h1>CandidatosScreen -- Auditoria completa</h1>
+  <p>10 findings. El critico es la tercera instancia del problema de tiers de afinidad — esta vez en el componente MatchTier que ademas usa azul para el tier medio, color conflictivo en un contexto civico-politico.</p>
+  <div class="meta">
+    <div class="meta-item">CandidatosScreen.tsx · 17.6 KB</div>
+    <div class="meta-item">CandidateCard + MatchTier</div>
+    <div class="meta-item">services/matching.ts · utils/candidato.ts</div>
+    <div class="meta-item">DS-11 Pantalla 4 · DS-08 Affinity Tiers</div>
+  </div>
+</div>
+
+<!-- CONTADOR -->
+<div class="count-box">
+  <div class="count-item crit"><div class="count-n">1</div><div class="count-lbl">Critico</div></div>
+  <div class="count-item high"><div class="count-n">1</div><div class="count-lbl">Alto</div></div>
+  <div class="count-item med"><div class="count-n">6</div><div class="count-lbl">Medios</div></div>
+  <div class="count-item low"><div class="count-n">2</div><div class="count-lbl">Bajos</div></div>
+</div>
+
+<!-- ══════════ CRITICO ══════════ -->
+<div class="sec-divider"><hr/><div class="sec-divider-lbl">Critico</div><hr/></div>
+
+<!-- C-04 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-crit">Critical</span>
+    <span class="finding-id">C-04</span>
+    <span class="finding-title">MatchTier usa 3 tiers con thresholds incorrectos y azul (info) para tier medio</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      <strong>Tercera instancia del problema de tiers.</strong>
+      <code>MatchTier.tsx</code> define su propia funcion <code>tierFromPercent()</code>
+      completamente desconectada de <code>getMatchTier()</code> del service. El resultado:
+      3 sistemas de thresholds distintos conviviendo en el mismo proyecto.
+      Ademas, el tier medio usa <code>info</code> (azul) — un color conflictivo en
+      un contexto civico-politico donde azul ya significa "el usuario" en el radar chart.
+    </p>
+
+    <!-- 3 sistemas de thresholds -->
+    <div>
+      <div style="font-size:10px;font-weight:800;color:var(--c-text2);text-transform:uppercase;
+        letter-spacing:.5px;margin-bottom:8px;">Los 3 sistemas de thresholds en el proyecto</div>
+      <div class="tier-systems">
+        <div class="tier-sys-col">
+          <div class="tier-sys-head bad">services/matching.ts</div>
+          <div class="tier-sys-body">
+            <div class="tier-row-item">
+              <div class="tier-swatch" style="background:#6B9B7A;"></div>
+              <div class="tier-row-info">
+                <div class="tier-row-pct">&ge;75% &rarr; <code>success</code></div>
+                <div class="tier-row-tok tier-mismatch">DS-08: &ge;80%</div>
+              </div>
+            </div>
+            <div class="tier-row-item">
+              <div class="tier-swatch" style="background:#C89B5C;"></div>
+              <div class="tier-row-info">
+                <div class="tier-row-pct">50-74% &rarr; <code>warning</code></div>
+                <div class="tier-row-tok tier-mismatch">DS-08: 40-79%</div>
+              </div>
+            </div>
+            <div class="tier-row-item">
+              <div class="tier-swatch" style="background:#B85C5C;"></div>
+              <div class="tier-row-info">
+                <div class="tier-row-pct">&lt;50% &rarr; <code>danger</code></div>
+                <div class="tier-row-tok tier-mismatch">DS-08: &lt;40%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tier-sys-col">
+          <div class="tier-sys-head warn">MatchTier.tsx (componente)</div>
+          <div class="tier-sys-body">
+            <div class="tier-row-item">
+              <div class="tier-swatch" style="background:#6B9B7A;"></div>
+              <div class="tier-row-info">
+                <div class="tier-row-pct">&ge;70% &rarr; <code>success</code></div>
+                <div class="tier-row-tok tier-mismatch">DS-08: &ge;80%</div>
+              </div>
+            </div>
+            <div class="tier-row-item">
+              <div class="tier-swatch" style="background:#2E5F7E;"></div>
+              <div class="tier-row-info">
+                <div class="tier-row-pct">40-69% &rarr; <code>info</code> azul</div>
+                <div class="tier-row-tok tier-mismatch">DS-08: warning (mostaza)</div>
+              </div>
+            </div>
+            <div class="tier-row-item">
+              <div class="tier-swatch" style="background:#C89B5C;"></div>
+              <div class="tier-row-info">
+                <div class="tier-row-pct">&lt;40% &rarr; <code>warning</code></div>
+                <div class="tier-row-tok tier-mismatch">DS-08: danger (terracota)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tier-sys-col">
+          <div class="tier-sys-head ok">DS-08 · Spec correcta</div>
+          <div class="tier-sys-body">
+            <div class="tier-row-item">
+              <div class="tier-swatch" style="background:#3A9E7A;"></div>
+              <div class="tier-row-info">
+                <div class="tier-row-pct">80-100% &rarr; aff5</div>
+                <div class="tier-row-tok">#3A9E7A brandAccent</div>
+              </div>
+            </div>
+            <div class="tier-row-item">
+              <div class="tier-swatch" style="background:#6B9B7A;"></div>
+              <div class="tier-row-info">
+                <div class="tier-row-pct">60-79% &rarr; aff4</div>
+                <div class="tier-row-tok">#6B9B7A success</div>
+              </div>
+            </div>
+            <div class="tier-row-item">
+              <div class="tier-swatch" style="background:#C89B5C;"></div>
+              <div class="tier-row-info">
+                <div class="tier-row-pct">40-59% &rarr; aff3</div>
+                <div class="tier-row-tok">#C89B5C warning</div>
+              </div>
+            </div>
+            <div class="tier-row-item">
+              <div class="tier-swatch" style="background:#D07777;"></div>
+              <div class="tier-row-info">
+                <div class="tier-row-pct">20-39% &rarr; aff2</div>
+                <div class="tier-row-tok">#D07777 danger300</div>
+              </div>
+            </div>
+            <div class="tier-row-item">
+              <div class="tier-swatch" style="background:#B85C5C;"></div>
+              <div class="tier-row-info">
+                <div class="tier-row-pct">0-19% &rarr; aff1</div>
+                <div class="tier-row-tok">#B85C5C danger</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Badge antes/despues -->
+    <div>
+      <div style="font-size:10px;font-weight:800;color:var(--c-text2);text-transform:uppercase;
+        letter-spacing:.5px;margin-bottom:10px;">Badge de afinidad media: azul vs mostaza</div>
+      <div class="badge-compare">
+        <div class="badge-col">
+          <div class="badge-col-label bad">Actual -- info (azul)</div>
+          <div class="badge-demo" style="background:#EFF6FF;color:#1D4ED8;border-color:#93C5FD;">
+            Match medio · 55%
+          </div>
+          <div style="font-size:10px;color:var(--c-danger);margin-top:4px;">
+            Azul = primary = "el usuario" en el radar chart.<br/>
+            En politica, azul implica afiliacion partidaria.
+          </div>
+        </div>
+        <div style="font-size:20px;color:var(--c-text3);align-self:center;">&rarr;</div>
+        <div class="badge-col">
+          <div class="badge-col-label ok">Propuesto -- aff3 (mostaza)</div>
+          <div class="badge-demo" style="background:#FEF3C7;color:#92400E;border-color:#D97706;">
+            Coincidencia media · 55%
+          </div>
+          <div style="font-size:10px;color:var(--c-success);margin-top:4px;">
+            Mostaza es DS-08 aff3. Neutral, sin carga politica.<br/>
+            Misma semantica de "precaucion" que en el resto del DS.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card antes/despues con badges correctos -->
+    <div>
+      <div style="font-size:10px;font-weight:800;color:var(--c-text2);text-transform:uppercase;
+        letter-spacing:.5px;margin-bottom:10px;">CandidateCards con badges correctos (DS-08)</div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:200px;">
+          <div class="cand-card">
+            <div class="cand-avatar" style="background:#3A9E7A;">CA</div>
+            <div class="cand-info">
+              <div class="cand-name">Candidata A</div>
+              <div class="cand-partido">Partido Verde</div>
+              <div class="cand-tier" style="background:#D1FAE5;color:#065F46;border-color:#6EE7B7;">Match alto · 87%</div>
+            </div>
+            <div class="cand-pct" style="color:#3A9E7A;">87%</div>
+            <div class="cand-chevron">›</div>
+          </div>
+          <div class="cand-card">
+            <div class="cand-avatar" style="background:#6B9B7A;">CB</div>
+            <div class="cand-info">
+              <div class="cand-name">Candidato B</div>
+              <div class="cand-partido">Coalicion Sur</div>
+              <div class="cand-tier" style="background:#DCFCE7;color:#166534;border-color:#86EFAC;">Match alto · 71%</div>
+            </div>
+            <div class="cand-pct" style="color:#6B9B7A;">71%</div>
+            <div class="cand-chevron">›</div>
+          </div>
+          <div class="cand-card">
+            <div class="cand-avatar" style="background:#C89B5C;">CC</div>
+            <div class="cand-info">
+              <div class="cand-name">Candidato C</div>
+              <div class="cand-partido">Movimiento Norte</div>
+              <div class="cand-tier" style="background:#FEF3C7;color:#92400E;border-color:#D97706;">Coincidencia media · 52%</div>
+            </div>
+            <div class="cand-pct" style="color:#C89B5C;">52%</div>
+            <div class="cand-chevron">›</div>
+          </div>
+          <div class="cand-card">
+            <div class="cand-avatar" style="background:#D07777;">CD</div>
+            <div class="cand-info">
+              <div class="cand-name">Candidato D</div>
+              <div class="cand-partido">Frente Unido</div>
+              <div class="cand-tier" style="background:#FEE2E2;color:#991B1B;border-color:#FCA5A5;">Coincidencia baja · 31%</div>
+            </div>
+            <div class="cand-pct" style="color:#D07777;">31%</div>
+            <div class="cand-chevron">›</div>
+          </div>
+        </div>
+        <div class="ins ins-r" style="margin:0;flex:1;min-width:160px;font-size:11px;align-self:flex-start;">
+          <strong>DS-11 Pantalla 4:</strong>
+          <ul style="padding-left:16px;margin:6px 0 0;line-height:1.8;">
+            <li>Barra y % &rarr; <code>--color-affinity-N</code></li>
+            <li>Numero de posicion &rarr; <code>--color-text-secondary</code> (neutro)</li>
+            <li>Nombre candidato &rarr; <code>--color-text-primary</code></li>
+          </ul>
+          <div style="margin-top:8px;padding:6px 8px;background:var(--c-danger-bg);
+            border-radius:6px;color:var(--c-danger);font-weight:700;">
+            Regla critica: La barra indica coincidencia matematica, no importancia.
+            Usar primary azul implicaria "azul = mejor candidato".
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fix codigo -->
+    <div class="diff">
+      <span class="diff-file">// MatchTier.tsx -- reemplazar tierFromPercent privado por getMatchTier del service</span>
+      <div class="diff-del">function tierFromPercent(p: number): MatchTierKind {</div>
+      <div class="diff-del">&nbsp;&nbsp;if (p &gt;= 70) return "high";  <span class="diff-comment">// DS-08 dice 80</span></div>
+      <div class="diff-del">&nbsp;&nbsp;if (p &gt;= 40) return "mid";   <span class="diff-comment">// DS-08 dice 60</span></div>
+      <div class="diff-del">&nbsp;&nbsp;return "low";</div>
+      <div class="diff-del">}</div>
+      <div class="diff-add">import { getMatchTier } from "../../services/matching";</div>
+      <div class="diff-add">function tierFromPercent(p: number): MatchTierKind {</div>
+      <div class="diff-add">&nbsp;&nbsp;const t = getMatchTier(p); <span class="diff-comment">// "aff5"|"aff4"|"aff3"|"aff2"|"aff1"</span></div>
+      <div class="diff-add">&nbsp;&nbsp;if (t === "aff5" || t === "aff4") return "high";</div>
+      <div class="diff-add">&nbsp;&nbsp;if (t === "aff3") return "mid";</div>
+      <div class="diff-add">&nbsp;&nbsp;return "low";</div>
+      <div class="diff-add">}</div>
+      <br/>
+      <span class="diff-file">// Reemplazar info azul por warning mostaza en el tier medio</span>
+      <div class="diff-del">&nbsp;&nbsp;mid: { bg: c.info800, fg: c.info100, border: c.info600 },   <span class="diff-comment">// dark</span></div>
+      <div class="diff-del">&nbsp;&nbsp;mid: { bg: c.info100, fg: c.info700, border: c.info500 },   <span class="diff-comment">// light</span></div>
+      <div class="diff-add">&nbsp;&nbsp;mid: { bg: c.warning800, fg: c.warning100, border: c.warning600 }, <span class="diff-comment">// dark</span></div>
+      <div class="diff-add">&nbsp;&nbsp;mid: { bg: c.warning100, fg: c.warning700, border: c.warning500 }, <span class="diff-comment">// light</span></div>
+    </div>
+
+    <div class="ins ins-a" style="margin:0;font-size:11px;">
+      <strong>Orden de implementacion:</strong> Este fix depende de <code>TASK-009</code>
+      (que agrega <code>getMatchTier()</code> con 5 tiers). Hacer ambos en el mismo PR
+      para evitar estados intermedios inconsistentes.
+      Tambien relacionado con <strong>M-17</strong> (threshold desincronizacion que se resuelve en el mismo cambio).
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ ALTO ══════════ -->
+<div class="sec-divider"><hr/><div class="sec-divider-lbl">Alto</div><hr/></div>
+
+<!-- A-08 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-high">High</span>
+    <span class="finding-id">A-08</span>
+    <span class="finding-title">openDetalle stale en useCallback + eslint-disable que oculta el problema</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      <code>openDetalle</code> cierra sobre <code>matchByCandidato</code> y
+      <code>navigation</code>. No esta en <code>useCallback</code> y no aparece
+      en las dependencias de <code>renderItem</code>. Cuando <code>navigation</code>
+      cambia (re-mount del container de navegacion), los items ya renderizados
+      usan la version vieja del handler. El <code>eslint-disable</code> suprime
+      el warning de React Hooks en lugar de resolver el problema real.
+    </p>
+
+    <!-- Diagrama de closure -->
+    <div class="closure-diagram">
+      <div class="closure-label">Dependencias de renderItem -- estado actual</div>
+      <div class="closure-zone">
+        <div class="closure-box stable">matchByCandidato</div>
+        <div class="closure-arrow">&check;</div>
+        <div style="font-size:10px;color:var(--c-success);align-self:center;">en deps</div>
+      </div>
+      <div class="closure-zone" style="background:rgba(184,92,92,.04);">
+        <div class="closure-box stale">openDetalle</div>
+        <div class="closure-arrow">&#10006;</div>
+        <div style="font-size:10px;color:var(--c-danger);align-self:center;">NO en deps -- stale closure</div>
+      </div>
+      <div class="closure-zone" style="background:rgba(184,92,92,.04);">
+        <div class="closure-box stale">navigation</div>
+        <div class="closure-arrow">&#10006;</div>
+        <div style="font-size:10px;color:var(--c-danger);align-self:center;">NO en deps (via openDetalle)</div>
+      </div>
+    </div>
+
+    <div class="diff">
+      <span class="diff-file">// CandidatosScreen.tsx -- antes: openDetalle sin memoizar</span>
+      <div class="diff-del">const openDetalle = (cand: Candidato) => {</div>
+      <div class="diff-del">&nbsp;&nbsp;const matchPct = matchByCandidato.get(cand.id) ?? null;</div>
+      <div class="diff-del">&nbsp;&nbsp;navigation.navigate("DetalleCandidato", { ... });</div>
+      <div class="diff-del">}; <span class="diff-comment">// se recrea en cada render</span></div>
+      <br/>
+      <div class="diff-del">const renderItem = useCallback(</div>
+      <div class="diff-del">&nbsp;&nbsp;({ item: cand }) =&gt; (&lt;CandidateCard ... onPress={() =&gt; openDetalle(cand)} /&gt;),</div>
+      <div class="diff-del">&nbsp;&nbsp;// eslint-disable-next-line react-hooks/exhaustive-deps</div>
+      <div class="diff-del">&nbsp;&nbsp;[matchByCandidato], <span class="diff-comment">// openDetalle ausente, lint suprimido</span></div>
+      <div class="diff-del">);</div>
+      <br/>
+      <span class="diff-file">// Despues: openDetalle memoizado, deps completas, sin eslint-disable</span>
+      <div class="diff-add">const openDetalle = useCallback((cand: Candidato) => {</div>
+      <div class="diff-add">&nbsp;&nbsp;const matchPct = matchByCandidato.get(cand.id) ?? null;</div>
+      <div class="diff-add">&nbsp;&nbsp;navigation.navigate("DetalleCandidato", {</div>
+      <div class="diff-add">&nbsp;&nbsp;&nbsp;&nbsp;candidatoId: cand.id, breakdown: null, matchPct, confianza: null,</div>
+      <div class="diff-add">&nbsp;&nbsp;});</div>
+      <div class="diff-add">}, [matchByCandidato, navigation]);</div>
+      <br/>
+      <div class="diff-add">const renderItem = useCallback(</div>
+      <div class="diff-add">&nbsp;&nbsp;({ item: cand }: { item: Candidato }) =&gt; (</div>
+      <div class="diff-add">&nbsp;&nbsp;&nbsp;&nbsp;&lt;CandidateCard ... onPress={() =&gt; openDetalle(cand)} /&gt;</div>
+      <div class="diff-add">&nbsp;&nbsp;),</div>
+      <div class="diff-add">&nbsp;&nbsp;[matchByCandidato, openDetalle], <span class="diff-comment">// deps completas, sin suprimir</span></div>
+      <div class="diff-add">);</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MEDIOS ══════════ -->
+<div class="sec-divider"><hr/><div class="sec-divider-lbl">Medios</div><hr/></div>
+
+<div class="g2">
+
+<!-- M-16 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-med">Med</span>
+    <span class="finding-id">M-16</span>
+    <span class="finding-title">CandidateCard: el porcentaje usa c.primary en lugar del color de afinidad</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      DS-11 Pantalla 4: <em>"% texto &rarr; --color-affinity-N (mismo que barra)."</em>
+      El numero grande siempre es azul primary, sin importar el % de match.
+    </p>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:6px;">
+      <div style="flex:1;min-width:160px;">
+        <div style="font-size:9px;font-weight:800;color:var(--c-danger);text-transform:uppercase;margin-bottom:6px;">Actual -- siempre c.primary</div>
+        <div class="cand-card" style="opacity:.9;">
+          <div class="cand-avatar" style="background:var(--c-border2);color:var(--c-text2);">CA</div>
+          <div class="cand-info">
+            <div class="cand-name">Candidata A</div>
+            <div class="cand-partido">Partido Verde</div>
+          </div>
+          <div class="cand-pct" style="color:#2E5F7E;">87%</div>
+        </div>
+        <div class="cand-card" style="opacity:.9;">
+          <div class="cand-avatar" style="background:var(--c-border2);color:var(--c-text2);">CC</div>
+          <div class="cand-info">
+            <div class="cand-name">Candidato C</div>
+            <div class="cand-partido">Movimiento Norte</div>
+          </div>
+          <div class="cand-pct" style="color:#2E5F7E;">31%</div>
+        </div>
+        <div style="font-size:10px;color:var(--c-danger);margin-top:4px;">
+          87% y 31% muestran el mismo azul -- el color no comunica nada.
+        </div>
+      </div>
+      <div style="font-size:20px;color:var(--c-text3);align-self:center;">&rarr;</div>
+      <div style="flex:1;min-width:160px;">
+        <div style="font-size:9px;font-weight:800;color:var(--c-success);text-transform:uppercase;margin-bottom:6px;">Propuesto -- color de afinidad</div>
+        <div class="cand-card">
+          <div class="cand-avatar" style="background:#3A9E7A;">CA</div>
+          <div class="cand-info">
+            <div class="cand-name">Candidata A</div>
+            <div class="cand-partido">Partido Verde</div>
+          </div>
+          <div class="cand-pct" style="color:#3A9E7A;">87%</div>
+        </div>
+        <div class="cand-card">
+          <div class="cand-avatar" style="background:#D07777;">CC</div>
+          <div class="cand-info">
+            <div class="cand-name">Candidato C</div>
+            <div class="cand-partido">Movimiento Norte</div>
+          </div>
+          <div class="cand-pct" style="color:#D07777;">31%</div>
+        </div>
+        <div style="font-size:10px;color:var(--c-success);margin-top:4px;">
+          El color codifica el nivel de afinidad matematicamente.
+        </div>
+      </div>
+    </div>
+    <div class="diff">
+      <span class="diff-file">// CandidateCard.tsx</span>
+      <div class="diff-del">pct: { fontSize: 22, fontWeight: "700", color: c.primary, ... },</div>
+      <div class="diff-add">// matchColor se pasa como prop derivado de getMatchColor(matchPercent)</div>
+      <div class="diff-add">pct: { fontSize: 22, fontWeight: "700", color: matchColor ?? c.primary, ... },</div>
+    </div>
+  </div>
+</div>
+
+<!-- M-17 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-med">Med</span>
+    <span class="finding-id">M-17</span>
+    <span class="finding-title">MatchTier thresholds desincronizados del service -- se agrava post-TASK-009</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      Un candidato al 71% es clasificado como <code>alto</code> en el service
+      (umbral 75%) pero como <code>high</code> (badge verde) en el componente
+      (umbral 70%). Cuando TASK-009 migre el service a 5 tiers, el componente
+      seguira usando sus propios 3 thresholds desincronizados.
+    </p>
+    <div class="diff">
+      <span class="diff-file">// Hacer ambos cambios en el mismo PR que TASK-009</span>
+      <div class="diff-del">// tierFromPercent en MatchTier.tsx (thresholds propios)</div>
+      <div class="diff-add">// Usar getMatchTier() del service -- fuente unica de verdad</div>
+      <div class="diff-add">import { getMatchTier } from "../../services/matching";</div>
+    </div>
+    <div class="ins ins-b" style="margin:0;font-size:11px;">
+      Este issue se resuelve automaticamente junto con <code>C-04</code>.
+      Documentado por separado para rastrear el callsite especifico.
+    </div>
+  </div>
+</div>
+
+<!-- M-18 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-med">Med</span>
+    <span class="finding-id">M-18</span>
+    <span class="finding-title">normalizar() es privada en el screen -- pertenece a utils/text.ts</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      Funcion pura sin dependencias React ni del store. <code>NoticiasScreen</code>
+      probablemente tiene una implementacion identica inline. Pertenece a
+      <code>utils/text.ts</code> donde puede ser testeada y reutilizada.
+    </p>
+    <div class="loc-diagram">
+      <div class="loc-file wrong">CandidatosScreen.tsx<br/><small>privada, no testeable</small></div>
+      <div class="loc-arrow">&rarr;</div>
+      <div class="loc-file right">utils/text.ts<br/><small>exportada, testeable, reutilizable</small></div>
+    </div>
+    <div class="diff">
+      <span class="diff-file">// utils/text.ts -- nueva funcion exportada</span>
+      <div class="diff-add">/**</div>
+      <div class="diff-add"> * Normaliza un string para busqueda: minusculas + sin acentos.</div>
+      <div class="diff-add"> * "Ramirez" -&gt; "ramirez" | "Bogota" -&gt; "bogota"</div>
+      <div class="diff-add"> */</div>
+      <div class="diff-add">export function normalizeForSearch(s: string): string {</div>
+      <div class="diff-add">&nbsp;&nbsp;return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");</div>
+      <div class="diff-add">}</div>
+    </div>
+  </div>
+</div>
+
+<!-- M-19 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-med">Med</span>
+    <span class="finding-id">M-19</span>
+    <span class="finding-title">limpiarTodo sin useCallback -- prop inestable hacia 2 componentes</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      <code>limpiarTodo</code> se pasa como <code>onAction</code> a
+      <code>EmptyState</code> y como <code>onLimpiar</code> a
+      <code>FilterBottomSheet</code>. Sin <code>useCallback</code>, ambos
+      componentes reciben una referencia nueva en cada render y re-renderizan
+      innecesariamente.
+    </p>
+    <div class="diff">
+      <div class="diff-del">const limpiarTodo = () => {</div>
+      <div class="diff-del">&nbsp;&nbsp;setQuery("");</div>
+      <div class="diff-del">&nbsp;&nbsp;setPartidosSel(new Set());</div>
+      <div class="diff-del">&nbsp;&nbsp;setTipoEleccionSel(null);</div>
+      <div class="diff-del">&nbsp;&nbsp;setRegionSel(null);</div>
+      <div class="diff-del">};</div>
+      <div class="diff-add">const limpiarTodo = useCallback(() => {</div>
+      <div class="diff-add">&nbsp;&nbsp;setQuery("");</div>
+      <div class="diff-add">&nbsp;&nbsp;setPartidosSel(new Set());</div>
+      <div class="diff-add">&nbsp;&nbsp;setTipoEleccionSel(null);</div>
+      <div class="diff-add">&nbsp;&nbsp;setRegionSel(null);</div>
+      <div class="diff-add">}, []); <span class="diff-comment">// state setters de useState son referencias estables</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- M-20 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-med">Med</span>
+    <span class="finding-id">M-20</span>
+    <span class="finding-title">Banner "Haz el cuestionario" usa accent2 -- token de hover, no de callout</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      <code>c.accent2</code> (#D4E4DB) esta definido en DS-04 como
+      <em>"tints suaves para fondos de hover/seleccion."</em> Un banner
+      informativo accionable deberia usar <code>info</code> o <code>primary50</code>
+      para comunicar que hay una accion pendiente importante.
+    </p>
+    <div class="banner-compare">
+      <div class="banner-wrap">
+        <div class="banner-col-label bad">Actual -- accent2 (hover tint)</div>
+        <div class="banner-demo" style="background:#D4E4DB;border-color:#B8D4C4;">
+          <div class="banner-icon" style="background:#2E5F7E;color:#fff;">i</div>
+          <div class="banner-text" style="color:#1a2e24;">Haz el cuestionario para ver tu match con cada candidato</div>
+          <div class="banner-chevron">›</div>
+        </div>
+        <div style="font-size:10px;color:var(--c-danger);margin-top:4px;">
+          Demasiado suave. Se confunde con un fondo decorativo, no con una CTA.
+        </div>
+      </div>
+      <div style="font-size:20px;color:var(--c-text3);align-self:center;">&rarr;</div>
+      <div class="banner-wrap">
+        <div class="banner-col-label ok">Propuesto -- info (accion informativa)</div>
+        <div class="banner-demo" style="background:#EFF6FF;border-color:#93C5FD;">
+          <div class="banner-icon" style="background:#2E5F7E;color:#fff;">i</div>
+          <div class="banner-text" style="color:#1e3a5f;">Haz el cuestionario para ver tu match con cada candidato</div>
+          <div class="banner-chevron">›</div>
+        </div>
+        <div style="font-size:10px;color:var(--c-success);margin-top:4px;">
+          Info azul claro = hay algo que hacer. Contraste y jerarquia correctos.
+        </div>
+      </div>
+    </div>
+    <div class="diff">
+      <div class="diff-del">{ backgroundColor: c.accent2, borderColor: c.border }</div>
+      <div class="diff-add">{ backgroundColor: c.info50, borderColor: c.info }</div>
+    </div>
+  </div>
+</div>
+
+<!-- M-21 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-med">Med</span>
+    <span class="finding-id">M-21</span>
+    <span class="finding-title">filtrosActivosCount calculado dos veces sin useMemo</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      El conteo de filtros activos se calcula directamente en el cuerpo del componente
+      y luego las mismas variables se usan como deps de <code>chipsActivos</code>.
+      Un <code>useMemo</code> centraliza la derivacion y garantiza coherencia.
+    </p>
+    <div class="diff">
+      <div class="diff-del">const filtrosActivosCount =</div>
+      <div class="diff-del">&nbsp;&nbsp;(query.trim() ? 1 : 0) + partidosSel.size + ...</div>
+      <div class="diff-del">const hayFiltroActivo = filtrosActivosCount &gt; 0;</div>
+      <div class="diff-add">const filtrosActivosCount = useMemo(</div>
+      <div class="diff-add">&nbsp;&nbsp;() =&gt; (query.trim() ? 1 : 0) + partidosSel.size</div>
+      <div class="diff-add">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ (tipoEleccionSel !== null ? 1 : 0)</div>
+      <div class="diff-add">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ (regionSel !== null ? 1 : 0),</div>
+      <div class="diff-add">&nbsp;&nbsp;[query, partidosSel, tipoEleccionSel, regionSel],</div>
+      <div class="diff-add">);</div>
+      <div class="diff-add">const hayFiltroActivo = filtrosActivosCount &gt; 0;</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /g2 -->
+
+<!-- ══════════ BAJOS ══════════ -->
+<div class="sec-divider"><hr/><div class="sec-divider-lbl">Bajos</div><hr/></div>
+
+<div class="g2">
+
+<!-- L-07 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-low">Low</span>
+    <span class="finding-id">L-07</span>
+    <span class="finding-title">FlatList sin getItemLayout -- scrollToIndex imposible</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      Sin <code>getItemLayout</code>, React Native no puede calcular posiciones
+      sin renderizar los elementos. Si en el futuro se necesita
+      <code>scrollToIndex</code> (deep link, notificacion, busqueda con
+      auto-scroll a candidato), fallara en silencio. Si la altura de los cards
+      es fija, el fix es trivial.
+    </p>
+    <div class="diff">
+      <span class="diff-file">// Solo si CandidateCard tiene altura fija conocida</span>
+      <div class="diff-add">const CARD_HEIGHT = 80; <span class="diff-comment">// padding(16*2) + content(48) = 80px</span></div>
+      <div class="diff-add">const SEPARATOR_HEIGHT = spacing.sp3; <span class="diff-comment">// itemSeparator</span></div>
+      <div class="diff-add">// En FlatList:</div>
+      <div class="diff-add">getItemLayout={(_, index) =&gt; ({</div>
+      <div class="diff-add">&nbsp;&nbsp;length: CARD_HEIGHT,</div>
+      <div class="diff-add">&nbsp;&nbsp;offset: (CARD_HEIGHT + SEPARATOR_HEIGHT) * index,</div>
+      <div class="diff-add">&nbsp;&nbsp;index,</div>
+      <div class="diff-add">})}</div>
+    </div>
+  </div>
+</div>
+
+<!-- L-08 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-low">Low</span>
+    <span class="finding-id">L-08</span>
+    <span class="finding-title">eslint-disable en array de deps -- sintoma visible de A-08</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      El comentario <code>// eslint-disable-next-line react-hooks/exhaustive-deps</code>
+      en el array de dependencias de <code>renderItem</code> es la pista visible
+      del problema de stale closure documentado en A-08. Resolviendo A-08,
+      este comentario desaparece por si solo — no requiere accion independiente.
+    </p>
+    <div class="diff">
+      <div class="diff-del">&nbsp;&nbsp;// eslint-disable-next-line react-hooks/exhaustive-deps</div>
+      <div class="diff-del">&nbsp;&nbsp;[matchByCandidato],</div>
+      <div class="diff-add">&nbsp;&nbsp;[matchByCandidato, openDetalle], <span class="diff-comment">// deps completas tras fix A-08</span></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /g2 -->
+
+<!-- ══════════ LO QUE ESTA BIEN ══════════ -->
+<div class="sec-divider"><hr/><div class="sec-divider-lbl">Lo que esta bien</div><hr/></div>
+
+<div class="g2">
+  <div class="ins ins-g" style="margin:0;">
+    <strong>FlatList correctamente virtualizada.</strong>
+    <code>initialNumToRender=20</code>, <code>maxToRenderPerBatch=20</code>,
+    <code>removeClippedSubviews</code>, <code>windowSize=10</code> — el fix
+    de UX-003 esta presente y correcto.
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>matchByCandidato como Map useMemo.</strong>
+    Lookup O(1) por ID. Memoizado correctamente con <code>[matches]</code>.
+    Patron eficiente para enriquecer listas.
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>candidatosFiltrados con useMemo completo.</strong>
+    Deps explicitas: query, partidos, tipoEleccion, region, tieneMatch,
+    matchByCandidato. Sin dependencias faltantes ni sobrantes.
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>Pluralizacion correcta en contadorLabel.</strong>
+    <code>candidato${total === 1 ? "" : "s"}</code> — contrasta con el
+    antipatron <code>(s)</code> de ResultadosScreen (UX-023).
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>CandidateCard con accessibilityLabel completo.</strong>
+    <code>"nombre, partido, match X%"</code> o <code>"nombre, partido"</code>
+    segun si hay match disponible. Correcto para VoiceOver.
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>keyExtractor memoizado con useCallback vacío.</strong>
+    Referencia estable — FlatList no necesita re-calcular keys.
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>Sort condicional: match desc si hay cuestionario, alfabetico si no.</strong>
+    Dentro de <code>candidatosFiltrados</code> useMemo.
+    Logica de presentacion correctamente separada de la logica de fetch.
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>Chips activos generados con useMemo.</strong>
+    Incluye boton de eliminar individual por filtro. UX de filtros
+    correctamente implementada con estado inmutable (<code>ReadonlySet</code>).
+  </div>
+</div>
+
+<!-- ══════════ TABLA RESUMEN ══════════ -->
+<div class="sec-divider"><hr/><div class="sec-divider-lbl">Tabla resumen</div><hr/></div>
+
+<div class="card" style="padding:0;overflow:hidden;">
+<table class="sum-table">
+  <thead>
+    <tr>
+      <th>ID</th><th>Sev</th><th>Categoria</th><th>Titulo</th><th>Archivo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="mono">C-04</td>
+      <td><span class="sev sev-crit">Critical</span></td>
+      <td>DS Tokens</td>
+      <td>MatchTier usa 3 tiers incorrectos y azul para tier medio</td>
+      <td class="mono">molecules/MatchTier.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">A-08</td>
+      <td><span class="sev sev-high">High</span></td>
+      <td>React / Bug</td>
+      <td>openDetalle stale en useCallback + eslint-disable que lo oculta</td>
+      <td class="mono">CandidatosScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">M-16</td>
+      <td><span class="sev sev-med">Med</span></td>
+      <td>DS Tokens</td>
+      <td>CandidateCard pct usa c.primary -- DS-11 requiere color de afinidad</td>
+      <td class="mono">organisms/CandidateCard.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">M-17</td>
+      <td><span class="sev sev-med">Med</span></td>
+      <td>DRY</td>
+      <td>MatchTier thresholds desincronizados del service</td>
+      <td class="mono">molecules/MatchTier.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">M-18</td>
+      <td><span class="sev sev-med">Med</span></td>
+      <td>DRY</td>
+      <td>normalizar() privada en el screen -- pertenece a utils/text.ts</td>
+      <td class="mono">CandidatosScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">M-19</td>
+      <td><span class="sev sev-med">Med</span></td>
+      <td>Perf</td>
+      <td>limpiarTodo sin useCallback -- prop inestable hacia 2 componentes</td>
+      <td class="mono">CandidatosScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">M-20</td>
+      <td><span class="sev sev-med">Med</span></td>
+      <td>DS Tokens</td>
+      <td>Banner usa accent2 (hover token) -- deberia ser info (callout)</td>
+      <td class="mono">CandidatosScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">M-21</td>
+      <td><span class="sev sev-med">Med</span></td>
+      <td>Perf</td>
+      <td>filtrosActivosCount sin useMemo -- duplicado implicito</td>
+      <td class="mono">CandidatosScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">L-07</td>
+      <td><span class="sev sev-low">Low</span></td>
+      <td>Perf</td>
+      <td>FlatList sin getItemLayout -- scrollToIndex imposible</td>
+      <td class="mono">CandidatosScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">L-08</td>
+      <td><span class="sev sev-low">Low</span></td>
+      <td>Code smell</td>
+      <td>eslint-disable en deps de useCallback -- sintoma de A-08</td>
+      <td class="mono">CandidatosScreen.tsx</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div style="height:40px;"></div>
+</div></div>
+
+<script>
+const btn = document.getElementById('theme-btn');
+btn.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  btn.textContent = document.body.classList.contains('dark') ? 'Light mode' : 'Dark mode';
+});
+</script>
+</body>
+</html>

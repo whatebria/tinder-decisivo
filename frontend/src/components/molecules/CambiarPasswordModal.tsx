@@ -113,6 +113,12 @@ export function CambiarPasswordModal({
           autoCorrect={false}
           autoComplete="new-password"
           textContentType="newPassword"
+          error={
+            // UX-044: feedback de longitud insuficiente antes de intentar confirmar.
+            next.length > 0 && next.length < PASSWORD_MIN_LENGTH
+              ? PASSWORD_MIN_LENGTH_MSG
+              : undefined
+          }
         />
         <FormField
           label="Confirmar nueva contraseña"

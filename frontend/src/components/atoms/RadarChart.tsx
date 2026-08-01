@@ -21,6 +21,7 @@ import Svg, {
 } from "react-native-svg";
 
 import { useThemeColors } from "../../theme/useTheme";
+import { EJE_LABELS } from "../../domain/dimensiones";
 
 export interface RadarChartProps {
   data: Record<string, number>;
@@ -41,17 +42,6 @@ interface Point {
   y: number;
 }
 
-const LABEL_MAP: Record<string, string> = {
-  ECONOMIA: "Economia",
-  SOCIEDAD: "Sociedad",
-  AMBIENTE: "Ambiente",
-  SEGURIDAD: "Seguridad",
-  DDHH: "DDHH",
-  INTERNACIONAL: "Internac.",
-  INSTITUCIONAL: "Institucional",
-  OTRO: "Otro",
-};
-
 /**
  * UX-038: genera un accessibilityLabel textual para lectores de pantalla.
  * WCAG 1.1.1 Nivel A: todo contenido no-texto necesita alternativa textual.
@@ -60,7 +50,7 @@ const LABEL_MAP: Record<string, string> = {
  */
 function buildA11yLabel(data: Record<string, number>): string {
   const ejes = Object.entries(data)
-    .map(([k, v]) => `${LABEL_MAP[k] ?? k}: ${Math.round(v)}%`)
+    .map(([k, v]) => `${EJE_LABELS[k] ?? k}: ${Math.round(v)}%`)
     .join(", ");
   return `Grafico de afinidad por eje tematico. ${ejes}.`;
 }
@@ -141,7 +131,7 @@ export function RadarChart({
     ? ejes.map((eje, i) => {
         const angle = startAngle + i * step;
         const labelPos = polarToCartesian(cx, cy, radius + 18, angle);
-        const label = LABEL_MAP[eje] ?? eje;
+        const label = EJE_LABELS[eje] ?? eje;
         return (
           <SvgText
             key={i}

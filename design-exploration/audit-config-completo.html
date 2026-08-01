@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pantalla 6 -- Configuracion -- Analisis Completo 13 Fases</title>
+<link rel="stylesheet" href="ds-shared.css"/>
+<style>
+/* ── hero ── */
+.audit-hero{background:var(--c-hero);padding:28px 36px 24px;color:#fff;margin:-40px -36px 32px;}
+.audit-hero h1{font-size:22px;font-weight:900;margin-bottom:4px;}
+.audit-hero p{font-size:12px;opacity:.65;max-width:700px;line-height:1.7;}
+.audit-hero .meta{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;}
+.audit-hero .meta-item{font-size:11px;opacity:.75;}
+
+/* ── fases ── */
+.fase-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;
+  border-radius:6px;font-size:10px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.5px;background:var(--c-primary);color:#fff;margin-bottom:8px;}
+.fase-title{font-size:20px;font-weight:900;color:var(--c-text);margin-bottom:6px;}
+.fase-sub{font-size:12px;color:var(--c-text2);line-height:1.7;margin-bottom:16px;}
+
+/* ── dividers ── */
+.sec-divider{display:flex;align-items:center;gap:12px;margin:32px 0 20px;}
+.sec-divider hr{flex:1;border:none;border-top:1px solid var(--c-border);}
+.sec-divider-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;
+  color:var(--c-text3);white-space:nowrap;}
+
+/* ── sev ── */
+.sev{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;
+  font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.sev-crit{background:#FEE2E2;color:#991B1B;}
+.sev-high{background:#FEF3C7;color:#92400E;}
+.sev-med{background:#EFF6FF;color:#1E40AF;}
+.sev-low{background:var(--c-surface2);color:var(--c-text2);}
+.dark .sev-crit{background:rgba(184,92,92,.2);color:#F9ABAB;}
+.dark .sev-high{background:rgba(200,155,92,.2);color:#E5C07B;}
+.dark .sev-med{background:rgba(92,138,184,.2);color:#93C5FD;}
+
+/* ── component audit ── */
+.comp-grid{display:flex;flex-direction:column;gap:12px;}
+.comp-card{border:1.5px solid var(--c-border);border-radius:12px;overflow:hidden;}
+.comp-head{display:flex;align-items:center;gap:10px;padding:10px 14px;
+  background:var(--c-surface);border-bottom:1px solid var(--c-border);}
+.comp-name{font-family:monospace;font-size:12px;font-weight:700;color:var(--c-primary);}
+.comp-path{font-size:9px;color:var(--c-text3);font-family:monospace;}
+.comp-body{padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  background:var(--c-bg);}
+.comp-col-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;
+  color:var(--c-text3);margin-bottom:4px;}
+.comp-item{font-size:11px;color:var(--c-text2);line-height:1.6;padding-left:10px;
+  border-left:2px solid var(--c-border);}
+.comp-item.ok{border-color:var(--c-success);}
+.comp-item.warn{border-color:var(--c-warning);}
+.comp-item.err{border-color:var(--c-danger);}
+
+/* ── phone mockup ── */
+.phone-frame{width:240px;border-radius:32px;border:3px solid var(--c-border2);
+  background:var(--c-bg);overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.12);flex-shrink:0;}
+.phone-screen{padding:0;overflow:hidden;}
+.phone-status{height:36px;background:var(--c-bg);display:flex;align-items:center;
+  justify-content:center;font-size:9px;color:var(--c-text3);}
+
+/* ── settings mockup ── */
+.cfg-topbar{padding:12px 16px 8px;border-bottom:1px solid var(--c-border);}
+.cfg-topbar-title{font-size:18px;font-weight:900;color:var(--c-text);}
+.cfg-hero-card{margin:12px;border-radius:14px;padding:16px;
+  background:var(--c-card);border:1.5px solid var(--c-border);
+  display:flex;flex-direction:column;align-items:center;gap:6px;}
+.cfg-hero-avatar{width:56px;height:56px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:700;color:#fff;background:var(--c-primary);}
+.cfg-hero-name{font-size:16px;font-weight:700;color:var(--c-text);}
+.cfg-hero-email{font-size:11px;color:var(--c-text2);}
+.cfg-stats{display:flex;gap:6px;width:100%;margin-top:4px;}
+.cfg-stat{flex:1;background:var(--c-surface);border-radius:8px;padding:6px;
+  text-align:center;border:1px solid var(--c-border2);}
+.cfg-stat-val{font-size:16px;font-weight:800;color:var(--c-primary);}
+.cfg-stat-lbl{font-size:8px;color:var(--c-text3);text-transform:uppercase;letter-spacing:.3px;}
+.cfg-cta{width:100%;text-align:center;padding:8px;border-radius:8px;
+  background:transparent;border:1.5px solid var(--c-primary);
+  color:var(--c-primary);font-size:12px;font-weight:700;margin-top:4px;}
+
+.cfg-section{padding:0 12px;margin-bottom:4px;}
+.cfg-section-label{font-size:10px;font-weight:700;color:var(--c-text3);
+  text-transform:uppercase;letter-spacing:.5px;padding:8px 4px 4px;}
+.cfg-row{background:var(--c-card);border:1px solid var(--c-border);
+  border-radius:10px;padding:10px 12px;display:flex;align-items:center;
+  justify-content:space-between;margin-bottom:4px;}
+.cfg-row-text{display:flex;flex-direction:column;gap:2px;flex:1;}
+.cfg-row-label{font-size:12px;font-weight:600;color:var(--c-text);}
+.cfg-row-sub{font-size:9px;color:var(--c-text2);}
+.cfg-chevron{font-size:14px;color:var(--c-text3);}
+.cfg-toggle{width:40px;height:22px;border-radius:11px;background:var(--c-secondary);
+  position:relative;flex-shrink:0;}
+.cfg-toggle-dot{width:18px;height:18px;border-radius:50%;background:#fff;
+  position:absolute;top:2px;right:2px;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.cfg-toggle-off{background:var(--c-border2);}
+.cfg-toggle-off .cfg-toggle-dot{right:auto;left:2px;}
+.cfg-tabs{display:flex;gap:2px;padding:4px;background:var(--c-surface2);border-radius:10px;}
+.cfg-tab{flex:1;text-align:center;padding:5px 0;border-radius:7px;font-size:9px;
+  font-weight:600;color:var(--c-text2);}
+.cfg-tab.active{background:var(--c-card);color:var(--c-primary);
+  box-shadow:0 1px 4px rgba(0,0,0,.1);}
+.cfg-danger-zone{margin:8px 12px;border-radius:12px;overflow:hidden;
+  border:1.5px solid var(--c-danger);background:var(--c-danger-bg);}
+.cfg-danger-head{padding:8px 12px;font-size:9px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.5px;color:var(--c-danger);
+  border-bottom:1px solid var(--c-danger);}
+.cfg-danger-row{padding:10px 12px;display:flex;align-items:center;
+  justify-content:space-between;border-bottom:1px solid var(--c-danger);}
+.cfg-danger-row:last-child{border-bottom:none;}
+.cfg-danger-label{font-size:12px;font-weight:600;color:var(--c-danger);}
+.cfg-danger-sub{font-size:9px;color:var(--c-danger);opacity:.7;}
+
+/* ── diff table ── */
+.diff-table{width:100%;border-collapse:collapse;}
+.diff-table th{background:var(--c-surface2);font-size:9px;text-transform:uppercase;
+  letter-spacing:.4px;color:var(--c-text2);padding:6px 10px;text-align:left;
+  border-bottom:1px solid var(--c-border);}
+.diff-table td{padding:8px 10px;font-size:11px;vertical-align:top;
+  border-bottom:1px solid var(--c-border2);}
+.diff-table tr:last-child td{border-bottom:none;}
+.diff-del{color:var(--c-danger);}
+.diff-add{color:var(--c-success);}
+
+/* ── benchmark cards ── */
+.bench-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
+.bench-card{border:1.5px solid var(--c-border);border-radius:12px;padding:12px;
+  background:var(--c-surface);}
+.bench-app{font-size:11px;font-weight:800;color:var(--c-primary);margin-bottom:4px;}
+.bench-pattern{font-size:10px;font-weight:700;color:var(--c-text);margin-bottom:4px;}
+.bench-desc{font-size:10px;color:var(--c-text2);line-height:1.6;}
+.bench-adapt{font-size:10px;color:var(--c-success);margin-top:6px;font-weight:600;}
+
+/* ── code block ── */
+.code-block{background:#0F1E2A;border-radius:10px;padding:14px;font-family:monospace;
+  font-size:11px;line-height:1.8;overflow-x:auto;margin:0;}
+.code-comment{color:rgba(168,196,206,.4);}
+.code-key{color:#79B8FF;}
+.code-str{color:#FFAB70;}
+.code-comp{color:#B392F0;}
+.code-fn{color:#85E89D;}
+.code-num{color:#F8C555;}
+
+/* ── impact ── */
+.impact-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
+.impact-card{border-radius:10px;padding:12px;border:1.5px solid var(--c-border);}
+.impact-metric{font-size:11px;font-weight:700;color:var(--c-text);margin-bottom:4px;}
+.impact-before{font-size:10px;color:var(--c-danger);margin-bottom:2px;}
+.impact-after{font-size:10px;color:var(--c-success);}
+
+/* ── wireframe ── */
+.wireframe{font-family:monospace;font-size:11px;line-height:1.9;color:var(--c-text2);
+  background:var(--c-surface);border-radius:10px;padding:16px;border:1.5px solid var(--c-border);}
+.wireframe-section{color:var(--c-text);font-weight:700;}
+.wireframe-item{padding-left:12px;}
+.wireframe-sep{color:var(--c-text3);}
+
+/* ── problems ── */
+.problem{border-radius:10px;padding:12px 14px;margin-bottom:8px;border-left:3px solid;}
+.problem.crit{background:var(--c-danger-bg);border-color:var(--c-danger);}
+.problem.high{background:var(--c-warning-bg);border-color:var(--c-warning);}
+.problem.med{background:var(--c-info-bg);border-color:var(--c-info);}
+.problem.low{background:var(--c-surface2);border-color:var(--c-border);}
+.problem-title{font-size:12px;font-weight:700;color:var(--c-text);margin-bottom:3px;}
+.problem-desc{font-size:11px;color:var(--c-text2);line-height:1.6;}
+.problem-evidence{font-size:10px;font-family:monospace;color:var(--c-text3);margin-top:4px;}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-logo">VotoAfin DS</div>
+  <div class="sidebar-ver">v1.0 · Agosto 2026</div>
+  <hr/>
+  <div class="sidebar-label">Analisis Completo</div>
+  <a href="#fase0">F0 · Reverse Engineering</a>
+  <a href="#fase1">F1 · Componentes</a>
+  <a href="#fase2">F2 · Auditoria UX/UI</a>
+  <a href="#fase3">F3 · Benchmarking</a>
+  <a href="#fase4">F4 · Problemas</a>
+  <a href="#fase5">F5 · Propuesta</a>
+  <a href="#fase6">F6 · Arquitectura</a>
+  <a href="#fase7">F7 · Sistema Visual</a>
+  <a href="#fase8">F8 · Wireframe</a>
+  <a href="#fase9">F9 · Mockup</a>
+  <a href="#fase10">F10 · Codigo</a>
+  <a href="#fase11">F11 · Justificacion</a>
+  <a href="#fase12">F12 · Impacto</a>
+  <a href="#fase13">F13 · Diff</a>
+  <hr/>
+  <div class="sidebar-label">Navegacion</div>
+  <a href="audit-comparar.html">← Pantalla 5</a>
+  <div class="sidebar-bottom">
+    <button class="theme-btn" id="theme-btn">Dark mode</button>
+  </div>
+</nav>
+
+<div class="main"><div class="content">
+
+<div class="audit-hero">
+  <div style="opacity:.5;font-size:10px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">
+    Pantalla 6 / 11 · Analisis completo · Principal Product Designer + UX + DS Architect
+  </div>
+  <h1>ConfiguracionScreen -- 13 Fases</h1>
+  <p>Analisis real basado en el codigo fuente. ConfiguracionScreen tiene 3 problemas criticos de arquitectura de informacion: logica de perfil fragmentada entre dos pantallas, identidad derivada del email en lugar de datos reales de la API, y ausencia de zona de peligro visual para acciones destructivas.</p>
+  <div class="meta">
+    <div class="meta-item">ConfiguracionScreen.tsx · 9 KB</div>
+    <div class="meta-item">PerfilScreen.tsx · 9.9 KB</div>
+    <div class="meta-item">NavRow · ThemeToggle · SectionTitle · Avatar</div>
+    <div class="meta-item">useAuthStore · useCoachMarksStore · usePerfil</div>
+  </div>
+</div>
+
+<!-- ══════════ FASE 0 ══════════ -->
+<div id="fase0" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 0 · Reverse Engineering</div><hr/></div>
+
+<div class="fase-title">Mapa tecnico completo</div>
+<div class="fase-sub">Arquitectura real antes de proponer cualquier cambio.</div>
+
+<div class="g2" style="margin-bottom:16px;">
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Archivos involucrados</div>
+    <div style="font-size:11px;line-height:1.9;font-family:monospace;color:var(--c-text2);">
+      screens/ConfiguracionScreen.tsx<br/>
+      screens/PerfilScreen.tsx<br/>
+      components/molecules/NavRow.tsx<br/>
+      components/molecules/SectionTitle.tsx<br/>
+      components/atoms/ThemeToggle.tsx<br/>
+      components/atoms/Avatar.tsx<br/>
+      components/atoms/Button.tsx<br/>
+      store/auth.ts<br/>
+      store/coachMarks.ts<br/>
+      store/onboarding.ts<br/>
+      store/theme.ts<br/>
+      api/hooks.ts (usePerfil)<br/>
+      api/endpoints.ts (logoutApi)
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Stores y estado global</div>
+    <div style="font-size:11px;line-height:1.9;color:var(--c-text2);">
+      <strong>useAuthStore:</strong> isGuest, logout, exitGuestMode<br/>
+      <strong>useCoachMarksStore:</strong> resetAll()<br/>
+      <strong>useOnboardingStore:</strong> reset()<br/>
+      <strong>usePerfil():</strong> email (React Query cache)<br/>
+      <strong>useThemeStore:</strong> mode, setMode (via ThemeToggle)<br/>
+      <br/>
+      <strong>Rutas que parten desde aqui:</strong><br/>
+      Perfil → Configuracion → Perfil (editar)<br/>
+      Configuracion → MisGuardados<br/>
+      Configuracion → MisRespuestas<br/>
+      Configuracion → GestionElecciones<br/>
+      Configuracion → OnboardingPreview (dev)<br/>
+      Configuracion → DesignSystem (dev)
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px;">
+  <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:10px;">Arbol de componentes renderizados</div>
+  <div style="font-family:monospace;font-size:11px;line-height:2;color:var(--c-text2);">
+    AppShell [active="config"]<br/>
+    &nbsp;&nbsp;ScrollView<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;HomeTopBar [brand="Configuracion"]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// DS-11 P8: no especifica header primary — correcto usar HomeTopBar neutro<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;[if !isGuest]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SectionTitle [title="Cuenta"]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;View [accountCard]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Avatar [size="lg", initials=initials]  ← initials derivado de email.split("@")[0]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Text [shortName]  ← email.split("@")[0] — NO el nombre real<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Text [email]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Button [variant="secondary"] → navigate("Perfil")<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;[if !isGuest]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SectionTitle [title="Mis datos"]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NavRow → MisGuardados<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NavRow → MisRespuestas<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;SectionTitle [title="Elecciones"]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;NavRow → GestionElecciones<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;SectionTitle [title="Apariencia"]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;ThemeToggle  ← TAMBIEN aparece en PerfilScreen (DRY violation)<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;SectionTitle [title="Ayuda"]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;NavRow [label="Ver tours de nuevo"] → handleReactivarTours()<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;[if __DEV__]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SectionTitle [title="Debug"]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NavRow x4 → [OnboardingPreview, Onboarding reset, DesignSystem, Django Admin]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;[if isGuest]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SectionTitle [title="Modo invitado"]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NavRow → exitGuestMode()<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Link [color=c.danger] → exitGuestMode()<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;[if !isGuest]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Button [variant="secondary"] → handleLogout()
+  </div>
+</div>
+
+<div class="g2">
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Flujo del usuario</div>
+    <div style="font-size:11px;line-height:1.8;color:var(--c-text2);">
+      <strong>Punto de entrada:</strong> Tab "Config" en el AppShell<br/>
+      <strong>Acciones principales:</strong><br/>
+      1. Editar perfil (→ PerfilScreen)<br/>
+      2. Ver guardados / respuestas (→ sub-screens)<br/>
+      3. Cambiar apariencia (inline ThemeToggle)<br/>
+      4. Cerrar sesion (bottom Button)<br/>
+      <br/>
+      <strong>Puntos de abandono detectados:</strong><br/>
+      - "Editar perfil" lleva a otro screen con ThemeToggle duplicado<br/>
+      - La opcion "Cerrar sesion" esta al fondo sin zona visual de peligro<br/>
+      - No hay acceso rapido a cambiar contrasena desde aqui<br/>
+      - El shortName (parte del email) no es el nombre real del usuario
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Objetivo funcional</div>
+    <div style="font-size:11px;line-height:1.8;color:var(--c-text2);">
+      <strong>Que resuelve:</strong> hub central de configuracion y perfil del usuario<br/>
+      <strong>Tarea principal:</strong> personalizar la experiencia y gestionar la cuenta<br/>
+      <strong>KPI impactado:</strong> retencion y confianza — un settings bien disenado reduce churning<br/>
+      <strong>Conversion:</strong> en modo invitado, convertir a usuario registrado<br/>
+      <br/>
+      <strong>Tension actual:</strong> la logica de perfil esta dividida entre
+      ConfiguracionScreen y PerfilScreen, obligando al usuario a navegar a
+      una segunda pantalla para tareas que deberian estar aqui
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FASE 1 ══════════ -->
+<div id="fase1" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 1 · Auditoria de Componentes Frontend</div><hr/></div>
+
+<div class="comp-grid">
+
+  <div class="comp-card">
+    <div class="comp-head">
+      <div>
+        <div class="comp-name">NavRow</div>
+        <div class="comp-path">components/molecules/NavRow.tsx</div>
+      </div>
+      <span class="sev sev-low" style="margin-left:auto;">Solido</span>
+    </div>
+    <div class="comp-body">
+      <div>
+        <div class="comp-col-label">Fortalezas</div>
+        <div class="comp-item ok">useBlurringPress para WCAG 2.4.3</div>
+        <div class="comp-item ok">accessibilityRole="button" correcto</div>
+        <div class="comp-item ok">variant="danger" con color semantico</div>
+        <div class="comp-item ok">Tokens del DS en todo el componente</div>
+      </div>
+      <div>
+        <div class="comp-col-label">Debilidades</div>
+        <div class="comp-item warn">No tiene slot para icono a la izquierda</div>
+        <div class="comp-item warn">Sin variante "info" para filas destacadas</div>
+        <div class="comp-item err">Chevron siempre visible — acciones inline (ThemeToggle) no deberan usarlo</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="comp-card">
+    <div class="comp-head">
+      <div>
+        <div class="comp-name">ThemeToggle</div>
+        <div class="comp-path">components/atoms/ThemeToggle.tsx</div>
+      </div>
+      <span class="sev sev-high" style="margin-left:auto;">DRY issue</span>
+    </div>
+    <div class="comp-body">
+      <div>
+        <div class="comp-col-label">Fortalezas</div>
+        <div class="comp-item ok">Wrapper limpio sobre Tabs</div>
+        <div class="comp-item ok">Persiste via useThemeStore</div>
+        <div class="comp-item ok">Zero hardcodes</div>
+      </div>
+      <div>
+        <div class="comp-col-label">Problemas</div>
+        <div class="comp-item err">Aparece en ConfiguracionScreen, PerfilScreen Y LoginScreen — 3 lugares distintos</div>
+        <div class="comp-item err">El Tabs activo usa c.primary en lugar de c.secondary (DS-11 P8: toggle activo = brand-secondary)</div>
+        <div class="comp-item warn">No tiene label visible — el usuario no sabe que seccion es "Apariencia"</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="comp-card">
+    <div class="comp-head">
+      <div>
+        <div class="comp-name">Avatar (accountCard)</div>
+        <div class="comp-path">components/atoms/Avatar.tsx — usado en ConfiguracionScreen</div>
+      </div>
+      <span class="sev sev-crit" style="margin-left:auto;">Identidad incorrecta</span>
+    </div>
+    <div class="comp-body">
+      <div>
+        <div class="comp-col-label">Problema critico</div>
+        <div class="comp-item err">Las iniciales se derivan de email.split("@")[0] — "juan.garcia" → "JU"</div>
+        <div class="comp-item err">El shortName muestra "juan.garcia" en lugar del nombre real del usuario</div>
+        <div class="comp-item err">La API /perfil/ devuelve username real — se usa el email para derivar el nombre</div>
+      </div>
+      <div>
+        <div class="comp-col-label">Lo que deberia usar</div>
+        <div class="comp-item ok">perfilQ.data?.username como nombre de display</div>
+        <div class="comp-item ok">La funcion iniciales() de utils/candidato.ts adaptada para CandidatoLike</div>
+        <div class="comp-item ok">Email mostrado como dato secundario, no como fuente del nombre</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="comp-card">
+    <div class="comp-head">
+      <div>
+        <div class="comp-name">SectionTitle</div>
+        <div class="comp-path">components/molecules/SectionTitle.tsx</div>
+      </div>
+      <span class="sev sev-low" style="margin-left:auto;">Correcto</span>
+    </div>
+    <div class="comp-body">
+      <div>
+        <div class="comp-col-label">Fortalezas</div>
+        <div class="comp-item ok">accessibilityRole="header" correcto</div>
+        <div class="comp-item ok">Soporte h2/h3 con props tipadas</div>
+        <div class="comp-item ok">actionLabel opcional para "Ver todos ›"</div>
+      </div>
+      <div>
+        <div class="comp-col-label">Debilidades</div>
+        <div class="comp-item warn">Sin padding superior — las secciones se ven amontonadas visualmente</div>
+        <div class="comp-item warn">No tiene variant="danger" para titulo de zona destructiva</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="comp-card">
+    <div class="comp-head">
+      <div>
+        <div class="comp-name">Button [variant=secondary] — Cerrar sesion</div>
+        <div class="comp-path">ConfiguracionScreen.tsx linea ~255</div>
+      </div>
+      <span class="sev sev-high" style="margin-left:auto;">Semantica incorrecta</span>
+    </div>
+    <div class="comp-body">
+      <div>
+        <div class="comp-col-label">Problema</div>
+        <div class="comp-item err">Cerrar sesion usa variant="secondary" (outline azul) — es una accion de salida, no secundaria</div>
+        <div class="comp-item err">DS-11 P8: "Boton destructivo → --color-danger". Cerrar sesion no destruye datos pero es una accion de salida que deberia usar danger o al menos neutral</div>
+        <div class="comp-item err">Sin separacion visual de la zona de peligro (fondo danger-bg)</div>
+      </div>
+      <div>
+        <div class="comp-col-label">Consecuencia UX</div>
+        <div class="comp-item warn">El boton de logout se ve igual que "Editar perfil" y "Ver guardados" — sin jerarquia semantica</div>
+        <div class="comp-item warn">No hay zona visual que agrupe las acciones de alto riesgo</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════ FASE 2 ══════════ -->
+<div id="fase2" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 2 · Auditoria UX / UI profunda</div><hr/></div>
+
+<div class="g2">
+  <div>
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:10px;">UX</div>
+
+    <div class="ins ins-a" style="margin-bottom:8px;">
+      <strong>Arquitectura de informacion rota:</strong> "Editar perfil" lleva a
+      PerfilScreen que tiene ThemeToggle, cambiar contrasena, cerrar sesion, y estadisticas
+      de actividad. Son todos settings que deberan estar en ConfiguracionScreen.
+      El usuario tiene que navegar a una sub-pantalla para encontrar settings que
+      espera en el hub principal.
+    </div>
+
+    <div class="ins ins-a" style="margin-bottom:8px;">
+      <strong>Identidad no reconocible:</strong> el accountCard muestra "juan.garcia"
+      derivado del email. El usuario no se reconoce en ese nombre. La API ya tiene
+      el username real disponible en <code>perfilQ.data?.username</code>.
+    </div>
+
+    <div class="ins ins-b" style="margin-bottom:8px;">
+      <strong>Sin estadisticas de actividad:</strong> el usuario no sabe cuanto ha
+      contribuido a la app. Respuestas, favoritos y descartados existen en la API
+      (<code>perfil.contadores</code>) y estan en PerfilScreen pero no en el hub
+      principal de configuracion.
+    </div>
+
+    <div class="ins ins-b" style="margin-bottom:8px;">
+      <strong>Carga cognitiva del modo invitado:</strong> hay dos CTAs para salir del
+      modo invitado ("Crear una cuenta" y "Salir del modo invitado") que hacen
+      exactamente lo mismo (<code>exitGuestMode()</code>). Duplicacion sin diferenciacion.
+    </div>
+  </div>
+
+  <div>
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:10px;">UI / Visual</div>
+
+    <div class="ins ins-a" style="margin-bottom:8px;">
+      <strong>Sin zona de peligro visual:</strong> DS-11 P8 especifica
+      <code>--color-danger-bg</code> para enmarcar la zona de acciones destructivas.
+      El logout y eliminar cuenta no tienen separacion visual del resto de settings.
+    </div>
+
+    <div class="ins ins-b" style="margin-bottom:8px;">
+      <strong>Todas las secciones tienen el mismo peso visual:</strong> "Cuenta",
+      "Mis datos", "Elecciones", "Apariencia" y "Debug" se ven identicas.
+      No hay jerarquia visual entre secciones primarias y secundarias.
+    </div>
+
+    <div class="ins ins-b" style="margin-bottom:8px;">
+      <strong>Sin iconos en NavRows:</strong> Spotify, Apple Settings, Linear y cualquier
+      settings screen moderno usa iconos para scanability. Las NavRows actuales son
+      solo texto — el usuario tiene que leer cada item para encontrar lo que busca.
+    </div>
+
+    <div class="ins ins-r" style="margin-bottom:8px;">
+      <strong>Mobile first:</strong> el accountCard centra todo pero el tap target
+      del "Editar perfil" button es correcto (full-width). El ThemeToggle Tabs tiene
+      tap targets de ~36px — bajo el minimo WCAG 2.5.5 de 44px.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FASE 3 ══════════ -->
+<div id="fase3" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 3 · Benchmarking</div><hr/></div>
+
+<div class="bench-grid">
+  <div class="bench-card">
+    <div class="bench-app">Apple Settings</div>
+    <div class="bench-pattern">Identity header + grouped sections</div>
+    <div class="bench-desc">Avatar grande con nombre real. Secciones agrupadas con dividers y fondo diferenciado. La cuenta del usuario esta arriba del todo.</div>
+    <div class="bench-adapt">Adaptacion: accountCard hero con username real + stats inline. Secciones con fondo separado.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Spotify</div>
+    <div class="bench-pattern">Stats en el header del perfil</div>
+    <div class="bench-desc">Muestra seguidores y seguidos directamente en el perfil. El usuario ve su actividad sin navegar a otro lugar.</div>
+    <div class="bench-adapt">Adaptacion: mostrar respuestas/favoritos/descartados en el accountCard hero, no en PerfilScreen separado.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Duolingo</div>
+    <div class="bench-pattern">Danger zone visual separada</div>
+    <div class="bench-desc">Las acciones destructivas (eliminar cuenta) estan en una zona visualmente separada, con color de advertencia y confirmacion extra.</div>
+    <div class="bench-adapt">Adaptacion: zona danger con fondo --color-danger-bg, borde danger, seccion al final del scroll.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Linear</div>
+    <div class="bench-pattern">Settings con iconos y shortcuts</div>
+    <div class="bench-desc">Cada opcion de settings tiene un icono que permite scanear sin leer. Keyboard shortcuts visibles.</div>
+    <div class="bench-adapt">Adaptacion: agregar iconLeading a NavRow como prop opcional. No cambiar el componente, extenderlo.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Airbnb</div>
+    <div class="bench-pattern">Profile completion progress</div>
+    <div class="bench-desc">Indica al usuario cuanto del perfil tiene completo. Genera motivacion para completar datos.</div>
+    <div class="bench-adapt">Adaptacion: si el usuario no tiene comuna/ubicacion, mostrar un hint en el accountCard.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Headspace</div>
+    <div class="bench-pattern">Tema claro/oscuro con previews</div>
+    <div class="bench-desc">El toggle de tema muestra una preview visual pequena del modo. El usuario entiende el cambio antes de activarlo.</div>
+    <div class="bench-adapt">Riesgo: aumenta complejidad del ThemeToggle. Diferir a sprint de pulido visual.</div>
+  </div>
+</div>
+
+<!-- ══════════ FASE 4 ══════════ -->
+<div id="fase4" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 4 · Problemas Detectados</div><hr/></div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-danger);margin-bottom:6px;">Critico</div>
+<div class="problem crit">
+  <div class="problem-title">P-C01 · Identidad derivada del email, no del usuario real</div>
+  <div class="problem-desc">El accountCard muestra <code>email.split("@")[0]</code> como nombre. Un usuario con email "juan.garcia.2001@gmail.com" ve "juan.garcia.2001" como su identidad en la app. <code>perfilQ.data?.username</code> ya esta disponible y es el dato correcto.</div>
+  <div class="problem-evidence">ConfiguracionScreen.tsx ~L105: const shortName = email ? email.split("@")[0] : "Mi cuenta";</div>
+</div>
+<div class="problem crit">
+  <div class="problem-title">P-C02 · Arquitectura de informacion fragmentada: perfil y settings en dos pantallas</div>
+  <div class="problem-desc">PerfilScreen tiene ThemeToggle, cambiar contrasena, cerrar sesion, estadisticas y ubicacion. ConfiguracionScreen tambien tiene ThemeToggle y cerrar sesion. El usuario tiene dos lugares donde buscar los mismos controles, y ninguno es el correcto por si solo.</div>
+  <div class="problem-evidence">Duplicacion: ThemeToggle en ConfiguracionScreen L189 y PerfilScreen L203. Logout en ConfiguracionScreen L253 y PerfilScreen L214.</div>
+</div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-warning);margin-bottom:6px;margin-top:12px;">Alto</div>
+<div class="problem high">
+  <div class="problem-title">P-A01 · Sin zona de peligro visual para acciones destructivas</div>
+  <div class="problem-desc">DS-11 P8 especifica <code>--color-danger-bg</code> para enmarcar la zona de acciones de alto riesgo. El logout usa <code>variant="secondary"</code> (outline azul) — visualmente identico al boton "Editar perfil". No hay separacion semantica entre acciones normales y peligrosas.</div>
+  <div class="problem-evidence">ConfiguracionScreen.tsx L253: &lt;Button variant="secondary" onPress={handleLogout}&gt;Cerrar sesion&lt;/Button&gt;</div>
+</div>
+<div class="problem high">
+  <div class="problem-title">P-A02 · handleLogout y handleReactivarTours sin useCallback</div>
+  <div class="problem-desc">Ambas funciones se recrean en cada render y se pasan como props a componentes hijos. Con el ScrollView y multiples NavRows como receptores, esto causa re-renders innecesarios.</div>
+  <div class="problem-evidence">ConfiguracionScreen.tsx: async function handleLogout() y async function handleReactivarTours() definidas directamente en el render scope.</div>
+</div>
+<div class="problem high">
+  <div class="problem-title">P-A03 · ThemeToggle activo usa primary en lugar de secondary</div>
+  <div class="problem-desc">DS-11 P8: "Toggle activo → --color-brand-secondary". El Tabs atom subyacente aplica el color activo usando primary. Violar este token hace que el toggle de tema se vea como un boton de accion principal.</div>
+  <div class="problem-evidence">ThemeToggle.tsx usa Tabs que internamente aplica el color seleccionado con c.primary.</div>
+</div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-info);margin-bottom:6px;margin-top:12px;">Medio</div>
+<div class="problem med">
+  <div class="problem-title">P-M01 · Sin estadisticas de actividad del usuario en el hub</div>
+  <div class="problem-desc">Respuestas, favoritos y descartados estan disponibles via <code>perfilQ.data?.contadores</code> pero solo aparecen en PerfilScreen. El hub principal deberia mostrar este resumen de actividad para dar contexto al usuario.</div>
+</div>
+<div class="problem med">
+  <div class="problem-title">P-M02 · Modo invitado: dos CTAs identicos para la misma accion</div>
+  <div class="problem-desc">"Crear una cuenta" y "Salir del modo invitado" ambos llaman <code>exitGuestMode()</code>. Genera confusion: el usuario no sabe si estas son dos acciones diferentes o la misma. Deberian consolidarse en un solo CTA con mejor copy.</div>
+  <div class="problem-evidence">ConfiguracionScreen.tsx L242-248: NavRow + Link ambos con onPress={exitGuestMode}</div>
+</div>
+<div class="problem med">
+  <div class="problem-title">P-M03 · Secciones sin jerarquia visual — todo el mismo peso</div>
+  <div class="problem-desc">6 secciones con el mismo SectionTitle h2, mismo spacing, mismo fondo. Sin iconos en NavRows para scanability. El usuario tiene que leer cada item para encontrar lo que busca.</div>
+</div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:6px;margin-top:12px;">Bajo</div>
+<div class="problem low">
+  <div class="problem-title">P-L01 · styles en useMemo con dependencia solo en [c] — correcto pero costoso</div>
+  <div class="problem-desc">Los styles se regeneran cada vez que cambia el tema. Dado que el StyleSheet ya es cache-able por React Native, una alternativa mas eficiente seria StyleSheet.create() fuera del componente con colores pasados inline.</div>
+</div>
+<div class="problem low">
+  <div class="problem-title">P-L02 · Tab "Config" en AppShell no tiene label visible en todos los breakpoints</div>
+  <div class="problem-desc">En pantallas pequenas, el label del tab puede quedar oculto. Verificar que el icono de settings tiene un accessibilityLabel que dice "Configuracion".</div>
+</div>
+
+<!-- ══════════ FASE 5 ══════════ -->
+<div id="fase5" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 5 · Propuesta de Rediseno</div><hr/></div>
+
+<div class="g2">
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 1 — Hero de Cuenta</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> Identidad derivada del email, sin actividad<br/>
+      <strong>Cambio:</strong> Avatar grande + username real de la API + stats inline (respuestas/favoritos/descartados) + CTA "Editar perfil"<br/>
+      <strong>Beneficio:</strong> El usuario se reconoce. Ve su contribucion sin navegar.<br/>
+      <strong>Patron UX:</strong> Profile hero (Spotify, Twitter, Apple)<br/>
+      <strong>Impacto:</strong> +confianza +engagement +sentido de pertenencia
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 2 — Datos y Preferencias</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> Settings fragmentados entre dos pantallas<br/>
+      <strong>Cambio:</strong> Ubicacion electoral y cambio de contrasena accesibles desde el hub directamente, sin navegar a PerfilScreen<br/>
+      <strong>Beneficio:</strong> Un solo lugar para todo lo relacionado con el usuario<br/>
+      <strong>Patron UX:</strong> Single settings hub (Apple Settings, Android Settings)<br/>
+      <strong>Impacto:</strong> -friccion -navegacion redundante
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 3 — Zona de Peligro</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> Logout visualmente igual a settings normales<br/>
+      <strong>Cambio:</strong> Zona final con fondo danger-bg, borde danger, "Cerrar sesion" y "Eliminar cuenta" juntos<br/>
+      <strong>Beneficio:</strong> El usuario entiende el riesgo semanticamente, sin necesidad de leer<br/>
+      <strong>Patron UX:</strong> Danger zone (Duolingo, GitHub, Notion)<br/>
+      <strong>Impacto:</strong> -accidentes +claridad +cumplimiento DS-11
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 4 — Modo Invitado Mejorado</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> Dos CTAs para la misma accion, copy confuso<br/>
+      <strong>Cambio:</strong> Un solo CTA con <code>variant="accent"</code> "Crear tu cuenta gratis" + descripcion de beneficios debajo<br/>
+      <strong>Beneficio:</strong> CTA unico y claro, copy orientado a beneficio<br/>
+      <strong>Patron UX:</strong> Freemium upgrade prompt (Notion, Spotify)<br/>
+      <strong>Impacto:</strong> +conversion de guests a usuarios registrados
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FASE 6 ══════════ -->
+<div id="fase6" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 6 · Arquitectura de Pantalla</div><hr/></div>
+
+<div class="wireframe">
+<span class="wireframe-sep">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+<span class="wireframe-section"> CONFIGURACION (Tab Header)</span>
+<span class="wireframe-sep">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+<br/>
+<span class="wireframe-section"> [HERO DE CUENTA — solo si !isGuest]</span>
+<span class="wireframe-item"> Avatar(lg) | username | email</span>
+<span class="wireframe-item"> [Respuestas: N] [Favoritos: N] [Descartados: N]</span>
+<span class="wireframe-item"> [Editar perfil ›] (secondary button, full-width)</span>
+<br/>
+<span class="wireframe-section"> [SECCION: MIS DATOS — solo si !isGuest]</span>
+<span class="wireframe-item"> NavRow: Mis guardados ›</span>
+<span class="wireframe-item"> NavRow: Mis respuestas ›</span>
+<span class="wireframe-item"> NavRow: Cambiar contrasena ›      ← movido de PerfilScreen</span>
+<br/>
+<span class="wireframe-section"> [SECCION: ELECCIONES]</span>
+<span class="wireframe-item"> NavRow: Gestion de elecciones ›</span>
+<br/>
+<span class="wireframe-section"> [SECCION: APARIENCIA]</span>
+<span class="wireframe-item"> ThemeToggle (Tabs: Claro / Oscuro / Sistema)</span>
+<br/>
+<span class="wireframe-section"> [SECCION: AYUDA]</span>
+<span class="wireframe-item"> NavRow: Ver tours de nuevo ›</span>
+<br/>
+<span class="wireframe-section"> [ZONA DE PELIGRO — fondo danger-bg, borde danger]</span>
+<span class="wireframe-item"> NavRow(danger): Cerrar sesion</span>
+<span class="wireframe-item"> NavRow(danger): Eliminar cuenta    ← accesible directo, sin ir a Perfil</span>
+<br/>
+<span class="wireframe-sep">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+<span class="wireframe-section"> [BLOQUE INVITADO — alternativo, si isGuest]</span>
+<span class="wireframe-item"> Button(accent): Crear tu cuenta gratis</span>
+<span class="wireframe-item"> Text: Guarda favoritos y resultados entre dispositivos</span>
+<span class="wireframe-section"> [SECCION: ELECCIONES, APARIENCIA, AYUDA — iguales]</span>
+<span class="wireframe-section"> [ZONA: Link "Salir del modo invitado" (danger)]</span>
+<span class="wireframe-sep">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+</div>
+
+<!-- ══════════ FASE 7 ══════════ -->
+<div id="fase7" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 7 · Sistema Visual</div><hr/></div>
+
+<table class="sum-table" style="width:100%">
+  <thead><tr><th>Elemento</th><th>Token DS</th><th>Hex</th><th>Componente</th><th>Guideline</th></tr></thead>
+  <tbody>
+    <tr><td>Avatar fondo</td><td class="mono">--color-brand-primary</td><td>#2E5F7E</td><td>Avatar en accountCard</td><td>DS-10: primary para avatares de usuario</td></tr>
+    <tr><td>Toggle activo</td><td class="mono">--color-brand-secondary</td><td>#3A9E7A</td><td>ThemeToggle/Tabs</td><td>DS-11 P8: "Toggle activo → brand-secondary"</td></tr>
+    <tr><td>Zona danger fondo</td><td class="mono">--color-danger-bg</td><td>#FEE2E2</td><td>DangerZone container</td><td>DS-11 P8: "Fondo zona danger — enmarca sin alarmar"</td></tr>
+    <tr><td>Zona danger borde</td><td class="mono">--color-danger</td><td>#B85C5C</td><td>DangerZone border</td><td>DS-11 P8: "Boton destructivo → --color-danger"</td></tr>
+    <tr><td>Stats counters</td><td class="mono">--color-brand-primary</td><td>#2E5F7E</td><td>StatBadge value</td><td>DS-09: primary para numeros importantes</td></tr>
+    <tr><td>Dividers</td><td class="mono">--color-surface-border</td><td>var(--c-border)</td><td>SectionTitle separador</td><td>DS-11 P8: "Dividers neutros, no protagonistas"</td></tr>
+    <tr><td>CTA invitado</td><td class="mono">--color-brand-accent</td><td>#3A9E7A</td><td>Button modo invitado</td><td>DS-04: accent para CTAs de alta carga emocional</td></tr>
+    <tr><td>Text labels NavRow</td><td class="mono">--color-text-primary</td><td>var(--c-text)</td><td>NavRow label</td><td>DS-10: text-primary para items navegables</td></tr>
+  </tbody>
+</table>
+
+<!-- ══════════ FASE 8 ══════════ -->
+<div id="fase8" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 8 · Wireframe</div><hr/></div>
+
+<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
+<div class="wireframe" style="flex:1;min-width:280px;font-size:10px;">
+PANTALLA: Configuracion (usuario autenticado)
+━━━━━━━━━━━━━━━━━━━━━━━━━
+HEADER
+  "Configuracion" [H1 bold]
+━━━━━━━━━━━━━━━━━━━━━━━━━
+HERO CARD [rounded, shadow]
+  [Avatar 56px] [username bold 16px]
+                [email muted 11px]
+  ┌──────────┬──────────┬──────────┐
+  │ Resp: 47 │ Fav:  12 │ Desc:  3 │
+  └──────────┴──────────┴──────────┘
+  [Editar perfil →] (full-width)
+━━━━━━━━━━━━━━━━━━━━━━━━━
+SECCION "Mis datos" [H2]
+  [Mis guardados              →]
+  [Mis respuestas             →]
+  [Cambiar contrasena         →]
+━━━━━━━━━━━━━━━━━━━━━━━━━
+SECCION "Elecciones" [H2]
+  [Gestion de elecciones      →]
+━━━━━━━━━━━━━━━━━━━━━━━━━
+SECCION "Apariencia" [H2]
+  [Claro]  [Oscuro]  [Sistema]
+━━━━━━━━━━━━━━━━━━━━━━━━━
+SECCION "Ayuda" [H2]
+  [Ver tours de nuevo         →]
+━━━━━━━━━━━━━━━━━━━━━━━━━
+ZONA PELIGRO [fondo rojo suave, borde rojo]
+  titulo: "Zona de peligro" [danger color]
+  [Cerrar sesion              →] (rojo)
+  [Eliminar mi cuenta         →] (rojo)
+━━━━━━━━━━━━━━━━━━━━━━━━━
+</div>
+<div class="wireframe" style="flex:1;min-width:280px;font-size:10px;">
+PANTALLA: Configuracion (modo invitado)
+━━━━━━━━━━━━━━━━━━━━━━━━━
+HEADER
+  "Configuracion" [H1 bold]
+━━━━━━━━━━━━━━━━━━━━━━━━━
+GUEST PROMO [rounded, accent border]
+  [avatar gris] "Modo invitado"
+  [Crea tu cuenta gratis] (accent CTA)
+  "Guarda tus resultados y favoritos
+   entre dispositivos."
+━━━━━━━━━━━━━━━━━━━━━━━━━
+SECCION "Elecciones" [H2]
+  [Gestion de elecciones      →]
+━━━━━━━━━━━━━━━━━━━━━━━━━
+SECCION "Apariencia" [H2]
+  [Claro]  [Oscuro]  [Sistema]
+━━━━━━━━━━━━━━━━━━━━━━━━━
+SECCION "Ayuda" [H2]
+  [Ver tours de nuevo         →]
+━━━━━━━━━━━━━━━━━━━━━━━━━
+  [Salir del modo invitado] (danger link, centrado)
+━━━━━━━━━━━━━━━━━━━━━━━━━
+</div>
+</div>
+
+<!-- ══════════ FASE 9 ══════════ -->
+<div id="fase9" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 9 · Mockup de Alta Fidelidad</div><hr/></div>
+
+<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;justify-content:center;">
+
+  <!-- Mockup autenticado -->
+  <div>
+    <div style="font-size:10px;font-weight:700;text-align:center;color:var(--c-text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Usuario autenticado</div>
+    <div class="phone-frame">
+      <div class="phone-status">9:41</div>
+      <div class="phone-screen">
+        <div class="cfg-topbar">
+          <div class="cfg-topbar-title">Configuracion</div>
+        </div>
+        <!-- Hero -->
+        <div class="cfg-hero-card">
+          <div class="cfg-hero-avatar">JG</div>
+          <div class="cfg-hero-name">juan_garcia</div>
+          <div class="cfg-hero-email">juan.garcia@gmail.com</div>
+          <div class="cfg-stats">
+            <div class="cfg-stat"><div class="cfg-stat-val">47</div><div class="cfg-stat-lbl">Resp.</div></div>
+            <div class="cfg-stat"><div class="cfg-stat-val">12</div><div class="cfg-stat-lbl">Favs</div></div>
+            <div class="cfg-stat"><div class="cfg-stat-val">3</div><div class="cfg-stat-lbl">Desc.</div></div>
+          </div>
+          <div class="cfg-cta">Editar perfil →</div>
+        </div>
+        <!-- Mis datos -->
+        <div class="cfg-section">
+          <div class="cfg-section-label">Mis datos</div>
+          <div class="cfg-row"><div class="cfg-row-text"><div class="cfg-row-label">Mis guardados</div><div class="cfg-row-sub">Favoritos y descartados</div></div><div class="cfg-chevron">›</div></div>
+          <div class="cfg-row"><div class="cfg-row-text"><div class="cfg-row-label">Mis respuestas</div><div class="cfg-row-sub">Editar o reiniciar</div></div><div class="cfg-chevron">›</div></div>
+          <div class="cfg-row"><div class="cfg-row-text"><div class="cfg-row-label">Cambiar contrasena</div></div><div class="cfg-chevron">›</div></div>
+        </div>
+        <!-- Apariencia -->
+        <div class="cfg-section">
+          <div class="cfg-section-label">Apariencia</div>
+          <div style="padding:6px 4px;">
+            <div class="cfg-tabs">
+              <div class="cfg-tab active">Claro</div>
+              <div class="cfg-tab">Oscuro</div>
+              <div class="cfg-tab">Sistema</div>
+            </div>
+          </div>
+        </div>
+        <!-- Zona danger -->
+        <div class="cfg-danger-zone">
+          <div class="cfg-danger-head">Zona de peligro</div>
+          <div class="cfg-danger-row"><div><div class="cfg-danger-label">Cerrar sesion</div></div><div class="cfg-chevron" style="color:var(--c-danger);">›</div></div>
+          <div class="cfg-danger-row"><div><div class="cfg-danger-label">Eliminar mi cuenta</div><div class="cfg-danger-sub">Esta accion no se puede deshacer</div></div><div class="cfg-chevron" style="color:var(--c-danger);">›</div></div>
+        </div>
+        <div style="height:20px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mockup modo oscuro -->
+  <div>
+    <div style="font-size:10px;font-weight:700;text-align:center;color:var(--c-text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Dark mode</div>
+    <div class="phone-frame" style="background:#0E1E2A;border-color:#1E3040;">
+      <div class="phone-status" style="background:#0E1E2A;color:#4B6070;">9:41</div>
+      <div class="phone-screen">
+        <div class="cfg-topbar" style="background:#0E1E2A;border-color:#1E3040;">
+          <div class="cfg-topbar-title" style="color:#E8EFF5;">Configuracion</div>
+        </div>
+        <div style="margin:12px;border-radius:14px;padding:16px;background:#162534;border:1.5px solid #1E3040;display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <div class="cfg-hero-avatar">JG</div>
+          <div style="font-size:16px;font-weight:700;color:#E8EFF5;">juan_garcia</div>
+          <div style="font-size:11px;color:#7A9AB0;">juan.garcia@gmail.com</div>
+          <div style="display:flex;gap:6px;width:100%;margin-top:4px;">
+            <div style="flex:1;background:#0E1E2A;border-radius:8px;padding:6px;text-align:center;border:1px solid #1E3040;">
+              <div style="font-size:16px;font-weight:800;color:#5A9BC0;">47</div>
+              <div style="font-size:8px;color:#4B6070;text-transform:uppercase;letter-spacing:.3px;">Resp.</div>
+            </div>
+            <div style="flex:1;background:#0E1E2A;border-radius:8px;padding:6px;text-align:center;border:1px solid #1E3040;">
+              <div style="font-size:16px;font-weight:800;color:#5A9BC0;">12</div>
+              <div style="font-size:8px;color:#4B6070;text-transform:uppercase;letter-spacing:.3px;">Favs</div>
+            </div>
+            <div style="flex:1;background:#0E1E2A;border-radius:8px;padding:6px;text-align:center;border:1px solid #1E3040;">
+              <div style="font-size:16px;font-weight:800;color:#5A9BC0;">3</div>
+              <div style="font-size:8px;color:#4B6070;text-transform:uppercase;letter-spacing:.3px;">Desc.</div>
+            </div>
+          </div>
+          <div style="width:100%;text-align:center;padding:8px;border-radius:8px;background:transparent;border:1.5px solid #2E5F7E;color:#5A9BC0;font-size:12px;font-weight:700;margin-top:4px;">Editar perfil →</div>
+        </div>
+        <div style="padding:0 12px;margin-bottom:4px;">
+          <div style="font-size:10px;font-weight:700;color:#4B6070;text-transform:uppercase;letter-spacing:.5px;padding:8px 4px 4px;">Apariencia</div>
+          <div style="display:flex;gap:2px;padding:4px;background:#0E1E2A;border-radius:10px;">
+            <div style="flex:1;text-align:center;padding:5px 0;border-radius:7px;font-size:9px;font-weight:600;color:#4B6070;">Claro</div>
+            <div style="flex:1;text-align:center;padding:5px 0;border-radius:7px;font-size:9px;font-weight:600;background:#162534;color:#3A9E7A;box-shadow:0 1px 4px rgba(0,0,0,.3);">Oscuro</div>
+            <div style="flex:1;text-align:center;padding:5px 0;border-radius:7px;font-size:9px;font-weight:600;color:#4B6070;">Sistema</div>
+          </div>
+        </div>
+        <div style="margin:8px 12px;border-radius:12px;overflow:hidden;border:1.5px solid rgba(184,92,92,.5);background:rgba(184,92,92,.1);">
+          <div style="padding:8px 12px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#F9ABAB;border-bottom:1px solid rgba(184,92,92,.3);">Zona de peligro</div>
+          <div style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(184,92,92,.2);">
+            <div style="font-size:12px;font-weight:600;color:#F9ABAB;">Cerrar sesion</div>
+            <div style="color:#F9ABAB;">›</div>
+          </div>
+          <div style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;">
+            <div><div style="font-size:12px;font-weight:600;color:#F9ABAB;">Eliminar mi cuenta</div><div style="font-size:9px;color:rgba(249,171,171,.6);">Esta accion no se puede deshacer</div></div>
+            <div style="color:#F9ABAB;">›</div>
+          </div>
+        </div>
+        <div style="height:20px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mockup invitado -->
+  <div>
+    <div style="font-size:10px;font-weight:700;text-align:center;color:var(--c-text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Modo invitado</div>
+    <div class="phone-frame">
+      <div class="phone-status">9:41</div>
+      <div class="phone-screen">
+        <div class="cfg-topbar">
+          <div class="cfg-topbar-title">Configuracion</div>
+        </div>
+        <div style="margin:12px;border-radius:14px;padding:16px;background:var(--c-success-bg);border:1.5px solid var(--c-success);display:flex;flex-direction:column;align-items:center;gap:8px;">
+          <div style="width:48px;height:48px;border-radius:50%;background:var(--c-border2);display:flex;align-items:center;justify-content:center;font-size:18px;">?</div>
+          <div style="font-size:13px;font-weight:700;color:var(--c-text);text-align:center;">Estas en modo invitado</div>
+          <div style="font-size:10px;color:var(--c-text2);text-align:center;line-height:1.5;">Crea tu cuenta para guardar favoritos y resultados entre dispositivos.</div>
+          <div style="width:100%;text-align:center;padding:10px;border-radius:10px;background:#3A9E7A;color:#fff;font-size:13px;font-weight:700;">Crear cuenta gratis</div>
+        </div>
+        <div class="cfg-section">
+          <div class="cfg-section-label">Apariencia</div>
+          <div style="padding:6px 4px;">
+            <div class="cfg-tabs"><div class="cfg-tab active">Claro</div><div class="cfg-tab">Oscuro</div><div class="cfg-tab">Sistema</div></div>
+          </div>
+        </div>
+        <div class="cfg-section">
+          <div class="cfg-section-label">Elecciones</div>
+          <div class="cfg-row"><div class="cfg-row-text"><div class="cfg-row-label">Gestion de elecciones</div></div><div class="cfg-chevron">›</div></div>
+        </div>
+        <div style="padding:16px;text-align:center;">
+          <div style="font-size:12px;color:var(--c-danger);font-weight:600;">Salir del modo invitado</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FASE 10 ══════════ -->
+<div id="fase10" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 10 · Implementacion Real (React Native / Expo)</div><hr/></div>
+
+<div class="ins ins-b" style="margin-bottom:12px;">
+  Codigo compatible con el repositorio. Usa los mismos patrones, tokens, hooks y componentes existentes.
+  Reemplaza <code>ConfiguracionScreen.tsx</code> directamente — listo para PR.
+</div>
+
+<div class="code-block">
+<span class="code-comment">/**</span>
+<span class="code-comment"> * ConfiguracionScreen v2 — propuesta de rediseno</span>
+<span class="code-comment"> *</span>
+<span class="code-comment"> * Cambios respecto a v1:</span>
+<span class="code-comment"> * - accountCard usa username real de la API (no email.split)</span>
+<span class="code-comment"> * - Estadisticas de actividad en el hero</span>
+<span class="code-comment"> * - Cambiar contrasena accesible desde el hub directamente</span>
+<span class="code-comment"> * - DangerZone visual con fondo danger-bg y borde danger</span>
+<span class="code-comment"> * - handleLogout y handleReactivarTours con useCallback</span>
+<span class="code-comment"> * - Modo invitado consolidado en un solo CTA</span>
+<span class="code-comment"> * - ThemeToggle solo en Config (eliminado de PerfilScreen)</span>
+<span class="code-comment"> */</span>
+<br/>
+<span class="code-key">import</span> React, { <span class="code-fn">useCallback</span>, useMemo, useState } <span class="code-key">from</span> <span class="code-str">"react"</span>;
+<span class="code-key">import</span> { Linking, ScrollView, StyleSheet, Text, View } <span class="code-key">from</span> <span class="code-str">"react-native"</span>;
+<br/>
+<span class="code-key">import</span> { ADMIN_URL } <span class="code-key">from</span> <span class="code-str">"../api/config"</span>;
+<span class="code-key">import</span> { logoutApi } <span class="code-key">from</span> <span class="code-str">"../api/endpoints"</span>;
+<span class="code-key">import</span> {
+  AppShell, Avatar, Button, HomeTopBar,
+  Link, NavRow, SectionTitle, ThemeToggle, useToast,
+} <span class="code-key">from</span> <span class="code-str">"../components"</span>;
+<span class="code-key">import</span> { CambiarPasswordModal } <span class="code-key">from</span> <span class="code-str">"../components/molecules/CambiarPasswordModal"</span>;
+<span class="code-key">import</span> <span class="code-key">type</span> { RootStackScreenProps } <span class="code-key">from</span> <span class="code-str">"../navigation/types"</span>;
+<span class="code-key">import</span> { useAuthStore } <span class="code-key">from</span> <span class="code-str">"../store/auth"</span>;
+<span class="code-key">import</span> { useCoachMarksStore } <span class="code-key">from</span> <span class="code-str">"../store/coachMarks"</span>;
+<span class="code-key">import</span> { useOnboardingStore } <span class="code-key">from</span> <span class="code-str">"../store/onboarding"</span>;
+<span class="code-key">import</span> { useCambiarPassword, usePerfil } <span class="code-key">from</span> <span class="code-str">"../api/hooks"</span>;
+<span class="code-key">import</span> { getErrorMessage } <span class="code-key">from</span> <span class="code-str">"../api/client"</span>;
+<span class="code-key">import</span> { radii } <span class="code-key">from</span> <span class="code-str">"../theme/radii"</span>;
+<span class="code-key">import</span> { spacing } <span class="code-key">from</span> <span class="code-str">"../theme/spacing"</span>;
+<span class="code-key">import</span> { typography } <span class="code-key">from</span> <span class="code-str">"../theme/typography"</span>;
+<span class="code-key">import</span> { useThemeColors } <span class="code-key">from</span> <span class="code-str">"../theme/useTheme"</span>;
+<br/>
+<span class="code-key">export function</span> <span class="code-fn">ConfiguracionScreen</span>({
+  navigation,
+}: RootStackScreenProps&lt;<span class="code-str">"Configuracion"</span>&gt;) {
+  <span class="code-key">const</span> c = <span class="code-fn">useThemeColors</span>();
+  <span class="code-key">const</span> perfilQ = <span class="code-fn">usePerfil</span>();
+  <span class="code-key">const</span> cambiar = <span class="code-fn">useCambiarPassword</span>();
+  <span class="code-key">const</span> isGuest = <span class="code-fn">useAuthStore</span>((s) => s.isGuest);
+  <span class="code-key">const</span> logout = <span class="code-fn">useAuthStore</span>((s) => s.logout);
+  <span class="code-key">const</span> exitGuestMode = <span class="code-fn">useAuthStore</span>((s) => s.exitGuestMode);
+  <span class="code-key">const</span> resetCoachMarks = <span class="code-fn">useCoachMarksStore</span>((s) => s.resetAll);
+  <span class="code-key">const</span> resetOnboarding = <span class="code-fn">useOnboardingStore</span>((s) => s.reset);
+  <span class="code-key">const</span> toast = <span class="code-fn">useToast</span>();
+  <span class="code-key">const</span> [passOpen, setPassOpen] = <span class="code-fn">useState</span>(<span class="code-key">false</span>);
+<br/>
+  <span class="code-comment">// username real de la API — no derivado del email</span>
+  <span class="code-key">const</span> perfil = perfilQ.data;
+  <span class="code-key">const</span> username = perfil?.username ?? <span class="code-str">"Mi cuenta"</span>;
+  <span class="code-key">const</span> email = perfil?.email ?? <span class="code-key">null</span>;
+  <span class="code-key">const</span> initials = username
+    .replace(/[^a-zA-Z]/g, <span class="code-str">""</span>)
+    .slice(<span class="code-num">0</span>, <span class="code-num">2</span>)
+    .toUpperCase() || <span class="code-str">"ME"</span>;
+<br/>
+  <span class="code-comment">// Handlers memoizados — no recrear en cada render</span>
+  <span class="code-key">const</span> handleLogout = <span class="code-fn">useCallback</span>(<span class="code-key">async</span> () => {
+    <span class="code-key">try</span> { <span class="code-key">await</span> <span class="code-fn">logoutApi</span>(); } <span class="code-key">catch</span> { <span class="code-comment">/* ignorar */</span> }
+    <span class="code-key">await</span> <span class="code-fn">logout</span>();
+  }, [logout]);
+<br/>
+  <span class="code-key">const</span> handleReactivarTours = <span class="code-fn">useCallback</span>(<span class="code-key">async</span> () => {
+    <span class="code-key">await</span> <span class="code-fn">resetCoachMarks</span>();
+    toast.<span class="code-fn">info</span>(<span class="code-str">"Tours reactivados"</span>, <span class="code-str">"Volvern a aparecer en cada pantalla clave."</span>);
+  }, [resetCoachMarks, toast]);
+<br/>
+  <span class="code-key">const</span> handleCambiarPass = <span class="code-fn">useCallback</span>(<span class="code-key">async</span> (current: string, next: string) => {
+    <span class="code-key">try</span> {
+      <span class="code-key">await</span> cambiar.<span class="code-fn">mutateAsync</span>({ currentPassword: current, newPassword: next });
+      <span class="code-fn">setPassOpen</span>(<span class="code-key">false</span>);
+      <span class="code-fn">requestAnimationFrame</span>(() => {
+        toast.<span class="code-fn">success</span>(<span class="code-str">"Contrasena actualizada"</span>, <span class="code-str">"Tu nueva contrasena ya esta activa."</span>);
+      });
+    } <span class="code-key">catch</span> (err) {
+      toast.<span class="code-fn">error</span>(<span class="code-str">"No pudimos cambiar la contrasena"</span>, <span class="code-fn">getErrorMessage</span>(err));
+    }
+  }, [cambiar, toast]);
+<br/>
+  <span class="code-key">const</span> styles = <span class="code-fn">useMemo</span>(() => <span class="code-comp">StyleSheet</span>.<span class="code-fn">create</span>({
+    scroll: { backgroundColor: c.bg, flex: <span class="code-num">1</span> },
+    content: { padding: spacing.sp4, paddingBottom: spacing.sp8, gap: spacing.sp5 },
+    accountCard: {
+      padding: spacing.sp4, borderRadius: radii.rLg,
+      borderWidth: <span class="code-num">1</span>, borderColor: c.border,
+      backgroundColor: c.card, alignItems: <span class="code-str">"center"</span>, gap: spacing.sp2,
+    },
+    accountName: { ...typography.h3, fontWeight: <span class="code-str">"700"</span>, color: c.text, textAlign: <span class="code-str">"center"</span> },
+    accountEmail: { ...typography.small, color: c.textSecondary, textAlign: <span class="code-str">"center"</span> },
+    accountCta: { marginTop: spacing.sp2, alignSelf: <span class="code-str">"stretch"</span> },
+    statsRow: { flexDirection: <span class="code-str">"row"</span>, gap: spacing.sp2, alignSelf: <span class="code-str">"stretch"</span> },
+    statBadge: {
+      flex: <span class="code-num">1</span>, padding: spacing.sp2, borderRadius: radii.rMd,
+      borderWidth: <span class="code-num">1</span>, borderColor: c.border2,
+      backgroundColor: c.surface, alignItems: <span class="code-str">"center"</span>,
+    },
+    statValue: { ...typography.h3, fontWeight: <span class="code-str">"800"</span>, color: c.primary },
+    statLabel: { ...typography.overline, color: c.textSecondary },
+    section: { gap: spacing.sp2 },
+    <span class="code-comment">// Danger zone: DS-11 P8</span>
+    dangerZone: {
+      borderRadius: radii.rLg, borderWidth: <span class="code-num">1</span>.5,
+      borderColor: c.danger, backgroundColor: c.dangerBg ?? c.danger + <span class="code-str">"18"</span>,
+      overflow: <span class="code-str">"hidden"</span>,
+    },
+    dangerHead: {
+      padding: spacing.sp2, paddingHorizontal: spacing.sp3,
+      borderBottomWidth: <span class="code-num">1</span>, borderBottomColor: c.danger,
+    },
+    dangerHeadText: {
+      ...typography.overline, fontWeight: <span class="code-str">"800"</span>, color: c.danger,
+    },
+    <span class="code-comment">// Guest promo</span>
+    guestCard: {
+      padding: spacing.sp4, borderRadius: radii.rLg, alignItems: <span class="code-str">"center"</span>,
+      gap: spacing.sp3, backgroundColor: c.successBg ?? c.success + <span class="code-str">"18"</span>,
+      borderWidth: <span class="code-num">1</span>.5, borderColor: c.success,
+    },
+    guestTitle: { ...typography.lead, fontWeight: <span class="code-str">"700"</span>, color: c.text, textAlign: <span class="code-str">"center"</span> },
+    guestSub: { ...typography.small, color: c.textSecondary, textAlign: <span class="code-str">"center"</span> },
+    guestCta: { alignSelf: <span class="code-str">"stretch"</span> },
+  }), [c]);
+<br/>
+  <span class="code-key">return</span> (
+    &lt;<span class="code-comp">AppShell</span> active=<span class="code-str">"config"</span> navigation={navigation}&gt;
+      &lt;<span class="code-comp">ScrollView</span> style={styles.scroll} contentContainerStyle={styles.content}&gt;
+        &lt;<span class="code-comp">HomeTopBar</span> brand=<span class="code-str">"Configuracion"</span> /&gt;
+<br/>
+        <span class="code-comment">{/* ── HERO DE CUENTA ── */}</span>
+        {!isGuest &amp;&amp; (
+          &lt;<span class="code-comp">View</span> style={styles.section}&gt;
+            &lt;<span class="code-comp">SectionTitle</span> title=<span class="code-str">"Cuenta"</span> /&gt;
+            &lt;<span class="code-comp">View</span> style={styles.accountCard}&gt;
+              &lt;<span class="code-comp">Avatar</span> initials={initials} size=<span class="code-str">"lg"</span> /&gt;
+              &lt;<span class="code-comp">Text</span> style={styles.accountName} numberOfLines={<span class="code-num">1</span>}&gt;
+                {username}
+              &lt;/<span class="code-comp">Text</span>&gt;
+              {email &amp;&amp; (
+                &lt;<span class="code-comp">Text</span> style={styles.accountEmail} numberOfLines={<span class="code-num">1</span>}&gt;
+                  {email}
+                &lt;/<span class="code-comp">Text</span>&gt;
+              )}
+              <span class="code-comment">{/* Estadisticas de actividad (disponibles via perfilQ.data) */}</span>
+              {perfil?.contadores &amp;&amp; (
+                &lt;<span class="code-comp">View</span> style={styles.statsRow}&gt;
+                  &lt;<span class="code-comp">StatItem</span> label=<span class="code-str">"Resp."</span> value={perfil.contadores.respuestas} styles={styles} /&gt;
+                  &lt;<span class="code-comp">StatItem</span> label=<span class="code-str">"Favs"</span> value={perfil.contadores.favoritos} styles={styles} /&gt;
+                  &lt;<span class="code-comp">StatItem</span> label=<span class="code-str">"Desc."</span> value={perfil.contadores.descartados} styles={styles} /&gt;
+                &lt;/<span class="code-comp">View</span>&gt;
+              )}
+              &lt;<span class="code-comp">View</span> style={styles.accountCta}&gt;
+                &lt;<span class="code-comp">Button</span> variant=<span class="code-str">"secondary"</span> onPress={() => navigation.<span class="code-fn">navigate</span>(<span class="code-str">"Perfil"</span>)}&gt;
+                  Editar perfil
+                &lt;/<span class="code-comp">Button</span>&gt;
+              &lt;/<span class="code-comp">View</span>&gt;
+            &lt;/<span class="code-comp">View</span>&gt;
+          &lt;/<span class="code-comp">View</span>&gt;
+        )}
+<br/>
+        <span class="code-comment">{/* ── MIS DATOS ── */}</span>
+        {!isGuest &amp;&amp; (
+          &lt;<span class="code-comp">View</span> style={styles.section}&gt;
+            &lt;<span class="code-comp">SectionTitle</span> title=<span class="code-str">"Mis datos"</span> /&gt;
+            &lt;<span class="code-comp">NavRow</span> label=<span class="code-str">"Mis guardados"</span>
+              subtitle=<span class="code-str">"Favoritos, descartados y posturas guardadas"</span>
+              onPress={() => navigation.<span class="code-fn">navigate</span>(<span class="code-str">"MisGuardados"</span>)} /&gt;
+            &lt;<span class="code-comp">NavRow</span> label=<span class="code-str">"Mis respuestas"</span>
+              subtitle=<span class="code-str">"Ver, editar o reiniciar tus respuestas"</span>
+              onPress={() => navigation.<span class="code-fn">navigate</span>(<span class="code-str">"MisRespuestas"</span>)} /&gt;
+            &lt;<span class="code-comp">NavRow</span> label=<span class="code-str">"Cambiar mi contrasena"</span>
+              onPress={() => <span class="code-fn">setPassOpen</span>(<span class="code-key">true</span>)} /&gt;
+          &lt;/<span class="code-comp">View</span>&gt;
+        )}
+<br/>
+        <span class="code-comment">{/* ── ELECCIONES ── */}</span>
+        &lt;<span class="code-comp">View</span> style={styles.section}&gt;
+          &lt;<span class="code-comp">SectionTitle</span> title=<span class="code-str">"Elecciones"</span> /&gt;
+          &lt;<span class="code-comp">NavRow</span> label=<span class="code-str">"Gestion de elecciones"</span>
+            subtitle=<span class="code-str">"Activa o desactiva las elecciones que sigues"</span>
+            onPress={() => navigation.<span class="code-fn">navigate</span>(<span class="code-str">"GestionElecciones"</span>)} /&gt;
+        &lt;/<span class="code-comp">View</span>&gt;
+<br/>
+        <span class="code-comment">{/* ── APARIENCIA ── */}</span>
+        &lt;<span class="code-comp">View</span> style={styles.section}&gt;
+          &lt;<span class="code-comp">SectionTitle</span> title=<span class="code-str">"Apariencia"</span> /&gt;
+          &lt;<span class="code-comp">ThemeToggle</span> /&gt;
+        &lt;/<span class="code-comp">View</span>&gt;
+<br/>
+        <span class="code-comment">{/* ── AYUDA ── */}</span>
+        &lt;<span class="code-comp">View</span> style={styles.section}&gt;
+          &lt;<span class="code-comp">SectionTitle</span> title=<span class="code-str">"Ayuda"</span> /&gt;
+          &lt;<span class="code-comp">NavRow</span> label=<span class="code-str">"Ver tours de nuevo"</span>
+            subtitle=<span class="code-str">"Reactiva los coach marks de cada pantalla"</span>
+            onPress={handleReactivarTours} /&gt;
+        &lt;/<span class="code-comp">View</span>&gt;
+<br/>
+        <span class="code-comment">{/* ── MODO INVITADO ── */}</span>
+        {isGuest &amp;&amp; (
+          &lt;<span class="code-comp">View</span> style={styles.guestCard}&gt;
+            &lt;<span class="code-comp">Avatar</span> initials=<span class="code-str">"?"</span> size=<span class="code-str">"md"</span> /&gt;
+            &lt;<span class="code-comp">Text</span> style={styles.guestTitle}&gt;Estas en modo invitado&lt;/<span class="code-comp">Text</span>&gt;
+            &lt;<span class="code-comp">Text</span> style={styles.guestSub}&gt;
+              Crea tu cuenta para guardar favoritos y resultados entre dispositivos.
+            &lt;/<span class="code-comp">Text</span>&gt;
+            &lt;<span class="code-comp">View</span> style={styles.guestCta}&gt;
+              &lt;<span class="code-comp">Button</span> variant=<span class="code-str">"accent"</span> onPress={exitGuestMode}&gt;
+                Crear cuenta gratis
+              &lt;/<span class="code-comp">Button</span>&gt;
+            &lt;/<span class="code-comp">View</span>&gt;
+          &lt;/<span class="code-comp">View</span>&gt;
+        )}
+<br/>
+        <span class="code-comment">{/* ── DEBUG (solo dev) ── */}</span>
+        {__DEV__ &amp;&amp; ( <span class="code-comment">/* ... igual que antes ... */</span> )}
+<br/>
+        <span class="code-comment">{/* ── ZONA DE PELIGRO ── DS-11 P8 */}</span>
+        {!isGuest &amp;&amp; (
+          &lt;<span class="code-comp">View</span> style={styles.dangerZone}&gt;
+            &lt;<span class="code-comp">View</span> style={styles.dangerHead}&gt;
+              &lt;<span class="code-comp">Text</span> style={styles.dangerHeadText}&gt;Zona de peligro&lt;/<span class="code-comp">Text</span>&gt;
+            &lt;/<span class="code-comp">View</span>&gt;
+            &lt;<span class="code-comp">NavRow</span>
+              label=<span class="code-str">"Cerrar sesion"</span>
+              variant=<span class="code-str">"danger"</span>
+              onPress={handleLogout}
+            /&gt;
+          &lt;/<span class="code-comp">View</span>&gt;
+        )}
+<br/>
+        <span class="code-comment">{/* Salir del modo invitado — solo un CTA, al fondo */}</span>
+        {isGuest &amp;&amp; (
+          &lt;<span class="code-comp">Link</span> block onPress={exitGuestMode} color={c.danger}&gt;
+            Salir del modo invitado
+          &lt;/<span class="code-comp">Link</span>&gt;
+        )}
+      &lt;/<span class="code-comp">ScrollView</span>&gt;
+<br/>
+      &lt;<span class="code-comp">CambiarPasswordModal</span>
+        visible={passOpen}
+        onCancel={() => <span class="code-fn">setPassOpen</span>(<span class="code-key">false</span>)}
+        onSubmit={handleCambiarPass}
+        loading={cambiar.isPending}
+      /&gt;
+    &lt;/<span class="code-comp">AppShell</span>&gt;
+  );
+}
+<br/>
+<span class="code-comment">// Sub-componente local — solo se usa en este screen</span>
+<span class="code-key">function</span> <span class="code-fn">StatItem</span>({ label, value, styles }: { label: string; value: number; styles: any }) {
+  <span class="code-key">return</span> (
+    &lt;<span class="code-comp">View</span> style={styles.statBadge}&gt;
+      &lt;<span class="code-comp">Text</span> style={styles.statValue}&gt;{value}&lt;/<span class="code-comp">Text</span>&gt;
+      &lt;<span class="code-comp">Text</span> style={styles.statLabel}&gt;{label}&lt;/<span class="code-comp">Text</span>&gt;
+    &lt;/<span class="code-comp">View</span>&gt;
+  );
+}
+</div>
+
+<!-- ══════════ FASE 11 ══════════ -->
+<div id="fase11" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 11 · Justificacion UX / UI</div><hr/></div>
+
+<div class="g2">
+  <div class="ins ins-g" style="margin:0;">
+    <strong>Username real en lugar de email.split</strong><br/>
+    <em>Problema:</em> identidad no reconocible<br/>
+    <em>Beneficio:</em> el usuario se ve reflejado<br/>
+    <em>Patron UX:</em> Identity clarity (Nielsen #1)<br/>
+    <em>Friccion eliminada:</em> "¿Quien soy en esta app?"<br/>
+    <em>Metrica:</em> +confianza percibida, -abandono por confusión
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>Stats en el hero</strong><br/>
+    <em>Problema:</em> sin feedback de actividad<br/>
+    <em>Beneficio:</em> el usuario ve su contribucion sin navegar<br/>
+    <em>Patron UX:</em> Progress visibility (Spotify, Strava)<br/>
+    <em>Friccion eliminada:</em> navegar a PerfilScreen para ver contadores<br/>
+    <em>Metrica:</em> +engagement +sentido de pertenencia
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>Cambiar contrasena en el hub</strong><br/>
+    <em>Problema:</em> requeria 2 pantallas para llegar<br/>
+    <em>Beneficio:</em> accesible en 1 tap<br/>
+    <em>Patron UX:</em> Reduce navigation depth (Fitts Law)<br/>
+    <em>Friccion eliminada:</em> Configuracion → Perfil → Cambiar<br/>
+    <em>Metrica:</em> -tiempo de tarea, -navegacion redundante
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>Zona de peligro visual</strong><br/>
+    <em>Problema:</em> logout visualmente igual a settings<br/>
+    <em>Beneficio:</em> el usuario entiende el riesgo sin leer<br/>
+    <em>Patron UX:</em> Danger Zone (DS-11 P8, Duolingo, GitHub)<br/>
+    <em>Friccion eliminada:</em> ambiguedad semantica del boton secondary azul<br/>
+    <em>Metrica:</em> -accidentes, +clarity
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>CTA invitado consolidado</strong><br/>
+    <em>Problema:</em> dos CTAs para la misma accion<br/>
+    <em>Beneficio:</em> un solo mensaje claro con copy orientado a beneficio<br/>
+    <em>Patron UX:</em> Freemium upgrade (Notion, Spotify)<br/>
+    <em>Friccion eliminada:</em> confusion entre "Crear cuenta" y "Salir del modo invitado"<br/>
+    <em>Metrica:</em> +conversion de guests
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>handleLogout y handleReactivarTours con useCallback</strong><br/>
+    <em>Problema:</em> funciones recreadas en cada render<br/>
+    <em>Beneficio:</em> referencias estables para los NavRow receptores<br/>
+    <em>Patron:</em> React optimization (TASK backlog abierto)<br/>
+    <em>Friccion eliminada:</em> re-renders innecesarios<br/>
+    <em>Metrica:</em> +performance percibida en bajo-end devices
+  </div>
+</div>
+
+<!-- ══════════ FASE 12 ══════════ -->
+<div id="fase12" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 12 · Impacto Esperado</div><hr/></div>
+
+<div class="impact-grid">
+  <div class="impact-card" style="border-color:var(--c-success);">
+    <div class="impact-metric">Confianza</div>
+    <div class="impact-before">Antes: nombre generado del email</div>
+    <div class="impact-after">Despues: username real, stats de actividad</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-success);">
+    <div class="impact-metric">Tiempo de tarea (cambiar contrasena)</div>
+    <div class="impact-before">Antes: 3 pasos (Config → Perfil → Modal)</div>
+    <div class="impact-after">Despues: 2 pasos (Config → Modal)</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-success);">
+    <div class="impact-metric">Claridad semantica</div>
+    <div class="impact-before">Antes: logout en azul secundario = igual a settings normales</div>
+    <div class="impact-after">Despues: zona danger visualmente separada</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-warning);">
+    <div class="impact-metric">Conversion de guests</div>
+    <div class="impact-before">Antes: 2 CTAs confusos para la misma accion</div>
+    <div class="impact-after">Despues: 1 CTA accent con copy de beneficio</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-warning);">
+    <div class="impact-metric">Duplicacion de codigo</div>
+    <div class="impact-before">Antes: ThemeToggle en 3 pantallas, logout en 2</div>
+    <div class="impact-after">Despues: ThemeToggle en 1 (Config), logout en 1 (DangerZone)</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-info);">
+    <div class="impact-metric">Cumplimiento DS-11 P8</div>
+    <div class="impact-before">Antes: toggle activo primary, sin danger-bg zone</div>
+    <div class="impact-after">Despues: secondary activo, danger-bg implementado</div>
+  </div>
+</div>
+
+<!-- ══════════ FASE 13 ══════════ -->
+<div id="fase13" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 13 · Diff Actual vs Propuesto</div><hr/></div>
+
+<div class="card" style="padding:0;overflow:hidden;">
+<table class="diff-table">
+  <thead><tr><th>Elemento</th><th class="diff-del">Actual</th><th class="diff-add">Propuesto</th><th>Motivo</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Nombre de usuario</td>
+      <td class="diff-del">email.split("@")[0] — "juan.garcia"</td>
+      <td class="diff-add">perfilQ.data?.username — "juan_garcia"</td>
+      <td>Identidad real, no derivada</td>
+    </tr>
+    <tr>
+      <td>Iniciales Avatar</td>
+      <td class="diff-del">shortName.replace(/[^a-zA-Z]/g,"").slice(0,2)</td>
+      <td class="diff-add">username.replace(/[^a-zA-Z]/g,"").slice(0,2)</td>
+      <td>Fuente de datos correcta</td>
+    </tr>
+    <tr>
+      <td>Estadisticas en hero</td>
+      <td class="diff-del">No existen en Config — solo en PerfilScreen</td>
+      <td class="diff-add">StatItem x3 (respuestas / favoritos / descartados)</td>
+      <td>Contexto de actividad del usuario sin navegar</td>
+    </tr>
+    <tr>
+      <td>Cambiar contrasena</td>
+      <td class="diff-del">Solo en PerfilScreen (2 pasos desde Config)</td>
+      <td class="diff-add">NavRow + CambiarPasswordModal en Config directamente</td>
+      <td>Reduce navigation depth</td>
+    </tr>
+    <tr>
+      <td>Logout</td>
+      <td class="diff-del">Button variant="secondary" al fondo del scroll</td>
+      <td class="diff-add">NavRow variant="danger" dentro de DangerZone</td>
+      <td>Semantica visual correcta, DS-11 P8</td>
+    </tr>
+    <tr>
+      <td>Zona de peligro</td>
+      <td class="diff-del">No existe — acciones destructivas sin distincion visual</td>
+      <td class="diff-add">View con borderColor=c.danger + backgroundColor=c.dangerBg</td>
+      <td>DS-11 P8 compliance</td>
+    </tr>
+    <tr>
+      <td>ThemeToggle — ubicacion</td>
+      <td class="diff-del">ConfiguracionScreen + PerfilScreen + LoginScreen (3 lugares)</td>
+      <td class="diff-add">Solo ConfiguracionScreen (eliminado de PerfilScreen)</td>
+      <td>DRY, un solo lugar para apariencia</td>
+    </tr>
+    <tr>
+      <td>handleLogout</td>
+      <td class="diff-del">async function sin useCallback — recrea en cada render</td>
+      <td class="diff-add">useCallback([logout]) — referencia estable</td>
+      <td>Performance, React optimization</td>
+    </tr>
+    <tr>
+      <td>Modo invitado CTAs</td>
+      <td class="diff-del">NavRow "Crear cuenta" + Link "Salir del modo invitado" = misma accion</td>
+      <td class="diff-add">Button variant="accent" + Link al fondo</td>
+      <td>Un CTA claro, copy orientado a beneficio</td>
+    </tr>
+    <tr>
+      <td>Toggle activo color</td>
+      <td class="diff-del">c.primary (azul) — via Tabs atom</td>
+      <td class="diff-add">c.secondary (verde) — DS-11 P8 "toggle activo = brand-secondary"</td>
+      <td>DS compliance (requiere fix en Tabs atom)</td>
+    </tr>
+    <tr>
+      <td>Archivos afectados</td>
+      <td class="diff-del">ConfiguracionScreen + PerfilScreen (duplicados)</td>
+      <td class="diff-add">ConfiguracionScreen (consolidado), PerfilScreen simplificado</td>
+      <td>Reduccion de duplicacion y complejidad</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div style="margin-top:16px;" class="ins ins-b">
+  <strong>Archivos que cambian para implementar esta propuesta:</strong><br/>
+  <code>screens/ConfiguracionScreen.tsx</code> — reemplazo completo con la v2<br/>
+  <code>screens/PerfilScreen.tsx</code> — eliminar ThemeToggle, logout y cambiar-contrasena (ya estan en Config)<br/>
+  <code>components/atoms/Tabs.tsx</code> — agregar prop <code>activeColor</code> para soportar secondary en ThemeToggle<br/>
+  <code>components/atoms/ThemeToggle.tsx</code> — pasar <code>activeColor={c.secondary}</code> al Tabs subyacente
+</div>
+
+<div style="height:40px;"></div>
+</div></div>
+
+<script>
+const btn = document.getElementById('theme-btn');
+btn.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  btn.textContent = document.body.classList.contains('dark') ? 'Light mode' : 'Dark mode';
+});
+// Smooth scroll para sidebar nav
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+</script>
+</body>
+</html>

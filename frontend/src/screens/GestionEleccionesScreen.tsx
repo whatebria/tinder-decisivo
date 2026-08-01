@@ -16,17 +16,25 @@ import {
   partitionTipos,
   useElectionsPrefsStore,
 } from "../store/electionsPrefs";
+import { tints } from "../theme/colors";
 import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
 
+/**
+ * TASK-045: daysUntil con validacion de fecha invalida y pasada.
+ * - NaN -> "sin fecha" (antes mostraba "NaN dias")
+ * - Pasada (days < 0) -> "Finalizada" (antes mostraba "0 dias")
+ * - Hoy (days === 0) -> "Hoy" (antes "0 dias")
+ */
 function daysUntil(dateIso?: string | null): string {
   if (!dateIso) return "sin fecha";
-  const days = Math.max(
-    0,
-    Math.ceil((new Date(dateIso).getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
-  );
+  const ms = new Date(dateIso).getTime() - Date.now();
+  if (Number.isNaN(ms)) return "sin fecha";  // fecha invalida
+  const days = Math.ceil(ms / (1000 * 60 * 60 * 24));
+  if (days < 0) return "Finalizada";
+  if (days === 0) return "Hoy";
   return `${days} días`;
 }
 
@@ -149,6 +157,30 @@ export function GestionEleccionesScreen({
           color: c.textSecondary,
         },
         loadingBox: { paddingTop: spacing.sp8, alignItems: "center" },
+        // UX-048: caja de advertencia cuando no hay elecciones activas.
+        warnBox: {
+          flexDirection: "row",
+          gap: spacing.sp2,
+          padding: spacing.sp3,
+          borderRadius: radii.rMd,
+          borderWidth: 1,
+          borderColor: c.warning,
+          backgroundColor: tints.warning50,
+          alignItems: "flex-start",
+        },
+        warnTitle: {
+          ...typography.overline,
+          textTransform: "none",
+          letterSpacing: 0,
+          fontWeight: "700",
+          color: c.warning700 ?? c.warning,
+        },
+        warnBody: {
+          ...typography.overline,
+          textTransform: "none",
+          letterSpacing: 0,
+          color: c.warning700 ?? c.warning,
+        },
       }),
     [c],
   );
@@ -187,7 +219,20 @@ export function GestionEleccionesScreen({
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>Activas</Text>
         {activas.length === 0 ? (
-          <Text style={styles.emptyText}>Ninguna activa por ahora.</Text>
+          <>
+            <Text style={styles.emptyText}>Ninguna activa por ahora.</Text>
+            {/* UX-048: alerta visible cuando 0 elecciones activas. */}
+            <View style={styles.warnBox}>
+              <Icon name="info" size={16} color={c.warning} />
+              <View style={styles.infoTextCol}>
+                <Text style={styles.warnTitle}>Home estará vacío</Text>
+                <Text style={styles.warnBody}>
+                  Sin elecciones activas no verás candidatos ni tu match.
+                  Activa al menos una abajo.
+                </Text>
+              </View>
+            </View>
+          </>
         ) : (
           activas.map((tipo) => (
             <View key={tipo.id} style={styles.card}>

@@ -35,6 +35,11 @@ export interface TabsProps<T extends string = string> {
    * superar el ancho disponible en pantallas pequenas.
    */
   scrollable?: boolean;
+  /**
+   * TASK-031: color del tab activo. Default: `c.primary` (azul).
+   * Usar `c.secondary` (verde) para toggles de estado activo (DS-11 P8).
+   */
+  activeColor?: string;
 }
 
 export function Tabs<T extends string = string>({
@@ -43,8 +48,11 @@ export function Tabs<T extends string = string>({
   items,
   style,
   scrollable = false,
+  activeColor,
 }: TabsProps<T>) {
   const c = useThemeColors();
+  // TASK-031: usa activeColor si se provee, fallback a c.primary.
+  const resolvedActiveColor = activeColor ?? c.primary;
 
   const s = useMemo(
     () =>
@@ -67,7 +75,7 @@ export function Tabs<T extends string = string>({
         },
         tabActive: { backgroundColor: c.card },
         label: { fontSize: 14, fontWeight: "500", color: c.textSecondary },
-        labelActive: { color: c.primary },
+        labelActive: { color: resolvedActiveColor },
         count: {
           minWidth: 20,
           height: 20,
@@ -77,11 +85,11 @@ export function Tabs<T extends string = string>({
           alignItems: "center",
           justifyContent: "center",
         },
-        countActive: { backgroundColor: c.primary },
+        countActive: { backgroundColor: resolvedActiveColor },
         countText: { fontSize: 11, fontWeight: "600", color: c.textSecondary },
         countTextActive: { color: c.textOnPrimary },
       }),
-    [c]
+    [c, resolvedActiveColor]
   );
 
   const inner = (

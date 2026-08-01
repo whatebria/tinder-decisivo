@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pantalla 7 -- Perfil del Candidato -- Analisis 11 Fases</title>
+<link rel="stylesheet" href="ds-shared.css"/>
+<style>
+.audit-hero{background:var(--c-hero);padding:28px 36px 24px;color:#fff;margin:-40px -36px 32px;}
+.audit-hero h1{font-size:22px;font-weight:900;margin-bottom:4px;}
+.audit-hero p{font-size:12px;opacity:.65;max-width:700px;line-height:1.7;}
+.audit-hero .meta{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;}
+.audit-hero .meta-item{font-size:11px;opacity:.75;}
+
+.sec-divider{display:flex;align-items:center;gap:12px;margin:32px 0 20px;}
+.sec-divider hr{flex:1;border:none;border-top:1px solid var(--c-border);}
+.sec-divider-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--c-text3);white-space:nowrap;}
+
+.sev{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.sev-crit{background:#FEE2E2;color:#991B1B;}
+.sev-high{background:#FEF3C7;color:#92400E;}
+.sev-med{background:#EFF6FF;color:#1E40AF;}
+.sev-low{background:var(--c-surface2);color:var(--c-text2);}
+.dark .sev-crit{background:rgba(184,92,92,.2);color:#F9ABAB;}
+.dark .sev-high{background:rgba(200,155,92,.2);color:#E5C07B;}
+.dark .sev-med{background:rgba(92,138,184,.2);color:#93C5FD;}
+
+.comp-card{border:1.5px solid var(--c-border);border-radius:12px;overflow:hidden;margin-bottom:10px;}
+.comp-head{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--c-surface);border-bottom:1px solid var(--c-border);}
+.comp-name{font-family:monospace;font-size:12px;font-weight:700;color:var(--c-primary);}
+.comp-path{font-size:9px;color:var(--c-text3);font-family:monospace;}
+.comp-body{padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;background:var(--c-bg);}
+.comp-col-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text3);margin-bottom:4px;}
+.comp-item{font-size:11px;color:var(--c-text2);line-height:1.6;padding-left:10px;border-left:2px solid var(--c-border);margin-bottom:3px;}
+.comp-item.ok{border-color:var(--c-success);}
+.comp-item.warn{border-color:var(--c-warning);}
+.comp-item.err{border-color:var(--c-danger);}
+
+.problem{border-radius:10px;padding:12px 14px;margin-bottom:8px;border-left:3px solid;}
+.problem.crit{background:var(--c-danger-bg);border-color:var(--c-danger);}
+.problem.high{background:var(--c-warning-bg);border-color:var(--c-warning);}
+.problem.med{background:var(--c-info-bg);border-color:var(--c-info);}
+.problem.low{background:var(--c-surface2);border-color:var(--c-border);}
+.problem-title{font-size:12px;font-weight:700;color:var(--c-text);margin-bottom:3px;}
+.problem-desc{font-size:11px;color:var(--c-text2);line-height:1.6;}
+.problem-evidence{font-size:10px;font-family:monospace;color:var(--c-text3);margin-top:4px;}
+
+.bench-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;}
+.bench-card{border:1.5px solid var(--c-border);border-radius:12px;padding:12px;background:var(--c-surface);}
+.bench-app{font-size:11px;font-weight:800;color:var(--c-primary);margin-bottom:3px;}
+.bench-pattern{font-size:10px;font-weight:700;color:var(--c-text);margin-bottom:4px;}
+.bench-desc{font-size:10px;color:var(--c-text2);line-height:1.6;}
+.bench-adapt{font-size:10px;color:var(--c-success);margin-top:6px;font-weight:600;}
+
+.wireframe{font-family:monospace;font-size:11px;line-height:1.9;color:var(--c-text2);background:var(--c-surface);border-radius:10px;padding:16px;border:1.5px solid var(--c-border);}
+.wireframe-section{color:var(--c-text);font-weight:700;}
+.wireframe-sep{color:var(--c-text3);}
+
+/* phone mockup */
+.phone-frame{width:230px;border-radius:32px;border:3px solid var(--c-border2);background:var(--c-bg);overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.12);flex-shrink:0;}
+.phone-status{height:32px;background:var(--c-bg);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--c-text3);}
+
+/* detalle candidato mockup */
+.dc-topbar{padding:10px 14px 6px;border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:8px;}
+.dc-back{font-size:18px;color:var(--c-primary);}
+.dc-topbar-text{flex:1;}
+.dc-topbar-title{font-size:14px;font-weight:700;color:var(--c-text);}
+.dc-topbar-sub{font-size:9px;color:var(--c-text2);}
+.dc-hero{background:var(--c-primary);padding:20px 14px;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.dc-avatar{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;border:2px solid rgba(255,255,255,.3);}
+.dc-partido{background:rgba(255,255,255,.15);color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:6px;}
+.dc-hero-name{font-size:18px;font-weight:700;color:#fff;text-align:center;}
+.dc-hero-sub{font-size:10px;color:rgba(255,255,255,.65);text-align:center;}
+.dc-match-block{padding:12px 14px;display:flex;flex-direction:column;align-items:center;gap:4px;border-bottom:1px solid var(--c-border);}
+.dc-match-pct{font-size:36px;font-weight:900;line-height:1.1;}
+.dc-match-label{font-size:9px;color:var(--c-text2);text-transform:uppercase;letter-spacing:.4px;font-weight:600;}
+.dc-tier{background:var(--c-success-bg);border:1px solid var(--c-success);color:var(--c-success);font-size:9px;font-weight:700;padding:2px 8px;border-radius:12px;display:inline-flex;align-items:center;gap:4px;}
+.dc-actions{display:flex;justify-content:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--c-border);}
+.dc-action-btn{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--c-border);display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--c-surface);}
+.dc-action-btn.fav{background:var(--c-primary);border-color:var(--c-primary);color:#fff;}
+.dc-action-btn.disc{background:var(--c-surface);}
+.dc-tabs{display:flex;gap:0;border-bottom:2px solid var(--c-border);}
+.dc-tab{flex:1;text-align:center;padding:8px 4px;font-size:10px;font-weight:600;color:var(--c-text2);border-bottom:2px solid transparent;margin-bottom:-2px;}
+.dc-tab.active{color:var(--c-primary);border-bottom-color:var(--c-primary);}
+.dc-body{padding:10px 14px;display:flex;flex-direction:column;gap:8px;}
+.dc-section-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text2);}
+.dc-text{font-size:10px;color:var(--c-text);line-height:1.5;}
+.dc-postura-card{background:var(--c-card);border:1px solid var(--c-border);border-radius:8px;padding:8px;}
+.dc-postura-q{font-size:10px;font-weight:600;color:var(--c-text);margin-bottom:2px;}
+.dc-postura-a-agree{font-size:10px;font-weight:700;color:var(--c-success);}
+.dc-postura-a-disagree{font-size:10px;font-weight:700;color:var(--c-danger);}
+.dc-postura-a-neutral{font-size:10px;font-weight:700;color:var(--c-text2);}
+.dc-ver-todas{font-size:10px;color:var(--c-primary);font-weight:700;text-align:center;padding:4px;}
+
+/* proposed hero — usa primary en lugar de accent2 */
+.dc-hero-proposed{background:var(--c-primary);padding:20px 14px;display:flex;flex-direction:column;align-items:center;gap:6px;}
+
+.diff-table{width:100%;border-collapse:collapse;}
+.diff-table th{background:var(--c-surface2);font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text2);padding:6px 10px;text-align:left;border-bottom:1px solid var(--c-border);}
+.diff-table td{padding:8px 10px;font-size:11px;vertical-align:top;border-bottom:1px solid var(--c-border2);}
+.diff-del{color:var(--c-danger);}
+.diff-add{color:var(--c-success);}
+
+.impact-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;}
+.impact-card{border-radius:10px;padding:12px;border:1.5px solid var(--c-border);}
+.impact-metric{font-size:11px;font-weight:700;color:var(--c-text);margin-bottom:4px;}
+.impact-before{font-size:10px;color:var(--c-danger);margin-bottom:2px;}
+.impact-after{font-size:10px;color:var(--c-success);}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-logo">VotoAfin DS</div>
+  <div class="sidebar-ver">v1.0 · Agosto 2026</div>
+  <hr/>
+  <div class="sidebar-label">11 Fases</div>
+  <a href="#fase0">F0 · Reverse Engineering</a>
+  <a href="#fase1">F1 · Componentes</a>
+  <a href="#fase2">F2 · Auditoria UX/UI</a>
+  <a href="#fase3">F3 · Benchmarking</a>
+  <a href="#fase4">F4 · Problemas</a>
+  <a href="#fase5">F5 · Propuesta</a>
+  <a href="#fase7">F7 · Sistema Visual</a>
+  <a href="#fase8">F8 · Wireframe</a>
+  <a href="#fase9">F9 · Mockup</a>
+  <a href="#fase11">F11 · Justificacion</a>
+  <a href="#fase12">F12 · Impacto</a>
+  <a href="#fase13">F13 · Diff</a>
+  <hr/>
+  <div class="sidebar-label">Navegacion</div>
+  <a href="audit-config-completo.html">← Pantalla 6</a>
+  <div class="sidebar-bottom">
+    <button class="theme-btn" id="theme-btn">Dark mode</button>
+  </div>
+</nav>
+
+<div class="main"><div class="content">
+
+<div class="audit-hero">
+  <div style="opacity:.5;font-size:10px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">
+    Pantalla 7 / 11 · 11 Fases (sin F6/F10) · Principal Product Designer + UX + DS Architect
+  </div>
+  <h1>DetalleCandidatoScreen -- Perfil del Candidato</h1>
+  <p>La pantalla mas compleja del sistema: 14 KB, 4 origenes de navegacion, 3 tabs, 8 hooks de datos, 5 sub-componentes locales y 6 organisms externos. La arquitectura de componentes es solida. Los problemas son de presentacion y semantica visual: el hero usa accent2 (token de hover) en lugar del token de hero, el chip de confianza tiene una semantica duplicada, y el estado de carga de posturas usa Text en lugar de Spinner.</p>
+  <div class="meta">
+    <div class="meta-item">DetalleCandidatoScreen.tsx · 14.1 KB</div>
+    <div class="meta-item">ResumenTab · NoticiasTab · ProfileHero · CandidatoPosturas · MatchTier</div>
+    <div class="meta-item">8 hooks · 4 origenes de navegacion · 3 tabs</div>
+  </div>
+</div>
+
+<!-- ══════════ FASE 0 ══════════ -->
+<div id="fase0" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 0 · Reverse Engineering</div><hr/></div>
+
+<div class="g2" style="margin-bottom:16px;">
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Archivos involucrados</div>
+    <div style="font-family:monospace;font-size:11px;line-height:1.9;color:var(--c-text2);">
+      screens/DetalleCandidatoScreen.tsx (14.1 KB)<br/>
+      screens/DetalleCandidato/ResumenTab.tsx (4.5 KB)<br/>
+      screens/DetalleCandidato/NoticiasTab.tsx (3.3 KB)<br/>
+      components/organisms/ProfileHero.tsx<br/>
+      components/organisms/CandidatoPosturas.tsx<br/>
+      components/organisms/MatchExplanation.tsx<br/>
+      components/organisms/RadarChart.tsx<br/>
+      components/molecules/MatchTier.tsx<br/>
+      components/molecules/NewsCard.tsx<br/>
+      services/matching.ts (getMatchColor, formatMatchPercentage)<br/>
+      utils/candidato.ts (iniciales, nombreCompleto)<br/>
+      constants/features.ts (SHOW_NOTICIAS)
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Hooks consumidos</div>
+    <div style="font-size:11px;line-height:1.9;color:var(--c-text2);">
+      <strong>useCandidato(id)</strong> — datos del candidato<br/>
+      <strong>useNoticiasCandidato(id)</strong> — noticias (SHOW_NOTICIAS)<br/>
+      <strong>usePosturasCandidato(id, tipoId)</strong> — posturas<br/>
+      <strong>useFavoritos()</strong> — para saber si es favorito<br/>
+      <strong>useDescartados()</strong> — para saber si es descartado<br/>
+      <strong>useTiposEleccion()</strong> — para el nombre de la eleccion<br/>
+      <strong>useToggleFavorito()</strong> — mutacion<br/>
+      <strong>useToggleDescartado()</strong> — mutacion<br/>
+      <br/>
+      <strong>Stores:</strong> useAuthStore (isGuest), useCuestionarioStore (tipoEleccionId)
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px;">
+  <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:10px;">Arbol de componentes</div>
+  <div style="font-family:monospace;font-size:11px;line-height:2;color:var(--c-text2);">
+    &lt;&gt;<br/>
+    &nbsp;&nbsp;ScreenChrome<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;ScrollView<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ScreenTopBar [title="Perfil de candidato", subtitle=eleccionNombre]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ProfileHero [name, initials, partido, subtitle, tilt="default"]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Avatar [size="lg"] -- usa iniciales del candidato (correcto)<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Badge [variant="info"] -- partido (ISSUE: variant deberia ser neutral/secondary)<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// fondo: c.accent2 (ISSUE: DS-11 P6 pide brand-hero)<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[if hasMatch] MatchBlock (sub-componente local)<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Text [fontSize:40] -- "87%" (HARDCODE documentado)<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Text -- "Compatibilidad"<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MatchTier [tier=confianzaToTier(confianza), label="Confianza alta"]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IconButton [variant="ghost"] -- info icon → modal<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[if !hasMatch] EmptyMatchBlock<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Button → navigate("Cuestionario")<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[if !isGuest] ActionRow (sub-componente local)<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IconButton [heart] -- fav toggle<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IconButton [close] -- desc toggle (ISSUE: solid activo = primary bg, no danger bg)<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IconButton [link] -- share<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Tabs [resumen|posturas|noticias?]<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[tab=resumen] ResumenTab<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bio, propuesta, RadarChart (si >=3 ejes), posturas.slice(0,3) (HARDCODE), MatchExplanation<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[tab=posturas] CandidatoPosturas<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// estado loading: Text "Cargando posturas..." en lugar de Spinner (ISSUE)<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[tab=noticias && SHOW_NOTICIAS] NoticiasTab<br/>
+    &nbsp;&nbsp;ShareModal<br/>
+    &nbsp;&nbsp;Modal [confianzaInfoOpen]<br/>
+    &nbsp;&nbsp;CoachMarkTour [tourId="perfilCandidato"] -- fuera de ScreenChrome (correcto)<br/>
+    &lt;/&gt;
+  </div>
+</div>
+
+<div class="g2">
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Flujo del usuario</div>
+    <div style="font-size:11px;line-height:1.8;color:var(--c-text2);">
+      <strong>4 origenes distintos:</strong><br/>
+      1. Resultados → DetalleCandidato (con matchPct + breakdown)<br/>
+      2. Candidatos → DetalleCandidato (con o sin matchPct)<br/>
+      3. Guardados → DetalleCandidato<br/>
+      4. Comparar → DetalleCandidato<br/>
+      <br/>
+      <strong>Variantes de estado:</strong><br/>
+      - Usuario autenticado con match calculado (estado completo)<br/>
+      - Usuario autenticado sin cuestionario (emptyMatchBlock)<br/>
+      - Usuario invitado (sin ActionRow, sin MatchExplanation)<br/>
+      <br/>
+      <strong>Puntos de abandono:</strong><br/>
+      - Sin "Ver todas las posturas" en ResumenTab<br/>
+      - Sin count badge en la tab Posturas para motivar el cambio
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Objetivo funcional</div>
+    <div style="font-size:11px;line-height:1.8;color:var(--c-text2);">
+      <strong>Que resuelve:</strong> contexto completo del candidato para tomar la decision de voto<br/>
+      <strong>Tarea principal:</strong> evaluar la compatibilidad y las posturas del candidato<br/>
+      <strong>KPI impactado:</strong> confianza en la decision de voto, tiempo de evaluacion<br/>
+      <strong>Conversion:</strong> usuario sin match → iniciar cuestionario<br/>
+      <br/>
+      <strong>Tension actual:</strong> las posturas destacadas (3) en el ResumenTab
+      no tienen CTA para ver todas, forzando al usuario a descubrir la tab "Posturas"
+      por si mismo. Sin hint de discoverability.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FASE 1 ══════════ -->
+<div id="fase1" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 1 · Auditoria de Componentes Frontend</div><hr/></div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">ProfileHero</div><div class="comp-path">components/organisms/ProfileHero.tsx</div></div>
+    <span class="sev sev-crit" style="margin-left:auto;">Token incorrecto</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Fortalezas</div>
+      <div class="comp-item ok">HeroTilt type para variantes</div>
+      <div class="comp-item ok">Avatar + Badge + StatBlock reutilizables</div>
+      <div class="comp-item ok">Tokens de spacing y radii correctos</div>
+      <div class="comp-item ok">Soporte de stats opcionales</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Problemas</div>
+      <div class="comp-item err">tilt="default" usa c.accent2 como fondo — DS-11 P6: "Header background → --color-brand-hero o foto". c.accent2 es el token de HOVER de buttons/links, no de fondos de hero</div>
+      <div class="comp-item err">Badge variant="info" para el partido — partido no es informacion, es identidad. DS-04 dice info=azul para info contextual, no identidad. Deberia ser variant="neutral" o una variante nueva "party"</div>
+      <div class="comp-item warn">tilt prop: "left"/"center"/"right" nunca usados en esta pantalla — YAGNI en el contexto del DetalleCandidato</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">MatchBlock (sub-componente local)</div><div class="comp-path">DetalleCandidatoScreen.tsx — sub-componente inline</div></div>
+    <span class="sev sev-high" style="margin-left:auto;">Hardcode + semantica doble</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Fortalezas</div>
+      <div class="comp-item ok">matchPct formateado via formatMatchPercentage()</div>
+      <div class="comp-item ok">Color del % via getMatchColor() — semantico y consistente</div>
+      <div class="comp-item ok">Modal de explicacion de confianza</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Problemas</div>
+      <div class="comp-item err">fontSize:40 hardcodeado — unica excepcion a la escala tipografica. Documentado, pero un token "typography.hero" o "typography.display2" eliminaría el hardcode</div>
+      <div class="comp-item warn">confianzaToTier() tiene semantica de confianza estadistica (ALTA/BAJA del backend), pero MatchTier fue disenado para match de afinidad. Dos conceptos distintos en el mismo componente visual</div>
+      <div class="comp-item warn">confianzaToTier: si backend envía "MEDIA" cae al else→"mid". Si envía valor inesperado, silenciosamente es "mid". Sin test ni log</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">ActionRow (sub-componente local)</div><div class="comp-path">DetalleCandidatoScreen.tsx — sub-componente inline</div></div>
+    <span class="sev sev-high" style="margin-left:auto;">Estado activo incorrecto</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Fortalezas</div>
+      <div class="comp-item ok">accessibilityLabel dinamico ("Quitar de favoritos" vs "Marcar como favorito")</div>
+      <div class="comp-item ok">Loading state via disabled prop</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Problemas</div>
+      <div class="comp-item err">IconButton variant="solid" cuando isDescartado=true usa fondo primary (azul). El icono X (descartar) activo deberia tener fondo danger, no primary — semanticamente incorrecto</div>
+      <div class="comp-item warn">Los 3 botones (fav, desc, share) tienen el mismo tamano sin label — un usuario nuevo no sabe que hace el corazon vs la X vs el link sin leer el accessibilityLabel</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">CandidatoPosturas</div><div class="comp-path">components/organisms/CandidatoPosturas.tsx</div></div>
+    <span class="sev sev-high" style="margin-left:auto;">Loading state incorrecto</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Fortalezas</div>
+      <div class="comp-item ok">Agrupacion por eje tematico con useMemo — eficiente</div>
+      <div class="comp-item ok">getLikertColor() para semantica de respuesta</div>
+      <div class="comp-item ok">Expandir/colapsar justificacion via toggle</div>
+      <div class="comp-item ok">extractUrl() para link a fuente</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Problemas</div>
+      <div class="comp-item err">Loading state: Text "Cargando posturas..." en lugar de Spinner — inconsistente con el resto de la app (CompararScreen, HomeScreen usan Spinner)</div>
+      <div class="comp-item warn">hint "Toca para ver justificacion" aparece incluso cuando p.justificacion es null — el usuario toca y no pasa nada visible (la View expandida queda vacia)</div>
+      <div class="comp-item warn">toggle() sin useCallback — se recrea en cada render del componente padre</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">ResumenTab</div><div class="comp-path">screens/DetalleCandidato/ResumenTab.tsx</div></div>
+    <span class="sev sev-med" style="margin-left:auto;">Discoverability</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Fortalezas</div>
+      <div class="comp-item ok">Sin estado propio — datos via props, testeable</div>
+      <div class="comp-item ok">RadarChart condicional (≥3 ejes)</div>
+      <div class="comp-item ok">getLikertColor para colores semanticos</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Problemas</div>
+      <div class="comp-item warn">posturasDestacadas = posturas.slice(0, 3) — numero magico. Sin prop configurable. Sin CTA "Ver todas las posturas →" para guiar al usuario a la tab Posturas</div>
+      <div class="comp-item warn">Si posturas tiene exactamente 3, el usuario no sabe si hay mas. Si tiene 0, la seccion "Posturas destacadas" no aparece, pero tampoco hay hint</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">NoticiasTab</div><div class="comp-path">screens/DetalleCandidato/NoticiasTab.tsx</div></div>
+    <span class="sev sev-med" style="margin-left:auto;">Schema mismatch</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Fortalezas</div>
+      <div class="comp-item ok">NoticiaDetailSheet para detalle completo</div>
+      <div class="comp-item ok">Estado vacío manejado</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Problemas</div>
+      <div class="comp-item warn">formatWhen usa 3 casts `(n as unknown as {...})` para distintos nombres de campo de fecha — schema mismatch entre Noticia type y API real</div>
+      <div class="comp-item warn">sentiment hardcodeado a "neutral" — si no se implementara nunca, YAGNI. Si se va a implementar, el type Sentiment ya existe pero no se usa</div>
+      <div class="comp-item warn">SHOW_NOTICIAS feature flag: si es siempre false, toda NoticiasTab es dead code</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">RadarChart</div><div class="comp-path">components/atoms/RadarChart.tsx — atom SVG, usado en ResumenTab (size=260) y RankingRow (size=56)</div></div>
+    <span class="sev sev-crit" style="margin-left:auto;">A11y + DRY violation</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Fortalezas</div>
+      <div class="comp-item ok">Calculo correcto: polarToCartesian, grid concentrico, vertices marcados</div>
+      <div class="comp-item ok">Guard: ejes.length menor que 3 retorna null — evita chart ilegible</div>
+      <div class="comp-item ok">showLabels=false para tallas pequenas (RankingRow usa size=56)</div>
+      <div class="comp-item ok">color prop permite usar getMatchColor() desde el caller — semantica correcta</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Problemas</div>
+      <div class="comp-item err">LABEL_MAP hardcodeado en el componente: DS-11 P6 dice "via API de dimensiones.ts, nunca hardcodeado". Si se agrega un eje nuevo, hay que actualizar LABEL_MAP ademas de dimensiones.ts — DRY violation</div>
+      <div class="comp-item err">Sin accessibilityLabel en el Svg: WCAG 1.1.1 — contenido no-texto sin alternativa textual. Un screen reader no puede interpretar el chart. El usuario con VoiceOver activo no recibe ningun dato del radar</div>
+      <div class="comp-item warn">fontSize={11} hardcodeado en SvgText — fuera de la escala tipografica del DS. Dificil de ajustar globalmente si la escala cambia</div>
+      <div class="comp-item warn">Magic numbers: radius = size*0.35 (con labels) / size*0.45 (sin labels), label offset = radius+18, fillOpacity=0.25 — sin tokens ni constantes documentadas</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FASE 2 ══════════ -->
+<div id="fase2" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 2 · Auditoria UX / UI Profunda</div><hr/></div>
+
+<div class="g2">
+  <div>
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:10px;">UX</div>
+    <div class="ins ins-a" style="margin-bottom:8px;">
+      <strong>Discoverability zero de la tab Posturas:</strong> el usuario ve "Posturas destacadas" con 3 items en el ResumenTab. No hay indicacion de que hay mas, no hay CTA "Ver todas", no hay count visible. El usuario tiene que descubrir solo que existe la tab "Posturas" con el numero completo.
+    </div>
+    <div class="ins ins-a" style="margin-bottom:8px;">
+      <strong>Semantica visual del descartar activo:</strong> cuando el candidato esta descartado, el boton X tiene fondo azul (primary solid). El azul en la app comunica afinidad y acciones positivas. Un candidato descartado deberia tener el boton con fondo danger, no primary.
+    </div>
+    <div class="ins ins-b" style="margin-bottom:8px;">
+      <strong>Confianza estadistica vs afinidad en el mismo chip:</strong> el MatchTier fue disenado para afinidad entre usuario y candidato (alta/media/baja coincidencia). En este screen se reutiliza para expresar la confianza estadistica del calculo (ALTA/BAJA del backend). Son dos conceptos distintos que el usuario podria confundir.
+    </div>
+    <div class="ins ins-b" style="margin-bottom:8px;">
+      <strong>ActionRow sin labels visuales:</strong> 3 IconButtons sin texto visible. En mobile los iconos de corazon, X y link son reconocibles — pero el link (compartir) podria confundirse con "abrir en navegador" o "copiar URL del perfil".
+    </div>
+  </div>
+  <div>
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:10px;">UI / Design System</div>
+    <div class="ins ins-a" style="margin-bottom:8px;">
+      <strong>ProfileHero usa c.accent2 como fondo:</strong> DS-11 P6: "Header background → --color-brand-hero o foto". c.accent2 es el token definido en DS-04 para el estado hover de botones e interacciones secundarias. Usarlo como fondo de un hero institutcional es una violacion semantica del sistema de tokens.
+    </div>
+    <div class="ins ins-b" style="margin-bottom:8px;">
+      <strong>Badge variant="info" para el partido:</strong> DS-04 dice que "info" es azul para informacion contextual. El partido de un candidato no es informacion contextual — es identidad. Visualmente correcto (badge azul es legible), pero semanticamente incorrecto.
+    </div>
+    <div class="ins ins-r" style="margin-bottom:8px;">
+      <strong>Mobile first — ActionRow:</strong> los 3 botones de 40px cumplen el minimo de tap target WCAG 2.5.5 (44px es el ideal, 40px es acceptable). Sin embargo, el gap entre botones es sp3 (~12px), lo que en mobile angosto puede generar taps accidentales.
+    </div>
+    <div class="ins ins-b" style="margin-bottom:8px;">
+      <strong>CandidatoPosturas hint "Toca para ver justificacion":</strong> aparece aunque no haya justificacion. El usuario toca y no pasa nada visible (la View condicional esta vacia). Feedback incorrecto — viola el principio de visibilidad del sistema (Nielsen #1).
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FASE 3 ══════════ -->
+<div id="fase3" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 3 · Benchmarking</div><hr/></div>
+
+<div class="bench-grid">
+  <div class="bench-card">
+    <div class="bench-app">LinkedIn</div>
+    <div class="bench-pattern">Hero con foto + rol + empresa</div>
+    <div class="bench-desc">Header institucional con foto de perfil grande, nombre, cargo y empresa. Fondo primary o foto para jerarquia visual maxima.</div>
+    <div class="bench-adapt">Adaptacion: ProfileHero con fondo --color-brand-primary (no accent2) para seriedad institucional.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Tinder</div>
+    <div class="bench-pattern">Actions row con labels bajo iconos</div>
+    <div class="bench-desc">X, corazon y estrella tienen labels contextuales que aparecen en el primer uso. El usuario aprende el patron rapidamente.</div>
+    <div class="bench-adapt">Adaptacion: agregar labels cortos ("Guardar", "Descartar", "Compartir") debajo de los iconos o como tooltip en primer uso via CoachMark.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Airbnb</div>
+    <div class="bench-pattern">Tabs con contadores y preview de contenido</div>
+    <div class="bench-desc">Las tabs muestran el numero de items (Reviews: 47) y un preview del primer item para motivar explorar la tab.</div>
+    <div class="bench-adapt">Adaptacion: la tab "Posturas" ya tiene el count. Agregar un hint en ResumenTab ("47 posturas — ver todas →") para motivar el cambio.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Spotify (artista)</div>
+    <div class="bench-pattern">Seccion "Popular" con ver mas</div>
+    <div class="bench-desc">Las 5 canciones mas populares tienen un boton "Ver mas" explicito. No se asume que el usuario descubrira las tabs.</div>
+    <div class="bench-adapt">Adaptacion: "Posturas destacadas (3 de N) — Ver todas las posturas →" que cambia a la tab Posturas programaticamente.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">16Personalities</div>
+    <div class="bench-pattern">Radar / spider chart prominente</div>
+    <div class="bench-desc">El radar chart es el elemento central de la pantalla, no secundario. Los ejes tienen labels directamente en el chart.</div>
+    <div class="bench-adapt">El RadarChart ya existe y esta implementado. Asegurarse de que tiene labels de ejes legibles en mobile (verificar implementacion).</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Political Compass</div>
+    <div class="bench-pattern">Score numerico prominente + contexto</div>
+    <div class="bench-desc">El porcentaje de match es el dato mas importante. Tiene contexto adicional (que significa, como se calculo) accesible pero no bloqueante.</div>
+    <div class="bench-adapt">El MatchBlock actual tiene esto bien implementado (el modal de info de confianza). El problema es la semantica visual del chip, no la funcionalidad.</div>
+  </div>
+</div>
+
+<!-- ══════════ FASE 4 ══════════ -->
+<div id="fase4" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 4 · Problemas Detectados</div><hr/></div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-danger);margin-bottom:6px;">Critico</div>
+
+<div class="problem crit">
+  <div class="problem-title">P-C01 · ProfileHero usa c.accent2 como fondo de hero (token de hover, no de hero)</div>
+  <div class="problem-desc">DS-11 P6: "Header background → --color-brand-hero o foto. Jerarquia y seriedad institucional." El componente ProfileHero con tilt="default" (el unico valor usado en DetalleCandidatoScreen) aplica c.accent2 como backgroundColor. DS-04 define accent2 como el token de estado hover para botones e interacciones — no como un fondo de hero. Usar un token de hover en un hero institutcional es una violacion semantica del sistema de design tokens.</div>
+  <div class="problem-evidence">ProfileHero.tsx L49-54: TILT_BG = { left:c.accent2, center:c.bg, right:c.card, default:c.accent2 }</div>
+</div>
+
+<div class="problem crit">
+  <div class="problem-title">P-C02 · CandidatoPosturas: estado loading usa Text en lugar de Spinner</div>
+  <div class="problem-desc">El estado de carga de posturas muestra un Text con "Cargando posturas..." en lugar del componente Spinner que el DS define para estados de carga. Esto viola la consistencia del sistema (CompararScreen, HomeScreen y DetalleCandidatoScreen propio usan Spinner). El usuario ve un texto plano donde el resto de la app muestra feedback visual animado.</div>
+  <div class="problem-evidence">CandidatoPosturas.tsx L65: return (&lt;Text style={{ color: c.textSecondary }}&gt;Cargando posturas...&lt;/Text&gt;);</div>
+</div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-warning);margin-bottom:6px;margin-top:12px;">Alto</div>
+
+<div class="problem high">
+  <div class="problem-title">P-A01 · ActionRow: IconButton "descartar activo" usa fondo primary en lugar de danger</div>
+  <div class="problem-desc">Cuando isDescartado=true, el IconButton del boton X usa variant="solid" cuyo fondo es c.primary (azul). El azul en esta app comunica afinidad positiva. Un candidato descartado activamente deberia tener el boton con fondo danger/rojo, no primary/azul. Esta incongruencia semantica confunde al usuario sobre el estado actual.</div>
+  <div class="problem-evidence">DetalleCandidatoScreen.tsx L341: variant={isDescartado ? "solid" : "soft"} — solid usa c.primary bg internamente</div>
+</div>
+
+<div class="problem high">
+  <div class="problem-title">P-A02 · ResumenTab: posturas.slice(0, 3) sin CTA para ver todas</div>
+  <div class="problem-desc">El ResumenTab muestra maximo 3 posturas como "Posturas destacadas". No hay CTA "Ver todas", no hay count total. El usuario no sabe cuantas hay, ni que existe una tab dedicada con el listado completo. Para un producto cuyo valor central es el matching por posturas, ocultar las posturas sin pista de discoverability es un problema grave de UX.</div>
+  <div class="problem-evidence">ResumenTab.tsx L42: const posturasDestacadas = posturas.slice(0, 3);</div>
+</div>
+
+<div class="problem high">
+  <div class="problem-title">P-A03 · CandidatoPosturas: hint "Toca para ver justificacion" aparece sin justificacion</div>
+  <div class="problem-desc">El hint aparece para TODAS las posturas, incluso cuando p.justificacion es null. El usuario toca y la View condicional queda vacia — sin feedback. Viola el principio de visibilidad del sistema (Nielsen #1) y genera una experiencia de bug aparente.</div>
+  <div class="problem-evidence">CandidatoPosturas.tsx L86-87: {isOpen && p.justificacion ? ... } y L89: el hint aparece sin condicionar a si hay justificacion</div>
+</div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-info);margin-bottom:6px;margin-top:12px;">Medio</div>
+
+<div class="problem med">
+  <div class="problem-title">P-M01 · confianzaToTier: funcion sin test, sin export, falla silenciosa para valores desconocidos</div>
+  <div class="problem-desc">La funcion modulo-local mapea "ALTA"→"high", else→"mid", "BAJA"→"low". Si el backend agrega "MEDIA" como valor explicito, cae a "mid" correctamente pero por coincidencia. Si agrega "VERIFICADA_ALTA" u otro valor, silenciosamente muestra "mid" sin warning.</div>
+  <div class="problem-evidence">DetalleCandidatoScreen.tsx L75-80: function confianzaToTier(confianza: string | null)</div>
+</div>
+
+<div class="problem med">
+  <div class="problem-title">P-M02 · NoticiasTab: 3 casts as-unknown-as para campos de fecha — schema mismatch</div>
+  <div class="problem-desc">formatWhen() hace tres casteos sucesivos `(n as unknown as { campo? })` para encontrar el campo de fecha correcto entre fecha_publicacion, fecha y created_at. Esto indica que el tipo Noticia del frontend no coincide con la respuesta real de la API. El schema deberia alinearse en lugar de parchear en la UI.</div>
+  <div class="problem-evidence">NoticiasTab.tsx L26-32: 3x as unknown as {...} para resolver el campo de fecha</div>
+</div>
+
+<div class="problem med">
+  <div class="problem-title">P-M03 · ProfileHero Badge variant="info" para el partido — semantica incorrecta</div>
+  <div class="problem-desc">El partido del candidato se muestra con Badge variant="info" (azul informacional). DS-04: "info → informacion contextual, notificaciones". El partido es identidad, no informacion contextual. Deberia usar variant="neutral" (sin color especifico) o una variante "party" con un color neutral.</div>
+  <div class="problem-evidence">ProfileHero.tsx L63: &lt;Badge variant="info"&gt;{partido}&lt;/Badge&gt;</div>
+</div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:6px;margin-top:12px;">Bajo</div>
+
+<div class="problem low">
+  <div class="problem-title">P-RC01 · RadarChart: LABEL_MAP hardcodeado viola DS-11 P6</div>
+  <div class="problem-desc">DS-11 P6: "DimensionCards borde y labels -> getDimensionColors() / via dimensiones.ts. Nunca hardcodeado." El LABEL_MAP en RadarChart.tsx replica los nombres de dimensiones que ya existen en domain/dimensiones.ts. Si se agrega un eje nuevo, hay que actualizar ambos archivos. Es una violacion DRY y del contrato del DS.</div>
+  <div class="problem-evidence">RadarChart.tsx L39-48: const LABEL_MAP: Record&lt;string, string&gt; = { ECONOMIA: "Economia", SOCIEDAD: "Sociedad", ... }</div>
+</div>
+
+<div class="problem crit">
+  <div class="problem-title">P-RC02 · RadarChart: sin alternativa textual accesible (WCAG 1.1.1)</div>
+  <div class="problem-desc">El SVG del radar chart no tiene accessibilityLabel, accessibilityHint, ni ningun rol de accesibilidad en el elemento Svg raiz. Un usuario con VoiceOver o TalkBack activo no recibe ningun dato del chart — el elemento es completamente invisible para lectores de pantalla. WCAG 1.1.1 (Nivel A): todo contenido no-texto requiere una alternativa textual.</div>
+  <div class="problem-evidence">RadarChart.tsx L140: &lt;Svg width={size} height={size}&gt; — sin accessibilityLabel, sin accessibilityRole, sin aria-label</div>
+</div>
+
+<div class="problem low">
+  <div class="problem-title">P-RC03 · RadarChart: magic numbers sin tokens (radius ratio, label offset, fillOpacity)</div>
+  <div class="problem-desc">radius = size*0.35 (con labels) y size*0.45 (sin labels), label offset = radius+18, fillOpacity=0.25. Ninguno esta documentado ni tiene una constante con nombre. Si el diseno del chart cambia, hay que encontrar los numeros dispersos en el codigo.</div>
+  <div class="problem-evidence">RadarChart.tsx L75-76: radius = showLabels ? size * 0.35 : size * 0.45 y L121: polarToCartesian(cx, cy, radius + 18, angle)</div>
+</div>
+
+<div class="problem low">
+  <div class="problem-title">P-L01 · fontSize:40 para el porcentaje de match — unico hardcode fuera de escala tipografica</div>
+  <div class="problem-desc">Documentado en el codigo como "excepcion unica". El valor 40 no esta en la escala typography del DS. Considerar agregar un token typography.display2 = { fontSize: 40 } para eliminar el hardcode y hacer la excepcion parte del sistema.</div>
+  <div class="problem-evidence">DetalleCandidatoScreen.tsx L433-438: fontSize: 40 con comentario "Excepcion documentada"</div>
+</div>
+
+<div class="problem low">
+  <div class="problem-title">P-L02 · buildShareText usa Math.round() directamente en lugar de formatMatchPercentage</div>
+  <div class="problem-desc">buildShareText formatea el matchPct como `${Math.round(matchPct)}%` mientras que la UI usa formatMatchPercentage(). Si formatMatchPercentage cambia su formato (decimales, simbolo), el texto compartido quedaria inconsistente con lo que el usuario ve en pantalla.</div>
+  <div class="problem-evidence">DetalleCandidatoScreen.tsx L413: `${Math.round(matchPct)}%` vs L64 import formatMatchPercentage</div>
+</div>
+
+<div class="problem low">
+  <div class="problem-title">P-L03 · SHOW_NOTICIAS=false permanente — NoticiasTab potencialmente dead code</div>
+  <div class="problem-desc">Si SHOW_NOTICIAS es siempre false en produccion, toda la tab Noticias y el hook useNoticiasCandidato son dead code (YAGNI). Si es un feature flag activo, documentar cuando se va a activar.</div>
+  <div class="problem-evidence">constants/features.ts: SHOW_NOTICIAS, usado en DetalleCandidatoScreen.tsx L222-224</div>
+</div>
+
+<!-- ══════════ FASE 5 ══════════ -->
+<div id="fase5" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 5 · Propuesta de Rediseno</div><hr/></div>
+
+<div class="g2">
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 1 — Hero institucional con token correcto</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> c.accent2 (hover) como fondo de hero<br/>
+      <strong>Cambio:</strong> Usar c.primary como fondo en ProfileHero tilt="default". El azul institucional da seriedad y consistencia con DS-11 P6. El avatar con borde blanco semi-transparente sobre azul es el patron estandar (LinkedIn, apps civicas).<br/>
+      <strong>Beneficio:</strong> Cumplimiento DS-11, seriedad institucional, contraste correcto (texto blanco sobre primary).<br/>
+      <strong>Patron UX:</strong> Institutional hero (LinkedIn, apps civicas)
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 2 — Posturas destacadas con CTA de discoverability</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> Sin pista de que hay mas posturas<br/>
+      <strong>Cambio:</strong> Agregar al pie de "Posturas destacadas" un link "Ver las N posturas →" que cambia programaticamente la tab activa a "posturas" via el onChangeTab prop.<br/>
+      <strong>Beneficio:</strong> El usuario descubre la tab Posturas sin necesidad de explorar.<br/>
+      <strong>Patron UX:</strong> Progressive disclosure con CTA explicito (Spotify, Airbnb)<br/>
+      <strong>Requiere:</strong> pasar onChangeTab como prop adicional a ResumenTab
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 3 — Estado descartado con color correcto</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> Boton X activo con fondo azul (primary)<br/>
+      <strong>Cambio:</strong> Cuando isDescartado=true, usar variant="solid" con override de backgroundColor a c.danger. O agregar variant="danger-solid" al IconButton.<br/>
+      <strong>Beneficio:</strong> Semantica visual correcta — rojo = candidato descartado.<br/>
+      <strong>Patron UX:</strong> Color semantico de estado (Tinder, apps de swipe)
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 4 — Spinner en CandidatoPosturas</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> Text "Cargando..." en lugar de Spinner<br/>
+      <strong>Cambio:</strong> Reemplazar el Text por &lt;Spinner size="large" /&gt; centrado en una View, mismo patron que el loading de DetalleCandidatoScreen propio.<br/>
+      <strong>Beneficio:</strong> Consistencia de loading states en toda la app.<br/>
+      <strong>Patron UX:</strong> Consistent feedback (Nielsen #1)
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 5 — Hint condicional a existencia de justificacion</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> "Toca para ver justificacion" aunque no haya justificacion<br/>
+      <strong>Cambio:</strong> Condicionar el hint a si p.justificacion != null. Si no hay justificacion, no mostrar hint. Si hay justificacion, mostrar el hint.<br/>
+      <strong>Beneficio:</strong> Sin feedback false, sin taps que no hacen nada visible.<br/>
+      <strong>Patron UX:</strong> Visibility of system status (Nielsen #1)
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 6 — buildShareText usa formatMatchPercentage</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> Inconsistencia potencial entre UI y texto compartido<br/>
+      <strong>Cambio:</strong> Reemplazar `${Math.round(matchPct)}%` por `formatMatchPercentage(matchPct)` en buildShareText.<br/>
+      <strong>Beneficio:</strong> Unica fuente de verdad para el formato del porcentaje.<br/>
+      <strong>Patron:</strong> DRY — un solo punto de formato
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FASE 7 ══════════ -->
+<div id="fase7" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 7 · Sistema Visual</div><hr/></div>
+
+<table style="width:100%;border-collapse:collapse;" class="sum-table">
+  <thead><tr><th>Elemento</th><th>Token actual</th><th>Token propuesto</th><th>Componente</th><th>Guideline DS-11</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Hero background</td>
+      <td style="color:var(--c-danger);font-family:monospace;font-size:11px;">c.accent2 (hover token)</td>
+      <td style="color:var(--c-success);font-family:monospace;font-size:11px;">c.primary</td>
+      <td>ProfileHero TILT_BG.default</td>
+      <td>DS-11 P6: "--color-brand-hero o foto"</td>
+    </tr>
+    <tr>
+      <td>% match</td>
+      <td style="font-family:monospace;font-size:11px;">getMatchColor(matchPct) </td>
+      <td style="font-family:monospace;font-size:11px;">sin cambio</td>
+      <td>MatchBlock.matchBig</td>
+      <td>DS-11 P6: "--color-affinity-N — consistencia con Resultados" </td>
+    </tr>
+    <tr>
+      <td>fontSize matchBig</td>
+      <td style="color:var(--c-warning);font-family:monospace;font-size:11px;">40 hardcoded</td>
+      <td style="color:var(--c-success);font-family:monospace;font-size:11px;">typography.display2 = {fontSize:40}</td>
+      <td>MatchBlock</td>
+      <td>Zen de Python: explicit is better than implicit</td>
+    </tr>
+    <tr>
+      <td>Badge partido</td>
+      <td style="color:var(--c-warning);font-family:monospace;font-size:11px;">variant="info" (azul contextual)</td>
+      <td style="color:var(--c-success);font-family:monospace;font-size:11px;">variant="neutral"</td>
+      <td>ProfileHero Badge</td>
+      <td>DS-04: info = informacion contextual, no identidad</td>
+    </tr>
+    <tr>
+      <td>Descartar activo bg</td>
+      <td style="color:var(--c-danger);font-family:monospace;font-size:11px;">c.primary (azul)</td>
+      <td style="color:var(--c-success);font-family:monospace;font-size:11px;">c.danger</td>
+      <td>ActionRow IconButton isDescartado</td>
+      <td>DS-04: danger = acciones destructivas, estado negativo</td>
+    </tr>
+    <tr>
+      <td>Postura respuesta color</td>
+      <td style="font-family:monospace;font-size:11px;">getLikertColor() </td>
+      <td style="font-family:monospace;font-size:11px;">sin cambio</td>
+      <td>ResumenTab, CandidatoPosturas</td>
+      <td>DS-11 P6: "Texto propuestas → text-primary. Legibilidad maxima." </td>
+    </tr>
+    <tr>
+      <td>DimensionCards borde</td>
+      <td style="font-family:monospace;font-size:11px;">getLikertColor / c.border </td>
+      <td style="font-family:monospace;font-size:11px;">sin cambio</td>
+      <td>CandidatoPosturas cards</td>
+      <td>DS-11 P6: "DimensionCards borde → getDimensionColors()" — pending verificacion RadarChart</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ══════════ FASE 8 ══════════ -->
+<div id="fase8" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 8 · Wireframe</div><hr/></div>
+
+<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
+<div class="wireframe" style="flex:1;min-width:280px;font-size:10px;">
+PANTALLA: Detalle Candidato (con match calculado)
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+TOPBAR
+  [← Volver]  "Perfil de candidato"
+               "Diputados Region Metropolitana"
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+HERO [fondo: c.primary] ← propuesto
+  [Avatar XL — iniciales]
+  [Badge neutral] Partido Verde
+  "Candidata A"
+  "Perfil basado en tus respuestas"
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+MATCH BLOCK
+  [87%]  ← color --color-affinity-5
+  "COMPATIBILIDAD"
+  [Badge: Confianza alta ●] [ℹ]
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+ACTION ROW [solo usuarios autenticados]
+  [ Favorito]  [ Descartar]  [↗ Compartir]
+  ← descartar activo: fondo danger (propuesto)
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+TABS  [Resumen]  [Posturas (47)]  [Noticias]
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+TAB RESUMEN:
+  Sobre el candidato
+  "Bio del candidato..."
+
+  Propuesta electoral
+  "Propuesta..."
+
+  Afinidad por eje tematico
+  [Radar Chart — 260px]
+
+  Posturas destacadas
+  ┌────────────────────────────┐
+  │ Pregunta 1                 │
+  │ De acuerdo             () │
+  └────────────────────────────┘
+  ┌────────────────────────────┐
+  │ Pregunta 2                 │
+  │ En desacuerdo          () │
+  └────────────────────────────┘
+  ┌────────────────────────────┐
+  │ Pregunta 3                 │
+  │ Sin postura            (—) │
+  └────────────────────────────┘
+  [Ver las 47 posturas →]  ← CTA propuesto
+
+  [MatchExplanation — solo auth con match]
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+</div>
+<div class="wireframe" style="flex:1;min-width:280px;font-size:10px;">
+PANTALLA: Detalle Candidato (sin match / modo invitado)
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+TOPBAR
+  [← Volver]  "Perfil de candidato"
+               ""
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+HERO [fondo: c.primary]
+  [Avatar XL]
+  [Badge neutral] Partido Verde
+  "Candidata A"
+  "Aun sin match calculado"
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+EMPTY MATCH BLOCK [card, borde, centrado]
+  "Aun no tienes match calculado"
+  "Responde el cuestionario para ver
+   tu porcentaje de afinidad."
+  [Empezar cuestionario]  ← CTA principal
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+                 ↑ sin ActionRow (invitado)
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+TABS  [Resumen]  [Posturas (47)]
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+TAB RESUMEN:
+  Sobre el candidato
+  [Bio]
+
+  Propuesta electoral
+  [Propuesta]
+
+  Posturas destacadas
+  [Card 1]  [Card 2]  [Card 3]
+  [Ver las 47 posturas →]
+  (Sin MatchExplanation — no hay match)
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+</div>
+</div>
+
+<!-- ══════════ FASE 9 ══════════ -->
+<div id="fase9" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 9 · Mockup de Alta Fidelidad</div><hr/></div>
+
+<style>
+/* ActionRow labels */
+.dc-action-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.dc-action-lbl{font-size:8px;color:var(--c-text3);font-weight:600;text-transform:uppercase;letter-spacing:.3px;}
+.dc-action-icon{font-size:13px;font-weight:700;line-height:1;}
+/* Radar SVG dentro del phone */
+.radar-wrap{display:flex;justify-content:center;padding:6px 0;}
+</style>
+
+<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;justify-content:center;">
+
+<!-- ── 1. CON MATCH (Tab Resumen con radar) ── -->
+<div>
+  <div style="font-size:10px;font-weight:700;text-align:center;color:var(--c-text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Tab Resumen — con match</div>
+  <div class="phone-frame">
+    <div class="phone-status">9:41</div>
+    <div class="dc-topbar">
+      <div class="dc-back">‹</div>
+      <div class="dc-topbar-text">
+        <div class="dc-topbar-title">Perfil de candidato</div>
+        <div class="dc-topbar-sub">Diputados RM</div>
+      </div>
+    </div>
+    <div class="dc-hero-proposed">
+      <div class="dc-avatar">CA</div>
+      <div class="dc-partido">Partido Verde</div>
+      <div class="dc-hero-name">Candidata A</div>
+      <div class="dc-hero-sub">Basado en tus respuestas</div>
+    </div>
+    <div class="dc-match-block">
+      <div class="dc-match-pct" style="color:var(--c-success);">87%</div>
+      <div class="dc-match-label">Compatibilidad</div>
+      <div class="dc-tier">+ Confianza alta &nbsp;<span style="opacity:.5;font-size:10px;">[i]</span></div>
+    </div>
+    <!-- ActionRow con labels explicitos -->
+    <div class="dc-actions">
+      <div class="dc-action-wrap">
+        <div class="dc-action-btn fav"><div class="dc-action-icon" style="color:#fff;">+</div></div>
+        <div class="dc-action-lbl">Guardar</div>
+      </div>
+      <div class="dc-action-wrap">
+        <div class="dc-action-btn"><div class="dc-action-icon" style="color:var(--c-danger);">X</div></div>
+        <div class="dc-action-lbl">Descartar</div>
+      </div>
+      <div class="dc-action-wrap">
+        <div class="dc-action-btn"><div class="dc-action-icon" style="color:var(--c-primary);">-&gt;</div></div>
+        <div class="dc-action-lbl">Compartir</div>
+      </div>
+    </div>
+    <!-- Tabs -->
+    <div class="dc-tabs">
+      <div class="dc-tab active">Resumen</div>
+      <div class="dc-tab">Posturas <span style="font-size:9px;opacity:.6;">47</span></div>
+    </div>
+    <!-- Resumen body: bio + radar + posturas -->
+    <div class="dc-body">
+      <div class="dc-section-lbl">Afinidad por eje tematico</div>
+      <!-- Radar chart SVG — 5 ejes, valores: Econ 87 / Social 72 / Amb 65 / DDHH 90 / Seg 55 -->
+      <div class="radar-wrap">
+        <svg width="180" height="180" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+          <!-- Grid circles r=13.5, 27, 40.5, 54 (4 levels) -->
+          <circle cx="90" cy="90" r="13.5" stroke="var(--c-border)" stroke-width="1" fill="none"/>
+          <circle cx="90" cy="90" r="27"   stroke="var(--c-border)" stroke-width="1" fill="none"/>
+          <circle cx="90" cy="90" r="40.5" stroke="var(--c-border)" stroke-width="1" fill="none"/>
+          <circle cx="90" cy="90" r="54"   stroke="var(--c-border)" stroke-width="1" fill="none"/>
+          <!-- Grid lines to each axis vertex (r=54) -->
+          <!-- Economia (-90deg): 90,36 -->
+          <line x1="90" y1="90" x2="90"    y2="36"   stroke="var(--c-border)" stroke-width="1"/>
+          <!-- Social   (-18deg): 141.4,73.4 -->
+          <line x1="90" y1="90" x2="141.4" y2="73.4" stroke="var(--c-border)" stroke-width="1"/>
+          <!-- Ambiente ( 54deg): 121.7,133.7 -->
+          <line x1="90" y1="90" x2="121.7" y2="133.7" stroke="var(--c-border)" stroke-width="1"/>
+          <!-- DDHH    (126deg): 58.3,133.7 -->
+          <line x1="90" y1="90" x2="58.3"  y2="133.7" stroke="var(--c-border)" stroke-width="1"/>
+          <!-- Segur.  (198deg): 38.6,73.4 -->
+          <line x1="90" y1="90" x2="38.6"  y2="73.4"  stroke="var(--c-border)" stroke-width="1"/>
+          <!-- Data polygon
+               Economia 87%  r=46.98  angle=-90:  90, 43
+               Social   72%  r=38.88  angle=-18:  127.0, 78.0
+               Ambiente 65%  r=35.1   angle= 54:  110.6,118.4
+               DDHH     90%  r=48.6   angle=126:   61.4,129.3
+               Seguridad55%  r=29.7   angle=198:   61.8, 80.8
+          -->
+          <polygon
+            points="90,43 127,78 110.6,118.4 61.4,129.3 61.8,80.8"
+            fill="var(--c-success)" fill-opacity="0.25"
+            stroke="var(--c-success)" stroke-width="2"/>
+          <!-- Vertex dots -->
+          <circle cx="90"    cy="43"    r="3" fill="var(--c-success)"/>
+          <circle cx="127"   cy="78"    r="3" fill="var(--c-success)"/>
+          <circle cx="110.6" cy="118.4" r="3" fill="var(--c-success)"/>
+          <circle cx="61.4"  cy="129.3" r="3" fill="var(--c-success)"/>
+          <circle cx="61.8"  cy="80.8"  r="3" fill="var(--c-success)"/>
+          <!-- Labels (r+14=68 desde centro) -->
+          <text x="90"   y="20"    font-size="9" fill="var(--c-text2)" text-anchor="middle">Economia</text>
+          <text x="154"  y="71"    font-size="9" fill="var(--c-text2)" text-anchor="start">Social</text>
+          <text x="126"  y="148"   font-size="9" fill="var(--c-text2)" text-anchor="middle">Ambiente</text>
+          <text x="54"   y="148"   font-size="9" fill="var(--c-text2)" text-anchor="middle">DDHH</text>
+          <text x="26"   y="71"    font-size="9" fill="var(--c-text2)" text-anchor="end">Seguridad</text>
+        </svg>
+      </div>
+      <div class="dc-section-lbl">Posturas destacadas</div>
+      <div class="dc-postura-card">
+        <div class="dc-postura-q">Reducir impuestos a PYMES</div>
+        <div class="dc-postura-a-agree">De acuerdo</div>
+      </div>
+      <div class="dc-postura-card">
+        <div class="dc-postura-q">Sistema de pensiones privado</div>
+        <div class="dc-postura-a-disagree">En desacuerdo</div>
+      </div>
+      <div class="dc-ver-todas">Ver las 47 posturas →</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 2. TAB POSTURAS ── -->
+<div>
+  <div style="font-size:10px;font-weight:700;text-align:center;color:var(--c-text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Tab Posturas</div>
+  <div class="phone-frame">
+    <div class="phone-status">9:41</div>
+    <div class="dc-topbar">
+      <div class="dc-back">‹</div>
+      <div class="dc-topbar-text">
+        <div class="dc-topbar-title">Perfil de candidato</div>
+        <div class="dc-topbar-sub">Diputados RM</div>
+      </div>
+    </div>
+    <div class="dc-hero-proposed" style="padding:12px 14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="dc-avatar" style="width:36px;height:36px;font-size:13px;">CA</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#fff;">Candidata A</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.6);">Partido Verde</div>
+        </div>
+        <div style="margin-left:auto;font-size:18px;font-weight:900;color:#fff;">87%</div>
+      </div>
+    </div>
+    <div class="dc-tabs">
+      <div class="dc-tab">Resumen</div>
+      <div class="dc-tab active">Posturas <span style="font-size:9px;opacity:.8;">47</span></div>
+    </div>
+    <!-- Posturas agrupadas por eje tematico -->
+    <div class="dc-body">
+      <!-- Grupo: Economia -->
+      <div style="font-size:10px;font-weight:700;color:var(--c-text);text-transform:capitalize;padding:2px 0;">Economia</div>
+      <div class="dc-postura-card">
+        <div class="dc-postura-q">Reducir impuestos a PYMES</div>
+        <div class="dc-postura-a-agree">De acuerdo</div>
+        <div style="font-size:9px;color:var(--c-text3);font-style:italic;margin-top:2px;">Toca para ver justificacion</div>
+      </div>
+      <div class="dc-postura-card">
+        <div class="dc-postura-q">Privatizacion de empresas estatales</div>
+        <div class="dc-postura-a-disagree">En desacuerdo</div>
+        <div style="font-size:9px;color:var(--c-text3);font-style:italic;margin-top:2px;">Toca para ver justificacion</div>
+      </div>
+      <!-- Grupo: Sociedad -->
+      <div style="font-size:10px;font-weight:700;color:var(--c-text);text-transform:capitalize;padding:6px 0 2px;">Sociedad</div>
+      <div class="dc-postura-card">
+        <div class="dc-postura-q">Educacion publica gratuita universitaria</div>
+        <div class="dc-postura-a-agree">De acuerdo</div>
+        <div style="font-size:9px;color:var(--c-text3);font-style:italic;margin-top:2px;">Toca para ver justificacion</div>
+      </div>
+      <div class="dc-postura-card">
+        <div class="dc-postura-q">Sistema de pensiones privado</div>
+        <div class="dc-postura-a-disagree">En desacuerdo</div>
+        <!-- sin hint — sin justificacion disponible (propuesto: ocultar hint) -->
+      </div>
+      <!-- Grupo: Ambiente -->
+      <div style="font-size:10px;font-weight:700;color:var(--c-text);text-transform:capitalize;padding:6px 0 2px;">Ambiente</div>
+      <div class="dc-postura-card">
+        <div class="dc-postura-q">Restriccion de actividades mineras en zonas protegidas</div>
+        <div class="dc-postura-a-neutral">Sin postura declarada</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 3. SIN MATCH (empty state) ── -->
+<div>
+  <div style="font-size:10px;font-weight:700;text-align:center;color:var(--c-text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Sin resultado calculado</div>
+  <div class="phone-frame">
+    <div class="phone-status">9:41</div>
+    <div class="dc-topbar">
+      <div class="dc-back">‹</div>
+      <div class="dc-topbar-text">
+        <div class="dc-topbar-title">Perfil de candidato</div>
+        <div class="dc-topbar-sub">Diputados RM</div>
+      </div>
+    </div>
+    <div class="dc-hero-proposed">
+      <div class="dc-avatar">CA</div>
+      <div class="dc-partido">Partido Verde</div>
+      <div class="dc-hero-name">Candidata A</div>
+      <div class="dc-hero-sub">Aun sin match calculado</div>
+    </div>
+    <!-- Empty match block -->
+    <div style="margin:12px;border:1px solid var(--c-border);border-radius:12px;padding:14px;background:var(--c-card);display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <div style="font-size:13px;font-weight:700;color:var(--c-text);text-align:center;">Aun no tienes match calculado</div>
+      <div style="font-size:10px;color:var(--c-text2);text-align:center;line-height:1.5;">Responde el cuestionario para ver tu porcentaje de afinidad con esta candidata.</div>
+      <div style="width:100%;text-align:center;padding:9px;border-radius:8px;background:var(--c-primary);color:#fff;font-size:12px;font-weight:700;">Empezar cuestionario</div>
+    </div>
+    <!-- sin ActionRow (no hay match, no tiene sentido guardar aun) -->
+    <div class="dc-tabs">
+      <div class="dc-tab active">Resumen</div>
+      <div class="dc-tab">Posturas <span style="font-size:9px;opacity:.6;">47</span></div>
+    </div>
+    <div class="dc-body">
+      <div class="dc-section-lbl">Sobre la candidata</div>
+      <div class="dc-text">Economista con 15 anos de experiencia en politica fiscal. Ex directora del MIDEPLAN.</div>
+      <div class="dc-section-lbl">Propuesta electoral</div>
+      <div class="dc-text">Reduccion de la burocracia estatal, fomento PYME, pension basica universal...</div>
+      <div class="dc-section-lbl">Posturas destacadas</div>
+      <div class="dc-postura-card">
+        <div class="dc-postura-q">Reducir impuestos a PYMES</div>
+        <div class="dc-postura-a-agree">De acuerdo</div>
+      </div>
+      <div class="dc-postura-card">
+        <div class="dc-postura-q">Sistema de pensiones privado</div>
+        <div class="dc-postura-a-disagree">En desacuerdo</div>
+      </div>
+      <div class="dc-ver-todas">Ver las 47 posturas →</div>
+      <!-- Sin MatchExplanation ni RadarChart — no hay datos de match -->
+    </div>
+  </div>
+</div>
+
+<!-- ── 4. DESCARTADO ── -->
+<div>
+  <div style="font-size:10px;font-weight:700;text-align:center;color:var(--c-text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Descartado — estado activo</div>
+  <div class="phone-frame">
+    <div class="phone-status">9:41</div>
+    <div class="dc-topbar">
+      <div class="dc-back">‹</div>
+      <div class="dc-topbar-text">
+        <div class="dc-topbar-title">Perfil de candidato</div>
+        <div class="dc-topbar-sub">Diputados RM</div>
+      </div>
+    </div>
+    <div class="dc-hero-proposed">
+      <div class="dc-avatar">CA</div>
+      <div class="dc-partido">Partido Verde</div>
+      <div class="dc-hero-name">Candidata A</div>
+      <div class="dc-hero-sub">Basado en tus respuestas</div>
+    </div>
+    <div class="dc-match-block">
+      <div class="dc-match-pct" style="color:var(--c-success);">87%</div>
+      <div class="dc-match-label">Compatibilidad</div>
+    </div>
+    <div class="dc-actions">
+      <div class="dc-action-wrap">
+        <div class="dc-action-btn"><div class="dc-action-icon" style="color:var(--c-primary);">+</div></div>
+        <div class="dc-action-lbl">Guardar</div>
+      </div>
+      <div class="dc-action-wrap">
+        <!-- Descartado activo: fondo danger (propuesta) -->
+        <div class="dc-action-btn" style="background:var(--c-danger);border-color:var(--c-danger);">
+          <div class="dc-action-icon" style="color:#fff;">X</div>
+        </div>
+        <div class="dc-action-lbl" style="color:var(--c-danger);">Restaurar</div>
+      </div>
+      <div class="dc-action-wrap">
+        <div class="dc-action-btn"><div class="dc-action-icon" style="color:var(--c-primary);">-&gt;</div></div>
+        <div class="dc-action-lbl">Compartir</div>
+      </div>
+    </div>
+    <div style="margin:0 12px 8px;background:var(--c-danger-bg);border:1px solid var(--c-danger);border-radius:8px;padding:8px;font-size:10px;color:var(--c-danger);text-align:center;">
+      Descartado — toca X para restaurar
+    </div>
+    <div class="dc-tabs">
+      <div class="dc-tab active">Resumen</div>
+      <div class="dc-tab">Posturas <span style="font-size:9px;opacity:.6;">47</span></div>
+    </div>
+    <div class="dc-body">
+      <div class="dc-postura-card">
+        <div class="dc-postura-q">Reducir impuestos a PYMES</div>
+        <div class="dc-postura-a-agree">De acuerdo</div>
+      </div>
+      <div class="dc-ver-todas">Ver las 47 posturas →</div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- nota de contraste visible bajo los mockups -->
+<div class="ins ins-a" style="margin-top:16px;">
+  <strong>Regla de contraste — hero background (valores reales del tema):</strong><br/><br/>
+  <strong>Light mode</strong> &rarr; <code>c.primary = #2E5F7E</code> (azul oscuro). Texto blanco encima: ratio <strong>5.5:1</strong> &rarr; AA pasa.<br/>
+  <strong>Dark mode</strong> &rarr; <code>c.primary = #7BB5D4</code> (azul claro). Texto blanco encima: ratio <strong>2.2:1</strong> &rarr; <strong>AA falla</strong>.<br/><br/>
+  Dos consecuencias directas:<br/>
+  1. El <strong>87% en verde sobre el hero azul</strong> falla en ambos modos &mdash; verde sobre azul nunca da 4.5:1. Fix aplicado en estos mockups: usar blanco.<br/>
+  2. Nuestra propuesta de usar <code>c.primary</code> como hero background tiene un problema en dark mode: texto blanco sobre <code>#7BB5D4</code> no es accesible.<br/><br/>
+  <strong>Fix correcto para dark mode:</strong> usar <code>primary800 = #1B3D53</code> como fondo del hero en dark mode (azul muy oscuro, texto blanco da ratio ~10:1), o detectar el modo y aplicar texto oscuro (<code>#0E1E2A</code>) sobre el azul claro.<br/>
+  En la implementacion: <code>const heroBg = isDark ? c.primary800 : c.primary;</code><br/><br/>
+  <strong>El 87% grande en el MatchBlock</strong> (fuera del hero, sobre <code>c.bg</code> neutro) <strong>si puede ser verde</strong> &mdash; ahi contrasta correctamente.
+</div>
+
+<!-- ══════════ FASE 11 ══════════ -->
+<div id="fase11" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 11 · Justificacion UX / UI</div><hr/></div>
+
+<div class="g2">
+  <div class="ins ins-g" style="margin:0 0 10px;">
+    <strong>Hero con c.primary en lugar de c.accent2</strong><br/>
+    <em>Problema:</em> token de hover usado en fondo institutcional<br/>
+    <em>Beneficio:</em> cumple DS-11 P6, da seriedad<br/>
+    <em>Patron UX:</em> Institutional hero (LinkedIn, apps civicas)<br/>
+    <em>Friccion eliminada:</em> incoherencia semantica del sistema de tokens<br/>
+    <em>Metrica:</em> +confianza institucional percibida
+  </div>
+  <div class="ins ins-g" style="margin:0 0 10px;">
+    <strong>"Ver todas las posturas →" en ResumenTab</strong><br/>
+    <em>Problema:</em> el usuario no sabe que hay mas posturas<br/>
+    <em>Beneficio:</em> la tab Posturas se descubre sin explorar<br/>
+    <em>Patron UX:</em> Progressive disclosure (Spotify, Airbnb)<br/>
+    <em>Friccion eliminada:</em> abandono por no saber que existe la tab<br/>
+    <em>Metrica:</em> +clicks a la tab Posturas, +tiempo en pantalla
+  </div>
+  <div class="ins ins-g" style="margin:0 0 10px;">
+    <strong>Descartar activo con fondo danger</strong><br/>
+    <em>Problema:</em> X activo con fondo azul (positivo)<br/>
+    <em>Beneficio:</em> el usuario entiende el estado sin leer<br/>
+    <em>Patron UX:</em> Estado visual semantico (Tinder)<br/>
+    <em>Friccion eliminada:</em> confusion sobre si el candidato esta descartado<br/>
+    <em>Metrica:</em> -taps accidentales de "des-descartar"
+  </div>
+  <div class="ins ins-g" style="margin:0 0 10px;">
+    <strong>Spinner en CandidatoPosturas</strong><br/>
+    <em>Problema:</em> Text plano donde todo usa Spinner<br/>
+    <em>Beneficio:</em> consistencia de feedback en toda la app<br/>
+    <em>Patron UX:</em> Consistency and standards (Nielsen #4)<br/>
+    <em>Friccion eliminada:</em> percepcion de estado de error vs carga<br/>
+    <em>Metrica:</em> +percepcion de calidad de la app
+  </div>
+  <div class="ins ins-g" style="margin:0 0 10px;">
+    <strong>Hint condicional a justificacion existente</strong><br/>
+    <em>Problema:</em> "Toca para ver" sin contenido disponible<br/>
+    <em>Beneficio:</em> sin feedback falso, sin taps vacios<br/>
+    <em>Patron UX:</em> Visibility of system status (Nielsen #1)<br/>
+    <em>Friccion eliminada:</em> confusion "es un bug?" cuando nada pasa<br/>
+    <em>Metrica:</em> -frustration signals
+  </div>
+  <div class="ins ins-g" style="margin:0 0 10px;">
+    <strong>buildShareText usa formatMatchPercentage</strong><br/>
+    <em>Problema:</em> Math.round() puede diferir de la UI<br/>
+    <em>Beneficio:</em> unica fuente de formato del porcentaje<br/>
+    <em>Patron:</em> DRY (Don't Repeat Yourself)<br/>
+    <em>Friccion eliminada:</em> inconsistencia entre lo que se ve y lo que se comparte<br/>
+    <em>Metrica:</em> +credibilidad en el texto compartido
+  </div>
+</div>
+
+<!-- ══════════ FASE 12 ══════════ -->
+<div id="fase12" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 12 · Impacto Esperado</div><hr/></div>
+
+<div class="impact-grid">
+  <div class="impact-card" style="border-color:var(--c-success);">
+    <div class="impact-metric">Confianza institucional</div>
+    <div class="impact-before">Antes: fondo accent2 (hover state)</div>
+    <div class="impact-after">Despues: fondo primary — seriedad y consistencia</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-success);">
+    <div class="impact-metric">Exploracion de posturas</div>
+    <div class="impact-before">Antes: tab Posturas descubierta por azar</div>
+    <div class="impact-after">Despues: CTA explicito en ResumenTab</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-success);">
+    <div class="impact-metric">Claridad de estado</div>
+    <div class="impact-before">Antes: X descartado = azul (positivo)</div>
+    <div class="impact-after">Despues: X descartado = rojo (danger)</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-warning);">
+    <div class="impact-metric">Consistencia de loading</div>
+    <div class="impact-before">Antes: Text plano en CandidatoPosturas</div>
+    <div class="impact-after">Despues: Spinner consistente con el resto</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-warning);">
+    <div class="impact-metric">Feedback correcto en posturas</div>
+    <div class="impact-before">Antes: hint aparece sin justificacion</div>
+    <div class="impact-after">Despues: hint solo si hay justificacion</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-info);">
+    <div class="impact-metric">Cumplimiento DS-11</div>
+    <div class="impact-before">Antes: 3 tokens incorrectos (accent2, info badge, primary solid)</div>
+    <div class="impact-after">Despues: primary, neutral badge, danger solid</div>
+  </div>
+</div>
+
+<!-- ══════════ FASE 13 ══════════ -->
+<div id="fase13" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 13 · Diff Actual vs Propuesto</div><hr/></div>
+
+<div class="card" style="padding:0;overflow:hidden;">
+<table class="diff-table">
+  <thead><tr><th>Elemento</th><th class="diff-del">Actual</th><th class="diff-add">Propuesto</th><th>Motivo</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Hero background</td>
+      <td class="diff-del">c.accent2 (token hover)</td>
+      <td class="diff-add">c.primary</td>
+      <td>DS-11 P6 compliance</td>
+    </tr>
+    <tr>
+      <td>Badge partido</td>
+      <td class="diff-del">variant="info" (azul contextual)</td>
+      <td class="diff-add">variant="neutral"</td>
+      <td>Semantica correcta — partido es identidad</td>
+    </tr>
+    <tr>
+      <td>fontSize matchBig</td>
+      <td class="diff-del">fontSize: 40 (hardcode)</td>
+      <td class="diff-add">typography.display2 = {fontSize:40}</td>
+      <td>Sin hardcodes fuera de la escala tipografica</td>
+    </tr>
+    <tr>
+      <td>Descartar activo bg</td>
+      <td class="diff-del">variant="solid" → c.primary bg</td>
+      <td class="diff-add">variant="solid" + bg override c.danger</td>
+      <td>Semantica de estado: rojo = descartado</td>
+    </tr>
+    <tr>
+      <td>CandidatoPosturas loading</td>
+      <td class="diff-del">&lt;Text&gt;Cargando posturas...&lt;/Text&gt;</td>
+      <td class="diff-add">&lt;Spinner size="large" /&gt;</td>
+      <td>Consistencia con todos los loading states de la app</td>
+    </tr>
+    <tr>
+      <td>Posturas hint</td>
+      <td class="diff-del">Siempre visible, con o sin justificacion</td>
+      <td class="diff-add">Solo visible cuando p.justificacion !== null</td>
+      <td>Nielsen #1: no dar feedback de accion sin resultado</td>
+    </tr>
+    <tr>
+      <td>ResumenTab posturas</td>
+      <td class="diff-del">posturas.slice(0,3) sin CTA</td>
+      <td class="diff-add">slice(0,3) + "Ver las N posturas →" que cambia tab</td>
+      <td>Discoverability — el usuario conoce la tab Posturas</td>
+    </tr>
+    <tr>
+      <td>buildShareText</td>
+      <td class="diff-del">Math.round(matchPct) + "%"</td>
+      <td class="diff-add">formatMatchPercentage(matchPct)</td>
+      <td>DRY — unica fuente de formato del porcentaje</td>
+    </tr>
+    <tr>
+      <td>Archivos afectados</td>
+      <td class="diff-del">5 archivos con issues</td>
+      <td class="diff-add">ProfileHero.tsx · DetalleCandidatoScreen.tsx · CandidatoPosturas.tsx · ResumenTab.tsx · theme/typography.ts</td>
+      <td>Cambios quirurgicos — sin refactor de arquitectura</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div style="height:40px;"></div>
+</div></div>
+
+<script>
+const btn = document.getElementById('theme-btn');
+btn.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  btn.textContent = document.body.classList.contains('dark') ? 'Light mode' : 'Dark mode';
+});
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+</script>
+</body>
+</html>

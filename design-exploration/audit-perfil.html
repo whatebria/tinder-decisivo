@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pantalla 8 -- Editar Perfil (PerfilScreen) -- 11 Fases</title>
+<link rel="stylesheet" href="ds-shared.css"/>
+<style>
+.audit-hero{background:var(--c-hero);padding:28px 36px 24px;color:#fff;margin:-40px -36px 32px;}
+.audit-hero h1{font-size:22px;font-weight:900;margin-bottom:4px;}
+.audit-hero p{font-size:12px;opacity:.65;max-width:700px;line-height:1.7;}
+.audit-hero .meta{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;}
+.audit-hero .meta-item{font-size:11px;opacity:.75;}
+
+.sec-divider{display:flex;align-items:center;gap:12px;margin:32px 0 20px;}
+.sec-divider hr{flex:1;border:none;border-top:1px solid var(--c-border);}
+.sec-divider-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--c-text3);white-space:nowrap;}
+
+.sev{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.sev-crit{background:#FEE2E2;color:#991B1B;}
+.sev-high{background:#FEF3C7;color:#92400E;}
+.sev-med{background:#EFF6FF;color:#1E40AF;}
+.sev-low{background:var(--c-surface2);color:var(--c-text2);}
+.dark .sev-crit{background:rgba(184,92,92,.2);color:#F9ABAB;}
+.dark .sev-high{background:rgba(200,155,92,.2);color:#E5C07B;}
+.dark .sev-med{background:rgba(92,138,184,.2);color:#93C5FD;}
+
+.comp-card{border:1.5px solid var(--c-border);border-radius:12px;overflow:hidden;margin-bottom:10px;}
+.comp-head{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--c-surface);border-bottom:1px solid var(--c-border);}
+.comp-name{font-family:monospace;font-size:12px;font-weight:700;color:var(--c-primary);}
+.comp-path{font-size:9px;color:var(--c-text3);font-family:monospace;}
+.comp-body{padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;background:var(--c-bg);}
+.comp-col-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text3);margin-bottom:4px;}
+.comp-item{font-size:11px;color:var(--c-text2);line-height:1.6;padding-left:10px;border-left:2px solid var(--c-border);margin-bottom:3px;}
+.comp-item.ok{border-color:var(--c-success);}
+.comp-item.warn{border-color:var(--c-warning);}
+.comp-item.err{border-color:var(--c-danger);}
+
+.problem{border-radius:10px;padding:12px 14px;margin-bottom:8px;border-left:3px solid;}
+.problem.crit{background:var(--c-danger-bg);border-color:var(--c-danger);}
+.problem.high{background:var(--c-warning-bg);border-color:var(--c-warning);}
+.problem.med{background:var(--c-info-bg);border-color:var(--c-info);}
+.problem.low{background:var(--c-surface2);border-color:var(--c-border);}
+.problem-title{font-size:12px;font-weight:700;color:var(--c-text);margin-bottom:3px;}
+.problem-desc{font-size:11px;color:var(--c-text2);line-height:1.6;}
+.problem-evidence{font-size:10px;font-family:monospace;color:var(--c-text3);margin-top:4px;}
+
+.bench-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;}
+.bench-card{border:1.5px solid var(--c-border);border-radius:12px;padding:12px;background:var(--c-surface);}
+.bench-app{font-size:11px;font-weight:800;color:var(--c-primary);margin-bottom:3px;}
+.bench-pattern{font-size:10px;font-weight:700;color:var(--c-text);margin-bottom:4px;}
+.bench-desc{font-size:10px;color:var(--c-text2);line-height:1.6;}
+.bench-adapt{font-size:10px;color:var(--c-success);margin-top:6px;font-weight:600;}
+
+.wireframe{font-family:monospace;font-size:11px;line-height:1.9;color:var(--c-text2);background:var(--c-surface);border-radius:10px;padding:16px;border:1.5px solid var(--c-border);}
+.wireframe-section{color:var(--c-text);font-weight:700;}
+.wireframe-sep{color:var(--c-text3);}
+
+.phone-frame{width:230px;border-radius:32px;border:3px solid var(--c-border2);background:var(--c-bg);overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.12);flex-shrink:0;}
+.phone-status{height:32px;background:var(--c-bg);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--c-text3);}
+
+/* Perfil mockup */
+.pf-topbar{padding:10px 14px 8px;border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:8px;}
+.pf-back{font-size:18px;color:var(--c-primary);}
+.pf-topbar-title{font-size:14px;font-weight:700;color:var(--c-text);}
+.pf-topbar-sub{font-size:9px;color:var(--c-text2);}
+.pf-section-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text2);padding:8px 0 4px;}
+.pf-info-card{background:var(--c-card);border:1px solid var(--c-border);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;margin-bottom:4px;}
+.pf-info-row{display:flex;flex-direction:column;gap:2px;}
+.pf-info-lbl{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text2);}
+.pf-info-val{font-size:13px;font-weight:600;color:var(--c-text);}
+.pf-info-val-sm{font-size:11px;color:var(--c-text);}
+.pf-info-val-muted{font-size:10px;color:var(--c-text2);}
+.pf-stats{display:flex;gap:6px;}
+.pf-stat{flex:1;background:var(--c-card);border:1px solid var(--c-border);border-radius:8px;padding:8px;text-align:center;}
+.pf-stat-val{font-size:20px;font-weight:800;color:var(--c-primary);}
+.pf-stat-lbl{font-size:8px;color:var(--c-text2);text-transform:uppercase;letter-spacing:.3px;}
+.pf-divider{height:1px;background:var(--c-border);margin:4px 0;}
+.pf-nav-row{background:var(--c-card);border:1px solid var(--c-border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.pf-nav-lbl{font-size:12px;font-weight:600;color:var(--c-text);}
+.pf-nav-lbl-danger{font-size:12px;font-weight:600;color:var(--c-danger);}
+.pf-nav-chevron{font-size:14px;color:var(--c-text2);}
+.pf-nav-chevron-danger{font-size:14px;color:var(--c-danger);}
+.pf-field{background:var(--c-card);border:1px solid var(--c-border);border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.pf-field-lbl{font-size:9px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:2px;}
+.pf-field-val{font-size:12px;color:var(--c-text);}
+.pf-field-val-placeholder{font-size:12px;color:var(--c-text2);}
+.pf-danger-zone{border:1.5px solid var(--c-danger);border-radius:10px;overflow:hidden;background:var(--c-danger-bg);}
+.pf-danger-head{padding:6px 12px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--c-danger);border-bottom:1px solid var(--c-danger);}
+.pf-danger-row{padding:10px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--c-danger);}
+.pf-danger-row:last-child{border-bottom:none;}
+.pf-tabs{display:flex;gap:2px;padding:3px;background:var(--c-surface2);border-radius:8px;}
+.pf-tab{flex:1;text-align:center;padding:5px 0;border-radius:6px;font-size:9px;font-weight:600;color:var(--c-text2);}
+.pf-tab.active{background:var(--c-card);color:var(--c-primary);box-shadow:0 1px 3px rgba(0,0,0,.1);}
+.pf-body{padding:10px 14px;display:flex;flex-direction:column;gap:6px;}
+.pf-clear-btn{font-size:11px;color:var(--c-danger);font-weight:600;padding:4px 0;}
+
+.diff-table{width:100%;border-collapse:collapse;}
+.diff-table th{background:var(--c-surface2);font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text2);padding:6px 10px;text-align:left;border-bottom:1px solid var(--c-border);}
+.diff-table td{padding:8px 10px;font-size:11px;vertical-align:top;border-bottom:1px solid var(--c-border2);}
+.diff-del{color:var(--c-danger);}
+.diff-add{color:var(--c-success);}
+
+.impact-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;}
+.impact-card{border-radius:10px;padding:12px;border:1.5px solid var(--c-border);}
+.impact-metric{font-size:11px;font-weight:700;color:var(--c-text);margin-bottom:4px;}
+.impact-before{font-size:10px;color:var(--c-danger);margin-bottom:2px;}
+.impact-after{font-size:10px;color:var(--c-success);}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-logo">VotoAfin DS</div>
+  <div class="sidebar-ver">v1.0 · Agosto 2026</div>
+  <hr/>
+  <div class="sidebar-label">11 Fases</div>
+  <a href="#fase0">F0 · Reverse Engineering</a>
+  <a href="#fase1">F1 · Componentes</a>
+  <a href="#fase2">F2 · Auditoria UX/UI</a>
+  <a href="#fase3">F3 · Benchmarking</a>
+  <a href="#fase4">F4 · Problemas</a>
+  <a href="#fase5">F5 · Propuesta</a>
+  <a href="#fase7">F7 · Sistema Visual</a>
+  <a href="#fase8">F8 · Wireframe</a>
+  <a href="#fase9">F9 · Mockup</a>
+  <a href="#fase11">F11 · Justificacion</a>
+  <a href="#fase12">F12 · Impacto</a>
+  <a href="#fase13">F13 · Diff</a>
+  <hr/>
+  <div class="sidebar-label">Navegacion</div>
+  <a href="audit-detalle-candidato.html">&#8592; Pantalla 7</a>
+  <div class="sidebar-bottom">
+    <button class="theme-btn" id="theme-btn">Dark mode</button>
+  </div>
+</nav>
+
+<div class="main"><div class="content">
+
+<div class="audit-hero">
+  <div style="opacity:.5;font-size:10px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">
+    Pantalla 8 / 11 &middot; 11 Fases (sin F6/F10) &middot; Principal Product Designer + UX + DS Architect
+  </div>
+  <h1>PerfilScreen &mdash; Editar Perfil</h1>
+  <p>La pantalla de perfil tiene un bug critico de seguridad: "Cerrar sesion" llama a logout() directo sin invalidar el token en el backend (logoutApi()), dejando la cookie httpOnly activa en web. Ademas, las acciones destructivas (cerrar sesion + eliminar cuenta) estan mezcladas con acciones normales sin zona de peligro visual. El ThemeToggle esta duplicado respecto a ConfiguracionScreen (REFACTOR-005).</p>
+  <div class="meta">
+    <div class="meta-item">PerfilScreen.tsx &middot; 9.9 KB</div>
+    <div class="meta-item">CambiarPasswordModal &middot; UbicacionPicker &middot; EliminarCuentaModal</div>
+    <div class="meta-item">4 hooks de datos &middot; 2 modales &middot; 3 handlers async</div>
+  </div>
+</div>
+
+<!-- F0 -->
+<div id="fase0" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 0 &middot; Reverse Engineering</div><hr/></div>
+
+<div class="g2" style="margin-bottom:16px;">
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Archivos y dependencias</div>
+    <div style="font-family:monospace;font-size:11px;line-height:1.9;color:var(--c-text2);">
+      screens/PerfilScreen.tsx (9.9 KB)<br/>
+      components/molecules/CambiarPasswordModal.tsx<br/>
+      components/molecules/EliminarCuentaModal.tsx<br/>
+      components/molecules/UbicacionPicker.tsx<br/>
+      components/molecules/ListPickerModal.tsx<br/>
+      components/molecules/NavRow.tsx<br/>
+      components/atoms/ThemeToggle.tsx<br/>
+      api/hooks.ts (usePerfil, useCambiarPassword, useEliminarCuenta, useActualizarComuna)<br/>
+      api/endpoints.ts (logoutApi, ComunaInline)<br/>
+      store/auth.ts (logout)<br/>
+      constants/validation.ts (PASSWORD_MIN_LENGTH)
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Arbol de componentes</div>
+    <div style="font-family:monospace;font-size:11px;line-height:1.9;color:var(--c-text2);">
+      AppShell [active=null]<br/>
+      &nbsp;&nbsp;ScrollView<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;ScreenTopBar [title="Mi perfil", subtitle=username]<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;[if isLoading] Spinner<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;[if perfil] InfoCard (username, email, fecha_registro)<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;[if perfil] SectionTitle "Mi actividad"<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;[if perfil] StatBadge x3 (respuestas, favoritos, descartados)<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;Divider<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;SectionTitle "Donde votas"<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;UbicacionPicker [value=perfil.comuna]<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;Divider<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;SectionTitle "Apariencia"<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;ThemeToggle -- DUPLICADO (tambien en ConfiguracionScreen)<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;Divider<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;SectionTitle "Cuenta"<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;NavRow "Cambiar mi contrasena"<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;NavRow "Cerrar sesion" -- BUG: sin logoutApi()<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;NavRow "Eliminar mi cuenta" [variant="danger"]<br/>
+      &nbsp;&nbsp;CambiarPasswordModal [visible=passOpen]<br/>
+      &nbsp;&nbsp;EliminarCuentaModal [visible=deleteOpen]
+    </div>
+  </div>
+</div>
+
+<div class="g2">
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Hooks y estado</div>
+    <div style="font-size:11px;line-height:1.8;color:var(--c-text2);">
+      <strong>usePerfil():</strong> datos del usuario (username, email, fecha_registro, contadores, comuna)<br/>
+      <strong>useCambiarPassword():</strong> mutation POST<br/>
+      <strong>useEliminarCuenta():</strong> mutation DELETE<br/>
+      <strong>useActualizarComuna():</strong> mutation PATCH<br/>
+      <strong>useAuthStore:</strong> logout()<br/>
+      <strong>useState:</strong> passOpen, deleteOpen<br/><br/>
+      <strong>Handlers async (sin useCallback):</strong><br/>
+      handleUbicacion, handleCambiarPass, handleEliminar
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Objetivo funcional</div>
+    <div style="font-size:11px;line-height:1.8;color:var(--c-text2);">
+      <strong>Que resuelve:</strong> visualizar y editar los datos del usuario<br/>
+      <strong>Tarea principal:</strong> ubicacion electoral, cambiar contrasena, eliminar cuenta<br/>
+      <strong>Acceso:</strong> desde ConfiguracionScreen via "Editar perfil"<br/><br/>
+      <strong>Tension actual:</strong> esta pantalla hace demasiado. Mezcla:
+      informacion de perfil (read-only) + edicion de ubicacion (accion) +
+      apariencia (ThemeToggle duplicado) + acciones destructivas (logout, eliminar).
+      El usuario no tiene claro el objetivo de la pantalla.
+    </div>
+  </div>
+</div>
+
+<!-- F1 -->
+<div id="fase1" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 1 &middot; Auditoria de Componentes Frontend</div><hr/></div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">PerfilScreen -- handlers async</div><div class="comp-path">screens/PerfilScreen.tsx</div></div>
+    <span class="sev sev-crit" style="margin-left:auto;">Bug de seguridad</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">handleEliminar (correcto)</div>
+      <div class="comp-item ok">Llama logoutApi() para limpiar cookie web</div>
+      <div class="comp-item ok">Luego llama logout() para limpiar estado local</div>
+      <div class="comp-item ok">Maneja error de logoutApi() con try/catch separado</div>
+    </div>
+    <div>
+      <div class="comp-col-label">handleLogout (BUG)</div>
+      <div class="comp-item err">NavRow "Cerrar sesion" llama onPress={logout} directo -- sin logoutApi(). La cookie httpOnly de web queda activa. En web, el usuario queda "deslogueado" en el frontend pero la sesion sigue valida en el backend</div>
+      <div class="comp-item err">Contraste con ConfiguracionScreen: handleLogout() ahi si llama logoutApi() primero. Comportamiento diferente segun desde donde se cierra sesion</div>
+      <div class="comp-item warn">Los 3 handlers sin useCallback -- se recrean en cada render</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">CambiarPasswordModal</div><div class="comp-path">components/molecules/CambiarPasswordModal.tsx</div></div>
+    <span class="sev sev-med" style="margin-left:auto;">Feedback incompleto</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Fortalezas</div>
+      <div class="comp-item ok">Validacion client-side antes de submit (passwordsMatch, canSubmit)</div>
+      <div class="comp-item ok">blurActiveElement() antes de submit y cancel</div>
+      <div class="comp-item ok">autoComplete / textContentType correctos para password managers</div>
+      <div class="comp-item ok">dismissOnBackdrop={!loading} -- no se puede cerrar mientras carga</div>
+      <div class="comp-item ok">Usa PASSWORD_MIN_LENGTH constante -- sin hardcode</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Problemas</div>
+      <div class="comp-item warn">El boton "Cambiar contrasena" esta deshabilitado hasta que canSubmit=true, pero no hay feedback visible de QUE falta para habilitarlo. El usuario no sabe si la contrasena es muy corta o si el confirm no coincide (solo el confirm tiene error visual)</div>
+      <div class="comp-item warn">styles en useMemo([c]) -- mismo patron ineficiente de ConfiguracionScreen</div>
+      <div class="comp-item warn">Error solo en el campo confirm, no en el campo "nueva contrasena" cuando es muy corta</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">UbicacionPicker</div><div class="comp-path">components/molecules/UbicacionPicker.tsx</div></div>
+    <span class="sev sev-med" style="margin-left:auto;">Varios menores</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Fortalezas</div>
+      <div class="comp-item ok">Cascada Region->Comuna correctamente implementada</div>
+      <div class="comp-item ok">comunaByIdRef usa Map para O(1) lookup</div>
+      <div class="comp-item ok">Invalida la comuna al cambiar de region</div>
+      <div class="comp-item ok">Boton "Quitar mi ubicacion" con accessibilityRole</div>
+      <div class="comp-item ok">ListPickerModal con searchable para comunas</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Problemas</div>
+      <div class="comp-item warn">Field muestra "Cargando..." como texto hardcodeado en lugar de indicador visual. Inconsistente con el patron de Spinner del resto de la app</div>
+      <div class="comp-item warn">chevron usa Unicode literal (\u25BE) en lugar del componente Icon -- puede renderizarse distinto en cada plataforma</div>
+      <div class="comp-item warn">handlePickRegion, handlePickComuna, handleClear sin useCallback</div>
+      <div class="comp-item warn">Sin feedback accesible cuando se selecciona una region o comuna (no hay announceForAccessibility)</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">StatBadge y InfoRow (sub-componentes locales)</div><div class="comp-path">screens/PerfilScreen.tsx -- inline</div></div>
+    <span class="sev sev-low" style="margin-left:auto;">Correcto</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Fortalezas</div>
+      <div class="comp-item ok">Styles a nivel de modulo (fuera del componente) -- patron correcto, sin useMemo innecesario</div>
+      <div class="comp-item ok">InfoRow tipada correctamente con interface</div>
+      <div class="comp-item ok">StatBadge usa c.primary para el numero -- consistente con DS</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Debilidades</div>
+      <div class="comp-item warn">InfoRow: valueStyle tipado como object en lugar de TextStyle -- pierde inferencia de TS</div>
+      <div class="comp-item warn">StatBadge duplicado con el que se propone en ConfiguracionScreen (UX-034). Si se mueve a un molecule compartido, eliminar de aqui</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">ThemeToggle (duplicado)</div><div class="comp-path">screens/PerfilScreen.tsx L33 -- tambien en ConfiguracionScreen</div></div>
+    <span class="sev sev-high" style="margin-left:auto;">DRY violation (REFACTOR-005)</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Problema</div>
+      <div class="comp-item err">ThemeToggle aparece en: ConfiguracionScreen, PerfilScreen y LoginScreen. El usuario puede cambiar el tema desde dos pantallas distintas de settings. Viola el principio de punto unico de control para una preferencia del sistema</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Referencia</div>
+      <div class="comp-item warn">Documentado en REFACTOR-005 -- se resuelve cuando se consolide la pantalla de configuracion. En el estado actual de PerfilScreen, el ThemeToggle deberia eliminarse de aqui</div>
+    </div>
+  </div>
+</div>
+
+<!-- F2 -->
+<div id="fase2" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 2 &middot; Auditoria UX / UI Profunda</div><hr/></div>
+
+<div class="g2">
+  <div>
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:10px;">UX</div>
+    <div class="ins ins-a" style="margin-bottom:8px;">
+      <strong>Pantalla con identidad difusa:</strong> el titulo es "Mi perfil" pero la pantalla hace: ver datos (read-only), editar ubicacion, cambiar contrasena, cambiar tema, cerrar sesion, y eliminar cuenta. Son 4 responsabilidades distintas. El usuario no sabe si esta en "ver mi perfil" o "gestionar mi cuenta".
+    </div>
+    <div class="ins ins-a" style="margin-bottom:8px;">
+      <strong>Acciones destructivas sin zona visual:</strong> "Cerrar sesion" y "Eliminar mi cuenta" estan en la seccion "Cuenta" junto con "Cambiar mi contrasena". No hay separacion visual que le avise al usuario que las dos ultimas son acciones de alto riesgo.
+    </div>
+    <div class="ins ins-b" style="margin-bottom:8px;">
+      <strong>Estado de error sin recuperacion:</strong> si perfilQ falla, se muestra "No pudimos cargar tu perfil." sin boton de retry. El usuario queda atascado con un mensaje sin accion posible. Los toasts de exito/error solo funcionan cuando hay datos cargados.
+    </div>
+    <div class="ins ins-b" style="margin-bottom:8px;">
+      <strong>UbicacionPicker sin estado de exito visible:</strong> cuando el usuario guarda su ubicacion, el toast de exito aparece pero el picker no muestra ningun feedback inline (checkmark, animacion de confirmacion). El cambio solo se ve si el usuario memoriza el valor anterior.
+    </div>
+  </div>
+  <div>
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:10px;">UI / Design System</div>
+    <div class="ins ins-a" style="margin-bottom:8px;">
+      <strong>Dividers como separadores de seccion:</strong> la pantalla usa 3 Dividers horizontales para separar secciones. Pero Divider es un separador de linea fina -- para secciones con contenido heterogeneo (informacion vs acciones vs apariencia), el patron del DS es usar SectionTitle con espaciado, no Divider. Los Dividers hacen la pantalla visualmente plana.
+    </div>
+    <div class="ins ins-b" style="margin-bottom:8px;">
+      <strong>infoCard sin tipo de borde semantico:</strong> la tarjeta de informacion (username, email, fecha) tiene el mismo estilo visual que cualquier card del sistema. No hay distincion visual entre datos "leibles" (info card) y datos "editables" (UbicacionPicker). El usuario podria intentar tocar el username esperando poder editarlo.
+    </div>
+    <div class="ins ins-r" style="margin-bottom:8px;">
+      <strong>statsRow sin minWidth responsive:</strong> los StatBadge usan minWidth=110 con flexGrow y flexBasis=110. En pantallas muy angostas (&#60;360px) los 3 badges podrian no caber en una fila y el flexWrap los rompe a dos lineas de forma asimetrica (2+1).
+    </div>
+  </div>
+</div>
+
+<!-- F3 -->
+<div id="fase3" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 3 &middot; Benchmarking</div><hr/></div>
+
+<div class="bench-grid">
+  <div class="bench-card">
+    <div class="bench-app">Apple Settings</div>
+    <div class="bench-pattern">Secciones agrupadas con etiquetas claras</div>
+    <div class="bench-desc">Cada grupo de settings tiene un titulo de seccion y un fondo levemente distinto. Las acciones destructivas (eliminar cuenta, reset) estan al final con color rojo.</div>
+    <div class="bench-adapt">Adaptacion: usar fondos de seccion distintos o Dividers con mas espaciado para separar informacion / edicion / acciones destructivas.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Duolingo</div>
+    <div class="bench-pattern">Zona de peligro visualmente separada</div>
+    <div class="bench-desc">Eliminar cuenta esta en una seccion separada al final, con fondo de advertencia y confirmacion multiple. El usuario entiende el riesgo sin leer.</div>
+    <div class="bench-adapt">Adaptacion: DangerZone con c.dangerBg y borde c.danger para agrupar "Cerrar sesion" y "Eliminar cuenta". Mismo patron propuesto para ConfiguracionScreen (UX-033).</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Airbnb</div>
+    <div class="bench-pattern">Retry en estados de error</div>
+    <div class="bench-desc">Cuando algo falla al cargar, siempre hay un boton "Intentar de nuevo" con el icono de recarga. El usuario tiene agencia para recuperarse.</div>
+    <div class="bench-adapt">Adaptacion: en el estado de error de perfilQ, agregar un Button "Intentar de nuevo" que llama a perfilQ.refetch().</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Twitter / X</div>
+    <div class="bench-pattern">Campos read-only vs editables diferenciados</div>
+    <div class="bench-desc">Los campos que no se pueden editar tienen un fondo distinto o un icono de candado. El usuario sabe de un vistazo que puede y que no puede cambiar.</div>
+    <div class="bench-adapt">Adaptacion: agregar una nota discreta debajo del infoCard "Para cambiar tu nombre de usuario, contacta soporte" -- o un icono de candado sutil en los campos no editables.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Notion</div>
+    <div class="bench-pattern">Feedback inline en pickers</div>
+    <div class="bench-desc">Cuando se guarda una preferencia, el campo muestra brevemente un checkmark verde antes de volver al estado normal. El usuario recibe confirmacion sin depender del toast.</div>
+    <div class="bench-adapt">Adaptacion: en UbicacionPicker, mostrar un estado "guardado" breve (1.5s) con un checkmark despues de que actualizarComuna.mutateAsync resuelve.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Headspace</div>
+    <div class="bench-pattern">Pantalla de perfil enfocada</div>
+    <div class="bench-desc">La pantalla de perfil solo muestra datos del usuario y una lista de preferencias. Las acciones destructivas estan en una pantalla separada de "Seguridad" o "Cuenta".</div>
+    <div class="bench-adapt">Dado el contexto del proyecto (app movil), esta separacion puede ser excesiva. La DangerZone visual es suficiente sin crear una nueva pantalla.</div>
+  </div>
+</div>
+
+<!-- F4 -->
+<div id="fase4" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 4 &middot; Problemas Detectados</div><hr/></div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-danger);margin-bottom:6px;">Critico</div>
+
+<div class="problem crit">
+  <div class="problem-title">P-C01 &middot; "Cerrar sesion" llama logout() sin logoutApi() &mdash; cookie httpOnly web no se invalida</div>
+  <div class="problem-desc">El NavRow "Cerrar sesion" tiene onPress={logout} directo. La funcion logout() del AuthStore solo limpia el estado local (token en SecureStore, userId). NO llama a logoutApi() que es la que invalida el token en el backend y limpia la cookie httpOnly en web. ConfiguracionScreen si tiene este patron correcto en su handleLogout(). El resultado: en plataforma web, el usuario queda "deslogueado" en el frontend pero la sesion del backend sigue activa hasta que expira el token.</div>
+  <div class="problem-evidence">PerfilScreen.tsx L214: &lt;NavRow label="Cerrar sesion" onPress={logout} /&gt; (sin logoutApi)</div>
+</div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-warning);margin-bottom:6px;margin-top:12px;">Alto</div>
+
+<div class="problem high">
+  <div class="problem-title">P-A01 &middot; "Cerrar sesion" y "Eliminar cuenta" en la misma seccion que "Cambiar contrasena" sin zona de peligro</div>
+  <div class="problem-desc">Las tres acciones de la seccion "Cuenta" tienen diferente riesgo: cambiar contrasena es una accion normal, cerrar sesion es una accion de salida, y eliminar cuenta es irreversible. Estan todas en el mismo bloque visual con el mismo estilo. El usuario no puede distinguir el riesgo entre ellas sin leer.</div>
+  <div class="problem-evidence">PerfilScreen.tsx L208-222: NavRow x3 en la misma View sin separacion de riesgo</div>
+</div>
+
+<div class="problem high">
+  <div class="problem-title">P-A02 &middot; Estado de error sin retry &mdash; el usuario queda atascado</div>
+  <div class="problem-desc">Si perfilQ.isLoading=false y perfil=null (error de red), la pantalla muestra "No pudimos cargar tu perfil." sin ningun boton de accion. El usuario no puede reintentar la carga sin salir y volver a entrar a la pantalla. El UbicacionPicker, ThemeToggle y acciones de cuenta siguen siendo accesibles, pero el usuario no sabe sus datos actuales.</div>
+  <div class="problem-evidence">PerfilScreen.tsx L160-162: : (&lt;Text...&gt;No pudimos cargar tu perfil.&lt;/Text&gt;) -- sin retry</div>
+</div>
+
+<div class="problem high">
+  <div class="problem-title">P-A03 &middot; ThemeToggle duplicado (REFACTOR-005)</div>
+  <div class="problem-desc">ThemeToggle aparece en ConfiguracionScreen (seccion "Apariencia") y en PerfilScreen (seccion "Apariencia"). El usuario puede cambiar el tema desde dos pantallas distintas. Viola el principio de single point of control: una preferencia del sistema deberia tener un solo lugar de configuracion. Documentado en REFACTOR-005 -- se resuelve al consolidar la pantalla.</div>
+  <div class="problem-evidence">PerfilScreen.tsx L202: &lt;ThemeToggle /&gt; | ConfiguracionScreen.tsx L189: &lt;ThemeToggle /&gt;</div>
+</div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-info);margin-bottom:6px;margin-top:12px;">Medio</div>
+
+<div class="problem med">
+  <div class="problem-title">P-M01 &middot; CambiarPasswordModal sin feedback de que falta para habilitar el submit</div>
+  <div class="problem-desc">El boton "Cambiar contrasena" esta disabled hasta que canSubmit=true (current no vacio + next.length >= MIN + passwords match). Pero si el usuario escribe una contrasena corta, no ve ningun error bajo el campo "Nueva contrasena" -- el error solo aparece en el campo confirm cuando no coincide. El usuario no entiende por que el boton sigue deshabilitado.</div>
+  <div class="problem-evidence">CambiarPasswordModal.tsx L35-36: canSubmit logic -- sin error feedback para password length</div>
+</div>
+
+<div class="problem med">
+  <div class="problem-title">P-M02 &middot; InfoCard no indica que los campos son read-only</div>
+  <div class="problem-desc">La tarjeta con username, email y fecha de registro tiene el mismo estilo visual que cualquier card editable del sistema. Un usuario podria intentar tocar el username o el email esperando poder editarlos. No hay icono de candado, ni texto de ayuda, ni diferenciacion visual de "este dato no se puede cambiar desde aqui".</div>
+</div>
+
+<div class="problem med">
+  <div class="problem-title">P-M03 &middot; Pantalla con identidad difusa -- 4 responsabilidades mezcladas</div>
+  <div class="problem-desc">El titulo es "Mi perfil" pero la pantalla cubre: (1) ver datos de cuenta, (2) editar ubicacion electoral, (3) cambiar apariencia, (4) gestionar acciones de cuenta (password, logout, eliminar). Ninguna de estas es el objetivo principal de la otra. La pantalla no tiene una tarea primaria clara.</div>
+</div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:6px;margin-top:12px;">Bajo</div>
+
+<div class="problem low">
+  <div class="problem-title">P-L01 &middot; UbicacionPicker: "Cargando..." hardcodeado en Field</div>
+  <div class="problem-desc">El sub-componente Field muestra el texto "Cargando..." cuando loading=true, en lugar de un indicador visual. Inconsistente con el patron de la app.</div>
+  <div class="problem-evidence">UbicacionPicker.tsx L161: loading ? "Cargando..." : value</div>
+</div>
+
+<div class="problem low">
+  <div class="problem-title">P-L02 &middot; UbicacionPicker: chevron como Unicode literal en lugar de Icon</div>
+  <div class="problem-desc">El chevron del Field usa `"\u25BE"` (caracter Unicode). El componente Icon ya existe en el sistema y garantiza renderizado consistente entre plataformas. Los caracteres Unicode pueden variar en tamano y alineacion.</div>
+  <div class="problem-evidence">UbicacionPicker.tsx L172: &lt;Text...&gt;{"\u25BE"}&lt;/Text&gt;</div>
+</div>
+
+<div class="problem low">
+  <div class="problem-title">P-L03 &middot; InfoRow: valueStyle tipado como object en lugar de TextStyle</div>
+  <div class="problem-desc">El prop valueStyle de InfoRow esta tipado como `object`, perdiendo toda la inferencia de TypeScript para estilos de texto. Deberia ser `StyleProp&lt;TextStyle&gt;`.</div>
+  <div class="problem-evidence">PerfilScreen.tsx L242: valueStyle?: object;</div>
+</div>
+
+<div class="problem low">
+  <div class="problem-title">P-L04 &middot; Handlers async sin useCallback</div>
+  <div class="problem-desc">handleUbicacion, handleCambiarPass y handleEliminar se recrean en cada render del componente. Los tres se pasan como props a componentes hijos (UbicacionPicker, CambiarPasswordModal, EliminarCuentaModal).</div>
+</div>
+
+<!-- F5 -->
+<div id="fase5" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 5 &middot; Propuesta de Rediseno</div><hr/></div>
+
+<div class="g2">
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 1 &mdash; Fix critico: logout correcto</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> logout() sin logoutApi() -- cookie web activa<br/>
+      <strong>Cambio:</strong> Reemplazar onPress={logout} por un handler que llame logoutApi() primero, igual que ConfiguracionScreen.<br/>
+      <strong>Beneficio:</strong> consistencia de comportamiento de cierre de sesion entre pantallas.<br/>
+      <strong>Patron UX:</strong> Security principle -- logout completo
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 2 &mdash; DangerZone para acciones destructivas</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> logout y eliminar sin separacion visual<br/>
+      <strong>Cambio:</strong> Zona final con fondo danger-bg, borde danger, titulo "Zona de peligro", con "Cerrar sesion" y "Eliminar mi cuenta" dentro.<br/>
+      <strong>Beneficio:</strong> El usuario entiende el riesgo sin leer.<br/>
+      <strong>Patron UX:</strong> Danger zone (DS-11 P8, Duolingo, GitHub)
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 3 &mdash; Retry en estado de error</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> error sin recuperacion posible<br/>
+      <strong>Cambio:</strong> Agregar Button "Intentar de nuevo" que llama perfilQ.refetch() en el estado de error.<br/>
+      <strong>Beneficio:</strong> El usuario tiene agencia para recuperarse de errores transitorios de red.<br/>
+      <strong>Patron UX:</strong> Error recovery (Nielsen #9)
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 4 &mdash; InfoCard con indicacion read-only</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> datos read-only visualmente iguales a editables<br/>
+      <strong>Cambio:</strong> Agregar una nota discreta debajo del infoCard: "El nombre de usuario y email no se pueden cambiar desde la app."<br/>
+      <strong>Beneficio:</strong> Elimina la confusion sobre que es editable.<br/>
+      <strong>Patron UX:</strong> Affordance y visibilidad del sistema (Nielsen #1)
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 5 &mdash; Feedback length en CambiarPasswordModal</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> boton disabled sin feedback de causa<br/>
+      <strong>Cambio:</strong> Mostrar error en el campo "Nueva contrasena" cuando next.length &gt; 0 && next.length &lt; PASSWORD_MIN_LENGTH.<br/>
+      <strong>Beneficio:</strong> El usuario sabe exactamente que falta para poder enviar.<br/>
+      <strong>Patron UX:</strong> Inline validation (Typeform, formularios modernos)
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 6 &mdash; Eliminar ThemeToggle</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> ThemeToggle duplicado en Config + Perfil<br/>
+      <strong>Cambio:</strong> Eliminar el bloque "Apariencia" + ThemeToggle de PerfilScreen. Solo queda en ConfiguracionScreen.<br/>
+      <strong>Beneficio:</strong> Un solo punto de control para preferencias de tema.<br/>
+      <strong>Patron:</strong> DRY, single point of control (REFACTOR-005)
+    </div>
+  </div>
+</div>
+
+<!-- F7 -->
+<div id="fase7" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 7 &middot; Sistema Visual</div><hr/></div>
+
+<table class="sum-table" style="width:100%;">
+  <thead><tr><th>Elemento</th><th>Token</th><th>Componente</th><th>Guideline DS-11</th></tr></thead>
+  <tbody>
+    <tr><td>StatBadge valor numerico</td><td class="mono">c.primary</td><td>StatBadge.statValue</td><td>DS-09: primary para numeros importantes</td></tr>
+    <tr><td>DangerZone fondo</td><td class="mono">c.dangerBg</td><td>DangerZone container</td><td>DS-11 P8: "--color-danger-bg"</td></tr>
+    <tr><td>DangerZone borde</td><td class="mono">c.danger</td><td>DangerZone border</td><td>DS-11 P8: "--color-danger"</td></tr>
+    <tr><td>InfoCard fondo</td><td class="mono">c.card + c.border</td><td>infoCard View</td><td>DS-11 P8: neutrales para contenido informativo</td></tr>
+    <tr><td>Labels de sección</td><td class="mono">c.textSecondary</td><td>InfoRow.infoLabel, SectionTitle</td><td>DS-10: text-secondary para overlines</td></tr>
+    <tr><td>UbicacionPicker campo</td><td class="mono">c.card + c.border</td><td>Field.fieldButton</td><td>DS-10: card para inputs tipo dropdown</td></tr>
+    <tr><td>Boton "Quitar ubicacion"</td><td class="mono">c.danger</td><td>clearText</td><td>DS-04: danger para acciones destructivas</td></tr>
+  </tbody>
+</table>
+
+<!-- F8 -->
+<div id="fase8" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 8 &middot; Wireframe</div><hr/></div>
+
+<div class="wireframe">
+<span class="wireframe-sep">&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;</span>
+<span class="wireframe-section"> TOPBAR</span>
+<span style="padding-left:16px;color:var(--c-text2);font-family:monospace;font-size:11px;">[&lt; Volver]   "Mi perfil"   [username]</span>
+<span class="wireframe-sep">&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;</span>
+<span class="wireframe-section"> INFORMACION DE CUENTA</span>
+<span style="padding-left:16px;color:var(--c-text2);font-family:monospace;font-size:11px;">[Card]</span>
+<span style="padding-left:24px;color:var(--c-text2);font-family:monospace;font-size:11px;">USUARIO          juan_garcia</span>
+<span style="padding-left:24px;color:var(--c-text2);font-family:monospace;font-size:11px;">EMAIL            j@gmail.com</span>
+<span style="padding-left:24px;color:var(--c-text2);font-family:monospace;font-size:11px;">MIEMBRO DESDE    3 de enero de 2024</span>
+<span style="padding-left:16px;color:var(--c-text2);font-family:monospace;font-size:11px;font-style:italic;">El nombre de usuario no se puede cambiar desde la app.</span>
+<span class="wireframe-sep">&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;</span>
+<span class="wireframe-section"> MI ACTIVIDAD</span>
+<span style="padding-left:16px;color:var(--c-text2);font-family:monospace;font-size:11px;">[Respuestas: 47]  [Favoritos: 12]  [Descartados: 3]</span>
+<span class="wireframe-sep">&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;</span>
+<span class="wireframe-section"> DONDE VOTAS</span>
+<span style="padding-left:16px;color:var(--c-text2);font-family:monospace;font-size:11px;">Region:  [Metropolitana         &#9660;]</span>
+<span style="padding-left:16px;color:var(--c-text2);font-family:monospace;font-size:11px;">Comuna:  [Santiago               &#9660;]</span>
+<span style="padding-left:16px;color:var(--c-text2);font-family:monospace;font-size:11px;">Quitar mi ubicacion (danger link)</span>
+<span class="wireframe-sep">&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;</span>
+<span class="wireframe-section"> SEGURIDAD</span>
+<span style="padding-left:16px;color:var(--c-text2);font-family:monospace;font-size:11px;">[Cambiar mi contrasena           &gt;]</span>
+<span class="wireframe-sep">&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;</span>
+<span class="wireframe-section"> ZONA DE PELIGRO [fondo danger-bg, borde danger]</span>
+<span style="padding-left:16px;color:var(--c-text2);font-family:monospace;font-size:11px;">[Cerrar sesion               &gt;] (rojo)</span>
+<span style="padding-left:16px;color:var(--c-text2);font-family:monospace;font-size:11px;">[Eliminar mi cuenta          &gt;] (rojo)</span>
+<span style="padding-left:24px;color:var(--c-text2);font-family:monospace;font-size:11px;font-style:italic;">Esta accion no se puede deshacer</span>
+<span class="wireframe-sep">&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;</span>
+</div>
+
+<!-- F9 -->
+<div id="fase9" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 9 &middot; Mockup de Alta Fidelidad</div><hr/></div>
+
+<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;justify-content:center;">
+
+<!-- Estado normal con datos -->
+<div>
+  <div style="font-size:10px;font-weight:700;text-align:center;color:var(--c-text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Estado normal</div>
+  <div class="phone-frame">
+    <div class="phone-status">9:41</div>
+    <div class="pf-topbar">
+      <div class="pf-back">&lsaquo;</div>
+      <div><div class="pf-topbar-title">Mi perfil</div><div class="pf-topbar-sub">juan_garcia</div></div>
+    </div>
+    <div class="pf-body">
+      <!-- Info card -->
+      <div class="pf-info-card">
+        <div class="pf-info-row">
+          <div class="pf-info-lbl">Usuario</div>
+          <div class="pf-info-val">juan_garcia</div>
+        </div>
+        <div class="pf-info-row">
+          <div class="pf-info-lbl">Email</div>
+          <div class="pf-info-val-sm">juan.garcia@gmail.com</div>
+        </div>
+        <div class="pf-info-row">
+          <div class="pf-info-lbl">Miembro desde</div>
+          <div class="pf-info-val-muted">3 de enero de 2024</div>
+        </div>
+      </div>
+      <div style="font-size:9px;color:var(--c-text3);font-style:italic;margin-bottom:4px;">El nombre de usuario no se puede cambiar desde la app.</div>
+
+      <!-- Actividad -->
+      <div class="pf-section-lbl">Mi actividad</div>
+      <div class="pf-stats">
+        <div class="pf-stat"><div class="pf-stat-val">47</div><div class="pf-stat-lbl">Respuestas</div></div>
+        <div class="pf-stat"><div class="pf-stat-val">12</div><div class="pf-stat-lbl">Favoritos</div></div>
+        <div class="pf-stat"><div class="pf-stat-val">3</div><div class="pf-stat-lbl">Descartados</div></div>
+      </div>
+
+      <div class="pf-divider"></div>
+
+      <!-- Donde votas -->
+      <div class="pf-section-lbl">Donde votas</div>
+      <div>
+        <div class="pf-field-lbl">Region</div>
+        <div class="pf-field">
+          <div class="pf-field-val">Metropolitana de Santiago</div>
+          <div style="color:var(--c-text2);">&#9660;</div>
+        </div>
+      </div>
+      <div>
+        <div class="pf-field-lbl">Comuna</div>
+        <div class="pf-field">
+          <div class="pf-field-val">Santiago</div>
+          <div style="color:var(--c-text2);">&#9660;</div>
+        </div>
+      </div>
+      <div class="pf-clear-btn">Quitar mi ubicacion</div>
+
+      <div class="pf-divider"></div>
+
+      <!-- Seguridad -->
+      <div class="pf-section-lbl">Seguridad</div>
+      <div class="pf-nav-row"><div class="pf-nav-lbl">Cambiar mi contrasena</div><div class="pf-nav-chevron">&rsaquo;</div></div>
+
+      <div class="pf-divider"></div>
+
+      <!-- Zona de peligro (propuesta) -->
+      <div class="pf-danger-zone">
+        <div class="pf-danger-head">Zona de peligro</div>
+        <div class="pf-danger-row">
+          <div class="pf-nav-lbl-danger">Cerrar sesion</div>
+          <div class="pf-nav-chevron-danger">&rsaquo;</div>
+        </div>
+        <div class="pf-danger-row">
+          <div>
+            <div class="pf-nav-lbl-danger">Eliminar mi cuenta</div>
+            <div style="font-size:9px;color:var(--c-danger);opacity:.7;">Esta accion no se puede deshacer</div>
+          </div>
+          <div class="pf-nav-chevron-danger">&rsaquo;</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Estado loading -->
+<div>
+  <div style="font-size:10px;font-weight:700;text-align:center;color:var(--c-text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Cargando</div>
+  <div class="phone-frame">
+    <div class="phone-status">9:41</div>
+    <div class="pf-topbar">
+      <div class="pf-back">&lsaquo;</div>
+      <div><div class="pf-topbar-title">Mi perfil</div></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;padding:40px 0;">
+      <div style="width:32px;height:32px;border-radius:50%;border:3px solid var(--c-border);border-top-color:var(--c-primary);animation:spin 1s linear infinite;"></div>
+    </div>
+    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+    <!-- Mientras carga, UbicacionPicker y Danger zone si son accesibles -->
+    <div class="pf-body">
+      <div class="pf-divider"></div>
+      <div class="pf-section-lbl">Donde votas</div>
+      <div class="pf-field"><div class="pf-field-val-placeholder">Elegir region</div><div style="color:var(--c-text2);">&#9660;</div></div>
+      <div class="pf-field" style="opacity:.5;"><div class="pf-field-val-placeholder">Elegir comuna</div><div style="color:var(--c-text2);">&#9660;</div></div>
+      <div class="pf-divider"></div>
+      <div class="pf-section-lbl">Seguridad</div>
+      <div class="pf-nav-row"><div class="pf-nav-lbl">Cambiar mi contrasena</div><div class="pf-nav-chevron">&rsaquo;</div></div>
+      <div class="pf-divider"></div>
+      <div class="pf-danger-zone">
+        <div class="pf-danger-head">Zona de peligro</div>
+        <div class="pf-danger-row"><div class="pf-nav-lbl-danger">Cerrar sesion</div><div class="pf-nav-chevron-danger">&rsaquo;</div></div>
+        <div class="pf-danger-row"><div class="pf-nav-lbl-danger">Eliminar mi cuenta</div><div class="pf-nav-chevron-danger">&rsaquo;</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Estado error con retry -->
+<div>
+  <div style="font-size:10px;font-weight:700;text-align:center;color:var(--c-text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Error &mdash; con retry</div>
+  <div class="phone-frame">
+    <div class="phone-status">9:41</div>
+    <div class="pf-topbar">
+      <div class="pf-back">&lsaquo;</div>
+      <div><div class="pf-topbar-title">Mi perfil</div></div>
+    </div>
+    <div class="pf-body">
+      <!-- Error state con retry -->
+      <div style="background:var(--c-danger-bg);border:1px solid var(--c-danger);border-radius:10px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;">
+        <div style="font-size:12px;font-weight:700;color:var(--c-text);">No pudimos cargar tu perfil</div>
+        <div style="font-size:10px;color:var(--c-text2);line-height:1.5;">Revisa tu conexion a internet e intenta de nuevo.</div>
+        <div style="background:var(--c-primary);color:#fff;border-radius:8px;padding:8px 16px;font-size:11px;font-weight:700;">Intentar de nuevo</div>
+      </div>
+      <div class="pf-divider"></div>
+      <div class="pf-section-lbl">Donde votas</div>
+      <div class="pf-field"><div class="pf-field-val-placeholder">Elegir region</div><div style="color:var(--c-text2);">&#9660;</div></div>
+      <div class="pf-field" style="opacity:.5;"><div class="pf-field-val-placeholder">Elegir comuna</div><div style="color:var(--c-text2);">&#9660;</div></div>
+      <div class="pf-divider"></div>
+      <div class="pf-danger-zone">
+        <div class="pf-danger-head">Zona de peligro</div>
+        <div class="pf-danger-row"><div class="pf-nav-lbl-danger">Cerrar sesion</div><div class="pf-nav-chevron-danger">&rsaquo;</div></div>
+        <div class="pf-danger-row"><div class="pf-nav-lbl-danger">Eliminar mi cuenta</div><div class="pf-nav-chevron-danger">&rsaquo;</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- F11 -->
+<div id="fase11" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 11 &middot; Justificacion UX / UI</div><hr/></div>
+
+<div class="g2">
+  <div class="ins ins-g" style="margin:0 0 10px;">
+    <strong>Fix de logout con logoutApi()</strong><br/>
+    <em>Problema:</em> cookie web activa despues de logout<br/>
+    <em>Beneficio:</em> comportamiento de cierre de sesion seguro y consistente entre pantallas<br/>
+    <em>Patron:</em> Security principle -- complete logout<br/>
+    <em>Friccion eliminada:</em> sesion backend activa en web tras logout del frontend<br/>
+    <em>Metrica:</em> -vulnerabilidad de sesion persistente
+  </div>
+  <div class="ins ins-g" style="margin:0 0 10px;">
+    <strong>DangerZone para logout y eliminar</strong><br/>
+    <em>Problema:</em> acciones destructivas sin separacion visual<br/>
+    <em>Beneficio:</em> el usuario entiende el riesgo sin leer<br/>
+    <em>Patron UX:</em> Danger zone (DS-11 P8, Duolingo)<br/>
+    <em>Friccion eliminada:</em> ambiguedad entre acciones normales y destructivas<br/>
+    <em>Metrica:</em> -accidentes, +clarity
+  </div>
+  <div class="ins ins-g" style="margin:0 0 10px;">
+    <strong>Retry en estado de error</strong><br/>
+    <em>Problema:</em> sin accion posible cuando falla la carga<br/>
+    <em>Beneficio:</em> el usuario puede recuperarse sin salir de la pantalla<br/>
+    <em>Patron UX:</em> Error recovery (Nielsen #9)<br/>
+    <em>Friccion eliminada:</em> abandono por error irrecuperable<br/>
+    <em>Metrica:</em> -abandono en error de red transitorio
+  </div>
+  <div class="ins ins-g" style="margin:0 0 10px;">
+    <strong>Eliminar ThemeToggle duplicado</strong><br/>
+    <em>Problema:</em> dos lugares para cambiar el tema<br/>
+    <em>Beneficio:</em> un solo punto de control para preferencias<br/>
+    <em>Patron:</em> DRY, single source of truth<br/>
+    <em>Friccion eliminada:</em> confusion sobre donde se configuran las preferencias<br/>
+    <em>Metrica:</em> -codigo duplicado, +coherencia de settings
+  </div>
+  <div class="ins ins-g" style="margin:0 0 10px;">
+    <strong>InfoCard con nota read-only</strong><br/>
+    <em>Problema:</em> campos no editables visualmente iguales a editables<br/>
+    <em>Beneficio:</em> el usuario sabe que no puede editar username/email<br/>
+    <em>Patron UX:</em> Affordance clarity (Norman)<br/>
+    <em>Friccion eliminada:</em> taps infructuosos sobre campos no editables<br/>
+    <em>Metrica:</em> -frustacion por expectativas no cumplidas
+  </div>
+  <div class="ins ins-g" style="margin:0 0 10px;">
+    <strong>Error de longitud en CambiarPasswordModal</strong><br/>
+    <em>Problema:</em> boton disabled sin explicacion visible<br/>
+    <em>Beneficio:</em> el usuario sabe exactamente que le falta para poder enviar<br/>
+    <em>Patron UX:</em> Inline validation (Typeform)<br/>
+    <em>Friccion eliminada:</em> confusion sobre por que el boton no se activa<br/>
+    <em>Metrica:</em> -abandono del formulario de cambio de contrasena
+  </div>
+</div>
+
+<!-- F12 -->
+<div id="fase12" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 12 &middot; Impacto Esperado</div><hr/></div>
+
+<div class="impact-grid">
+  <div class="impact-card" style="border-color:var(--c-danger);">
+    <div class="impact-metric">Seguridad (web)</div>
+    <div class="impact-before">Antes: cookie activa tras logout desde Perfil</div>
+    <div class="impact-after">Despues: logoutApi() invalida token en backend</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-success);">
+    <div class="impact-metric">Claridad de acciones destructivas</div>
+    <div class="impact-before">Antes: logout junto a cambiar contrasena</div>
+    <div class="impact-after">Despues: DangerZone visual separada</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-success);">
+    <div class="impact-metric">Recuperacion de errores</div>
+    <div class="impact-before">Antes: error sin accion posible</div>
+    <div class="impact-after">Despues: retry button visible</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-warning);">
+    <div class="impact-metric">Duplicacion de ThemeToggle</div>
+    <div class="impact-before">Antes: Config + Perfil + Login</div>
+    <div class="impact-after">Despues: solo Config</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-warning);">
+    <div class="impact-metric">Conversion cambio de contrasena</div>
+    <div class="impact-before">Antes: boton disabled sin feedback de causa</div>
+    <div class="impact-after">Despues: error inline de longitud</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-info);">
+    <div class="impact-metric">Affordance read-only</div>
+    <div class="impact-before">Antes: usuario intenta tocar username</div>
+    <div class="impact-after">Despues: nota discreta aclara que no es editable</div>
+  </div>
+</div>
+
+<!-- F13 -->
+<div id="fase13" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 13 &middot; Diff Actual vs Propuesto</div><hr/></div>
+
+<div class="card" style="padding:0;overflow:hidden;">
+<table class="diff-table">
+  <thead><tr><th>Elemento</th><th class="diff-del">Actual</th><th class="diff-add">Propuesto</th><th>Motivo</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Logout handler</td>
+      <td class="diff-del">onPress={logout} directo -- sin logoutApi()</td>
+      <td class="diff-add">handleLogout = useCallback(async () =&gt; { await logoutApi(); await logout(); })</td>
+      <td>Seguridad: cookie web invalida tras logout</td>
+    </tr>
+    <tr>
+      <td>Acciones destructivas</td>
+      <td class="diff-del">NavRow x3 en seccion "Cuenta" sin distincion visual</td>
+      <td class="diff-add">NavRow "Cambiar contrasena" en seccion "Seguridad" + DangerZone para logout y eliminar</td>
+      <td>DS-11 P8 compliance + semantica visual</td>
+    </tr>
+    <tr>
+      <td>Estado de error</td>
+      <td class="diff-del">Text "No pudimos cargar tu perfil." sin accion</td>
+      <td class="diff-add">Card de error + Button "Intentar de nuevo" -&gt; perfilQ.refetch()</td>
+      <td>Nielsen #9: recovery from errors</td>
+    </tr>
+    <tr>
+      <td>ThemeToggle</td>
+      <td class="diff-del">Presente en PerfilScreen seccion "Apariencia"</td>
+      <td class="diff-add">Eliminado de PerfilScreen -- solo en ConfiguracionScreen</td>
+      <td>DRY, single point of control (REFACTOR-005)</td>
+    </tr>
+    <tr>
+      <td>InfoCard</td>
+      <td class="diff-del">Sin indicacion de que campos son read-only</td>
+      <td class="diff-add">Nota discreta: "El nombre de usuario no se puede cambiar desde la app."</td>
+      <td>Affordance clarity</td>
+    </tr>
+    <tr>
+      <td>CambiarPasswordModal error</td>
+      <td class="diff-del">Error solo en confirm cuando no coincide</td>
+      <td class="diff-add">Error en "Nueva contrasena" cuando length &gt; 0 &amp;&amp; &lt; MIN</td>
+      <td>Inline validation feedback</td>
+    </tr>
+    <tr>
+      <td>Handlers</td>
+      <td class="diff-del">handleUbicacion, handleCambiarPass, handleEliminar sin useCallback</td>
+      <td class="diff-add">Los 3 con useCallback y deps correctas</td>
+      <td>Performance, referencias estables</td>
+    </tr>
+    <tr>
+      <td>InfoRow.valueStyle</td>
+      <td class="diff-del">valueStyle?: object</td>
+      <td class="diff-add">valueStyle?: StyleProp&lt;TextStyle&gt;</td>
+      <td>TypeScript inference correcta</td>
+    </tr>
+    <tr>
+      <td>Archivos afectados</td>
+      <td class="diff-del">PerfilScreen.tsx, CambiarPasswordModal.tsx</td>
+      <td class="diff-add">PerfilScreen.tsx, CambiarPasswordModal.tsx, ConfiguracionScreen.tsx (coordinar con REFACTOR-005)</td>
+      <td>Cambios quirurgicos sin nueva arquitectura</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div style="height:40px;"></div>
+</div></div>
+
+<script>
+const btn = document.getElementById('theme-btn');
+btn.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  btn.textContent = document.body.classList.contains('dark') ? 'Light mode' : 'Dark mode';
+});
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+</script>
+</body>
+</html>

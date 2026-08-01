@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Auditoria -- ResultadosScreen -- Pantalla 3/11</title>
+<link rel="stylesheet" href="ds-shared.css"/>
+<style>
+/* ── page-specific ── */
+.audit-hero{background:var(--c-hero);padding:28px 36px 24px;color:#fff;margin:-40px -36px 32px;}
+.audit-hero h1{font-size:22px;font-weight:900;margin-bottom:4px;}
+.audit-hero p{font-size:12px;opacity:.65;max-width:600px;line-height:1.6;}
+.audit-hero .meta{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;}
+.audit-hero .meta-item{font-size:11px;opacity:.75;}
+
+/* severity badges */
+.sev{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;
+  font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.sev-crit{background:#FEE2E2;color:#991B1B;}
+.sev-high{background:#FEF3C7;color:#92400E;}
+.sev-med{background:#EFF6FF;color:#1E40AF;}
+.sev-low{background:var(--c-surface2);color:var(--c-text2);}
+.dark .sev-crit{background:rgba(184,92,92,.2);color:#F9ABAB;}
+.dark .sev-high{background:rgba(200,155,92,.2);color:#E5C07B;}
+.dark .sev-med{background:rgba(92,138,184,.2);color:#93C5FD;}
+.dark .sev-low{background:var(--c-surface2);color:var(--c-text2);}
+
+/* finding cards */
+.finding{border:1.5px solid var(--c-border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.finding-head{display:flex;align-items:center;gap:10px;padding:12px 16px;
+  background:var(--c-surface);border-bottom:1px solid var(--c-border);}
+.finding-id{font-family:monospace;font-size:11px;font-weight:800;color:var(--c-text2);}
+.finding-title{font-size:13px;font-weight:700;color:var(--c-text);flex:1;}
+.finding-body{padding:16px;background:var(--c-bg);display:flex;flex-direction:column;gap:14px;}
+.finding-body p{font-size:12px;color:var(--c-text2);line-height:1.7;}
+
+/* code diff */
+.diff{background:#0F1E2A;border-radius:10px;padding:14px;font-family:monospace;font-size:11px;
+  line-height:1.8;overflow-x:auto;}
+.diff-del{color:#F9ABAB;text-decoration:line-through;opacity:.7;}
+.diff-add{color:#86EFAC;}
+.diff-ctx{color:#A8C4CE;}
+.diff-file{color:#7BA098;font-size:9px;margin-bottom:6px;display:block;font-family:monospace;}
+.diff-comment{color:rgba(168,196,206,.4);}
+
+/* count boxes */
+.count-box{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+.count-item{border-radius:10px;padding:10px 16px;display:flex;flex-direction:column;
+  align-items:center;gap:3px;min-width:72px;}
+.count-item.crit{background:var(--c-danger-bg);border:1.5px solid var(--c-danger);}
+.count-item.high{background:var(--c-warning-bg);border:1.5px solid var(--c-warning);}
+.count-item.med{background:var(--c-info-bg);border:1.5px solid var(--c-info);}
+.count-item.low{background:var(--c-surface2);border:1.5px solid var(--c-border);}
+.count-n{font-size:24px;font-weight:900;}
+.count-item.crit .count-n{color:var(--c-danger);}
+.count-item.high .count-n{color:var(--c-warning);}
+.count-item.med .count-n{color:var(--c-info);}
+.count-item.low .count-n{color:var(--c-text2);}
+.count-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text2);}
+
+/* section divider */
+.sec-divider{display:flex;align-items:center;gap:12px;margin:28px 0 18px;}
+.sec-divider hr{flex:1;border:none;border-top:1px solid var(--c-border);}
+.sec-divider-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;
+  color:var(--c-text3);white-space:nowrap;}
+
+/* affinity tier visualization */
+.tier-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+.tier-cell{border-radius:10px;overflow:hidden;flex:1;min-width:100px;border:1.5px solid var(--c-border);}
+.tier-pct-band{padding:10px 12px;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.tier-pct{font-size:26px;font-weight:900;color:#fff;}
+.tier-range{font-size:9px;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.4px;}
+.tier-name{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:5px 8px;
+  background:var(--c-surface);text-align:center;}
+.tier-token{font-size:8px;font-family:monospace;color:var(--c-text2);padding:3px 8px 5px;
+  background:var(--c-surface);text-align:center;border-top:1px solid var(--c-border2);}
+
+/* three-tier vs five-tier comparison */
+.tier-compare{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;}
+.tier-col{flex:1;min-width:200px;}
+.tier-col-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+  margin-bottom:8px;padding:4px 8px;border-radius:4px;display:inline-block;}
+.tier-col-label.bad{background:var(--c-danger-bg);color:var(--c-danger);}
+.tier-col-label.ok{background:var(--c-success-bg);color:var(--c-success);}
+.tier-bar{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.tier-swatch{width:28px;height:28px;border-radius:6px;flex-shrink:0;}
+.tier-info{flex:1;}
+.tier-info-pct{font-size:12px;font-weight:700;color:var(--c-text);}
+.tier-info-tok{font-size:9px;font-family:monospace;color:var(--c-text2);}
+.tier-mismatch{font-size:9px;color:var(--c-danger);font-weight:700;margin-left:4px;}
+
+/* phone mockup */
+.phone-row{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;}
+.phone{width:200px;border-radius:24px;overflow:hidden;border:2.5px solid var(--c-border);
+  background:var(--c-bg);flex-shrink:0;box-shadow:0 4px 16px rgba(0,0,0,.08);}
+.phone-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+  text-align:center;padding:6px;color:var(--c-text2);}
+.phone-label.bad{color:var(--c-danger);}
+.phone-label.ok{color:var(--c-success);}
+
+/* ranking card mini */
+.mini-rank-card{background:var(--c-surface);border:1.5px solid var(--c-border2);
+  border-radius:10px;padding:10px;margin-bottom:6px;}
+.mini-rank-header{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.mini-rank-pos{font-size:10px;font-weight:700;color:var(--c-text2);width:14px;}
+.mini-avatar{width:22px;height:22px;border-radius:50%;background:var(--c-border2);flex-shrink:0;}
+.mini-rank-name{font-size:10px;font-weight:600;color:var(--c-text);}
+.mini-rank-pct{font-size:18px;font-weight:800;text-align:center;margin:4px 0 2px;}
+.mini-rank-label{font-size:8px;color:var(--c-text3);text-align:center;text-transform:uppercase;
+  letter-spacing:.3px;}
+
+/* button variants */
+.btn-compare{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.btn-demo{display:inline-flex;align-items:center;justify-content:center;
+  border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;font-family:inherit;
+  cursor:default;}
+.btn-demo.secondary{background:transparent;color:var(--c-primary);border:1.5px solid var(--c-primary);}
+.btn-demo.accent{background:var(--c-accent);color:#fff;border:1.5px solid transparent;}
+.btn-demo-label{font-size:9px;color:var(--c-text2);text-align:center;margin-top:4px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.4px;}
+.btn-demo-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;}
+
+/* IIFE diagram */
+.iife-diagram{border-radius:10px;overflow:hidden;border:1.5px solid var(--c-border);}
+.iife-zone{padding:10px 14px;font-size:11px;font-family:monospace;line-height:1.7;}
+.iife-zone.problem{background:rgba(184,92,92,.06);border-bottom:1px solid var(--c-border);}
+.iife-zone.ok{background:rgba(107,155,122,.06);}
+.iife-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+  padding:5px 14px;border-bottom:1px solid var(--c-border);}
+.iife-label.bad{background:var(--c-danger-bg);color:var(--c-danger);}
+.iife-label.ok{background:var(--c-success-bg);color:var(--c-success);}
+.iife-bad{color:var(--c-danger);}
+.iife-ok{color:var(--c-success);}
+.iife-neutral{color:var(--c-text2);}
+
+/* pluralization demo */
+.plural-demo{display:flex;gap:12px;flex-wrap:wrap;}
+.plural-card{flex:1;min-width:180px;border-radius:10px;padding:12px;border:1.5px solid;
+  background:var(--c-surface);}
+.plural-card.bad{border-color:var(--c-danger);}
+.plural-card.ok{border-color:var(--c-success);}
+.plural-text{font-size:13px;padding:8px 12px;border-radius:7px;margin:6px 0;}
+.plural-text.bad{background:var(--c-danger-bg);color:var(--c-danger);font-weight:600;}
+.plural-text.ok{background:var(--c-success-bg);color:var(--c-success);font-weight:600;}
+.plural-sub{font-size:9px;color:var(--c-text2);}
+
+/* cast diagram */
+.cast-flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px;
+  background:var(--c-surface);border-radius:10px;border:1.5px solid var(--c-border);}
+.cast-box{border-radius:7px;padding:6px 10px;font-family:monospace;font-size:10px;font-weight:700;}
+.cast-box.source{background:var(--c-info-bg);color:var(--c-info);border:1px solid var(--c-info);}
+.cast-box.escape{background:var(--c-danger-bg);color:var(--c-danger);border:1px solid var(--c-danger);}
+.cast-box.target{background:var(--c-warning-bg);color:var(--c-warning);border:1px solid var(--c-warning);}
+.cast-box.good{background:var(--c-success-bg);color:var(--c-success);border:1px solid var(--c-success);}
+.cast-arrow{font-size:16px;color:var(--c-text3);}
+
+/* url warning */
+.url-card{border-radius:10px;padding:14px;border:2px solid var(--c-danger);background:var(--c-danger-bg);}
+.url-hardcoded{font-family:monospace;font-size:13px;font-weight:700;color:var(--c-danger);
+  word-break:break-all;}
+.url-envs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.url-env{border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;}
+.url-env.local{background:#EEF5FA;color:#2E5F7E;}
+.url-env.staging{background:var(--c-warning-bg);color:var(--c-warning);}
+.url-env.prod{background:var(--c-success-bg);color:var(--c-success);}
+
+/* sum table */
+.sum-table th{font-size:9px;}
+.sum-table td{font-size:11px;}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-logo">VotoAfin DS</div>
+  <div class="sidebar-ver">v1.0 · Agosto 2026</div>
+  <hr/>
+  <div class="sidebar-label">Auditorias UX</div>
+  <a href="ds-11-screens.html">11 · Validacion por Pantalla</a>
+  <a href="audit-cuestionario.html">Auditoria · Pantalla 2</a>
+  <a href="audit-resultados.html" class="active">Auditoria · Pantalla 3</a>
+  <hr/>
+  <div class="sidebar-label">Design System</div>
+  <a href="ds-index.html">Inicio DS</a>
+  <a href="ds-08-affinity.html">08 · Tiers de Afinidad</a>
+  <a href="ds-10-tokens.html">10 · Design Tokens</a>
+  <div class="sidebar-bottom">
+    <button class="theme-btn" id="theme-btn">Dark mode</button>
+  </div>
+</nav>
+
+<div class="main"><div class="content">
+
+<div class="audit-hero">
+  <div style="opacity:.5;font-size:10px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">
+    Pantalla 3 / 11 · Sprint Auditoria UX
+  </div>
+  <h1>ResultadosScreen -- Auditoria completa</h1>
+  <p>15 findings en codigo real. El critico afecta la representacion de afinidad en todas las pantallas que usen getMatchColor.</p>
+  <div class="meta">
+    <div class="meta-item">ResultadosScreen.tsx · 22.1 KB</div>
+    <div class="meta-item">ResultadoHero + RankingCard + ShareModal</div>
+    <div class="meta-item">services/matching.ts + services/share.ts</div>
+    <div class="meta-item">DS-11 Pantalla 3 · DS-08 Affinity Tiers</div>
+  </div>
+</div>
+
+<!-- CONTADOR -->
+<div class="count-box">
+  <div class="count-item crit"><div class="count-n">1</div><div class="count-lbl">Critico</div></div>
+  <div class="count-item high"><div class="count-n">4</div><div class="count-lbl">Altos</div></div>
+  <div class="count-item med"><div class="count-n">7</div><div class="count-lbl">Medios</div></div>
+  <div class="count-item low"><div class="count-n">3</div><div class="count-lbl">Bajos</div></div>
+</div>
+
+<!-- ══════════ CRITICO ══════════ -->
+<div class="sec-divider"><hr/><div class="sec-divider-lbl">Critico</div><hr/></div>
+
+<!-- C-03 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-crit">Critical</span>
+    <span class="finding-id">C-03</span>
+    <span class="finding-title">getMatchColor usa 3 tiers con tokens incorrectos — DS-08 define 5 tiers de afinidad</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      DS-08 y DS-11 definen <strong>5 tiers de afinidad</strong> con tokens propios
+      (<code>--c-aff5</code> a <code>--c-aff1</code>). <code>getMatchColor()</code> en
+      <code>services/matching.ts</code> implementa solo <strong>3 buckets</strong>
+      mapeados a tokens semanticos genericos (<code>success</code>, <code>warning</code>,
+      <code>danger</code>). <code>colors.ts</code> no exporta los tokens de afinidad.
+      Resultado: un match del 90% muestra el verde-bosque apagado del tier 4
+      cuando deberia mostrar el verde vibrante (<code>brandAccent</code>) del tier 5.
+    </p>
+
+    <!-- 5 tiers DS-08 -->
+    <div>
+      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+        color:var(--c-text2);margin-bottom:8px;">DS-08: 5 tiers correctos</div>
+      <div class="tier-row">
+        <div class="tier-cell">
+          <div class="tier-pct-band" style="background:#3A9E7A;">
+            <div class="tier-pct">87%</div>
+            <div class="tier-range">80 - 100</div>
+          </div>
+          <div class="tier-name" style="color:#3A9E7A;">aff5</div>
+          <div class="tier-token">#3A9E7A · brandAccent</div>
+        </div>
+        <div class="tier-cell">
+          <div class="tier-pct-band" style="background:#6B9B7A;">
+            <div class="tier-pct">72%</div>
+            <div class="tier-range">60 - 79</div>
+          </div>
+          <div class="tier-name" style="color:#6B9B7A;">aff4</div>
+          <div class="tier-token">#6B9B7A · success</div>
+        </div>
+        <div class="tier-cell">
+          <div class="tier-pct-band" style="background:#C89B5C;">
+            <div class="tier-pct">51%</div>
+            <div class="tier-range">40 - 59</div>
+          </div>
+          <div class="tier-name" style="color:#C89B5C;">aff3</div>
+          <div class="tier-token">#C89B5C · warning</div>
+        </div>
+        <div class="tier-cell">
+          <div class="tier-pct-band" style="background:#D07777;">
+            <div class="tier-pct">34%</div>
+            <div class="tier-range">20 - 39</div>
+          </div>
+          <div class="tier-name" style="color:#D07777;">aff2</div>
+          <div class="tier-token">#D07777 · danger300</div>
+        </div>
+        <div class="tier-cell">
+          <div class="tier-pct-band" style="background:#B85C5C;">
+            <div class="tier-pct">12%</div>
+            <div class="tier-range">0 - 19</div>
+          </div>
+          <div class="tier-name" style="color:#B85C5C;">aff1</div>
+          <div class="tier-token">#B85C5C · danger</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- comparacion 3 vs 5 tiers -->
+    <div class="tier-compare">
+      <div class="tier-col">
+        <div class="tier-col-label bad">Actual — 3 tiers incorrectos</div>
+        <div class="tier-bar">
+          <div class="tier-swatch" style="background:#6B9B7A;"></div>
+          <div class="tier-info">
+            <div class="tier-info-pct">75 - 100% &rarr; <code>success</code></div>
+            <div class="tier-info-tok">#6B9B7A <span class="tier-mismatch">deberia ser aff5 #3A9E7A</span></div>
+          </div>
+        </div>
+        <div class="tier-bar">
+          <div class="tier-swatch" style="background:#C89B5C;"></div>
+          <div class="tier-info">
+            <div class="tier-info-pct">50 - 74% &rarr; <code>warning</code></div>
+            <div class="tier-info-tok">#C89B5C <span class="tier-mismatch">cubre aff3 + mitad aff4</span></div>
+          </div>
+        </div>
+        <div class="tier-bar">
+          <div class="tier-swatch" style="background:#B85C5C;"></div>
+          <div class="tier-info">
+            <div class="tier-info-pct">0 - 49% &rarr; <code>danger</code></div>
+            <div class="tier-info-tok">#B85C5C <span class="tier-mismatch">cubre aff1 + aff2</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:20px;color:var(--c-text3);align-self:center;">&rarr;</div>
+      <div class="tier-col">
+        <div class="tier-col-label ok">Propuesto — 5 tiers DS-08</div>
+        <div class="tier-bar">
+          <div class="tier-swatch" style="background:#3A9E7A;"></div>
+          <div class="tier-info">
+            <div class="tier-info-pct">80 - 100% &rarr; <code>aff5</code></div>
+            <div class="tier-info-tok">#3A9E7A · brandAccent (verde vibrante)</div>
+          </div>
+        </div>
+        <div class="tier-bar">
+          <div class="tier-swatch" style="background:#6B9B7A;"></div>
+          <div class="tier-info">
+            <div class="tier-info-pct">60 - 79% &rarr; <code>aff4</code></div>
+            <div class="tier-info-tok">#6B9B7A · success</div>
+          </div>
+        </div>
+        <div class="tier-bar">
+          <div class="tier-swatch" style="background:#C89B5C;"></div>
+          <div class="tier-info">
+            <div class="tier-info-pct">40 - 59% &rarr; <code>aff3</code></div>
+            <div class="tier-info-tok">#C89B5C · warning</div>
+          </div>
+        </div>
+        <div class="tier-bar">
+          <div class="tier-swatch" style="background:#D07777;"></div>
+          <div class="tier-info">
+            <div class="tier-info-pct">20 - 39% &rarr; <code>aff2</code></div>
+            <div class="tier-info-tok">#D07777 · danger300</div>
+          </div>
+        </div>
+        <div class="tier-bar">
+          <div class="tier-swatch" style="background:#B85C5C;"></div>
+          <div class="tier-info">
+            <div class="tier-info-pct">0 - 19% &rarr; <code>aff1</code></div>
+            <div class="tier-info-tok">#B85C5C · danger</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- fix en codigo -->
+    <div class="diff">
+      <span class="diff-file">// theme/colors.ts -- agregar tokens de afinidad</span>
+      <div class="diff-add">export const affinity = {</div>
+      <div class="diff-add">  aff5: "#3A9E7A",  // 80-100% -- brandAccent</div>
+      <div class="diff-add">  aff4: "#6B9B7A",  // 60-79%  -- success</div>
+      <div class="diff-add">  aff3: "#C89B5C",  // 40-59%  -- warning</div>
+      <div class="diff-add">  aff2: "#D07777",  // 20-39%  -- danger300</div>
+      <div class="diff-add">  aff1: "#B85C5C",  // 0-19%   -- danger</div>
+      <div class="diff-add">} as const;</div>
+      <br/>
+      <span class="diff-file">// services/matching.ts -- refactorizar a 5 tiers</span>
+      <div class="diff-del">const TIER_THRESHOLDS = { alto: 75, medio: 50 } as const;</div>
+      <div class="diff-add">const TIER_THRESHOLDS = { t5: 80, t4: 60, t3: 40, t2: 20 } as const;</div>
+      <br/>
+      <div class="diff-del">export function getMatchColor(pct, palette): string {</div>
+      <div class="diff-del">  const tier = getMatchTier(pct);</div>
+      <div class="diff-del">  return { alto: palette.success, medio: palette.warning, bajo: palette.danger }[tier];</div>
+      <div class="diff-del">}</div>
+      <div class="diff-add">export function getMatchColor(pct: number): string {</div>
+      <div class="diff-add">  if (pct >= TIER_THRESHOLDS.t5) return affinity.aff5;</div>
+      <div class="diff-add">  if (pct >= TIER_THRESHOLDS.t4) return affinity.aff4;</div>
+      <div class="diff-add">  if (pct >= TIER_THRESHOLDS.t3) return affinity.aff3;</div>
+      <div class="diff-add">  if (pct >= TIER_THRESHOLDS.t2) return affinity.aff2;</div>
+      <div class="diff-add">  return affinity.aff1;</div>
+      <div class="diff-add">}</div>
+    </div>
+
+    <!-- ranking cards antes/despues -->
+    <div class="phone-row">
+      <div>
+        <div class="phone-label bad">Actual -- 3 tiers</div>
+        <div class="phone" style="width:180px;">
+          <div style="padding:10px;">
+            <div class="mini-rank-card">
+              <div class="mini-rank-header">
+                <div class="mini-rank-pos">#1</div>
+                <div class="mini-avatar"></div>
+                <div style="font-size:10px;font-weight:600;color:var(--c-text);">Candidata A</div>
+              </div>
+              <div class="mini-rank-pct" style="color:#6B9B7A;">87%</div>
+              <div class="mini-rank-label" style="color:#6B9B7A;">alto (success)</div>
+            </div>
+            <div class="mini-rank-card">
+              <div class="mini-rank-header">
+                <div class="mini-rank-pos">#2</div>
+                <div class="mini-avatar"></div>
+                <div style="font-size:10px;font-weight:600;color:var(--c-text);">Candidato B</div>
+              </div>
+              <div class="mini-rank-pct" style="color:#C89B5C;">62%</div>
+              <div class="mini-rank-label" style="color:#C89B5C;">medio (warning)</div>
+            </div>
+            <div class="mini-rank-card">
+              <div class="mini-rank-header">
+                <div class="mini-rank-pos">#3</div>
+                <div class="mini-avatar"></div>
+                <div style="font-size:10px;font-weight:600;color:var(--c-text);">Candidato C</div>
+              </div>
+              <div class="mini-rank-pct" style="color:#B85C5C;">31%</div>
+              <div class="mini-rank-label" style="color:#B85C5C;">bajo (danger)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:20px;color:var(--c-text3);align-self:center;">&rarr;</div>
+      <div>
+        <div class="phone-label ok">DS-08 -- 5 tiers</div>
+        <div class="phone" style="width:180px;">
+          <div style="padding:10px;">
+            <div class="mini-rank-card">
+              <div class="mini-rank-header">
+                <div class="mini-rank-pos">#1</div>
+                <div class="mini-avatar"></div>
+                <div style="font-size:10px;font-weight:600;color:var(--c-text);">Candidata A</div>
+              </div>
+              <div class="mini-rank-pct" style="color:#3A9E7A;">87%</div>
+              <div class="mini-rank-label" style="color:#3A9E7A;">aff5 (80-100%)</div>
+            </div>
+            <div class="mini-rank-card">
+              <div class="mini-rank-header">
+                <div class="mini-rank-pos">#2</div>
+                <div class="mini-avatar"></div>
+                <div style="font-size:10px;font-weight:600;color:var(--c-text);">Candidato B</div>
+              </div>
+              <div class="mini-rank-pct" style="color:#6B9B7A;">62%</div>
+              <div class="mini-rank-label" style="color:#6B9B7A;">aff4 (60-79%)</div>
+            </div>
+            <div class="mini-rank-card">
+              <div class="mini-rank-header">
+                <div class="mini-rank-pos">#3</div>
+                <div class="mini-avatar"></div>
+                <div style="font-size:10px;font-weight:600;color:var(--c-text);">Candidato C</div>
+              </div>
+              <div class="mini-rank-pct" style="color:#D07777;">31%</div>
+              <div class="mini-rank-label" style="color:#D07777;">aff2 (20-39%)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ins ins-r" style="margin:0;flex:1;min-width:160px;font-size:11px;align-self:flex-start;">
+        <strong>Alcance global:</strong> <code>getMatchColor</code> se usa en
+        <code>ResultadosScreen</code>, <code>CandidatosScreen</code>,
+        <code>CompararScreen</code>, <code>DetalleCandidato</code>
+        y <code>MisGuardadosScreen</code>. El fix corrige la representacion
+        en toda la app simultaneamente.
+      </div>
+    </div>
+
+    <div class="ins ins-a" style="margin:0;font-size:11px;">
+      <strong>Riesgo DS-11 asociado:</strong> "Usar el color del tier en el nombre del candidato
+      implica que verde = candidato bueno -- sesgo de framing inaceptable."
+      El texto <code>c.text</code> sobre el nombre ya esta correcto en <code>RankingCard</code>.
+      Solo el numero porcentual hereda el color -- eso SI esta permitido por DS-11.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ ALTOS ══════════ -->
+<div class="sec-divider"><hr/><div class="sec-divider-lbl">Altos</div><hr/></div>
+
+<!-- A-04 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-high">High</span>
+    <span class="finding-id">A-04</span>
+    <span class="finding-title">IIFE de 45 lineas dentro del JSX para el top match</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      El bloque del candidato #1 esta envuelto en un IIFE anonimo dentro del JSX.
+      No es nombrado, no es testeable, y fuerza al lector a inferir su proposito
+      desde el contenido. Todo lo que esta adentro puede vivir como variables
+      derivadas antes del <code>return</code> o como un componente
+      <code>&lt;TopMatchSection&gt;</code>.
+    </p>
+    <div class="iife-diagram">
+      <div class="iife-label bad">Actual -- IIFE anonimo (45 lineas)</div>
+      <div class="iife-zone problem">
+        <span class="iife-bad">{top ? (</span><br/>
+        <span class="iife-bad">&nbsp;&nbsp;(() =&gt; {</span>
+        <span class="diff-comment"> // funcion anonima autoejecutada</span><br/>
+        <span class="iife-neutral">&nbsp;&nbsp;&nbsp;&nbsp;const pct = Number(top.match_percentage);</span><br/>
+        <span class="iife-neutral">&nbsp;&nbsp;&nbsp;&nbsp;const scoreCol = getMatchColor(pct, c);</span><br/>
+        <span class="iife-neutral">&nbsp;&nbsp;&nbsp;&nbsp;const conf = getConfianzaBadge(top.confianza);</span><br/>
+        <span class="iife-neutral">&nbsp;&nbsp;&nbsp;&nbsp;// ... 35 lineas mas de logica + JSX ...</span><br/>
+        <span class="iife-neutral">&nbsp;&nbsp;&nbsp;&nbsp;return (&lt;View&gt;...&lt;/View&gt;);</span><br/>
+        <span class="iife-bad">&nbsp;&nbsp;})()</span><br/>
+        <span class="iife-bad">) : (&lt;Text&gt;No hay candidatos...&lt;/Text&gt;)}</span>
+      </div>
+      <div class="iife-label ok">Propuesto -- variables derivadas + componente extraido</div>
+      <div class="iife-zone ok">
+        <span class="diff-comment">// Antes del return -- derivaciones legibles</span><br/>
+        <span class="iife-ok">const topPct = top ? Number(top.match_percentage) : null;</span><br/>
+        <span class="iife-ok">const topColor = topPct != null ? getMatchColor(topPct) : null;</span><br/>
+        <span class="iife-ok">const topConf = top ? getConfianzaBadge(top.confianza) : null;</span><br/>
+        <br/>
+        <span class="diff-comment">// En el JSX -- limpio y nombrado</span><br/>
+        <span class="iife-ok">{top ? (</span><br/>
+        <span class="iife-ok">&nbsp;&nbsp;&lt;TopMatchSection result={top} matchColor={topColor!} /&gt;</span><br/>
+        <span class="iife-ok">) : (</span><br/>
+        <span class="iife-ok">&nbsp;&nbsp;&lt;Text&gt;No hay candidatos para mostrar.&lt;/Text&gt;</span><br/>
+        <span class="iife-ok">)}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- A-05 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-high">High</span>
+    <span class="finding-id">A-05</span>
+    <span class="finding-title">Cast breakdown_por_eje duplicado en dos callsites</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      El tipo <code>MatchResult.breakdown_por_eje</code> es <code>unknown</code> en el
+      schema generado. El mismo cast aparece en dos lugares distintos del screen.
+      <code>breakdownToChartData()</code> en <code>endpoints.ts</code> deberia aceptar
+      <code>unknown</code> directamente y hacer el cast internamente una sola vez.
+    </p>
+    <div class="cast-flow">
+      <div class="cast-box source">MatchResult<br/>.breakdown_por_eje<br/><small>: unknown</small></div>
+      <div class="cast-arrow">&rarr;</div>
+      <div class="cast-box escape">as BreakdownPorEje<br/>| null | undefined<br/><small>x2 en el screen</small></div>
+      <div class="cast-arrow">&rarr;</div>
+      <div class="cast-box target">breakdownToChartData()<br/><small>acepta BreakdownPorEje</small></div>
+    </div>
+    <div class="diff">
+      <span class="diff-file">// endpoints.ts -- ampliar la firma para aceptar unknown</span>
+      <div class="diff-del">export function breakdownToChartData(breakdown: BreakdownPorEje | null | undefined)</div>
+      <div class="diff-add">export function breakdownToChartData(breakdown: unknown)</div>
+      <div class="diff-add">  : Record&lt;string, number&gt; {</div>
+      <div class="diff-add">  const b = breakdown as BreakdownPorEje | null | undefined;</div>
+      <div class="diff-add">  // ... mismo cuerpo, cast una sola vez</div>
+      <br/>
+      <span class="diff-file">// ResultadosScreen.tsx -- los dos callsites se simplifican</span>
+      <div class="diff-del">breakdownToChartData(top.breakdown_por_eje as BreakdownPorEje | null | undefined)</div>
+      <div class="diff-add">breakdownToChartData(top.breakdown_por_eje)</div>
+    </div>
+  </div>
+</div>
+
+<!-- A-06 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-high">High</span>
+    <span class="finding-id">A-06</span>
+    <span class="finding-title">APP_URL hardcodeada en services/share.ts</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      En staging y previews, el texto compartido lleva el link de produccion.
+      El usuario o el equipo de QA que comparte desde un entorno de prueba
+      lleva a sus contactos a la URL de produccion en lugar del entorno correcto.
+    </p>
+    <div class="url-card">
+      <div class="url-hardcoded">"https://tinder-decisivo.cl"</div>
+      <div style="font-size:9px;color:var(--c-danger);margin-top:4px;font-weight:700;">
+        Hardcodeado en services/share.ts linea 13
+      </div>
+      <div class="url-envs">
+        <div class="url-env local">localhost:8082 (dev)</div>
+        <div class="url-env staging">staging.tinder-decisivo.cl</div>
+        <div class="url-env prod">tinder-decisivo.cl (prod)</div>
+      </div>
+      <div style="font-size:9px;color:var(--c-danger);margin-top:6px;">
+        Los tres entornos comparten siempre la URL de produccion
+      </div>
+    </div>
+    <div class="diff">
+      <div class="diff-del">const APP_URL = "https://tinder-decisivo.cl";</div>
+      <div class="diff-add">const APP_URL =</div>
+      <div class="diff-add">&nbsp;&nbsp;process.env.EXPO_PUBLIC_APP_URL ?? "https://tinder-decisivo.cl";</div>
+    </div>
+  </div>
+</div>
+
+<!-- A-07 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-high">High</span>
+    <span class="finding-id">A-07</span>
+    <span class="finding-title">fromMatchResults usa as unknown as -- mapper fantasma</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      El JSDoc dice "adapter sin castear en cada callsite". El cast doble
+      <code>as unknown as</code> existe, solo esta oculto dentro de la funcion.
+      Si <code>MatchResult.candidato_data</code> cambia de schema, TypeScript
+      no avisara porque el cast lo silencia. Los campos realmente existen en el
+      tipo -- el mapper explicito es un one-liner.
+    </p>
+    <div class="cast-flow" style="margin-bottom:12px;">
+      <div class="cast-box source">MatchResult[]<br/><small>schema tipado</small></div>
+      <div class="cast-arrow">&rarr;</div>
+      <div class="cast-box escape">as unknown<br/>as ShareableMatch[]<br/><small>TypeScript ciego</small></div>
+      <div class="cast-arrow">&rarr;</div>
+      <div class="cast-box target">buildShareText()<br/><small>usa campos</small></div>
+    </div>
+    <div class="diff">
+      <span class="diff-file">// services/share.ts -- mapper explicito, sin escape hatch</span>
+      <div class="diff-del">export function fromMatchResults(matches: MatchResult[]): ShareableMatch[] {</div>
+      <div class="diff-del">&nbsp;&nbsp;return matches as unknown as ShareableMatch[];</div>
+      <div class="diff-del">}</div>
+      <div class="diff-add">export function fromMatchResults(matches: MatchResult[]): ShareableMatch[] {</div>
+      <div class="diff-add">&nbsp;&nbsp;return matches.map((m) =&gt; ({</div>
+      <div class="diff-add">&nbsp;&nbsp;&nbsp;&nbsp;match_percentage: m.match_percentage,</div>
+      <div class="diff-add">&nbsp;&nbsp;&nbsp;&nbsp;candidato_data: {</div>
+      <div class="diff-add">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nombre:   m.candidato_data.nombre,</div>
+      <div class="diff-add">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;apellido: m.candidato_data.apellido,</div>
+      <div class="diff-add">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;partido:  m.candidato_data.partido ?? null,</div>
+      <div class="diff-add">&nbsp;&nbsp;&nbsp;&nbsp;},</div>
+      <div class="diff-add">&nbsp;&nbsp;}));</div>
+      <div class="diff-add">}</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MEDIOS ══════════ -->
+<div class="sec-divider"><hr/><div class="sec-divider-lbl">Medios</div><hr/></div>
+
+<div class="g2">
+
+<!-- M-09 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-med">Med</span>
+    <span class="finding-id">M-09</span>
+    <span class="finding-title">Boton "Compartir" usa variant="secondary" -- DS-11 requiere brandAccent</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      DS-11 Pantalla 3: <em>"CTA Compartir &rarr; --color-brand-accent.
+      Accion de alta energia en momento de recompensa."</em>
+      Este es exactamente ese momento. El usuario acaba de ver sus resultados.
+    </p>
+    <div class="btn-compare">
+      <div class="btn-demo-wrap">
+        <div class="btn-demo secondary">Compartir mi ranking</div>
+        <div class="btn-demo-label bad" style="color:var(--c-danger);">Actual -- secondary</div>
+        <div style="font-size:9px;color:var(--c-text3);text-align:center;">
+          transparente + borde primary<br/>correcto para acciones neutras
+        </div>
+      </div>
+      <div style="font-size:18px;color:var(--c-text3);align-self:center;">&rarr;</div>
+      <div class="btn-demo-wrap">
+        <div class="btn-demo accent">Compartir mi ranking</div>
+        <div class="btn-demo-label ok" style="color:var(--c-success);">Propuesto -- accent</div>
+        <div style="font-size:9px;color:var(--c-text3);text-align:center;">
+          #3A9E7A verde vibrante<br/>correcto para recompensa
+        </div>
+      </div>
+    </div>
+    <div class="ins ins-b" style="margin:0;font-size:11px;">
+      Verificar que <code>Button</code> tenga <code>variant="accent"</code>.
+      Si no existe, agregar la variante usando <code>c.brandAccent</code>
+      con <code>c.textOnPrimary</code> (blanco) para el texto.
+    </div>
+  </div>
+</div>
+
+<!-- M-10 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-med">Med</span>
+    <span class="finding-id">M-10</span>
+    <span class="finding-title">confianzaToBadge duplica logica de getConfianzaBadge del service</span>
+  </div>
+  <div class="finding-body">
+    <p>DRY roto. La funcion no exportada en el screen repite la misma clasificacion
+    que el service ya tiene. No es testeable. Eliminarla y agregar
+    <code>getConfianzaBadgeVariant()</code> al service.</p>
+    <div class="diff">
+      <span class="diff-file">// ResultadosScreen.tsx -- BORRAR</span>
+      <div class="diff-del">function confianzaToBadge(confianza?: string): BadgeVariant {</div>
+      <div class="diff-del">&nbsp;&nbsp;const key = (confianza ?? "TENTATIVA").toUpperCase();</div>
+      <div class="diff-del">&nbsp;&nbsp;if (key === "ALTA") return "success";</div>
+      <div class="diff-del">&nbsp;&nbsp;if (key === "MEDIA") return "warning";</div>
+      <div class="diff-del">&nbsp;&nbsp;return "danger";</div>
+      <div class="diff-del">}</div>
+      <br/>
+      <span class="diff-file">// services/matching.ts -- AGREGAR</span>
+      <div class="diff-add">export function getConfianzaBadgeVariant(confianza?: string): BadgeVariant {</div>
+      <div class="diff-add">&nbsp;&nbsp;const key = (confianza ?? "TENTATIVA").toUpperCase();</div>
+      <div class="diff-add">&nbsp;&nbsp;if (key === "ALTA")  return "success";</div>
+      <div class="diff-add">&nbsp;&nbsp;if (key === "MEDIA") return "warning";</div>
+      <div class="diff-add">&nbsp;&nbsp;return "danger";</div>
+      <div class="diff-add">}</div>
+    </div>
+  </div>
+</div>
+
+<!-- M-11 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-med">Med</span>
+    <span class="finding-id">M-11</span>
+    <span class="finding-title">candidato(s) descartado(s) -- antipatron de pluralizacion</span>
+  </div>
+  <div class="finding-body">
+    <p>La forma <code>(s)</code> nunca se lee bien en voz alta y falla en lectores de pantalla (WCAG 3.1 Readable).</p>
+    <div class="plural-demo">
+      <div class="plural-card bad">
+        <div style="font-size:9px;font-weight:800;color:var(--c-danger);text-transform:uppercase;margin-bottom:6px;">Actual</div>
+        <div class="plural-text bad">"3 candidato(s) descartado(s). Ver lista"</div>
+        <div class="plural-sub">Nunca se lee bien. VoiceOver lo leeera literalmente con el parentesis.</div>
+      </div>
+      <div class="plural-card ok">
+        <div style="font-size:9px;font-weight:800;color:var(--c-success);text-transform:uppercase;margin-bottom:6px;">Propuesto</div>
+        <div class="plural-text ok">"3 candidatos descartados. Ver lista"</div>
+        <div class="plural-text ok" style="font-size:11px;">"1 candidato descartado. Ver lista"</div>
+        <div class="plural-sub">Ternaria simple. Legible en voz alta y en texto.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- M-12 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-med">Med</span>
+    <span class="finding-id">M-12</span>
+    <span class="finding-title">rankingCols calculado en render sin useMemo</span>
+  </div>
+  <div class="finding-body">
+    <p>La ternaria se recalcula en cada render aunque <code>screenWidth</code> no haya cambiado. Candidato ideal para <code>useMemo</code>.</p>
+    <div class="diff">
+      <div class="diff-del">const rankingCols = screenWidth &lt; 400 ? 1 : screenWidth &lt; 720 ? 2 : screenWidth &lt; 1000 ? 3 : 4;</div>
+      <div class="diff-add">const rankingCols = useMemo(</div>
+      <div class="diff-add">&nbsp;&nbsp;() =&gt; screenWidth &lt; 400 ? 1 : screenWidth &lt; 720 ? 2 : screenWidth &lt; 1000 ? 3 : 4,</div>
+      <div class="diff-add">&nbsp;&nbsp;[screenWidth],</div>
+      <div class="diff-add">);</div>
+    </div>
+  </div>
+</div>
+
+<!-- M-13 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-med">Med</span>
+    <span class="finding-id">M-13</span>
+    <span class="finding-title">"100%" as unknown as number -- tipo incorrecto en cardFlexBasis</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      <code>flexBasis</code> en React Native acepta <code>DimensionValue</code>
+      que incluye strings porcentuales. El cast doble es innecesario y viola el sistema de tipos.
+    </p>
+    <div class="diff">
+      <div class="diff-del">const cardFlexBasis =</div>
+      <div class="diff-del">&nbsp;&nbsp;rankingCols === 1</div>
+      <div class="diff-del">&nbsp;&nbsp;&nbsp;&nbsp;? ("100%" as unknown as number)</div>
+      <div class="diff-del">&nbsp;&nbsp;&nbsp;&nbsp;: (screenWidth - gapTotal - spacing.sp4 * 2) / rankingCols;</div>
+      <div class="diff-add">import type { DimensionValue } from "react-native";</div>
+      <div class="diff-add">const cardFlexBasis: DimensionValue =</div>
+      <div class="diff-add">&nbsp;&nbsp;rankingCols === 1</div>
+      <div class="diff-add">&nbsp;&nbsp;&nbsp;&nbsp;? "100%"</div>
+      <div class="diff-add">&nbsp;&nbsp;&nbsp;&nbsp;: (screenWidth - gapTotal - spacing.sp4 * 2) / rankingCols;</div>
+    </div>
+  </div>
+</div>
+
+<!-- M-14 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-med">Med</span>
+    <span class="finding-id">M-14</span>
+    <span class="finding-title">ResultadoHero sin accessibilityLabel en el contenedor</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      VoiceOver llega al card del top match sin saber que es. El
+      <code>Button</code> interior si tiene label, pero el contenedor
+      que agrupa nombre + partido + porcentaje + badge de confianza no.
+    </p>
+    <div class="diff">
+      <span class="diff-file">// ResultadoHero.tsx -- View raiz del card</span>
+      <div class="diff-add">&lt;View</div>
+      <div class="diff-add">&nbsp;&nbsp;style={[styles.card, style]}</div>
+      <div class="diff-add">&nbsp;&nbsp;accessibilityRole="summary"</div>
+      <div class="diff-add">&nbsp;&nbsp;accessibilityLabel={`Tu mejor match: ${nombreCompleto}, ${Math.round(matchPct)}% de afinidad`}</div>
+      <div class="diff-add">&gt;</div>
+    </div>
+  </div>
+</div>
+
+<!-- M-15 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-med">Med</span>
+    <span class="finding-id">M-15</span>
+    <span class="finding-title">sortByMatchDesc sin useMemo -- re-sort en cada render</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      Al filtrar por partido (<code>setPartidoFiltro</code>), el componente re-renderiza
+      y <code>sortByMatchDesc</code> re-ordena el array completo aunque
+      <code>activeMutation.data</code> no haya cambiado.
+    </p>
+    <div class="diff">
+      <div class="diff-del">const allResults = activeMutation.data ? sortByMatchDesc(activeMutation.data) : [];</div>
+      <div class="diff-add">const allResults = useMemo(</div>
+      <div class="diff-add">&nbsp;&nbsp;() =&gt; activeMutation.data ? sortByMatchDesc(activeMutation.data) : [],</div>
+      <div class="diff-add">&nbsp;&nbsp;[activeMutation.data],</div>
+      <div class="diff-add">);</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /g2 -->
+
+<!-- ══════════ BAJOS ══════════ -->
+<div class="sec-divider"><hr/><div class="sec-divider-lbl">Bajos</div><hr/></div>
+
+<div class="g2">
+
+<!-- L-04 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-low">Low</span>
+    <span class="finding-id">L-04</span>
+    <span class="finding-title">esTentativa inline dentro del IIFE -- no testeable</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      La clasificacion de confianza tiene logica de negocio que deberia vivir
+      en el service y ser testeable de forma aislada.
+    </p>
+    <div class="diff">
+      <div class="diff-del">const esTentativa = (top.confianza ?? "TENTATIVA").toUpperCase() === "TENTATIVA";</div>
+      <div class="diff-add">// services/matching.ts</div>
+      <div class="diff-add">export function isConfianzaTentativa(confianza?: string): boolean {</div>
+      <div class="diff-add">&nbsp;&nbsp;return (confianza ?? "TENTATIVA").toUpperCase() === "TENTATIVA";</div>
+      <div class="diff-add">}</div>
+    </div>
+  </div>
+</div>
+
+<!-- L-05 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-low">Low</span>
+    <span class="finding-id">L-05</span>
+    <span class="finding-title">Banner de cobertura usa texto "(!)" en lugar del componente Icon</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      No es accesible para lectores de pantalla. El proyecto ya tiene el
+      componente <code>Icon</code>.
+    </p>
+    <div class="diff">
+      <div class="diff-del">&lt;Text style={{ fontSize: 16, lineHeight: 20 }}&gt;(!)&lt;/Text&gt;</div>
+      <div class="diff-add">&lt;Icon name="warning" size={16} color={c.warning} accessibilityLabel="Advertencia" /&gt;</div>
+    </div>
+  </div>
+</div>
+
+<!-- L-06 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-low">Low</span>
+    <span class="finding-id">L-06</span>
+    <span class="finding-title">c.warning + "22" -- concatenacion hex fragil para transparencia</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      Aparece 3 veces en el archivo. En dark mode o si el color cambia de
+      formato, la concatenacion producira un valor CSS invalido sin error visible.
+    </p>
+    <div class="diff">
+      <div class="diff-del">backgroundColor: c.warning + "22"</div>
+      <div class="diff-del">backgroundColor: c.primary + "18"</div>
+      <div class="diff-add">// theme/utils.ts -- helper reutilizable</div>
+      <div class="diff-add">export function withAlpha(hex: string, alpha: number): string {</div>
+      <div class="diff-add">&nbsp;&nbsp;const a = Math.round(alpha * 255).toString(16).padStart(2, "0");</div>
+      <div class="diff-add">&nbsp;&nbsp;return `${hex}${a}`;</div>
+      <div class="diff-add">}</div>
+      <div class="diff-add">// Uso:</div>
+      <div class="diff-add">backgroundColor: withAlpha(c.warning, 0.13)</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /g2 -->
+
+<!-- ══════════ TABLA RESUMEN ══════════ -->
+<div class="sec-divider"><hr/><div class="sec-divider-lbl">Tabla resumen</div><hr/></div>
+
+<div class="card" style="padding:0;overflow:hidden;">
+<table class="sum-table">
+  <thead>
+    <tr>
+      <th>ID</th><th>Sev</th><th>Categoria</th><th>Titulo</th><th>Archivo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="mono">C-03</td>
+      <td><span class="sev sev-crit">Critical</span></td>
+      <td>DS Tokens</td>
+      <td>getMatchColor usa 3 tiers -- DS-08 define 5 (aff1-aff5)</td>
+      <td class="mono">services/matching.ts</td>
+    </tr>
+    <tr>
+      <td class="mono">A-04</td>
+      <td><span class="sev sev-high">High</span></td>
+      <td>Arquitectura</td>
+      <td>IIFE de 45 lineas en JSX para top match</td>
+      <td class="mono">ResultadosScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">A-05</td>
+      <td><span class="sev sev-high">High</span></td>
+      <td>TypeScript</td>
+      <td>Cast breakdown_por_eje duplicado en 2 callsites</td>
+      <td class="mono">ResultadosScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">A-06</td>
+      <td><span class="sev sev-high">High</span></td>
+      <td>Config</td>
+      <td>APP_URL hardcodeada en services/share.ts</td>
+      <td class="mono">services/share.ts:13</td>
+    </tr>
+    <tr>
+      <td class="mono">A-07</td>
+      <td><span class="sev sev-high">High</span></td>
+      <td>TypeScript</td>
+      <td>fromMatchResults usa as unknown as -- mapper fantasma</td>
+      <td class="mono">services/share.ts</td>
+    </tr>
+    <tr>
+      <td class="mono">M-09</td>
+      <td><span class="sev sev-med">Med</span></td>
+      <td>DS Tokens</td>
+      <td>Boton "Compartir" usa secondary -- DS-11 requiere brandAccent</td>
+      <td class="mono">ResultadosScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">M-10</td>
+      <td><span class="sev sev-med">Med</span></td>
+      <td>DRY</td>
+      <td>confianzaToBadge duplica getConfianzaBadge del service</td>
+      <td class="mono">ResultadosScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">M-11</td>
+      <td><span class="sev sev-med">Med</span></td>
+      <td>UX / A11y</td>
+      <td>candidato(s) descartado(s) -- antipatron de pluralizacion</td>
+      <td class="mono">ResultadosScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">M-12</td>
+      <td><span class="sev sev-med">Med</span></td>
+      <td>Perf</td>
+      <td>rankingCols sin useMemo -- recalculo en cada render</td>
+      <td class="mono">ResultadosScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">M-13</td>
+      <td><span class="sev sev-med">Med</span></td>
+      <td>TypeScript</td>
+      <td>"100%" as unknown as number en cardFlexBasis</td>
+      <td class="mono">ResultadosScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">M-14</td>
+      <td><span class="sev sev-med">Med</span></td>
+      <td>A11y</td>
+      <td>ResultadoHero sin accessibilityLabel en contenedor</td>
+      <td class="mono">organisms/ResultadoHero.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">M-15</td>
+      <td><span class="sev sev-med">Med</span></td>
+      <td>Perf</td>
+      <td>sortByMatchDesc sin useMemo -- re-sort en cada render</td>
+      <td class="mono">ResultadosScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">L-04</td>
+      <td><span class="sev sev-low">Low</span></td>
+      <td>DRY</td>
+      <td>esTentativa inline en IIFE -- no testeable</td>
+      <td class="mono">ResultadosScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">L-05</td>
+      <td><span class="sev sev-low">Low</span></td>
+      <td>A11y</td>
+      <td>Banner usa "(!) " en lugar del componente Icon</td>
+      <td class="mono">ResultadosScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">L-06</td>
+      <td><span class="sev sev-low">Low</span></td>
+      <td>Theme</td>
+      <td>c.warning + "22" -- hex concat fragil para transparencia</td>
+      <td class="mono">ResultadosScreen.tsx</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<!-- LO QUE ESTA BIEN -->
+<div class="sec-divider"><hr/><div class="sec-divider-lbl">Lo que esta bien</div><hr/></div>
+
+<div class="g2">
+  <div class="ins ins-g" style="margin:0;">
+    <strong>sortByMatchDesc en el service.</strong> No confia ciegamente en el orden
+    del backend. El sort defensivo esta en el lugar correcto.
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>loading de la mutation SI se consume.</strong> A diferencia de
+    CuestionarioScreen (BUG-010), aqui el spinner se muestra correctamente
+    durante el fetch.
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>descartadoIds y favoritoIds con useMemo.</strong> Las dos
+    transformaciones de lista mas costosas estan correctamente memoizadas.
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>Guardia esTipoBase con UI dedicada.</strong> El edge case de
+    "preguntas base sin candidatos" tiene un estado vacio especifico con CTA
+    contextual. Bien manejado.
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>MatchPalette desacoplada del tema.</strong> La interfaz en el service
+    no depende de React ni del theme object -- es puro TypeScript testeable.
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>RankingCard con accessibilityLabel completo.</strong> El Pressable
+    interno tiene label: nombre + porcentaje + posicion. Correcto para lectores.
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>Nombre del candidato en c.text (no en el color del tier).</strong>
+    DS-11: "Nunca heredar el color del tier -- es dato, no estado."
+    <code>styles.nombre</code> usa <code>c.text</code>. Correcto.
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>filteredResults con useMemo doble.</strong> El pipeline
+    visible &rarr; filtrado tiene ambas etapas memoizadas con dependencias correctas.
+  </div>
+</div>
+
+<div style="height:40px;"></div>
+</div></div>
+
+<script>
+const btn = document.getElementById('theme-btn');
+btn.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  btn.textContent = document.body.classList.contains('dark') ? 'Light mode' : 'Dark mode';
+});
+</script>
+</body>
+</html>

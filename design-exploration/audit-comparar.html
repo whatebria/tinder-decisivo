@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Auditoria -- CompararScreen -- Pantalla 5/11</title>
+<link rel="stylesheet" href="ds-shared.css"/>
+<style>
+.audit-hero{background:var(--c-hero);padding:28px 36px 24px;color:#fff;margin:-40px -36px 32px;}
+.audit-hero h1{font-size:22px;font-weight:900;margin-bottom:4px;}
+.audit-hero p{font-size:12px;opacity:.65;max-width:600px;line-height:1.6;}
+.audit-hero .meta{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;}
+.audit-hero .meta-item{font-size:11px;opacity:.75;}
+
+.sev{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;
+  font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.sev-high{background:#FEF3C7;color:#92400E;}
+.sev-med{background:#EFF6FF;color:#1E40AF;}
+.sev-low{background:var(--c-surface2);color:var(--c-text2);}
+.dark .sev-high{background:rgba(200,155,92,.2);color:#E5C07B;}
+.dark .sev-med{background:rgba(92,138,184,.2);color:#93C5FD;}
+.dark .sev-low{background:var(--c-surface2);color:var(--c-text2);}
+
+.finding{border:1.5px solid var(--c-border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.finding-head{display:flex;align-items:center;gap:10px;padding:12px 16px;
+  background:var(--c-surface);border-bottom:1px solid var(--c-border);}
+.finding-id{font-family:monospace;font-size:11px;font-weight:800;color:var(--c-text2);}
+.finding-title{font-size:13px;font-weight:700;color:var(--c-text);flex:1;}
+.finding-body{padding:16px;background:var(--c-bg);display:flex;flex-direction:column;gap:14px;}
+.finding-body p{font-size:12px;color:var(--c-text2);line-height:1.7;}
+
+.diff{background:#0F1E2A;border-radius:10px;padding:14px;font-family:monospace;font-size:11px;
+  line-height:1.8;overflow-x:auto;}
+.diff-del{color:#F9ABAB;text-decoration:line-through;opacity:.7;}
+.diff-add{color:#86EFAC;}
+.diff-ctx{color:#A8C4CE;}
+.diff-file{color:#7BA098;font-size:9px;margin-bottom:6px;display:block;}
+.diff-comment{color:rgba(168,196,206,.4);}
+
+.count-box{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+.count-item{border-radius:10px;padding:10px 16px;display:flex;flex-direction:column;
+  align-items:center;gap:3px;min-width:72px;}
+.count-item.high{background:var(--c-warning-bg);border:1.5px solid var(--c-warning);}
+.count-item.med{background:var(--c-info-bg);border:1.5px solid var(--c-info);}
+.count-item.low{background:var(--c-surface2);border:1.5px solid var(--c-border);}
+.count-item.clean{background:var(--c-success-bg);border:1.5px solid var(--c-success);}
+.count-n{font-size:24px;font-weight:900;}
+.count-item.high .count-n{color:var(--c-warning);}
+.count-item.med  .count-n{color:var(--c-info);}
+.count-item.low  .count-n{color:var(--c-text2);}
+.count-item.clean .count-n{color:var(--c-success);}
+.count-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text2);}
+
+.sec-divider{display:flex;align-items:center;gap:12px;margin:28px 0 18px;}
+.sec-divider hr{flex:1;border:none;border-top:1px solid var(--c-border);}
+.sec-divider-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;
+  color:var(--c-text3);white-space:nowrap;}
+
+/* ── perf diagram ── */
+.perf-compare{display:flex;gap:14px;flex-wrap:wrap;}
+.perf-col{flex:1;min-width:200px;border-radius:10px;overflow:hidden;border:1.5px solid var(--c-border);}
+.perf-head{padding:8px 12px;font-size:10px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.5px;border-bottom:1px solid var(--c-border);}
+.perf-head.bad{background:var(--c-danger-bg);color:var(--c-danger);}
+.perf-head.ok{background:var(--c-success-bg);color:var(--c-success);}
+.perf-body{padding:12px;display:flex;flex-direction:column;gap:6px;}
+.perf-step{display:flex;align-items:flex-start;gap:8px;font-size:11px;line-height:1.5;}
+.perf-dot{width:18px;height:18px;border-radius:50%;font-size:9px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.perf-dot.bad{background:var(--c-danger);color:#fff;}
+.perf-dot.ok{background:var(--c-success);color:#fff;}
+.perf-complexity{display:inline-block;font-family:monospace;font-size:10px;font-weight:700;
+  padding:1px 6px;border-radius:4px;}
+.perf-complexity.bad{background:var(--c-danger-bg);color:var(--c-danger);}
+.perf-complexity.ok{background:var(--c-success-bg);color:var(--c-success);}
+
+/* ── comparar screen mockup ── */
+.comparar-header{display:flex;gap:0;background:var(--c-card);border-radius:10px;
+  overflow:hidden;border:1.5px solid var(--c-border);margin-bottom:6px;}
+.comparar-slot{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:10px 8px;}
+.comparar-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:12px;font-weight:700;color:#fff;}
+.comparar-name{font-size:10px;font-weight:600;color:var(--c-text);text-align:center;}
+.comparar-pct{font-size:16px;font-weight:800;}
+
+/* ── fila comparacion ── */
+.fila-compare{display:flex;gap:14px;flex-wrap:wrap;}
+.fila-wrap{flex:1;min-width:200px;}
+.fila-col-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+  margin-bottom:8px;padding:3px 7px;border-radius:4px;display:inline-block;}
+.fila-col-label.bad{background:var(--c-danger-bg);color:var(--c-danger);}
+.fila-col-label.ok{background:var(--c-success-bg);color:var(--c-success);}
+.fila-card{border:1.5px solid var(--c-border);border-radius:10px;padding:10px;
+  background:var(--c-card);margin-bottom:6px;}
+.fila-header{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;}
+.fila-nivel{width:20px;font-size:14px;font-weight:900;text-align:center;flex-shrink:0;}
+.fila-pregunta{font-size:11px;font-weight:600;color:var(--c-text);flex:1;line-height:1.5;}
+.fila-cols{display:flex;gap:8px;}
+.fila-col{flex:1;}
+.fila-col-lbl{font-size:9px;font-weight:700;color:var(--c-text2);text-transform:uppercase;
+  letter-spacing:.4px;margin-bottom:3px;}
+.fila-col-val{font-size:11px;font-weight:600;line-height:1.4;}
+
+/* ── loading compare ── */
+.loading-compare{display:flex;gap:20px;flex-wrap:wrap;align-items:center;}
+.loading-demo{flex:1;min-width:140px;display:flex;flex-direction:column;align-items:center;
+  gap:6px;padding:20px;border-radius:10px;border:1.5px solid var(--c-border);background:var(--c-surface);}
+.loading-text-bad{font-size:13px;color:var(--c-text2);font-style:italic;}
+.spinner-demo{width:32px;height:32px;border-radius:50%;border:3px solid var(--c-border);
+  border-top-color:var(--c-primary);animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── accessibility compare ── */
+.a11y-compare{display:flex;gap:14px;flex-wrap:wrap;}
+.a11y-col{flex:1;min-width:180px;}
+.a11y-col-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+  margin-bottom:8px;padding:3px 7px;border-radius:4px;display:inline-block;}
+.a11y-col-label.bad{background:var(--c-danger-bg);color:var(--c-danger);}
+.a11y-col-label.ok{background:var(--c-success-bg);color:var(--c-success);}
+.a11y-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;
+  border:1.5px solid;margin-bottom:6px;margin-right:6px;font-size:11px;font-weight:600;}
+.a11y-chip.neutral{background:var(--c-bg);border-color:var(--c-border);color:var(--c-text);}
+.a11y-chip.active{background:var(--c-primary);border-color:var(--c-primary);color:#fff;}
+.voiceover-bubble{background:#1C1C1E;color:#AEAEB2;font-size:10px;font-family:monospace;
+  padding:8px 12px;border-radius:8px;margin-top:6px;line-height:1.6;}
+.voiceover-says{color:#30D158;font-weight:700;}
+
+/* ── void antipattern ── */
+.void-box{background:#0F1E2A;border-radius:10px;padding:14px;font-family:monospace;font-size:11px;
+  line-height:1.8;position:relative;}
+.void-highlight{background:rgba(184,92,92,.25);border-radius:3px;padding:0 3px;}
+.void-note{font-size:10px;color:var(--c-text2);margin-top:8px;padding:8px 10px;
+  border-left:3px solid var(--c-warning);background:var(--c-warning-bg);border-radius:0 6px 6px 0;}
+
+/* ── dead code box ── */
+.dead-code{border:1.5px dashed var(--c-border);border-radius:10px;overflow:hidden;}
+.dead-code-head{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+  padding:5px 12px;background:var(--c-surface2);color:var(--c-text3);}
+.dead-code-body{padding:10px 12px;font-family:monospace;font-size:11px;color:var(--c-text3);
+  line-height:1.7;text-decoration:line-through;opacity:.6;}
+
+/* ── summary table ── */
+.sum-table th{font-size:9px;}
+.sum-table td{font-size:11px;}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-logo">VotoAfin DS</div>
+  <div class="sidebar-ver">v1.0 · Agosto 2026</div>
+  <hr/>
+  <div class="sidebar-label">Auditorias UX</div>
+  <a href="ds-11-screens.html">11 · Validacion por Pantalla</a>
+  <a href="audit-cuestionario.html">Auditoria · Pantalla 2</a>
+  <a href="audit-resultados.html">Auditoria · Pantalla 3</a>
+  <a href="audit-candidatos.html">Auditoria · Pantalla 4</a>
+  <a href="audit-comparar.html" class="active">Auditoria · Pantalla 5</a>
+  <hr/>
+  <div class="sidebar-label">Design System</div>
+  <a href="ds-index.html">Inicio DS</a>
+  <a href="ds-08-affinity.html">08 · Tiers de Afinidad</a>
+  <a href="ds-10-tokens.html">10 · Design Tokens</a>
+  <div class="sidebar-bottom">
+    <button class="theme-btn" id="theme-btn">Dark mode</button>
+  </div>
+</nav>
+
+<div class="main"><div class="content">
+
+<div class="audit-hero">
+  <div style="opacity:.5;font-size:10px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">
+    Pantalla 5 / 11 · Sprint Auditoria UX
+  </div>
+  <h1>CompararScreen -- Auditoria completa</h1>
+  <p>10 findings. Sin criticos — la pantalla tiene la mejor logica de negocio del proyecto (services/comparar.ts es ejemplar). Los problemas son de tokens de color, accesibilidad y algunos code smells. El radar chart de DS-11 es una decision de producto documentada, no un finding.</p>
+  <div class="meta">
+    <div class="meta-item">CompararScreen.tsx · 16.7 KB</div>
+    <div class="meta-item">services/comparar.ts · logica pura</div>
+    <div class="meta-item">CandidatoHeaderSlot + FilaComparacion (inline)</div>
+    <div class="meta-item">DS-11 Pantalla 5 · chart-s1/s2/s3</div>
+  </div>
+</div>
+
+<!-- CONTADOR -->
+<div class="count-box">
+  <div class="count-item clean"><div class="count-n">0</div><div class="count-lbl">Criticos</div></div>
+  <div class="count-item high"><div class="count-n">1</div><div class="count-lbl">Alto</div></div>
+  <div class="count-item med"><div class="count-n">6</div><div class="count-lbl">Medios</div></div>
+  <div class="count-item low"><div class="count-n">3</div><div class="count-lbl">Bajos</div></div>
+</div>
+
+<!-- nota radar -->
+<div class="ins ins-b" style="margin:0 0 20px;">
+  <strong>Nota sobre el radar chart:</strong> DS-11 Pantalla 5 muestra un radar como visualizacion
+  principal con tokens <code>chart-s1/s2/s3</code>. El docstring de
+  <code>CompararScreen</code> reconoce explicitamente esta decision:
+  <em>"Alcance actual: 2 candidatos. El wireframe habla de hasta 3; se extendera cuando aparezca
+  la necesidad."</em> La vista textual actual es una decision de producto documentada —
+  <strong>no es un finding</strong>.
+</div>
+
+<!-- ══════════ ALTO ══════════ -->
+<div class="sec-divider"><hr/><div class="sec-divider-lbl">Alto</div><hr/></div>
+
+<!-- A-09 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-high">High</span>
+    <span class="finding-id">A-09</span>
+    <span class="finding-title">matchPctPara hace Array.find O(n) dos veces por render — usar Map como CandidatosScreen</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      <code>matchPctPara()</code> hace un <code>Array.find</code> lineal sobre
+      todos los resultados de matches en cada render del componente, llamado dos veces
+      (slot A y slot B). <code>CandidatosScreen</code> ya resolvio este patron
+      correctamente con un <code>Map&lt;id, pct&gt;</code> en <code>useMemo</code>.
+      El mismo patron debe aplicarse aqui para consistencia y rendimiento.
+    </p>
+
+    <div class="perf-compare">
+      <div class="perf-col">
+        <div class="perf-head bad">Actual -- Array.find x2 por render</div>
+        <div class="perf-body">
+          <div class="perf-step">
+            <div class="perf-dot bad">1</div>
+            <div>
+              <code>matchPctA = matchPctPara(candidatoA?.id, matchesQ.data)</code><br/>
+              <span class="perf-complexity bad">O(n)</span>
+              <span style="font-size:10px;color:var(--c-text2);"> Array.find sobre todos los matches</span>
+            </div>
+          </div>
+          <div class="perf-step">
+            <div class="perf-dot bad">2</div>
+            <div>
+              <code>matchPctB = matchPctPara(candidatoB?.id, matchesQ.data)</code><br/>
+              <span class="perf-complexity bad">O(n)</span>
+              <span style="font-size:10px;color:var(--c-text2);"> segundo Array.find en el mismo render</span>
+            </div>
+          </div>
+          <div class="perf-step">
+            <div class="perf-dot bad">!</div>
+            <div style="font-size:10px;color:var(--c-danger);">
+              Se repite en cada re-render aunque <code>matchesQ.data</code>
+              no haya cambiado. Con 1000+ candidatos, notable.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:20px;color:var(--c-text3);align-self:center;">&rarr;</div>
+
+      <div class="perf-col">
+        <div class="perf-head ok">Propuesto -- Map en useMemo + lookup O(1)</div>
+        <div class="perf-body">
+          <div class="perf-step">
+            <div class="perf-dot ok">1</div>
+            <div>
+              <code>matchByCandidatoId = useMemo(..., [matchesQ.data])</code><br/>
+              <span class="perf-complexity ok">O(n)</span>
+              <span style="font-size:10px;color:var(--c-text2);"> una sola vez, solo cuando cambian los datos</span>
+            </div>
+          </div>
+          <div class="perf-step">
+            <div class="perf-dot ok">2</div>
+            <div>
+              <code>matchPctA = matchByCandidatoId.get(candidatoA.id)</code><br/>
+              <span class="perf-complexity ok">O(1)</span>
+              <span style="font-size:10px;color:var(--c-text2);"> lookup instantaneo</span>
+            </div>
+          </div>
+          <div class="perf-step">
+            <div class="perf-dot ok">3</div>
+            <div>
+              <code>matchPctB = matchByCandidatoId.get(candidatoB.id)</code><br/>
+              <span class="perf-complexity ok">O(1)</span>
+              <span style="font-size:10px;color:var(--c-text2);"> segundo lookup instantaneo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="diff">
+      <span class="diff-file">// CompararScreen.tsx -- antes</span>
+      <div class="diff-del">const matchPctA = matchPctPara(candidatoA?.id, matchesQ.data);</div>
+      <div class="diff-del">const matchPctB = matchPctPara(candidatoB?.id, matchesQ.data);</div>
+      <br/>
+      <span class="diff-file">// CompararScreen.tsx -- despues: Map + useMemo (patron de CandidatosScreen)</span>
+      <div class="diff-add">const matchByCandidatoId = useMemo(() => {</div>
+      <div class="diff-add">&nbsp;&nbsp;const map = new Map&lt;number, number&gt;();</div>
+      <div class="diff-add">&nbsp;&nbsp;for (const m of matchesQ.data ?? []) {</div>
+      <div class="diff-add">&nbsp;&nbsp;&nbsp;&nbsp;const id = m.candidato_data?.id;</div>
+      <div class="diff-add">&nbsp;&nbsp;&nbsp;&nbsp;const n = parseFloat(m.match_percentage);</div>
+      <div class="diff-add">&nbsp;&nbsp;&nbsp;&nbsp;if (id != null && Number.isFinite(n)) map.set(id, Math.round(n));</div>
+      <div class="diff-add">&nbsp;&nbsp;}</div>
+      <div class="diff-add">&nbsp;&nbsp;return map;</div>
+      <div class="diff-add">}, [matchesQ.data]);</div>
+      <br/>
+      <div class="diff-add">const matchPctA = candidatoA ? (matchByCandidatoId.get(candidatoA.id) ?? null) : null;</div>
+      <div class="diff-add">const matchPctB = candidatoB ? (matchByCandidatoId.get(candidatoB.id) ?? null) : null;</div>
+      <br/>
+      <span class="diff-file">// matchPctPara() -- eliminar funcion, ya no hace falta</span>
+      <div class="diff-del">function matchPctPara(candidatoId, matches) { ... }</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MEDIOS ══════════ -->
+<div class="sec-divider"><hr/><div class="sec-divider-lbl">Medios</div><hr/></div>
+
+<div class="g2">
+
+<!-- M-22 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-med">Med</span>
+    <span class="finding-id">M-22</span>
+    <span class="finding-title">CandidatoHeaderSlot: match% usa c.primary en lugar del color de afinidad</span>
+  </div>
+  <div class="finding-body">
+    <p>DS-11 especifica <code>--color-affinity-N</code> para el porcentaje de afinidad.
+    Tercera instancia del mismo problema (M-16 en CandidateCard, M-22 aqui). Depende de TASK-009.</p>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:6px;">
+      <div style="flex:1;min-width:180px;">
+        <div style="font-size:9px;font-weight:800;color:var(--c-danger);text-transform:uppercase;margin-bottom:6px;">Actual -- siempre c.primary</div>
+        <div class="comparar-header">
+          <div class="comparar-slot">
+            <div class="comparar-avatar" style="background:#2E5F7E;">CA</div>
+            <div class="comparar-name">Candidata A</div>
+            <div class="comparar-pct" style="color:#2E5F7E;">87%</div>
+          </div>
+          <div style="width:1px;background:var(--c-border);"></div>
+          <div class="comparar-slot">
+            <div class="comparar-avatar" style="background:#2E5F7E;">CB</div>
+            <div class="comparar-name">Candidato B</div>
+            <div class="comparar-pct" style="color:#2E5F7E;">31%</div>
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--c-danger);">87% y 31% muestran el mismo azul.</div>
+      </div>
+      <div style="font-size:18px;color:var(--c-text3);align-self:center;">&rarr;</div>
+      <div style="flex:1;min-width:180px;">
+        <div style="font-size:9px;font-weight:800;color:var(--c-success);text-transform:uppercase;margin-bottom:6px;">Propuesto -- color de afinidad</div>
+        <div class="comparar-header">
+          <div class="comparar-slot">
+            <div class="comparar-avatar" style="background:#3A9E7A;">CA</div>
+            <div class="comparar-name">Candidata A</div>
+            <div class="comparar-pct" style="color:#3A9E7A;">87%</div>
+          </div>
+          <div style="width:1px;background:var(--c-border);"></div>
+          <div class="comparar-slot">
+            <div class="comparar-avatar" style="background:#D07777;">CB</div>
+            <div class="comparar-name">Candidato B</div>
+            <div class="comparar-pct" style="color:#D07777;">31%</div>
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--c-success);">Cada slot comunica su tier de afinidad.</div>
+      </div>
+    </div>
+    <div class="diff">
+      <div class="diff-del">&lt;Text style={[styles.candMatch, { color: c.primary }]}&gt;</div>
+      <div class="diff-add">const matchColor = matchPct != null ? getMatchColor(matchPct) : c.textSecondary;</div>
+      <div class="diff-add">&lt;Text style={[styles.candMatch, { color: matchColor }]}&gt;</div>
+    </div>
+  </div>
+</div>
+
+<!-- M-23 (FilaComparacion color) -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-med">Med</span>
+    <span class="finding-id">M-23</span>
+    <span class="finding-title">FilaComparacion: color del nivel sangra al texto de la postura politica</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      DS-11: <em>"Texto de propuestas &rarr; <code>--color-text-primary</code>.
+      Legibilidad maxima — el contenido es el protagonista."</em>
+      En filas <strong>opuesta</strong>, ambas posturas politicas aparecen en rojo.
+      El contenido parece un error, no una posicion.
+    </p>
+    <div class="fila-compare">
+      <div class="fila-wrap">
+        <div class="fila-col-label bad">Actual -- color del nivel en el texto</div>
+        <div class="fila-card">
+          <div class="fila-header">
+            <div class="fila-nivel" style="color:#B85C5C;">X</div>
+            <div class="fila-pregunta">Reduccion del IVA a productos basicos</div>
+          </div>
+          <div class="fila-cols">
+            <div class="fila-col">
+              <div class="fila-col-lbl">A</div>
+              <div class="fila-col-val" style="color:#B85C5C;">Muy de acuerdo</div>
+            </div>
+            <div class="fila-col">
+              <div class="fila-col-lbl">B</div>
+              <div class="fila-col-val" style="color:#B85C5C;">Muy en desacuerdo</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--c-danger);margin-top:2px;">
+          "Muy de acuerdo" en rojo parece un error de validacion, no una postura politica.
+        </div>
+      </div>
+      <div style="font-size:18px;color:var(--c-text3);align-self:center;">&rarr;</div>
+      <div class="fila-wrap">
+        <div class="fila-col-label ok">Propuesto -- color solo en el indicador</div>
+        <div class="fila-card">
+          <div class="fila-header">
+            <div class="fila-nivel" style="color:#B85C5C;">X</div>
+            <div class="fila-pregunta">Reduccion del IVA a productos basicos</div>
+          </div>
+          <div class="fila-cols">
+            <div class="fila-col">
+              <div class="fila-col-lbl">A</div>
+              <div class="fila-col-val" style="color:var(--c-text);">Muy de acuerdo</div>
+            </div>
+            <div class="fila-col">
+              <div class="fila-col-lbl">B</div>
+              <div class="fila-col-val" style="color:var(--c-text);">Muy en desacuerdo</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--c-success);margin-top:2px;">
+          La X roja indica la tension. El texto en c.text es legible y neutral.
+        </div>
+      </div>
+    </div>
+    <div class="diff">
+      <div class="diff-del">&lt;Text style={[styles.colValor, { color: item.posturaA ? color : c.textSecondary }]}&gt;</div>
+      <div class="diff-add">&lt;Text style={[styles.colValor, { color: item.posturaA ? c.text : c.textSecondary }]}&gt;</div>
+      <div class="diff-add"><span class="diff-comment">// El color del nivel queda solo en filaNivel — no se propaga al contenido</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- M-24 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-med">Med</span>
+    <span class="finding-id">M-24</span>
+    <span class="finding-title">Estado de carga usa Text "Cargando posturas..." en lugar de Spinner</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      El resto de la app usa <code>&lt;Spinner size="large" /&gt;</code> para estados de
+      carga. Un texto en italica no comunica progreso visual ni es consistente con el DS.
+    </p>
+    <div class="loading-compare">
+      <div style="flex:1;min-width:140px;">
+        <div style="font-size:9px;font-weight:800;color:var(--c-danger);text-transform:uppercase;margin-bottom:6px;">Actual</div>
+        <div class="loading-demo">
+          <div class="loading-text-bad">Cargando posturas...</div>
+        </div>
+      </div>
+      <div style="font-size:18px;color:var(--c-text3);align-self:center;">&rarr;</div>
+      <div style="flex:1;min-width:140px;">
+        <div style="font-size:9px;font-weight:800;color:var(--c-success);text-transform:uppercase;margin-bottom:6px;">Propuesto</div>
+        <div class="loading-demo">
+          <div class="spinner-demo"></div>
+          <div style="font-size:10px;color:var(--c-text2);">Spinner size="large"</div>
+        </div>
+      </div>
+    </div>
+    <div class="diff">
+      <div class="diff-del">) : loading ? (</div>
+      <div class="diff-del">&nbsp;&nbsp;&lt;Text style={[styles.paragraph, { color: c.textSecondary }]}&gt;</div>
+      <div class="diff-del">&nbsp;&nbsp;&nbsp;&nbsp;Cargando posturas...</div>
+      <div class="diff-del">&nbsp;&nbsp;&lt;/Text&gt;</div>
+      <div class="diff-add">) : loading ? (</div>
+      <div class="diff-add">&nbsp;&nbsp;&lt;View style={styles.loadingBox}&gt;</div>
+      <div class="diff-add">&nbsp;&nbsp;&nbsp;&nbsp;&lt;Spinner size="large" /&gt;</div>
+      <div class="diff-add">&nbsp;&nbsp;&lt;/View&gt;</div>
+    </div>
+  </div>
+</div>
+
+<!-- M-25 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-med">Med</span>
+    <span class="finding-id">M-25</span>
+    <span class="finding-title">iconoNivel usa strings ASCII -- VoiceOver lee "equis", "tilde", "guion"</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      El label de accesibilidad del chip dice <em>"Filtrar: X Opuestas"</em>.
+      VoiceOver lo anuncia como <strong>"Filtrar: equis Opuestas"</strong>.
+      La X visual tambien se confunde con un boton de cerrar.
+    </p>
+    <div class="a11y-compare">
+      <div class="a11y-col">
+        <div class="a11y-col-label bad">Actual -- ASCII sin a11y</div>
+        <div>
+          <div class="a11y-chip neutral">Todas</div>
+          <div class="a11y-chip neutral">= Identicas</div>
+          <div class="a11y-chip neutral">~ Cercanas</div>
+          <div class="a11y-chip active">X Opuestas</div>
+        </div>
+        <div class="voiceover-bubble">
+          <span class="voiceover-says">VoiceOver:</span>
+          "Filtrar: equis Opuestas, boton"
+        </div>
+      </div>
+      <div style="font-size:18px;color:var(--c-text3);align-self:center;">&rarr;</div>
+      <div class="a11y-col">
+        <div class="a11y-col-label ok">Propuesto -- accessibilityLabel correcto</div>
+        <div>
+          <div class="a11y-chip neutral">Todas</div>
+          <div class="a11y-chip neutral">= Identicas</div>
+          <div class="a11y-chip neutral">~ Cercanas</div>
+          <div class="a11y-chip active">X Opuestas</div>
+        </div>
+        <div class="voiceover-bubble">
+          <span class="voiceover-says">VoiceOver:</span>
+          "Filtrar por posturas opuestas, boton, seleccionado"
+        </div>
+      </div>
+    </div>
+    <div class="diff">
+      <span class="diff-file">// Fix: accessibilityLabel semantico, simbolo queda como decorativo</span>
+      <div class="diff-del">accessibilityLabel={`Filtrar: ${opt.label}`}</div>
+      <div class="diff-add">accessibilityLabel={`Filtrar por posturas ${opt.labelA11y}`}</div>
+      <div class="diff-add">accessibilityState={{ selected: active }}</div>
+      <div class="diff-add"><span class="diff-comment">// Con labelA11y: "todas"|"identicas"|"cercanas"|"opuestas" en FILTROS constante</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- M-26 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-med">Med</span>
+    <span class="finding-id">M-26</span>
+    <span class="finding-title">handleSelectPicker sin useCallback -- prop inestable hacia CandidatoPickerModal</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      <code>handleSelectPicker</code> se pasa como <code>onSelect</code> a
+      <code>CandidatoPickerModal</code>. Sin <code>useCallback</code>,
+      el modal recibe una referencia nueva en cada render, incluyendo cada
+      vez que el usuario tipea en el buscador del modal.
+    </p>
+    <div class="diff">
+      <div class="diff-del">function handleSelectPicker(cand: Candidato) {</div>
+      <div class="diff-del">&nbsp;&nbsp;if (pickerOpen === "A") setCandidatoA(cand);</div>
+      <div class="diff-del">&nbsp;&nbsp;else if (pickerOpen === "B") setCandidatoB(cand);</div>
+      <div class="diff-del">&nbsp;&nbsp;setPickerOpen(null);</div>
+      <div class="diff-del">}</div>
+      <div class="diff-add">const handleSelectPicker = useCallback((cand: Candidato) => {</div>
+      <div class="diff-add">&nbsp;&nbsp;if (pickerOpen === "A") setCandidatoA(cand);</div>
+      <div class="diff-add">&nbsp;&nbsp;else if (pickerOpen === "B") setCandidatoB(cand);</div>
+      <div class="diff-add">&nbsp;&nbsp;setPickerOpen(null);</div>
+      <div class="diff-add">}, [pickerOpen]);</div>
+    </div>
+  </div>
+</div>
+
+<!-- M-27 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-med">Med</span>
+    <span class="finding-id">M-27</span>
+    <span class="finding-title">colorNivel usa ?? "#B45309" -- fallback hardcodeado imposible de alcanzar</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      <code>c.warning</code> es <code>string</code> en el theme — nunca
+      <code>null</code> ni <code>undefined</code>. El operador <code>??</code>
+      nunca activa el fallback, pero el hex <code>#B45309</code> (amber-700 de Tailwind)
+      introduce un color externo al DS que ademas difiere del <code>c.warning</code>
+      real (<code>#C89B5C</code>).
+    </p>
+    <div class="diff">
+      <div class="diff-del">case "cercana":</div>
+      <div class="diff-del">&nbsp;&nbsp;return c.warning ?? "#B45309"; <span class="diff-comment">// c.warning es string — nunca null</span></div>
+      <div class="diff-add">case "cercana":</div>
+      <div class="diff-add">&nbsp;&nbsp;return c.warning; <span class="diff-comment">// c.warning: string garantizado por el theme</span></div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;">
+        <div style="width:20px;height:20px;border-radius:4px;background:#C89B5C;"></div>
+        <code>c.warning = #C89B5C</code> <span style="color:var(--c-text2);">(DS token)</span>
+      </div>
+      <div style="font-size:11px;color:var(--c-text3);">vs</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;">
+        <div style="width:20px;height:20px;border-radius:4px;background:#B45309;"></div>
+        <code>#B45309</code> <span style="color:var(--c-danger);">(Tailwind amber-700, nunca alcanzado)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /g2 -->
+
+<!-- ══════════ BAJOS ══════════ -->
+<div class="sec-divider"><hr/><div class="sec-divider-lbl">Bajos</div><hr/></div>
+
+<div class="g2">
+
+<!-- L-09 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-low">Low</span>
+    <span class="finding-id">L-09</span>
+    <span class="finding-title">Array de opciones de filtro definido inline en el JSX</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      Array literal estatico recreado en cada render. El cast
+      <code>as { value: NivelFiltro; label: string }[]</code> inline
+      se puede eliminar con tipado en la constante.
+    </p>
+    <div class="diff">
+      <span class="diff-file">// Fuera del componente -- constante de modulo tipada</span>
+      <div class="diff-add">const FILTROS: Array&lt;{</div>
+      <div class="diff-add">&nbsp;&nbsp;value: NivelFiltro;</div>
+      <div class="diff-add">&nbsp;&nbsp;label: string;</div>
+      <div class="diff-add">&nbsp;&nbsp;labelA11y: string; <span class="diff-comment">// bonus: arregla M-25 tambien</span></div>
+      <div class="diff-add">}&gt; = [</div>
+      <div class="diff-add">&nbsp;&nbsp;{ value: "todas",    label: "Todas",       labelA11y: "todas" },</div>
+      <div class="diff-add">&nbsp;&nbsp;{ value: "identica", label: "= Identicas", labelA11y: "identicas" },</div>
+      <div class="diff-add">&nbsp;&nbsp;{ value: "cercana",  label: "~ Cercanas",  labelA11y: "cercanas" },</div>
+      <div class="diff-add">&nbsp;&nbsp;{ value: "opuesta",  label: "X Opuestas",  labelA11y: "opuestas" },</div>
+      <div class="diff-add">];</div>
+      <br/>
+      <span class="diff-file">// En el JSX -- sin cast, sin array inline</span>
+      <div class="diff-del">{([...] as ...).map((opt) => { ... })}</div>
+      <div class="diff-add">{FILTROS.map((opt) =&gt; { ... })}</div>
+    </div>
+  </div>
+</div>
+
+<!-- L-10 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-low">Low</span>
+    <span class="finding-id">L-10</span>
+    <span class="finding-title">void badgeVariantNivel -- antipatron para suprimir TypeScript</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      <code>void expr</code> como tecnica de supresion de
+      "declared but never used" viola el principio YAGNI:
+      la funcion no tiene consumidores actuales. Si se espera un
+      segundo consumidor pronto, se exporta. Si no, se elimina.
+    </p>
+    <div class="void-box">
+      <span style="color:#7BA098;font-size:9px;display:block;margin-bottom:4px;">// CompararScreen.tsx -- al final del archivo</span>
+      <span style="color:#A8C4CE;">// Se conserva la funcion aunque no se use directamente en el JSX:</span><br/>
+      <span style="color:#A8C4CE;">// mapea nivel -> variante de Badge y sirve como single source of truth</span><br/>
+      <span style="color:#A8C4CE;">// por si aparece otro consumidor sin duplicar el switch.</span><br/>
+      <span class="void-highlight" style="color:#F9ABAB;">void badgeVariantNivel;</span>
+    </div>
+    <div class="void-note">
+      <strong>YAGNI:</strong> "por si aparece otro consumidor" no justifica mantener codigo muerto.
+      Si el consumidor llega, se agrega entonces. Exportar la funcion es la alternativa correcta
+      si hay razon de creerlo.
+    </div>
+    <div class="diff">
+      <div class="diff-del">void badgeVariantNivel;</div>
+      <div class="diff-add">// Opcion A: exportar si se espera segundo consumidor</div>
+      <div class="diff-add">export { badgeVariantNivel };</div>
+      <div class="diff-add">// Opcion B (YAGNI): eliminar funcion y su comentario</div>
+    </div>
+  </div>
+</div>
+
+<!-- L-11 -->
+<div class="finding">
+  <div class="finding-head">
+    <span class="sev sev-low">Low</span>
+    <span class="finding-id">L-11</span>
+    <span class="finding-title">RIGHT_GUTTER=0 + leftGutter/rightGutter -- infraestructura de ancho cero</span>
+  </div>
+  <div class="finding-body">
+    <p>
+      Una constante que vale <code>0</code>, dos estilos de <code>width: 0</code>,
+      y dos <code>View</code> vacias que no ocupan espacio ni son accesibles.
+      El comentario lo explica, pero el codigo sigue como infraestructura fantasma.
+    </p>
+    <div class="dead-code">
+      <div class="dead-code-head">Codigo muerto a eliminar</div>
+      <div class="dead-code-body">
+        const RIGHT_GUTTER = 0;<br/><br/>
+        // En styles:<br/>
+        leftGutter:  { width: 0 },<br/>
+        rightGutter: { width: RIGHT_GUTTER },<br/><br/>
+        // En JSX:<br/>
+        &lt;View style={styles.leftGutter} /&gt;<br/>
+        &lt;View style={styles.rightGutter} /&gt;
+      </div>
+    </div>
+    <div class="diff">
+      <div class="diff-del">const RIGHT_GUTTER = 0;</div>
+      <div class="diff-del">leftGutter:  { width: 0 },</div>
+      <div class="diff-del">rightGutter: { width: RIGHT_GUTTER },</div>
+      <div class="diff-del">&lt;View style={styles.leftGutter} /&gt;</div>
+      <div class="diff-del">&lt;View style={styles.rightGutter} /&gt;</div>
+      <div class="diff-add"><span class="diff-comment">// Las columnas de candidatos se distribuyen simetricamente.</span></div>
+      <div class="diff-add"><span class="diff-comment">// Sin gutter — Comparar es un tab primario sin back button.</span></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /g2 -->
+
+<!-- ══════════ LO QUE ESTA BIEN ══════════ -->
+<div class="sec-divider"><hr/><div class="sec-divider-lbl">Lo que esta bien -- y mucho</div><hr/></div>
+
+<div class="g2">
+  <div class="ins ins-g" style="margin:0;">
+    <strong>services/comparar.ts es ejemplar.</strong>
+    Funcion pura, sin side effects, sin React, 100% testeable.
+    Cruza listas por <code>pregunta_id</code> usando dos Maps: O(n+m).
+    Documentacion inline clara.
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>nivelDe() con regla diff===2 documentada.</strong>
+    El comentario <em>"tibio — lo consideramos cercano"</em> es la decision
+    de producto registrada en el codigo. Correcto.
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>calcularResumen() excluye solo_uno del denominador.</strong>
+    <code>porcentajeCoincidencia</code> solo divide sobre preguntas donde
+    ambos respondieron. Semanticamente correcto.
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>gruposCompletos y grupos en useMemo con deps correctas.</strong>
+    El pipeline completo esta memoizado: datos brutos &rarr; grupos &rarr; filtro &rarr; resumen.
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>excluirId en CandidatoPickerModal.</strong>
+    El candidato ya seleccionado en el otro slot queda excluido del picker.
+    Edge case bien manejado.
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>Toggle de filtro: volver a "todas" si se presiona el activo.</strong>
+    <code>setNivelFiltro(active && opt.value !== "todas" ? "todas" : opt.value)</code>
+    Buena UX sin estado extra.
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>NivelFiltro con Exclude&lt;&gt; explicito.</strong>
+    <code>Exclude&lt;NivelCoincidencia, "solo_uno" | "ninguno"&gt;</code>
+    El tipo del filtro UI excluye los valores que no tienen sentido como filtro
+    standalone. Correcto.
+  </div>
+  <div class="ins ins-g" style="margin:0;">
+    <strong>stickyHeaderIndices={[0]}.</strong>
+    Cabecera pegada durante el scroll. El header de candidatos + filtros
+    siempre visible. Correcto.
+  </div>
+</div>
+
+<!-- ══════════ TABLA RESUMEN ══════════ -->
+<div class="sec-divider"><hr/><div class="sec-divider-lbl">Tabla resumen</div><hr/></div>
+
+<div class="card" style="padding:0;overflow:hidden;">
+<table class="sum-table">
+  <thead>
+    <tr>
+      <th>ID</th><th>Sev</th><th>Categoria</th><th>Titulo</th><th>Archivo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="mono">A-09</td>
+      <td><span class="sev sev-high">High</span></td>
+      <td>Perf</td>
+      <td>matchPctPara Array.find O(n) x2 por render — usar Map</td>
+      <td class="mono">CompararScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">M-22</td>
+      <td><span class="sev sev-med">Med</span></td>
+      <td>DS Tokens</td>
+      <td>CandidatoHeaderSlot match% usa c.primary — DS-11 requiere affinity</td>
+      <td class="mono">CompararScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">M-23</td>
+      <td><span class="sev sev-med">Med</span></td>
+      <td>UX / DS</td>
+      <td>FilaComparacion color de nivel sangra al texto de la postura</td>
+      <td class="mono">CompararScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">M-24</td>
+      <td><span class="sev sev-med">Med</span></td>
+      <td>UX</td>
+      <td>Estado de carga usa Text en lugar de Spinner</td>
+      <td class="mono">CompararScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">M-25</td>
+      <td><span class="sev sev-med">Med</span></td>
+      <td>A11y</td>
+      <td>iconoNivel con ASCII — VoiceOver lee "equis", "tilde", "guion"</td>
+      <td class="mono">CompararScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">M-26</td>
+      <td><span class="sev sev-med">Med</span></td>
+      <td>Perf</td>
+      <td>handleSelectPicker sin useCallback</td>
+      <td class="mono">CompararScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">M-27</td>
+      <td><span class="sev sev-med">Med</span></td>
+      <td>Code quality</td>
+      <td>colorNivel usa ?? "#B45309" — fallback hardcodeado imposible</td>
+      <td class="mono">CompararScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">L-09</td>
+      <td><span class="sev sev-low">Low</span></td>
+      <td>Code quality</td>
+      <td>Array de filtros inline en JSX — constante de modulo</td>
+      <td class="mono">CompararScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">L-10</td>
+      <td><span class="sev sev-low">Low</span></td>
+      <td>YAGNI</td>
+      <td>void badgeVariantNivel — antipatron para suprimir TypeScript</td>
+      <td class="mono">CompararScreen.tsx</td>
+    </tr>
+    <tr>
+      <td class="mono">L-11</td>
+      <td><span class="sev sev-low">Low</span></td>
+      <td>Code quality</td>
+      <td>RIGHT_GUTTER=0 + leftGutter/rightGutter — infraestructura de ancho cero</td>
+      <td class="mono">CompararScreen.tsx</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div style="height:40px;"></div>
+</div></div>
+
+<script>
+const btn = document.getElementById('theme-btn');
+btn.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  btn.textContent = document.body.classList.contains('dark') ? 'Light mode' : 'Dark mode';
+});
+</script>
+</body>
+</html>

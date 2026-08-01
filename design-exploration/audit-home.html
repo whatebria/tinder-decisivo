@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pantalla 1 -- Home HUB -- 11 Fases</title>
+<link rel="stylesheet" href="ds-shared.css"/>
+<style>
+.audit-hero{background:var(--c-hero);padding:28px 36px 24px;color:#fff;margin:-40px -36px 32px;}
+.audit-hero h1{font-size:22px;font-weight:900;margin-bottom:4px;}
+.audit-hero p{font-size:12px;opacity:.65;max-width:700px;line-height:1.7;}
+.audit-hero .meta{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;}
+.audit-hero .meta-item{font-size:11px;opacity:.75;}
+.sec-divider{display:flex;align-items:center;gap:12px;margin:32px 0 20px;}
+.sec-divider hr{flex:1;border:none;border-top:1px solid var(--c-border);}
+.sec-divider-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--c-text3);white-space:nowrap;}
+.sev{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.sev-crit{background:#FEE2E2;color:#991B1B;}.sev-high{background:#FEF3C7;color:#92400E;}
+.sev-med{background:#EFF6FF;color:#1E40AF;}.sev-low{background:var(--c-surface2);color:var(--c-text2);}
+.dark .sev-crit{background:rgba(184,92,92,.2);color:#F9ABAB;}.dark .sev-high{background:rgba(200,155,92,.2);color:#E5C07B;}
+.dark .sev-med{background:rgba(92,138,184,.2);color:#93C5FD;}
+.comp-card{border:1.5px solid var(--c-border);border-radius:12px;overflow:hidden;margin-bottom:10px;}
+.comp-head{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--c-surface);border-bottom:1px solid var(--c-border);}
+.comp-name{font-family:monospace;font-size:12px;font-weight:700;color:var(--c-primary);}
+.comp-path{font-size:9px;color:var(--c-text3);font-family:monospace;}
+.comp-body{padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;background:var(--c-bg);}
+.comp-col-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text3);margin-bottom:4px;}
+.comp-item{font-size:11px;color:var(--c-text2);line-height:1.6;padding-left:10px;border-left:2px solid var(--c-border);margin-bottom:3px;}
+.comp-item.ok{border-color:var(--c-success);}.comp-item.warn{border-color:var(--c-warning);}.comp-item.err{border-color:var(--c-danger);}
+.problem{border-radius:10px;padding:12px 14px;margin-bottom:8px;border-left:3px solid;}
+.problem.crit{background:var(--c-danger-bg);border-color:var(--c-danger);}
+.problem.high{background:var(--c-warning-bg);border-color:var(--c-warning);}
+.problem.med{background:var(--c-info-bg);border-color:var(--c-info);}
+.problem.low{background:var(--c-surface2);border-color:var(--c-border);}
+.problem-title{font-size:12px;font-weight:700;color:var(--c-text);margin-bottom:3px;}
+.problem-desc{font-size:11px;color:var(--c-text2);line-height:1.6;}
+.problem-evidence{font-size:10px;font-family:monospace;color:var(--c-text3);margin-top:4px;}
+.bench-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px;}
+.bench-card{border:1.5px solid var(--c-border);border-radius:12px;padding:12px;background:var(--c-surface);}
+.bench-app{font-size:11px;font-weight:800;color:var(--c-primary);margin-bottom:3px;}
+.bench-pattern{font-size:10px;font-weight:700;color:var(--c-text);margin-bottom:4px;}
+.bench-desc{font-size:10px;color:var(--c-text2);line-height:1.6;}
+.bench-adapt{font-size:10px;color:var(--c-success);margin-top:6px;font-weight:600;}
+.wireframe{font-family:monospace;font-size:11px;line-height:1.9;color:var(--c-text2);background:var(--c-surface);border-radius:10px;padding:16px;border:1.5px solid var(--c-border);}
+/* Phone mockup */
+.phone-frame{width:230px;border-radius:32px;border:3px solid var(--c-border2);background:var(--c-bg);overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.12);flex-shrink:0;}
+.phone-status{height:32px;background:#1C3A52;display:flex;align-items:center;justify-content:center;font-size:9px;color:rgba(255,255,255,.5);}
+/* Hero */
+.h-hero{background:#1C3A52;padding:14px;}
+.h-toprow{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.h-brand{font-size:12px;font-weight:700;color:#fff;}
+.h-avatar{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;}
+.h-pill{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:3px 10px;font-size:9px;color:#fff;display:inline-flex;align-items:center;gap:5px;margin-bottom:8px;}
+.h-pill-dot{width:5px;height:5px;border-radius:50%;background:#3A9E7A;}
+.h-greeting{font-size:10px;color:rgba(255,255,255,.55);margin-bottom:2px;}
+.h-headline{font-size:16px;font-weight:900;color:#fff;line-height:1.25;margin-bottom:8px;}
+.h-cta{background:#3A9E7A;color:#fff;border-radius:8px;padding:9px;text-align:center;font-size:12px;font-weight:700;margin-bottom:8px;}
+.h-trust{display:flex;justify-content:center;gap:12px;font-size:8px;color:rgba(255,255,255,.55);}
+/* Body */
+.h-body{padding:12px 14px;display:flex;flex-direction:column;gap:10px;}
+.h-section-lbl{font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);letter-spacing:.4px;}
+/* ElectionItem */
+.h-el-card{background:var(--c-card);border:1px solid var(--c-border);border-radius:10px;padding:10px;display:flex;align-items:center;gap:8px;}
+.h-el-ring{width:36px;height:36px;border-radius:50%;border:3px solid var(--c-border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--c-text3);}
+.h-el-name{font-size:11px;font-weight:700;color:var(--c-text);}
+.h-el-meta{font-size:9px;color:var(--c-text2);}
+.h-el-prog{height:3px;background:var(--c-border2);border-radius:2px;margin-top:3px;}
+.h-el-prog-fill{height:100%;border-radius:2px;background:var(--c-primary);}
+.h-el-btn{padding:4px 10px;border-radius:6px;font-size:9px;font-weight:700;margin-left:auto;flex-shrink:0;}
+/* MatchSummary */
+.h-match-card{background:var(--c-card);border:1px solid var(--c-border2);border-radius:10px;padding:12px;width:100%;}
+.h-match-toprow{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.h-match-avatar{width:40px;height:40px;border-radius:50%;background:var(--c-primary);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+.h-match-name{font-size:13px;font-weight:600;color:var(--c-text);}
+.h-match-chip{display:inline-block;background:var(--c-surface2);border-radius:20px;padding:2px 8px;font-size:9px;color:var(--c-text2);margin-top:2px;}
+.h-match-pct{font-size:36px;font-weight:800;color:var(--c-success);text-align:right;line-height:1;}
+.h-match-ctx{font-size:10px;color:var(--c-text2);text-align:right;margin-top:2px;}
+.h-match-btn{background:var(--c-secondary);color:#fff;border-radius:7px;padding:7px;text-align:center;font-size:11px;font-weight:700;margin-top:8px;}
+/* Locked */
+.h-lock{background:var(--c-card);border:1px solid var(--c-border2);border-radius:10px;overflow:hidden;position:relative;}
+.h-lock-blur{padding:12px;opacity:.3;}
+.h-lock-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(28,58,82,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:14px;}
+.h-lock-icon{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:16px;color:rgba(255,255,255,.75);}
+.h-lock-title{font-size:13px;font-weight:800;color:#fff;}
+.h-lock-body{font-size:10px;color:rgba(255,255,255,.6);text-align:center;line-height:1.5;}
+/* Novedades */
+.h-nov{background:var(--c-card);border:1px solid var(--c-border);border-radius:8px;padding:10px;}
+.h-nov-title{font-size:11px;font-weight:600;color:var(--c-text);margin-bottom:2px;}
+.h-nov-meta{font-size:9px;color:var(--c-text2);}
+.diff-table{width:100%;border-collapse:collapse;}
+.diff-table th{background:var(--c-surface2);font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text2);padding:6px 10px;text-align:left;border-bottom:1px solid var(--c-border);}
+.diff-table td{padding:8px 10px;font-size:11px;vertical-align:top;border-bottom:1px solid var(--c-border2);}
+.diff-del{color:var(--c-danger);}.diff-add{color:var(--c-success);}
+.impact-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;}
+.impact-card{border-radius:10px;padding:12px;border:1.5px solid var(--c-border);}
+.impact-metric{font-size:11px;font-weight:700;color:var(--c-text);margin-bottom:4px;}
+.impact-before{font-size:10px;color:var(--c-danger);margin-bottom:2px;}
+.impact-after{font-size:10px;color:var(--c-success);}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-logo">VotoAfin DS</div>
+  <div class="sidebar-ver">v1.0 &middot; Agosto 2026</div>
+  <hr/>
+  <div class="sidebar-label">11 Fases</div>
+  <a href="#fase0">F0 &middot; Reverse Engineering</a>
+  <a href="#fase1">F1 &middot; Componentes</a>
+  <a href="#fase2">F2 &middot; Auditoria UX/UI</a>
+  <a href="#fase3">F3 &middot; Benchmarking</a>
+  <a href="#fase4">F4 &middot; Problemas</a>
+  <a href="#fase5">F5 &middot; Propuesta</a>
+  <a href="#fase7">F7 &middot; Sistema Visual</a>
+  <a href="#fase8">F8 &middot; Wireframe</a>
+  <a href="#fase9">F9 &middot; Mockup</a>
+  <a href="#fase11">F11 &middot; Justificacion</a>
+  <a href="#fase12">F12 &middot; Impacto</a>
+  <a href="#fase13">F13 &middot; Diff</a>
+  <hr/>
+  <div class="sidebar-label">Navegacion</div>
+  <a href="audit-mis-respuestas.html">Pantalla 11</a>
+  <div class="sidebar-bottom">
+    <button class="theme-btn" id="theme-btn">Dark mode</button>
+  </div>
+</nav>
+<div class="main"><div class="content">
+
+<div class="audit-hero">
+  <div style="opacity:.5;font-size:10px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Pantalla 1 / 11 &middot; 11 Fases (sin F6/F10) &middot; Principal Product Designer + UX + DS Architect</div>
+  <h1>HomeScreen &mdash; Home HUB</h1>
+  <p>La pantalla mas compleja del proyecto: 15.9 KB, 6 sub-organismos, 5 hooks de datos, logica derivada para 5 estados distintos. El hero section esta excelente -- fondo #1C3A52 fijo (correcto para identidad de marca), CTA accent verde, trust meta row, ProgressRing. Los issues principales son: useNoticiasFeed siempre activo aunque SHOW_NOTICIAS=false (request desperdiciada), un eslint-disable en el useMemo de novedades que esconde un potencial stale closure, y handlers async sin useCallback en el componente mas pesado de la app.</p>
+  <div class="meta">
+    <div class="meta-item">HomeScreen.tsx &middot; 15.9 KB</div>
+    <div class="meta-item">HomeHeroSection 9.7KB &middot; HomeElectionItem 6KB &middot; MatchSummaryCard 5.9KB &middot; HomeMatchLocked 5.2KB</div>
+    <div class="meta-item">5 hooks de datos &middot; 5 estados derivados &middot; 4 handlers</div>
+  </div>
+</div>
+
+<!-- F0 -->
+<div id="fase0" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 0 &middot; Reverse Engineering</div><hr/></div>
+<div class="g2" style="margin-bottom:16px;">
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Archivos involucrados</div>
+    <div style="font-family:monospace;font-size:11px;line-height:1.9;color:var(--c-text2);">
+      screens/HomeScreen.tsx (15.9 KB)<br/>
+      organisms/HomeHeroSection.tsx (9.7 KB)<br/>
+      molecules/HomeElectionItem.tsx (6.0 KB)<br/>
+      molecules/MatchSummaryCard.tsx (5.9 KB)<br/>
+      molecules/HomeMatchLocked.tsx (5.2 KB)<br/>
+      molecules/HomeTrustSection.tsx (2.8 KB)<br/>
+      organisms/NovedadesFeed.tsx (0.9 KB)<br/>
+      atoms/ElectionCardAdd + ProgressRing + Progress<br/>
+      domain/eleccion.ts (computeDiasRestantes, deriveEleccionEstado)<br/>
+      domain/affinity.ts (getAffinityColor)<br/>
+      store/cuestionario.ts + electionsPrefs.ts + auth.ts
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Arbol de componentes</div>
+    <div style="font-family:monospace;font-size:11px;line-height:2;color:var(--c-text2);">
+      &lt;&gt;<br/>
+      &nbsp;&nbsp;AppShell [active="home"] &larr; correcto<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;View screen<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HomeHeroSection [sticky, fuera del scroll]<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ScrollView<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[if tiposActivos] SectionTitle "Tus elecciones"<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HomeElectionItem x N<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ElectionCardAdd "+ Activar otra eleccion"<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[if tiposActivos] SectionTitle "Tu mejor match"<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[sinMatches] HomeMatchLocked<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[else] MatchSummaryCard x N<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[if novedades] SectionTitle "Novedades"<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NovedadesFeed<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[showTrust] HomeTrustSection<br/>
+      &nbsp;&nbsp;ConfirmModal [reiniciar]<br/>
+      &nbsp;&nbsp;NoticiaDetailSheet<br/>
+      &nbsp;&nbsp;CoachMarkTour [tourId="home"] &larr; correcto, fuera de AppShell
+    </div>
+  </div>
+</div>
+<div class="g2">
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Hooks y estado derivado</div>
+    <div style="font-size:11px;line-height:1.8;color:var(--c-text2);">
+      <strong>useTiposEleccion:</strong> todos los tipos disponibles<br/>
+      <strong>useMisElecciones:</strong> progreso por tipo (respondidas, total, top_match)<br/>
+      <strong>useNoticiasFeed:</strong> activado siempre aunque SHOW_NOTICIAS=false<br/>
+      <strong>usePerfil:</strong> email para el saludo y avatar<br/>
+      <strong>useReiniciarCuestionario:</strong> mutation<br/><br/>
+      <strong>5 valores derivados con useMemo:</strong><br/>
+      tiposActivos, progresoByTipo, mejoresMatches, heroProgress, heroCta, countdownDays, sinMatches, lockBody, showTrust, novedades
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Estados del Home</div>
+    <div style="font-size:11px;line-height:1.9;color:var(--c-text2);">
+      <strong>1. Guest:</strong> hero sin nombre/avatar, CTA "Empezar", sin matches<br/>
+      <strong>2. Usuario nuevo (0 respuestas):</strong> hero sin ring, CTA "Empezar cuestionario", MatchLocked, HomeTrustSection visible<br/>
+      <strong>3. En curso:</strong> hero con ring parcial, CTA "Continuar", MatchLocked con "Faltan N preguntas"<br/>
+      <strong>4. Completo con match:</strong> ring lleno, CTA "Ver mis matches", MatchSummaryCard<br/>
+      <strong>5. Sin tipos activos:</strong> hero solo, sin secciones de eleccion ni match
+    </div>
+  </div>
+</div>
+
+<!-- F1 -->
+<div id="fase1" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 1 &middot; Auditoria de Componentes Frontend</div><hr/></div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">HomeHeroSection</div><div class="comp-path">organisms/HomeHeroSection.tsx &middot; 9.7 KB</div></div>
+    <span class="sev sev-low" style="margin-left:auto;">Excelente</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Fortalezas</div>
+      <div class="comp-item ok">HERO_BG #1C3A52 fijo -- correcto para identidad de marca, no depende del tema</div>
+      <div class="comp-item ok">accessibilityRole="header" en el contenedor -- landmark correcto</div>
+      <div class="comp-item ok">WCAG documentado en el JSDoc: blanco/#1C3A52 = 9.1:1 (AAA)</div>
+      <div class="comp-item ok">countdownLabel exportada para testing -- buen patron</div>
+      <div class="comp-item ok">greetingLine en useMemo([displayName]) -- correcto</div>
+      <div class="comp-item ok">ProgressRing condicional: solo cuando progressValue &gt; 0</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Debilidades</div>
+      <div class="comp-item warn">styles en useMemo([c.brandAccent]) -- mismo patron ineficiente recurrente</div>
+      <div class="comp-item warn">Trust row items ("~15 min", "100% privado", "Datos SERVEL") hardcodeados como JSX -- deberian ser constantes o props</div>
+      <div class="comp-item warn">WCAG borderline: CTA accent #3A9E7A/#FFFFFF = 3.2:1 -- pasa AA solo si el boton califica como "large text" (&gt;= 18pt o 14pt bold). Documentado en JSDoc</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">novedades useMemo -- eslint-disable stale closure</div><div class="comp-path">HomeScreen.tsx L208-238</div></div>
+    <span class="sev sev-crit" style="margin-left:auto;">Stale closure potencial</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Problema</div>
+      <div class="comp-item err">El useMemo de novedades usa iniciarCuestionario() internamente pero no la incluye en las dependencias. El comentario lo documenta con // eslint-disable-next-line. iniciarCuestionario captura loadForTipoEleccion, progresoByTipo y navigation en closure -- si cualquiera de estos cambia, el handler onCta del item de novedades apunta a la version stale de iniciarCuestionario</div>
+      <div class="comp-item warn">El workaround correcto: extraer iniciarCuestionario como useCallback con sus dependencias reales, y luego incluirla en las deps de novedades. El eslint-disable indica que el codigo sabe que hay un problema pero lo suprime en lugar de resolverlo</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Riesgo real</div>
+      <div class="comp-item warn">El riesgo es bajo en la practica si los stores de Zustand son estables (references fijas). Pero es un patron fragil que puede romperse con refactors futuros</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">useNoticiasFeed -- siempre activo aunque SHOW_NOTICIAS=false</div><div class="comp-path">HomeScreen.tsx L103</div></div>
+    <span class="sev sev-high" style="margin-left:auto;">Request desperdiciada</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Problema</div>
+      <div class="comp-item err">useNoticiasFeed() se llama siempre al montar HomeScreen, independientemente del valor de SHOW_NOTICIAS. Cuando SHOW_NOTICIAS=false, el array noticias se usa solo para construir los items de novedades, pero ese codigo tambien esta condicionado por SHOW_NOTICIAS -- por lo que la request es completamente inutil</div>
+      <div class="comp-item warn">Mismo patron que TASK-039 (SHOW_NOTICIAS dead code) pero aplicado a un hook que hace una request de red real</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Solucion</div>
+      <div class="comp-item ok">const { data: noticias = [] } = useNoticiasFeed({ enabled: SHOW_NOTICIAS })</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">HomeElectionItem + MatchSummaryCard</div><div class="comp-path">molecules/HomeElectionItem.tsx &middot; molecules/MatchSummaryCard.tsx</div></div>
+    <span class="sev sev-med" style="margin-left:auto;">Varios menores</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">HomeElectionItem -- Fortalezas</div>
+      <div class="comp-item ok">ctaForEstado exportada para testing -- patron correcto</div>
+      <div class="comp-item ok">deriveEleccionEstado desde domain/eleccion -- DRY correcto</div>
+      <div class="comp-item ok">a11yLabel compuesto: nombre + progreso + CTA</div>
+      <div class="comp-item ok">DS-11 P1: "sin_empezar" usa secondary, "en_curso" usa primary</div>
+      <div class="comp-item warn">styles en useMemo([c, estado, isDone]) -- triple dependencia</div>
+    </div>
+    <div>
+      <div class="comp-col-label">MatchSummaryCard -- Issues</div>
+      <div class="comp-item warn">CARD_WIDTH = 260 hardcoded -- en layout vertical (View, no ScrollView horizontal) el ancho fijo deja un gap en pantallas anchas. En Pantalla 4 (CandidatosScreen) es una card en scroll horizontal -- ahi si tiene sentido. En Home la card es vertical y deberia ser full-width</div>
+      <div class="comp-item ok">affinityColor via getAffinityColor -- FIX C-03 correcto</div>
+      <div class="comp-item ok">accessibilityRole="summary" con label descriptivo completo</div>
+      <div class="comp-item warn">styles en useMemo([c, affinityColor]) -- doble dep</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">Handlers en HomeScreen sin useCallback</div><div class="comp-path">HomeScreen.tsx L179-213</div></div>
+    <span class="sev sev-high" style="margin-left:auto;">Performance + stale closure</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Handlers afectados</div>
+      <div class="comp-item err">iniciarCuestionario(tipo): async, sin useCallback. Es la funcion mas usada -- llamada desde HomeElectionItem (N veces), desde handleHeroCta, y desde novedades onCta. Se recrea en cada render</div>
+      <div class="comp-item err">handleHeroCta(): sin useCallback, pasada como onCta a HomeHeroSection</div>
+      <div class="comp-item warn">handleConfirmReiniciar(): sin useCallback, pasada a ConfirmModal</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Impacto</div>
+      <div class="comp-item warn">HomeHeroSection re-renderiza en cada render de HomeScreen por la referencia nueva de onCta</div>
+      <div class="comp-item warn">Las N instancias de HomeElectionItem tambien re-renderizan por onEmpezar/onContinuar/onVerResultados</div>
+    </div>
+  </div>
+</div>
+
+<!-- F2 -->
+<div id="fase2" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 2 &middot; Auditoria UX / UI Profunda</div><hr/></div>
+<div class="g2">
+  <div>
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:10px;">UX</div>
+    <div class="ins ins-g" style="margin-bottom:8px;"><strong>HomeHeroSection: arquitectura UX excelente.</strong> El hero unificado (fondo #1C3A52 + saludo + ring + CTA) resuelve el patron "doble borde" del HomeTopBar anterior. El CTA adapta su label a 3 estados (Empezar / Continuar / Ver mis matches) -- comunicacion de estado contextual correcta. El CountdownPill motiva urgencia electoral.</div>
+    <div class="ins ins-g" style="margin-bottom:8px;"><strong>HomeMatchLocked: patron tinder-reveal efectivo.</strong> El blur-canvas + overlay da la sensacion de que hay algo que ver, motivando al usuario a completar el cuestionario. El CTA "Continuar cuestionario" en el overlay es redundante con el del hero, pero en este contexto es correcto -- el usuario que llega hasta aca puede haber olvidado el CTA del hero.</div>
+    <div class="ins ins-a" style="margin-bottom:8px;"><strong>MatchSummaryCard ancho fijo en layout vertical.</strong> La card tiene CARD_WIDTH=260. En un iPhone 14 (390px), la card ocupa 260px dejando 130px libres a la derecha -- visualmente parece una card a medio renderizar. En tablets o web es mas evidente. Si se van a mostrar multiples matches en lista vertical, la card deberia ser full-width.</div>
+    <div class="ins ins-b" style="margin-bottom:8px;"><strong>Sin estado de error para tiposLoading=true pero error presente.</strong> El useEffect que muestra toast en caso de error es correcto, pero el spinner de carga se sigue mostrando si el error ocurre. El usuario ve un spinner indefinido con un toast de error -- no sabe si seguir esperando o si algo fallo definitivamente.</div>
+  </div>
+  <div>
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:10px;">UI / Design System</div>
+    <div class="ins ins-g" style="margin-bottom:8px;"><strong>Progress: DS-11 P1 correctamente implementado.</strong> HomeElectionItem usa c.secondary para "sin_empezar" (verde accent) y c.primary para "en_curso" (azul). El estado "completa" usa c.success para la barra. Tokenizacion correcta y consistente.</div>
+    <div class="ins ins-a" style="margin-bottom:8px;"><strong>HomeElectionItem: border c.primary en estado "en_curso" no documentado en DS-11.</strong> Cuando el cuestionario esta en curso, la card tiene borderColor: c.primary. DS-11 P1 especifica la barra de progreso pero no el borde de la card. Es una decision local no respaldada por el spec.</div>
+    <div class="ins ins-b" style="margin-bottom:8px;"><strong>emailPrefix computed inline con .split("@")[0].</strong> La logica de extraer el prefijo del email ya existe en deriveDisplayName(). HomeScreen hace el split manualmente antes de llamar a la util -- la util deberia aceptar directamente el email.</div>
+    <div class="ins ins-r" style="margin-bottom:8px;"><strong>HomeTrustSection: solo visible para usuarios sin cuestionario.</strong> Esto es correcto segun la especificacion (showTrust = !isGuest && mejoresMatches.length === 0 && heroProgress === 0). Pero si un usuario completo el cuestionario y luego lo reinicio, HomeTrustSection vuelve a aparecer -- puede parecer condescendiente para usuarios veteranos.</div>
+  </div>
+</div>
+
+<!-- F3 -->
+<div id="fase3" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 3 &middot; Benchmarking</div><hr/></div>
+<div class="bench-grid">
+  <div class="bench-card">
+    <div class="bench-app">Spotify (Home)</div>
+    <div class="bench-pattern">Hero fijo + scroll independiente</div>
+    <div class="bench-desc">El header de Spotify con nombre de usuario y saludo es sticky. El scroll del contenido pasa por debajo. Igual arquitectura que HomeHeroSection sticky fuera del ScrollView.</div>
+    <div class="bench-adapt">El patron actual de HomeScreen ya lo implementa correctamente.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Duolingo</div>
+    <div class="bench-pattern">Progress ring en el hero</div>
+    <div class="bench-desc">Duolingo muestra un ring de progreso del streak en el hero. El usuario sabe de un vistazo si tiene que completar algo hoy.</div>
+    <div class="bench-adapt">HomeHeroSection ya implementa el ProgressRing correctamente. Sin cambios.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Tinder</div>
+    <div class="bench-pattern">Blur-to-reveal motivacional</div>
+    <div class="bench-desc">El patron de contenido borroso que se desvela al completar una accion es la esencia de Tinder. HomeMatchLocked lo implementa correctamente.</div>
+    <div class="bench-adapt">Implementacion correcta. Mantener.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Airbnb</div>
+    <div class="bench-pattern">Cards full-width en lista vertical</div>
+    <div class="bench-desc">En Airbnb, las tarjetas de resultados en lista vertical siempre son full-width. Las tarjetas de ancho fijo aparecen solo en scrolls horizontales.</div>
+    <div class="bench-adapt">MatchSummaryCard deberia ser full-width cuando se renderiza en lista vertical (Home). Mantener CARD_WIDTH=260 solo para scroll horizontal (ej. si se usa en otro contexto).</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Linear</div>
+    <div class="bench-pattern">Estado de error visible, no solo toast</div>
+    <div class="bench-desc">Cuando Linear falla al cargar, reemplaza el spinner con un mensaje de error + retry. El usuario no queda mirando un spinner infinito.</div>
+    <div class="bench-adapt">Cuando error es truthy en useTiposEleccion, reemplazar el spinner con un EmptyState de error + retry.</div>
+  </div>
+</div>
+
+<!-- F4 -->
+<div id="fase4" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 4 &middot; Problemas Detectados</div><hr/></div>
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-danger);margin-bottom:6px;">Critico</div>
+<div class="problem crit">
+  <div class="problem-title">P-C01 &middot; novedades useMemo usa iniciarCuestionario() sin incluirla en deps -- stale closure</div>
+  <div class="problem-desc">El useMemo de novedades llama iniciarCuestionario() en el handler onCta, pero iniciarCuestionario no esta en las dependencias (hay un eslint-disable comentado). Si loadForTipoEleccion, navigation o progresoByTipo cambian, el onCta del item de novedades apunta a la version vieja. El fix correcto: extraer iniciarCuestionario como useCallback y agregarla a las deps del useMemo.</div>
+  <div class="problem-evidence">HomeScreen.tsx L234: // eslint-disable-next-line react-hooks/exhaustive-deps | novedades deps: [tiposActivos, activeId, noticias]</div>
+</div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-warning);margin-bottom:6px;margin-top:12px;">Alto</div>
+<div class="problem high">
+  <div class="problem-title">P-A01 &middot; useNoticiasFeed() siempre activo aunque SHOW_NOTICIAS=false</div>
+  <div class="problem-desc">useNoticiasFeed() se llama incondicionalmente en HomeScreen. Cuando SHOW_NOTICIAS=false, el resultado nunca se usa para renderizar nada visible. Es una request de red desperdiciada en cada mount del Home, que es la pantalla que el usuario ve mas frecuentemente.</div>
+  <div class="problem-evidence">HomeScreen.tsx L103: const { data: noticias = [] } = useNoticiasFeed(); -- sin condicion</div>
+</div>
+<div class="problem high">
+  <div class="problem-title">P-A02 &middot; iniciarCuestionario, handleHeroCta, handleConfirmReiniciar sin useCallback</div>
+  <div class="problem-desc">Los tres handlers principales se recrean en cada render. iniciarCuestionario se pasa a N instancias de HomeElectionItem (como onEmpezar, onContinuar, onVerResultados) y a novedades. handleHeroCta se pasa al HomeHeroSection. Cada re-render de HomeScreen causa re-render de todos sus hijos.</div>
+</div>
+<div class="problem high">
+  <div class="problem-title">P-A03 &middot; Estado de error de tiposLoading: spinner infinito con toast</div>
+  <div class="problem-desc">Cuando useTiposEleccion falla, el useEffect emite un toast pero la pantalla sigue mostrando el Spinner. El usuario ve un spinner que nunca resuelve con un toast de error que desaparece. Sin boton de retry visible.</div>
+  <div class="problem-evidence">HomeScreen.tsx L118-120: if (tiposLoading) return Spinner -- sin manejo de error en el return anticipado</div>
+</div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-info);margin-bottom:6px;margin-top:12px;">Medio</div>
+<div class="problem med">
+  <div class="problem-title">P-M01 &middot; MatchSummaryCard CARD_WIDTH=260 fijo en layout vertical</div>
+  <div class="problem-desc">La MatchSummaryCard tiene width:260 fijo. En HomeScreen se usa en una lista vertical (View, no ScrollView horizontal). En una pantalla de 390px (iPhone 14), la card ocupa 260px dejando 130px sin usar a la derecha. Visualmente parece una card a medio renderizar.</div>
+  <div class="problem-evidence">MatchSummaryCard.tsx L80: const CARD_WIDTH = 260 -- sin flexGrow ni width:"100%"</div>
+</div>
+<div class="problem med">
+  <div class="problem-title">P-M02 &middot; emailPrefix computed inline duplica logica de deriveDisplayName</div>
+  <div class="problem-desc">HomeScreen hace email.split("@")[0] manualmente antes de llamar a deriveDisplayName(emailPrefix). La util ya encapsula la logica -- deberia aceptar el email directamente para evitar el split duplicado.</div>
+  <div class="problem-evidence">HomeScreen.tsx L115-117: const emailPrefix = email ? email.split("@")[0] : null;</div>
+</div>
+<div class="problem med">
+  <div class="problem-title">P-M03 &middot; HomeElectionItem borde c.primary en estado "en_curso" no especificado en DS-11</div>
+  <div class="problem-desc">Cuando el cuestionario esta en curso, la card tiene borderColor: c.primary. DS-11 P1 especifica la barra de progreso (secondary/primary) pero no el borde de la card. Es una decision local que no tiene respaldo en el spec.</div>
+  <div class="problem-evidence">HomeElectionItem.tsx L117: borderColor: estado === "en_curso" ? c.primary : c.border2</div>
+</div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:6px;margin-top:12px;">Bajo</div>
+<div class="problem low">
+  <div class="problem-title">P-L01 &middot; HomeTrustSection reaparece al reiniciar cuestionario</div>
+  <div class="problem-desc">showTrust = heroProgress === 0 && mejoresMatches.length === 0. Si un usuario veterano reinicia el cuestionario, HomeTrustSection reaparece. Para usuarios que ya conocen la app puede parecer condescendiente.</div>
+</div>
+<div class="problem low">
+  <div class="problem-title">P-L02 &middot; Trust items hardcodeados en HomeHeroSection JSX</div>
+  <div class="problem-desc">"~15 min", "100% privado", "Datos SERVEL" son strings directamente en el JSX. Deberian ser constantes exportadas para facilitar cambios sin buscar en el JSX.</div>
+</div>
+<div class="problem low">
+  <div class="problem-title">P-L03 &middot; styles en useMemo en todos los componentes del Home</div>
+  <div class="problem-desc">HomeScreen, HomeHeroSection, HomeElectionItem, HomeMatchLocked y MatchSummaryCard todos usan el patron StyleSheet.create dentro de useMemo. Es el patron ineficiente documentado en multiples pantallas anteriores.</div>
+</div>
+
+<!-- F5 -->
+<div id="fase5" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 5 &middot; Propuesta de Rediseno</div><hr/></div>
+<div class="g2">
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 1 &mdash; Fix stale closure + useCallback</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> iniciarCuestionario sin useCallback ni deps correctas<br/>
+      <strong>Cambio:</strong> Convertir iniciarCuestionario a useCallback([loadForTipoEleccion, progresoByTipo, navigation, isGuest, toast]), luego incluirla en las deps del useMemo de novedades. Eliminar el eslint-disable.<br/>
+      <strong>Beneficio:</strong> referencias estables, sin stale closure, cumple exhaustive-deps.
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 2 &mdash; useNoticiasFeed condicionado</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> request de red siempre activa aunque SHOW_NOTICIAS=false<br/>
+      <strong>Cambio:</strong> useNoticiasFeed({ enabled: SHOW_NOTICIAS })<br/>
+      <strong>Beneficio:</strong> 0 requests de noticias mientras el feature flag este desactivado.
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 3 &mdash; Error state para tiposLoading</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> spinner infinito cuando la request falla<br/>
+      <strong>Cambio:</strong> Agregar manejo de error al return anticipado de loading: si error es truthy, mostrar EmptyState con retry.<br/>
+      <strong>Beneficio:</strong> El usuario puede recuperarse de errores de red.
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 4 &mdash; MatchSummaryCard full-width en Home</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> CARD_WIDTH=260 en layout vertical<br/>
+      <strong>Cambio:</strong> Agregar prop fullWidth?: boolean a MatchSummaryCard. Cuando fullWidth=true, width:"100%" en lugar de CARD_WIDTH. En HomeScreen pasar fullWidth.<br/>
+      <strong>Beneficio:</strong> card visual completa en Home.
+    </div>
+  </div>
+</div>
+
+<!-- F7 -->
+<div id="fase7" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 7 &middot; Sistema Visual</div><hr/></div>
+<table class="sum-table" style="width:100%;">
+  <thead><tr><th>Elemento</th><th>Token</th><th>Guideline DS-11 P1</th><th>Estado</th></tr></thead>
+  <tbody>
+    <tr><td>Hero background</td><td class="mono">#1C3A52 (fijo)</td><td>brand-hero fijo, no depende del tema</td><td style="color:var(--c-success);">&#10003; Correcto</td></tr>
+    <tr><td>CTA hero</td><td class="mono">Button variant="accent" (#3A9E7A)</td><td>DS-11 P1: CTA accent en hero</td><td style="color:var(--c-success);">&#10003; Correcto</td></tr>
+    <tr><td>Progress "sin_empezar"</td><td class="mono">c.secondary</td><td>DS-11 P1: brand-secondary para sin empezar</td><td style="color:var(--c-success);">&#10003; Correcto</td></tr>
+    <tr><td>Progress "en_curso"</td><td class="mono">c.primary</td><td>DS-11 P1: brand-primary para en curso</td><td style="color:var(--c-success);">&#10003; Correcto</td></tr>
+    <tr><td>Match percent color</td><td class="mono">getAffinityColor(pct, isDark)</td><td>DS-08: tier-based affinity color</td><td style="color:var(--c-success);">&#10003; Correcto (FIX C-03 aplicado)</td></tr>
+    <tr><td>Borde HomeElectionItem "en_curso"</td><td class="mono">c.primary</td><td>No especificado en DS-11 P1</td><td style="color:var(--c-warning);">&#9888; Decision local</td></tr>
+    <tr><td>MatchSummaryCard width</td><td class="mono">260px fijo</td><td>Full-width en lista vertical (Airbnb pattern)</td><td style="color:var(--c-danger);">&#10007; Ancho fijo en layout vertical</td></tr>
+  </tbody>
+</table>
+
+<!-- F8 -->
+<div id="fase8" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 8 &middot; Wireframe</div><hr/></div>
+<div class="wireframe">
+&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;
+ HERO (sticky, fondo #1C3A52)
+  [AppIcon] Tinder Decisivo                        [Avatar JV]
+  [Elecciones en 47 dias]
+  Buenos tardes, jenny          [Ring 65%]
+  Con quien votas realmente?
+  [    Continuar cuestionario   ]
+  ~15 min | 100% privado | Datos SERVEL
+&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;
+ SCROLL
+ TUS ELECCIONES (2)                          [Gestionar]
+  [Ring] Presidenciales 2025                 [Continuar]
+         13 de 20 preguntas ===--------
+  [Ring] Diputados RM                        [Empezar]
+         Sin empezar ----------
+  [+ Activar otra eleccion]
+&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;
+ TU MEJOR MATCH
+  [Avatar] Candidata A          87 %
+           Presidenciales 2025  coincides en 15/20
+           [ Ver perfil ]       (full-width propuesto)
+&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;
+ NOVEDADES (solo si SHOW_NOTICIAS=true)
+  [bell] Responde el cuestionario de Diputados    [Ir]
+&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;
+</div>
+
+<!-- F9 -->
+<div id="fase9" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 9 &middot; Mockup de Alta Fidelidad</div><hr/></div>
+<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;justify-content:center;">
+
+<!-- Estado: en curso -->
+<div>
+  <div style="font-size:10px;font-weight:700;text-align:center;color:var(--c-text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">En curso</div>
+  <div class="phone-frame">
+    <div class="phone-status">9:41</div>
+    <div class="h-hero">
+      <div class="h-toprow">
+        <div class="h-brand">&#9632; Tinder Decisivo</div>
+        <div class="h-avatar">JV</div>
+      </div>
+      <div class="h-pill"><div class="h-pill-dot"></div>Elecciones en 47 dias</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;">
+        <div>
+          <div class="h-greeting">Buenas tardes, jenny</div>
+          <div class="h-headline">Con quien<br/>votas realmente?</div>
+        </div>
+        <!-- Ring 65% -->
+        <div style="width:52px;height:52px;border-radius:50%;border:4px solid rgba(255,255,255,.15);border-top-color:#3A9E7A;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+          <div style="font-size:10px;font-weight:800;color:#fff;">65%</div>
+        </div>
+      </div>
+      <div class="h-cta">Continuar cuestionario</div>
+      <div class="h-trust">
+        <span>&#10003; ~15 min</span>
+        <span>&#128274; 100% privado</span>
+        <span>&#127759; Datos SERVEL</span>
+      </div>
+    </div>
+    <div class="h-body">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div class="h-section-lbl">Tus elecciones (2)</div>
+          <div style="font-size:9px;color:var(--c-primary);font-weight:600;">Gestionar</div>
+        </div>
+        <!-- ElectionItem en curso -->
+        <div class="h-el-card" style="border-color:var(--c-primary);margin-bottom:6px;">
+          <div class="h-el-ring" style="border-color:var(--c-primary);border-top-color:transparent;">
+            <span>65%</span>
+          </div>
+          <div style="flex:1;">
+            <div class="h-el-name">Presidenciales 2025</div>
+            <div class="h-el-meta">13 de 20 preguntas</div>
+            <div class="h-el-prog"><div class="h-el-prog-fill" style="width:65%;"></div></div>
+          </div>
+          <div class="h-el-btn" style="background:var(--c-primary);color:#fff;">Continuar</div>
+        </div>
+        <!-- ElectionItem sin empezar -->
+        <div class="h-el-card" style="margin-bottom:6px;">
+          <div class="h-el-ring"></div>
+          <div style="flex:1;">
+            <div class="h-el-name">Diputados RM</div>
+            <div class="h-el-meta">Sin empezar</div>
+            <div class="h-el-prog"><div class="h-el-prog-fill" style="width:0%;background:var(--c-secondary);"></div></div>
+          </div>
+          <div class="h-el-btn" style="background:var(--c-secondary);color:#fff;">Empezar</div>
+        </div>
+        <div style="border:1px dashed var(--c-border);border-radius:8px;padding:8px;text-align:center;font-size:10px;color:var(--c-primary);font-weight:600;">+ Activar otra eleccion</div>
+      </div>
+      <div>
+        <div class="h-section-lbl" style="margin-bottom:8px;">Tu mejor match</div>
+        <!-- MatchLocked -->
+        <div class="h-lock">
+          <div class="h-lock-blur">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <div style="width:40px;height:40px;border-radius:50%;background:var(--c-border2);"></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:4px;"><div style="height:10px;background:var(--c-border2);border-radius:4px;"></div><div style="height:8px;background:var(--c-border2);border-radius:4px;width:60%;"></div></div>
+              <div style="font-size:32px;font-weight:900;color:var(--c-border2);">??%</div>
+            </div>
+            <div style="height:50px;background:var(--c-border2);border-radius:6px;opacity:.3;"></div>
+          </div>
+          <div class="h-lock-overlay">
+            <div class="h-lock-icon">&#128274;</div>
+            <div class="h-lock-title">Completa para revelar</div>
+            <div class="h-lock-body">Faltan 7 preguntas en Presidenciales 2025</div>
+            <div style="width:100%;background:#3A9E7A;color:#fff;border-radius:7px;padding:7px;text-align:center;font-size:11px;font-weight:700;margin-top:4px;">Continuar cuestionario</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Estado: con match -->
+<div>
+  <div style="font-size:10px;font-weight:700;text-align:center;color:var(--c-text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Con match calculado</div>
+  <div class="phone-frame">
+    <div class="phone-status">9:41</div>
+    <div class="h-hero">
+      <div class="h-toprow">
+        <div class="h-brand">&#9632; Tinder Decisivo</div>
+        <div class="h-avatar">JV</div>
+      </div>
+      <div class="h-pill"><div class="h-pill-dot"></div>Elecciones en 47 dias</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;">
+        <div>
+          <div class="h-greeting">Buenas tardes, jenny</div>
+          <div class="h-headline">Con quien<br/>votas realmente?</div>
+        </div>
+        <div style="width:52px;height:52px;border-radius:50%;border:4px solid #3A9E7A;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+          <div style="font-size:10px;font-weight:800;color:#3A9E7A;">&#10003;</div>
+        </div>
+      </div>
+      <div class="h-cta">Ver mis matches</div>
+      <div class="h-trust"><span>&#10003; ~15 min</span><span>&#128274; 100% privado</span><span>&#127759; Datos SERVEL</span></div>
+    </div>
+    <div class="h-body">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div class="h-section-lbl">Tus elecciones (1)</div>
+          <div style="font-size:9px;color:var(--c-primary);font-weight:600;">Gestionar</div>
+        </div>
+        <div class="h-el-card">
+          <div class="h-el-ring" style="border-color:var(--c-success);">&#10003;</div>
+          <div style="flex:1;">
+            <div class="h-el-name" style="color:var(--c-text2);">Presidenciales 2025</div>
+            <div class="h-el-meta" style="color:var(--c-success);font-weight:700;">Completado</div>
+          </div>
+          <div class="h-el-btn" style="color:var(--c-text2);border:1px solid var(--c-border);">Ver resultados</div>
+        </div>
+      </div>
+      <div>
+        <div class="h-section-lbl" style="margin-bottom:8px;">Tu mejor match</div>
+        <!-- MatchSummaryCard full-width (propuesto) -->
+        <div class="h-match-card">
+          <div class="h-match-toprow">
+            <div class="h-match-avatar">CA</div>
+            <div style="flex:1;">
+              <div class="h-match-name">Candidata A</div>
+              <div class="h-match-chip">Presidenciales 2025</div>
+            </div>
+          </div>
+          <div class="h-match-pct" style="color:var(--c-success);">87<span style="font-size:18px;">%</span></div>
+          <div class="h-match-ctx">coincides en 17 de 20 preguntas</div>
+          <div class="h-match-btn">Ver perfil</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Estado: usuario nuevo -->
+<div>
+  <div style="font-size:10px;font-weight:700;text-align:center;color:var(--c-text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Usuario nuevo</div>
+  <div class="phone-frame">
+    <div class="phone-status">9:41</div>
+    <div class="h-hero">
+      <div class="h-toprow">
+        <div class="h-brand">&#9632; Tinder Decisivo</div>
+        <div class="h-avatar" style="background:rgba(255,255,255,.1);">&#9786;</div>
+      </div>
+      <div class="h-greeting">Buenas tardes</div>
+      <div class="h-headline" style="margin-bottom:8px;">Con quien<br/>votas realmente?</div>
+      <div class="h-cta">Empezar cuestionario</div>
+      <div class="h-trust"><span>&#10003; ~15 min</span><span>&#128274; 100% privado</span><span>&#127759; Datos SERVEL</span></div>
+    </div>
+    <div class="h-body">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div class="h-section-lbl">Tus elecciones (1)</div>
+          <div style="font-size:9px;color:var(--c-primary);font-weight:600;">Gestionar</div>
+        </div>
+        <div class="h-el-card">
+          <div class="h-el-ring"></div>
+          <div style="flex:1;"><div class="h-el-name">Presidenciales 2025</div><div class="h-el-meta">Sin empezar</div><div class="h-el-prog"></div></div>
+          <div class="h-el-btn" style="background:var(--c-secondary);color:#fff;">Empezar</div>
+        </div>
+      </div>
+      <!-- Trust section -->
+      <div style="background:var(--c-card);border:1px solid var(--c-border);border-radius:10px;padding:12px;">
+        <div style="font-size:11px;font-weight:700;color:var(--c-text);margin-bottom:4px;">Por que confiar en VotoAfin?</div>
+        <div style="font-size:10px;color:var(--c-text2);line-height:1.6;">Datos oficiales del SERVEL. Tus respuestas son privadas y nunca se comparten.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- F11 -->
+<div id="fase11" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 11 &middot; Justificacion</div><hr/></div>
+<div class="g2">
+  <div class="ins ins-g" style="margin:0 0 10px;"><strong>Fix stale closure novedades</strong><br/><em>Problema:</em> eslint-disable esconde stale closure potencial<br/><em>Beneficio:</em> deps correctas, sin comportamiento inesperado en re-renders<br/><em>Patron:</em> React hooks exhaustive-deps rule</div>
+  <div class="ins ins-g" style="margin:0 0 10px;"><strong>useNoticiasFeed condicionado</strong><br/><em>Problema:</em> request de red en cada mount aunque SHOW_NOTICIAS=false<br/><em>Beneficio:</em> 0 requests de noticias cuando el feature no esta activo<br/><em>Patron:</em> YAGNI, feature flags correctos</div>
+  <div class="ins ins-g" style="margin:0 0 10px;"><strong>Error state para tiposLoading</strong><br/><em>Problema:</em> spinner infinito en caso de error de red<br/><em>Beneficio:</em> el usuario puede recuperarse sin reiniciar la app<br/><em>Patron:</em> Nielsen #9 Error recovery</div>
+  <div class="ins ins-g" style="margin:0 0 10px;"><strong>MatchSummaryCard full-width</strong><br/><em>Problema:</em> card de 260px en layout vertical<br/><em>Beneficio:</em> card visualmente completa en Home<br/><em>Patron:</em> Airbnb cards en lista vertical</div>
+</div>
+
+<!-- F12 -->
+<div id="fase12" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 12 &middot; Impacto</div><hr/></div>
+<div class="impact-grid">
+  <div class="impact-card" style="border-color:var(--c-danger);"><div class="impact-metric">Stale closure novedades</div><div class="impact-before">Antes: eslint-disable, stale potencial</div><div class="impact-after">Despues: useCallback + deps correctas</div></div>
+  <div class="impact-card" style="border-color:var(--c-success);"><div class="impact-metric">Requests de noticias</div><div class="impact-before">Antes: siempre activa (SHOW_NOTICIAS=false)</div><div class="impact-after">Despues: 0 requests cuando flag=false</div></div>
+  <div class="impact-card" style="border-color:var(--c-success);"><div class="impact-metric">Error state loading</div><div class="impact-before">Antes: spinner infinito + toast</div><div class="impact-after">Despues: EmptyState + retry</div></div>
+  <div class="impact-card" style="border-color:var(--c-warning);"><div class="impact-metric">MatchSummaryCard width</div><div class="impact-before">Antes: 260px fijo en vertical</div><div class="impact-after">Despues: full-width en Home</div></div>
+  <div class="impact-card" style="border-color:var(--c-warning);"><div class="impact-metric">Re-renders hijo</div><div class="impact-before">Antes: N HomeElectionItem re-render cada vez</div><div class="impact-after">Despues: useCallback, referencias estables</div></div>
+</div>
+
+<!-- F13 -->
+<div id="fase13" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 13 &middot; Diff Actual vs Propuesto</div><hr/></div>
+<div class="card" style="padding:0;overflow:hidden;">
+<table class="diff-table">
+  <thead><tr><th>Elemento</th><th class="diff-del">Actual</th><th class="diff-add">Propuesto</th><th>Motivo</th></tr></thead>
+  <tbody>
+    <tr><td>iniciarCuestionario</td><td class="diff-del">async function sin useCallback</td><td class="diff-add">useCallback([loadForTipoEleccion, progresoByTipo, navigation, isGuest, toast])</td><td>Refs estables, eliminar eslint-disable</td></tr>
+    <tr><td>handleHeroCta</td><td class="diff-del">function sin useCallback</td><td class="diff-add">useCallback([mejoresMatches, navigation, tiposActivos, iniciarCuestionario])</td><td>Performance</td></tr>
+    <tr><td>novedades deps</td><td class="diff-del">[tiposActivos, activeId, noticias] + eslint-disable</td><td class="diff-add">[tiposActivos, activeId, noticias, iniciarCuestionario]</td><td>Sin stale closure</td></tr>
+    <tr><td>useNoticiasFeed</td><td class="diff-del">useNoticiasFeed() siempre</td><td class="diff-add">useNoticiasFeed({ enabled: SHOW_NOTICIAS })</td><td>0 requests cuando flag=false</td></tr>
+    <tr><td>Loading error state</td><td class="diff-del">if (tiposLoading) return Spinner -- sin manejo de error</td><td class="diff-add">if (tiposLoading && !error) return Spinner; if (error) return EmptyState + retry</td><td>Error recovery (Nielsen #9)</td></tr>
+    <tr><td>MatchSummaryCard en Home</td><td class="diff-del">width:260 fijo (CARD_WIDTH)</td><td class="diff-add">fullWidth prop -- width:"100%" en Home</td><td>Card visualmente completa</td></tr>
+    <tr><td>emailPrefix</td><td class="diff-del">email.split("@")[0] inline</td><td class="diff-add">Pasar email directamente a deriveDisplayName(email)</td><td>DRY</td></tr>
+    <tr><td>Archivos afectados</td><td class="diff-del">HomeScreen.tsx</td><td class="diff-add">HomeScreen.tsx + MatchSummaryCard.tsx (fullWidth prop)</td><td>Cambios minimos y quirurgicos</td></tr>
+  </tbody>
+</table>
+</div>
+<div style="height:40px;"></div>
+</div></div>
+<script>
+const btn=document.getElementById('theme-btn');
+btn.addEventListener('click',()=>{document.body.classList.toggle('dark');btn.textContent=document.body.classList.contains('dark')?'Light mode':'Dark mode';});
+document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth'});});});
+</script>
+</body>
+</html>

@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pantalla 10 -- Mis Guardados -- 11 Fases</title>
+<link rel="stylesheet" href="ds-shared.css"/>
+<style>
+.audit-hero{background:var(--c-hero);padding:28px 36px 24px;color:#fff;margin:-40px -36px 32px;}
+.audit-hero h1{font-size:22px;font-weight:900;margin-bottom:4px;}
+.audit-hero p{font-size:12px;opacity:.65;max-width:700px;line-height:1.7;}
+.audit-hero .meta{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;}
+.audit-hero .meta-item{font-size:11px;opacity:.75;}
+
+.sec-divider{display:flex;align-items:center;gap:12px;margin:32px 0 20px;}
+.sec-divider hr{flex:1;border:none;border-top:1px solid var(--c-border);}
+.sec-divider-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--c-text3);white-space:nowrap;}
+
+.sev{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.sev-crit{background:#FEE2E2;color:#991B1B;}
+.sev-high{background:#FEF3C7;color:#92400E;}
+.sev-med{background:#EFF6FF;color:#1E40AF;}
+.sev-low{background:var(--c-surface2);color:var(--c-text2);}
+.dark .sev-crit{background:rgba(184,92,92,.2);color:#F9ABAB;}
+.dark .sev-high{background:rgba(200,155,92,.2);color:#E5C07B;}
+.dark .sev-med{background:rgba(92,138,184,.2);color:#93C5FD;}
+
+.comp-card{border:1.5px solid var(--c-border);border-radius:12px;overflow:hidden;margin-bottom:10px;}
+.comp-head{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--c-surface);border-bottom:1px solid var(--c-border);}
+.comp-name{font-family:monospace;font-size:12px;font-weight:700;color:var(--c-primary);}
+.comp-path{font-size:9px;color:var(--c-text3);font-family:monospace;}
+.comp-body{padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;background:var(--c-bg);}
+.comp-col-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text3);margin-bottom:4px;}
+.comp-item{font-size:11px;color:var(--c-text2);line-height:1.6;padding-left:10px;border-left:2px solid var(--c-border);margin-bottom:3px;}
+.comp-item.ok{border-color:var(--c-success);}
+.comp-item.warn{border-color:var(--c-warning);}
+.comp-item.err{border-color:var(--c-danger);}
+
+.problem{border-radius:10px;padding:12px 14px;margin-bottom:8px;border-left:3px solid;}
+.problem.crit{background:var(--c-danger-bg);border-color:var(--c-danger);}
+.problem.high{background:var(--c-warning-bg);border-color:var(--c-warning);}
+.problem.med{background:var(--c-info-bg);border-color:var(--c-info);}
+.problem.low{background:var(--c-surface2);border-color:var(--c-border);}
+.problem-title{font-size:12px;font-weight:700;color:var(--c-text);margin-bottom:3px;}
+.problem-desc{font-size:11px;color:var(--c-text2);line-height:1.6;}
+.problem-evidence{font-size:10px;font-family:monospace;color:var(--c-text3);margin-top:4px;}
+
+.bench-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px;}
+.bench-card{border:1.5px solid var(--c-border);border-radius:12px;padding:12px;background:var(--c-surface);}
+.bench-app{font-size:11px;font-weight:800;color:var(--c-primary);margin-bottom:3px;}
+.bench-pattern{font-size:10px;font-weight:700;color:var(--c-text);margin-bottom:4px;}
+.bench-desc{font-size:10px;color:var(--c-text2);line-height:1.6;}
+.bench-adapt{font-size:10px;color:var(--c-success);margin-top:6px;font-weight:600;}
+
+.wireframe{font-family:monospace;font-size:11px;line-height:1.9;color:var(--c-text2);background:var(--c-surface);border-radius:10px;padding:16px;border:1.5px solid var(--c-border);}
+
+/* Phone mockup */
+.phone-frame{width:230px;border-radius:32px;border:3px solid var(--c-border2);background:var(--c-bg);overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.12);flex-shrink:0;}
+.phone-status{height:32px;background:var(--c-bg);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--c-text3);}
+.ph-topbar{padding:8px 14px 6px;border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:8px;}
+.ph-back{font-size:18px;color:var(--c-primary);}
+.ph-title{font-size:13px;font-weight:700;color:var(--c-text);}
+.ph-sub{font-size:9px;color:var(--c-text2);}
+.ph-chips{display:flex;gap:4px;padding:6px 14px;overflow:hidden;}
+.ph-chip{padding:3px 10px;border-radius:20px;font-size:9px;font-weight:600;border:1px solid var(--c-border);color:var(--c-text2);background:var(--c-card);white-space:nowrap;}
+.ph-chip.active{background:var(--c-primary);color:#fff;border-color:var(--c-primary);}
+.ph-tabs{display:flex;border-bottom:2px solid var(--c-border);}
+.ph-tab{flex:1;text-align:center;padding:7px 2px;font-size:9px;font-weight:600;color:var(--c-text2);}
+.ph-tab.active{color:var(--c-primary);border-bottom:2px solid var(--c-primary);margin-bottom:-2px;}
+.ph-body{padding:10px 14px;display:flex;flex-direction:column;gap:6px;}
+.ph-card{background:var(--c-card);border:1px solid var(--c-border);border-radius:8px;padding:10px;}
+.ph-cand-row{display:flex;align-items:center;gap:8px;}
+.ph-avatar{width:32px;height:32px;border-radius:50%;background:var(--c-primary);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+.ph-cand-name{font-size:12px;font-weight:700;color:var(--c-text);}
+.ph-cand-meta{font-size:9px;color:var(--c-text2);}
+.ph-bookmark{width:24px;height:24px;border-radius:6px;border:1px solid var(--c-border);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--c-primary);margin-left:auto;flex-shrink:0;}
+.ph-restore-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--c-primary);font-size:9px;font-weight:600;color:var(--c-primary);margin-left:auto;flex-shrink:0;}
+.ph-card-title{font-size:11px;font-weight:700;color:var(--c-text);margin-bottom:2px;}
+.ph-card-meta{font-size:9px;color:var(--c-text2);margin-bottom:4px;}
+.ph-card-body{font-size:10px;color:var(--c-text2);line-height:1.5;}
+.ph-empty{display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px 14px;}
+.ph-empty-icon{font-size:28px;}
+.ph-empty-title{font-size:12px;font-weight:700;color:var(--c-text);}
+.ph-empty-desc{font-size:10px;color:var(--c-text2);text-align:center;line-height:1.5;}
+.ph-chip-warn{background:var(--c-warning-bg);border:1px solid var(--c-warning);border-radius:8px;padding:6px 10px;font-size:9px;color:var(--c-text);}
+
+.diff-table{width:100%;border-collapse:collapse;}
+.diff-table th{background:var(--c-surface2);font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text2);padding:6px 10px;text-align:left;border-bottom:1px solid var(--c-border);}
+.diff-table td{padding:8px 10px;font-size:11px;vertical-align:top;border-bottom:1px solid var(--c-border2);}
+.diff-del{color:var(--c-danger);}
+.diff-add{color:var(--c-success);}
+
+.impact-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;}
+.impact-card{border-radius:10px;padding:12px;border:1.5px solid var(--c-border);}
+.impact-metric{font-size:11px;font-weight:700;color:var(--c-text);margin-bottom:4px;}
+.impact-before{font-size:10px;color:var(--c-danger);margin-bottom:2px;}
+.impact-after{font-size:10px;color:var(--c-success);}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-logo">VotoAfin DS</div>
+  <div class="sidebar-ver">v1.0 &middot; Agosto 2026</div>
+  <hr/>
+  <div class="sidebar-label">11 Fases</div>
+  <a href="#fase0">F0 &middot; Reverse Engineering</a>
+  <a href="#fase1">F1 &middot; Componentes</a>
+  <a href="#fase2">F2 &middot; Auditoria UX/UI</a>
+  <a href="#fase3">F3 &middot; Benchmarking</a>
+  <a href="#fase4">F4 &middot; Problemas</a>
+  <a href="#fase5">F5 &middot; Propuesta</a>
+  <a href="#fase7">F7 &middot; Sistema Visual</a>
+  <a href="#fase8">F8 &middot; Wireframe</a>
+  <a href="#fase9">F9 &middot; Mockup</a>
+  <a href="#fase11">F11 &middot; Justificacion</a>
+  <a href="#fase12">F12 &middot; Impacto</a>
+  <a href="#fase13">F13 &middot; Diff</a>
+  <hr/>
+  <div class="sidebar-label">Navegacion</div>
+  <a href="audit-gestion-elecciones.html">&#8592; Pantalla 9</a>
+  <div class="sidebar-bottom">
+    <button class="theme-btn" id="theme-btn">Dark mode</button>
+  </div>
+</nav>
+
+<div class="main"><div class="content">
+
+<div class="audit-hero">
+  <div style="opacity:.5;font-size:10px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">
+    Pantalla 10 / 11 &middot; 11 Fases (sin F6/F10) &middot; Principal Product Designer + UX + DS Architect
+  </div>
+  <h1>MisGuardadosScreen &mdash; Mis Guardados</h1>
+  <p>El hallazgo critico es una UI enganosa: los chips de filtro por eleccion se renderizan, se pueden activar y tienen estado visual, pero NO filtran los datos. El comentario del propio codigo lo documenta como TODO. Ademas, los toggles de posturas y noticias fallan silenciosamente sin onSuccess/onError, y hay 8 queries activas simultaneamente aunque el usuario solo este mirando un tab.</p>
+  <div class="meta">
+    <div class="meta-item">MisGuardadosScreen.tsx &middot; 14.1 KB</div>
+    <div class="meta-item">4 tabs &middot; 8 hooks &middot; 4 render functions</div>
+    <div class="meta-item">Favoritos &middot; Descartados &middot; Posturas &middot; Noticias</div>
+  </div>
+</div>
+
+<!-- F0 -->
+<div id="fase0" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 0 &middot; Reverse Engineering</div><hr/></div>
+
+<div class="g2" style="margin-bottom:16px;">
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Archivos y dependencias</div>
+    <div style="font-family:monospace;font-size:11px;line-height:1.9;color:var(--c-text2);">
+      screens/MisGuardadosScreen.tsx (14.1 KB)<br/>
+      api/hooks.ts (useFavoritos, useDescartados, usePosturasBookmarks,<br/>
+      &nbsp;&nbsp;useNoticiasBookmarks, useToggleFavorito, useToggleDescartado,<br/>
+      &nbsp;&nbsp;useToggleNoticiaBookmark, useTogglePosturaBookmark, useTiposEleccion)<br/>
+      components/atoms/Avatar, BookmarkButton, Button, Chip<br/>
+      components/organisms/EmptyState, Tabs<br/>
+      constants/features.ts (SHOW_NOTICIAS)<br/>
+      utils/candidato.ts (iniciales, nombreCompleto)
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Arbol de componentes</div>
+    <div style="font-family:monospace;font-size:11px;line-height:1.9;color:var(--c-text2);">
+      &lt;&gt;<br/>
+      &nbsp;&nbsp;AppShell [active=null] &larr; correcto<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;View topBarWrapper<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ScreenTopBar [title="Mis guardados"]<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;ScrollView<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;filterRow &larr; CHIPS SIN EFECTO en datos<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chip "Todas" + Chip por cada tipo de eleccion<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Tabs [favoritos|descartados|posturas|noticias?]<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;currentBody &larr; IIFE switch(tab)<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;renderFavoritos / renderDescartados /<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;renderPosturas / renderNoticias<br/>
+      &nbsp;&nbsp;CoachMarkTour [tourId="guardados"] &larr; correcto, fuera de AppShell
+    </div>
+  </div>
+</div>
+
+<div class="g2">
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Estado y hooks</div>
+    <div style="font-size:11px;line-height:1.8;color:var(--c-text2);">
+      <strong>tab:</strong> GuardadoTab ("favoritos" por defecto)<br/>
+      <strong>eleccionFilter:</strong> number | null (null = Todas) &mdash; <span style="color:var(--c-danger);">sin efecto en datos</span><br/><br/>
+      <strong>8 queries activas simultaneamente:</strong><br/>
+      useTiposEleccion, useFavoritos, useDescartados,<br/>
+      usePosturasBookmarks, useNoticiasBookmarks,<br/>
+      useToggleFavorito, useToggleDescartado,<br/>
+      useToggleNoticiaBookmark, useTogglePosturaBookmark<br/><br/>
+      <strong>Mutaciones con feedback:</strong><br/>
+      handleQuitarFav &#10003; (toast success/error)<br/>
+      handleRestoreDesc &#10003; (toast success/error)<br/>
+      renderPosturas &#10007; (sin callbacks de toast)<br/>
+      renderNoticias &#10007; (sin callbacks de toast)
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Objetivo funcional</div>
+    <div style="font-size:11px;line-height:1.8;color:var(--c-text2);">
+      <strong>Que resuelve:</strong> vista consolidada de todo lo guardado por el usuario<br/>
+      <strong>Valor principal:</strong> el usuario puede gestionar sus listas sin navegar por la app<br/>
+      <strong>Navegacion hacia:</strong> DetalleCandidato, Noticias (externa)<br/>
+      <strong>Navegacion desde:</strong> AppShell tab "guardados" (o navegacion directa)<br/><br/>
+      <strong>Tension actual:</strong> 4 tabs de contenido heterogeneo + filtro de eleccion
+      que no funciona = la pantalla promete mas de lo que entrega.
+    </div>
+  </div>
+</div>
+
+<!-- F1 -->
+<div id="fase1" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 1 &middot; Auditoria de Componentes Frontend</div><hr/></div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">Filtro por eleccion (chips)</div><div class="comp-path">MisGuardadosScreen.tsx L275-300 -- eleccionFilter sin efecto en datos</div></div>
+    <span class="sev sev-crit" style="margin-left:auto;">UI enganosa</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">El problema</div>
+      <div class="comp-item err">eleccionFilter se actualiza en estado cuando el usuario toca un chip, pero NINGUN render function (renderFavoritos, renderDescartados, renderPosturas) usa eleccionFilter para filtrar los datos. El comentario del codigo lo documenta: "Por ahora solo 'Todas' tiene efecto; el filtrado por tipo de eleccion queda como TODO"</div>
+      <div class="comp-item err">Los chips de tipo de eleccion aparecen activos (fondo primary) cuando se seleccionan, dando feedback visual de que estan filtrando. El usuario espera ver menos items y sigue viendo todos</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Opciones</div>
+      <div class="comp-item warn">Opcion A (recomendada): Ocultar los chips de tipo de eleccion hasta implementar el filtrado. Solo mostrar "Todas" o no mostrar el filtro</div>
+      <div class="comp-item warn">Opcion B: Implementar el filtrado -- requiere que los bookmarks expongan el tipo de eleccion del candidato (verificar con el backend)</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">renderPosturas / renderNoticias -- mutaciones sin feedback</div><div class="comp-path">MisGuardadosScreen.tsx L243 / L268</div></div>
+    <span class="sev sev-high" style="margin-left:auto;">Falla silenciosa</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Problema</div>
+      <div class="comp-item err">togglePos.mutate(b.postura) -- sin onSuccess ni onError. Si la llamada falla, el usuario no lo sabe. Contraste con handleQuitarFav que si tiene callbacks de toast</div>
+      <div class="comp-item err">toggleNot.mutate(b.noticia) -- mismo problema. El usuario puede quitar el bookmark de una noticia y si falla, no recibe ningun feedback</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Solucion</div>
+      <div class="comp-item ok">Agregar handleQuitarPostura y handleQuitarNoticia como funciones memoizadas con callbacks de toast, igual al patron de handleQuitarFav y handleRestoreDesc</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">renderCandidatoCard + initials -- DRY y memoizacion</div><div class="comp-path">MisGuardadosScreen.tsx L164-210</div></div>
+    <span class="sev sev-high" style="margin-left:auto;">DRY + Performance</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Problemas</div>
+      <div class="comp-item err">initials() es un wrapper de una linea de iniciales() que ya esta importado. DRY violation: funcion innecesaria que oscurece la dependencia real</div>
+      <div class="comp-item warn">renderCandidatoCard captura c, styles, navigation en closure sin useCallback. Se recrea en cada render, causando re-render de todos los hijos</div>
+      <div class="comp-item warn">handleQuitarFav y handleRestoreDesc sin useCallback</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Solucion</div>
+      <div class="comp-item ok">Eliminar la funcion initials() local y llamar iniciales() directamente</div>
+      <div class="comp-item ok">Convertir renderCandidatoCard en un componente React memoizado (React.memo) para evitar re-renders innecesarios</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">8 queries activas + currentBody como IIFE</div><div class="comp-path">MisGuardadosScreen.tsx L88-108 / L321-330</div></div>
+    <span class="sev sev-med" style="margin-left:auto;">Performance + Legibilidad</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">8 queries simultáneas</div>
+      <div class="comp-item warn">useFavoritos, useDescartados, usePosturasBookmarks, useNoticiasBookmarks se activan al montar el componente, aunque el usuario solo este viendo la tab "Favoritos". Para listas largas esto puede generar carga innecesaria en el backend</div>
+      <div class="comp-item warn">Las queries de mutations (toggle*) son necesarias siempre, pero las 4 queries de datos podrian ser lazy (enabled segun la tab activa)</div>
+    </div>
+    <div>
+      <div class="comp-col-label">IIFE currentBody</div>
+      <div class="comp-item warn">const currentBody = (() =&gt; { switch(tab) {...} })() es un patron poco idiomatico en React. Mejor: una funcion named renderBody() o un objeto de renderFns[tab]</div>
+    </div>
+  </div>
+</div>
+
+<div class="comp-card">
+  <div class="comp-head">
+    <div><div class="comp-name">Posturas card -- jerarquia visual del candidato</div><div class="comp-path">MisGuardadosScreen.tsx L218-250</div></div>
+    <span class="sev sev-med" style="margin-left:auto;">UX / Legibilidad</span>
+  </div>
+  <div class="comp-body">
+    <div>
+      <div class="comp-col-label">Problema</div>
+      <div class="comp-item warn">El nombre del candidato se muestra en cardMeta (overline, c.textSecondary) -- visualmente secundario. El texto de la pregunta esta en cardTitle (prominente). Para el usuario que guarda posturas de varios candidatos, el "de quien es esta postura" queda relegado</div>
+    </div>
+    <div>
+      <div class="comp-col-label">Propuesta</div>
+      <div class="comp-item ok">Mostrar el candidato primero con Avatar + nombre en texto primario. La pregunta y la respuesta en segundo nivel. Mismo patron que las cards de favoritos/descartados</div>
+    </div>
+  </div>
+</div>
+
+<!-- F2 -->
+<div id="fase2" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 2 &middot; Auditoria UX / UI Profunda</div><hr/></div>
+
+<div class="g2">
+  <div>
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:10px;">UX</div>
+    <div class="ins ins-a" style="margin-bottom:8px;">
+      <strong>Filtro de elecciones enganoso:</strong> el usuario puede seleccionar una eleccion especifica en los chips, ver el chip activo (azul), y los datos no cambian. Es el tipo de bug mas dañino: no es un error visible, es una expectativa rota. El usuario asume que el filtro no encontro nada o que todos sus guardados son de esa eleccion.
+    </div>
+    <div class="ins ins-a" style="margin-bottom:8px;">
+      <strong>Falla silenciosa en posturas y noticias:</strong> quitar una postura o noticia guardada no emite toast de confirmacion ni de error. Si la operacion falla en el backend, la card desaparece visualmente (optimistic) pero vuelve a aparecer en la proxima carga, sin que el usuario entienda por que.
+    </div>
+    <div class="ins ins-b" style="margin-bottom:8px;">
+      <strong>Descartados sin contexto de por que fueron descartados:</strong> la tab "Descartados" muestra los candidatos con un boton "Restaurar". El usuario no ve cuando los descarto ni por que. Para tomar la decision de restaurar, necesitaria entrar al detalle del candidato.
+    </div>
+    <div class="ins ins-b" style="margin-bottom:8px;">
+      <strong>Cand sin id -- Pressable silencioso:</strong> si `cand.id == null`, el Pressable tiene `accessibilityRole="button"` pero el onPress no hace nada. VoiceOver anuncia "Ver detalle de Candidato" como boton, el usuario lo activa, y nada ocurre. Sin feedback de que la accion no esta disponible.
+    </div>
+  </div>
+  <div>
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:10px;">UI / Design System</div>
+    <div class="ins ins-a" style="margin-bottom:8px;">
+      <strong>Posturas card: candidato visualmente secundario:</strong> el nombre del candidato aparece en overline muted sobre el texto de la pregunta. Para una lista de posturas de varios candidatos, el primero que debe captar la atencion visual es "de quien es", no "que pregunta".
+    </div>
+    <div class="ins ins-b" style="margin-bottom:8px;">
+      <strong>Spacer View vacio en renderPosturas:</strong> `&lt;View style={styles.row}&gt;&lt;View /&gt;&lt;BookmarkButton...` usa un View vacio para empujar el BookmarkButton a la derecha. Hack de layout que se puede reemplazar con `justifyContent: "flex-end"` en el row.
+    </div>
+    <div class="ins ins-r" style="margin-bottom:8px;">
+      <strong>Tab Noticias condicionalmente oculta pero tipo en GuardadoTab:</strong> cuando SHOW_NOTICIAS=false, el tab no aparece pero el tipo "noticias" sigue existiendo en GuardadoTab. Si por alguna razon `tab` se establece como "noticias", el switch retorna null silenciosamente.
+    </div>
+  </div>
+</div>
+
+<!-- F3 -->
+<div id="fase3" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 3 &middot; Benchmarking</div><hr/></div>
+
+<div class="bench-grid">
+  <div class="bench-card">
+    <div class="bench-app">Pocket</div>
+    <div class="bench-pattern">Filtros claramente marcados como "en construccion"</div>
+    <div class="bench-desc">Si una funcion de filtrado no esta disponible, Pocket la muestra en gris con tooltip "Proximamente". No da feedback visual de seleccion si no tiene efecto.</div>
+    <div class="bench-adapt">Adaptacion: ocultar los chips de eleccion o mostrarlos con opacity reducida + tooltip "Filtrado por eleccion disponible pronto".</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Spotify (Liked Songs)</div>
+    <div class="bench-pattern">Feedback de guardado en tiempo real</div>
+    <div class="bench-desc">Al quitar un guardado (unlike), aparece un toast "Eliminado de tu biblioteca" con un undo link. Si falla, el item vuelve y aparece un toast de error.</div>
+    <div class="bench-adapt">Adaptacion: agregar handleQuitarPostura y handleQuitarNoticia con toast de confirmacion, igual a handleQuitarFav.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Airbnb (Wishlists)</div>
+    <div class="bench-pattern">Card con jerarquia clara: imagen > nombre > detalle</div>
+    <div class="bench-desc">El elemento principal (la propiedad) siempre es lo mas prominente visualmente. El nombre del anfitrion es secundario.</div>
+    <div class="bench-adapt">Adaptacion: en posturas, el candidato debe ser prominente (Avatar + nombre bold) y la postura en segundo nivel.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Feedly</div>
+    <div class="bench-pattern">Lazy loading por tab</div>
+    <div class="bench-desc">Feedly solo carga el contenido de la seccion activa. Al cambiar de seccion, hace una nueva request. Evita cargar 4 endpoints cuando el usuario solo ve 1.</div>
+    <div class="bench-adapt">Adaptacion: activar las queries segun el tab activo con enabled: tab === "favoritos" para cada hook.</div>
+  </div>
+  <div class="bench-card">
+    <div class="bench-app">Twitter (Bookmarks)</div>
+    <div class="bench-pattern">Estado de descartado con contexto temporal</div>
+    <div class="bench-desc">Los tweets silenciados muestran cuando fueron silenciados. El usuario puede evaluar si sigue siendo relevante la accion.</div>
+    <div class="bench-adapt">Adaptacion: mostrar la fecha de descarte en la card de descartados si el backend la expone. Permite tomar mejores decisiones al restaurar.</div>
+  </div>
+</div>
+
+<!-- F4 -->
+<div id="fase4" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 4 &middot; Problemas Detectados</div><hr/></div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-danger);margin-bottom:6px;">Critico</div>
+
+<div class="problem crit">
+  <div class="problem-title">P-C01 &middot; Filtro de elecciones con estado visual pero sin efecto en datos</div>
+  <div class="problem-desc">Los chips de tipo de eleccion se pueden seleccionar y muestran el chip activo en azul, pero ningun render function usa el estado eleccionFilter para filtrar los datos. El usuario experimenta una expectativa rota: cree estar filtrando, pero ve todos sus guardados independientemente del chip seleccionado. Documentado como TODO en el propio codigo.</div>
+  <div class="problem-evidence">MisGuardadosScreen.tsx L19: "el filtrado por tipo de eleccion queda como TODO" | L115: setEleccionFilter sin uso en renderFavoritos/renderDescartados/renderPosturas</div>
+</div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-warning);margin-bottom:6px;margin-top:12px;">Alto</div>
+
+<div class="problem high">
+  <div class="problem-title">P-A01 &middot; Mutaciones de posturas y noticias sin feedback de exito/error</div>
+  <div class="problem-desc">togglePos.mutate(b.postura) y toggleNot.mutate(b.noticia) no tienen callbacks de onSuccess ni onError. Si la operacion falla, el item desaparece visualmente (UI optimista) y vuelve a aparecer en la proxima carga sin que el usuario entienda por que. Contrasta con handleQuitarFav y handleRestoreDesc que si tienen toasts.</div>
+  <div class="problem-evidence">MisGuardadosScreen.tsx L243: togglePos.mutate(b.postura) | L268: toggleNot.mutate(b.noticia)</div>
+</div>
+
+<div class="problem high">
+  <div class="problem-title">P-A02 &middot; initials() funcion local duplica iniciales() importado (DRY violation)</div>
+  <div class="problem-desc">La funcion local initials(nombre, apellido) es un wrapper de una linea de iniciales({nombre, apellido}) que ya esta importado de utils/candidato. Agrega una capa de indirection innecesaria y duplica la dependencia de forma oscura. Viola DRY.</div>
+  <div class="problem-evidence">MisGuardadosScreen.tsx L162-164: function initials(nombre, apellido) { return iniciales({nombre, apellido}); }</div>
+</div>
+
+<div class="problem high">
+  <div class="problem-title">P-A03 &middot; 8 queries activas al montar -- sin lazy loading por tab</div>
+  <div class="problem-desc">useFavoritos, useDescartados, usePosturasBookmarks, useNoticiasBookmarks se activan todas al montar el componente. El usuario que entra a ver sus Favoritos desencadena 4 requests de datos aunque solo vaya a usar 1. En conexiones lentas o con listas largas, esto aumenta el tiempo a primer contenido visible.</div>
+</div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-info);margin-bottom:6px;margin-top:12px;">Medio</div>
+
+<div class="problem med">
+  <div class="problem-title">P-M01 &middot; Posturas card: candidato en overline muted, pregunta prominente</div>
+  <div class="problem-desc">En la card de postura guardada, el nombre del candidato aparece en cardMeta (typography.overline, c.textSecondary) y la pregunta en cardTitle (body bold, c.text). Para una lista de posturas de varios candidatos, el usuario necesita saber primero "de quien" antes de ver "que dijo". La jerarquia visual actual invierte la prioridad de informacion.</div>
+</div>
+
+<div class="problem med">
+  <div class="problem-title">P-M02 &middot; Pressable en renderCandidatoCard silencioso cuando cand.id == null</div>
+  <div class="problem-desc">Si cand.id es null, el Pressable tiene accessibilityRole="button" pero su onPress es un no-op. VoiceOver anuncia el elemento como boton interactivo, el usuario lo activa, y nada ocurre. Sin feedback de que la accion no esta disponible (disabled, ni mensaje).</div>
+  <div class="problem-evidence">MisGuardadosScreen.tsx L185: cand.id != null && navigation.navigate(...) -- sin else</div>
+</div>
+
+<div class="problem med">
+  <div class="problem-title">P-M03 &middot; currentBody como IIFE -- patron poco idiomatico</div>
+  <div class="problem-desc">La logica de seleccion de render function se implementa como una IIFE (Immediately Invoked Function Expression): const currentBody = (() => { switch(tab)... })(); Este patron es inusual en componentes React y dificulta la lectura.</div>
+  <div class="problem-evidence">MisGuardadosScreen.tsx L321: const currentBody = (() => { switch (tab) { ... } })()</div>
+</div>
+
+<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:6px;margin-top:12px;">Bajo</div>
+
+<div class="problem low">
+  <div class="problem-title">P-L01 &middot; View vacio como spacer en renderPosturas</div>
+  <div class="problem-desc">La fila de acciones en la card de postura usa &lt;View /&gt; vacio para empujar el BookmarkButton a la derecha. Se puede resolver con justifyContent: "flex-end" en el row style.</div>
+  <div class="problem-evidence">MisGuardadosScreen.tsx L246: &lt;View style={styles.row}&gt;&lt;View /&gt;&lt;BookmarkButton...&gt;</div>
+</div>
+
+<div class="problem low">
+  <div class="problem-title">P-L02 &middot; handleQuitarFav y handleRestoreDesc sin useCallback</div>
+  <div class="problem-desc">Ambas funciones se recrean en cada render. Se pasan como props a componentes hijos dentro de renderCandidatoCard.</div>
+</div>
+
+<div class="problem low">
+  <div class="problem-title">P-L03 &middot; styles en useMemo([c]) -- patron ineficiente recurrente</div>
+  <div class="problem-desc">Mismo problema documentado en otras pantallas. StyleSheet se regenera en cada cambio de tema.</div>
+</div>
+
+<!-- F5 -->
+<div id="fase5" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 5 &middot; Propuesta de Rediseno</div><hr/></div>
+
+<div class="g2">
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 1 &mdash; Ocultar chips hasta implementar filtrado</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> UI enganosa -- chips con estado visual sin efecto<br/>
+      <strong>Cambio:</strong> Ocultar el bloque de chips de eleccion hasta que el backend exponga el tipo de eleccion en todos los bookmarks y el filtrado este implementado. Mantener el estado y la logica en el codigo para la implementacion futura, solo ocultar la UI.<br/>
+      <strong>Beneficio:</strong> Sin expectativas rotas.<br/>
+      <strong>Alternativa:</strong> Si se quiere mantener visible, agregar una nota "(Proximamente)" junto al label "Eleccion".
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 2 &mdash; Handlers con toast para posturas y noticias</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> togglePos y toggleNot sin feedback<br/>
+      <strong>Cambio:</strong> Extraer handleQuitarPostura y handleQuitarNoticia con el mismo patron que handleQuitarFav (mutate + onSuccess/onError callbacks).<br/>
+      <strong>Beneficio:</strong> Consistencia de feedback en toda la pantalla.<br/>
+      <strong>Patron:</strong> Error visibility (Nielsen #1)
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 3 &mdash; Eliminar initials() wrapper</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> DRY violation -- wrapper de una linea<br/>
+      <strong>Cambio:</strong> Llamar iniciales() directamente en renderCandidatoCard.<br/>
+      <strong>Beneficio:</strong> Menos indirection, dependencia explicita.<br/>
+      <strong>Patron:</strong> DRY, YAGNI
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 4 &mdash; Lazy loading por tab</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> 8 queries activas al montar<br/>
+      <strong>Cambio:</strong> Activar cada query segun el tab activo con la prop `enabled` de React Query:<br/>
+      `useFavoritos({ enabled: tab === "favoritos" })`<br/>
+      <strong>Beneficio:</strong> Solo se carga el tab visible. Menos requests, TTFCP menor.<br/>
+      <strong>Patron UX:</strong> Progressive loading (Feedly, Twitter)
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 5 &mdash; Posturas card con candidato prominente</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> candidato en overline muted, pregunta en bold<br/>
+      <strong>Cambio:</strong> Usar renderCandidatoCard como base y agregar el texto de la postura debajo del nombre del candidato, en lugar de la card independiente actual.<br/>
+      <strong>Beneficio:</strong> El usuario sabe de quien es cada postura de un vistazo.
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:8px;">Bloque 6 &mdash; renderBody() en lugar de IIFE</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Problema:</strong> IIFE poco idiomatico en React<br/>
+      <strong>Cambio:</strong> Reemplazar el IIFE por una funcion named:<br/>
+      `function renderBody() { switch(tab) {...} }`<br/>
+      Y llamar `{renderBody()}` en el JSX.<br/>
+      <strong>Beneficio:</strong> Legibilidad, patron idiomatico React.
+    </div>
+  </div>
+</div>
+
+<!-- F7 -->
+<div id="fase7" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 7 &middot; Sistema Visual</div><hr/></div>
+
+<table class="sum-table" style="width:100%;">
+  <thead><tr><th>Elemento</th><th>Token</th><th>Guideline DS</th><th>Estado</th></tr></thead>
+  <tbody>
+    <tr><td>Chip activo (filtro)</td><td class="mono">c.primary fondo, #fff texto</td><td>DS-04: chips activos usan brand-primary</td><td style="color:var(--c-success);">&#10003; Token correcto, funcionalidad pendiente</td></tr>
+    <tr><td>Card de candidato</td><td class="mono">c.card + c.border</td><td>DS-10: card para items de lista</td><td style="color:var(--c-success);">&#10003; Correcto</td></tr>
+    <tr><td>Nombre candidato</td><td class="mono">c.text, typography.body bold</td><td>DS-10: primary text para nombres</td><td style="color:var(--c-success);">&#10003; Correcto</td></tr>
+    <tr><td>Partido / meta</td><td class="mono">c.textSecondary</td><td>DS-10: secondary para metadata</td><td style="color:var(--c-success);">&#10003; Correcto</td></tr>
+    <tr><td>Nombre candidato en postura card</td><td class="mono">c.textSecondary (overline)</td><td>DS-10: candidato deberia ser primario</td><td style="color:var(--c-danger);">&#10007; Jerarquia invertida</td></tr>
+    <tr><td>EmptyState icon</td><td class="mono">Icon name + titulo + descripcion</td><td>DS-10: EmptyState con ilustracion y CTA opcional</td><td style="color:var(--c-success);">&#10003; Patron correcto</td></tr>
+    <tr><td>Boton Restaurar</td><td class="mono">Button variant="secondary" size="sm"</td><td>DS-11: acciones secundarias = secondary variant</td><td style="color:var(--c-success);">&#10003; Correcto</td></tr>
+  </tbody>
+</table>
+
+<!-- F8 -->
+<div id="fase8" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 8 &middot; Wireframe</div><hr/></div>
+
+<div class="wireframe">
+&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;
+ TOPBAR
+  [&lt; Volver]   "Mis guardados"   "Todo lo que guardaste en un solo lugar."
+&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;
+ FILTRO (propuesta: solo mostrar si filtrado implementado)
+  Eleccion:  [Todas]  [Presidenciales]  [Diputados]
+  o: ocultar hasta que el filtro funcione
+&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;
+ TABS  [Favoritos 12] [Descartados 3] [Posturas 7] [Noticias?]
+&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;
+ TAB FAVORITOS (card candidato)
+  [Avatar] Candidata A                             [&#9829;]
+           Partido Verde
+  [Avatar] Candidato B                             [&#9829;]
+           Partido Rojo
+&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;
+ TAB POSTURAS (propuesto: candidato prominente)
+  [Avatar] Candidata A  Partido Verde              [&#9825;]
+           Eje: Economia
+           "Reducir impuestos a PYMES"
+           Respondio: De acuerdo
+  [Avatar] Candidato B  Partido Rojo               [&#9825;]
+           Eje: Sociedad
+           "Educacion publica gratuita"
+           Respondio: En desacuerdo
+&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;
+ TAB DESCARTADOS
+  [Avatar] Candidata C                    [Restaurar]
+           Partido Azul
+&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;
+</div>
+
+<!-- F9 -->
+<div id="fase9" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 9 &middot; Mockup de Alta Fidelidad</div><hr/></div>
+
+<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;justify-content:center;">
+
+<!-- Tab Favoritos -->
+<div>
+  <div style="font-size:10px;font-weight:700;text-align:center;color:var(--c-text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Tab Favoritos</div>
+  <div class="phone-frame">
+    <div class="phone-status">9:41</div>
+    <div class="ph-topbar">
+      <div class="ph-back">&lsaquo;</div>
+      <div><div class="ph-title">Mis guardados</div><div class="ph-sub">Todo lo que guardaste en un solo lugar.</div></div>
+    </div>
+    <!-- Chips: solo "Todas" hasta implementar filtrado -->
+    <div class="ph-chips">
+      <div class="ph-chip active">Todas</div>
+      <div class="ph-chip">Presidenciales</div>
+      <div class="ph-chip">Diputados RM</div>
+    </div>
+    <!-- Nota engano filtro (propuesta) -->
+    <div style="padding:0 14px 4px;">
+      <div class="ph-chip-warn">El filtro por eleccion estara disponible pronto</div>
+    </div>
+    <div class="ph-tabs">
+      <div class="ph-tab active">Favoritos 12</div>
+      <div class="ph-tab">Descartados 3</div>
+      <div class="ph-tab">Posturas 7</div>
+    </div>
+    <div class="ph-body">
+      <div class="ph-card">
+        <div class="ph-cand-row">
+          <div class="ph-avatar">CA</div>
+          <div style="flex:1;">
+            <div class="ph-cand-name">Candidata A</div>
+            <div class="ph-cand-meta">Partido Verde</div>
+          </div>
+          <div class="ph-bookmark">&#9829;</div>
+        </div>
+      </div>
+      <div class="ph-card">
+        <div class="ph-cand-row">
+          <div class="ph-avatar" style="background:var(--c-secondary);">CB</div>
+          <div style="flex:1;">
+            <div class="ph-cand-name">Candidato B</div>
+            <div class="ph-cand-meta">Partido Rojo</div>
+          </div>
+          <div class="ph-bookmark">&#9829;</div>
+        </div>
+      </div>
+      <div class="ph-card">
+        <div class="ph-cand-row">
+          <div class="ph-avatar" style="background:var(--c-text2);">CC</div>
+          <div style="flex:1;">
+            <div class="ph-cand-name">Candidata C</div>
+            <div class="ph-cand-meta">Partido Azul</div>
+          </div>
+          <div class="ph-bookmark">&#9829;</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tab Posturas (propuesto) -->
+<div>
+  <div style="font-size:10px;font-weight:700;text-align:center;color:var(--c-text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Tab Posturas (propuesto)</div>
+  <div class="phone-frame">
+    <div class="phone-status">9:41</div>
+    <div class="ph-topbar">
+      <div class="ph-back">&lsaquo;</div>
+      <div><div class="ph-title">Mis guardados</div></div>
+    </div>
+    <div class="ph-chips">
+      <div class="ph-chip active">Todas</div>
+    </div>
+    <div class="ph-tabs">
+      <div class="ph-tab">Favoritos 12</div>
+      <div class="ph-tab">Descartados 3</div>
+      <div class="ph-tab active">Posturas 7</div>
+    </div>
+    <div class="ph-body">
+      <!-- Postura card: candidato prominente (propuesto) -->
+      <div class="ph-card">
+        <div class="ph-cand-row" style="margin-bottom:8px;">
+          <div class="ph-avatar">CA</div>
+          <div style="flex:1;">
+            <div class="ph-cand-name">Candidata A</div>
+            <div class="ph-cand-meta">Economia</div>
+          </div>
+          <div class="ph-bookmark">&#9825;</div>
+        </div>
+        <div style="font-size:11px;font-weight:600;color:var(--c-text);margin-bottom:3px;">Reducir impuestos a PYMES</div>
+        <div style="font-size:10px;color:var(--c-text2);">Respondio: <span style="color:var(--c-success);font-weight:600;">De acuerdo</span></div>
+      </div>
+      <div class="ph-card">
+        <div class="ph-cand-row" style="margin-bottom:8px;">
+          <div class="ph-avatar" style="background:var(--c-secondary);">CB</div>
+          <div style="flex:1;">
+            <div class="ph-cand-name">Candidato B</div>
+            <div class="ph-cand-meta">Sociedad</div>
+          </div>
+          <div class="ph-bookmark">&#9825;</div>
+        </div>
+        <div style="font-size:11px;font-weight:600;color:var(--c-text);margin-bottom:3px;">Educacion publica gratuita universitaria</div>
+        <div style="font-size:10px;color:var(--c-text2);">Respondio: <span style="color:var(--c-danger);font-weight:600;">En desacuerdo</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tab Descartados -->
+<div>
+  <div style="font-size:10px;font-weight:700;text-align:center;color:var(--c-text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Tab Descartados</div>
+  <div class="phone-frame">
+    <div class="phone-status">9:41</div>
+    <div class="ph-topbar">
+      <div class="ph-back">&lsaquo;</div>
+      <div><div class="ph-title">Mis guardados</div></div>
+    </div>
+    <div class="ph-chips"><div class="ph-chip active">Todas</div></div>
+    <div class="ph-tabs">
+      <div class="ph-tab">Favoritos 12</div>
+      <div class="ph-tab active">Descartados 3</div>
+      <div class="ph-tab">Posturas 7</div>
+    </div>
+    <div class="ph-body">
+      <div class="ph-card">
+        <div class="ph-cand-row">
+          <div class="ph-avatar" style="background:var(--c-text2);">CC</div>
+          <div style="flex:1;">
+            <div class="ph-cand-name">Candidata C</div>
+            <div class="ph-cand-meta">Partido Azul</div>
+          </div>
+          <div class="ph-restore-btn">Restaurar</div>
+        </div>
+      </div>
+      <div class="ph-card">
+        <div class="ph-cand-row">
+          <div class="ph-avatar" style="background:#888;">CD</div>
+          <div style="flex:1;">
+            <div class="ph-cand-name">Candidato D</div>
+            <div class="ph-cand-meta">Independiente</div>
+          </div>
+          <div class="ph-restore-btn">Restaurar</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- F11 -->
+<div id="fase11" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 11 &middot; Justificacion UX / UI</div><hr/></div>
+
+<div class="g2">
+  <div class="ins ins-g" style="margin:0 0 10px;">
+    <strong>Ocultar chips hasta implementar filtrado</strong><br/>
+    <em>Problema:</em> UI enganosa -- expectativas rotas<br/>
+    <em>Beneficio:</em> ninguna promesa que no se pueda cumplir<br/>
+    <em>Patron UX:</em> Error prevention (Nielsen #5)<br/>
+    <em>Friccion eliminada:</em> confusion al ver que el filtro no cambia los resultados<br/>
+    <em>Metrica:</em> -reportes de "el filtro no funciona"
+  </div>
+  <div class="ins ins-g" style="margin:0 0 10px;">
+    <strong>Handlers con toast para posturas/noticias</strong><br/>
+    <em>Problema:</em> falla silenciosa<br/>
+    <em>Beneficio:</em> consistencia de feedback en toda la pantalla<br/>
+    <em>Patron UX:</em> Visibility (Nielsen #1)<br/>
+    <em>Friccion eliminada:</em> confucion cuando el item reaparece despues de un error<br/>
+    <em>Metrica:</em> -reportes de "el boton no funciona"
+  </div>
+  <div class="ins ins-g" style="margin:0 0 10px;">
+    <strong>Lazy loading por tab</strong><br/>
+    <em>Problema:</em> 8 queries al montar<br/>
+    <em>Beneficio:</em> solo carga el tab visible, TTFCP menor<br/>
+    <em>Patron UX:</em> Progressive loading<br/>
+    <em>Friccion eliminada:</em> espera innecesaria al entrar a Favoritos<br/>
+    <em>Metrica:</em> -ms de TTFCP, -requests innecesarias
+  </div>
+  <div class="ins ins-g" style="margin:0 0 10px;">
+    <strong>Posturas con candidato prominente</strong><br/>
+    <em>Problema:</em> jerarquia visual invertida<br/>
+    <em>Beneficio:</em> el usuario identifica de quien es cada postura de un vistazo<br/>
+    <em>Patron UX:</em> Information hierarchy (Airbnb)<br/>
+    <em>Friccion eliminada:</em> escanear el nombre del candidato de cada postura<br/>
+    <em>Metrica:</em> +comprension a primer golpe de vista
+  </div>
+</div>
+
+<!-- F12 -->
+<div id="fase12" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 12 &middot; Impacto Esperado</div><hr/></div>
+
+<div class="impact-grid">
+  <div class="impact-card" style="border-color:var(--c-danger);">
+    <div class="impact-metric">Chips enganosos</div>
+    <div class="impact-before">Antes: chips con estado visual sin efecto</div>
+    <div class="impact-after">Despues: ocultos o con nota "proximamente"</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-success);">
+    <div class="impact-metric">Feedback posturas/noticias</div>
+    <div class="impact-before">Antes: mutacion silenciosa</div>
+    <div class="impact-after">Despues: toast success/error consistente</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-success);">
+    <div class="impact-metric">Requests al montar</div>
+    <div class="impact-before">Antes: 4 queries simultaneas siempre</div>
+    <div class="impact-after">Despues: 1 query segun tab activo</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-warning);">
+    <div class="impact-metric">Jerarquia posturas card</div>
+    <div class="impact-before">Antes: candidato en overline muted</div>
+    <div class="impact-after">Despues: Avatar + nombre prominente</div>
+  </div>
+  <div class="impact-card" style="border-color:var(--c-warning);">
+    <div class="impact-metric">DRY violation</div>
+    <div class="impact-before">Antes: initials() wrapper de una linea</div>
+    <div class="impact-after">Despues: iniciales() directo</div>
+  </div>
+</div>
+
+<!-- F13 -->
+<div id="fase13" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 13 &middot; Diff Actual vs Propuesto</div><hr/></div>
+
+<div class="card" style="padding:0;overflow:hidden;">
+<table class="diff-table">
+  <thead><tr><th>Elemento</th><th class="diff-del">Actual</th><th class="diff-add">Propuesto</th><th>Motivo</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Chips de eleccion</td>
+      <td class="diff-del">Visibles y activables sin efecto en datos</td>
+      <td class="diff-add">Ocultos (o con nota "Proximamente") hasta implementar filtrado</td>
+      <td>Sin UI enganosa</td>
+    </tr>
+    <tr>
+      <td>togglePos.mutate()</td>
+      <td class="diff-del">Sin callbacks -- falla silenciosa</td>
+      <td class="diff-add">handleQuitarPostura() con onSuccess/onError toast</td>
+      <td>Consistencia de feedback</td>
+    </tr>
+    <tr>
+      <td>toggleNot.mutate()</td>
+      <td class="diff-del">Sin callbacks -- falla silenciosa</td>
+      <td class="diff-add">handleQuitarNoticia() con onSuccess/onError toast</td>
+      <td>Consistencia de feedback</td>
+    </tr>
+    <tr>
+      <td>Queries al montar</td>
+      <td class="diff-del">useFavoritos(), useDescartados(), usePosturasBookmarks(), useNoticiasBookmarks() siempre activas</td>
+      <td class="diff-add">enabled: tab === "favoritos" etc. por cada hook</td>
+      <td>Lazy loading por tab</td>
+    </tr>
+    <tr>
+      <td>initials() local</td>
+      <td class="diff-del">function initials(n,a) { return iniciales({nombre:n, apellido:a}); }</td>
+      <td class="diff-add">Llamar iniciales() directamente</td>
+      <td>DRY</td>
+    </tr>
+    <tr>
+      <td>Postura card jerarquia</td>
+      <td class="diff-del">candidatoNombre en cardMeta (overline, muted)</td>
+      <td class="diff-add">Avatar + candidatoNombre en text bold + postura debajo</td>
+      <td>Jerarquia de informacion correcta</td>
+    </tr>
+    <tr>
+      <td>currentBody</td>
+      <td class="diff-del">const currentBody = (() =&gt; { switch(tab)... })()</td>
+      <td class="diff-add">function renderBody() { switch(tab)... } + {renderBody()}</td>
+      <td>Patron idiomatico React</td>
+    </tr>
+    <tr>
+      <td>View spacer</td>
+      <td class="diff-del">&lt;View /&gt; vacio para empujar BookmarkButton</td>
+      <td class="diff-add">row con justifyContent: "flex-end"</td>
+      <td>Sin hacks de layout</td>
+    </tr>
+    <tr>
+      <td>Archivos afectados</td>
+      <td class="diff-del">MisGuardadosScreen.tsx</td>
+      <td class="diff-add">MisGuardadosScreen.tsx + api/hooks.ts (prop enabled)</td>
+      <td>Lazy loading requiere modificar los hooks</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div style="height:40px;"></div>
+</div></div>
+
+<script>
+const btn = document.getElementById('theme-btn');
+btn.addEventListener('click',()=>{
+  document.body.classList.toggle('dark');
+  btn.textContent=document.body.classList.contains('dark')?'Light mode':'Dark mode';
+});
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    e.preventDefault();
+    document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth'});
+  });
+});
+</script>
+</body>
+</html>

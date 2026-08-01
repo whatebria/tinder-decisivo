@@ -17,7 +17,7 @@
  * Notificaciones, Privacidad · Exportar, Sobre la app, Version.
  */
 
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { Linking, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { ADMIN_URL } from "../api/config";
@@ -61,23 +61,19 @@ export function ConfiguracionScreen({
   const resetOnboarding = useOnboardingStore((s) => s.reset);
   const toast = useToast();
 
-  /**
-   * Primero invalida el token en el backend (limpia cookie httpOnly web).
-   * Luego limpia el estado local. Si la API falla, continuamos igual:
-   * el usuario queda deslogueado del frontend de todas formas.
-   */
-  async function handleLogout() {
+  // TASK-030: useCallback para estabilizar las props onPress pasadas a NavRow/Button.
+  const handleLogout = useCallback(async () => {
     try { await logoutApi(); } catch { /* ignorar: token ya expirado o red */ }
     await logout();
-  }
+  }, [logout]);
 
-  async function handleReactivarTours() {
+  const handleReactivarTours = useCallback(async () => {
     await resetCoachMarks();
     toast.info(
       "Tours reactivados",
       "Volver\u00e1n a aparecer en cada pantalla clave.",
     );
-  }
+  }, [resetCoachMarks, toast]);
 
   const styles = useMemo(
     () =>
@@ -117,6 +113,54 @@ export function ConfiguracionScreen({
 
         // Footer (cerrar sesion)
         logoutWrap: { marginTop: spacing.sp3 },
+
+        // UX-034: stats row dentro del accountCard.
+        statRow: {
+          flexDirection: "row",
+          justifyContent: "space-around",
+          alignSelf: "stretch",
+          borderTopWidth: 1,
+          borderTopColor: c.border2,
+          marginTop: spacing.sp2,
+          paddingTop: spacing.sp3,
+        },
+        statItem: { alignItems: "center", gap: spacing.sp1 },
+        statValue: {
+          ...typography.h3,
+          fontWeight: "700",
+          color: c.primary,
+          textAlign: "center",
+        },
+        statLabel: {
+          ...typography.overline,
+          textTransform: "none",
+          letterSpacing: 0,
+          color: c.textSecondary,
+          textAlign: "center",
+        },
+
+        // UX-035: card hero para modo invitado.
+        guestCard: {
+          padding: spacing.sp5,
+          borderRadius: radii.rLg,
+          borderWidth: 1,
+          borderColor: c.border,
+          backgroundColor: c.card,
+          alignItems: "center",
+          gap: spacing.sp3,
+        },
+        guestTitle: {
+          ...typography.h3,
+          fontWeight: "700",
+          color: c.text,
+          textAlign: "center",
+        },
+        guestSubtitle: {
+          ...typography.small,
+          color: c.textSecondary,
+          textAlign: "center",
+        },
+        guestCta: { alignSelf: "stretch" },
 
         // UX-033: DangerZone — enmarca las acciones destructivas (DS-11 P8).
         // dangerBg no existe como token semantico todavia; se simula con
@@ -167,6 +211,29 @@ export function ConfiguracionScreen({
                 <Text style={styles.accountEmail} numberOfLines={1}>
                   {email}
                 </Text>
+              ) : null}
+              {/* UX-034: contadores de actividad — datos reales del backend. */}
+              {perfilQ.data?.contadores ? (
+                <View style={styles.statRow}>
+                  <View style={styles.statItem}>
+                    <Text style={styles.statValue}>
+                      {perfilQ.data.contadores.respuestas}
+                    </Text>
+                    <Text style={styles.statLabel}>Respuestas</Text>
+                  </View>
+                  <View style={styles.statItem}>
+                    <Text style={styles.statValue}>
+                      {perfilQ.data.contadores.favoritos}
+                    </Text>
+                    <Text style={styles.statLabel}>Favoritos</Text>
+                  </View>
+                  <View style={styles.statItem}>
+                    <Text style={styles.statValue}>
+                      {perfilQ.data.contadores.descartados}
+                    </Text>
+                    <Text style={styles.statLabel}>Descartados</Text>
+                  </View>
+                </View>
               ) : null}
               <View style={styles.accountCta}>
                 <Button
@@ -259,18 +326,27 @@ export function ConfiguracionScreen({
           </View>
         ) : null}
 
-        {/* Bloque modo invitado */}
+        {/* UX-035: modo invitado — un solo hero card con CTA acento + link discreto. */}
         {isGuest ? (
           <View style={styles.section}>
             <SectionTitle title="Modo invitado" />
-            <NavRow
-              label="Crear una cuenta"
-              subtitle="Guarda tus favoritos y match entre dispositivos"
-              onPress={exitGuestMode}
-            />
-            <Link block onPress={exitGuestMode} color={c.danger}>
-              Salir del modo invitado
-            </Link>
+            <View style={styles.guestCard}>
+              <Text style={styles.guestTitle}>
+                ¿Listo para guardar tu progreso?
+              </Text>
+              <Text style={styles.guestSubtitle}>
+                Crea una cuenta gratis para guardar favoritos, descartados y
+                comparar tu match entre dispositivos.
+              </Text>
+              <View style={styles.guestCta}>
+                <Button variant="accent" onPress={exitGuestMode}>
+                  Crear una cuenta
+                </Button>
+              </View>
+              <Link block onPress={exitGuestMode} color={c.textSecondary}>
+                Salir del modo invitado
+              </Link>
+            </View>
           </View>
         ) : null}
 
