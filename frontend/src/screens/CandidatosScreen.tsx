@@ -170,11 +170,16 @@ export function CandidatosScreen({
 
   // -- Filtros activos / chips -----------------------------------------
 
-  const filtrosActivosCount =
-    (query.trim() ? 1 : 0) +
-    partidosSel.size +
-    (tipoEleccionSel !== null ? 1 : 0) +
-    (regionSel !== null ? 1 : 0);
+  const filtrosActivosCount = useMemo(
+    // Deps identicas a chipsActivos -- evita recalculo en renders no relacionados.
+    // Documentar la dependencia explicitamente (TASK-022).
+    () =>
+      (query.trim() ? 1 : 0) +
+      partidosSel.size +
+      (tipoEleccionSel !== null ? 1 : 0) +
+      (regionSel !== null ? 1 : 0),
+    [query, partidosSel, tipoEleccionSel, regionSel],
+  );
 
   const hayFiltroActivo = filtrosActivosCount > 0;
 
@@ -217,12 +222,14 @@ export function CandidatosScreen({
     return chips;
   }, [query, partidosSel, tipoEleccionSel, regionSel, tiposEleccion]);
 
-  const limpiarTodo = () => {
+  const limpiarTodo = useCallback(() => {
+    // Los state setters de useState son referencias estables -> deps vacia correcto.
+    // useCallback evita prop inestable hacia EmptyState y FilterBottomSheet. (TASK-021)
     setQuery("");
     setPartidosSel(new Set());
     setTipoEleccionSel(null);
     setRegionSel(null);
-  };
+  }, []);
 
   // -- Summaries para CollapsibleFilterSection ----------------------------
 

@@ -24,7 +24,7 @@
  * Se mantiene inline con tokens.
  */
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import {
@@ -38,7 +38,6 @@ import {
   AppShell,
   Avatar,
   Badge,
-  type BadgeVariant,
   CoachMarkTour,
   HomeTopBar,
   Spinner,
@@ -69,7 +68,7 @@ function colorNivel(
     case "identica":
       return c.success;
     case "cercana":
-      return c.warning ?? "#B45309";
+      return c.warning; // c.warning: string garantizado, ?? nunca activaba (TASK-026)
     case "opuesta":
       return c.danger;
     default:
@@ -89,19 +88,6 @@ function iconoNivel(nivel: NivelCoincidencia): string {
       return "-";
     default:
       return "?";
-  }
-}
-
-function badgeVariantNivel(nivel: NivelCoincidencia): BadgeVariant {
-  switch (nivel) {
-    case "identica":
-      return "success";
-    case "cercana":
-      return "warning";
-    case "opuesta":
-      return "danger";
-    default:
-      return "neutral";
   }
 }
 
@@ -176,11 +162,11 @@ export function CompararScreen({
   const matchPctA = candidatoA ? (matchByCandidatoId.get(candidatoA.id) ?? null) : null;
   const matchPctB = candidatoB ? (matchByCandidatoId.get(candidatoB.id) ?? null) : null;
 
-  function handleSelectPicker(cand: Candidato) {
+  const handleSelectPicker = useCallback((cand: Candidato) => {
     if (pickerOpen === "A") setCandidatoA(cand);
     else if (pickerOpen === "B") setCandidatoB(cand);
     setPickerOpen(null);
-  }
+  }, [pickerOpen]); // TASK-025: prop estable hacia CandidatoPickerModal
 
   return (
     <AppShell active="comparar" navigation={navigation}>
@@ -192,7 +178,6 @@ export function CompararScreen({
           <HomeTopBar brand="Comparar" style={styles.topBar} />
 
           <View style={[styles.candHeader, { backgroundColor: c.card }]}>
-            <View style={styles.leftGutter} />
             <CandidatoHeaderSlot
               slot="A"
               candidato={candidatoA}
@@ -205,7 +190,6 @@ export function CompararScreen({
               matchPct={matchPctB}
               onPress={() => setPickerOpen("B")}
             />
-            <View style={styles.rightGutter} />
           </View>
 
           <View style={styles.toggleRow}>
@@ -425,19 +409,13 @@ function FilaComparacion({
   );
 }
 
-// Se conserva la funcion aunque no se use directamente en el JSX: mapea
-// nivel -> variante de Badge y sirve como single source of truth por si
-// aparece otro consumidor (p.ej. lista alternativa) sin duplicar el switch.
-void badgeVariantNivel;
-
 // ---------- Styles ----------
 //
 // Reglas: TODOS los valores dimensionales vienen de tokens del DS.
 // Excepciones documentadas donde aplica.
 
-// Las columnas de candidatos se distribuyen simétricamente — sin gutter
-// de compensacion ya que Comparar es un tab primario sin back button.
-const RIGHT_GUTTER = 0;
+// Las columnas de candidatos se distribuyen simétricamente.
+// Sin gutter extra: Comparar es un tab primario sin back button. (TASK-029)
 
 const styles = StyleSheet.create({
   scroll: {
@@ -456,8 +434,6 @@ const styles = StyleSheet.create({
     borderRadius: radii.rLg,
     alignItems: "flex-start",
   },
-  leftGutter: { width: 0 },
-  rightGutter: { width: RIGHT_GUTTER },
   candSlot: {
     flex: 1,
     alignItems: "center",
