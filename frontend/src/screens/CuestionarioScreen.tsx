@@ -25,6 +25,7 @@ import {
   Chip,
   CoachMarkTour,
   CuestionarioHeader,
+  Divider,
   ScreenChrome,
   PreguntaInfoModal,
   RadioGroup,
@@ -37,6 +38,7 @@ import {
   esPrimeraPregunta,
   esUltimaPregunta,
   PESOS,
+  puedeEnviar,
   separarOpciones,
 } from "../services/cuestionario";
 import { useAuthStore } from "../store/auth";
@@ -122,6 +124,14 @@ export function CuestionarioScreen({
           gap: spacing.sp2,
           flexWrap: "wrap",
         },
+        noSeLabel: {
+          ...typography.overline,
+          textTransform: "none",
+          letterSpacing: 0,
+          color: c.textTertiary,
+          fontWeight: "500",
+          fontSize: 11,
+        },
         // Footer sticky: siempre visible, nunca dentro del ScrollView.
         footer: {
           flexDirection: "row",
@@ -172,6 +182,10 @@ export function CuestionarioScreen({
     respuesta?.opcionElegidaId,
   );
   const canAdvance = Boolean(respuesta);
+  // puedeEnviar valida TODAS las preguntas -- no solo la actual.
+  // Necesario para que Enviar quede deshabilitado si el usuario volvio atras
+  // y dejo una pregunta intermedia sin responder (BUG-012).
+  const canSubmit = puedeEnviar(preguntas, respuestas);
 
   // TODO: cuando el backend exponga preguntas base vs extras por tipoEleccion,
   // reemplazar por la particion real. Por ahora todo es "base".
@@ -184,14 +198,16 @@ export function CuestionarioScreen({
   const puedeVerResultadosParciales =
     !isGuest && respondidas >= MIN_PARA_RESULTADO && !isLast;
 
-  const opcionesLikert = [
-    ...opcionesRegulares
-      .filter((op) => op.id != null)
-      .map((op) => ({ value: op.id as number, label: op.texto ?? "" })),
-    ...(opcionNoSe && opcionNoSe.id != null
-      ? [{ value: opcionNoSe.id, label: opcionNoSe.texto ?? "No sé" }]
-      : []),
-  ];
+  // Separo regulares y "No se" para poder insertar un Divider entre ellos
+  // (UX-017). Ambos grupos comparten value / onChange para estado unificado.
+  const opcionesLikertRegulares = opcionesRegulares
+    .filter((op) => op.id != null)
+    .map((op) => ({ value: op.id as number, label: op.texto ?? "" }));
+
+  const opcionNoSeMapped =
+    opcionNoSe?.id != null
+      ? { value: opcionNoSe.id as number, label: opcionNoSe.texto ?? "No sé" }
+      : null;
 
   async function handleSubmit() {
     try {
@@ -251,12 +267,29 @@ export function CuestionarioScreen({
 
         <View style={{ gap: spacing.sp2 }}>
           <Text style={styles.sectionLabel}>Tu postura</Text>
+
+          {/* Opciones Likert regulares */}
           <RadioGroup<number>
-            options={opcionesLikert}
+            options={opcionesLikertRegulares}
             value={respuesta?.opcionElegidaId ?? null}
             onChange={handleSelectRespuesta}
             accessibilityLabel="Opciones de respuesta"
           />
+
+          {/* Separador visual + "No se" (UX-017): semanticamente es una
+              abstencion, no una posicion de la escala Likert. Separarla
+              evita el sesgo de posicion documentado en DS-02. */}
+          {opcionNoSeMapped ? (
+            <>
+              <Divider style={{ marginVertical: spacing.sp1 }} />
+              <Text style={styles.noSeLabel}>Sin postura definida</Text>
+              <RadioGroup<number>
+                options={[opcionNoSeMapped]}
+                value={respuesta?.opcionElegidaId ?? null}
+                onChange={handleSelectRespuesta}
+              />
+            </>
+          ) : null}
         </View>
 
         {mostrarPeso && respuesta ? (
@@ -292,7 +325,7 @@ export function CuestionarioScreen({
             <Button
               variant="success"
               onPress={handleSubmit}
-              disabled={!canAdvance || submitting}
+              disabled={!canSubmit || submitting}
               loading={submitting}
             >
               {submitting ? "Enviando..." : "Enviar"}
@@ -323,7 +356,7 @@ export function CuestionarioScreen({
       <PreguntaInfoModal
         visible={infoOpen}
         onClose={() => setInfoOpen(false)}
-        pregunta={pregunta as any}
+        pregunta={pregunta}
       />
 
       <CoachMarkTour tourId="cuestionario" />
