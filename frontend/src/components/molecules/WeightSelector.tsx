@@ -48,7 +48,8 @@ export function WeightSelector({
         pill: {
           flex: 1,
           minHeight: 44,
-          borderRadius: radii.rFull,
+          // DS hi-fi usa r-md (rect redondeado), NO capsule/rFull.
+          borderRadius: radii.rMd,
           borderWidth: 1.5,
           alignItems: "center",
           justifyContent: "center",
@@ -57,7 +58,8 @@ export function WeightSelector({
         pillDefault: { borderColor: c.border, backgroundColor: c.card },
         pillSelected: { borderColor: c.primary, backgroundColor: c.primary },
         text: { fontSize: 13, fontWeight: "500" },
-        textDefault: { color: c.text },
+        // DS hi-fi: inactivo usa color-text-2 (muted), no texto completo.
+        textDefault: { color: c.textSecondary },
         textSelected: { color: c.textOnPrimary },
       }),
     [c],
