@@ -28,6 +28,12 @@ export const PESOS: readonly PesoOption[] = [
 
 export const DEFAULT_PESO: PesoValue = 2;
 
+/** Minimo de respuestas para habilitar la vista de resultados parciales.
+ *  Regla de negocio: con 5+ respuestas el backend puede calcular match
+ *  con confianza BAJA. Centralizado aqui para evitar magic numbers en UI.
+ */
+export const MIN_RESPUESTAS_PARA_RESULTADO = 5;
+
 // -- Opciones -----------------------------------------------------------------
 
 export interface OpcionesSeparadas {
@@ -77,6 +83,23 @@ export function esUltimaPregunta(currentIndex: number, total: number): boolean {
 
 export function esPrimeraPregunta(currentIndex: number): boolean {
   return currentIndex <= 0;
+}
+
+// -- Subtitle del header del cuestionario ------------------------------------
+
+export type ParticionCuestionario = "base" | "extras";
+
+/**
+ * Formatea el subtitle "N de M · particion" del header del cuestionario.
+ * Centralizado para evitar strings de dominio hardcodeados en la UI.
+ * Cuando lleguen preguntas extras, la pantalla pasa particion="extras".
+ */
+export function formatSubtitleCuestionario(
+  idx: number,
+  total: number,
+  particion: ParticionCuestionario = "base"
+): string {
+  return `${idx + 1} de ${total} \u00b7 ${particion}`;
 }
 
 // -- Validacion --------------------------------------------------------------

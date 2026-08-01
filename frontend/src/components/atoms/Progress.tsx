@@ -14,10 +14,12 @@ export interface ProgressProps {
   value: number;
   /** Alto de la barra en px. Default 8. */
   height?: number;
+  /** Descripcion para VoiceOver / TalkBack. */
+  accessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
 }
 
-export function Progress({ value, height = 8, style }: ProgressProps) {
+export function Progress({ value, height = 8, accessibilityLabel, style }: ProgressProps) {
   const c = useThemeColors();
   const pct = Math.min(1, Math.max(0, value)) * 100;
 
@@ -43,6 +45,7 @@ export function Progress({ value, height = 8, style }: ProgressProps) {
   return (
     <View
       accessibilityRole="progressbar"
+      accessibilityLabel={accessibilityLabel}
       accessibilityValue={{ min: 0, max: 100, now: Math.round(pct) }}
       style={[styles.track, style]}
     >

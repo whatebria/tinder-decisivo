@@ -36,6 +36,10 @@ export function ProgressSplit({
   const baseFrac = baseTotal > 0 ? Math.min(1, baseDone / baseTotal) : 0;
   const extrasFrac = extrasTotal > 0 ? Math.min(1, extrasDone / extrasTotal) : 0;
 
+  const basePct = Math.round(baseFrac * 100);
+  const extrasPct = Math.round(extrasFrac * 100);
+  const hasExtras = extrasTotal > 0;
+
   // Flex proporcional al peso relativo de cada segmento (mínimo 1 para no colapsar).
   const baseFlex = Math.max(1, baseTotal);
   const extrasFlex = Math.max(1, extrasTotal);
@@ -53,7 +57,6 @@ export function ProgressSplit({
           color: c.textSecondary,
           fontWeight: "600",
         },
-        extrasMuted: { opacity: 0.4 },
       }),
     [c],
   );
@@ -62,18 +65,28 @@ export function ProgressSplit({
     <View style={[styles.col, style]}>
       <View style={styles.row}>
         <View style={{ flex: baseFlex }}>
-          <Progress value={baseFrac} />
+          <Progress
+            value={baseFrac}
+            accessibilityLabel={`Progreso base: ${basePct} de 100`}
+          />
         </View>
-        <View style={[{ flex: extrasFlex }, extrasTotal === 0 ? styles.extrasMuted : null]}>
-          <Progress value={extrasFrac} />
-        </View>
+        {hasExtras ? (
+          <View style={{ flex: extrasFlex }}>
+            <Progress
+              value={extrasFrac}
+              accessibilityLabel={`Progreso extras: ${extrasPct} de 100`}
+            />
+          </View>
+        ) : null}
       </View>
-      {(baseLabel || extrasLabel) ? (
+      {(baseLabel || (extrasLabel && hasExtras)) ? (
         <View style={styles.labels}>
           <Text style={styles.label}>{baseLabel ?? `Base (${baseTotal})`}</Text>
-          <Text style={[styles.label, extrasTotal === 0 ? styles.extrasMuted : null]}>
-            {extrasLabel ?? `Extras (${extrasTotal})`}
-          </Text>
+          {hasExtras ? (
+            <Text style={styles.label}>
+              {extrasLabel ?? `Extras (${extrasTotal})`}
+            </Text>
+          ) : null}
         </View>
       ) : null}
     </View>

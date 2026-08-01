@@ -37,6 +37,8 @@ import {
   debeMostrarPeso,
   esPrimeraPregunta,
   esUltimaPregunta,
+  formatSubtitleCuestionario,
+  MIN_RESPUESTAS_PARA_RESULTADO,
   PESOS,
   puedeEnviar,
   separarOpciones,
@@ -46,6 +48,11 @@ import { useCuestionarioStore, type RespuestaLocal } from "../store/cuestionario
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
+
+/** Delay para que el layout del nuevo contenido se calcule antes de hacer
+ *  scroll. Menos de ~100ms puede resultar en scrollToEnd calculando la
+ *  posicion antes de que los chips de peso se hayan renderizado. */
+const SCROLL_AFTER_LAYOUT_MS = 150;
 
 export function CuestionarioScreen({
   navigation,
@@ -194,9 +201,8 @@ export function CuestionarioScreen({
 
   // Con 5 respuestas el backend ya puede calcular match (confianza BAJA).
   // Permitimos enviar parcial sin forzar completar todo el cuestionario.
-  const MIN_PARA_RESULTADO = 5;
   const puedeVerResultadosParciales =
-    !isGuest && respondidas >= MIN_PARA_RESULTADO && !isLast;
+    !isGuest && respondidas >= MIN_RESPUESTAS_PARA_RESULTADO && !isLast;
 
   // Separo regulares y "No se" para poder insertar un Divider entre ellos
   // (UX-017). Ambos grupos comparten value / onChange para estado unificado.
@@ -232,14 +238,15 @@ export function CuestionarioScreen({
     if (vaAMostrarPeso) {
       setTimeout(() => {
         scrollRef.current?.scrollToEnd({ animated: true });
-      }, 150);
+      }, SCROLL_AFTER_LAYOUT_MS);
     }
   }
 
-  /** Vuelve al tope del scroll al cambiar de pregunta. Sin animacion: el
-   *  contenido cambia instantaneamente, una transicion lenta se ve rara. */
+  /** Vuelve al tope del scroll al cambiar de pregunta. Animado para una
+   *  transicion suave; el cambio de contenido ocurre simultaneamente pero
+   *  el retorno al tope con animacion mejora la orientacion espacial. */
   function scrollToTop() {
-    scrollRef.current?.scrollTo({ y: 0, animated: false });
+    scrollRef.current?.scrollTo({ y: 0, animated: true });
   }
 
   return (
@@ -250,7 +257,7 @@ export function CuestionarioScreen({
         {/* Header sticky fuera del ScrollView (UX-015 + UX-016) */}
         <CuestionarioHeader
           title={pregunta.tipo_eleccion_nombre ?? "Cuestionario"}
-          subtitle={`${currentIndex + 1} de ${totalPreguntas} · base`}
+          subtitle={formatSubtitleCuestionario(currentIndex, totalPreguntas)}
           respondidas={respondidas}
           totalPreguntas={totalPreguntas}
           onBack={() => navigation.goBack()}
@@ -316,7 +323,13 @@ export function CuestionarioScreen({
            fuera de pantalla. */}
       <View style={styles.footer}>
         <View style={styles.backSlot}>
-          <Button variant="secondary" onPress={() => { prev(); scrollToTop(); }} disabled={isFirst}>
+          <Button
+            variant="secondary"
+            onPress={() => { prev(); scrollToTop(); }}
+            disabled={isFirst}
+            accessibilityLabel="Atras"
+            accessibilityHint="Vuelve a la pregunta anterior"
+          >
             Atras
           </Button>
         </View>
@@ -327,11 +340,18 @@ export function CuestionarioScreen({
               onPress={handleSubmit}
               disabled={!canSubmit || submitting}
               loading={submitting}
+              accessibilityLabel="Enviar respuestas"
+              accessibilityHint="Envia todas tus respuestas y calcula tu resultado"
             >
               {submitting ? "Enviando..." : "Enviar"}
             </Button>
           ) : (
-            <Button onPress={() => { next(); scrollToTop(); }} disabled={!canAdvance}>
+            <Button
+              onPress={() => { next(); scrollToTop(); }}
+              disabled={!canAdvance}
+              accessibilityLabel="Siguiente pregunta"
+              accessibilityHint="Guarda tu respuesta y avanza a la siguiente pregunta"
+            >
               Siguiente
             </Button>
           )}
