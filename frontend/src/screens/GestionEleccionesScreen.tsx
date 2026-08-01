@@ -133,7 +133,7 @@ export function GestionEleccionesScreen({
 
   if (isLoading) {
     return (
-      <AppShell active="home" navigation={navigation}>
+      <AppShell active={null} navigation={navigation}>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
           <View style={styles.loadingBox}>
             <Spinner size="large" />
@@ -145,7 +145,7 @@ export function GestionEleccionesScreen({
 
   return (
     <>
-    <AppShell active="home" navigation={navigation}>
+    <AppShell active={null} navigation={navigation}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
       {/* TopBar breadcrumb */}
       <ScreenTopBar

@@ -20,6 +20,7 @@ import {
 } from "../api/hooks";
 import {
   AppShell,
+  Button,
   CambiarPasswordModal,
   Divider,
   EliminarCuentaModal,
@@ -37,6 +38,7 @@ import { useAuthStore } from "../store/auth";
 import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
+import { tints } from "../theme/colors";
 import { useThemeColors } from "../theme/useTheme";
 
 export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
@@ -165,9 +167,26 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
               </View>
             </>
           ) : (
-            <Text style={[styles.errorText, { color: c.textSecondary }]}>
-              No pudimos cargar tu perfil.
-            </Text>
+            // BUG-019: estado de error con boton de retry (Nielsen #9).
+            <View
+              style={[
+                styles.errorBox,
+                { borderColor: c.danger, backgroundColor: tints.danger50 },
+              ]}
+            >
+              <Text style={[styles.errorText, { color: c.text }]}>
+                No pudimos cargar tu perfil
+              </Text>
+              <Text style={[styles.errorSub, { color: c.textSecondary }]}>
+                Revisa tu conexion a internet e intenta de nuevo.
+              </Text>
+              <Button
+                variant="secondary"
+                onPress={() => { void perfilQ.refetch(); }}
+              >
+                Intentar de nuevo
+              </Button>
+            </View>
           )}
 
           <Divider />
@@ -288,7 +307,16 @@ const styles = StyleSheet.create({
     padding: spacing.sp5,
   },
 
-  errorText: typography.body,
+  errorText: { ...typography.body, textAlign: "center" },
+  // BUG-019: error box con retry
+  errorBox: {
+    padding: spacing.sp4,
+    borderRadius: radii.rMd,
+    borderWidth: 1,
+    gap: spacing.sp3,
+    alignItems: "center",
+  },
+  errorSub: { ...typography.small, textAlign: "center" },
 
   infoCard: {
     padding: spacing.sp4,
