@@ -29,8 +29,14 @@ export const API_TIMEOUT_MS = 10_000;
 
 /**
  * URL absoluta al Django admin del backend. Se deriva del API_BASE_URL
- * quitando el sufijo `/api/vN/` y agregando `/admin/`. Util para links
- * del app hacia el panel administrativo (dev-only).
+ * quitando el sufijo `/api/vN/` y agregando el path del admin.
+ *
+ * El path del admin NO es `/admin/` — el backend lo oculta en
+ * `DJANGO_ADMIN_URL` (default: `hidden-admin/`) por seguridad (F6).
+ * En el frontend se expone via `EXPO_PUBLIC_DJANGO_ADMIN_URL`.
+ * Si no se setea, usa el mismo default que el backend.
  */
 export const ADMIN_URL =
-  API_BASE_URL.replace(/\/api\/v[0-9]+\/?$/, "") + "/admin/";
+  API_BASE_URL.replace(/\/api\/v[0-9]+\/?$/, "") +
+  "/" +
+  (process.env.EXPO_PUBLIC_DJANGO_ADMIN_URL ?? "hidden-admin/");
