@@ -4,15 +4,15 @@
  * Basado en design-system-lowfi.html Template #15 Comparador.
  *
  * Layout:
- *   - ScreenTopBar (back + titulo + subtitulo con eleccion)
+ *   - HomeTopBar (tab principal — no hay back button)
  *   - Header sticky con avatares fijos (col A, col B) + match%
- *   - Toggle "Solo mostrar diferencias"
+ *   - Chips de filtro: Todas / Identicas / Cercanas / Opuestas
  *   - Resumen (% coincidencia + Badges de counts) cuando ambos elegidos
  *   - Filas por eje > preguntas (granularidad mantenida por decision de diseno)
  *
  * Composicion via design system:
- *   - AppShell / ScreenTopBar / Avatar / Toggle / Badge (atom + molecule + organism)
- *   - CandidatoPickerModal (molecule)
+ *   - AppShell / HomeTopBar / Avatar / Badge (atom + molecule + organism)
+ *   - CandidatoPickerModal con filtro por tipoEleccion (molecule)
  *   - Todos los styles usan tokens spacing/radii/typography
  *
  * Alcance actual: 2 candidatos (YAGNI). El wireframe habla de "hasta 3"; se
@@ -41,7 +41,6 @@ import {
   type BadgeVariant,
   CoachMarkTour,
   HomeTopBar,
-  ScreenTopBar,
 } from "../components";
 import { CandidatoPickerModal } from "../components/molecules/CandidatoPickerModal";
 import type { RootStackScreenProps } from "../navigation/types";
@@ -115,7 +114,12 @@ function matchPctPara(
   return Number.isFinite(n) ? Math.round(n) : null;
 }
 
-type NivelFiltro = "todas" | "identica" | "cercana" | "opuesta";
+/**
+ * Filtro de nivel de coincidencia para el comparador.
+ * Deriva de NivelCoincidencia excluyendo los valores que no tienen sentido
+ * como filtro standalone (solo_uno y ninguno quedan cubiertos por "todas").
+ */
+type NivelFiltro = "todas" | Exclude<NivelCoincidencia, "solo_uno" | "ninguno">;
 
 export function CompararScreen({
   navigation,
@@ -134,16 +138,6 @@ export function CompararScreen({
 
   const posturasAQ = usePosturasCandidato(candidatoA?.id, tipoEleccionId);
   const posturasBQ = usePosturasCandidato(candidatoB?.id, tipoEleccionId);
-
-  // eleccionNombre: ya no se usa en el header (HomeTopBar no muestra subtitulo de eleccion).
-  // Se mantiene como variable por si algun sub-componente lo necesita en el futuro (YAGNI off).
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _eleccionNombre = useMemo(() => {
-    if (!tipoEleccionId) return "";
-    return (
-      (tiposQ.data ?? []).find((t) => t.id === tipoEleccionId)?.nombre ?? ""
-    );
-  }, [tiposQ.data, tipoEleccionId]);
 
   const gruposCompletos = useMemo(() => {
     if (!candidatoA || !candidatoB) return [];

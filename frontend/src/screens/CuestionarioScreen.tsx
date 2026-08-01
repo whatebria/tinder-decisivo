@@ -133,8 +133,9 @@ export function CuestionarioScreen({
         },
         backSlot: { flex: 1 },
         primarySlot: { flex: 2 },
-        // Boton de resultados parciales: ocupa ancho propio debajo del row principal.
-        partialSlot: { alignItems: "center", paddingTop: spacing.sp1 },
+        // Boton de resultados parciales: ocupa el ancho completo de la segunda
+        // fila (gracias a flexWrap en footer) y centra el contenido.
+        partialSlot: { width: "100%", alignItems: "center" },
       }),
     [c, insets.bottom],
   );

@@ -1,9 +1,14 @@
 /**
  * Tabs: segmented control con contador opcional. Reactivo al tema.
  *
- * El prop `scrollable` envuelve los tabs en un ScrollView horizontal,
- * util cuando los labels son largos o hay muchos items en pantallas
- * pequenas (evita que queden cortados o fuera de pantalla).
+ * Props:
+ *   - `items`      lista de tabs con value, label y count opcional.
+ *   - `value`      tab activo (controlled).
+ *   - `onChange`   callback al cambiar de tab.
+ *   - `scrollable` (false por defecto) envuelve los tabs en un ScrollView
+ *                  horizontal. Usar cuando la suma de labels puede superar
+ *                  el ancho de pantalla en dispositivos pequenos (ej: 3+ tabs
+ *                  con labels largos como "Descartados" / "Posturas").
  */
 
 import React, { useMemo } from "react";

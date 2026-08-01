@@ -229,6 +229,24 @@ describe("useMatchesQuery (guards)", () => {
     expect(matchCandidatosMock).not.toHaveBeenCalled();
   });
 
+  test("retorna [] sin lanzar error cuando el backend responde 400 (sin respuestas aun)", async () => {
+    // BUG-010: 400 es un estado valido — el user no hizo el cuestionario aun.
+    // El hook debe silenciarlo y retornar lista vacia en vez de error.
+    useAuthStore.setState({ isAuthenticated: true });
+    const axiosError = Object.assign(new Error("Bad Request"), {
+      isAxiosError: true,
+      response: { status: 400, data: { detail: "Sin respuestas" } },
+    });
+    matchCandidatosMock.mockRejectedValueOnce(axiosError);
+
+    const { Wrapper } = makeWrapper();
+    const { result } = renderHook(() => useMatchesQuery(99), { wrapper: Wrapper });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual([]);
+    expect(result.current.isError).toBe(false);
+  });
+
   test("dispara y trae data si isAuth=true + tipoId valido", async () => {
     useAuthStore.setState({ isAuthenticated: true });
     const data = [makeMatch()];

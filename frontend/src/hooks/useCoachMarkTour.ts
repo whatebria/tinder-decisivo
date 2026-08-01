@@ -11,7 +11,21 @@
  *   - Se hace `resetAll()` desde Config -> Ayuda
  *   - El user cambia de identidad y en esa identidad todavia no lo vio
  *
- * Uso típico:
+ * ### Logica anti-apilamiento en reset
+ *
+ * Cuando el usuario presiona "Ver tours de nuevo", el store limpia `seen` y
+ * actualiza `lastResetAt`. Si hay pantallas ya montadas con sus CoachMarkTour
+ * activos, todos reaccionarian a `seen = {}` al mismo tiempo y se mostrarian
+ * en pila. Para evitarlo:
+ *
+ *   - Cada instancia del hook captura su `mountedAt = Date.now()` en un ref
+ *     al momento de montarse.
+ *   - `visible` solo es `true` cuando `mountedAt >= lastResetAt`.
+ *   - Los tours de pantallas ya montadas quedan suprimidos hasta que el
+ *     usuario navegue a esa pantalla de nuevo (desmonta y remonta el hook,
+ *     capturando un nuevo `mountedAt` posterior al reset).
+ *
+ * Uso tipico:
  *
  *   const tour = useCoachMarkTour("home");
  *   return (

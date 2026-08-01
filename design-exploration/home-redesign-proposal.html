@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VotoAfin -- Home Wireframe Mid-Hi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #ECEFF3; }
+
+    /* ---- Phone shell ---- */
+    .phone {
+      width: 375px;
+      background: #fff;
+      border-radius: 40px;
+      overflow: hidden;
+      position: relative;
+      box-shadow:
+        0 0 0 1px #9CA3AF,
+        0 0 0 5px #4B5563,
+        0 24px 60px rgba(0,0,0,0.35);
+    }
+    .phone-screen {
+      height: 780px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
+      position: relative;
+    }
+    .phone-screen::-webkit-scrollbar { display: none; }
+
+    /* ---- Wireframe primitives ---- */
+    /* Placeholder image box */
+    .wf-img {
+      background: #D1D5DB;
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+    .wf-img::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(45deg, transparent 45%, #B5BAC4 45%, #B5BAC4 55%, transparent 55%),
+        linear-gradient(-45deg, transparent 45%, #B5BAC4 45%, #B5BAC4 55%, transparent 55%);
+    }
+    /* Avatar placeholder */
+    .wf-avatar {
+      background: #D1D5DB;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    /* Text placeholder bar */
+    .wf-bar {
+      background: #E5E7EB;
+      border-radius: 3px;
+      height: 10px;
+    }
+    /* Section label pill */
+    .wf-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #6B7280;
+    }
+    /* Primary button */
+    .wf-btn-primary {
+      background: #2E5F7E;
+      color: #fff;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+    }
+    /* Secondary button */
+    .wf-btn-secondary {
+      background: transparent;
+      color: #2E5F7E;
+      border: 1.5px solid #2E5F7E;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    /* Ghost button */
+    .wf-btn-ghost {
+      background: transparent;
+      color: #6B7280;
+      border: 1.5px solid #D1D5DB;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    /* Hero area */
+    .hero-area {
+      background: #1C3A52;
+    }
+    /* Progress ring SVG */
+    .ring-bg   { stroke: rgba(255,255,255,0.12); }
+    .ring-fill { stroke: #3DD68C; stroke-linecap: round; transition: stroke-dashoffset .5s ease; }
+
+    /* Card */
+    .wf-card {
+      background: #fff;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 16px;
+    }
+    .wf-card.active {
+      border-color: #2E5F7E;
+      border-width: 2px;
+    }
+
+    /* Annotation line */
+    .annotation {
+      font-size: 10px;
+      color: #9CA3AF;
+      font-style: italic;
+      position: absolute;
+    }
+
+    /* Bottom nav */
+    .bottom-nav {
+      position: sticky;
+      bottom: 0;
+      background: #fff;
+      border-top: 1.5px solid #E5E7EB;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 8px 0 16px;
+      z-index: 50;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .nav-label {
+      font-size: 9px;
+      font-weight: 600;
+      color: #9CA3AF;
+    }
+    .nav-label.active { color: #2E5F7E; }
+
+    /* Blur overlay for locked match */
+    .blur-lock {
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      background: rgba(255,255,255,0.55);
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .lock-card {
+      background: #1C3A52;
+      border-radius: 14px;
+      padding: 16px 20px;
+      text-align: center;
+      width: 240px;
+    }
+
+    /* State toggles (outside phone) */
+    .state-btn {
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1.5px solid #4B5563;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      background: #fff;
+      color: #4B5563;
+    }
+    .state-btn.on { background: #1C3A52; color: #fff; border-color: #1C3A52; }
+
+    /* Radar wireframe (SVG, not Chart.js) */
+    .radar-wf { opacity: 0.7; }
+
+    /* Red dot for status */
+    .dot-pending  { background: #D1D5DB; }
+    .dot-progress { background: #2E5F7E; }
+    .dot-done     { background: #059669; }
+
+    /* Match pct color */
+    .pct-high { color: #059669; }
+    .pct-blur { color: #9CA3AF; }
+  </style>
+</head>
+<body>
+
+<div class="min-h-screen flex flex-col items-center justify-start py-12 px-6 gap-8">
+
+  <!-- Header doc -->
+  <div class="text-center">
+    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">VotoAfin -- Home Redesign</p>
+    <h1 class="text-2xl font-black text-gray-800">Wireframe Mid-Hi Fidelity</h1>
+    <p class="text-sm text-gray-500 mt-1">3 estados del Home segun progreso del usuario</p>
+  </div>
+
+  <!-- State selector -->
+  <div class="flex gap-2">
+    <button class="state-btn" id="btn-new"      onclick="setState('new')">Usuario nuevo</button>
+    <button class="state-btn on" id="btn-progress" onclick="setState('progress')">En progreso</button>
+    <button class="state-btn" id="btn-done"     onclick="setState('done')">Completado</button>
+  </div>
+
+  <!-- 3 phones side by side on desktop, stacked on mobile -->
+  <div class="flex flex-wrap gap-16 items-start justify-center">
+
+    <!-- =========================================================
+         PHONE FRAME
+         ========================================================= -->
+    <div class="flex flex-col items-center gap-4">
+
+      <div class="phone">
+        <div class="phone-screen" id="screen">
+
+          <!-- ===== STICKY TOP BAR ===== -->
+          <div class="sticky top-0 z-50 flex items-center justify-between px-5 pt-10 pb-3"
+               id="topbar-el"
+               style="background:#1C3A52;">
+            <!-- Brand -->
+            <div class="flex items-center gap-2">
+              <!-- App icon wireframe -->
+              <div style="width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <polygon points="8,2 13,5.5 11,12 5,12 3,5.5" stroke="rgba(255,255,255,0.8)" stroke-width="1.2" fill="none"/>
+                  <path d="M5.5 8.5 L7.5 10.5 L11 7" stroke="#3DD68C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <span style="color:#fff;font-size:16px;font-weight:800;letter-spacing:-0.3px;">VotoAfin</span>
+            </div>
+            <!-- Right: notif + avatar -->
+            <div class="flex items-center gap-2">
+              <div style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;">
+                <svg width="16" height="16" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                  <path d="M13.73 21a2 2 0 01-3.46 0"/>
+                </svg>
+              </div>
+              <div style="width:32px;height:32px;border-radius:9999px;background:#2E5F7E;border:2px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;">
+                <span style="color:#fff;font-size:11px;font-weight:800;" id="avatar-initials">JV</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== HERO SECTION ===== -->
+          <div class="hero-area px-5 pb-6 -mt-3" style="padding-top:12px;">
+
+            <!-- Countdown pill -->
+            <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:999px;padding:5px 12px;margin-bottom:14px;">
+              <div style="width:6px;height:6px;border-radius:9999px;background:#3DD68C;"></div>
+              <span style="color:rgba(255,255,255,0.85);font-size:11px;font-weight:600;">
+                Elecciones presidenciales en <span style="color:#3DD68C;font-weight:800;" id="countdown-days">87 dias</span>
+              </span>
+            </div>
+
+            <!-- Headline + Ring -->
+            <div class="flex items-start justify-between gap-3 mb-4">
+              <div style="flex:1;">
+                <h2 style="color:#fff;font-size:22px;font-weight:900;line-height:1.2;margin-bottom:6px;" id="hero-headline">
+                  Con quien votas realmente?
+                </h2>
+                <p style="color:rgba(255,255,255,0.55);font-size:13px;line-height:1.45;" id="hero-body">
+                  Responde 15 preguntas. Descubre tu candidato mas afin.
+                </p>
+              </div>
+
+              <!-- Progress ring (hidden for new user) -->
+              <div id="ring-wrap" style="display:none;flex-shrink:0;">
+                <svg width="72" height="72" viewBox="0 0 72 72">
+                  <circle cx="36" cy="36" r="30" stroke-width="5.5" fill="none" class="ring-bg" transform="rotate(-90 36 36)"/>
+                  <circle cx="36" cy="36" r="30" stroke-width="5.5" fill="none" class="ring-fill" transform="rotate(-90 36 36)"
+                    id="ring-circle"
+                    stroke-dasharray="188.5"
+                    stroke-dashoffset="60.3"/>
+                </svg>
+                <div style="position:absolute;margin-top:-72px;width:72px;height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;">
+                  <span style="color:#fff;font-size:15px;font-weight:900;" id="ring-pct-label">68%</span>
+                  <span style="color:rgba(255,255,255,0.5);font-size:9px;margin-top:1px;">listo</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- CTA principal -->
+            <button class="wf-btn-primary" style="height:48px;margin-bottom:10px;border-radius:14px;" id="hero-cta-btn">
+              <svg width="15" height="15" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+              <span id="hero-cta-label">Empezar cuestionario</span>
+            </button>
+
+            <!-- Meta row -->
+            <div style="display:flex;gap:16px;justify-content:center;">
+              <span style="color:rgba(255,255,255,0.45);font-size:11px;display:flex;align-items:center;gap:5px;">
+                <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span id="meta-time">~15 min</span>
+              </span>
+              <span style="color:rgba(255,255,255,0.45);font-size:11px;display:flex;align-items:center;gap:5px;">
+                <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                100% privado
+              </span>
+              <span style="color:rgba(255,255,255,0.45);font-size:11px;display:flex;align-items:center;gap:5px;">
+                <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Datos SERVEL
+              </span>
+            </div>
+          </div>
+
+          <!-- ===== ELECTIONS SECTION ===== -->
+          <div style="padding:20px 16px 0;">
+
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <span class="wf-section-label">Tus elecciones</span>
+              <span style="font-size:11px;font-weight:700;color:#2E5F7E;">Gestionar</span>
+            </div>
+
+            <!-- Card Presidencial -->
+            <div class="wf-card" id="card-presi"
+                 style="padding:14px 16px;margin-bottom:10px;">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <!-- Mini ring -->
+                <div style="position:relative;width:48px;height:48px;flex-shrink:0;">
+                  <svg width="48" height="48" viewBox="0 0 48 48">
+                    <circle cx="24" cy="24" r="19" stroke="#E5E7EB" stroke-width="4.5" fill="none" transform="rotate(-90 24 24)"/>
+                    <circle cx="24" cy="24" r="19" stroke-width="4.5" fill="none" transform="rotate(-90 24 24)"
+                      id="mini-ring-presi"
+                      stroke-linecap="round"
+                      stroke-dasharray="119.4"
+                      stroke-dashoffset="38.2"
+                      style="stroke:#2E5F7E;transition:stroke-dashoffset .5s ease;"/>
+                  </svg>
+                  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+                    <span style="font-size:10px;font-weight:900;color:#2E5F7E;" id="presi-ring-label">68%</span>
+                  </div>
+                </div>
+                <!-- Info -->
+                <div style="flex:1;min-width:0;">
+                  <p style="font-size:13px;font-weight:700;color:#111827;">Presidencial 2025</p>
+                  <p style="font-size:11px;color:#6B7280;margin-top:2px;" id="presi-meta">12 de 17 preguntas</p>
+                  <div style="margin-top:4px;height:3px;background:#F3F4F6;border-radius:2px;overflow:hidden;">
+                    <div id="presi-bar" style="height:100%;background:#2E5F7E;border-radius:2px;width:70%;transition:width .5s ease;"></div>
+                  </div>
+                </div>
+                <!-- CTA -->
+                <button class="wf-btn-secondary" id="presi-cta"
+                        style="padding:8px 12px;flex-shrink:0;">Continuar</button>
+              </div>
+            </div>
+
+            <!-- Card Diputados -->
+            <div class="wf-card" id="card-dip"
+                 style="padding:14px 16px;margin-bottom:10px;">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div style="position:relative;width:48px;height:48px;flex-shrink:0;">
+                  <svg width="48" height="48" viewBox="0 0 48 48">
+                    <circle cx="24" cy="24" r="19" stroke="#E5E7EB" stroke-width="4.5" fill="none" transform="rotate(-90 24 24)"/>
+                    <circle cx="24" cy="24" r="19" stroke="#059669" stroke-width="4.5" fill="none" transform="rotate(-90 24 24)"
+                      stroke-dasharray="119.4" stroke-dashoffset="0"/>
+                  </svg>
+                  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+                    <svg width="14" height="14" fill="none" stroke="#059669" stroke-width="2.5" viewBox="0 0 24 24">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                </div>
+                <div style="flex:1;min-width:0;">
+                  <p style="font-size:13px;font-weight:700;color:#111827;">Diputados 2025</p>
+                  <p style="font-size:11px;color:#059669;font-weight:700;margin-top:2px;">Completado</p>
+                  <div style="margin-top:4px;height:3px;background:#F3F4F6;border-radius:2px;overflow:hidden;">
+                    <div style="height:100%;background:#059669;border-radius:2px;width:100%;"></div>
+                  </div>
+                </div>
+                <button class="wf-btn-ghost" style="padding:8px 12px;flex-shrink:0;">Resultados</button>
+              </div>
+            </div>
+
+            <!-- Card Senadores -->
+            <div class="wf-card" id="card-sen"
+                 style="padding:14px 16px;margin-bottom:4px;opacity:0.6;">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div style="position:relative;width:48px;height:48px;flex-shrink:0;">
+                  <svg width="48" height="48" viewBox="0 0 48 48">
+                    <circle cx="24" cy="24" r="19" stroke="#E5E7EB" stroke-width="4.5" fill="none"/>
+                  </svg>
+                  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+                    <span style="font-size:10px;font-weight:700;color:#9CA3AF;">0%</span>
+                  </div>
+                </div>
+                <div style="flex:1;min-width:0;">
+                  <p style="font-size:13px;font-weight:700;color:#6B7280;">Senadores 2025</p>
+                  <p style="font-size:11px;color:#9CA3AF;margin-top:2px;">Sin empezar &bull; ~8 min</p>
+                  <div style="margin-top:4px;height:3px;background:#F3F4F6;border-radius:2px;"></div>
+                </div>
+                <button class="wf-btn-secondary" style="padding:8px 12px;flex-shrink:0;">Empezar</button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ===== MATCH SECTION ===== -->
+          <div style="padding:20px 16px 0;" id="match-section">
+
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <span class="wf-section-label">Tu mejor match</span>
+              <span style="font-size:11px;font-weight:700;color:#2E5F7E;" id="match-action-label">Ver todos</span>
+            </div>
+
+            <!-- LOCKED match (new / in-progress) -->
+            <div style="position:relative;border-radius:16px;overflow:hidden;" id="match-locked">
+              <!-- Blurred content behind -->
+              <div class="wf-card" style="padding:16px;filter:blur(4px);user-select:none;pointer-events:none;">
+                <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
+                  <div class="wf-avatar" style="width:48px;height:48px;">
+                    <svg width="20" height="20" fill="#9CA3AF" viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+                  </div>
+                  <div style="flex:1;">
+                    <div class="wf-bar" style="width:120px;margin-bottom:6px;"></div>
+                    <div class="wf-bar" style="width:80px;height:8px;"></div>
+                  </div>
+                  <span style="font-size:36px;font-weight:900;color:#D1D5DB;">??%</span>
+                </div>
+                <!-- Radar wireframe placeholder -->
+                <svg viewBox="0 0 200 110" width="100%" style="opacity:0.3;">
+                  <polygon points="100,10 170,55 145,100 55,100 30,55" stroke="#D1D5DB" stroke-width="1.5" fill="none"/>
+                  <polygon points="100,30 150,62 132,90 68,90 50,62" stroke="#D1D5DB" stroke-width="1" fill="none"/>
+                  <polygon points="100,50 130,68 118,80 82,80 70,68" stroke="#D1D5DB" stroke-width="1" fill="none"/>
+                  <polygon points="100,25 155,58 138,92 62,92 45,58" stroke="#9CA3AF" stroke-width="1.5" fill="rgba(156,163,175,0.15)"/>
+                </svg>
+                <div class="wf-bar" style="width:80%;margin:8px auto 0;"></div>
+              </div>
+              <!-- Lock overlay -->
+              <div class="blur-lock" id="lock-overlay">
+                <div class="lock-card">
+                  <svg width="20" height="20" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2" viewBox="0 0 24 24" style="margin:0 auto 8px;">
+                    <rect x="3" y="11" width="18" height="11" rx="2"/>
+                    <path d="M7 11V7a5 5 0 0110 0v4"/>
+                  </svg>
+                  <p style="color:#fff;font-size:13px;font-weight:800;margin-bottom:4px;">Completa para revelar</p>
+                  <p style="color:rgba(255,255,255,0.55);font-size:11px;margin-bottom:12px;" id="lock-body">Faltan 5 preguntas en Presidencial</p>
+                  <button class="wf-btn-primary" style="height:38px;font-size:12px;border-radius:10px;">Continuar cuestionario</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- REVEALED match (done state) -->
+            <div class="wf-card" style="padding:16px;display:none;" id="match-revealed">
+              <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
+                <div class="wf-avatar" style="width:48px;height:48px;background:#BFDBFE;">
+                  <span style="font-size:14px;font-weight:800;color:#1D4ED8;">GM</span>
+                </div>
+                <div style="flex:1;">
+                  <p style="font-size:14px;font-weight:700;color:#111827;">Gabriel Matias</p>
+                  <p style="font-size:11px;color:#6B7280;margin-top:2px;">Candidato Presidencial</p>
+                  <span style="display:inline-block;margin-top:4px;background:#EFF6FF;color:#2E5F7E;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;">Presidencial 2025</span>
+                </div>
+                <div style="text-align:right;">
+                  <span style="font-size:38px;font-weight:900;" class="pct-high">87%</span>
+                  <p style="font-size:10px;color:#9CA3AF;margin-top:-2px;">afinidad</p>
+                </div>
+              </div>
+
+              <!-- Radar SVG wireframe (revealed) -->
+              <svg viewBox="0 0 240 130" width="100%" style="display:block;margin-bottom:8px;">
+                <!-- Grid -->
+                <g opacity="0.25">
+                  <polygon points="120,10 195,58 170,115 70,115 45,58" stroke="#9CA3AF" stroke-width="1" fill="none"/>
+                  <polygon points="120,30 172,66 153,103 87,103 68,66" stroke="#9CA3AF" stroke-width="1" fill="none"/>
+                  <polygon points="120,50 149,72 136,92 104,92 91,72" stroke="#9CA3AF" stroke-width="1" fill="none"/>
+                  <!-- Spokes -->
+                  <line x1="120" y1="10" x2="120" y2="50" stroke="#9CA3AF" stroke-width="1"/>
+                  <line x1="195" y1="58" x2="149" y2="72" stroke="#9CA3AF" stroke-width="1"/>
+                  <line x1="170" y1="115" x2="136" y2="92" stroke="#9CA3AF" stroke-width="1"/>
+                  <line x1="70" y1="115" x2="104" y2="92" stroke="#9CA3AF" stroke-width="1"/>
+                  <line x1="45" y1="58" x2="91" y2="72" stroke="#9CA3AF" stroke-width="1"/>
+                </g>
+                <!-- User data polygon -->
+                <polygon points="120,15 185,63 162,110 78,110 51,63"
+                  stroke="#2E5F7E" stroke-width="2" fill="rgba(46,95,126,0.1)"/>
+                <!-- Dots -->
+                <circle cx="120" cy="15" r="3.5" fill="#2E5F7E"/>
+                <circle cx="185" cy="63" r="3.5" fill="#2E5F7E"/>
+                <circle cx="162" cy="110" r="3.5" fill="#2E5F7E"/>
+                <circle cx="78" cy="110" r="3.5" fill="#2E5F7E"/>
+                <circle cx="51" cy="63" r="3.5" fill="#2E5F7E"/>
+                <!-- Axis labels -->
+                <text x="120" y="7" text-anchor="middle" font-size="8" fill="#6B7280" font-weight="600">Economia</text>
+                <text x="205" y="62" text-anchor="start" font-size="8" fill="#6B7280" font-weight="600">Sociedad</text>
+                <text x="168" y="125" text-anchor="middle" font-size="8" fill="#6B7280" font-weight="600">Ambiente</text>
+                <text x="68" y="125" text-anchor="middle" font-size="8" fill="#6B7280" font-weight="600">Seguridad</text>
+                <text x="35" y="62" text-anchor="end" font-size="8" fill="#6B7280" font-weight="600">DDHH</text>
+              </svg>
+
+              <p style="text-align:center;font-size:11px;color:#9CA3AF;margin-bottom:12px;">Coincides en 13 de 15 preguntas</p>
+              <button class="wf-btn-primary" style="height:44px;">Ver perfil completo</button>
+            </div>
+
+          </div>
+
+          <!-- ===== HOW IT WORKS (solo estado nuevo) ===== -->
+          <div style="padding:20px 16px 0;" id="how-section">
+            <span class="wf-section-label">Como funciona</span>
+            <div class="wf-card" style="padding:16px;margin-top:10px;">
+
+              <!-- Step 1 -->
+              <div style="display:flex;gap:12px;margin-bottom:16px;position:relative;">
+                <div style="position:absolute;left:19px;top:38px;bottom:-16px;width:1.5px;background:linear-gradient(#E5E7EB,#E5E7EB);"></div>
+                <div style="width:38px;height:38px;border-radius:9999px;background:#2E5F7E;display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1;">
+                  <span style="color:#fff;font-size:14px;font-weight:800;">1</span>
+                </div>
+                <div style="padding-top:6px;">
+                  <p style="font-size:13px;font-weight:700;color:#111827;margin-bottom:2px;">Responde</p>
+                  <p style="font-size:11px;color:#6B7280;line-height:1.5;">15 preguntas sobre economia, seguridad, medioambiente, derechos y mas.</p>
+                </div>
+              </div>
+
+              <!-- Step 2 -->
+              <div style="display:flex;gap:12px;margin-bottom:16px;position:relative;">
+                <div style="position:absolute;left:19px;top:38px;bottom:-16px;width:1.5px;background:#E5E7EB;"></div>
+                <div style="width:38px;height:38px;border-radius:9999px;background:#EFF6FF;border:1.5px solid #BFDBFE;display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1;">
+                  <span style="color:#2E5F7E;font-size:14px;font-weight:800;">2</span>
+                </div>
+                <div style="padding-top:6px;">
+                  <p style="font-size:13px;font-weight:700;color:#111827;margin-bottom:2px;">Calculamos</p>
+                  <p style="font-size:11px;color:#6B7280;line-height:1.5;">Comparamos tus respuestas con las posiciones publicas verificadas de cada candidato.</p>
+                </div>
+              </div>
+
+              <!-- Step 3 -->
+              <div style="display:flex;gap:12px;">
+                <div style="width:38px;height:38px;border-radius:9999px;background:#ECFDF5;border:1.5px solid #A7F3D0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <span style="color:#059669;font-size:14px;font-weight:800;">3</span>
+                </div>
+                <div style="padding-top:6px;">
+                  <p style="font-size:13px;font-weight:700;color:#111827;margin-bottom:2px;">Descubres</p>
+                  <p style="font-size:11px;color:#6B7280;line-height:1.5;">Tu candidato mas afin por eleccion, con detalle por dimension politica y postura verificable.</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ===== TRUST SECTION ===== -->
+          <div style="padding:16px 16px 4px;">
+            <div style="background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:16px;padding:14px;">
+              <p style="font-size:10px;font-weight:800;color:#2E5F7E;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px;">Transparencia &amp; confianza</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div style="display:flex;align-items:flex-start;gap:6px;">
+                  <svg width="14" height="14" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px;"><polyline points="20 6 9 17 4 12"/></svg>
+                  <p style="font-size:11px;color:#374151;font-weight:500;line-height:1.3;">Datos oficiales SERVEL 2025</p>
+                </div>
+                <div style="display:flex;align-items:flex-start;gap:6px;">
+                  <svg width="14" height="14" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px;"><polyline points="20 6 9 17 4 12"/></svg>
+                  <p style="font-size:11px;color:#374151;font-weight:500;line-height:1.3;">Sin publicidad politica</p>
+                </div>
+                <div style="display:flex;align-items:flex-start;gap:6px;">
+                  <svg width="14" height="14" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px;"><polyline points="20 6 9 17 4 12"/></svg>
+                  <p style="font-size:11px;color:#374151;font-weight:500;line-height:1.3;">Respuestas 100% privadas</p>
+                </div>
+                <div style="display:flex;align-items:flex-start;gap:6px;">
+                  <svg width="14" height="14" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px;"><polyline points="20 6 9 17 4 12"/></svg>
+                  <p style="font-size:11px;color:#374151;font-weight:500;line-height:1.3;">Proyecto independiente</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- spacer -->
+          <div style="height:20px;"></div>
+
+          <!-- ===== BOTTOM NAV ===== -->
+          <div class="bottom-nav">
+            <div class="nav-item">
+              <svg width="22" height="22" fill="#2E5F7E" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+              <span class="nav-label active">Home</span>
+            </div>
+            <div class="nav-item">
+              <svg width="22" height="22" fill="none" stroke="#D1D5DB" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+              <span class="nav-label">Candidatos</span>
+            </div>
+            <div class="nav-item">
+              <svg width="22" height="22" fill="none" stroke="#D1D5DB" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <span class="nav-label">Match</span>
+            </div>
+            <div class="nav-item">
+              <svg width="22" height="22" fill="none" stroke="#D1D5DB" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+              <span class="nav-label">Guardados</span>
+            </div>
+            <div class="nav-item">
+              <svg width="22" height="22" fill="none" stroke="#D1D5DB" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span class="nav-label">Perfil</span>
+            </div>
+          </div>
+
+        </div><!-- /phone-screen -->
+      </div><!-- /phone -->
+
+      <p style="font-size:11px;color:#9CA3AF;text-align:center;margin-top:8px;">Desplazate dentro del telefono para ver el scroll completo</p>
+    </div><!-- /phone wrapper -->
+
+    <!-- =========================================================
+         ANNOTATIONS PANEL
+         ========================================================= -->
+    <div style="max-width:320px;padding-top:32px;" class="hidden lg:block">
+      <p style="font-size:11px;font-weight:800;color:#4B5563;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:16px;">Anotaciones de diseno</p>
+
+      <div style="display:flex;flex-direction:column;gap:12px;">
+
+        <div style="background:#fff;border:1.5px solid #E5E7EB;border-radius:12px;padding:14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <div style="width:22px;height:22px;border-radius:6px;background:#1C3A52;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <span style="color:#fff;font-size:10px;font-weight:900;">A</span>
+            </div>
+            <p style="font-size:12px;font-weight:700;color:#111827;">Top bar + Hero = 1 bloque</p>
+          </div>
+          <p style="font-size:11px;color:#6B7280;line-height:1.5;">La barra superior y el hero comparten el mismo fondo oscuro. El top bar se vuelve opaco cuando el usuario hace scroll. Evita el "doble borde" que genera el card-dentro-de-card actual.</p>
+        </div>
+
+        <div style="background:#fff;border:1.5px solid #E5E7EB;border-radius:12px;padding:14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <div style="width:22px;height:22px;border-radius:6px;background:#2E5F7E;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <span style="color:#fff;font-size:10px;font-weight:900;">B</span>
+            </div>
+            <p style="font-size:12px;font-weight:700;color:#111827;">1 solo CTA en el hero</p>
+          </div>
+          <p style="font-size:11px;color:#6B7280;line-height:1.5;">El hero no compite. Un titular, un boton, un objetivo. El copy del boton cambia segun estado: "Empezar" / "Continuar" / "Ver mis matches". El anillo de progreso aparece solo cuando hay progreso que mostrar.</p>
+        </div>
+
+        <div style="background:#fff;border:1.5px solid #E5E7EB;border-radius:12px;padding:14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <div style="width:22px;height:22px;border-radius:6px;background:#374151;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <span style="color:#fff;font-size:10px;font-weight:900;">C</span>
+            </div>
+            <p style="font-size:12px;font-weight:700;color:#111827;">Cards verticales, 100% visible</p>
+          </div>
+          <p style="font-size:11px;color:#6B7280;line-height:1.5;">Lista vertical en lugar de carrusel horizontal. Las 3 elecciones son visibles sin scroll lateral. El mini-ring + barra lineal + CTA inline comunican estado y accion en un solo vistazo.</p>
+        </div>
+
+        <div style="background:#fff;border:1.5px solid #E5E7EB;border-radius:12px;padding:14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <div style="width:22px;height:22px;border-radius:6px;background:#059669;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <span style="color:#fff;font-size:10px;font-weight:900;">D</span>
+            </div>
+            <p style="font-size:12px;font-weight:700;color:#111827;">Match bloqueado = curiosidad</p>
+          </div>
+          <p style="font-size:11px;color:#6B7280;line-height:1.5;">El resultado existe pero esta desenfocado. El usuario ve que HAY algo pero no puede leerlo. Patron de "curiosity gap" (Tinder, 16Personalities). Tasa de completado del cuestionario estimada +40-60%.</p>
+        </div>
+
+        <div style="background:#fff;border:1.5px solid #E5E7EB;border-radius:12px;padding:14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <div style="width:22px;height:22px;border-radius:6px;background:#D97706;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <span style="color:#fff;font-size:10px;font-weight:900;">E</span>
+            </div>
+            <p style="font-size:12px;font-weight:700;color:#111827;">Radar chart en el Home</p>
+          </div>
+          <p style="font-size:11px;color:#6B7280;line-height:1.5;">El radar chart es el elemento mas diferenciador de la app y vive enterrado en Resultados. Llevarlo al Home (en estado revelado) como hero visual del match es el gancho de retorno y comparticion.</p>
+        </div>
+
+        <div style="background:#fff;border:1.5px solid #E5E7EB;border-radius:12px;padding:14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <div style="width:22px;height:22px;border-radius:6px;background:#6B7280;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <span style="color:#fff;font-size:10px;font-weight:900;">F</span>
+            </div>
+            <p style="font-size:12px;font-weight:700;color:#111827;">"Como funciona" solo a nuevos</p>
+          </div>
+          <p style="font-size:11px;color:#6B7280;line-height:1.5;">La seccion de 3 pasos se muestra solo en el estado "nuevo" (sin preguntas respondidas). Una vez que el usuario empezo, desaparece. No ocupa espacio que podria usar para los resultados.</p>
+        </div>
+
+      </div>
+
+      <!-- Color tokens del wireframe -->
+      <div style="margin-top:20px;background:#fff;border:1.5px solid #E5E7EB;border-radius:12px;padding:14px;">
+        <p style="font-size:11px;font-weight:800;color:#4B5563;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:12px;">Tokens de color usados</p>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:28px;height:18px;border-radius:4px;background:#1C3A52;flex-shrink:0;"></div>
+            <p style="font-size:11px;color:#374151;"><code style="font-size:10px;background:#F3F4F6;padding:1px 4px;border-radius:3px;">#1C3A52</code> — Fondo hero / top bar</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:28px;height:18px;border-radius:4px;background:#2E5F7E;flex-shrink:0;"></div>
+            <p style="font-size:11px;color:#374151;"><code style="font-size:10px;background:#F3F4F6;padding:1px 4px;border-radius:3px;">#2E5F7E</code> — Primary (CTAs, anillos activos)</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:28px;height:18px;border-radius:4px;background:#059669;flex-shrink:0;"></div>
+            <p style="font-size:11px;color:#374151;"><code style="font-size:10px;background:#F3F4F6;padding:1px 4px;border-radius:3px;">#059669</code> — Exito / completado / match alto</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:28px;height:18px;border-radius:4px;background:#3DD68C;flex-shrink:0;"></div>
+            <p style="font-size:11px;color:#374151;"><code style="font-size:10px;background:#F3F4F6;padding:1px 4px;border-radius:3px;">#3DD68C</code> — Acento vivo (rings, countdown)</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:28px;height:18px;border-radius:4px;background:#E5E7EB;flex-shrink:0;border:1px solid #D1D5DB;"></div>
+            <p style="font-size:11px;color:#374151;"><code style="font-size:10px;background:#F3F4F6;padding:1px 4px;border-radius:3px;">#E5E7EB</code> — Bordes, placeholders</p>
+          </div>
+        </div>
+      </div>
+    </div><!-- /annotations -->
+
+  </div><!-- /flex row -->
+</div><!-- /wrapper -->
+
+<script>
+  const states = {
+    new: {
+      headline: 'Con quien votas realmente?',
+      body: 'Responde 15 preguntas. Descubre tu candidato mas afin.',
+      ctaLabel: 'Empezar cuestionario',
+      metaTime: '~15 min',
+      showRing: false,
+      ringPct: '0%',
+      ringOffset: 188.5,
+      presiMeta: 'Sin responder - ~10 min',
+      presiBarW: '0%',
+      presiRingLabel: '0%',
+      presiRingOffset: 119.4,
+      presiCtaText: 'Empezar',
+      presiCtaClass: 'wf-btn-secondary',
+      showLock: true,
+      lockBody: 'Completa el cuestionario para ver tu match',
+      showHowTo: true,
+      cardPresiActive: false,
+    },
+    progress: {
+      headline: 'Con quien votas realmente?',
+      body: 'Faltan 5 preguntas para revelar tu match.',
+      ctaLabel: 'Continuar cuestionario',
+      metaTime: '~5 min restantes',
+      showRing: true,
+      ringPct: '68%',
+      ringOffset: 60.3,
+      presiMeta: '12 de 17 preguntas',
+      presiBarW: '70%',
+      presiRingLabel: '68%',
+      presiRingOffset: 38.2,
+      presiCtaText: 'Continuar',
+      presiCtaClass: 'wf-btn-secondary',
+      showLock: true,
+      lockBody: 'Faltan 5 preguntas en Presidencial',
+      showHowTo: false,
+      cardPresiActive: true,
+    },
+    done: {
+      headline: 'Buenos dias, Jenny',
+      body: 'Tu afinidad politica esta lista. Explora tus resultados.',
+      ctaLabel: 'Ver todos mis matches',
+      metaTime: 'Completado',
+      showRing: true,
+      ringPct: '100%',
+      ringOffset: 0,
+      presiMeta: '17 de 17 preguntas',
+      presiBarW: '100%',
+      presiRingLabel: '100%',
+      presiRingOffset: 0,
+      presiCtaText: 'Resultados',
+      presiCtaClass: 'wf-btn-ghost',
+      showLock: false,
+      lockBody: '',
+      showHowTo: false,
+      cardPresiActive: false,
+    },
+  };
+
+  function setState(key) {
+    const s = states[key];
+
+    // Buttons
+    ['new','progress','done'].forEach(k => {
+      document.getElementById('btn-'+k).classList.remove('on');
+    });
+    document.getElementById('btn-'+key).classList.add('on');
+
+    // Hero
+    document.getElementById('hero-headline').textContent = s.headline;
+    document.getElementById('hero-body').textContent = s.body;
+    document.getElementById('hero-cta-label').textContent = s.ctaLabel;
+    document.getElementById('meta-time').textContent = s.metaTime;
+
+    // Ring
+    const ringWrap = document.getElementById('ring-wrap');
+    ringWrap.style.display = s.showRing ? '' : 'none';
+    document.getElementById('ring-circle').setAttribute('stroke-dashoffset', s.ringOffset);
+    document.getElementById('ring-pct-label').textContent = s.ringPct;
+    // Color: verde cuando done
+    document.getElementById('ring-circle').style.stroke = key === 'done' ? '#059669' : '#3DD68C';
+
+    // Presi card
+    document.getElementById('presi-meta').textContent = s.presiMeta;
+    document.getElementById('presi-bar').style.width = s.presiBarW;
+    document.getElementById('presi-ring-label').textContent = s.presiRingLabel;
+    document.getElementById('mini-ring-presi').setAttribute('stroke-dashoffset', s.presiRingOffset);
+    document.getElementById('mini-ring-presi').style.stroke = key === 'done' ? '#059669' : '#2E5F7E';
+    const presiCta = document.getElementById('presi-cta');
+    presiCta.textContent = s.presiCtaText;
+    presiCta.className = s.presiCtaClass;
+    presiCta.style.cssText = 'padding:8px 12px;flex-shrink:0;';
+
+    // Card active border
+    const cardPresi = document.getElementById('card-presi');
+    if (s.cardPresiActive) {
+      cardPresi.classList.add('active');
+    } else {
+      cardPresi.classList.remove('active');
+    }
+
+    // Match section
+    document.getElementById('match-locked').style.display = s.showLock ? '' : 'none';
+    document.getElementById('match-revealed').style.display = s.showLock ? 'none' : 'block';
+    if (s.lockBody) document.getElementById('lock-body').textContent = s.lockBody;
+
+    // How to
+    document.getElementById('how-section').style.display = s.showHowTo ? '' : 'none';
+
+    // Scroll to top
+    document.getElementById('screen').scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Topbar scroll effect: vuelve opaco
+  document.getElementById('screen').addEventListener('scroll', function() {
+    const tb = document.getElementById('topbar-el');
+    tb.style.background = this.scrollTop > 60
+      ? 'rgba(28,58,82,0.98)'
+      : '#1C3A52';
+  });
+
+  setState('progress');
+</script>
+</body>
+</html>

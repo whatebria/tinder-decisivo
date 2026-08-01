@@ -9,6 +9,7 @@
  * porque involucran side-effects mas complejos (navegar, resetear form).
  */
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
 
 import {
   actualizarComuna,
@@ -186,8 +187,7 @@ export function useMatchesQuery(tipoEleccionId: number | null | undefined) {
         // 400 = el backend responde "no hay respuestas registradas todavia".
         // Es un estado valido (el user no hizo el cuestionario aun),
         // no un error que deba propagarse. Retornamos lista vacia.
-        const status = (err as { response?: { status?: number } })?.response?.status;
-        if (status === 400) return [];
+        if (axios.isAxiosError(err) && err.response?.status === 400) return [];
         throw err;
       }
     },
