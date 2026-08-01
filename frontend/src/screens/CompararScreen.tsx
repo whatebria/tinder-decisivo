@@ -41,6 +41,7 @@ import {
   type BadgeVariant,
   CoachMarkTour,
   HomeTopBar,
+  Spinner,
 } from "../components";
 import { CandidatoPickerModal } from "../components/molecules/CandidatoPickerModal";
 import type { RootStackScreenProps } from "../navigation/types";
@@ -50,6 +51,7 @@ import {
   type ItemComparacion,
   type NivelCoincidencia,
 } from "../services/comparar";
+import { getMatchColor } from "../services/matching";
 import { useCuestionarioStore } from "../store/cuestionario";
 import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
@@ -103,23 +105,21 @@ function badgeVariantNivel(nivel: NivelCoincidencia): BadgeVariant {
   }
 }
 
-function matchPctPara(
-  candidatoId: number | undefined,
-  matches: MatchResult[] | undefined,
-): number | null {
-  if (!candidatoId || !matches) return null;
-  const m = matches.find((r) => r.candidato_data?.id === candidatoId);
-  if (!m) return null;
-  const n = Number.parseFloat(m.match_percentage);
-  return Number.isFinite(n) ? Math.round(n) : null;
-}
-
 /**
  * Filtro de nivel de coincidencia para el comparador.
  * Deriva de NivelCoincidencia excluyendo los valores que no tienen sentido
  * como filtro standalone (solo_uno y ninguno quedan cubiertos por "todas").
  */
 type NivelFiltro = "todas" | Exclude<NivelCoincidencia, "solo_uno" | "ninguno">;
+
+// Constante de filtros con label accesible -- evita el inline en JSX y
+// da a VoiceOver un string limpio en lugar de "equis Opuestas" (UX-031).
+const FILTROS_NIVEL: Array<{ value: NivelFiltro; label: string; labelA11y: string }> = [
+  { value: "todas",    label: "Todas",        labelA11y: "todas las posturas" },
+  { value: "identica", label: "= Idénticas",  labelA11y: "posturas idénticas" },
+  { value: "cercana",  label: "\u007e Cercanas",   labelA11y: "posturas cercanas" },
+  { value: "opuesta",  label: "X Opuestas",   labelA11y: "posturas opuestas" },
+];
 
 export function CompararScreen({
   navigation,
@@ -159,11 +159,22 @@ export function CompararScreen({
     [gruposCompletos],
   );
 
+  // Map id->pct O(1) -- reemplaza Array.find O(n) x2 por render (TASK-024)
+  const matchByCandidatoId = useMemo(() => {
+    const map = new Map<number, number>();
+    for (const m of matchesQ.data ?? []) {
+      const id = m.candidato_data?.id;
+      const n = parseFloat(m.match_percentage);
+      if (id != null && Number.isFinite(n)) map.set(id, Math.round(n));
+    }
+    return map;
+  }, [matchesQ.data]);
+
   const loading = posturasAQ.isLoading || posturasBQ.isLoading;
   const ambosSeleccionados = !!candidatoA && !!candidatoB;
 
-  const matchPctA = matchPctPara(candidatoA?.id, matchesQ.data);
-  const matchPctB = matchPctPara(candidatoB?.id, matchesQ.data);
+  const matchPctA = candidatoA ? (matchByCandidatoId.get(candidatoA.id) ?? null) : null;
+  const matchPctB = candidatoB ? (matchByCandidatoId.get(candidatoB.id) ?? null) : null;
 
   function handleSelectPicker(cand: Candidato) {
     if (pickerOpen === "A") setCandidatoA(cand);
@@ -198,12 +209,7 @@ export function CompararScreen({
           </View>
 
           <View style={styles.toggleRow}>
-            {([
-              { value: "todas",    label: "Todas" },
-              { value: "identica", label: "= Identicas" },
-              { value: "cercana",  label: "~ Cercanas" },
-              { value: "opuesta",  label: "X Opuestas" },
-            ] as { value: NivelFiltro; label: string }[]).map((opt) => {
+            {FILTROS_NIVEL.map((opt) => {
               const active = nivelFiltro === opt.value;
               return (
                 <Pressable
@@ -219,7 +225,8 @@ export function CompararScreen({
                     !ambosSeleccionados && { opacity: 0.4 },
                   ]}
                   accessibilityRole="button"
-                  accessibilityLabel={`Filtrar: ${opt.label}`}
+                  accessibilityLabel={`Filtrar por ${opt.labelA11y}`}
+                  accessibilityState={{ selected: active }}
                 >
                   <Text
                     style={[
@@ -263,9 +270,9 @@ export function CompararScreen({
               Elige ambos candidatos para ver la comparacion.
             </Text>
           ) : loading ? (
-            <Text style={[styles.paragraph, { color: c.textSecondary }]}>
-              Cargando posturas...
-            </Text>
+            <View style={styles.loadingBox}>
+              <Spinner size="large" />
+            </View>
           ) : gruposCompletos.length === 0 ? (
             <Text style={[styles.empty, { color: c.textSecondary }]}>
               Ninguno de los dos tiene posturas cargadas para este tipo de
@@ -324,6 +331,8 @@ function CandidatoHeaderSlot({
 }: CandidatoHeaderSlotProps) {
   const c = useThemeColors();
   const filled = !!candidato;
+  // DS-11: el % de afinidad usa el color del tier, no c.primary (UX-028)
+  const matchColor = matchPct != null ? getMatchColor(matchPct) : c.textSecondary;
   return (
     <Pressable
       onPress={onPress}
@@ -349,13 +358,9 @@ function CandidatoHeaderSlot({
       >
         {filled ? nombreCompleto(candidato) : `Elegir ${slot}`}
       </Text>
-      {filled && matchPct != null ? (
-        <Text style={[styles.candMatch, { color: c.primary }]}>
-          {matchPct}%
-        </Text>
-      ) : (
-        <Text style={[styles.candMatch, { color: c.textSecondary }]}>—</Text>
-      )}
+      <Text style={[styles.candMatch, { color: matchColor }]}>
+        {matchPct != null ? `${matchPct}%` : "—"}
+      </Text>
     </Pressable>
   );
 }
@@ -376,7 +381,11 @@ function FilaComparacion({
       ]}
     >
       <View style={styles.filaHeader}>
-        <Text style={[styles.filaNivel, { color }]}>
+        <Text
+          style={[styles.filaNivel, { color }]}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        >
           {iconoNivel(item.nivel)}
         </Text>
         <Text
@@ -389,10 +398,12 @@ function FilaComparacion({
       <View style={styles.filaBody}>
         <View style={styles.col}>
           <Text style={[styles.colLabel, { color: c.textSecondary }]}>A</Text>
+          {/* DS-11: texto de postura siempre en c.text -- el color del nivel
+              queda solo en el icono, no sangra al contenido politico (UX-029) */}
           <Text
             style={[
               styles.colValor,
-              { color: item.posturaA ? color : c.textSecondary },
+              { color: item.posturaA ? c.text : c.textSecondary },
             ]}
           >
             {item.posturaA?.opcion_respuesta_texto ?? "Sin postura"}
@@ -403,7 +414,7 @@ function FilaComparacion({
           <Text
             style={[
               styles.colValor,
-              { color: item.posturaB ? color : c.textSecondary },
+              { color: item.posturaB ? c.text : c.textSecondary },
             ]}
           >
             {item.posturaB?.opcion_respuesta_texto ?? "Sin postura"}
@@ -505,6 +516,10 @@ const styles = StyleSheet.create({
     padding: spacing.sp6,
     textAlign: "center",
     fontStyle: "italic",
+  },
+  loadingBox: {
+    alignItems: "center" as const,
+    padding: spacing.sp6,
   },
   paragraph: typography.small,
 

@@ -3,6 +3,19 @@
  */
 
 /**
+ * Normaliza un string para busqueda insensible a mayusculas y acentos.
+ *
+ * Ejemplos:
+ *   "Ramírez" -> "ramirez" | "ELECCIÓN" -> "eleccion" | "Bogotá" -> "bogota"
+ *
+ * Centralizado aqui para evitar duplicaciones en CandidatosScreen,
+ * NoticiasScreen y cualquier otro screen que filtre texto. (TASK-020)
+ */
+export function normalizeForSearch(s: string): string {
+  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+/**
  * Limpia texto que puede venir con markup HTML crudo desde el scraper del
  * backend (ej: <a href="...">link</a>, <br>, &amp;, &nbsp;). React Native
  * Text no parsea HTML, asi que sin esto las tags se ven literalmente.

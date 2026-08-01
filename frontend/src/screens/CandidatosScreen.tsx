@@ -63,15 +63,7 @@ import {
   nombreCompleto,
   sublabelCandidato,
 } from "../utils/candidato";
-
-// -- Helpers ----------------------------------------------------------------
-
-function normalizar(s: string): string {
-  return s
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-}
+import { normalizeForSearch } from "../utils/text";
 
 // -- Screen -----------------------------------------------------------------
 
@@ -134,10 +126,10 @@ export function CandidatosScreen({
   // -- Filtrado ---------------------------------------------------------
 
   const candidatosFiltrados = useMemo(() => {
-    const q = normalizar(query.trim());
+    const q = normalizeForSearch(query.trim());
     const filtrados = candidatos.filter((cand) => {
       if (q) {
-        const haystack = normalizar(
+        const haystack = normalizeForSearch(
           `${cand.nombre} ${cand.apellido ?? ""} ${cand.partido}`,
         );
         if (!haystack.includes(q)) return false;
@@ -355,7 +347,7 @@ export function CandidatosScreen({
           onPress={() => navigation.navigate("Cuestionario")}
           style={[
             styles.matchBanner,
-            { backgroundColor: c.accent2, borderColor: c.border },
+            { backgroundColor: c.info50, borderColor: c.info },
           ]}
           accessibilityRole="button"
           accessibilityLabel="Haz el cuestionario para ver tu match con cada candidato"

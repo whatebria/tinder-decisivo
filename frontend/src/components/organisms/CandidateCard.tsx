@@ -9,6 +9,7 @@ import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } fro
 import { Avatar } from "../atoms/Avatar";
 import { Icon } from "../atoms/Icon";
 import { MatchTier } from "../molecules/MatchTier";
+import { getMatchColor } from "../../services/matching";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors, useThemeShadows } from "../../theme/useTheme";
@@ -44,6 +45,8 @@ export function CandidateCard({
   const c = useThemeColors();
   const shadows = useThemeShadows();
 
+  const matchColor = matchPercent != null ? getMatchColor(matchPercent) : c.primary;
+
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -61,10 +64,12 @@ export function CandidateCard({
         partido: { fontSize: 13, color: c.textSecondary },
         sublabel: { fontSize: 12, color: c.textTertiary },
         tierWrap: { marginTop: spacing.sp1 },
-        pct: { fontSize: 22, fontWeight: "700", color: c.primary, marginHorizontal: spacing.sp3 },
+        // DS-11 Pantalla 4: el % usa --color-affinity-N (mismo tier que el badge).
+        // Calculado via getMatchColor() para consistencia con el service. (UX-026)
+        pct: { fontSize: 22, fontWeight: "700", color: matchColor, marginHorizontal: spacing.sp3 },
         pressed: { opacity: 0.85 },
       }),
-    [c, shadows],
+    [c, shadows, matchColor],
   );
 
   const content = (
