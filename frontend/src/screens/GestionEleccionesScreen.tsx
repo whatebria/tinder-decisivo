@@ -6,11 +6,11 @@
  * client-side vía `useElectionsPrefsStore` (secureStorage).
  */
 
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useTiposEleccion } from "../api/hooks";
-import { AppShell, CoachMarkTour, Icon, ScreenTopBar, Spinner, Toggle } from "../components";
+import { AppShell, CoachMarkTour, Icon, ScreenTopBar, Spinner, Toggle, useToast } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import {
   partitionTipos,
@@ -34,6 +34,7 @@ export function GestionEleccionesScreen({
   navigation,
 }: RootStackScreenProps<"GestionElecciones">) {
   const c = useThemeColors();
+  const toast = useToast();
   const { data: tipos = [], isLoading } = useTiposEleccion();
   const activeIds = useElectionsPrefsStore((s) => s.activeIds);
   const toggle = useElectionsPrefsStore((s) => s.toggle);
@@ -46,6 +47,27 @@ export function GestionEleccionesScreen({
   const { activas, disponibles } = useMemo(
     () => partitionTipos(tipos, activeIds),
     [tipos, activeIds],
+  );
+
+  // UX-047: handler con feedback de persistencia.
+  // isNowActive se calcula ANTES del toggle (activeIds aun no cambia en este frame).
+  const handleToggle = useCallback(
+    async (tipo: { id?: number | null; nombre?: string | null }) => {
+      if (tipo.id == null) return;
+      const isNowActive = !(activeIds ?? []).includes(tipo.id);
+      const nombre = tipo.nombre ?? "la eleccion";
+      try {
+        await toggle(tipo.id, allIds);
+        if (isNowActive) {
+          toast.success("Eleccion activada", `${nombre} aparecerá en tu Home.`);
+        } else {
+          toast.info("Eleccion desactivada", `${nombre} ya no aparecerá en tu Home.`);
+        }
+      } catch {
+        toast.error("No pudimos guardar tu preferencia", "Intenta de nuevo.");
+      }
+    },
+    [toggle, allIds, activeIds, toast],
   );
 
   const styles = useMemo(
@@ -177,7 +199,7 @@ export function GestionEleccionesScreen({
               </View>
               <Toggle
                 value
-                onPress={() => tipo.id && toggle(tipo.id, allIds)}
+                onPress={() => handleToggle(tipo)}
                 accessibilityLabel={`Desactivar ${tipo.nombre}`}
               />
             </View>
@@ -201,7 +223,7 @@ export function GestionEleccionesScreen({
               </View>
               <Toggle
                 value={false}
-                onPress={() => tipo.id && toggle(tipo.id, allIds)}
+                onPress={() => handleToggle(tipo)}
                 accessibilityLabel={`Activar ${tipo.nombre}`}
               />
             </View>

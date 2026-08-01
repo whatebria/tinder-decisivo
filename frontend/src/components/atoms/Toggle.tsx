@@ -26,7 +26,7 @@ export function Toggle({ value, disabled, accessibilityLabel, ...rest }: ToggleP
           width: TRACK_W,
           height: TRACK_H,
           borderRadius: TRACK_H / 2,
-          backgroundColor: value ? c.primary : c.border,
+          backgroundColor: value ? c.secondary : c.border,
           padding: 2,
           justifyContent: "center",
         },

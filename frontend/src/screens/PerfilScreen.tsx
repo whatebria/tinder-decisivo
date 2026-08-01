@@ -213,13 +213,29 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
 
           <Divider />
 
-          {/* Acciones especificas del perfil (REFACTOR-005: logout movido a Config) */}
-          <SectionTitle title="Cuenta" />
-          <View style={styles.actions}>
-            <NavRow
-              label="Cambiar mi contraseña"
-              onPress={() => setPassOpen(true)}
-            />
+          {/* UX-043: separar accion normal de accion destructiva */}
+          <SectionTitle title="Seguridad" />
+          <NavRow
+            label="Cambiar mi contraseña"
+            onPress={() => setPassOpen(true)}
+          />
+
+          <View
+            style={[
+              styles.dangerZone,
+              { borderColor: c.danger, backgroundColor: tints.danger50 },
+            ]}
+          >
+            <View
+              style={[
+                styles.dangerZoneHeader,
+                { borderBottomColor: c.danger },
+              ]}
+            >
+              <Text style={[styles.dangerZoneTitle, { color: c.danger }]}>
+                Zona de peligro
+              </Text>
+            </View>
             <NavRow
               label="Eliminar mi cuenta"
               variant="danger"
@@ -352,4 +368,19 @@ const styles = StyleSheet.create({
   statLabel: typography.overline,
 
   actions: { gap: spacing.sp2 },
+  // UX-043: zona de peligro para acciones destructivas
+  dangerZone: {
+    borderRadius: radii.rLg,
+    borderWidth: 1.5,
+    overflow: "hidden",
+  },
+  dangerZoneHeader: {
+    paddingVertical: spacing.sp2,
+    paddingHorizontal: spacing.sp3,
+    borderBottomWidth: 1,
+  },
+  dangerZoneTitle: {
+    ...typography.overline,
+    fontWeight: "800" as const,
+  },
 });

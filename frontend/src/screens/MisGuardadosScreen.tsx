@@ -297,7 +297,13 @@ export function MisGuardadosScreen({
           <View />
           <BookmarkButton
             saved
-            onPress={() => togglePos.mutate(b.postura)}
+            onPress={() =>
+              // BUG-022: callbacks de toast para no fallar silenciosamente
+              togglePos.mutate(b.postura, {
+                onSuccess: () => toast.success("Postura eliminada", "Se quitó de tus guardados."),
+                onError: (e) => toast.error("No pudimos quitar la postura", getErrorMessage(e)),
+              })
+            }
             loading={togglePos.isPending}
             accessibilityLabel="Quitar postura guardada"
           />
@@ -339,7 +345,13 @@ export function MisGuardadosScreen({
           <Text style={styles.cardMeta}>{b.noticia_data.fuente ?? ""}</Text>
           <BookmarkButton
             saved
-            onPress={() => toggleNot.mutate(b.noticia)}
+            onPress={() =>
+              // BUG-022: callbacks de toast para no fallar silenciosamente
+              toggleNot.mutate(b.noticia, {
+                onSuccess: () => toast.success("Noticia eliminada", "Se quitó de tus guardados."),
+                onError: (e) => toast.error("No pudimos quitar la noticia", getErrorMessage(e)),
+              })
+            }
             loading={toggleNot.isPending}
             accessibilityLabel={`Quitar noticia guardada: ${b.noticia_data.titulo}`}
           />
@@ -387,31 +399,10 @@ export function MisGuardadosScreen({
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-        {/* Filtro por eleccion (chips). Por ahora "Todas" es la unica funcional. */}
-        <View style={styles.filterRow}>
-          <Text style={styles.filterLabel}>Elección</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.filterChips}
-          >
-            <Chip
-              active={eleccionFilter === null}
-              onPress={() => setEleccionFilter(null)}
-            >
-              Todas
-            </Chip>
-            {eleccionesChips.map((t) => (
-              <Chip
-                key={t.id}
-                active={eleccionFilter === t.id}
-                onPress={() => t.id != null && setEleccionFilter(t.id)}
-              >
-                {t.nombre ?? "Elección"}
-              </Chip>
-            ))}
-          </ScrollView>
-        </View>
+        {/* BUG-021: chips de eleccion ocultados hasta que el backend exponga
+            tipo_eleccion consistentemente en todos los bookmarks shapes.
+            El estado eleccionFilter y la logica se conservan para cuando
+            el filtrado este implementado. Ver BUG-021. */}
 
         <Tabs<GuardadoTab>
           scrollable
