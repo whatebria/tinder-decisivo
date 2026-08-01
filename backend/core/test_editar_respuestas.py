@@ -128,11 +128,8 @@ class TestEditarRespuestaService:
         match_actualizado = MatchCandidato.objects.get(id=id_original)
         # El usuario cambio a opcion=5 (mismo valor que Ana) con peso=3 (PESO_MUCHO).
         # PESO_MUCHO multiplier = 2.0 -> score_total=1.0*2.0=2.0, peso_total=2.0.
-        # Con suavizado Bayesiano (ALPHA=2, PRIOR=0.5, n=1):
-        #   smoothed = (2.0 + 2*0.5) / (2.0 + 2) * 100 = 3.0/4.0 * 100 = 75.00%
-        # Nota: coincide numericamente con el seed pero por razones distintas.
-        # La verificacion clave del test es el id_original, no el %.
-        assert float(match_actualizado.match_percentage_value) == 75.0
+        # RAW: 2.0/2.0 * 100 = 100.00%
+        assert float(match_actualizado.match_percentage_value) == 100.0
 
     def test_no_toca_matches_de_otro_tipo(self, user, escenario):
         # Otro tipo con otro candidato + match del user

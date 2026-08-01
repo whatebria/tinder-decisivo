@@ -292,6 +292,20 @@ export function ResultadosScreen({
           textAlign: "center",
         },
         footerCol: { gap: spacing.sp2, marginTop: spacing.sp3 },
+        // Banner de cobertura baja: visible cuando confianza == TENTATIVA.
+        coverageBanner: {
+          flexDirection: "row",
+          alignItems: "flex-start",
+          gap: spacing.sp3,
+          padding: spacing.sp3,
+          borderRadius: radii.rMd,
+          borderWidth: 1,
+        },
+        coverageBannerText: {
+          flex: 1,
+          ...typography.small,
+          lineHeight: 18,
+        },
       }),
     [c],
   );
@@ -444,8 +458,28 @@ export function ResultadosScreen({
             const candidato = top.candidato_data;
             const candId = candidato.id!;
             const isFav = favoritoIds.has(candId);
+            const esTentativa = (top.confianza ?? "TENTATIVA").toUpperCase() === "TENTATIVA";
             return (
               <View style={{ gap: spacing.sp3 }}>
+                {esTentativa ? (
+                  <View
+                    style={[
+                      styles.coverageBanner,
+                      { backgroundColor: c.warning + "22", borderColor: c.warning },
+                    ]}
+                  >
+                    <Text style={{ fontSize: 16, lineHeight: 20 }}>(!)</Text>
+                    <Text style={[styles.coverageBannerText, { color: c.text }]}>
+                      <Text style={{ fontWeight: "700" }}>Resultado preliminar. </Text>
+                      Solo se compararon{" "}
+                      <Text style={{ fontWeight: "700" }}>
+                        {top.preguntas_consideradas}{" "}
+                        {top.preguntas_consideradas === 1 ? "pregunta" : "preguntas"}
+                      </Text>
+                      . Responde más para afinar tu afinidad.
+                    </Text>
+                  </View>
+                ) : null}
                 <ResultadoHero
                   nombre={candidato.nombre}
                   apellido={candidato.apellido}

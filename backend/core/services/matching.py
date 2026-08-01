@@ -12,6 +12,7 @@ Arquitectura:
 
 from __future__ import annotations
 
+import math
 from decimal import Decimal
 from typing import Iterable, Optional, TypedDict
 
@@ -51,23 +52,26 @@ PESO_MULTIPLIERS = {
 CONFIANZA_UMBRAL_MEDIA = 5
 CONFIANZA_UMBRAL_ALTA = 10
 
-# Suavizado Bayesiano (Laplace additive smoothing).
+# Ordenamiento por cobertura (coverage-weighted ranking).
 #
-# Problema: si un candidato solo comparte 1 pregunta con el user y coinciden,
-# el match bruto es 100% -- informativamente vacio pero visualmente engañoso.
+# Problema: un candidato con 1 pregunta de overlap perfecta (100% raw)
+# puede superar en ranking a uno con 12 preguntas al 93% de acuerdo real.
+# Distorsionar el porcentaje visible (ej. Bayesian smoothing) confunde al
+# usuario: "coincidi en todo y sale 86%?"
 #
-# Solucion: inyectar SMOOTHING_ALPHA pseudo-preguntas con score neutro (50%).
-#   smoothed = (score_total + ALPHA * PRIOR) / (peso_total + ALPHA) * 100
+# Solucion: el porcentaje que ve el usuario es el % RAW (honesto).
+# El ORDEN del ranking usa un coverage_score interno:
 #
-# Con ALPHA=2:
-#   n=1,  100% raw  --> 66.67%  (no domina el ranking)
-#   n=5,  100% raw  --> 85.71%
-#   n=12, 100% raw  --> 92.86%  (convergencia suave hacia el valor real)
+#   coverage_score = match_percentage * log(1 + n_overlap)
 #
-# El prior 0.5 representa "sin opinion, 50% de acuerdo por defecto".
-# NO se aplica al breakdown_por_eje (solo al score global de ranking).
-SMOOTHING_ALPHA = Decimal("2")
-SMOOTHING_PRIOR = Decimal("0.5")
+# Efecto:
+#   n=1,  100% -> coverage=69.3   (score bajo, no domina el ranking)
+#   n=2,  93%  -> coverage=102.3  (supera al de n=1 aunque % menor)
+#   n=12, 93%  -> coverage=238.5  (candidato bien cubierto sube mucho)
+#
+# El coverage_score es INTERNO: no se serializa ni se muestra al usuario.
+# La UX comunica la incertidumbre via el campo `confianza` y el banner
+# de ResultadosScreen cuando confianza == TENTATIVA.
 
 
 def _tipo_ids_con_base(tipo_eleccion) -> list[int]:
@@ -208,13 +212,10 @@ def _calcular_scores(
             acc[2] += 1
 
         if peso_total > 0:
-            # Suavizado Bayesiano: inyecta SMOOTHING_ALPHA pseudo-preguntas
-            # neutras (50%) para amortiguar scores extremos con baja cobertura.
-            # n=1, 100% -> 66.67%; n=12, 100% -> 92.86%.
-            # Ver constantes SMOOTHING_ALPHA / SMOOTHING_PRIOR en este modulo.
-            numerador = score_total + SMOOTHING_ALPHA * SMOOTHING_PRIOR
-            denominador = peso_total + SMOOTHING_ALPHA
-            porcentaje = (numerador / denominador * 100).quantize(Decimal("0.01"))
+            # Porcentaje RAW: lo que ve el usuario es el acuerdo real
+            # en las preguntas que efectivamente se compararon.
+            # El ordenamiento usa coverage_score (ver sort mas abajo).
+            porcentaje = (score_total / peso_total * 100).quantize(Decimal("0.01"))
         else:
             porcentaje = Decimal("0.00")
 
@@ -237,7 +238,16 @@ def _calcular_scores(
             "confianza": confianza_por_n(considered),
         })
 
-    resultados.sort(key=lambda r: r["match_percentage"], reverse=True)
+    # Ordenar por coverage_score (% * log(1+n)) para que candidatos con
+    # mayor cobertura suban aunque su % raw sea ligeramente menor.
+    # Desempate secundario por match_percentage puro.
+    resultados.sort(
+        key=lambda r: (
+            float(r["match_percentage"]) * math.log1p(r["num_preguntas_consideradas"]),
+            float(r["match_percentage"]),
+        ),
+        reverse=True,
+    )
     return resultados
 
 

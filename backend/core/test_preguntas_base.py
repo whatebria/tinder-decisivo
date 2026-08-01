@@ -145,9 +145,9 @@ class TestMatchConPreguntasBase:
         ada_result = resp.data[0]
         # 5 preguntas consideradas (2 base + 3 presidenciales)
         assert ada_result["preguntas_consideradas"] == 5
-        # Suavizado Bayesiano (ALPHA=2, PRIOR=0.5, n=5):
-        # (5 + 1) / (5 + 2) * 100 = 85.71%
-        assert float(ada_result["match_percentage"]) == 85.71
+        # RAW (n=5, score_total=5.0, peso_total=5.0):
+        # 5.0/5.0 * 100 = 100.00%
+        assert float(ada_result["match_percentage"]) == 100.0
 
     def test_match_solo_con_respuestas_base_funciona(
         self, api, user, escenario_con_base
@@ -166,8 +166,8 @@ class TestMatchConPreguntasBase:
         assert len(resp.data) == 1
         ada = resp.data[0]
         assert ada["preguntas_consideradas"] == 2
-        # Suavizado Bayesiano (ALPHA=2, PRIOR=0.5, n=2):
-        # (2 + 1) / (2 + 2) * 100 = 75.00%
-        assert float(ada["match_percentage"]) == 75.00
+        # RAW (n=2, score_total=2.0, peso_total=2.0):
+        # 2.0/2.0 * 100 = 100.00%
+        assert float(ada["match_percentage"]) == 100.0
         # Solo 2 preguntas -> confianza tentativa.
         assert ada["confianza"] == "tentativa"
