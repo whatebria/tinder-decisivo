@@ -13,7 +13,7 @@
  */
 
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { Candidato, PosturaCandidatoDetalle } from "../../api/endpoints";
 import { MatchExplanation, RadarChart } from "../../components";
@@ -30,6 +30,11 @@ export interface ResumenTabProps {
   scoreCol: string;
   posturas: PosturaCandidatoDetalle[];
   isGuest: boolean;
+  /**
+   * UX-041: callback para navegar a la tab de posturas completa.
+   * Al recibirlo, se muestra un CTA "Ver las N posturas" bajo el preview.
+   */
+  onVerTodasPosturas?: () => void;
 }
 
 export function ResumenTab({
@@ -39,6 +44,7 @@ export function ResumenTab({
   scoreCol,
   posturas,
   isGuest,
+  onVerTodasPosturas,
 }: ResumenTabProps) {
   const c = useThemeColors();
   const isDark = useIsDark();
@@ -109,6 +115,18 @@ export function ResumenTab({
               </View>
             ))}
           </View>
+          {/* UX-041: CTA para descubrir el listado completo de posturas. */}
+          {onVerTodasPosturas && (
+            <Pressable
+              onPress={onVerTodasPosturas}
+              accessibilityRole="link"
+              accessibilityLabel={`Ver las ${posturas.length} posturas del candidato`}
+            >
+              <Text style={[styles.verTodas, { color: c.primary }]}>
+                {`Ver las ${posturas.length} posturas >`}
+              </Text>
+            </Pressable>
+          )}
         </View>
       ) : null}
 
@@ -145,4 +163,11 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   posturaRespuesta: { ...typography.small },
+  // UX-041: link discreto bajo las posturas destacadas.
+  verTodas: {
+    ...typography.small,
+    fontWeight: "700",
+    textAlign: "center",
+    paddingVertical: spacing.sp2,
+  },
 });

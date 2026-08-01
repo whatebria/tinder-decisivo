@@ -15,7 +15,7 @@ import { radii } from "../../theme/radii";
 import { useThemeColors } from "../../theme/useTheme";
 import { useBlurringPress } from "../../hooks/useBlurringPress";
 
-export type IconButtonVariant = "soft" | "ghost" | "solid";
+export type IconButtonVariant = "soft" | "ghost" | "solid" | "danger-solid";
 export type IconButtonSize = "sm" | "md" | "lg";
 
 export interface IconButtonProps extends Omit<PressableProps, "children" | "style"> {
@@ -48,9 +48,13 @@ export function IconButton({
 
   const styles = useMemo(() => {
     const VARIANTS = {
-      soft: { backgroundColor: c.accent2 },
-      ghost: { backgroundColor: "transparent" },
-      solid: { backgroundColor: c.primary },
+      soft:         { backgroundColor: c.accent2 },
+      ghost:        { backgroundColor: "transparent" },
+      solid:        { backgroundColor: c.primary },
+      // UX-040: variante destructiva — fondo danger (rojo) para estado activo
+      // de descartar. El azul de "solid" comunica positivo; rojo comunica
+      // descarte activo correctamente.
+      "danger-solid": { backgroundColor: c.danger },
     } as const;
     return StyleSheet.create({
       base: {

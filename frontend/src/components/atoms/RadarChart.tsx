@@ -28,6 +28,12 @@ export interface RadarChartProps {
   color?: string;
   showLabels?: boolean;
   levels?: number;
+  /**
+   * UX-038: alternativa textual para lectores de pantalla (WCAG 1.1.1 Nivel A).
+   * Por defecto se genera automaticamente a partir de `data`.
+   * Pasar string vacio o `null` para usos puramente decorativos (ej. RankingRow).
+   */
+  accessibilityLabel?: string | null;
 }
 
 interface Point {
@@ -45,6 +51,19 @@ const LABEL_MAP: Record<string, string> = {
   INSTITUCIONAL: "Institucional",
   OTRO: "Otro",
 };
+
+/**
+ * UX-038: genera un accessibilityLabel textual para lectores de pantalla.
+ * WCAG 1.1.1 Nivel A: todo contenido no-texto necesita alternativa textual.
+ *
+ * Ejemplo: "Grafico de afinidad por eje tematico. Economia: 72%, Sociedad: 85%."
+ */
+function buildA11yLabel(data: Record<string, number>): string {
+  const ejes = Object.entries(data)
+    .map(([k, v]) => `${LABEL_MAP[k] ?? k}: ${Math.round(v)}%`)
+    .join(", ");
+  return `Grafico de afinidad por eje tematico. ${ejes}.`;
+}
 
 function polarToCartesian(
   cx: number,
@@ -64,6 +83,7 @@ export function RadarChart({
   color,
   showLabels = true,
   levels = 4,
+  accessibilityLabel: accessibilityLabelProp,
 }: RadarChartProps) {
   const c = useThemeColors();
   const strokeColor = color ?? c.primary;
@@ -139,7 +159,18 @@ export function RadarChart({
     : null;
 
   return (
-    <Svg width={size} height={size}>
+    <Svg
+      width={size}
+      height={size}
+      accessibilityRole="image"
+      accessibilityLabel={
+        // null o "" -> decorativo, no anuncia nada al lector de pantalla.
+        // undefined -> genera la descripcion automatica a partir de los datos.
+        accessibilityLabelProp != null
+          ? accessibilityLabelProp
+          : buildA11yLabel(data)
+      }
+    >
       <G>
         {gridCircles}
         {gridLines}

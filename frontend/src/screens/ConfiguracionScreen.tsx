@@ -41,6 +41,7 @@ import { usePerfil } from "../api/hooks";
 import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
+import { tints } from "../theme/colors";
 import { useThemeColors } from "../theme/useTheme";
 
 export function ConfiguracionScreen({
@@ -50,7 +51,9 @@ export function ConfiguracionScreen({
   // F18: email ya no está en AuthState. Se obtiene de usePerfil() (misma fuente
   // que HomeScreen / PerfilScreen). React Query lo cachea sin request adicional.
   const perfilQ = usePerfil();
-  const email = perfilQ.data?.email ?? null;
+  const email    = perfilQ.data?.email ?? null;
+  // UX-032: usar el username real del backend, no el prefijo del email.
+  const username = perfilQ.data?.username ?? "Mi cuenta";
   const isGuest = useAuthStore((s) => s.isGuest);
   const logout = useAuthStore((s) => s.logout);
   const exitGuestMode = useAuthStore((s) => s.exitGuestMode);
@@ -114,16 +117,37 @@ export function ConfiguracionScreen({
 
         // Footer (cerrar sesion)
         logoutWrap: { marginTop: spacing.sp3 },
+
+        // UX-033: DangerZone — enmarca las acciones destructivas (DS-11 P8).
+        // dangerBg no existe como token semantico todavia; se simula con
+        // tints.danger50 (light) que es exactamente el fondo suave de alerta.
+        dangerZone: {
+          borderRadius: radii.rLg,
+          borderWidth: 1.5,
+          borderColor: c.danger,
+          backgroundColor: tints.danger50,
+          overflow: "hidden",
+        },
+        dangerZoneHeader: {
+          paddingHorizontal: spacing.sp4,
+          paddingVertical: spacing.sp2,
+          borderBottomWidth: 1,
+          borderBottomColor: c.danger,
+        },
+        dangerZoneTitle: {
+          ...typography.overline,
+          fontWeight: "800",
+          color: c.danger,
+          textTransform: "uppercase",
+          letterSpacing: 1,
+        },
       }),
     [c],
   );
 
-  // Nombre "corto" derivado del email (parte antes del @). No es identidad
-  // real (no tenemos first/last name en el store todavia) pero evita mostrar
-  // el email dos veces.
-  const shortName = email ? email.split("@")[0] : "Mi cuenta";
+  // UX-032: iniciales del username real (no del email).
   const initials =
-    shortName.replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase() || "ME";
+    username.replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase() || "ME";
 
   return (
     <AppShell active="config" navigation={navigation}>
@@ -137,7 +161,7 @@ export function ConfiguracionScreen({
             <View style={styles.accountCard}>
               <Avatar initials={initials} size="lg" />
               <Text style={styles.accountName} numberOfLines={1}>
-                {shortName}
+                {username}
               </Text>
               {email ? (
                 <Text style={styles.accountEmail} numberOfLines={1}>
@@ -250,12 +274,19 @@ export function ConfiguracionScreen({
           </View>
         ) : null}
 
-        {/* 5. Cerrar sesion */}
+        {/* UX-033: Zona de peligro (DS-11 P8) -- agrupa acciones destructivas. */}
         {!isGuest ? (
-          <View style={styles.logoutWrap}>
-            <Button variant="secondary" onPress={handleLogout}>
-              Cerrar sesión
-            </Button>
+          <View style={[styles.section, { marginTop: spacing.sp3 }]}>
+            <View style={styles.dangerZone}>
+              <View style={styles.dangerZoneHeader}>
+                <Text style={styles.dangerZoneTitle}>Zona de peligro</Text>
+              </View>
+              <NavRow
+                label="Cerrar sesión"
+                variant="danger"
+                onPress={handleLogout}
+              />
+            </View>
           </View>
         ) : null}
       </ScrollView>

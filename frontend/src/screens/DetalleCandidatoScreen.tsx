@@ -236,6 +236,7 @@ export function DetalleCandidatoScreen({
             scoreCol={scoreCol}
             posturas={posturas}
             isGuest={isGuest}
+            onVerTodasPosturas={() => setTab("posturas")}
           />
         ) : tab === "posturas" ? (
           <CandidatoPosturas
@@ -378,12 +379,12 @@ function ActionRow({
         onPress={onToggleDesc}
         disabled={loadingDesc}
         accessibilityLabel={isDescartado ? "Restaurar" : "Descartar"}
-        variant={isDescartado ? "solid" : "soft"}
+        variant={isDescartado ? "danger-solid" : "soft"}
       >
         <Icon
           name="close"
           size={20}
-          color={isDescartado ? c.textOnPrimary : c.danger}
+          color={isDescartado ? "#FFFFFF" : c.danger}
         />
       </IconButton>
       <IconButton

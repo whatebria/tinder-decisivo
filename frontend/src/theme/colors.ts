@@ -73,7 +73,7 @@ const grays = {
 // Tint scales de marca (50-900 por familia semantica)
 // ============================================================================
 
-const tints = {
+export const tints = {
   // Primary — azul peteroleo
   primary50:  "#EEF3F7",
   primary100: "#D6E2EB",

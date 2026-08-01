@@ -12,6 +12,7 @@ import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { PosturaCandidatoDetalle } from "../../api/endpoints";
 import { getLikertColor } from "../../services/matching";
+import { Spinner } from "../atoms/Spinner";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { typography } from "../../theme/typography";
@@ -60,9 +61,12 @@ export function CandidatoPosturas({ posturas, loading }: Props) {
     });
   }
 
+  // BUG-016: usar Spinner en lugar de Text plano para el estado de carga.
   if (loading) {
     return (
-      <Text style={{ color: c.textSecondary }}>Cargando posturas...</Text>
+      <View style={{ alignItems: "center", padding: spacing.sp5 }}>
+        <Spinner size="large" />
+      </View>
     );
   }
 
@@ -85,10 +89,15 @@ export function CandidatoPosturas({ posturas, loading }: Props) {
             const respuestaColor = getLikertColor(p.opcion_respuesta_valor, c, isDark);
 
             return (
+              // BUG-017: si no hay justificacion, el item no debe ser interactivo.
+              // accessible=false lo saca del arbol de accesibilidad cuando es
+              // solo texto, y onPress=undefined evita el feedback tactil vacio.
               <Pressable
                 key={p.id}
-                onPress={() => toggle(p.id)}
+                onPress={p.justificacion ? () => toggle(p.id) : undefined}
                 style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}
+                accessible={!!p.justificacion}
+                accessibilityRole={p.justificacion ? "button" : "text"}
               >
                 <Text style={[styles.pregunta, { color: c.text }]}>
                   {p.pregunta_texto}
@@ -112,9 +121,12 @@ export function CandidatoPosturas({ posturas, loading }: Props) {
                   </View>
                 ) : null}
 
-                <Text style={[styles.hint, { color: c.textSecondary }]}>
-                  {isOpen ? "Toca para cerrar" : "Toca para ver justificacion"}
-                </Text>
+                {/* BUG-017: hint solo cuando hay justificacion disponible. */}
+                {p.justificacion ? (
+                  <Text style={[styles.hint, { color: c.textSecondary }]}>
+                    {isOpen ? "Toca para cerrar" : "Toca para ver justificacion"}
+                  </Text>
+                ) : null}
               </Pressable>
             );
           })}

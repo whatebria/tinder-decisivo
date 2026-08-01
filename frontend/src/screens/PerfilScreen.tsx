@@ -1,14 +1,11 @@
 /**
  * PerfilScreen: info del usuario + contadores + acciones (cambiar password,
- * eliminar cuenta, cerrar sesion).
+ * eliminar cuenta).
  *
- * Migrado a Fase 5:
- *   - Fuera Tamagui, todo con RN + design system nativo
- *   - AppShell con active=null (accedido desde Config)
- *   - ScreenTopBar con back button
- *   - Elimina ThemeSelector local (DRY: usa ThemeToggle atom que ya hace lo mismo con Tabs)
- *   - StatBadge queda inline (patron chico y unico de este screen)
- *   - Cero hardcodes: todo via tokens
+ * REFACTOR-005: ThemeToggle y Cerrar sesion se eliminaron de esta pantalla
+ * (ambos ya estan en ConfiguracionScreen). PerfilScreen retiene solo lo que
+ * es especifico del perfil: ubicacion electoral, cambiar contrasena y
+ * eliminar cuenta.
  */
 
 import React, { useMemo, useState } from "react";
@@ -30,7 +27,6 @@ import {
   ScreenTopBar,
   SectionTitle,
   Spinner,
-  ThemeToggle,
   UbicacionPicker,
   useToast,
 } from "../components";
@@ -198,22 +194,12 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
 
           <Divider />
 
-          {/* Apariencia */}
-          <SectionTitle title="Apariencia" />
-          <ThemeToggle />
-
-          <Divider />
-
-          {/* Acciones */}
+          {/* Acciones especificas del perfil (REFACTOR-005: logout movido a Config) */}
           <SectionTitle title="Cuenta" />
           <View style={styles.actions}>
             <NavRow
               label="Cambiar mi contraseña"
               onPress={() => setPassOpen(true)}
-            />
-            <NavRow
-              label="Cerrar sesión"
-              onPress={logout}
             />
             <NavRow
               label="Eliminar mi cuenta"
