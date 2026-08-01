@@ -46,3 +46,12 @@ export {
   type DimensionBadgeProps,
   type DimensionBadgeSize,
 } from "./DimensionBadge";
+
+// Home HUB rediseno (Fase 10)
+export {
+  ProgressRing,
+  type ProgressRingProps,
+  type ProgressRingSize,
+  type ProgressRingState,
+} from "./ProgressRing";
+

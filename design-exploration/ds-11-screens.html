@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>VotoAfin DS — Validacion por Pantalla</title>
+<link rel="stylesheet" href="ds-shared.css"/>
+<style>
+/* ── Screen cards ── */
+.screen-card{background:var(--c-surface);border:1.5px solid var(--c-border);
+  border-radius:16px;padding:20px;margin-bottom:18px;}
+.screen-title{font-size:14px;font-weight:900;color:var(--c-text);margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;}
+.screen-num{display:inline-flex;align-items:center;justify-content:center;width:26px;
+  height:26px;border-radius:8px;background:var(--c-primary);color:var(--c-on-primary);
+  font-size:11px;font-weight:900;flex-shrink:0;}
+.mini-demo{border-radius:12px;overflow:hidden;border:1.5px solid var(--c-border2);
+  margin-bottom:14px;font-family:system-ui,sans-serif;}
+.risk-box{background:var(--c-warning-bg);border:1px solid var(--c-warning);
+  border-radius:8px;padding:9px 12px;font-size:11px;color:#5C3D10;margin-top:10px;
+  line-height:1.6;}
+.dark .risk-box{color:var(--c-warning);background:rgba(200,155,92,.1);}
+.risk-label{font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:.4px;}
+.note-box{background:var(--c-info-bg);border:1px solid var(--c-info);border-radius:8px;
+  padding:9px 12px;font-size:11px;color:#1E3A5F;margin-top:10px;line-height:1.6;}
+.dark .note-box{color:var(--c-info);background:rgba(92,138,184,.1);}
+
+/* ── Mini demo internals ── */
+.md-hero{background:var(--c-hero);padding:16px;color:#fff;}
+.md-hero-title{font-size:13px;font-weight:900;margin-bottom:4px;}
+.md-hero-sub{font-size:10px;opacity:.65;margin-bottom:12px;}
+.md-badge{display:inline-block;background:var(--c-accent);color:var(--c-on-accent);
+  font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;}
+.md-cta{display:inline-block;background:var(--c-accent);color:var(--c-on-accent);font-size:11px;
+  font-weight:700;padding:7px 16px;border-radius:8px;margin-top:8px;}
+.md-body{background:var(--c-bg-mkt);padding:12px;display:flex;gap:8px;}
+.md-elcard{background:var(--c-surface);border:1.5px solid var(--c-border);
+  border-radius:10px;padding:10px;flex:1;}
+.md-elcard-title{font-size:11px;font-weight:800;color:var(--c-text);margin-bottom:4px;}
+.md-elcard-sub{font-size:9px;color:var(--c-text3);}
+.md-prog{height:4px;background:var(--c-border2);border-radius:2px;margin-top:6px;}
+.md-prog-fill{height:100%;border-radius:2px;background:var(--c-secondary);}
+.md-prog-fill-done{height:100%;border-radius:2px;background:var(--c-success);}
+
+/* Cuestionario demo */
+.md-q-header{background:var(--c-primary);padding:12px 16px;color:var(--c-on-primary);}
+.md-q-title{font-size:12px;font-weight:800;}
+.md-q-prog{height:3px;background:rgba(255,255,255,.2);border-radius:2px;margin-top:8px;}
+.md-q-prog-fill{height:100%;width:40%;border-radius:2px;background:var(--c-secondary);}
+.md-q-body{background:var(--c-bg);padding:12px;display:flex;flex-direction:column;gap:6px;}
+.md-q-opt{background:var(--c-surface);border:1.5px solid var(--c-border);
+  border-radius:8px;padding:7px 10px;font-size:11px;color:var(--c-text);}
+.md-q-opt.sel{border-color:var(--c-primary);background:rgba(46,95,126,.07);font-weight:700;}
+.md-q-next{background:var(--c-primary);color:var(--c-on-primary);font-size:11px;font-weight:700;
+  padding:7px 14px;border-radius:8px;display:inline-block;margin-top:4px;align-self:flex-end;}
+
+/* Resultados demo */
+.md-r-body{background:var(--c-bg);padding:14px;display:flex;gap:10px;align-items:flex-start;}
+.md-r-card{background:var(--c-surface);border:1.5px solid var(--c-border);
+  border-radius:12px;padding:14px;flex:1;}
+.md-r-pct{font-size:36px;font-weight:900;line-height:1;color:var(--c-aff5);}
+.md-r-name{font-size:12px;font-weight:800;color:var(--c-text);margin-top:6px;}
+.md-r-party{font-size:10px;color:var(--c-text3);}
+.md-r-btns{display:flex;gap:6px;margin-top:10px;}
+.md-r-btn-p{background:var(--c-primary);color:var(--c-on-primary);font-size:10px;font-weight:700;
+  padding:5px 10px;border-radius:6px;}
+.md-r-btn-a{background:var(--c-accent);color:var(--c-on-accent);font-size:10px;font-weight:700;
+  padding:5px 10px;border-radius:6px;}
+
+/* Ranking demo */
+.md-rank-body{background:var(--c-bg);padding:12px;display:flex;flex-direction:column;gap:6px;}
+.md-rank-row{display:flex;align-items:center;gap:8px;}
+.md-rank-pos{font-size:11px;font-weight:700;color:var(--c-text2);width:16px;text-align:center;}
+.md-rank-avatar{width:28px;height:28px;border-radius:50%;background:var(--c-border2);flex-shrink:0;}
+.md-rank-info{flex:1;}
+.md-rank-name{font-size:11px;font-weight:700;color:var(--c-text);}
+.md-rank-bar-wrap{height:4px;background:var(--c-border2);border-radius:2px;margin-top:3px;}
+.md-rank-bar{height:100%;border-radius:2px;}
+.md-rank-pct{font-size:11px;font-weight:800;width:36px;text-align:right;}
+
+/* Compartir demo */
+.md-share{background:var(--c-hero);padding:22px;display:flex;flex-direction:column;align-items:center;text-align:center;}
+.md-share-pct{font-size:48px;font-weight:900;line-height:1;color:var(--c-accent);}
+.md-share-label{font-size:11px;color:rgba(255,255,255,.7);margin-top:4px;}
+.md-share-name{font-size:14px;font-weight:800;color:#fff;margin-top:8px;}
+.md-share-logo{font-size:12px;font-weight:900;color:var(--c-accent);margin-top:12px;letter-spacing:1px;}
+
+/* Login demo */
+.md-login{background:var(--c-bg-mkt);padding:20px;display:flex;justify-content:center;}
+.md-login-form{background:var(--c-surface);border:1.5px solid var(--c-border);
+  border-radius:12px;padding:16px;width:200px;}
+.md-login-title{font-size:12px;font-weight:900;color:var(--c-text);margin-bottom:12px;}
+.md-login-inp{border:1.5px solid var(--c-border);border-radius:6px;padding:5px 8px;
+  font-size:11px;color:var(--c-text);width:100%;margin-bottom:6px;background:var(--c-surface);}
+.md-login-inp.focused{border-color:var(--c-primary);}
+.md-login-btn{background:var(--c-primary);color:var(--c-on-primary);font-size:11px;font-weight:700;
+  padding:7px;border-radius:7px;width:100%;text-align:center;margin-top:4px;}
+.md-login-link{font-size:10px;color:var(--c-primary);text-align:center;margin-top:8px;text-decoration:underline;}
+
+/* Config demo */
+.md-cfg{background:var(--c-bg);padding:12px;display:flex;flex-direction:column;gap:0;}
+.md-cfg-row{display:flex;justify-content:space-between;align-items:center;
+  padding:9px 4px;border-bottom:1px solid var(--c-border2);font-size:11px;color:var(--c-text);}
+.md-cfg-toggle{width:28px;height:16px;border-radius:8px;background:var(--c-secondary);
+  position:relative;}
+.md-cfg-toggle-dot{position:absolute;right:2px;top:2px;width:12px;height:12px;
+  border-radius:50%;background:#fff;}
+.md-cfg-danger{background:var(--c-danger-bg);border:1px solid var(--c-danger);
+  border-radius:8px;padding:10px 12px;margin-top:8px;display:flex;justify-content:space-between;align-items:center;}
+.md-cfg-danger-lbl{font-size:11px;color:var(--c-danger);font-weight:700;}
+.md-cfg-danger-btn{background:var(--c-danger);color:#fff;font-size:10px;
+  font-weight:700;padding:4px 10px;border-radius:6px;}
+
+/* Summary table ── */
+.summ-table th{font-size:9px;} .summ-table td{font-size:10px;}
+.dot-yes{color:var(--c-accent);font-weight:900;}
+.dot-no{color:var(--c-border);font-weight:900;}
+.dot-cond{color:var(--c-warning);font-weight:900;}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-logo">VotoAfin DS</div>
+  <div class="sidebar-ver">v1.0 · Agosto 2026</div>
+  <hr/>
+  <div class="sidebar-label">Fundamentos</div>
+  <a href="ds-index.html">Inicio</a>
+  <a href="ds-01-philosophy.html">01 · Filosofia y Principios</a>
+  <a href="ds-02-psychology.html">02 · Psicologia del Usuario</a>
+  <a href="ds-03-benchmarking.html">03 · Benchmarking</a>
+  <hr/>
+  <div class="sidebar-label">Sistema de Color</div>
+  <a href="ds-04-color-system.html">04 · Sistema de Color</a>
+  <a href="ds-05-dark-mode.html">05 · Dark Mode</a>
+  <a href="ds-06-axes.html">06 · Ejes Tematicos</a>
+  <hr/>
+  <div class="sidebar-label">Datos y Visualizacion</div>
+  <a href="ds-07-dataviz.html">07 · Visualizacion de Datos</a>
+  <a href="ds-08-affinity.html">08 · Tiers de Afinidad</a>
+  <hr/>
+  <div class="sidebar-label">Componentes</div>
+  <a href="ds-09-components.html">09 · Component Library</a>
+  <hr/>
+  <div class="sidebar-label">Implementacion</div>
+  <a href="ds-10-tokens.html">10 · Design Tokens</a>
+  <a href="ds-11-screens.html">11 · Validacion por Pantalla</a>
+  <div class="sidebar-bottom">
+    <button class="theme-btn" id="theme-btn">Dark mode</button>
+  </div>
+</nav>
+
+<div class="main"><div class="content">
+
+<div class="page-header">
+  <div class="breadcrumb">Implementacion / 11</div>
+  <h1>Validacion por Pantalla</h1>
+  <p>Que colores usar en cada area del producto, por que, y que riesgos evitar.</p>
+</div>
+
+<!-- PANTALLA 1 -->
+<div class="screen-card">
+  <div class="screen-title"><span class="screen-num">1</span> Home / Dashboard</div>
+  <div class="mini-demo">
+    <div class="md-hero">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div class="md-hero-title">Buenos dias, Ana</div>
+          <div class="md-hero-sub">3 elecciones pendientes · Chile 2026</div>
+          <div class="md-cta">Empezar</div>
+        </div>
+        <div class="md-badge">3</div>
+      </div>
+    </div>
+    <div class="md-body">
+      <div class="md-elcard">
+        <div class="md-elcard-title">Diputados</div>
+        <div class="md-elcard-sub">15 candidatos · 15 preguntas</div>
+        <div class="md-prog"><div class="md-prog-fill" style="width:60%;"></div></div>
+      </div>
+      <div class="md-elcard">
+        <div class="md-elcard-title">Senadores</div>
+        <div class="md-elcard-sub">Completado</div>
+        <div class="md-prog"><div class="md-prog-fill-done" style="width:100%;"></div></div>
+      </div>
+    </div>
+  </div>
+  <table><thead><tr><th>Elemento</th><th>Token</th><th>Razon</th></tr></thead><tbody>
+    <tr><td>Hero background</td><td class="mono">--color-brand-hero (#1C3A52)</td><td>Seriedad institucional, concentracion antes de empezar</td></tr>
+    <tr><td>CTA "Empezar"</td><td class="mono">--color-brand-accent (#3A9E7A)</td><td>Unico contexto donde el verde es accion pura, sin ambiguedad</td></tr>
+    <tr><td>Contador badge</td><td class="mono">--color-brand-accent</td><td>Urgencia positiva sin alarma</td></tr>
+    <tr><td>Cards fondo</td><td class="mono">--color-surface-bg-mkt (#F0F4F8)</td><td>Conecta visualmente con el hero</td></tr>
+    <tr><td>Progress bar</td><td class="mono">--color-brand-secondary (#7BA098)</td><td>Progreso neutro, no energetico</td></tr>
+    <tr><td>Completado ring</td><td class="mono">--color-success (#6B9B7A)</td><td>Recompensa tranquila, no exaltada</td></tr>
+  </tbody></table>
+  <div class="risk-box"><span class="risk-label">Riesgo:</span> Si el accent verde aparece mas de 3 veces en el viewport, pierde su rol de CTA unico y se convierte en decoracion.</div>
+</div>
+
+<!-- PANTALLA 2 -->
+<div class="screen-card">
+  <div class="screen-title"><span class="screen-num">2</span> Cuestionario</div>
+  <div class="mini-demo">
+    <div class="md-q-header">
+      <div class="md-q-title">Pregunta 6 de 15 · Economia</div>
+      <div class="md-q-prog"><div class="md-q-prog-fill"></div></div>
+    </div>
+    <div class="md-q-body">
+      <div style="font-size:12px;font-weight:700;color:var(--c-text);margin-bottom:2px;">El Estado debe controlar los precios de bienes basicos</div>
+      <div class="md-q-opt">Muy en desacuerdo</div>
+      <div class="md-q-opt sel">En desacuerdo</div>
+      <div class="md-q-opt">De acuerdo</div>
+      <div class="md-q-opt">Muy de acuerdo</div>
+      <div class="md-q-next">Siguiente</div>
+    </div>
+  </div>
+  <table><thead><tr><th>Elemento</th><th>Token</th><th>Razon</th></tr></thead><tbody>
+    <tr><td>Fondo</td><td class="mono">--color-surface-bg (#F5F7F5)</td><td>Verde-gris reduce fatiga ocular en sesiones largas</td></tr>
+    <tr><td>Header</td><td class="mono">--color-brand-primary (#2E5F7E)</td><td>Encuadra sin agobiar, azul perceptualmente neutro</td></tr>
+    <tr><td>Opcion seleccionada</td><td class="mono">border: --color-brand-primary · bg: primary50</td><td>El azul como accion no implica "correcta"</td></tr>
+    <tr><td>Progress bar</td><td class="mono">--color-brand-secondary (#7BA098)</td><td>Progreso tranquilo, no excitante</td></tr>
+    <tr><td>Boton Siguiente</td><td class="mono">--color-brand-primary</td><td>NO usar accent aqui — ver Regla 1</td></tr>
+    <tr><td>DimensionBadge eje</td><td class="mono">var(--c-axis-*) via getDimensionColors</td><td>Siempre via API de dominio, nunca hardcodeado</td></tr>
+  </tbody></table>
+  <div class="risk-box">
+    <span class="risk-label">Riesgos criticos:</span>
+    Accent verde (#3A9E7A) apareciendo en cualquier elemento = ERROR critico (Regla 1).
+    Feedback rojo/verde en las opciones = sesgo documentado, PROHIBIDO.
+  </div>
+</div>
+
+<!-- PANTALLA 3 -->
+<div class="screen-card">
+  <div class="screen-title"><span class="screen-num">3</span> Resultados de Matching</div>
+  <div class="mini-demo">
+    <div class="md-r-body">
+      <div class="md-r-card">
+        <div class="md-r-pct">87%</div>
+        <div class="md-r-name">Candidata A</div>
+        <div class="md-r-party">Partido Verde · Diputada</div>
+        <div class="md-r-btns">
+          <div class="md-r-btn-p">Ver perfil</div>
+          <div class="md-r-btn-a">Compartir</div>
+        </div>
+      </div>
+      <div style="flex:1;">
+        <svg width="100%" viewBox="0 0 150 150" style="display:block;">
+          <circle cx="75" cy="75" r="55" fill="none" stroke="var(--c-border2)" stroke-width="1"/>
+          <circle cx="75" cy="75" r="37" fill="none" stroke="var(--c-border2)" stroke-width="1"/>
+          <circle cx="75" cy="75" r="18" fill="none" stroke="var(--c-border2)" stroke-width="1"/>
+          <polygon points="75,22 121,50 121,100 75,128 29,100 29,50"
+            fill="rgba(46,95,126,.15)" stroke="var(--c-s1)" stroke-width="1.5"/>
+          <polygon points="75,30 112,55 110,97 75,120 40,97 38,55"
+            fill="rgba(58,158,122,.15)" stroke="var(--c-s2)" stroke-width="1.5"/>
+        </svg>
+        <div style="display:flex;gap:10px;font-size:9px;color:var(--c-text2);justify-content:center;margin-top:4px;">
+          <span style="display:flex;align-items:center;gap:3px;"><span style="width:10px;height:3px;background:var(--c-s1);display:inline-block;border-radius:1px;"></span>Tu perfil</span>
+          <span style="display:flex;align-items:center;gap:3px;"><span style="width:10px;height:3px;background:var(--c-s2);display:inline-block;border-radius:1px;"></span>Candidata A</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <table><thead><tr><th>Elemento</th><th>Token</th><th>Razon</th></tr></thead><tbody>
+    <tr><td>% de match</td><td class="mono">--color-affinity-N segun rango</td><td>Comunica coincidencia matematicamente, no emocionalmente</td></tr>
+    <tr><td>Nombre candidato</td><td class="mono">--color-text-primary</td><td>Nunca hereda el color del tier — es dato, no estado</td></tr>
+    <tr><td>Radar usuario</td><td class="mono">--color-chart-s1 (#2E5F7E)</td><td>El usuario siempre es azul, siempre la referencia</td></tr>
+    <tr><td>Radar candidato</td><td class="mono">--color-chart-s2 (#3A9E7A)</td><td>Primer candidato siempre verde en el sistema de series</td></tr>
+    <tr><td>CTA "Ver perfil"</td><td class="mono">--color-brand-primary</td><td>Accion secundaria, no recompensa</td></tr>
+    <tr><td>CTA "Compartir"</td><td class="mono">--color-brand-accent</td><td>Accion de alta energia en momento de recompensa</td></tr>
+  </tbody></table>
+  <div class="risk-box"><span class="risk-label">Riesgo:</span> Usar el color del tier en el nombre del candidato implica que "verde = candidato bueno" — sesgo de framing inaceptable.</div>
+</div>
+
+<!-- PANTALLA 4 -->
+<div class="screen-card">
+  <div class="screen-title"><span class="screen-num">4</span> Ranking de Afinidad</div>
+  <div class="mini-demo">
+    <div class="md-rank-body">
+      <div class="md-rank-row">
+        <div class="md-rank-pos">1</div>
+        <div class="md-rank-avatar"></div>
+        <div class="md-rank-info">
+          <div class="md-rank-name">Candidata A</div>
+          <div class="md-rank-bar-wrap"><div class="md-rank-bar" style="width:87%;background:var(--c-aff5);"></div></div>
+        </div>
+        <div class="md-rank-pct" style="color:var(--c-aff5);">87%</div>
+      </div>
+      <div class="md-rank-row">
+        <div class="md-rank-pos">2</div>
+        <div class="md-rank-avatar"></div>
+        <div class="md-rank-info">
+          <div class="md-rank-name">Candidato B</div>
+          <div class="md-rank-bar-wrap"><div class="md-rank-bar" style="width:71%;background:var(--c-aff4);"></div></div>
+        </div>
+        <div class="md-rank-pct" style="color:var(--c-aff4);">71%</div>
+      </div>
+      <div class="md-rank-row">
+        <div class="md-rank-pos">3</div>
+        <div class="md-rank-avatar"></div>
+        <div class="md-rank-info">
+          <div class="md-rank-name">Candidato C</div>
+          <div class="md-rank-bar-wrap"><div class="md-rank-bar" style="width:52%;background:var(--c-aff3);"></div></div>
+        </div>
+        <div class="md-rank-pct" style="color:var(--c-aff3);">52%</div>
+      </div>
+      <div class="md-rank-row">
+        <div class="md-rank-pos">4</div>
+        <div class="md-rank-avatar"></div>
+        <div class="md-rank-info">
+          <div class="md-rank-name">Candidato D</div>
+          <div class="md-rank-bar-wrap"><div class="md-rank-bar" style="width:31%;background:var(--c-aff2);"></div></div>
+        </div>
+        <div class="md-rank-pct" style="color:var(--c-aff2);">31%</div>
+      </div>
+    </div>
+  </div>
+  <table><thead><tr><th>Elemento</th><th>Token</th><th>Razon</th></tr></thead><tbody>
+    <tr><td>Barra de ranking</td><td class="mono">--color-affinity-N</td><td>Color matematico segun % de coincidencia, no por posicion</td></tr>
+    <tr><td>Numero de posicion</td><td class="mono">--color-text-secondary</td><td>Neutro, no heroico — el puesto es consecuencia del match</td></tr>
+    <tr><td>% texto</td><td class="mono">--color-affinity-N (mismo que barra)</td><td>Coherencia visual entre barra y etiqueta</td></tr>
+    <tr><td>Nombre candidato</td><td class="mono">--color-text-primary</td><td>Neutral, el nombre no hereda el tier</td></tr>
+  </tbody></table>
+  <div class="risk-box"><span class="risk-label">Regla critica:</span> La barra indica coincidencia matematica, NO importancia del candidato. Usar --color-brand-primary para la barra del #1 implicaria "azul = mejor candidato".</div>
+</div>
+
+<!-- PANTALLA 5 -->
+<div class="screen-card">
+  <div class="screen-title"><span class="screen-num">5</span> Comparador de Candidatos</div>
+  <div class="mini-demo" style="background:var(--c-bg);padding:14px;">
+    <div style="display:flex;gap:12px;align-items:flex-start;">
+      <svg width="150" height="150" viewBox="0 0 150 150" style="flex-shrink:0;">
+        <circle cx="75" cy="75" r="55" fill="none" stroke="var(--c-border2)" stroke-width="1"/>
+        <circle cx="75" cy="75" r="37" fill="none" stroke="var(--c-border2)" stroke-width="1"/>
+        <circle cx="75" cy="75" r="18" fill="none" stroke="var(--c-border2)" stroke-width="1"/>
+        <line x1="75" y1="20" x2="75" y2="130" stroke="var(--c-border2)" stroke-width=".7"/>
+        <line x1="20" y1="75" x2="130" y2="75" stroke="var(--c-border2)" stroke-width=".7"/>
+        <line x1="27" y1="30" x2="123" y2="120" stroke="var(--c-border2)" stroke-width=".7"/>
+        <line x1="123" y1="30" x2="27" y2="120" stroke="var(--c-border2)" stroke-width=".7"/>
+        <polygon points="75,22 121,50 121,100 75,128 29,100 29,50"
+          fill="rgba(46,95,126,.2)" stroke="var(--c-s1)" stroke-width="2"/>
+        <polygon points="75,35 108,58 106,98 75,116 44,98 42,58"
+          fill="rgba(58,158,122,.2)" stroke="var(--c-s2)" stroke-width="2"/>
+        <polygon points="75,45 98,64 96,96 75,110 54,96 52,64"
+          fill="rgba(200,155,92,.15)" stroke="var(--c-s3)" stroke-width="1.5" stroke-dasharray="3,2"/>
+      </svg>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:11px;">
+        <div style="font-weight:700;color:var(--c-text2);font-size:9px;text-transform:uppercase;letter-spacing:.4px;">Leyenda</div>
+        <div style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:3px;background:var(--c-s1);display:inline-block;border-radius:1px;"></span><span style="color:var(--c-text);">Tu perfil</span></div>
+        <div style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:3px;background:var(--c-s2);display:inline-block;border-radius:1px;"></span><span style="color:var(--c-text);">Candidata A</span></div>
+        <div style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:3px;background:var(--c-s3);display:inline-block;border-radius:1px;border:1px dashed var(--c-s3);"></span><span style="color:var(--c-text);">Candidato B</span></div>
+        <div style="margin-top:8px;">
+          <div style="font-size:9px;color:var(--c-text3);margin-bottom:4px;">Ejes</div>
+          <div class="chip chip-neutral" style="margin-bottom:3px;font-size:9px;">Economia</div>
+          <div class="chip chip-neutral" style="margin-bottom:3px;font-size:9px;">Social</div>
+          <div class="chip chip-neutral" style="font-size:9px;">Ambiental</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <table><thead><tr><th>Elemento</th><th>Token</th><th>Razon</th></tr></thead><tbody>
+    <tr><td>Usuario (referencia)</td><td class="mono">--color-chart-s1 (#2E5F7E)</td><td>Siempre azul, siempre la referencia del usuario</td></tr>
+    <tr><td>Candidato A</td><td class="mono">--color-chart-s2 (#3A9E7A)</td><td>Segundo en el sistema, siempre verde</td></tr>
+    <tr><td>Candidato B</td><td class="mono">--color-chart-s3 (#C89B5C)</td><td>Tercero, ambar — diferenciacion cromatica clara</td></tr>
+    <tr><td>Grid del radar</td><td class="mono">--color-surface-border</td><td>Neutro, no compite con los datos de serie</td></tr>
+    <tr><td>Labels de ejes</td><td class="mono">--color-text-secondary</td><td>Informativos, no protagonistas</td></tr>
+  </tbody></table>
+  <div class="risk-box"><span class="risk-label">Limite:</span> Mas de 5 series en el radar = ilegible. Limitar a 5 candidatos max en comparacion simultanea. Agregar validacion en UI.</div>
+</div>
+
+<!-- PANTALLA 6 -->
+<div class="screen-card">
+  <div class="screen-title"><span class="screen-num">6</span> Perfil de Candidato</div>
+  <div class="mini-demo">
+    <div class="md-hero" style="display:flex;align-items:center;gap:12px;">
+      <div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.15);flex-shrink:0;"></div>
+      <div>
+        <div class="md-hero-title">Candidata A</div>
+        <div class="md-hero-sub">Partido Verde · Diputada Region Metropolitana</div>
+        <div style="display:flex;gap:6px;align-items:center;margin-top:6px;">
+          <span style="background:rgba(255,255,255,.12);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;">87% afinidad</span>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--c-bg);padding:12px;display:flex;flex-direction:column;gap:8px;">
+      <div style="font-size:11px;font-weight:800;color:var(--c-text2);text-transform:uppercase;letter-spacing:.4px;font-size:9px;">Propuestas por eje</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <div style="border-left:3px solid var(--c-eco);padding:6px 10px;background:var(--c-surface);border-radius:6px;font-size:10px;color:var(--c-text);">Economia</div>
+        <div style="border-left:3px solid var(--c-social);padding:6px 10px;background:var(--c-surface);border-radius:6px;font-size:10px;color:var(--c-text);">Social</div>
+        <div style="border-left:3px solid var(--c-ambiental);padding:6px 10px;background:var(--c-surface);border-radius:6px;font-size:10px;color:var(--c-text);">Ambiental</div>
+      </div>
+    </div>
+  </div>
+  <table><thead><tr><th>Elemento</th><th>Token</th><th>Razon</th></tr></thead><tbody>
+    <tr><td>Header background</td><td class="mono">--color-brand-hero o foto</td><td>Jerarquia y seriedad institucional</td></tr>
+    <tr><td>% de afinidad del usuario</td><td class="mono">--color-affinity-N</td><td>Mismo sistema que en resultados — consistencia</td></tr>
+    <tr><td>DimensionCards borde</td><td class="mono">getDimensionColors(key, isDark)</td><td>Siempre via API de dimensiones.ts, nunca hardcodeado</td></tr>
+    <tr><td>Texto de propuestas</td><td class="mono">--color-text-primary</td><td>Legibilidad maxima — el contenido es el protagonista</td></tr>
+  </tbody></table>
+</div>
+
+<!-- PANTALLA 7 -->
+<div class="screen-card">
+  <div class="screen-title"><span class="screen-num">7</span> Login y Registro</div>
+  <div class="mini-demo">
+    <div class="md-login">
+      <div class="md-login-form">
+        <div class="md-login-title">Inicia sesion</div>
+        <div style="font-size:9px;color:var(--c-text2);margin-bottom:4px;">Correo</div>
+        <div class="md-login-inp">ana@ejemplo.com</div>
+        <div style="font-size:9px;color:var(--c-text2);margin-bottom:4px;">Contrasena</div>
+        <div class="md-login-inp focused">••••••••</div>
+        <div class="md-login-btn">Ingresar</div>
+        <div class="md-login-link">Olvidaste tu contrasena?</div>
+      </div>
+    </div>
+  </div>
+  <table><thead><tr><th>Elemento</th><th>Token</th><th>Razon</th></tr></thead><tbody>
+    <tr><td>Fondo</td><td class="mono">--color-surface-bg-mkt</td><td>Continuidad visual con el Home</td></tr>
+    <tr><td>Input focused</td><td class="mono">border: --color-brand-primary</td><td>Accion estandar, coherente con todo el sistema</td></tr>
+    <tr><td>CTA login</td><td class="mono">--color-brand-primary</td><td>Accion principal de la pantalla</td></tr>
+    <tr><td>Link "Olvidaste..."</td><td class="mono">--color-text-link</td><td>Link estandar del sistema, recognoscible</td></tr>
+  </tbody></table>
+  <div class="note-box"><span style="font-weight:800;">Nota:</span> El accent verde NO se usa aqui. El login no es un momento de recompensa; es una tarea utilitaria.</div>
+</div>
+
+<!-- PANTALLA 8 -->
+<div class="screen-card">
+  <div class="screen-title"><span class="screen-num">8</span> Configuracion</div>
+  <div class="mini-demo">
+    <div class="md-cfg">
+      <div class="md-cfg-row">Notificaciones<div class="md-cfg-toggle"><div class="md-cfg-toggle-dot"></div></div></div>
+      <div class="md-cfg-row">Modo oscuro<div class="md-cfg-toggle" style="background:var(--c-border2);"><div class="md-cfg-toggle-dot" style="right:auto;left:2px;"></div></div></div>
+      <div class="md-cfg-row" style="border-bottom:none;">Idioma<span style="font-size:11px;color:var(--c-text2);">Espanol</span></div>
+      <div class="md-cfg-danger">
+        <div class="md-cfg-danger-lbl">Eliminar cuenta</div>
+        <div class="md-cfg-danger-btn">Eliminar</div>
+      </div>
+    </div>
+  </div>
+  <table><thead><tr><th>Elemento</th><th>Token</th><th>Razon</th></tr></thead><tbody>
+    <tr><td>Toggle activo</td><td class="mono">--color-brand-secondary</td><td>Progreso/estado activo, no accion inmediata</td></tr>
+    <tr><td>Boton destructivo</td><td class="mono">--color-danger</td><td>Accion de alto riesgo, maxima visibilidad semantica</td></tr>
+    <tr><td>Fondo zona danger</td><td class="mono">--color-danger-bg</td><td>Enmarca la zona de peligro sin alarmar con rojo solido</td></tr>
+    <tr><td>Dividers</td><td class="mono">--color-surface-border</td><td>Estructura neutra, no protagonista</td></tr>
+  </tbody></table>
+</div>
+
+<!-- PANTALLA 9 -->
+<div class="screen-card">
+  <div class="screen-title"><span class="screen-num">9</span> Dashboard Futuro (alta densidad)</div>
+  <div class="mini-demo" style="background:var(--c-bg);padding:14px;">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">
+      <div style="background:var(--c-surface);border:1.5px solid var(--c-border);border-radius:8px;padding:10px;">
+        <div style="font-size:9px;color:var(--c-text3);">Participacion total</div>
+        <div style="font-size:18px;font-weight:900;color:var(--c-primary);">12.4K</div>
+      </div>
+      <div style="background:var(--c-surface);border:1.5px solid var(--c-border);border-radius:8px;padding:10px;">
+        <div style="font-size:9px;color:var(--c-text3);">Afinidad promedio</div>
+        <div style="font-size:18px;font-weight:900;color:var(--c-accent);">67%</div>
+      </div>
+      <div style="background:var(--c-surface);border:1.5px solid var(--c-border);border-radius:8px;padding:10px;">
+        <div style="font-size:9px;color:var(--c-text3);">Completados</div>
+        <div style="font-size:18px;font-weight:900;color:var(--c-success);">8.2K</div>
+      </div>
+    </div>
+    <div style="background:var(--c-surface);border:1.5px solid var(--c-border);border-radius:8px;padding:10px;display:flex;align-items:flex-end;gap:4px;height:60px;">
+      <div style="flex:1;background:var(--c-s1);border-radius:3px 3px 0 0;height:80%;"></div>
+      <div style="flex:1;background:var(--c-s2);border-radius:3px 3px 0 0;height:60%;"></div>
+      <div style="flex:1;background:var(--c-s3);border-radius:3px 3px 0 0;height:45%;"></div>
+      <div style="flex:1;background:var(--c-s4);border-radius:3px 3px 0 0;height:30%;"></div>
+      <div style="flex:1;background:var(--c-s5);border-radius:3px 3px 0 0;height:20%;"></div>
+    </div>
+  </div>
+  <table><thead><tr><th>Elemento</th><th>Token</th><th>Razon</th></tr></thead><tbody>
+    <tr><td>KPI cards (dato critico)</td><td class="mono">--color-brand-primary</td><td>Datos mas importantes en primary, jerarquia clara</td></tr>
+    <tr><td>KPI cards (dato positivo)</td><td class="mono">--color-brand-accent</td><td>Accent solo para KPI de alto impacto positivo</td></tr>
+    <tr><td>Charts (barras/lineas)</td><td class="mono">--color-chart-s1 a --color-chart-s5</td><td>Orden de series fijo — Regla 3</td></tr>
+    <tr><td>Filtros por eje</td><td class="mono">getDimensionColors(key, isDark)</td><td>Via API de ejes, nunca hardcodeado</td></tr>
+    <tr><td>Rows alternos de tabla</td><td class="mono">--color-surface-border (sutiles)</td><td>Claridad sobre decoracion</td></tr>
+  </tbody></table>
+  <div class="note-box"><span style="font-weight:800;">Densidad alta:</span> Max 2-3 colores semanticos por viewport. Con mas, el usuario pierde la jerarquia visual.</div>
+</div>
+
+<!-- PANTALLA 10 -->
+<div class="screen-card">
+  <div class="screen-title"><span class="screen-num">10</span> Estados Vacios y de Error</div>
+  <div class="mini-demo" style="background:var(--c-bg);padding:14px;display:flex;gap:10px;">
+    <div style="flex:1;background:var(--c-surface);border:1.5px solid var(--c-border);border-radius:10px;padding:16px;text-align:center;">
+      <div style="width:40px;height:40px;border-radius:50%;background:var(--c-border2);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--c-border);">o</div>
+      <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:4px;">Sin resultados</div>
+      <div style="font-size:10px;color:var(--c-text2);margin-bottom:10px;">Completa el cuestionario para ver tus candidatos</div>
+      <div class="btn btn-primary btn-sm" style="font-size:10px;">Empezar</div>
+    </div>
+    <div style="flex:1;background:var(--c-danger-bg);border:1.5px solid var(--c-danger);border-radius:10px;padding:16px;text-align:center;">
+      <div style="font-size:18px;color:var(--c-danger);margin-bottom:8px;">!</div>
+      <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:4px;">Error de conexion</div>
+      <div style="font-size:10px;color:var(--c-text2);margin-bottom:10px;">No pudimos cargar los datos</div>
+      <div class="btn btn-primary btn-sm" style="font-size:10px;">Reintentar</div>
+    </div>
+  </div>
+  <table><thead><tr><th>Elemento</th><th>Token</th><th>Razon</th></tr></thead><tbody>
+    <tr><td>Empty state icono</td><td class="mono">--color-surface-border (muy suave)</td><td>No debe llamar la atencion — representa ausencia</td></tr>
+    <tr><td>Empty state texto</td><td class="mono">--color-text-secondary</td><td>Informativo, no alarma</td></tr>
+    <tr><td>Empty CTA</td><td class="mono">--color-brand-primary</td><td>La accion de salir del estado vacio es primary</td></tr>
+    <tr><td>Error page icono</td><td class="mono">--color-danger</td><td>El error es semanticamente danger — consistencia global</td></tr>
+    <tr><td>Error fondo</td><td class="mono">--color-danger-bg</td><td>Enmarca sin sobrecargar el estado de estres</td></tr>
+    <tr><td>Error texto</td><td class="mono">--color-text-primary</td><td>Legibilidad maxima en situacion de estres del usuario</td></tr>
+  </tbody></table>
+</div>
+
+<!-- PANTALLA 11 -->
+<div class="screen-card">
+  <div class="screen-title"><span class="screen-num">11</span> Compartir Resultados</div>
+  <div class="mini-demo">
+    <div class="md-share">
+      <div style="font-size:10px;color:rgba(255,255,255,.5);margin-bottom:8px;text-transform:uppercase;letter-spacing:.6px;">Mi resultado en VotoAfin</div>
+      <div class="md-share-pct">87%</div>
+      <div class="md-share-label">de afinidad con</div>
+      <div class="md-share-name">Candidata A · Diputados 2026</div>
+      <div style="height:1px;background:rgba(255,255,255,.1);width:80%;margin:12px auto;"></div>
+      <div class="md-share-logo">VotoAfin</div>
+    </div>
+  </div>
+  <table><thead><tr><th>Elemento</th><th>Token</th><th>Razon</th></tr></thead><tbody>
+    <tr><td>Card fondo</td><td class="mono">--color-brand-hero (#1C3A52)</td><td>Identidad maxima en el momento de mayor visibilidad publica</td></tr>
+    <tr><td>% de match</td><td class="mono">--color-brand-accent (#3A9E7A)</td><td>El numero mas importante en el color mas energetico</td></tr>
+    <tr><td>Texto general</td><td class="mono">#FFFFFF · --color-text-on-dark</td><td>Contraste maximo sobre hero oscuro — WCAG AAA</td></tr>
+    <tr><td>Logo VotoAfin</td><td class="mono">#FFFFFF + accent</td><td>Marca recognoscible, patron verde-sobre-oscuro identitario</td></tr>
+  </tbody></table>
+  <div class="note-box"><span style="font-weight:800;">Decision de diseno:</span> El patron accent verde sobre hero oscuro replica la identidad Spotify (verde sobre negro). Es el momento de mayor sharing — la identidad visual debe ser maxima y reconoscible en redes sociales.</div>
+</div>
+
+<!-- RESUMEN FINAL -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">12</div>
+    <h2>Colores por capa en toda la app</h2>
+    <p>Mapa global de que tokens aparecen en cada pantalla. S = series de datos. A = affinity tiers.</p>
+  </div>
+  <div class="card" style="overflow-x:auto;">
+    <table class="summ-table">
+      <thead>
+        <tr>
+          <th>Pantalla</th>
+          <th>Accent</th>
+          <th>Primary</th>
+          <th>Secondary</th>
+          <th>Ejes</th>
+          <th>Series S1-S5</th>
+          <th>Affinity</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="font-weight:700;">Home</td><td class="dot-yes">SI (CTA hero)</td><td class="dot-yes">SI (cards, links)</td><td class="dot-yes">SI (progress)</td><td class="dot-no">—</td><td class="dot-no">—</td><td class="dot-no">—</td></tr>
+        <tr><td style="font-weight:700;">Cuestionario</td><td class="dot-no" style="color:var(--c-danger);font-weight:900;">PROHIBIDO</td><td class="dot-yes">SI (todo)</td><td class="dot-yes">SI (progress)</td><td class="dot-yes">SI</td><td class="dot-no">—</td><td class="dot-no">—</td></tr>
+        <tr><td style="font-weight:700;">Resultados</td><td class="dot-yes">SI (compartir)</td><td class="dot-yes">SI (CTA)</td><td class="dot-no">—</td><td class="dot-yes">SI</td><td class="dot-yes">SI (radar)</td><td class="dot-yes">SI (%)</td></tr>
+        <tr><td style="font-weight:700;">Ranking</td><td class="dot-no">—</td><td class="dot-no">—</td><td class="dot-no">—</td><td class="dot-no">—</td><td class="dot-no">—</td><td class="dot-yes">SI (barras)</td></tr>
+        <tr><td style="font-weight:700;">Comparador</td><td class="dot-no">—</td><td class="dot-no">—</td><td class="dot-no">—</td><td class="dot-yes">SI (filtros)</td><td class="dot-yes">SI (radar)</td><td class="dot-no">—</td></tr>
+        <tr><td style="font-weight:700;">Perfil</td><td class="dot-no">—</td><td class="dot-yes">SI</td><td class="dot-no">—</td><td class="dot-yes">SI</td><td class="dot-yes">SI (radar)</td><td class="dot-yes">SI (%)</td></tr>
+        <tr><td style="font-weight:700;">Login</td><td class="dot-no">—</td><td class="dot-yes">SI</td><td class="dot-no">—</td><td class="dot-no">—</td><td class="dot-no">—</td><td class="dot-no">—</td></tr>
+        <tr><td style="font-weight:700;">Config</td><td class="dot-no">—</td><td class="dot-no">—</td><td class="dot-yes">SI (toggles)</td><td class="dot-no">—</td><td class="dot-no">—</td><td class="dot-no">—</td></tr>
+        <tr><td style="font-weight:700;">Dashboard</td><td class="dot-cond">Cond.</td><td class="dot-yes">SI</td><td class="dot-yes">SI</td><td class="dot-yes">SI</td><td class="dot-yes">SI</td><td class="dot-no">—</td></tr>
+        <tr><td style="font-weight:700;">Vacio / Error</td><td class="dot-no">—</td><td class="dot-yes">SI (CTA)</td><td class="dot-no">—</td><td class="dot-no">—</td><td class="dot-no">—</td><td class="dot-no">—</td></tr>
+        <tr><td style="font-weight:700;">Compartir</td><td class="dot-yes">SI (%)</td><td class="dot-no">—</td><td class="dot-no">—</td><td class="dot-no">—</td><td class="dot-no">—</td><td class="dot-yes">SI (%)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="ins ins-b" style="margin-top:12px;">
+    <strong>Lectura del mapa:</strong> El accent aparece solo donde hay un momento de alta carga emocional positiva (home CTA, compartir, KPI critico). El primary es la columna vertebral de la accion en toda la app. Los ejes y series tienen dominios propios que no se mezclan.
+  </div>
+</div>
+
+</div></div>
+<script src="ds-nav.js"></script>
+</body>
+</html>

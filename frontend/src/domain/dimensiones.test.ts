@@ -52,7 +52,7 @@ const WCAG_AA_LARGE = 3.0;
 // ---- Sanity ---------------------------------------------------------------
 
 describe("catalogo DIMENSIONES", () => {
-  test("tiene exactamente las 5 dimensiones esperadas", () => {
+  test("tiene exactamente las 7 dimensiones esperadas", () => {
     const keys = DIMENSIONES.map((d) => d.key);
     expect(keys).toEqual([
       "economico",
@@ -60,6 +60,8 @@ describe("catalogo DIMENSIONES", () => {
       "cultural",
       "ambiental",
       "institucional",
+      "pueblos_originarios",
+      "discapacidad",
     ]);
   });
 
@@ -141,6 +143,8 @@ describe("getDimension", () => {
       "cultural",
       "ambiental",
       "institucional",
+      "pueblos_originarios",
+      "discapacidad",
     ];
     for (const k of keys) {
       expect(getDimension(k).key).toBe(k);

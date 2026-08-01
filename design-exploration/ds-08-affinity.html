@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>VotoAfin DS — Tiers de Afinidad</title>
+<link rel="stylesheet" href="ds-shared.css"/>
+<style>
+/* ── Tier cards ── */
+.tier-card{border-radius:14px;border:2px solid transparent;padding:20px 22px;position:relative;overflow:hidden;}
+.tier-range{position:absolute;top:12px;right:14px;font-size:9px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.6px;opacity:.65;font-family:monospace;}
+.tier-num{font-size:42px;font-weight:900;line-height:1;margin-bottom:6px;}
+.tier-label{font-size:15px;font-weight:800;margin-bottom:3px;}
+.tier-sub{font-size:11px;line-height:1.5;margin-bottom:14px;opacity:.8;}
+.tier-just-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;opacity:.55;margin-bottom:5px;}
+.tier-just{font-size:11px;line-height:1.6;opacity:.8;}
+
+/* Tier 5 — alta afinidad */
+.t5{background:#F0FDF6;border-color:#3A9E7A;color:#1A5C3E;}
+/* Tier 4 — buena */
+.t4{background:#F0F5F1;border-color:#6B9B7A;color:#2A4D33;}
+/* Tier 3 — media */
+.t3{background:#FBF6EE;border-color:#C89B5C;color:#5C3D10;}
+/* Tier 2 — baja */
+.t2{background:#FAEEEE;border-color:#D07777;color:#5C2020;}
+/* Tier 1 — muy baja */
+.t1{background:#FAEEEE;border-color:#B85C5C;color:#4D1C1C;}
+
+.dark .t5{background:rgba(58,158,122,.12);color:#7DDCB2;}
+.dark .t4{background:rgba(107,155,122,.12);color:#9BC0B0;}
+.dark .t3{background:rgba(200,155,92,.12);color:#D9B378;}
+.dark .t2{background:rgba(208,119,119,.12);color:#D07777;}
+.dark .t1{background:rgba(184,92,92,.12);color:#D08888;}
+
+/* ── Ramp de afinidad ── */
+.aff-ramp{display:flex;border-radius:10px;overflow:hidden;height:40px;}
+.aff-ramp-seg{display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;}
+.ramp-markers{display:flex;font-size:9px;color:var(--c-text3);margin-top:6px;font-family:monospace;}
+.ramp-marker{flex:1;text-align:left;padding-left:2px;}
+.ramp-marker:last-child{text-align:right;padding-left:0;}
+
+/* ── Uso en componentes ── */
+.comp-demo{background:var(--c-surface);border:1.5px solid var(--c-border);border-radius:12px;padding:16px;}
+.comp-demo-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text3);margin-bottom:10px;}
+
+/* Match % badge */
+.match-pct-badge{font-size:36px;font-weight:900;line-height:1;}
+.match-pct-sub{font-size:10px;color:var(--c-text3);margin-top:2px;}
+
+/* Horizontal bar */
+.hbar-track{height:10px;background:var(--c-border2);border-radius:5px;overflow:hidden;margin-top:6px;}
+.hbar-fill{height:100%;border-radius:5px;}
+
+/* Badge circular */
+.circ-badge{width:52px;height:52px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:3px solid;}
+.circ-badge-pct{font-size:14px;font-weight:900;line-height:1;}
+.circ-badge-lbl{font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;opacity:.7;}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-logo">VotoAfin DS</div>
+  <div class="sidebar-ver">v1.0 · Agosto 2026</div>
+  <hr/>
+  <div class="sidebar-label">Fundamentos</div>
+  <a href="ds-index.html">Inicio</a>
+  <a href="ds-01-philosophy.html">01 · Filosofia y Principios</a>
+  <a href="ds-02-psychology.html">02 · Psicologia del Usuario</a>
+  <a href="ds-03-benchmarking.html">03 · Benchmarking</a>
+  <hr/>
+  <div class="sidebar-label">Sistema de Color</div>
+  <a href="ds-04-color-system.html">04 · Sistema de Color</a>
+  <a href="ds-05-dark-mode.html">05 · Dark Mode</a>
+  <a href="ds-06-axes.html">06 · Ejes Tematicos</a>
+  <hr/>
+  <div class="sidebar-label">Datos y Visualizacion</div>
+  <a href="ds-07-dataviz.html">07 · Visualizacion de Datos</a>
+  <a href="ds-08-affinity.html">08 · Tiers de Afinidad</a>
+  <hr/>
+  <div class="sidebar-label">Componentes</div>
+  <a href="ds-09-components.html">09 · Component Library</a>
+  <hr/>
+  <div class="sidebar-label">Implementacion</div>
+  <a href="ds-10-tokens.html">10 · Design Tokens</a>
+  <a href="ds-11-screens.html">11 · Validacion por Pantalla</a>
+  <div class="sidebar-bottom">
+    <button class="theme-btn" id="theme-btn">Dark mode</button>
+  </div>
+</nav>
+
+<div class="main"><div class="content">
+
+<div class="page-header">
+  <div class="breadcrumb">Datos y Visualizacion / 08</div>
+  <h1>Tiers de Afinidad</h1>
+  <p>Sistema de 5 niveles para representar el porcentaje de coincidencia entre usuario y candidato. Justificacion psicologica incluida.</p>
+</div>
+
+<!-- A: LOS 5 TIERS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">Sistema</div>
+    <h2>A · Los 5 Tiers</h2>
+    <p>De mayor a menor afinidad. Los tokens son de dominio matematico — nunca cargados de opinion.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:12px;">
+
+    <!-- TIER 5 -->
+    <div class="tier-card t5">
+      <div class="tier-range">81–100%</div>
+      <div class="tier-num">87%</div>
+      <div class="tier-label">Alta afinidad</div>
+      <div class="tier-sub">Coincidencia fuerte — candidato alineado con tus posiciones</div>
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;opacity:.55;margin-bottom:5px;">Token: <span style="font-family:monospace;">--c-aff5 / #3A9E7A</span></div>
+      <div class="tier-just-label">Justificacion psicologica</div>
+      <div class="tier-just">Verde activa respuesta emocional de "correcto" y "seguro". Es el unico contexto del producto donde el verde puede implicar algo positivo sin sesgo — porque el usuario ya completo el cuestionario y el porcentaje es un dato matematico, no una opinion.</div>
+    </div>
+
+    <!-- TIER 4 -->
+    <div class="tier-card t4">
+      <div class="tier-range">61–80%</div>
+      <div class="tier-num">71%</div>
+      <div class="tier-label">Afinidad buena</div>
+      <div class="tier-sub">Coincidencia significativa — varios puntos en comun</div>
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;opacity:.55;margin-bottom:5px;">Token: <span style="font-family:monospace;">--c-aff4 / #6B9B7A</span></div>
+      <div class="tier-just-label">Justificacion psicologica</div>
+      <div class="tier-just">Verde muted. El usuario reconoce que hay coincidencia pero no es tan fuerte como el tier 5. La desaturacion comunica "bien pero no perfecto" sin ser negativo.</div>
+    </div>
+
+    <!-- TIER 3 -->
+    <div class="tier-card t3">
+      <div class="tier-range">41–60%</div>
+      <div class="tier-num">52%</div>
+      <div class="tier-label">Afinidad media</div>
+      <div class="tier-sub">Coincidencia parcial — puntos en comun y diferencias claras</div>
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;opacity:.55;margin-bottom:5px;">Token: <span style="font-family:monospace;">--c-aff3 / #C89B5C</span></div>
+      <div class="tier-just-label">Justificacion psicologica</div>
+      <div class="tier-just">Ambar/mostaza es neutral-positivo. No implica "malo" — implica "mixto". El usuario puede explorar las diferencias sin sentir que el candidato es su opuesto.</div>
+    </div>
+
+    <!-- TIER 2 -->
+    <div class="tier-card t2">
+      <div class="tier-range">21–40%</div>
+      <div class="tier-num">33%</div>
+      <div class="tier-label">Afinidad baja</div>
+      <div class="tier-sub">Pocas coincidencias — posiciones divergentes en varios ejes</div>
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;opacity:.55;margin-bottom:5px;">Token: <span style="font-family:monospace;">--c-aff2 / #D07777</span></div>
+      <div class="tier-just-label">Justificacion psicologica</div>
+      <div class="tier-just">Terracota media. Comunica divergencia sin alarma. Es mas suave que el danger (#B85C5C) para evitar que el usuario descarte automaticamente al candidato sin leer sus propuestas.</div>
+    </div>
+
+    <!-- TIER 1 -->
+    <div class="tier-card t1">
+      <div class="tier-range">0–20%</div>
+      <div class="tier-num">12%</div>
+      <div class="tier-label">Afinidad muy baja</div>
+      <div class="tier-sub">Posiciones opuestas en la mayoria de los ejes</div>
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;opacity:.55;margin-bottom:5px;">Token: <span style="font-family:monospace;">--c-aff1 / #B85C5C</span></div>
+      <div class="tier-just-label">Justificacion psicologica</div>
+      <div class="tier-just">Terracota oscura. Es el mismo token que danger — el nivel de señal es apropiado para indicar divergencia significativa. Importante: <strong>NO es rojo alarma (#DC2626)</strong>. La terracota organica no genera stress innecesario.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- B: REGLAS CRITICAS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-warn">Critico</div>
+    <h2>B · Reglas criticas de Afinidad</h2>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table>
+      <thead><tr><th>#</th><th>Regla</th></tr></thead>
+      <tbody>
+        <tr>
+          <td style="font-weight:900;color:var(--c-danger);width:28px;">1</td>
+          <td>El nombre del candidato <strong>nunca</strong> hereda el color del tier — solo el numero de porcentaje y la barra.</td>
+        </tr>
+        <tr>
+          <td style="font-weight:900;color:var(--c-danger);">2</td>
+          <td>El color del tier es matematico, no una recomendacion. El copy siempre dice <em>"coincidencia"</em>, nunca <em>"recomendado"</em>.</td>
+        </tr>
+        <tr>
+          <td style="font-weight:900;color:var(--c-danger);">3</td>
+          <td>Los tiers usan tokens <span class="mono">--c-aff*</span>. <strong>Nunca</strong> hardcodear los hex directamente en los componentes.</td>
+        </tr>
+        <tr>
+          <td style="font-weight:900;color:var(--c-danger);">4</td>
+          <td>En dark mode, los tiers mantienen el hue pero aumentan la luminancia (igual que todos los tokens semanticos).</td>
+        </tr>
+        <tr>
+          <td style="font-weight:900;color:var(--c-danger);">5</td>
+          <td>Un candidato puede tener tier 5 en un eje y tier 1 en otro — el % global es un promedio ponderado, no el maximo.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- C: RAMPA VISUAL -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">Visual</div>
+    <h2>C · Escala visual de la rampa de afinidad</h2>
+    <p>Cada segmento tiene ancho proporcional a su rango (0-20, 21-40, 41-60, 61-80, 81-100).</p>
+  </div>
+  <div class="aff-ramp">
+    <!-- Tier 1: 0-20 = 20% del ancho -->
+    <div class="aff-ramp-seg" style="flex:20;background:var(--c-aff1);">1–20%</div>
+    <!-- Tier 2: 21-40 = 20% -->
+    <div class="aff-ramp-seg" style="flex:20;background:var(--c-aff2);">21–40%</div>
+    <!-- Tier 3: 41-60 = 20% -->
+    <div class="aff-ramp-seg" style="flex:20;background:var(--c-aff3);">41–60%</div>
+    <!-- Tier 4: 61-80 = 20% -->
+    <div class="aff-ramp-seg" style="flex:20;background:var(--c-aff4);">61–80%</div>
+    <!-- Tier 5: 81-100 = 20% -->
+    <div class="aff-ramp-seg" style="flex:20;background:var(--c-aff5);">81–100%</div>
+  </div>
+  <div class="ramp-markers">
+    <span class="ramp-marker">0</span>
+    <span class="ramp-marker" style="text-align:center;">21</span>
+    <span class="ramp-marker" style="text-align:center;">41</span>
+    <span class="ramp-marker" style="text-align:center;">61</span>
+    <span class="ramp-marker" style="text-align:center;">81</span>
+    <span class="ramp-marker">100</span>
+  </div>
+</div>
+
+<!-- D: USO EN COMPONENTES -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">Componentes</div>
+    <h2>D · Uso en componentes</h2>
+  </div>
+  <div class="g3">
+    <!-- 1. Match percentage number -->
+    <div class="comp-demo">
+      <div class="comp-demo-label">1 · Match % en RankingCard</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:baseline;gap:6px;">
+          <span class="match-pct-badge" style="color:var(--c-aff5);">87%</span>
+          <span style="font-size:10px;color:var(--c-text3);">coincidencia</span>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:6px;">
+          <span class="match-pct-badge" style="color:var(--c-aff3);font-size:28px;">52%</span>
+          <span style="font-size:10px;color:var(--c-text3);">coincidencia</span>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:6px;">
+          <span class="match-pct-badge" style="color:var(--c-aff1);font-size:24px;">14%</span>
+          <span style="font-size:10px;color:var(--c-text3);">coincidencia</span>
+        </div>
+      </div>
+    </div>
+    <!-- 2. Barra horizontal -->
+    <div class="comp-demo">
+      <div class="comp-demo-label">2 · Barra horizontal en ranking</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--c-text2);margin-bottom:3px;"><span>Garcia Morales</span><span style="font-weight:800;color:var(--c-aff5);">87%</span></div>
+          <div class="hbar-track"><div class="hbar-fill" style="width:87%;background:var(--c-aff5);"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--c-text2);margin-bottom:3px;"><span>Nunez Rios</span><span style="font-weight:800;color:var(--c-aff3);">52%</span></div>
+          <div class="hbar-track"><div class="hbar-fill" style="width:52%;background:var(--c-aff3);"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--c-text2);margin-bottom:3px;"><span>Carrasco Diaz</span><span style="font-weight:800;color:var(--c-aff1);">14%</span></div>
+          <div class="hbar-track"><div class="hbar-fill" style="width:14%;background:var(--c-aff1);"></div></div>
+        </div>
+      </div>
+    </div>
+    <!-- 3. Badge circular -->
+    <div class="comp-demo">
+      <div class="comp-demo-label">3 · Badge en match result card</div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding-top:4px;">
+        <div class="circ-badge" style="color:var(--c-aff5);border-color:var(--c-aff5);background:rgba(58,158,122,.08);">
+          <span class="circ-badge-pct">87%</span>
+          <span class="circ-badge-lbl">match</span>
+        </div>
+        <div class="circ-badge" style="color:var(--c-aff3);border-color:var(--c-aff3);background:rgba(200,155,92,.08);">
+          <span class="circ-badge-pct">52%</span>
+          <span class="circ-badge-lbl">match</span>
+        </div>
+        <div class="circ-badge" style="color:var(--c-aff1);border-color:var(--c-aff1);background:rgba(184,92,92,.08);">
+          <span class="circ-badge-pct">14%</span>
+          <span class="circ-badge-lbl">match</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div></div><!-- /content /main -->
+<script src="ds-nav.js"></script>
+</body></html>

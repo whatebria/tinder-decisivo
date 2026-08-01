@@ -28,6 +28,8 @@ import { StyleSheet, Text, View, type ViewStyle } from "react-native";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
+import { useIsDark } from "../../theme/useTheme";
+import { getAffinityColor } from "../../domain/affinity";
 import { Avatar } from "../atoms/Avatar";
 import { Button } from "../atoms/Button";
 import { Chip } from "../atoms/Chip";
@@ -76,12 +78,19 @@ export function MatchSummaryCard({
   accessibilityLabel,
 }: MatchSummaryCardProps) {
   const c = useThemeColors();
+  const isDark = useIsDark();
 
   const iniciales = useMemo(
     () => deriveIniciales(candidatoNombre),
     [candidatoNombre],
   );
   const pctRedondeado = Math.round(matchPercent);
+  /**
+   * FIX C-03: el porcentaje de afinidad usa el tier color correcto del DS-08,
+   * NO c.primary. Un 87% y un 31% ahora se ven distintos semanticamente.
+   * Token: --c-aff5 (verde) a --c-aff1 (terracota) segun rango.
+   */
+  const affinityColor = getAffinityColor(pctRedondeado, isDark);
 
   const styles = useMemo(
     () =>
@@ -117,13 +126,13 @@ export function MatchSummaryCard({
         pctN: {
           fontSize: 40,
           fontWeight: "800",
-          color: c.primary,
+          color: affinityColor, // DS-08: tier-based, no c.primary
           lineHeight: 44,
         },
         pctUnit: {
           fontSize: 18,
           fontWeight: "700",
-          color: c.primary,
+          color: affinityColor, // coherencia con pctN (DS-11 Pantalla 4)
         },
         contexto: {
           fontSize: 12,
@@ -131,7 +140,7 @@ export function MatchSummaryCard({
           textAlign: "right",
         },
       }),
-    [c],
+    [c, affinityColor],
   );
 
   return (

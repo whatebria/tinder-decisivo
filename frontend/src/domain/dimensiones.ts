@@ -34,7 +34,9 @@ export type DimensionKey =
   | "social"
   | "cultural"
   | "ambiental"
-  | "institucional";
+  | "institucional"
+  | "pueblos_originarios"
+  | "discapacidad";
 
 /**
  * Definicion completa de una dimension.
@@ -74,9 +76,14 @@ export const DIMENSIONES: readonly Dimension[] = [
     key: "economico",
     label: "Economico",
     icon: "$",
-    badge: "#0F766E", // teal-700
-    text: { light: "#0F766E", dark: "#5EEAD4" }, // teal-300 en dark
-    border: { light: "#0F766E", dark: "#5EEAD4" },
+    // Movido de teal-700 (#0F766E, hue 174) a cyan-700 (#0E7490, hue 193).
+    // Razon: el teal original colisionaba en hue con el accent verde (#3A9E7A,
+    // hue 157) a solo 17deg de distancia. El cyan queda 36deg del accent y
+    // 29deg del primary azul — aceptable dado que el badge (24px) y el CTA
+    // (boton grande) son formas completamente distintas.
+    badge: "#0E7490", // cyan-700
+    text: { light: "#155E75", dark: "#67E8F9" }, // cyan-800 light, cyan-300 dark
+    border: { light: "#155E75", dark: "#67E8F9" },
   },
   {
     key: "social",
@@ -112,6 +119,28 @@ export const DIMENSIONES: readonly Dimension[] = [
     badge: "#1E40AF", // blue-800
     text: { light: "#1E40AF", dark: "#93C5FD" }, // blue-300 en dark
     border: { light: "#1E40AF", dark: "#93C5FD" },
+  },
+  {
+    key: "pueblos_originarios",
+    label: "Pueblos Originarios",
+    icon: "P",
+    // Deep rose (hue 336). Espacio completamente libre en el sistema:
+    // 41deg de cultural (263), 41deg de discapacidad (295), 24deg del
+    // danger terracota (0/360, diferente luminancia).
+    badge: "#9D174D", // pink-800
+    text: { light: "#9D174D", dark: "#F9A8D4" }, // pink-800 light, pink-300 dark
+    border: { light: "#9D174D", dark: "#F9A8D4" },
+  },
+  {
+    key: "discapacidad",
+    label: "Discapacidad",
+    icon: "D",
+    // Fuchsia (hue 295). 32deg de cultural (263), 41deg de pueblos_originarios (336).
+    // El magenta-fuchsia es el color utilizado por organizaciones de inclusion
+    // y discapacidad a nivel internacional.
+    badge: "#86198F", // fuchsia-800
+    text: { light: "#86198F", dark: "#E879F9" }, // fuchsia-800 light, fuchsia-400 dark
+    border: { light: "#86198F", dark: "#E879F9" },
   },
 ] as const;
 

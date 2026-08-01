@@ -26,6 +26,14 @@ const light = {
   primary:      "#2E5F7E",  // CTA principal
   primaryHover: "#24506C",
   secondary:    "#7BA098",  // progreso, secundarios
+  /**
+   * brandAccent: verde vibrante para CTAs de alta carga emocional (hero Home,
+   * lock overlay, compartir). DS-04 --c-accent (#3A9E7A). Diferente del
+   * token `accent` (#A8C5B5) que es solo un tint de hover/fondo.
+   * Regla DS-10: max 3 apariciones de brandAccent por viewport.
+   * DS-11: PROHIBIDO en cuestionario — solo Home hero, Compartir, lock CTA.
+   */
+  brandAccent:  "#3A9E7A",
 
   // Texto
   text:          "#1A2B33",
@@ -154,6 +162,7 @@ const dark = {
   primary:      "#7BB5D4",
   primaryHover: "#9BC7DF",
   secondary:    "#9BC0B5",
+  brandAccent:  "#5BCEA0",
 
   // Texto (invertido)
   text:          "#E8EEEA",

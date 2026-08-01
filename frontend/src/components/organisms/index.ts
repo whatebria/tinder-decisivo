@@ -57,3 +57,7 @@ export {
   CandidatoPicker,
   type CandidatoPickerProps,
 } from "./CandidatoPicker";
+
+// Home HUB rediseno (Fase 10 — Sprint auditoría UX)
+export { HomeHeroSection, type HomeHeroSectionProps } from "./HomeHeroSection";
+

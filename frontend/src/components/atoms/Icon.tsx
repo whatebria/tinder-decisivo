@@ -32,7 +32,9 @@ export type IconName =
   | "columns"
   | "swipe"
   | "home"
-  | "bookmark";
+  | "bookmark"
+  | "lock"
+  | "shield";
 
 export interface IconProps {
   name: IconName;
@@ -219,5 +221,18 @@ function renderIcon(name: IconName, p: object) {
     case "bookmark":
       // Marcador clasico (nav Guardados) - SVG oficial DS
       return <Path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" {...p} />;
+    case "lock":
+      // Candado cerrado (privacidad, contenido bloqueado)
+      return (
+        <>
+          <Path d="M7 11V7a5 5 0 0 1 10 0v4" {...p} />
+          <Path d="M5 11h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z" {...p} />
+        </>
+      );
+    case "shield":
+      // Escudo (datos seguros, SERVEL)
+      return (
+        <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" {...p} />
+      );
   }
 }

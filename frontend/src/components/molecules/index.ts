@@ -63,3 +63,9 @@ export { CoachMarkTour, type CoachMarkTourProps } from "./CoachMarkTour";
 
 // Dimensiones tematicas de dominio
 export { DimensionCard, type DimensionCardProps } from "./DimensionCard";
+
+// Home HUB rediseno (Fase 10 — Sprint auditoría UX)
+export { HomeElectionItem, type HomeElectionItemProps } from "./HomeElectionItem";
+export { HomeMatchLocked, type HomeMatchLockedProps } from "./HomeMatchLocked";
+export { HomeTrustSection } from "./HomeTrustSection";
+

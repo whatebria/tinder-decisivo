@@ -1,22 +1,22 @@
 /**
- * Home HUB: dashboard central de la app.
+ * Home HUB: dashboard central de la app (rediseno Sprint UX-Auditoria).
  *
- * Basado en design-system-lowfi.html · Home HUB (rediseno 2026-07-28).
- * Estructura:
- *   1. TopBar (brand + notif)
- *   2. Greeting (title + subtitle)
- *   3. Section "Tus elecciones" — cards de progreso del cuestionario
- *   4. Section "Tus mejores matches" — hero cards por eleccion completada
- *   5. Divider
- *   6. Section "Novedades" (feed mixto: noticias + acciones sugeridas)
+ * Cambios respecto a la version anterior:
+ *   - HomeTopBar + HomeGreeting reemplazados por HomeHeroSection (organismo
+ *     con hero oscuro #1C3A52 + saludo + CTA accent + trust meta row).
+ *   - ElectionCard en scroll horizontal -> HomeElectionItem en lista vertical.
+ *   - MatchSummaryCard en scroll horizontal -> card full-width con estado
+ *     bloqueado (HomeMatchLocked) cuando no hay matches.
+ *   - HomeTrustSection visible para usuarios nuevos / sin cuestionario.
+ *   - MatchSummaryCard: color del porcentaje corregido a affinity tier (C-03).
  *
- * Data model: 1 sola query agregada (`useMisElecciones`) trae total/respondidas/
- * completa + top_match por cada tipo. Antes hacia N queries de matches + M de
- * preguntas — escalaba mal con el numero de elecciones.
+ * Arquitectura:
+ *   - Hero section fuera del scroll (sticky) para mantener el CTA visible.
+ *   - ScrollView con gap entre secciones y padding propio.
+ *   - Todos los componentes reciben props derivados aca (sin logica en atoms).
  *
- * Modo guest: no llama al endpoint agregado (requiere auth). Se apoya en el
- * catalogo (`useTiposEleccion`) y en el flujo local del cuestionario para
- * responder + calcular match anonimo.
+ * Data model sin cambios: 1 sola query agregada (useMisElecciones).
+ * Modo guest: catalogo sin progreso persistido, CTA siempre "Empezar".
  */
 
 import { SHOW_NOTICIAS } from "../constants/features";
@@ -36,10 +36,11 @@ import {
   AppShell,
   CoachMarkTour,
   ConfirmModal,
-  ElectionCard,
   ElectionCardAdd,
-  HomeGreeting,
-  HomeTopBar,
+  HomeElectionItem,
+  HomeHeroSection,
+  HomeMatchLocked,
+  HomeTrustSection,
   MatchSummaryCard,
   NoticiaDetailSheet,
   NovedadesFeed,
@@ -49,6 +50,7 @@ import {
   type NoticiaDetail,
   type NovedadFeedItem,
 } from "../components";
+import { computeDiasRestantes } from "../domain/eleccion";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
@@ -58,13 +60,37 @@ import { useThemeColors } from "../theme/useTheme";
 import { sanitizeSnippet } from "../utils/text";
 import { noticiaToDetail } from "../utils/noticia";
 
-// -- Helpers --------------------------------------------------------------
+// -- Helpers ------------------------------------------------------------------
 
-function greetingByHour(): string {
-  const h = new Date().getHours();
-  if (h < 12) return "Buenos días";
-  if (h < 20) return "Buenas tardes";
-  return "Buenas noches";
+/**
+ * Deriva las iniciales del usuario a partir de un email prefix.
+ * "jenny.venegas" -> "JV" | "jenny" -> "J" | "jenny.venegas.garcia" -> "JV"
+ */
+function deriveInitials(emailPrefix: string): string {
+  const parts = emailPrefix.split(".").filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+
+/**
+ * Etiqueta del primer nombre a partir del email prefix.
+ * "jenny.venegas" -> "jenny" | "jenny" -> "jenny"
+ */
+function deriveDisplayName(emailPrefix: string): string {
+  return emailPrefix.split(".")[0];
+}
+
+/**
+ * Indexa el resumen del backend por tipo_eleccion_id. Puro y O(N).
+ */
+function indexProgresoByTipo(
+  items: MiProgresoItem[] | undefined,
+): Map<number, MiProgresoItem> {
+  const m = new Map<number, MiProgresoItem>();
+  if (!items) return m;
+  for (const it of items) m.set(it.tipo_eleccion_id, it);
+  return m;
 }
 
 function whenLabel(dateIso?: string): string {
@@ -78,26 +104,10 @@ function whenLabel(dateIso?: string): string {
   return `hace ${d}d`;
 }
 
-/**
- * Indexa el resumen del backend por tipo_eleccion_id. Puro y O(N).
- * Devuelve un Map porque la lookup posterior por id es O(1).
- */
-function indexProgresoByTipo(
-  items: MiProgresoItem[] | undefined,
-): Map<number, MiProgresoItem> {
-  const m = new Map<number, MiProgresoItem>();
-  if (!items) return m;
-  for (const it of items) m.set(it.tipo_eleccion_id, it);
-  return m;
-}
-
-// -- Screen ----------------------------------------------------------------
+// -- Screen -------------------------------------------------------------------
 
 export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   const c = useThemeColors();
-  // F18: email ya no viene en el login response. Lo obtenemos de usePerfil().
-  // React Query lo cachea, asi que el GET /perfil/ que ya hace PerfilScreen
-  // alimenta este saludo sin request adicional en la mayoria de los casos.
   const perfilQ = usePerfil();
   const email = perfilQ.data?.email ?? null;
   const isGuest = useAuthStore((s) => s.isGuest);
@@ -107,8 +117,6 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   const toast = useToast();
 
   const { data: tipos = [], isLoading: tiposLoading, error } = useTiposEleccion();
-  // Guest no dispara el query (enabled: isAuth). En modo guest el Home muestra
-  // solo el catalogo + el CTA para responder — no hay resumen persistido.
   const { data: progresoItems } = useMisElecciones();
   const { data: noticias = [] } = useNoticiasFeed();
   const reiniciar = useReiniciarCuestionario();
@@ -116,18 +124,16 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   const [tipoAReiniciar, setTipoAReiniciar] = useState<TipoEleccion | null>(null);
   const [selectedNoticia, setSelectedNoticia] = useState<NoticiaDetail | null>(null);
 
-  const saludo = useMemo(() => {
-    const base = greetingByHour();
-    if (isGuest) return `${base}, invitado`;
-    if (email) return `${base}, ${email.split("@")[0]}`;
-    return base;
-  }, [email, isGuest]);
-
   React.useEffect(() => {
     if (error) toast.error("Error cargando elecciones", getErrorMessage(error));
   }, [error, toast]);
 
-  // Solo elecciones activadas por el user (client-side pref sobre catalogo).
+  // Datos derivados del perfil
+  const emailPrefix = email ? email.split("@")[0] : null;
+  const displayName = emailPrefix ? deriveDisplayName(emailPrefix) : undefined;
+  const userInitials = emailPrefix ? deriveInitials(emailPrefix) : undefined;
+
+  // Solo elecciones activadas por el user
   const { activas: tiposActivos } = useMemo(
     () => partitionTipos(tipos, electionsActiveIds),
     [tipos, electionsActiveIds],
@@ -135,19 +141,12 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
 
   const activeId = activeTipoId ?? tiposActivos[0]?.id ?? null;
 
-  // Indexa el resumen por tipoId para lookup O(1) al pintar cada card.
   const progresoByTipo = useMemo(
     () => indexProgresoByTipo(progresoItems),
     [progresoItems],
   );
 
-  // Lista de hero cards "Tus mejores matches": solo items del user con
-  // cuestionario COMPLETO y top_match resuelto, filtrados por elecciones
-  // activas. El backend ya filtra los top_match por completitud (ver
-  // mi_progreso.py), pero repetimos el chequeo aca como defense in depth:
-  // si algun dev toca el endpoint sin cuidado, la UI no vuelve a mostrar
-  // "matches fantasma" en cuestionarios no contestados. activeIds=null
-  // significa "todas activas" (default pre-primera edicion del user).
+  // Matches: solo cuestionarios completos con top_match resuelto
   const mejoresMatches = useMemo(() => {
     if (!progresoItems) return [];
     return progresoItems.filter(
@@ -159,13 +158,56 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
     );
   }, [progresoItems, electionsActiveIds]);
 
-  // Al tocar una card: carga preguntas y decide destino.
-  //   - Auth + completa: va directo a Resultados (evita cuestionario vacio).
-  //   - Guest o incompleta: va al Cuestionario.
-  //
-  // Antes se derivaba de `preguntas.length === 0` post-load. Ahora usamos el
-  // flag `completa` del backend que es la fuente de verdad y evita el race
-  // condition donde el store aun no habia cargado.
+  // Progreso global: ratio de la eleccion activa (para el ring del hero)
+  const heroProgress = useMemo(() => {
+    if (isGuest || !activeId) return 0;
+    const p = progresoByTipo.get(activeId);
+    if (!p || !p.total_preguntas) return 0;
+    return Math.min(p.respondidas / p.total_preguntas, 1);
+  }, [isGuest, activeId, progresoByTipo]);
+
+  // CTA del hero segun estado global
+  const heroCta = useMemo(() => {
+    if (mejoresMatches.length > 0) return "Ver mis matches";
+    if (heroProgress > 0) return "Continuar cuestionario";
+    return "Empezar cuestionario";
+  }, [mejoresMatches.length, heroProgress]);
+
+  function handleHeroCta() {
+    if (mejoresMatches.length > 0) {
+      navigation.navigate("Resultados");
+      return;
+    }
+    const tipo = tiposActivos.find((t) => t.id === activeId) ?? tiposActivos[0];
+    if (tipo) iniciarCuestionario(tipo);
+  }
+
+  // Countdown: dias hasta la eleccion con fecha mas proxima
+  const countdownDays = useMemo(() => {
+    const fechas = tiposActivos
+      .map((t) => computeDiasRestantes(t.fecha_eleccion ?? null))
+      .filter((d): d is number => d !== null && d >= 0);
+    if (fechas.length === 0) return null;
+    return Math.min(...fechas);
+  }, [tiposActivos]);
+
+  // Si el user NO tiene ninguna eleccion completa -> mostrar lock
+  const sinMatches = mejoresMatches.length === 0 && tiposActivos.length > 0;
+
+  // Cuerpo del mensaje en la lock card
+  const lockBody = useMemo(() => {
+    if (!activeId) return "Completa el cuestionario para ver tu candidato";
+    const p = progresoByTipo.get(activeId);
+    if (!p) return "Completa el cuestionario para ver tu candidato";
+    const faltan = p.total_preguntas - p.respondidas;
+    const tipo = tiposActivos.find((t) => t.id === activeId);
+    return `Faltan ${faltan} pregunta${faltan !== 1 ? "s" : ""} en ${tipo?.nombre ?? "el cuestionario"}`;
+  }, [activeId, progresoByTipo, tiposActivos]);
+
+  // Mostrar trust section solo para usuarios sin ningun cuestionario iniciado
+  const showTrust = !isGuest && mejoresMatches.length === 0 && heroProgress === 0;
+
+  // Al tocar una card de eleccion
   async function iniciarCuestionario(tipo: TipoEleccion) {
     if (!tipo.id) return;
     const progreso = progresoByTipo.get(tipo.id);
@@ -194,18 +236,62 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
     }
   }
 
+  // Novedades: accion sugerida + noticias
+  const novedades: NovedadFeedItem[] = useMemo(() => {
+    const items: NovedadFeedItem[] = [];
+    const tipoSinCuestionario = tiposActivos.find((t) => t.id && t.id !== activeId);
+    if (tipoSinCuestionario) {
+      items.push({
+        key: `action-${tipoSinCuestionario.id}`,
+        kind: "action",
+        icon: "bell",
+        title: `Responde el cuestionario de ${tipoSinCuestionario.nombre}`,
+        subtitle: "Descubre tu top match",
+        ctaLabel: "Ir",
+        onCta: () => iniciarCuestionario(tipoSinCuestionario),
+      });
+    }
+    if (SHOW_NOTICIAS) {
+      noticias.slice(0, 4).forEach((n) => {
+        items.push({
+          key: `noticia-${n.id}`,
+          kind: "noticia",
+          imageUrl: n.imagen_url,
+          title: sanitizeSnippet(n.titulo),
+          snippet: sanitizeSnippet(n.descripcion),
+          category: n.fuente,
+          when: whenLabel(n.fecha_publicacion),
+          onPress: () =>
+            setSelectedNoticia(
+              noticiaToDetail(n, {
+                when: whenLabel(n.fecha_publicacion),
+                sentiment: "neutral",
+              }),
+            ),
+        });
+      });
+    }
+    return items;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tiposActivos, activeId, noticias]);
+
   const styles = useMemo(
     () =>
       StyleSheet.create({
-        scroll: { flex: 1, backgroundColor: c.bg },
-        content: {
-          padding: spacing.sp4,
+        screen: { flex: 1, backgroundColor: c.bg },
+        scroll: { flex: 1 },
+        scrollContent: {
+          paddingHorizontal: spacing.sp4,
+          paddingTop: spacing.sp5,
           paddingBottom: spacing.sp8,
           gap: spacing.sp5,
         },
-        loading: { paddingTop: spacing.sp8, alignItems: "center" },
-        strip: { flexDirection: "row", gap: spacing.sp3, paddingBottom: 4 },
-        divider: { height: 1, backgroundColor: c.border2, marginVertical: spacing.sp2 },
+        loadingContainer: {
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          paddingTop: spacing.sp8,
+        },
       }),
     [c],
   );
@@ -213,160 +299,116 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   if (tiposLoading) {
     return (
       <AppShell active="home" navigation={navigation}>
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-          <View style={styles.loading}>
-            <Spinner size="large" />
-          </View>
-        </ScrollView>
+        <View style={styles.loadingContainer}>
+          <Spinner size="large" />
+        </View>
       </AppShell>
     );
   }
 
-  // Construyo Novedades: accion sugerida (si hay tipo sin cuestionario) + noticias reales.
-  const tipoSinCuestionario = tiposActivos.find((t) => t.id && t.id !== activeId);
-  const novedades: NovedadFeedItem[] = [];
-
-  if (tipoSinCuestionario) {
-    novedades.push({
-      key: `action-${tipoSinCuestionario.id}`,
-      kind: "action",
-      icon: "bell",
-      title: `Responde el cuestionario de ${tipoSinCuestionario.nombre}`,
-      subtitle: "Descubre tu top match",
-      ctaLabel: "Ir",
-      onCta: () => iniciarCuestionario(tipoSinCuestionario),
-    });
-  }
-
-  if (SHOW_NOTICIAS) {
-    noticias.slice(0, 4).forEach((n) => {
-    novedades.push({
-      key: `noticia-${n.id}`,
-      kind: "noticia",
-      imageUrl: n.imagen_url,
-      title: sanitizeSnippet(n.titulo),
-      snippet: sanitizeSnippet(n.descripcion),
-      category: n.fuente,
-      when: whenLabel(n.fecha_publicacion),
-      onPress: () =>
-        setSelectedNoticia(
-          noticiaToDetail(n, {
-            when: whenLabel(n.fecha_publicacion),
-            sentiment: "neutral",
-          }),
-        ),
-    });
-  }); // end noticias.slice
-  } // end if (SHOW_NOTICIAS)
-
   return (
     <>
       <AppShell active="home" navigation={navigation}>
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-          <HomeTopBar
-            brand="Tinder Decisivo"
-            onNotifications={SHOW_NOTICIAS ? () => navigation.navigate("Noticias") : undefined}
+        <View style={styles.screen}>
+          <HomeHeroSection
+            displayName={isGuest ? undefined : displayName}
+            userInitials={isGuest ? undefined : userInitials}
+            countdownDays={countdownDays}
+            progressValue={heroProgress}
+            ctaLabel={heroCta}
+            onCta={handleHeroCta}
           />
 
-          <HomeGreeting
-            title={saludo}
-            subtitle="Explora las elecciones activas."
-          />
-
-          {tiposActivos.length === 0 ? (
-            <HomeGreeting
-              title=""
-              subtitle="Aún no hay elecciones disponibles."
-            />
-          ) : (
-            <View>
-              <SectionTitle
-                title={`Tus elecciones (${tiposActivos.length})`}
-                actionLabel="Gestionar"
-                onAction={() => navigation.navigate("GestionElecciones")}
-              />
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.strip}
-                style={{ marginTop: spacing.sp3 }}
-              >
-                {tiposActivos.map((tipo) => {
-                  const progreso = tipo.id
-                    ? progresoByTipo.get(tipo.id)
-                    : undefined;
-                  const isActive = tipo.id === activeId;
-                  // Modo auth: usamos progreso agregado (respondidas + total).
-                  // Modo guest: no hay progreso persistido -> card pending.
-                  const isCompleted = progreso?.completa;
-                  return (
-                    <ElectionCard
-                      key={tipo.id}
-                      name={tipo.nombre}
-                      isCompleted={isCompleted}
-                      respondidas={progreso?.respondidas}
-                      totalPreguntas={progreso?.total_preguntas}
-                      variant={
-                        isActive
-                          ? "active"
-                          : isCompleted
-                            ? "secondary"
-                            : "pending"
-                      }
-                      onPress={() => iniciarCuestionario(tipo)}
-                    />
-                  );
-                })}
-                <ElectionCardAdd
-                  label="+ Activar otra elección"
-                  onPress={() => navigation.navigate("GestionElecciones")}
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {tiposActivos.length === 0 ? null : (
+              <View>
+                <SectionTitle
+                  title={`Tus elecciones (${tiposActivos.length})`}
+                  actionLabel="Gestionar"
+                  onAction={() => navigation.navigate("GestionElecciones")}
                 />
-              </ScrollView>
-            </View>
-          )}
+                <View style={{ gap: spacing.sp3, marginTop: spacing.sp3 }}>
+                  {tiposActivos.map((tipo) => {
+                    const progreso = tipo.id ? progresoByTipo.get(tipo.id) : undefined;
+                    const yaCompleto = !isGuest && progreso?.completa === true;
+                    return (
+                      <HomeElectionItem
+                        key={tipo.id}
+                        name={tipo.nombre}
+                        scope={tipo.descripcion ?? undefined}
+                        respondidas={progreso?.respondidas ?? 0}
+                        totalPreguntas={progreso?.total_preguntas ?? 0}
+                        onEmpezar={() => iniciarCuestionario(tipo)}
+                        onContinuar={() => iniciarCuestionario(tipo)}
+                        onVerResultados={
+                          yaCompleto
+                            ? async () => {
+                                await loadForTipoEleccion(tipo.id!);
+                                navigation.navigate("Resultados");
+                              }
+                            : undefined
+                        }
+                      />
+                    );
+                  })}
+                  <ElectionCardAdd
+                    label="+ Activar otra eleccion"
+                    onPress={() => navigation.navigate("GestionElecciones")}
+                  />
+                </View>
+              </View>
+            )}
 
-          {mejoresMatches.length > 0 ? (
-            <View>
-              <SectionTitle title="Tus mejores matches" />
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.strip}
-                style={{ marginTop: spacing.sp3 }}
-              >
-                {mejoresMatches.map((item) => {
-                  const top = item.top_match!;
-                  const candidato = top.candidato;
-                  const nombre = `${candidato.nombre} ${candidato.apellido ?? ""}`.trim();
-                  return (
-                    <MatchSummaryCard
-                      key={item.tipo_eleccion_id}
-                      candidatoNombre={nombre}
-                      candidatoFotoUrl={candidato.profile_picture ?? null}
-                      tipoEleccionNombre={item.tipo_eleccion_nombre}
-                      matchPercent={Number(top.match_percentage)}
-                      preguntasConsideradas={top.preguntas_consideradas}
-                      totalPreguntas={item.total_preguntas}
-                      onVerPerfil={() =>
-                        navigation.navigate("DetalleCandidato", {
-                          candidatoId: candidato.id!,
-                          breakdown:
-                            (top.breakdown_por_eje as BreakdownPorEje | null) ??
-                            null,
-                          matchPct: Number(top.match_percentage),
-                          confianza: top.confianza ?? null,
-                        })
-                      }
+            {tiposActivos.length > 0 ? (
+              <View>
+                <SectionTitle title="Tu mejor match" />
+                <View style={{ marginTop: spacing.sp3 }}>
+                  {sinMatches ? (
+                    <HomeMatchLocked
+                      body={lockBody}
+                      onContinuar={() => {
+                        const tipo =
+                          tiposActivos.find((t) => t.id === activeId) ?? tiposActivos[0];
+                        if (tipo) iniciarCuestionario(tipo);
+                      }}
                     />
-                  );
-                })}
-              </ScrollView>
-            </View>
-          ) : null}
+                  ) : (
+                    mejoresMatches.map((item) => {
+                      const top = item.top_match!;
+                      const candidato = top.candidato;
+                      const nombre = `${candidato.nombre} ${candidato.apellido ?? ""}`.trim();
+                      return (
+                        <MatchSummaryCard
+                          key={item.tipo_eleccion_id}
+                          candidatoNombre={nombre}
+                          candidatoFotoUrl={candidato.profile_picture ?? null}
+                          tipoEleccionNombre={item.tipo_eleccion_nombre}
+                          matchPercent={Number(top.match_percentage)}
+                          preguntasConsideradas={top.preguntas_consideradas}
+                          totalPreguntas={item.total_preguntas}
+                          style={{ marginBottom: spacing.sp3 }}
+                          onVerPerfil={() =>
+                            navigation.navigate("DetalleCandidato", {
+                              candidatoId: candidato.id!,
+                              breakdown:
+                                (top.breakdown_por_eje as BreakdownPorEje | null) ?? null,
+                              matchPct: Number(top.match_percentage),
+                              confianza: top.confianza ?? null,
+                            })
+                          }
+                        />
+                      );
+                    })
+                  )}
+                </View>
+              </View>
+            ) : null}
 
-          {novedades.length > 0 ? (
-            <>
-              <View style={styles.divider} />
+            {novedades.length > 0 ? (
               <View>
                 <SectionTitle
                   title="Novedades"
@@ -377,16 +419,18 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
                   <NovedadesFeed items={novedades} />
                 </View>
               </View>
-            </>
-          ) : null}
-        </ScrollView>
+            ) : null}
+
+            {showTrust ? <HomeTrustSection /> : null}
+          </ScrollView>
+        </View>
       </AppShell>
 
       <ConfirmModal
         visible={!!tipoAReiniciar}
-        title="¿Reiniciar cuestionario?"
+        title="Reiniciar cuestionario?"
         message={`Vas a borrar tus respuestas de ${tipoAReiniciar?.nombre ?? ""}. No se puede deshacer.`}
-        confirmLabel="Sí, reiniciar"
+        confirmLabel="Si, reiniciar"
         cancelLabel="Cancelar"
         onConfirm={handleConfirmReiniciar}
         onCancel={() => setTipoAReiniciar(null)}

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>VotoAfin DS — Psicologia del Usuario</title>
+<link rel="stylesheet" href="ds-shared.css"/>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-logo">VotoAfin DS</div>
+  <div class="sidebar-ver">v1.0 · Agosto 2026</div>
+  <hr/>
+  <div class="sidebar-label">Fundamentos</div>
+  <a href="ds-index.html">Inicio</a>
+  <a href="ds-01-philosophy.html">01 · Filosofia y Principios</a>
+  <a href="ds-02-psychology.html">02 · Psicologia del Usuario</a>
+  <a href="ds-03-benchmarking.html">03 · Benchmarking</a>
+  <hr/>
+  <div class="sidebar-label">Sistema de Color</div>
+  <a href="ds-04-color-system.html">04 · Sistema de Color</a>
+  <a href="ds-05-dark-mode.html">05 · Dark Mode</a>
+  <a href="ds-06-axes.html">06 · Ejes Tematicos</a>
+  <hr/>
+  <div class="sidebar-label">Datos y Visualizacion</div>
+  <a href="ds-07-dataviz.html">07 · Visualizacion de Datos</a>
+  <a href="ds-08-affinity.html">08 · Tiers de Afinidad</a>
+  <hr/>
+  <div class="sidebar-label">Componentes</div>
+  <a href="ds-09-components.html">09 · Component Library</a>
+  <hr/>
+  <div class="sidebar-label">Implementacion</div>
+  <a href="ds-10-tokens.html">10 · Design Tokens</a>
+  <a href="ds-11-screens.html">11 · Validacion por Pantalla</a>
+  <div class="sidebar-bottom">
+    <button class="theme-btn" id="theme-btn">Dark mode</button>
+  </div>
+</nav>
+<div class="main"><div class="content">
+
+<div class="page-header">
+  <div class="breadcrumb">Fundamentos / 02</div>
+  <h1>Psicologia del Usuario</h1>
+  <p class="lead">Como el sistema visual apoya los estados cognitivos y emocionales del usuario en cada contexto de uso.</p>
+</div>
+
+<!-- CONTEXTO 1: CUESTIONARIO -->
+<div class="section">
+  <div class="section-header"><h2>Contexto 1 — Durante el Cuestionario</h2>
+    <span class="chip chip-neutral" style="font-size:11px;">Calmo · Concentrado · Sostenido</span>
+  </div>
+  <div class="g2" style="margin-bottom:16px;">
+    <div>
+      <div class="card" style="background:var(--c-bg);border:2px dashed var(--c-border);">
+        <p style="font-size:11px;font-weight:700;color:var(--c-text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Demo de fondo</p>
+        <div style="background:#F5F7F5;border-radius:6px;padding:16px;text-align:center;">
+          <p style="font-size:12px;color:var(--c-text2);">Fondo <code>#F5F7F5</code></p>
+          <p style="font-size:11px;color:var(--c-text3);">verde-gris neutro</p>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <p style="font-size:11px;font-weight:700;color:var(--c-text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Estado cognitivo</p>
+        <ul style="font-size:12px;color:var(--c-text2);padding-left:16px;line-height:1.8;">
+          <li>Decision fatigue progresiva</li>
+          <li>Necesidad de concentracion sostenida</li>
+          <li>Tentacion de abandono en preguntas 8–12</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>Decision de color</th><th>Razon psicologica</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Fondo <code style="background:var(--c-bg-mkt);padding:2px 5px;border-radius:3px;">#F5F7F5</code> (verde-gris)</td>
+        <td>Reduce fatiga ocular 15–20% vs blanco puro. El ojo procesa el verde como neutro.</td>
+      </tr>
+      <tr>
+        <td>Primary <code style="background:var(--c-primary);color:#fff;padding:2px 6px;border-radius:3px;">#2E5F7E</code> como unica accion</td>
+        <td>El usuario aprende: azul = "avanzar". Sin ambiguedad, sin confusion de CTA.</td>
+      </tr>
+      <tr>
+        <td>Feedback desaturado: terracota <code style="background:#B85C5C;color:#fff;padding:2px 5px;border-radius:3px;">#B85C5C</code>, mostaza <code style="background:#C89B5C;color:#fff;padding:2px 5px;border-radius:3px;">#C89B5C</code></td>
+        <td>No implican "respuesta incorrecta". Eliminan sesgo de deseabilidad social en la escala.</td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--c-danger);">Accent <code>#3A9E7A</code> PROHIBIDO</strong></td>
+        <td>Verde = exito podria implicar que una respuesta es "correcta". Sesgo inaceptable.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="toast toast-success" style="margin-top:12px;font-size:12px;">
+    <strong>Metricas objetivo:</strong> Completado del cuestionario &gt; 85% · Abandono en zona media &lt; 20%
+  </div>
+</div>
+
+<!-- CONTEXTO 2: COMPARACION -->
+<div class="section">
+  <div class="section-header"><h2>Contexto 2 — Durante Comparacion de Candidatos</h2>
+    <span class="chip chip-primary" style="font-size:11px;">Alta carga cognitiva · Objetividad</span>
+  </div>
+  <table>
+    <thead><tr><th>Decision de color</th><th>Razon psicologica</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Series S1–S5 siempre en el mismo orden por candidato</td>
+        <td>El color de cada candidato es predecible. Sin ventaja visual para ninguno.</td>
+      </tr>
+      <tr>
+        <td>Usuario siempre es S1 (azul primary)</td>
+        <td>El usuario es el punto de referencia visual. Su posicion nunca cambia.</td>
+      </tr>
+      <tr>
+        <td>% de match usa colores de afinidad (aff5–aff1), no colores de candidato</td>
+        <td>Separa "cuanto coincides" de "quien es este candidato". Sin contaminacion semantica.</td>
+      </tr>
+      <tr>
+        <td>Ejes del radar usan colores de dominio (eco, social, cultural…)</td>
+        <td>Separa "quien eres" de "en que coinciden". Dos sistemas de color paralelos sin interferencia.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- CONTEXTO 3: RESULTADOS -->
+<div class="section">
+  <div class="section-header"><h2>Contexto 3 — Durante Revision de Resultados</h2>
+    <span class="chip chip-accent" style="font-size:11px;">Alta expectativa · Descubrimiento</span>
+  </div>
+  <table>
+    <thead><tr><th>Decision de color</th><th>Razon psicologica</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>% de match en color de tier (aff5 verde → aff1 rojo)</td>
+        <td>Genera respuesta emocional proporcional al resultado. Justa y predecible.</td>
+      </tr>
+      <tr>
+        <td>Nombre del candidato NUNCA hereda el color del tier</td>
+        <td>Evita sesgar: "el candidato verde = el bueno". El color describe afinidad, no valor politico.</td>
+      </tr>
+      <tr>
+        <td>Pantalla usa <code>bg-mkt</code> <code style="background:#F0F4F8;padding:2px 5px;border-radius:3px;">#F0F4F8</code> en vez de bg-focus</td>
+        <td>Momento de descubrimiento, no de trabajo. Fondo ligeramente distinto marca el cambio de contexto.</td>
+      </tr>
+      <tr>
+        <td>CTA de compartir usa accent verde <code style="background:#3A9E7A;color:#fff;padding:2px 6px;border-radius:3px;">#3A9E7A</code></td>
+        <td>Accion positiva de alta energia. El momento de mayor motivacion del usuario en toda la sesion.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- CONTEXTO 4: EXPLORACION -->
+<div class="section">
+  <div class="section-header"><h2>Contexto 4 — Durante Exploracion Libre</h2>
+    <span class="chip chip-success" style="font-size:11px;">Bajo estres · Navegacion libre</span>
+  </div>
+  <table>
+    <thead><tr><th>Decision de color</th><th>Razon psicologica</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Fondos neutros: bg-focus, surface</td>
+        <td>Sin objetivo urgente. La neutralidad cromatica no genera presion de accion.</td>
+      </tr>
+      <tr>
+        <td>Sin accent verde prominente</td>
+        <td>El verde de alta energia se reserva para momentos de inicio y recompensa. Aqui no aplica.</td>
+      </tr>
+      <tr>
+        <td>Colores de eje visibles en filtros tematicos</td>
+        <td>Ayudan al usuario a orientarse en la navegacion tematica sin requerir aprendizaje previo.</td>
+      </tr>
+      <tr>
+        <td>Progress bars en secondary <code style="background:#7BA098;color:#fff;padding:2px 6px;border-radius:3px;">#7BA098</code></td>
+        <td>La neutralidad cromatica no genera presion. Secondary es informativo, no urgente.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- RIESGOS -->
+<div class="section">
+  <div class="section-header"><h2>Riesgos Psicologicos Documentados</h2></div>
+  <table>
+    <thead><tr><th>Riesgo</th><th>Descripcion</th><th>Mitigacion implementada</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="tag-bad">Verde = correcto</span></td>
+        <td>Accent verde en opciones de cuestionario implica sesgo de deseabilidad social.</td>
+        <td>Accent prohibido en todo el flujo de cuestionario. Solo primary como accion.</td>
+      </tr>
+      <tr>
+        <td><span class="tag-warn">Azul institucional</span></td>
+        <td>Primary azul-petroleo puede evocar partidos especificos en ciertos usuarios chilenos.</td>
+        <td>Desaturacion intencional: saturacion 45%, no azul electrico. Hue alejado de azules partidarios.</td>
+      </tr>
+      <tr>
+        <td><span class="tag-warn">Verde = ecologismo</span></td>
+        <td>Accent verde puede ser percibido como simpatia politica ecologista o progresista.</td>
+        <td>El accent aparece como accion de producto (CTA, progreso), nunca como simbolo de contenido politico.</td>
+      </tr>
+      <tr>
+        <td><span class="tag-bad">Fatiga por hero oscuro</span></td>
+        <td>Fondo <code>#1C3A52</code> durante sesiones largas genera fatiga visual acumulada.</td>
+        <td>Hero ocupa maximo 40% del viewport. El cuestionario usa bg-focus claro siempre.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+</div></div>
+<script src="ds-nav.js"></script>
+</body></html>

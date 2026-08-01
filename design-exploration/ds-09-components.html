@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>VotoAfin DS — Component Library</title>
+<link rel="stylesheet" href="ds-shared.css"/>
+<style>
+/* ── Row helpers ── */
+.flex-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+.flex-col{display:flex;flex-direction:column;gap:10px;}
+.comp-group{margin-bottom:20px;}
+.comp-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text3);margin-bottom:8px;}
+
+/* ── Input variants ── */
+.inp-wrap{display:flex;flex-direction:column;gap:0;}
+.inp-err-msg{font-size:10px;color:var(--c-danger);margin-top:4px;}
+.inp-focused{border-color:var(--c-primary)!important;box-shadow:0 0 0 3px rgba(74,155,191,.3);}
+.inp-disabled{opacity:.5;cursor:not-allowed;}
+
+/* ── Checkbox / Radio ── */
+.faux-check{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--c-border);background:var(--c-surface);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+.faux-check.checked{background:var(--c-primary);border-color:var(--c-primary);}
+.faux-check.checked::after{content:'';color:#fff;font-size:10px;font-weight:900;line-height:1;}
+.faux-radio{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--c-border);background:var(--c-surface);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+.faux-radio.selected::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--c-primary);}
+.form-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--c-text);}
+
+/* ── Affinity Bar ── */
+.aff-bar-wrap{display:flex;flex-direction:column;gap:4px;}
+.aff-bar-row{display:flex;align-items:center;gap:10px;padding:8px 12px;
+  background:var(--c-surface2);border-radius:9px;border:1px solid var(--c-border);}
+.aff-bar-rank{font-size:11px;font-weight:800;color:var(--c-text3);min-width:20px;}
+.aff-bar-avatar{width:32px;height:32px;border-radius:16px;background:var(--c-border);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:var(--c-text2);}
+.aff-bar-info{flex:1;min-width:0;}
+.aff-bar-name{font-size:12px;font-weight:700;color:var(--c-text);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;}
+.aff-bar-track{height:8px;background:var(--c-border2);border-radius:4px;overflow:hidden;}
+.aff-bar-fill{height:100%;border-radius:4px;transition:width .3s ease;}
+.aff-bar-pct{font-size:13px;font-weight:900;min-width:38px;text-align:right;flex-shrink:0;}
+/* Tier fills */
+.fill-5{background:var(--c-aff5);} .fill-4{background:var(--c-aff4);}
+.fill-3{background:var(--c-aff3);} .fill-2{background:var(--c-aff2);} .fill-1{background:var(--c-aff1);}
+/* Tier text colors */
+.pct-5{color:var(--c-aff5);} .pct-4{color:var(--c-aff4);}
+.pct-3{color:var(--c-aff3);} .pct-2{color:var(--c-aff2);} .pct-1{color:var(--c-aff1);}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;}
+.tag-primary{background:rgba(46,95,126,.12);color:var(--c-primary);}
+.tag-accent{background:rgba(58,158,122,.12);color:var(--c-accent);}
+.tag-success{background:var(--c-success-bg);color:var(--c-success);}
+.tag-warning{background:var(--c-warning-bg);color:var(--c-warning);}
+.tag-danger{background:var(--c-danger-bg);color:var(--c-danger);}
+.tag-neutral{background:var(--c-surface2);color:var(--c-text2);}
+
+/* ── Progress bar / Slider ── */
+.prog-accent .prog-fill{background:var(--c-accent);}
+.slider-wrap{display:flex;align-items:center;gap:10px;}
+.slider-track{flex:1;height:5px;background:var(--c-border2);border-radius:3px;position:relative;}
+.slider-fill{height:100%;border-radius:3px;background:var(--c-primary);width:62%;}
+.slider-thumb{position:absolute;top:50%;right:38%;transform:translate(50%,-50%);width:14px;height:14px;border-radius:50%;background:#fff;border:2.5px solid var(--c-primary);box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.slider-val{font-size:11px;font-weight:700;color:var(--c-text2);min-width:24px;}
+
+/* ── Election Card ── */
+.elect-card{background:var(--c-surface);border:1.5px solid var(--c-border);border-radius:14px;padding:16px;}
+.elect-title{font-size:13px;font-weight:800;color:var(--c-text);margin-bottom:4px;}
+.elect-meta{font-size:10px;color:var(--c-text3);margin-bottom:12px;}
+
+/* ── Candidate Card ── */
+.cand-card{background:var(--c-surface);border:1.5px solid var(--c-border);border-radius:14px;padding:14px;display:flex;gap:12px;align-items:center;}
+.cand-avatar{width:42px;height:42px;border-radius:50%;background:var(--c-border2);flex-shrink:0;}
+.cand-name{font-size:13px;font-weight:800;color:var(--c-text);}
+.cand-party{font-size:10px;color:var(--c-text3);margin-bottom:6px;}
+.cand-pct{font-size:11px;font-weight:800;}
+
+/* ── Match Result Card ── */
+.match-card{background:var(--c-surface);border:1.5px solid var(--c-border);border-radius:16px;padding:24px;max-width:340px;}
+.match-num{font-size:52px;font-weight:900;line-height:1;color:var(--c-aff5);}
+.match-name{font-size:15px;font-weight:800;color:var(--c-text);margin-top:8px;margin-bottom:4px;}
+.match-sub{font-size:11px;color:var(--c-text3);margin-bottom:14px;}
+
+/* ── Empty states ── */
+.empty-state{display:flex;flex-direction:column;align-items:center;text-align:center;padding:32px 20px;background:var(--c-surface);border:1.5px solid var(--c-border);border-radius:14px;}
+.empty-icon{width:56px;height:56px;margin-bottom:14px;color:var(--c-text3);}
+.empty-title{font-size:14px;font-weight:800;color:var(--c-text);margin-bottom:6px;}
+.empty-sub{font-size:12px;color:var(--c-text2);margin-bottom:16px;line-height:1.6;}
+
+/* ── Skeleton ── */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+.skel{background:var(--c-border2);border-radius:6px;animation:pulse 1.5s ease infinite;}
+
+/* ── Spinner ── */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:28px;height:28px;border-radius:50%;border:3px solid var(--c-border2);border-top-color:var(--c-primary);animation:spin .8s linear infinite;}
+
+/* ── Tabs ── */
+.tab-bar{display:flex;border-bottom:1.5px solid var(--c-border);gap:0;}
+.tab-item{padding:10px 18px;font-size:12px;font-weight:600;color:var(--c-text2);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1.5px;transition:all .15s;white-space:nowrap;}
+.tab-item.active{color:var(--c-primary);font-weight:800;border-bottom-color:var(--c-primary);}
+.tab-item:hover:not(.active){color:var(--c-text);}
+
+/* ── Toasts ── */
+.toast-info{background:var(--c-info-bg);border-color:var(--c-info);}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-logo">VotoAfin DS</div>
+  <div class="sidebar-ver">v1.0 · Agosto 2026</div>
+  <hr/>
+  <div class="sidebar-label">Fundamentos</div>
+  <a href="ds-index.html">Inicio</a>
+  <a href="ds-01-philosophy.html">01 · Filosofia y Principios</a>
+  <a href="ds-02-psychology.html">02 · Psicologia del Usuario</a>
+  <a href="ds-03-benchmarking.html">03 · Benchmarking</a>
+  <hr/>
+  <div class="sidebar-label">Sistema de Color</div>
+  <a href="ds-04-color-system.html">04 · Sistema de Color</a>
+  <a href="ds-05-dark-mode.html">05 · Dark Mode</a>
+  <a href="ds-06-axes.html">06 · Ejes Tematicos</a>
+  <hr/>
+  <div class="sidebar-label">Datos y Visualizacion</div>
+  <a href="ds-07-dataviz.html">07 · Visualizacion de Datos</a>
+  <a href="ds-08-affinity.html">08 · Tiers de Afinidad</a>
+  <hr/>
+  <div class="sidebar-label">Componentes</div>
+  <a href="ds-09-components.html">09 · Component Library</a>
+  <hr/>
+  <div class="sidebar-label">Implementacion</div>
+  <a href="ds-10-tokens.html">10 · Design Tokens</a>
+  <a href="ds-11-screens.html">11 · Validacion por Pantalla</a>
+  <div class="sidebar-bottom">
+    <button class="theme-btn" id="theme-btn">Dark mode</button>
+  </div>
+</nav>
+
+<div class="main"><div class="content">
+
+<div class="page-header">
+  <div class="breadcrumb">Componentes / 09</div>
+  <h1>Component Library</h1>
+  <p>Todos los componentes base del sistema. Renderizados reales — no mockups.</p>
+</div>
+
+<!-- A: BUTTONS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">A</div>
+    <h2>Buttons</h2>
+  </div>
+  <div class="card">
+    <div class="comp-group">
+      <div class="comp-label">Variantes</div>
+      <div class="flex-row">
+        <button class="btn btn-primary">Primary</button>
+        <button class="btn btn-accent">Accent</button>
+        <button class="btn btn-secondary">Secondary</button>
+        <button class="btn btn-ghost">Ghost</button>
+        <button class="btn btn-danger">Danger</button>
+        <button class="btn btn-link">Link</button>
+      </div>
+    </div>
+    <div class="comp-group">
+      <div class="comp-label">Sizes</div>
+      <div class="flex-row" style="align-items:flex-end;">
+        <button class="btn btn-primary btn-sm">Small</button>
+        <button class="btn btn-primary">Default (md)</button>
+        <button class="btn btn-primary btn-lg">Large</button>
+      </div>
+    </div>
+    <div class="comp-group">
+      <div class="comp-label">Disabled</div>
+      <div class="flex-row">
+        <button class="btn btn-primary" disabled style="opacity:.45;cursor:not-allowed;">Primary disabled</button>
+        <button class="btn btn-accent" disabled style="opacity:.45;cursor:not-allowed;">Accent disabled</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">
+      <strong>Primary</strong> — solo una accion principal por pantalla · <strong>Accent</strong> — solo en hero o pantallas de recompensa · <strong>Ghost</strong> — acciones secundarias que no compiten con primary · <strong>Danger</strong> — solo destructivas, siempre con confirmacion modal
+    </div>
+  </div>
+</div>
+
+<!-- B: INPUTS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">B</div>
+    <h2>Inputs + Form Controls</h2>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="comp-group">
+        <label class="inp-label">Input default</label>
+        <input class="inp" placeholder="Escribe aqui..." value=""/>
+        <div class="inp-hint">Texto de ayuda para el campo</div>
+      </div>
+      <div class="comp-group">
+        <label class="inp-label">Input focused</label>
+        <input class="inp inp-focused" value="Con foco activo"/>
+      </div>
+      <div class="comp-group">
+        <label class="inp-label" style="color:var(--c-danger);">Input error</label>
+        <input class="inp inp-error" value="valor invalido"/>
+        <div class="inp-err-msg">Este campo es requerido</div>
+      </div>
+      <div class="comp-group">
+        <label class="inp-label">Input disabled</label>
+        <input class="inp inp-disabled" value="Campo bloqueado" style="pointer-events:none;" disabled/>
+      </div>
+    </div>
+    <div class="card">
+      <div class="comp-group">
+        <label class="inp-label">Textarea</label>
+        <textarea class="inp" rows="3" placeholder="Escribe tu justificacion..."></textarea>
+      </div>
+      <div class="comp-group">
+        <div class="comp-label">Checkbox</div>
+        <div class="flex-col" style="gap:8px;">
+          <div class="form-row"><div class="faux-check checked"></div><span>Opcion seleccionada</span></div>
+          <div class="form-row"><div class="faux-check"></div><span>Opcion sin seleccionar</span></div>
+        </div>
+      </div>
+      <div class="comp-group">
+        <div class="comp-label">Radio</div>
+        <div class="flex-col" style="gap:8px;">
+          <div class="form-row"><div class="faux-radio selected"></div><span>Opcion activa</span></div>
+          <div class="form-row"><div class="faux-radio"></div><span>Opcion inactiva</span></div>
+        </div>
+      </div>
+      <div class="comp-group">
+        <label class="inp-label">Select</label>
+        <select class="inp"><option>Selecciona una opcion</option><option>Diputados 2025</option><option>Senadores 2025</option></select>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px;">
+    <div class="comp-group">
+      <div class="comp-label">Progress bar — cuestionario (secondary)</div>
+      <div class="prog-track"><div class="prog-fill" style="width:58%;"></div></div>
+    </div>
+    <div class="comp-group">
+      <div class="comp-label">Progress bar — home (accent)</div>
+      <div class="prog-track prog-accent"><div class="prog-fill" style="width:35%;"></div></div>
+    </div>
+    <div class="comp-group" style="margin-bottom:0;">
+      <div class="comp-label">Slider</div>
+      <div class="slider-wrap">
+        <span class="slider-val">0</span>
+        <div class="slider-track"><div class="slider-fill"></div><div class="slider-thumb"></div></div>
+        <span class="slider-val">100</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- B2: AFFINITY BAR -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">B2</div>
+    <h2>Affinity Bar</h2>
+    <p>Componente de ranking de candidatos. La barra indica coincidencia matematica — su color refleja el tier, no el candidato. El nombre del candidato NUNCA hereda el color del tier.</p>
+  </div>
+
+  <!-- Demo completo: 5 filas, una por tier -->
+  <div class="card" style="margin-bottom:14px;">
+    <div class="comp-label" style="margin-bottom:10px;">Lista de candidatos — 5 tiers</div>
+    <div class="aff-bar-wrap">
+      <div class="aff-bar-row">
+        <div class="aff-bar-rank">#1</div>
+        <div class="aff-bar-avatar">AG</div>
+        <div class="aff-bar-info">
+          <div class="aff-bar-name">Ana Garcia Morales</div>
+          <div class="aff-bar-track"><div class="aff-bar-fill fill-5" style="width:87%;"></div></div>
+        </div>
+        <div class="aff-bar-pct pct-5">87%</div>
+      </div>
+      <div class="aff-bar-row">
+        <div class="aff-bar-rank">#2</div>
+        <div class="aff-bar-avatar">BR</div>
+        <div class="aff-bar-info">
+          <div class="aff-bar-name">Benjamin Rojas</div>
+          <div class="aff-bar-track"><div class="aff-bar-fill fill-4" style="width:72%;"></div></div>
+        </div>
+        <div class="aff-bar-pct pct-4">72%</div>
+      </div>
+      <div class="aff-bar-row">
+        <div class="aff-bar-rank">#3</div>
+        <div class="aff-bar-avatar">CM</div>
+        <div class="aff-bar-info">
+          <div class="aff-bar-name">Carla Munoz</div>
+          <div class="aff-bar-track"><div class="aff-bar-fill fill-3" style="width:54%;"></div></div>
+        </div>
+        <div class="aff-bar-pct pct-3">54%</div>
+      </div>
+      <div class="aff-bar-row">
+        <div class="aff-bar-rank">#4</div>
+        <div class="aff-bar-avatar">DP</div>
+        <div class="aff-bar-info">
+          <div class="aff-bar-name">Diego Perez</div>
+          <div class="aff-bar-track"><div class="aff-bar-fill fill-2" style="width:33%;"></div></div>
+        </div>
+        <div class="aff-bar-pct pct-2">33%</div>
+      </div>
+      <div class="aff-bar-row">
+        <div class="aff-bar-rank">#5</div>
+        <div class="aff-bar-avatar">ES</div>
+        <div class="aff-bar-info">
+          <div class="aff-bar-name">Elena Silva</div>
+          <div class="aff-bar-track"><div class="aff-bar-fill fill-1" style="width:12%;"></div></div>
+        </div>
+        <div class="aff-bar-pct pct-1">12%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Spec table -->
+  <div class="g2">
+    <div>
+      <table>
+        <thead><tr><th>Elemento</th><th>Token</th><th>Regla</th></tr></thead>
+        <tbody>
+          <tr><td>Rango (#N)</td><td class="mono">--c-text3</td><td>Neutro — la posicion es dato, no jerarquia de valor</td></tr>
+          <tr><td>Nombre</td><td class="mono">--c-text</td><td>Siempre en color de texto primario. Nunca hereda el color del tier</td></tr>
+          <tr><td>Barra track</td><td class="mono">--c-border2</td><td>Fondo neutro de la barra, sin color semantico</td></tr>
+          <tr><td>Barra fill</td><td class="mono">--c-aff1 a --c-aff5</td><td>Calculado del % de afinidad del usuario con ese candidato</td></tr>
+          <tr><td>% texto</td><td class="mono">--c-aff1 a --c-aff5</td><td>Mismo tier que la barra. Coherencia visual.</td></tr>
+          <tr><td>Avatar</td><td class="mono">--c-border</td><td>Placeholder neutro. Nunca usa el color del candidato</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <table>
+        <thead><tr><th>Rango</th><th>Token fill</th><th>Token text</th><th>Tier</th></tr></thead>
+        <tbody>
+          <tr><td>81-100%</td><td class="mono" style="color:var(--c-aff5);">--c-aff5</td><td class="mono" style="color:var(--c-aff5);">--c-aff5</td><td>5 - Alta</td></tr>
+          <tr><td>61-80%</td><td class="mono" style="color:var(--c-aff4);">--c-aff4</td><td class="mono" style="color:var(--c-aff4);">--c-aff4</td><td>4 - Buena</td></tr>
+          <tr><td>41-60%</td><td class="mono" style="color:var(--c-aff3);">--c-aff3</td><td class="mono" style="color:var(--c-aff3);">--c-aff3</td><td>3 - Media</td></tr>
+          <tr><td>21-40%</td><td class="mono" style="color:var(--c-aff2);">--c-aff2</td><td class="mono" style="color:var(--c-aff2);">--c-aff2</td><td>2 - Baja</td></tr>
+          <tr><td>0-20%</td><td class="mono" style="color:var(--c-aff1);">--c-aff1</td><td class="mono" style="color:var(--c-aff1);">--c-aff1</td><td>1 - Muy baja</td></tr>
+        </tbody>
+      </table>
+      <div class="ins ins-r" style="margin-top:10px;">
+        <strong>Regla critica:</strong> La barra usa el tier del % de coincidencia del <em>usuario activo</em> con ese candidato. Si el usuario cambia, los colores cambian. No son propiedades del candidato.
+      </div>
+    </div>
+  </div>
+
+  <!-- React snippet -->
+  <div class="code-block" style="margin-top:14px;">
+    <span class="code-comment">// React Native — AffinityBar util</span><br/>
+    <span class="code-key">function</span> <span class="code-str">getAffinityTier</span>(pct: <span class="code-key">number</span>) {<br/>
+    &nbsp;&nbsp;<span class="code-key">if</span> (pct &gt;= 81) <span class="code-key">return</span> { token: <span class="code-str">'aff5'</span>, color: <span class="code-str">'#3A9E7A'</span> };<br/>
+    &nbsp;&nbsp;<span class="code-key">if</span> (pct &gt;= 61) <span class="code-key">return</span> { token: <span class="code-str">'aff4'</span>, color: <span class="code-str">'#6B9B7A'</span> };<br/>
+    &nbsp;&nbsp;<span class="code-key">if</span> (pct &gt;= 41) <span class="code-key">return</span> { token: <span class="code-str">'aff3'</span>, color: <span class="code-str">'#C89B5C'</span> };<br/>
+    &nbsp;&nbsp;<span class="code-key">if</span> (pct &gt;= 21) <span class="code-key">return</span> { token: <span class="code-str">'aff2'</span>, color: <span class="code-str">'#D07777'</span> };<br/>
+    &nbsp;&nbsp;<span class="code-key">return</span> { token: <span class="code-str">'aff1'</span>, color: <span class="code-str">'#B85C5C'</span> };<br/>
+    }<br/>
+    <span class="code-comment">// -- anti-patron: <Text style={{color: getAffinityTier(pct).color}}>{candidato.nombre}</Text></span><br/>
+    <span class="code-comment">// -- correcto:   <Text style={{color: c.text}}>{candidato.nombre}</Text></span>
+  </div>
+</div>
+
+<!-- C: CHIPS Y TAGS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">C</div>
+    <h2>Chips y Tags</h2>
+  </div>
+  <div class="card">
+    <div class="comp-group">
+      <div class="comp-label">Chips (con border)</div>
+      <div class="flex-row">
+        <span class="chip chip-primary">Primary</span>
+        <span class="chip chip-accent">Accent</span>
+        <span class="chip chip-success">Success</span>
+        <span class="chip chip-warning">Warning</span>
+        <span class="chip chip-danger">Danger</span>
+        <span class="chip chip-neutral">Neutral</span>
+      </div>
+    </div>
+    <div class="comp-group" style="margin-bottom:0;">
+      <div class="comp-label">Tags (sin border)</div>
+      <div class="flex-row">
+        <span class="tag tag-primary">Primary</span>
+        <span class="tag tag-accent">Accent</span>
+        <span class="tag tag-success">Success</span>
+        <span class="tag tag-warning">Warning</span>
+        <span class="tag tag-danger">Danger</span>
+        <span class="tag tag-neutral">Neutral</span>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:11px;color:var(--c-text2);">Chips tienen border · Tags no. Ambos usan <span class="mono">border-radius: 999px</span>.</div>
+  </div>
+</div>
+
+<!-- D: CARDS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">D</div>
+    <h2>Cards</h2>
+  </div>
+  <div class="g3">
+    <div class="card">
+      <div style="font-size:13px;font-weight:800;color:var(--c-text);margin-bottom:6px;">Card basica</div>
+      <div style="font-size:11px;color:var(--c-text2);line-height:1.6;">Superficie neutra para contenido secundario. Usa <span class="mono">--c-surface</span> como fondo y <span class="mono">--c-border</span> como borde.</div>
+    </div>
+    <div class="elect-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+        <div class="elect-title">Elecciones 2025</div>
+        <span class="chip chip-success" style="font-size:9px;padding:2px 8px;">Activa</span>
+      </div>
+      <div class="elect-meta">Diputados · 15 preguntas</div>
+      <div class="prog-track" style="margin-bottom:6px;"><div class="prog-fill" style="width:60%;"></div></div>
+      <div style="font-size:10px;color:var(--c-text3);">9 de 15 preguntas respondidas</div>
+    </div>
+    <div class="cand-card">
+      <div class="cand-avatar"></div>
+      <div style="flex:1;min-width:0;">
+        <div class="cand-name">A. Garcia</div>
+        <div class="cand-party">Partido Ejemplo · Dist. 12</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="prog-track" style="flex:1;"><div class="prog-fill" style="width:87%;background:var(--c-aff5);"></div></div>
+          <span class="cand-pct" style="color:var(--c-aff5);">87%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- E: MATCH RESULT CARD -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">E</div>
+    <h2>Match Result Card</h2>
+  </div>
+  <div class="match-card">
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text3);margin-bottom:4px;">Tu coincidencia</div>
+        <div class="match-num">87%</div>
+        <div class="match-name">Ana Garcia Morales</div>
+        <div class="match-sub">32 preguntas coinciden</div>
+        <button class="btn btn-primary btn-sm">Ver perfil completo</button>
+      </div>
+      <!-- Mini radar -->
+      <svg viewBox="0 0 120 108" width="120" height="108" aria-label="Mini radar">
+        <defs>
+          <style>
+            .mr-grid{fill:none;stroke:var(--c-border);stroke-width:.8;}
+            .mr-p1{fill:rgba(46,95,126,.12);stroke:#2E5F7E;stroke-width:2;stroke-linejoin:round;}
+            .mr-p2{fill:rgba(58,158,122,.10);stroke:#3A9E7A;stroke-width:1.5;stroke-linejoin:round;}
+            .mr-d1{fill:#2E5F7E;} .mr-d2{fill:#3A9E7A;}
+            .mr-lbl{font-size:7px;fill:var(--c-text3);font-family:system-ui,sans-serif;}
+          </style>
+        </defs>
+        <!-- Centro 60,54 radio 38 -->
+        <polygon class="mr-grid" points="60,16 96,38 83,80 37,80 24,38"/>
+        <polygon class="mr-grid" points="60,29 80,42 73,63 47,63 40,42"/>
+        <polygon class="mr-grid" points="60,41 70,48 66,59 54,59 50,48"/>
+        <line stroke="var(--c-border)" stroke-width=".8" x1="60" y1="54" x2="60" y2="16"/>
+        <line stroke="var(--c-border)" stroke-width=".8" x1="60" y1="54" x2="96" y2="38"/>
+        <line stroke="var(--c-border)" stroke-width=".8" x1="60" y1="54" x2="83" y2="80"/>
+        <line stroke="var(--c-border)" stroke-width=".8" x1="60" y1="54" x2="37" y2="80"/>
+        <line stroke="var(--c-border)" stroke-width=".8" x1="60" y1="54" x2="24" y2="38"/>
+        <!-- S1 usuario valores 0.80, 0.65, 0.55, 0.75, 0.70 -->
+        <polygon class="mr-p1" points="60,22 82,46 71,70 43,75 35,45"/>
+        <circle class="mr-d1" cx="60" cy="22" r="2.5"/>
+        <circle class="mr-d1" cx="82" cy="46" r="2.5"/>
+        <circle class="mr-d1" cx="71" cy="70" r="2.5"/>
+        <circle class="mr-d1" cx="43" cy="75" r="2.5"/>
+        <circle class="mr-d1" cx="35" cy="45" r="2.5"/>
+        <!-- S2 candidato valores 0.90, 0.70, 0.80, 0.85, 0.60 -->
+        <polygon class="mr-p2" points="60,20 87,44 77,74 46,79 32,46"/>
+        <circle class="mr-d2" cx="60" cy="20" r="2.5"/>
+        <circle class="mr-d2" cx="87" cy="44" r="2.5"/>
+        <circle class="mr-d2" cx="77" cy="74" r="2.5"/>
+        <circle class="mr-d2" cx="46" cy="79" r="2.5"/>
+        <circle class="mr-d2" cx="32" cy="46" r="2.5"/>
+        <text class="mr-lbl" x="60" y="10" text-anchor="middle">Eco</text>
+        <text class="mr-lbl" x="100" y="39" text-anchor="start">Soc</text>
+        <text class="mr-lbl" x="83" y="90" text-anchor="middle">Amb</text>
+        <text class="mr-lbl" x="37" y="90" text-anchor="middle">Seg</text>
+        <text class="mr-lbl" x="19" y="39" text-anchor="end">DD</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- F: TOASTS / ALERTS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">F</div>
+    <h2>Toasts / Alerts</h2>
+  </div>
+  <div class="flex-col">
+    <div class="toast toast-success">
+      <svg class="toast-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="var(--c-success)" stroke-width="1.5"/><path d="M4 7l2 2 4-4" stroke="var(--c-success)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div><strong style="font-size:12px;color:var(--c-success);">Respuestas guardadas</strong><br/><span style="font-size:11px;color:var(--c-text2);">Tu progreso se guardo automaticamente.</span></div>
+    </div>
+    <div class="toast toast-warning">
+      <svg class="toast-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2L12.5 12H1.5L7 2z" stroke="var(--c-warning)" stroke-width="1.5" stroke-linejoin="round"/><line x1="7" y1="6" x2="7" y2="9" stroke="var(--c-warning)" stroke-width="1.5" stroke-linecap="round"/><circle cx="7" cy="10.5" r="0.5" fill="var(--c-warning)"/></svg>
+      <div><strong style="font-size:12px;color:var(--c-warning);">Conexion lenta</strong><br/><span style="font-size:11px;color:var(--c-text2);">Los resultados pueden tardar un poco mas.</span></div>
+    </div>
+    <div class="toast toast-danger">
+      <svg class="toast-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="var(--c-danger)" stroke-width="1.5"/><line x1="5" y1="5" x2="9" y2="9" stroke="var(--c-danger)" stroke-width="1.5" stroke-linecap="round"/><line x1="9" y1="5" x2="5" y2="9" stroke="var(--c-danger)" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div><strong style="font-size:12px;color:var(--c-danger);">Error al cargar</strong><br/><span style="font-size:11px;color:var(--c-text2);">No se pudo obtener el perfil del candidato.</span></div>
+    </div>
+    <div class="toast toast-info" style="background:var(--c-info-bg);border-color:var(--c-info);">
+      <svg class="toast-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="var(--c-info)" stroke-width="1.5"/><line x1="7" y1="6" x2="7" y2="10" stroke="var(--c-info)" stroke-width="1.5" stroke-linecap="round"/><circle cx="7" cy="4" r="0.7" fill="var(--c-info)"/></svg>
+      <div><strong style="font-size:12px;color:var(--c-info);">Tip</strong><br/><span style="font-size:11px;color:var(--c-text2);">Puedes cambiar tus respuestas en cualquier momento.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- G: EMPTY STATES -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">G</div>
+    <h2>Empty States</h2>
+  </div>
+  <div class="g2">
+    <div class="empty-state">
+      <svg class="empty-icon" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="10" y="8" width="36" height="44" rx="4" stroke-dasharray="4 2"/>
+        <line x1="18" y1="20" x2="38" y2="20"/><line x1="18" y1="28" x2="38" y2="28"/><line x1="18" y1="36" x2="30" y2="36"/>
+        <circle cx="44" cy="44" r="6" fill="none"/><line x1="40" y1="44" x2="48" y2="44"/><line x1="44" y1="40" x2="44" y2="48"/>
+      </svg>
+      <div class="empty-title">Aun no respondiste preguntas</div>
+      <div class="empty-sub">Completa el cuestionario para ver tus resultados de coincidencia con los candidatos.</div>
+      <button class="btn btn-primary btn-sm">Empezar cuestionario</button>
+    </div>
+    <div class="empty-state">
+      <svg class="empty-icon" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="28" cy="24" r="10"/><circle cx="28" cy="24" r="4"/>
+        <path d="M18 40 Q28 34 38 40" stroke-linecap="round"/>
+        <line x1="40" y1="16" x2="48" y2="8"/><line x1="40" y1="8" x2="48" y2="16"/>
+      </svg>
+      <div class="empty-title">No hay candidatos disponibles</div>
+      <div class="empty-sub">No encontramos candidatos para esta busqueda. Intenta cambiar los filtros.</div>
+      <button class="btn btn-ghost btn-sm">Volver al inicio</button>
+    </div>
+  </div>
+</div>
+
+<!-- H: LOADING STATES -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">H</div>
+    <h2>Loading States</h2>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="comp-label">Skeleton card</div>
+      <div class="flex-col" style="gap:10px;">
+        <div class="skel" style="height:16px;width:60%;"></div>
+        <div class="skel" style="height:12px;width:90%;"></div>
+        <div class="skel" style="height:12px;width:75%;"></div>
+        <div class="skel" style="height:8px;width:45%;"></div>
+      </div>
+    </div>
+    <div class="card" style="display:flex;align-items:center;justify-content:center;min-height:100px;gap:14px;flex-direction:column;">
+      <div class="spinner"></div>
+      <div style="font-size:11px;color:var(--c-text3);">Calculando afinidad...</div>
+    </div>
+  </div>
+</div>
+
+<!-- I: TABS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">I</div>
+    <h2>Tabs</h2>
+  </div>
+  <div class="card" style="padding-top:0;padding-left:0;padding-right:0;">
+    <div class="tab-bar">
+      <div class="tab-item active">Resultados</div>
+      <div class="tab-item">Por eje</div>
+      <div class="tab-item">Comparacion</div>
+      <div class="tab-item">Compartir</div>
+    </div>
+    <div style="padding:16px;font-size:12px;color:var(--c-text2);">Contenido del tab activo "Resultados" aparece aqui.</div>
+  </div>
+</div>
+
+</div></div><!-- /content /main -->
+<script src="ds-nav.js"></script>
+</body></html>

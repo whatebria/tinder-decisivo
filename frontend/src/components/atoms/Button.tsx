@@ -19,7 +19,7 @@ import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
 import { useBlurringPress } from "../../hooks/useBlurringPress";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "success";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "success" | "accent";
 export type ButtonSize = "sm" | "md" | "lg";
 
 export interface ButtonProps extends Omit<PressableProps, "children" | "style"> {
@@ -74,6 +74,13 @@ export function Button({
       success: {
         container: { backgroundColor: c.success, borderColor: c.success, borderWidth: 1.5 },
         text: { color: c.textOnPrimary },
+      },
+      accent: {
+        // DS-11: CTA hero Home, lock overlay, compartir. Max 3x por viewport.
+        // Usa brandAccent (#3A9E7A light / #5BCEA0 dark) en vez de c.accent
+        // que es solo el tint de hover (#A8C5B5).
+        container: { backgroundColor: c.brandAccent, borderColor: c.brandAccent, borderWidth: 1.5 },
+        text: { color: "#FFFFFF" },
       },
     } as const;
     const SIZES = {
