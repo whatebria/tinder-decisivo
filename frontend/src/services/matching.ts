@@ -8,16 +8,24 @@
  *
  * Se testea sin necesidad de renderizar componentes.
  */
-import { colors } from "../theme/colors";
+import { colors, affinity } from "../theme/colors";
 import type { MatchResult } from "../api/endpoints";
 
-// -- Match tier --------------------------------------------------------------
+// -- Match tier (DS-08: 5 tiers de afinidad) --------------------------------
 
-export type MatchTier = "alto" | "medio" | "bajo";
+/**
+ * 5 niveles de afinidad electoral (DS-08):
+ *   aff5: 80-100%  verde vibrante (brandAccent)
+ *   aff4: 60-79%   verde bosque   (success)
+ *   aff3: 40-59%   mostaza        (warning)
+ *   aff2: 20-39%   terracota suave (danger300)
+ *   aff1: 0-19%    terracota      (danger)
+ */
+export type MatchTier = "aff5" | "aff4" | "aff3" | "aff2" | "aff1";
 
-const TIER_THRESHOLDS = { alto: 75, medio: 50 } as const;
+const TIER_THRESHOLDS = { t5: 80, t4: 60, t3: 40, t2: 20 } as const;
 
-/** Sub-set de la paleta que necesitamos para colorear matches. */
+/** Sub-set de la paleta que necesitamos para colorear confianza. */
 export interface MatchPalette {
   success: string;
   warning: string;
@@ -25,24 +33,20 @@ export interface MatchPalette {
 }
 
 export function getMatchTier(pct: number): MatchTier {
-  if (pct >= TIER_THRESHOLDS.alto) return "alto";
-  if (pct >= TIER_THRESHOLDS.medio) return "medio";
-  return "bajo";
+  if (pct >= TIER_THRESHOLDS.t5) return "aff5";
+  if (pct >= TIER_THRESHOLDS.t4) return "aff4";
+  if (pct >= TIER_THRESHOLDS.t3) return "aff3";
+  if (pct >= TIER_THRESHOLDS.t2) return "aff2";
+  return "aff1";
 }
 
 /**
- * Devuelve el color hex correspondiente al tier del match.
- * @param pct porcentaje del match (0-100)
- * @param palette paleta a usar. Default: `colors` (light theme). En componentes
- *   reactivos al tema, pasar `useThemeColors()`.
+ * Devuelve el color hex del tier de afinidad para un porcentaje dado.
+ * Usa tokens DS-08 (affinity) directamente -- theme-agnostic.
+ * Para dark mode, usa `affinityDark` desde theme/colors.
  */
-export function getMatchColor(pct: number, palette: MatchPalette = colors): string {
-  const tier = getMatchTier(pct);
-  return {
-    alto: palette.success,
-    medio: palette.warning,
-    bajo: palette.danger,
-  }[tier];
+export function getMatchColor(pct: number): string {
+  return affinity[getMatchTier(pct)];
 }
 
 export function formatMatchPercentage(pct: number): string {

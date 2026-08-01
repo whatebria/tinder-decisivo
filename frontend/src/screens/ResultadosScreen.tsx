@@ -450,7 +450,7 @@ export function ResultadosScreen({
         {top ? (
           (() => {
             const pct = Number(top.match_percentage);
-            const scoreCol = getMatchColor(pct, c);
+            const scoreCol = getMatchColor(pct);
             const conf = getConfianzaBadge(top.confianza);
             const chartData = breakdownToChartData(
               top.breakdown_por_eje as BreakdownPorEje | null | undefined,
@@ -518,7 +518,7 @@ export function ResultadosScreen({
             <View style={styles.rankGrid}>
               {rest.map((r, idx) => {
                 const pct = Number(r.match_percentage);
-                const scoreCol = getMatchColor(pct, c);
+                const scoreCol = getMatchColor(pct);
                 const chartData = breakdownToChartData(
                   r.breakdown_por_eje as BreakdownPorEje | null | undefined,
                 );

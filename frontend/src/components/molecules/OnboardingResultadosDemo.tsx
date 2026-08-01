@@ -49,7 +49,7 @@ export function OnboardingResultadosDemo() {
           apellido={cand.apellido}
           partido={cand.partido}
           matchPct={cand.matchPct}
-          matchColor={getMatchColor(cand.matchPct, c)}
+              matchColor={getMatchColor(cand.matchPct)}
           style={{ flex: 1, minWidth: 0 }}
         />
       ))}

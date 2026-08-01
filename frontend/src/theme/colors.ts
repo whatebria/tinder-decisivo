@@ -214,3 +214,36 @@ export const colorsDark = {
 } as const;
 
 export type ColorKey = keyof typeof colors;
+
+// ============================================================================
+// Affinity tokens (DS-08) — 5 tiers de afinidad electoral
+//
+// Usados por getMatchColor() en services/matching.ts.
+// Desacoplados de la paleta semantica (success/warning/danger) para que
+// el match pueda evolucionar independientemente del feedback UI generico.
+// ============================================================================
+
+/** Tokens de afinidad en light mode. */
+export const affinity = {
+  /** aff5: 80-100% — verde vibrante = brandAccent */
+  aff5: "#3A9E7A",
+  /** aff4: 60-79%  — verde bosque = success */
+  aff4: "#6B9B7A",
+  /** aff3: 40-59%  — mostaza = warning */
+  aff3: "#C89B5C",
+  /** aff2: 20-39%  — terracota suave = danger300 */
+  aff2: "#D07777",
+  /** aff1: 0-19%   — terracota = danger */
+  aff1: "#B85C5C",
+} as const;
+
+/** Tokens de afinidad en dark mode (tints mas claros para contraste). */
+export const affinityDark = {
+  aff5: "#5BCEA0",
+  aff4: "#8FB89A",
+  aff3: "#D9B378",
+  aff2: "#E09090",
+  aff1: "#D07777",
+} as const;
+
+export type AffinityTier = keyof typeof affinity;

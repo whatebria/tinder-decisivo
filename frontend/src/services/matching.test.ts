@@ -12,59 +12,98 @@ import {
   getMatchTier,
   sortByMatchDesc,
 } from "./matching";
-import { colors } from "../theme/colors";
+import { colors, affinity } from "../theme/colors";
 
 describe("getMatchTier", () => {
-  test("100% es tier alto", () => {
-    expect(getMatchTier(100)).toBe("alto");
+  test("100% es aff5 (verde vibrante)", () => {
+    expect(getMatchTier(100)).toBe("aff5");
   });
 
-  test("75% justo en el umbral es alto", () => {
-    expect(getMatchTier(75)).toBe("alto");
+  test("80% umbral t5 exacto es aff5", () => {
+    expect(getMatchTier(80)).toBe("aff5");
   });
 
-  test("74.9% es medio (justo debajo del umbral alto)", () => {
-    expect(getMatchTier(74.9)).toBe("medio");
+  test("79% justo debajo del umbral t5 es aff4", () => {
+    expect(getMatchTier(79)).toBe("aff4");
   });
 
-  test("50% justo en el umbral es medio", () => {
-    expect(getMatchTier(50)).toBe("medio");
+  test("60% umbral t4 exacto es aff4", () => {
+    expect(getMatchTier(60)).toBe("aff4");
   });
 
-  test("49.9% es bajo (justo debajo del umbral medio)", () => {
-    expect(getMatchTier(49.9)).toBe("bajo");
+  test("59% justo debajo del umbral t4 es aff3", () => {
+    expect(getMatchTier(59)).toBe("aff3");
   });
 
-  test("0% es bajo", () => {
-    expect(getMatchTier(0)).toBe("bajo");
+  test("40% umbral t3 exacto es aff3", () => {
+    expect(getMatchTier(40)).toBe("aff3");
+  });
+
+  test("39% justo debajo del umbral t3 es aff2", () => {
+    expect(getMatchTier(39)).toBe("aff2");
+  });
+
+  test("20% umbral t2 exacto es aff2", () => {
+    expect(getMatchTier(20)).toBe("aff2");
+  });
+
+  test("19% justo debajo del umbral t2 es aff1", () => {
+    expect(getMatchTier(19)).toBe("aff1");
+  });
+
+  test("0% es aff1 (terracota)", () => {
+    expect(getMatchTier(0)).toBe("aff1");
   });
 
   test.each([
-    [0, "bajo"],
-    [30, "bajo"],
-    [49.99, "bajo"],
-    [50, "medio"],
-    [60, "medio"],
-    [74.99, "medio"],
-    [75, "alto"],
-    [90, "alto"],
-    [100, "alto"],
-  ] as const)("pct=%p devuelve tier=%p", (pct, expected) => {
+    [0,   "aff1"],
+    [10,  "aff1"],
+    [19,  "aff1"],
+    [20,  "aff2"],
+    [30,  "aff2"],
+    [39,  "aff2"],
+    [40,  "aff3"],
+    [50,  "aff3"],
+    [59,  "aff3"],
+    [60,  "aff4"],
+    [70,  "aff4"],
+    [79,  "aff4"],
+    [80,  "aff5"],
+    [90,  "aff5"],
+    [100, "aff5"],
+  ] as const)("pct=%p devuelve tier=%p (DS-08)", (pct, expected) => {
     expect(getMatchTier(pct)).toBe(expected);
   });
 });
 
 describe("getMatchColor", () => {
-  test("alto usa color success", () => {
-    expect(getMatchColor(90)).toBe(colors.success);
+  test("aff5 (80+%): verde vibrante = affinity.aff5", () => {
+    expect(getMatchColor(90)).toBe(affinity.aff5);  // #3A9E7A
   });
 
-  test("medio usa color warning", () => {
-    expect(getMatchColor(60)).toBe(colors.warning);
+  test("aff5 umbral exacto (80%)", () => {
+    expect(getMatchColor(80)).toBe(affinity.aff5);
   });
 
-  test("bajo usa color danger", () => {
-    expect(getMatchColor(30)).toBe(colors.danger);
+  test("aff4 (60-79%): verde bosque = affinity.aff4", () => {
+    expect(getMatchColor(70)).toBe(affinity.aff4);  // #6B9B7A
+  });
+
+  test("aff3 (40-59%): mostaza = affinity.aff3", () => {
+    expect(getMatchColor(50)).toBe(affinity.aff3);  // #C89B5C
+  });
+
+  test("aff2 (20-39%): terracota suave = affinity.aff2", () => {
+    expect(getMatchColor(30)).toBe(affinity.aff2);  // #D07777 (antes: danger #B85C5C)
+  });
+
+  test("aff1 (0-19%): terracota = affinity.aff1", () => {
+    expect(getMatchColor(10)).toBe(affinity.aff1);  // #B85C5C
+  });
+
+  test("90% no devuelve success del theme (bug DS-08 corregido)", () => {
+    expect(getMatchColor(90)).not.toBe(colors.success);
+    expect(getMatchColor(90)).toBe(affinity.aff5);
   });
 });
 

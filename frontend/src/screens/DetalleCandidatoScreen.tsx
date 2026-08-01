@@ -135,7 +135,7 @@ export function DetalleCandidatoScreen({
     () => breakdownToChartData(breakdown),
     [breakdown],
   );
-  const scoreCol = getMatchColor(matchPct ?? 0, c);
+  const scoreCol = getMatchColor(matchPct ?? 0);
 
   if (candidatoQ.isLoading) {
     return (
