@@ -45,14 +45,12 @@ import {
   ScreenTopBar,
   ShareModal,
   Spinner,
+  TopMatchSection,
   useToast,
 } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import {
   formatMatchPercentage,
-  getConfianzaBadge,
-  getConfianzaBadgeVariant,
-  isConfianzaTentativa,
   getMatchColor,
   sortByMatchDesc,
 } from "../services/matching";
@@ -143,6 +141,14 @@ export function ResultadosScreen({
     if (!partidoFiltro) return visibleResults;
     return visibleResults.filter((r) => r.candidato_data.partido === partidoFiltro);
   }, [visibleResults, partidoFiltro]);
+
+  // Derivaciones del top match, fuera del IIFE (REFACTOR-004).
+  // Viven aqui (post-filteredResults) para que el JSX no contenga logica de derivacion.
+  const top = filteredResults[0] ?? null;
+  const topPct = top ? Number(top.match_percentage) : null;
+  const topColor = topPct != null ? getMatchColor(topPct) : null;
+  const topChart = top ? breakdownToChartData(top.breakdown_por_eje) : null;
+  const rest = top ? filteredResults.slice(1) : filteredResults;
 
   const favoritoIds = useMemo(
     () =>
@@ -365,8 +371,8 @@ export function ResultadosScreen({
     );
   }
 
-  const top = filteredResults[0];
-  const rest = filteredResults.slice(1);
+  // top, topPct, topColor, topChart, rest: derivados antes del return
+  // en el cuerpo del componente (fuera del IIFE, REFACTOR-004).
 
   return (
     <>
@@ -456,67 +462,18 @@ export function ResultadosScreen({
           </View>
         ) : null}
 
-        {top ? (
-          (() => {
-            const pct = Number(top.match_percentage);
-            const scoreCol = getMatchColor(pct);
-            const conf = getConfianzaBadge(top.confianza);
-            const chartData = breakdownToChartData(top.breakdown_por_eje);
-            const candidato = top.candidato_data;
-            const candId = candidato.id!;
-            const isFav = favoritoIds.has(candId);
-            const esTentativa = isConfianzaTentativa(top.confianza ?? undefined);
-            return (
-              <View style={{ gap: spacing.sp3 }}>
-                {esTentativa ? (
-                  <View
-                    style={[
-                      styles.coverageBanner,
-                      { backgroundColor: withAlpha(c.warning, 0.13), borderColor: c.warning },
-                    ]}
-                  >
-                    <Icon
-                      name="alert"
-                      size={18}
-                      color={c.warning}
-                    />
-                    <Text style={[styles.coverageBannerText, { color: c.text }]}>
-                      <Text style={{ fontWeight: "700" }}>Resultado preliminar. </Text>
-                      Solo se compararon{" "}
-                      <Text style={{ fontWeight: "700" }}>
-                        {top.preguntas_consideradas}{" "}
-                        {top.preguntas_consideradas === 1 ? "pregunta" : "preguntas"}
-                      </Text>
-                      . Responde más para afinar tu afinidad.
-                    </Text>
-                  </View>
-                ) : null}
-                <ResultadoHero
-                  nombre={candidato.nombre}
-                  apellido={candidato.apellido}
-                  partido={candidato.partido}
-                  imageUrl={candidato.profile_picture}
-                  matchPct={pct}
-                  matchColor={scoreCol}
-                  ejeScores={chartData}
-                  confianzaLabel={`Confianza ${conf.label.toLowerCase()}`}
-                  confianzaVariant={getConfianzaBadgeVariant(top.confianza ?? undefined)}
-                  confianzaSubtext={`${top.preguntas_consideradas} ${top.preguntas_consideradas === 1 ? "pregunta coincide" : "preguntas coinciden"}`}
-                  onCta={() => goToDetalle(top)}
-                />
-                {!isGuest ? (
-                  <BookmarkActions
-                    isFavorito={isFav}
-                    isDescartado={false}
-                    onToggleFavorito={() => handleToggleFav(candId)}
-                    onToggleDescartado={() => handleToggleDesc(candId)}
-                    loading={toggleFav.isPending || toggleDesc.isPending}
-                    size="sm"
-                  />
-                ) : null}
-              </View>
-            );
-          })()
+        {top && topColor && topChart ? (
+          <TopMatchSection
+            result={top}
+            matchColor={topColor}
+            chartData={topChart}
+            isFavorito={favoritoIds.has(top.candidato_data.id!)}
+            isGuest={isGuest}
+            onDetalle={() => goToDetalle(top)}
+            onToggleFav={handleToggleFav}
+            onToggleDesc={handleToggleDesc}
+            loadingBookmarks={toggleFav.isPending || toggleDesc.isPending}
+          />
         ) : (
           <Text style={styles.emptyText}>
             No hay candidatos para mostrar. Intenta nuevamente más tarde.
