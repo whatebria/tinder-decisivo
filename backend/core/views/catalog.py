@@ -7,6 +7,7 @@ El bookmarking (favoritos/descartados/decision) sigue requiriendo auth.
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import generics, permissions
 from rest_framework.response import Response
+from django.db.models import Q
 
 from ..models import Candidato, PosturaCandidato, TipoEleccion
 from ..serializers import (
@@ -72,11 +73,17 @@ class CandidatoPosturasView(generics.ListAPIView):
         qs = (
             PosturaCandidato.objects.filter(candidato_id=candidato_id)
             .select_related(
-                "candidato", "pregunta", "opcion_respuesta"
+                "candidato", "pregunta", "pregunta__tipo_eleccion", "opcion_respuesta"
             )
-            .order_by("pregunta__orden")
+            .order_by("pregunta__tipo_eleccion__es_base", "pregunta__orden")
         )
         tipo_id = self.request.query_params.get("tipo_eleccion_id")
         if tipo_id:
-            qs = qs.filter(pregunta__tipo_eleccion_id=tipo_id)
+            # Devuelve el tipo solicitado + el tipo base (piso general de preguntas).
+            # El tipo base no es un filtro opcional: siempre es relevante porque
+            # sus preguntas competen a cualquier politico y el usuario las respondio.
+            qs = qs.filter(
+                Q(pregunta__tipo_eleccion_id=tipo_id)
+                | Q(pregunta__tipo_eleccion__es_base=True)
+            )
         return qs

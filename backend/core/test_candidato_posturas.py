@@ -81,8 +81,55 @@ class TestCandidatoPosturasView:
         data = resp.json()
         assert data[0]["pregunta_orden"] < data[1]["pregunta_orden"]
 
-    def test_filtra_por_tipo_eleccion(self, escenario, db):
-        # Creo otro tipo con otra pregunta y postura del mismo candidato
+    def test_filtra_por_tipo_eleccion_incluye_base(self, escenario, db):
+        """Filtrar por tipo_eleccion_id devuelve ese tipo + el tipo base siempre."""
+        # Tipo base
+        tipo_base = TipoEleccion.objects.create(nombre="Base", es_base=True)
+        p_base = Pregunta.objects.create(
+            tipo_eleccion=tipo_base, texto="P base", eje_tematico="economia", orden=1
+        )
+        crear_opciones_acuerdo_desacuerdo(p_base)
+        PosturaCandidato.objects.create(
+            candidato=escenario["candidato"],
+            pregunta=p_base,
+            opcion_respuesta=p_base.opciones_respuesta.get(valor=3),
+            justificacion="Postura base.",
+        )
+
+        # Otro tipo ajeno (no deberia aparecer al filtrar por Presidencial)
+        otro_tipo = TipoEleccion.objects.create(nombre="Gobernador")
+        p_otro = Pregunta.objects.create(
+            tipo_eleccion=otro_tipo, texto="Otro", eje_tematico="cultural", orden=1
+        )
+        crear_opciones_acuerdo_desacuerdo(p_otro)
+        escenario["candidato"].tipos_eleccion.add(otro_tipo)
+        PosturaCandidato.objects.create(
+            candidato=escenario["candidato"],
+            pregunta=p_otro,
+            opcion_respuesta=p_otro.opciones_respuesta.get(valor=3),
+            justificacion="Data test.",
+        )
+
+        client = APIClient()
+        # Sin filtro: devuelve las 4 (2 presidencial + 1 base + 1 gobernador)
+        resp = client.get(
+            reverse("candidato-posturas", args=[escenario["candidato"].id])
+        )
+        assert len(resp.json()) == 4
+
+        # Con filtro por Presidencial: devuelve 2 presidencial + 1 base = 3
+        resp = client.get(
+            reverse("candidato-posturas", args=[escenario["candidato"].id]),
+            {"tipo_eleccion_id": escenario["tipo"].id},
+        )
+        assert len(resp.json()) == 3
+        ejes = {p["pregunta_texto"] for p in resp.json()}
+        # La postura base y las presidenciales deben estar; Gobernador no
+        assert "P base" in ejes
+        assert "Otro" not in ejes
+
+    def test_sin_filtro_devuelve_todo(self, escenario, db):
+        """Sin tipo_eleccion_id devuelve todas las posturas sin excepcion."""
         otro_tipo = TipoEleccion.objects.create(nombre="Gobernador")
         p_otro = Pregunta.objects.create(
             tipo_eleccion=otro_tipo,
@@ -100,18 +147,10 @@ class TestCandidatoPosturasView:
         )
 
         client = APIClient()
-        # Sin filtro: devuelve las 3
         resp = client.get(
             reverse("candidato-posturas", args=[escenario["candidato"].id])
         )
         assert len(resp.json()) == 3
-
-        # Con filtro: solo las 2 del tipo presidencial
-        resp = client.get(
-            reverse("candidato-posturas", args=[escenario["candidato"].id]),
-            {"tipo_eleccion_id": escenario["tipo"].id},
-        )
-        assert len(resp.json()) == 2
 
     def test_candidato_inexistente_devuelve_lista_vacia(self, db):
         client = APIClient()
