@@ -293,6 +293,13 @@ CORS_ALLOWED_ORIGIN_REGEXES = config(
     cast=Csv(),
 )
 
+# F7: valida que los regex no sean peligrosamente amplios.
+# Regex invalido o regex que acepta origenes externos -> ImproperlyConfigured en prod.
+# En DEBUG=True solo emite WARNING para no bloquear el desarrollo local.
+if CORS_ALLOWED_ORIGIN_REGEXES:  # No-op si la lista esta vacia (caso mas comun).
+    from .cors_security import check_cors_regexes  # noqa: E402
+    check_cors_regexes(CORS_ALLOWED_ORIGIN_REGEXES, debug=DEBUG)
+
 # ------------------------------------------------------------
 # Hardening de seguridad para produccion (activo solo si DEBUG=False)
 # ------------------------------------------------------------

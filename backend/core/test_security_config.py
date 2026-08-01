@@ -1,12 +1,14 @@
-"""Tests para configuracion de seguridad (F5, F17, F18).
+"""Tests para configuracion de seguridad (F5, F7, F17, F18).
 
 F5:  Content-Security-Policy middleware.
+F7:  Validacion de CORS_ALLOWED_ORIGIN_REGEXES al bootstrap.
 F17: guards de configuracion en settings.py (DEBUG en produccion + custom 404).
 F18: login response no incluye email.
 """
 
 import pytest
 from django.contrib.auth.models import User
+from django.core.exceptions import ImproperlyConfigured
 from rest_framework.test import APIClient
 
 
@@ -47,6 +49,98 @@ class TestCSPMiddleware:
         assert "default-src 'self'" in csp
         assert "script-src 'self' 'unsafe-inline'" in csp
         assert "frame-ancestors 'none'" in csp
+
+
+# ---------------------------------------------------------------------------
+# F7: CORS regex validation guard
+# ---------------------------------------------------------------------------
+
+
+class TestCorsRegexGuard:
+    """Tests para check_cors_regexes() (F7 -- CORS regex peligroso).
+
+    Testa la funcion pura directamente, sin recargar settings.
+    """
+
+    def setup_method(self):
+        from api.cors_security import check_cors_regexes
+        self.check = check_cors_regexes
+
+    # -- Casos seguros (no deben levantar ni loguear warning) ---------------
+
+    def test_lista_vacia_es_segura(self):
+        """Sin regexes configurados, no hay nada que validar."""
+        self.check([], debug=False)  # No debe lanzar
+
+    def test_regex_especifico_con_anchors_es_seguro(self):
+        """Un regex bien escrito no hace match con origenes hostiles."""
+        safe_patterns = [
+            r"^https://miapp\.servel\.cl$",
+            r"^https://[\w-]+\.midominio\.cl$",
+            r"^http://localhost:\d{4,5}$",
+        ]
+        # No debe lanzar en prod ni en dev
+        self.check(safe_patterns, debug=False)
+        self.check(safe_patterns, debug=True)
+
+    def test_strings_vacios_se_ignoran(self):
+        """Strings vacios en la lista se saltean sin error."""
+        self.check(["", "", ""], debug=False)
+
+    # -- Casos peligrosos en PRODUCCION (deben lanzar ImproperlyConfigured) -
+
+    def test_regex_catch_all_lanza_en_prod(self):
+        """Un '.*' acepta cualquier origen -> ImproperlyConfigured en prod."""
+        with pytest.raises(ImproperlyConfigured, match=r"\[F7\]"):
+            self.check([".*"], debug=False)
+
+    def test_regex_sin_anchor_de_dominio_lanza_en_prod(self):
+        """Un regex sin anchors puede aceptar origenes no deseados."""
+        # 'https://' sin nada mas hace match con cualquier URL que empiece con https://
+        with pytest.raises(ImproperlyConfigured, match=r"\[F7\]"):
+            self.check(["https://"], debug=False)
+
+    def test_regex_invalido_lanza_siempre(self):
+        """Un regex que no compila es un error en cualquier entorno."""
+        with pytest.raises(ImproperlyConfigured, match=r"\[F7\]"):
+            self.check(["[regex invalido sin cerrar"], debug=False)
+
+    def test_regex_invalido_lanza_tambien_en_debug(self):
+        """Un regex que no compila es error incluso en DEBUG=True."""
+        with pytest.raises(ImproperlyConfigured, match=r"\[F7\]"):
+            self.check(["[regex invalido"], debug=True)
+
+    # -- Casos peligrosos en DESARROLLO (warning, sin excepcion) ------------
+
+    def test_regex_catch_all_solo_warning_en_debug(self, caplog):
+        """En DEBUG=True, un regex peligroso emite WARNING pero no lanza."""
+        import logging
+        with caplog.at_level(logging.WARNING, logger="django.security.cors"):
+            self.check([".*"], debug=True)  # No debe lanzar
+        assert any(
+            "[F7]" in record.message and record.levelno == logging.WARNING
+            for record in caplog.records
+        ), "Debia haber un WARNING [F7] en los logs"
+
+    # -- Mix de patrones seguros e inseguros ---------------------------------
+
+    def test_un_regex_peligroso_en_lista_mixta_lanza_en_prod(self):
+        """Basta un regex peligroso en la lista para fallar en prod."""
+        mixed = [
+            r"^https://miapp\.servel\.cl$",  # seguro
+            ".*",                             # peligroso
+        ]
+        with pytest.raises(ImproperlyConfigured, match=r"\[F7\]"):
+            self.check(mixed, debug=False)
+
+    def test_todos_seguros_en_lista_mixta_no_lanza(self):
+        """Lista de patrones todos seguros -> sin error."""
+        all_safe = [
+            r"^https://app\.midominio\.cl$",
+            r"^https://staging\.midominio\.cl$",
+            r"^http://localhost:19006$",
+        ]
+        self.check(all_safe, debug=False)
 
 
 # ---------------------------------------------------------------------------
