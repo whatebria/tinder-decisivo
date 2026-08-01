@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>VotoAfin DS — Ejes Tematicos</title>
+<link rel="stylesheet" href="ds-shared.css"/>
+<style>
+.ax-card{background:var(--c-surface);border:1.5px solid var(--c-border);border-radius:12px;padding:14px;border-top:3px solid transparent;}
+.ax-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.ax-badge-lg{width:36px;height:36px;border-radius:18px;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:900;font-size:14px;flex-shrink:0;}
+.ax-name{font-size:13px;font-weight:800;color:var(--c-text);}
+.ax-key{font-family:monospace;font-size:9px;color:var(--c-text3);}
+.ax-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--c-border2);}
+.ax-row:last-child{border-bottom:none;}
+.ax-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text3);}
+.ax-val{font-family:monospace;font-size:9px;color:var(--c-text2);}
+.cr-ok{font-family:monospace;font-size:9px;color:#065F46;font-weight:700;}
+.hue-map{position:relative;height:36px;border-radius:8px;overflow:visible;margin:20px 0 40px;}
+.hue-bg{width:100%;height:100%;border-radius:8px;background:linear-gradient(to right,
+  hsl(0,80%,50%),hsl(30,80%,50%),hsl(60,80%,50%),hsl(90,80%,50%),hsl(120,80%,50%),
+  hsl(150,80%,50%),hsl(180,80%,50%),hsl(210,80%,50%),hsl(240,80%,50%),
+  hsl(270,80%,50%),hsl(300,80%,50%),hsl(330,80%,50%),hsl(360,80%,50%));opacity:.85;}
+.hue-dot{position:absolute;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;
+  border-radius:50%;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);}
+.hue-lbl{position:absolute;top:calc(100% + 6px);transform:translateX(-50%);
+  font-size:8px;font-weight:700;white-space:nowrap;text-align:center;}
+.dim-card-light{border-left:4px solid;border-radius:8px;padding:9px 12px;
+  background:#EEF0EE;display:flex;align-items:center;gap:10px;margin-bottom:5px;}
+.dim-card-dark{border-left:4px solid;border-radius:8px;padding:9px 12px;
+  background:#2E3532;display:flex;align-items:center;gap:10px;margin-bottom:5px;}
+.rule-n{width:22px;height:22px;border-radius:6px;background:var(--c-surface2);border:1.5px solid var(--c-border);
+  font-size:11px;font-weight:900;color:var(--c-text2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-logo">VotoAfin DS</div>
+  <div class="sidebar-ver">v1.0 · Agosto 2026</div>
+  <hr/>
+  <div class="sidebar-label">Fundamentos</div>
+  <a href="ds-index.html">Inicio</a>
+  <a href="ds-01-philosophy.html">01 · Filosofia y Principios</a>
+  <a href="ds-02-psychology.html">02 · Psicologia del Usuario</a>
+  <a href="ds-03-benchmarking.html">03 · Benchmarking</a>
+  <hr/>
+  <div class="sidebar-label">Sistema de Color</div>
+  <a href="ds-04-color-system.html">04 · Sistema de Color</a>
+  <a href="ds-05-dark-mode.html">05 · Dark Mode</a>
+  <a href="ds-06-axes.html">06 · Ejes Tematicos</a>
+  <hr/>
+  <div class="sidebar-label">Datos y Visualizacion</div>
+  <a href="ds-07-dataviz.html">07 · Visualizacion de Datos</a>
+  <a href="ds-08-affinity.html">08 · Tiers de Afinidad</a>
+  <hr/>
+  <div class="sidebar-label">Componentes</div>
+  <a href="ds-09-components.html">09 · Component Library</a>
+  <hr/>
+  <div class="sidebar-label">Implementacion</div>
+  <a href="ds-10-tokens.html">10 · Design Tokens</a>
+  <a href="ds-11-screens.html">11 · Validacion por Pantalla</a>
+  <div class="sidebar-bottom">
+    <button class="theme-btn" id="theme-btn">Dark mode</button>
+  </div>
+</nav>
+
+<div class="main"><div class="content">
+
+<div class="page-header">
+  <div class="breadcrumb">Sistema de Color / 06</div>
+  <h1>Ejes Tematicos</h1>
+  <p>Los 7 ejes son tokens de dominio, no de UI. Son invariantes conceptuales — verde siempre es ambiental.
+     Definidos en <code>dimensiones.ts</code>, nunca en <code>colors.ts</code>.</p>
+</div>
+
+<!-- A: RAZON ARQUITECTONICA -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">Arquitectura</div>
+    <h2>A · Por que una capa separada</h2>
+  </div>
+  <div class="ins ins-b">
+    <strong>Los colores de UI cambian con el branding. Los colores de dominio no pueden cambiar</strong>
+    porque estan en la cabeza del usuario: verde = ambiental, violeta = cultural.
+    Si rebrandeas y cambias el verde de marca, no cambia lo que el usuario asocia con "ambiental".
+    Por eso viven en un archivo separado (<code>dimensiones.ts</code>) con sus propios tests —
+    completamente desacoplados de <code>colors.ts</code>.
+  </div>
+  <div class="g3" style="margin-top:12px;">
+    <div class="card" style="border-top:3px solid var(--c-primary);">
+      <p style="font-size:12px;font-weight:700;color:var(--c-text);margin-bottom:4px;">colors.ts</p>
+      <p style="font-size:11px;color:var(--c-text2);">Tokens de UI. Pueden cambiar con el rebrand.</p>
+      <div class="code-block" style="margin-top:8px;padding:10px;">
+        <span class="code-key">primary</span>: <span class="code-val">'#2E5F7E'</span><br/>
+        <span class="code-key">accent</span>: <span class="code-val">'#3A9E7A'</span>
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--c-ambiental);">
+      <p style="font-size:12px;font-weight:700;color:var(--c-text);margin-bottom:4px;">dimensiones.ts</p>
+      <p style="font-size:11px;color:var(--c-text2);">Tokens de dominio. Invariantes conceptuales.</p>
+      <div class="code-block" style="margin-top:8px;padding:10px;">
+        <span class="code-key">ambiental</span>: <span class="code-val">'#166534'</span><br/>
+        <span class="code-key">cultural</span>: <span class="code-val">'#7C3AED'</span>
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--c-warning);">
+      <p style="font-size:12px;font-weight:700;color:var(--c-text);margin-bottom:4px;">Tests propios</p>
+      <p style="font-size:11px;color:var(--c-text2);">Cada eje tiene un test WCAG independiente.</p>
+      <div class="code-block" style="margin-top:8px;padding:10px;">
+        <span class="code-comment">// dimensiones.test.ts</span><br/>
+        <span class="code-key">expect</span>(cr(<span class="code-str">'ambiental'</span>)).<br/>
+        toBeGreaterThan(<span class="code-num">4.5</span>)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- B: CATALOGO -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">Catalogo</div>
+    <h2>B · Catalogo Completo — 7 Ejes</h2>
+    <p>Ratios WCAG: text.light medido sobre gray100 (#EEF0EE) · text.dark medido sobre gray800 (#2E3532).</p>
+  </div>
+  <div class="g3" style="gap:10px;">
+
+    <!-- Economico -->
+    <div class="ax-card" style="border-top-color:#0E7490;">
+      <div class="ax-head">
+        <div class="ax-badge-lg" style="background:#0E7490;">$</div>
+        <div><div class="ax-name">Economico</div><div class="ax-key">key="economico"</div></div>
+      </div>
+      <div class="ax-row"><span class="ax-label">Badge</span><span class="ax-val">#0E7490</span></div>
+      <div class="ax-row"><span class="ax-label">text.light</span><span class="cr-ok">#155E75 · 6.34:1</span></div>
+      <div class="ax-row"><span class="ax-label">text.dark</span><span class="cr-ok">#67E8F9 · 8.67:1</span></div>
+      <div class="ax-row"><span class="ax-label">Hue</span><span class="ax-val">193°</span></div>
+      <div class="ax-row"><span class="ax-label">Usar en</span><span class="ax-val">DimensionBadge, DimensionCard</span></div>
+      <div class="ax-row"><span class="ax-label">Prohibido</span><span style="font-size:9px;color:var(--c-danger);">Botones, fondos, charts</span></div>
+    </div>
+
+    <!-- Social -->
+    <div class="ax-card" style="border-top-color:#B45309;">
+      <div class="ax-head">
+        <div class="ax-badge-lg" style="background:#B45309;">@</div>
+        <div><div class="ax-name">Social</div><div class="ax-key">key="social"</div></div>
+      </div>
+      <div class="ax-row"><span class="ax-label">Badge</span><span class="ax-val">#B45309</span></div>
+      <div class="ax-row"><span class="ax-label">text.light</span><span class="cr-ok">#92400E · 6.19:1</span></div>
+      <div class="ax-row"><span class="ax-label">text.dark</span><span class="cr-ok">#FCD34D · 8.71:1</span></div>
+      <div class="ax-row"><span class="ax-label">Hue</span><span class="ax-val">32°</span></div>
+      <div class="ax-row"><span class="ax-label">Usar en</span><span class="ax-val">DimensionBadge, DimensionCard</span></div>
+      <div class="ax-row"><span class="ax-label">Prohibido</span><span style="font-size:9px;color:var(--c-danger);">Botones, fondos, charts</span></div>
+    </div>
+
+    <!-- Cultural -->
+    <div class="ax-card" style="border-top-color:#7C3AED;">
+      <div class="ax-head">
+        <div class="ax-badge-lg" style="background:#7C3AED;">~</div>
+        <div><div class="ax-name">Cultural</div><div class="ax-key">key="cultural"</div></div>
+      </div>
+      <div class="ax-row"><span class="ax-label">Badge</span><span class="ax-val">#7C3AED</span></div>
+      <div class="ax-row"><span class="ax-label">text.light</span><span class="cr-ok">#7C3AED · 4.98:1</span></div>
+      <div class="ax-row"><span class="ax-label">text.dark</span><span class="cr-ok">#C4B5FD · 6.81:1</span></div>
+      <div class="ax-row"><span class="ax-label">Hue</span><span class="ax-val">263°</span></div>
+      <div class="ax-row"><span class="ax-label">Usar en</span><span class="ax-val">DimensionBadge, DimensionCard</span></div>
+      <div class="ax-row"><span class="ax-label">Prohibido</span><span style="font-size:9px;color:var(--c-danger);">Botones, fondos, charts</span></div>
+    </div>
+
+    <!-- Ambiental -->
+    <div class="ax-card" style="border-top-color:#166534;">
+      <div class="ax-head">
+        <div class="ax-badge-lg" style="background:#166534;">^</div>
+        <div><div class="ax-name">Ambiental</div><div class="ax-key">key="ambiental"</div></div>
+      </div>
+      <div class="ax-row"><span class="ax-label">Badge</span><span class="ax-val">#166534</span></div>
+      <div class="ax-row"><span class="ax-label">text.light</span><span class="cr-ok">#166534 · 6.23:1</span></div>
+      <div class="ax-row"><span class="ax-label">text.dark</span><span class="cr-ok">#86EFAC · 8.95:1</span></div>
+      <div class="ax-row"><span class="ax-label">Hue</span><span class="ax-val">142°</span></div>
+      <div class="ax-row"><span class="ax-label">Usar en</span><span class="ax-val">DimensionBadge, DimensionCard</span></div>
+      <div class="ax-row"><span class="ax-label">Prohibido</span><span style="font-size:9px;color:var(--c-danger);">Botones, fondos, charts</span></div>
+    </div>
+
+    <!-- Institucional -->
+    <div class="ax-card" style="border-top-color:#1E40AF;">
+      <div class="ax-head">
+        <div class="ax-badge-lg" style="background:#1E40AF;">#</div>
+        <div><div class="ax-name">Institucional</div><div class="ax-key">key="institucional"</div></div>
+      </div>
+      <div class="ax-row"><span class="ax-label">Badge</span><span class="ax-val">#1E40AF</span></div>
+      <div class="ax-row"><span class="ax-label">text.light</span><span class="cr-ok">#1E40AF · 7.62:1</span></div>
+      <div class="ax-row"><span class="ax-label">text.dark</span><span class="cr-ok">#93C5FD · 6.97:1</span></div>
+      <div class="ax-row"><span class="ax-label">Hue</span><span class="ax-val">222°</span></div>
+      <div class="ax-row"><span class="ax-label">Usar en</span><span class="ax-val">DimensionBadge, DimensionCard</span></div>
+      <div class="ax-row"><span class="ax-label">Prohibido</span><span style="font-size:9px;color:var(--c-danger);">Botones, fondos, charts</span></div>
+    </div>
+
+    <!-- Pueblos -->
+    <div class="ax-card" style="border-top-color:#9D174D;">
+      <div class="ax-head">
+        <div class="ax-badge-lg" style="background:#9D174D;">P</div>
+        <div><div class="ax-name">Pueblos Orig.</div><div class="ax-key">key="pueblos_originarios"</div></div>
+      </div>
+      <div class="ax-row"><span class="ax-label">Badge</span><span class="ax-val">#9D174D</span></div>
+      <div class="ax-row"><span class="ax-label">text.light</span><span class="cr-ok">#9D174D · 6.88:1</span></div>
+      <div class="ax-row"><span class="ax-label">text.dark</span><span class="cr-ok">#F9A8D4 · 6.93:1</span></div>
+      <div class="ax-row"><span class="ax-label">Hue</span><span class="ax-val">336°</span></div>
+      <div class="ax-row"><span class="ax-label">Usar en</span><span class="ax-val">DimensionBadge, DimensionCard</span></div>
+      <div class="ax-row"><span class="ax-label">Prohibido</span><span style="font-size:9px;color:var(--c-danger);">Botones, fondos, charts</span></div>
+    </div>
+
+    <!-- Discapacidad (ocupa el 7mo slot en grid 3col = celda solitaria) -->
+    <div class="ax-card" style="border-top-color:#86198F;">
+      <div class="ax-head">
+        <div class="ax-badge-lg" style="background:#86198F;">D</div>
+        <div><div class="ax-name">Discapacidad</div><div class="ax-key">key="discapacidad"</div></div>
+      </div>
+      <div class="ax-row"><span class="ax-label">Badge</span><span class="ax-val">#86198F</span></div>
+      <div class="ax-row"><span class="ax-label">text.light</span><span class="cr-ok">#86198F · 7.19:1</span></div>
+      <div class="ax-row"><span class="ax-label">text.dark</span><span class="cr-ok">#E879F9 · 5.11:1</span></div>
+      <div class="ax-row"><span class="ax-label">Hue</span><span class="ax-val">295°</span></div>
+      <div class="ax-row"><span class="ax-label">Usar en</span><span class="ax-val">DimensionBadge, DimensionCard</span></div>
+      <div class="ax-row"><span class="ax-label">Prohibido</span><span style="font-size:9px;color:var(--c-danger);">Botones, fondos, charts</span></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- C: MAPA DE HUE -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">Visualizacion</div>
+    <h2>C · Mapa de Hue — Distribucion Espectral</h2>
+    <p>Cada punto es la posicion del eje en el espectro de 360°. Distancia minima requerida: 20° entre nuevos ejes.</p>
+  </div>
+  <div class="hue-map">
+    <div class="hue-bg"></div>
+    <!-- hue/360*100 = left% -->
+    <!-- economico 193 = 53.6% -->
+    <div class="hue-dot" style="left:53.6%;background:#0E7490;">
+      <div class="hue-lbl" style="color:#0E7490;">Eco<br/>193°</div>
+    </div>
+    <!-- social 32 = 8.9% -->
+    <div class="hue-dot" style="left:8.9%;background:#B45309;">
+      <div class="hue-lbl" style="color:#B45309;">Soc<br/>32°</div>
+    </div>
+    <!-- cultural 263 = 73.1% -->
+    <div class="hue-dot" style="left:73.1%;background:#7C3AED;">
+      <div class="hue-lbl" style="color:#7C3AED;">Cul<br/>263°</div>
+    </div>
+    <!-- ambiental 142 = 39.4% -->
+    <div class="hue-dot" style="left:39.4%;background:#166534;">
+      <div class="hue-lbl" style="color:#166534;">Amb<br/>142°</div>
+    </div>
+    <!-- institucional 222 = 61.7% -->
+    <div class="hue-dot" style="left:61.7%;background:#1E40AF;">
+      <div class="hue-lbl" style="color:#1E40AF;">Ins<br/>222°</div>
+    </div>
+    <!-- pueblos 336 = 93.3% -->
+    <div class="hue-dot" style="left:93.3%;background:#9D174D;">
+      <div class="hue-lbl" style="color:#9D174D;">Pue<br/>336°</div>
+    </div>
+    <!-- discapacidad 295 = 81.9% -->
+    <div class="hue-dot" style="left:81.9%;background:#86198F;">
+      <div class="hue-lbl" style="color:#86198F;">Dis<br/>295°</div>
+    </div>
+  </div>
+  <div class="ins ins-a">
+    El cluster 263°-295°-336° (cultural/discapacidad/pueblos) es el mas denso.
+    Diferenciados por saturacion, luminancia y forma del componente. Cualquier nuevo eje
+    en esa zona requiere justificacion formal y test de usuario.
+  </div>
+</div>
+
+<!-- D: DEMO DIMENSION CARDS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">Demo</div>
+    <h2>D · Demo DimensionCard y DimensionBadge</h2>
+    <p>Renderizado real de los componentes en ambos temas.</p>
+  </div>
+
+  <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text3);margin-bottom:8px;">
+    Light mode — fondo gray100 (#EEF0EE)
+  </p>
+  <div style="background:#EEF0EE;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:5px;margin-bottom:16px;">
+    <div class="dim-card-light" style="border-left-color:#0E7490;">
+      <span style="width:22px;height:22px;border-radius:50%;background:#0E7490;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;flex-shrink:0;">$</span>
+      <span style="font-size:11px;font-weight:700;color:#155E75;">Economico</span>
+      <span style="font-size:11px;color:#5C6560;margin-left:auto;">Politica fiscal, empleo, comercio exterior</span>
+    </div>
+    <div class="dim-card-light" style="border-left-color:#B45309;">
+      <span style="width:22px;height:22px;border-radius:50%;background:#B45309;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;flex-shrink:0;">@</span>
+      <span style="font-size:11px;font-weight:700;color:#92400E;">Social</span>
+      <span style="font-size:11px;color:#5C6560;margin-left:auto;">Salud, educacion, vivienda, genero</span>
+    </div>
+    <div class="dim-card-light" style="border-left-color:#7C3AED;">
+      <span style="width:22px;height:22px;border-radius:50%;background:#7C3AED;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;flex-shrink:0;">~</span>
+      <span style="font-size:11px;font-weight:700;color:#7C3AED;">Cultural</span>
+      <span style="font-size:11px;color:#5C6560;margin-left:auto;">Arte, lenguas, identidad nacional</span>
+    </div>
+    <div class="dim-card-light" style="border-left-color:#166534;">
+      <span style="width:22px;height:22px;border-radius:50%;background:#166534;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;flex-shrink:0;">^</span>
+      <span style="font-size:11px;font-weight:700;color:#166534;">Ambiental</span>
+      <span style="font-size:11px;color:#5C6560;margin-left:auto;">Clima, biodiversidad, recursos naturales</span>
+    </div>
+    <div class="dim-card-light" style="border-left-color:#1E40AF;">
+      <span style="width:22px;height:22px;border-radius:50%;background:#1E40AF;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;flex-shrink:0;">#</span>
+      <span style="font-size:11px;font-weight:700;color:#1E40AF;">Institucional</span>
+      <span style="font-size:11px;color:#5C6560;margin-left:auto;">Estado, justicia, seguridad</span>
+    </div>
+    <div class="dim-card-light" style="border-left-color:#9D174D;">
+      <span style="width:22px;height:22px;border-radius:50%;background:#9D174D;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;flex-shrink:0;">P</span>
+      <span style="font-size:11px;font-weight:700;color:#9D174D;">Pueblos Originarios</span>
+      <span style="font-size:11px;color:#5C6560;margin-left:auto;">Derechos, territorio, cultura</span>
+    </div>
+    <div class="dim-card-light" style="border-left-color:#86198F;">
+      <span style="width:22px;height:22px;border-radius:50%;background:#86198F;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;flex-shrink:0;">D</span>
+      <span style="font-size:11px;font-weight:700;color:#86198F;">Discapacidad</span>
+      <span style="font-size:11px;color:#5C6560;margin-left:auto;">Inclusion, accesibilidad, derechos</span>
+    </div>
+  </div>
+
+  <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text3);margin-bottom:8px;">
+    Dark mode — fondo gray800 (#2E3532)
+  </p>
+  <div style="background:#2E3532;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:5px;">
+    <div class="dim-card-dark" style="border-left-color:#0E7490;">
+      <span style="width:22px;height:22px;border-radius:50%;background:#0E7490;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;flex-shrink:0;">$</span>
+      <span style="font-size:11px;font-weight:700;color:#67E8F9;">Economico</span>
+      <span style="font-size:11px;color:#A8B0AA;margin-left:auto;">Politica fiscal, empleo, comercio exterior</span>
+    </div>
+    <div class="dim-card-dark" style="border-left-color:#B45309;">
+      <span style="width:22px;height:22px;border-radius:50%;background:#B45309;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;flex-shrink:0;">@</span>
+      <span style="font-size:11px;font-weight:700;color:#FCD34D;">Social</span>
+      <span style="font-size:11px;color:#A8B0AA;margin-left:auto;">Salud, educacion, vivienda, genero</span>
+    </div>
+    <div class="dim-card-dark" style="border-left-color:#7C3AED;">
+      <span style="width:22px;height:22px;border-radius:50%;background:#7C3AED;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;flex-shrink:0;">~</span>
+      <span style="font-size:11px;font-weight:700;color:#C4B5FD;">Cultural</span>
+      <span style="font-size:11px;color:#A8B0AA;margin-left:auto;">Arte, lenguas, identidad nacional</span>
+    </div>
+    <div class="dim-card-dark" style="border-left-color:#166534;">
+      <span style="width:22px;height:22px;border-radius:50%;background:#166534;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;flex-shrink:0;">^</span>
+      <span style="font-size:11px;font-weight:700;color:#86EFAC;">Ambiental</span>
+      <span style="font-size:11px;color:#A8B0AA;margin-left:auto;">Clima, biodiversidad, recursos naturales</span>
+    </div>
+    <div class="dim-card-dark" style="border-left-color:#1E40AF;">
+      <span style="width:22px;height:22px;border-radius:50%;background:#1E40AF;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;flex-shrink:0;">#</span>
+      <span style="font-size:11px;font-weight:700;color:#93C5FD;">Institucional</span>
+      <span style="font-size:11px;color:#A8B0AA;margin-left:auto;">Estado, justicia, seguridad</span>
+    </div>
+    <div class="dim-card-dark" style="border-left-color:#9D174D;">
+      <span style="width:22px;height:22px;border-radius:50%;background:#9D174D;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;flex-shrink:0;">P</span>
+      <span style="font-size:11px;font-weight:700;color:#F9A8D4;">Pueblos Originarios</span>
+      <span style="font-size:11px;color:#A8B0AA;margin-left:auto;">Derechos, territorio, cultura</span>
+    </div>
+    <div class="dim-card-dark" style="border-left-color:#86198F;">
+      <span style="width:22px;height:22px;border-radius:50%;background:#86198F;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;flex-shrink:0;">D</span>
+      <span style="font-size:11px;font-weight:700;color:#E879F9;">Discapacidad</span>
+      <span style="font-size:11px;color:#A8B0AA;margin-left:auto;">Inclusion, accesibilidad, derechos</span>
+    </div>
+  </div>
+</div>
+
+<!-- E: REGLAS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">Reglas</div>
+    <h2>E · Reglas de los Ejes</h2>
+    <p>Normas no negociables. Cualquier excepcion requiere RFC en el repositorio.</p>
+  </div>
+  <div class="card">
+    <div style="display:flex;flex-direction:column;gap:0;">
+
+      <div class="rule-item" style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--c-border2);">
+        <div class="rule-n">1</div>
+        <div>
+          <strong style="font-size:12px;">Los badges NUNCA cambian entre light y dark</strong>
+          <p style="font-size:11px;color:var(--c-text2);margin-top:2px;">El fondo circular del badge es invariante. Es la unica pieza cromatica que el usuario memoriza. Solo texto y borde de la card contenedora cambian con el tema.</p>
+        </div>
+      </div>
+
+      <div class="rule-item" style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--c-border2);">
+        <div class="rule-n">2</div>
+        <div>
+          <strong style="font-size:12px;">Los colores de eje NUNCA se usan en botones, fondos ni UI general</strong>
+          <p style="font-size:11px;color:var(--c-text2);margin-top:2px;">Si un boton necesita ser "verde ambiental", esta mal el diseno. Los ejes son metadata de dominio, no elementos de accion.</p>
+        </div>
+      </div>
+
+      <div class="rule-item" style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--c-border2);">
+        <div class="rule-n">3</div>
+        <div>
+          <strong style="font-size:12px;">Los colores de eje NUNCA son series en charts</strong>
+          <p style="font-size:11px;color:var(--c-text2);margin-top:2px;">Las series usan s1-s5 (capa D). Si un chart visualiza datos por eje, usa el color de eje en la leyenda como label, nunca como color de la barra o linea.</p>
+        </div>
+      </div>
+
+      <div class="rule-item" style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--c-border2);">
+        <div class="rule-n">4</div>
+        <div>
+          <strong style="font-size:12px;">Importar siempre desde dimensiones.ts — nunca hardcodear</strong>
+          <p style="font-size:11px;color:var(--c-text2);margin-top:2px;">
+            Correcto: <code>import {EJES} from '@/dimensiones'</code><br/>
+            Incorrecto: <code style="color:var(--c-danger);">color: '#166534'</code> en un componente.
+          </p>
+        </div>
+      </div>
+
+      <div class="rule-item" style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--c-border2);">
+        <div class="rule-n">5</div>
+        <div>
+          <strong style="font-size:12px;">Agregar un eje nuevo requiere 3 pasos</strong>
+          <p style="font-size:11px;color:var(--c-text2);margin-top:2px;">
+            1) Definirlo en <code>dimensiones.ts</code> con badge, text.light y text.dark.<br/>
+            2) Pasar el test WCAG AA en ambos temas (minimo 4.5:1).<br/>
+            3) Documentarlo en este archivo con hue, ratios y contextos de uso.
+          </p>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;">
+        <div class="rule-n">6</div>
+        <div>
+          <strong style="font-size:12px;">Distancia minima de hue: 20° entre nuevo eje y accent de marca</strong>
+          <p style="font-size:11px;color:var(--c-text2);margin-top:2px;">El accent <code>#3A9E7A</code> esta en hue 157°. Zona prohibida para nuevos ejes: 137°-177°. El cluster actual mas cercano (ambiental 142°) fue anterior al accent actual y esta grandfathered — no agregar mas ejes en esa zona.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</div></div>
+<script src="ds-nav.js"></script>
+</body></html>

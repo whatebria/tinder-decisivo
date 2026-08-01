@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>VotoAfin DS — Sistema de Color</title>
+<link rel="stylesheet" href="ds-shared.css"/>
+<style>
+.layer-row td:nth-child(1){font-weight:700;color:var(--c-text);}
+.layer-row td:nth-child(5){font-size:10px;}
+.tint-strip{display:flex;border-radius:8px;overflow:hidden;height:30px;margin-bottom:4px;}
+.tint-strip div{flex:1;}
+.tint-hex{display:grid;grid-template-columns:repeat(10,1fr);gap:0;margin-bottom:14px;}
+.tint-hex span{font-family:monospace;font-size:7px;color:var(--c-text3);text-align:center;display:block;padding:1px 0;}
+.tint-family-label{font-size:11px;font-weight:700;color:var(--c-text2);margin-bottom:5px;}
+.sem-card{background:var(--c-surface);border:1.5px solid var(--c-border);border-radius:12px;overflow:hidden;}
+.sem-swatch{height:48px;}
+.sem-body{padding:10px 12px;}
+.sem-name{font-size:11px;font-weight:700;color:var(--c-text);margin-bottom:2px;}
+.sem-hex{font-family:monospace;font-size:9px;color:var(--c-text2);}
+.sem-use{font-size:10px;color:var(--c-text2);margin-top:6px;line-height:1.5;}
+.sem-ban{font-size:10px;color:var(--c-danger);margin-top:4px;line-height:1.5;}
+.cr-badge{display:inline-block;padding:1px 5px;border-radius:4px;font-size:8px;font-weight:700;margin-top:2px;}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-logo">VotoAfin DS</div>
+  <div class="sidebar-ver">v1.0 · Agosto 2026</div>
+  <hr/>
+  <div class="sidebar-label">Fundamentos</div>
+  <a href="ds-index.html">Inicio</a>
+  <a href="ds-01-philosophy.html">01 · Filosofia y Principios</a>
+  <a href="ds-02-psychology.html">02 · Psicologia del Usuario</a>
+  <a href="ds-03-benchmarking.html">03 · Benchmarking</a>
+  <hr/>
+  <div class="sidebar-label">Sistema de Color</div>
+  <a href="ds-04-color-system.html">04 · Sistema de Color</a>
+  <a href="ds-05-dark-mode.html">05 · Dark Mode</a>
+  <a href="ds-06-axes.html">06 · Ejes Tematicos</a>
+  <hr/>
+  <div class="sidebar-label">Datos y Visualizacion</div>
+  <a href="ds-07-dataviz.html">07 · Visualizacion de Datos</a>
+  <a href="ds-08-affinity.html">08 · Tiers de Afinidad</a>
+  <hr/>
+  <div class="sidebar-label">Componentes</div>
+  <a href="ds-09-components.html">09 · Component Library</a>
+  <hr/>
+  <div class="sidebar-label">Implementacion</div>
+  <a href="ds-10-tokens.html">10 · Design Tokens</a>
+  <a href="ds-11-screens.html">11 · Validacion por Pantalla</a>
+  <div class="sidebar-bottom">
+    <button class="theme-btn" id="theme-btn">Dark mode</button>
+  </div>
+</nav>
+
+<div class="main"><div class="content">
+
+<div class="page-header">
+  <div class="breadcrumb">Sistema de Color / 04</div>
+  <h1>Sistema Completo de Color</h1>
+  <p>Toda la paleta del producto. 6 capas, 90+ tokens, escalas 50-900. Fuente de verdad para designers y developers.</p>
+</div>
+
+<!-- ═══ A: CLASIFICACION ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">Arquitectura</div>
+    <h2>A · Clasificacion de Responsabilidades</h2>
+    <p>Cada capa tiene ownership exclusivo. Ningun token puede actuar en dos capas al mismo tiempo.</p>
+  </div>
+  <div style="border-radius:10px;overflow:hidden;border:1.5px solid var(--c-border);">
+    <table>
+      <thead><tr>
+        <th>Capa</th><th>Tokens principales</th><th>Controla</th><th>No controla</th><th>Rebrand</th>
+      </tr></thead>
+      <tbody>
+        <tr class="layer-row"><td>A · Marca</td><td class="mono">brand-hero, primary, secondary, accent</td><td style="font-size:10px;">Hero, CTAs, links, progress</td><td style="font-size:10px;">Ejes, series de datos</td><td><span class="section-tag tag-ok" style="margin:0;">SI</span></td></tr>
+        <tr class="layer-row"><td>B · Semantica</td><td class="mono">success, warning, danger, info</td><td style="font-size:10px;">Toasts, badges de estado, feedback</e="font-size:10px;">Colores de candidato</td><td><span class="section-tag tag-warn" style="margin:0;">Solo si hay razon</span></td></tr>
+        <tr class="layer-row"><td>C · Superficie</td><td class="mono">bg, bg-mkt, surface, border</td><td style="font-size:10px;">Fondos, cards, inputs, dividers</td><td style="font-size:10px;">Ninguna capa semantica</td><td><span class="section-tag tag-ok" style="margin:0;">SI</span></td></tr>
+        <tr class="layer-row"><td>D · Datos</td><td class="mono">s1, s2, s3, s4, s5</td><td style="font-size:10px;">Series radar, ranking bars, comparador</td><td style="font-size:10px;">Marca, semantica</td><td><span class="section-tag tag-bad" style="margin:0;">NO</span></td></tr>
+        <tr class="layer-row"><td>E · Ejes</td><td class="mono">eco, social, cultural, ambiental, institucional, pueblos, discapacidad</td><td style="font-size:10px;">DimensionBadge, DimensionCard</td><td style="font-size:10px;">Todo lo demas</td><td><span class="section-tag tag-bad" style="margin:0;">NO — invariante</span></td></tr>
+        <tr class="layer-row"><td>F · Premium </td><td class="mono">--c-premium: #7C5C9E</td><td style="font-size:10px;">Indicadores de plan premium</td><td style="font-size:10px;">Todo</td><td><span class="section-tag tag-ok" style="margin:0;">SI</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="ins ins-a" style="margin-top:10px;"> Capa F aun no implementada. El violeta <code>#7C5C9E</code> fue elegido para maximizar distancia con el cultural <code>#7C3AED</code> (mismo hue, menor saturacion/luminancia).</p>
+</div>
+
+<!-- ═══ B: PALETA DE MARCA ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">Marca</div>
+    <h2>B · Paleta de Marca</h2>
+    <p>Cinco tokens de identidad. Unicos colores permitidos en UI generica.</p>
+  </div>
+  <div class="g5">
+    <div class="sw-card">
+      <div class="sw-color" style="background:#1C3A52;"></div>
+      <div class="sw-info">
+        <div class="sw-name">brand-hero</div>
+        <div class="sw-hex">#1C3A52</div>
+        <div class="sw-cr cr-aaa">18.4:1 AAA </div>
+      </div>
+    </div>
+    <div class="sw-card">
+      <div class="sw-color" style="background:#2E5F7E;"></div>
+      <div class="sw-info">
+        <div class="sw-name">primary</div>
+        <div class="sw-hex">#2E5F7E</div>
+        <div class="sw-cr cr-aa">5.5:1 AA </div>
+      </div>
+    </div>
+    <div class="sw-card">
+      <div class="sw-color" style="background:#4A9BBF;"></div>
+      <div class="sw-info">
+        <div class="sw-name">primary-light</div>
+        <div class="sw-hex">#4A9BBF</div>
+        <div class="sw-cr cr-fail">Solo sobre oscuro</div>
+      </div>
+    </div>
+    <div class="sw-card">
+      <div class="sw-color" style="background:#7BA098;"></div>
+      <div class="sw-info">
+        <div class="sw-name">secondary</div>
+        <div class="sw-hex">#7BA098</div>
+        <div class="sw-cr cr-aa">4.6:1 AA </div>
+      </div>
+    </div>
+    <div class="sw-card">
+      <div class="sw-color" style="background:#3A9E7A;"></div>
+      <div class="sw-info">
+        <div class="sw-name">accent</div>
+        <div class="sw-hex">#3A9E7A</div>
+        <div class="sw-cr cr-aa">5.2:1 s/#1C3A52</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ C: GRAYS ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">Superficie</div>
+    <h2>C · Escala de Grays</h2>
+    <p>Escala verde-gris — no neutral pura. Intencional para cohesion con <code>bg-focus</code>.</p>
+  </div>
+  <div class="tint-strip">
+    <div style="background:#F7F8F7;"></div><div style="background:#EEF0EE;"></div>
+    <div style="background:#E1E5E2;"></div><div style="background:#CBD1CD;"></div>
+    <div style="background:#A8B0AA;"></div><div style="background:#7C8580;"></div>
+    <div style="background:#5C6560;"></div><div style="background:#444C47;"></div>
+    <div style="background:#2E3532;"></div><div style="background:#1A1F1C;"></div>
+  </div>
+  <div class="tint-hex">
+    <span>50<br/>#F7F8F7</span><span>100<br/>#EEF0EE</span><span>200<br/>#E1E5E2</span>
+    <span>300<br/>#CBD1CD</span><span>400<br/>#A8B0AA</span><span>500<br/>#7C8580</span>
+    <span>600<br/>#5C6560</span><span>700<br/>#444C47</span><span>800<br/>#2E3532</span><span>900<br/>#1A1F1C</span>
+  </div>
+</div>
+
+<!-- ═══ D: TINT SCALES ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">Escalas</div>
+    <h2>D · Escalas de Tints (50–900)</h2>
+    <p>Base del sistema de color. El token base siempre esta en la posicion 600 o 700.</p>
+  </div>
+
+  <div class="tint-family-label">Primary — Azul petroleo</div>
+  <div class="tint-strip">
+    <div style="background:#EEF3F7;"></div><div style="background:#D6E2EB;"></div><div style="background:#ADC5D6;"></div>
+    <div style="background:#82A6BF;"></div><div style="background:#5A87A5;"></div><div style="background:#3D6F8E;"></div>
+    <div style="background:#2E5F7E;border:2px solid #fff;"></div><div style="background:#24506C;"></div>
+    <div style="background:#1B3D53;"></div><div style="background:#132A3A;"></div>
+  </div>
+  <div class="tint-hex">
+    <span>#EEF3F7</span><span>#D6E2EB</span><span>#ADC5D6</span><span>#82A6BF</span><span>#5A87A5</span>
+    <span>#3D6F8E</span><span>#2E5F7E</span><span>#24506C</span><span>#1B3D53</span><span>#132A3A</span>
+  </div>
+
+  <div class="tint-family-label">Secondary — Verde salvia</div>
+  <div class="tint-strip">
+    <div style="background:#F1F6F4;"></div><div style="background:#DEE9E5;"></div><div style="background:#C1D6CE;"></div>
+    <div style="background:#A2C0B4;"></div><div style="background:#8DAFA3;"></div><div style="background:#7BA098;border:2px solid #fff;"></div>
+    <div style="background:#648679;"></div><div style="background:#4E6B60;"></div>
+    <div style="background:#3A5148;"></div><div style="background:#283732;"></div>
+  </div>
+  <div class="tint-hex">
+    <span>#F1F6F4</span><span>#DEE9E5</span><span>#C1D6CE</span><span>#A2C0B4</span><span>#8DAFA3</span>
+    <span>#7BA098</span><span>#648679</span><span>#4E6B60</span><span>#3A5148</span><span>#283732</span>
+  </div>
+
+  <div class="tint-family-label">Accent — Verde vivo</div>
+  <div class="tint-strip">
+    <div style="background:#F0FDF6;"></div><div style="background:#D1FAE5;"></div><div style="background:#A7F3CC;"></div>
+    <div style="background:#6EE7B0;"></div><div style="background:#34D399;"></div><div style="background:#3A9E7A;border:2px solid #fff;"></div>
+    <div style="background:#2E7D62;"></div><div style="background:#1E6350;"></div>
+    <div style="background:#134A3A;"></div><div style="background:#0A3127;"></div>
+  </div>
+  <div class="tint-hex">
+    <span>#F0FDF6</span><span>#D1FAE5</span><span>#A7F3CC</span><span>#6EE7B0</span><span>#34D399</span>
+    <span>#3A9E7A</span><span>#2E7D62</span><span>#1E6350</span><span>#134A3A</span><span>#0A3127</span>
+  </div>
+
+  <div class="tint-family-label">Success — Verde bosque</div>
+  <div class="tint-strip">
+    <div style="background:#F0F5F1;"></div><div style="background:#DAE8DE;"></div><div style="background:#B7D2C0;"></div>
+    <div style="background:#94BCA1;"></div><div style="background:#7EAB88;"></div><div style="background:#6B9B7A;border:2px solid #fff;"></div>
+    <div style="background:#558062;"></div><div style="background:#42654D;"></div>
+    <div style="background:#2F4A38;"></div><div style="background:#1E3125;"></div>
+  </div>
+  <div class="tint-hex">
+    <span>#F0F5F1</span><span>#DAE8DE</span><span>#B7D2C0</span><span>#94BCA1</span><span>#7EAB88</span>
+    <span>#6B9B7A</span><span>#558062</span><span>#42654D</span><span>#2F4A38</span><span>#1E3125</span>
+  </div>
+
+  <div class="tint-family-label">Warning — Mostaza</div>
+  <div class="tint-strip">
+    <div style="background:#FBF6EE;"></div><div style="background:#F5E8D0;"></div><div style="background:#EBD1A0;"></div>
+    <div style="background:#DEB77A;"></div><div style="background:#D5A76A;"></div><div style="background:#C89B5C;border:2px solid #fff;"></div>
+    <div style="background:#A57F49;"></div><div style="background:#816339;"></div>
+    <div style="background:#5D4728;"></div><div style="background:#3D2E1A;"></div>
+  </div>
+  <div class="tint-hex">
+    <span>#FBF6EE</span><span>#F5E8D0</span><span>#EBD1A0</span><span>#DEB77A</span><span>#D5A76A</span>
+    <span>#C89B5C</span><span>#A57F49</span><span>#816339</span><span>#5D4728</span><span>#3D2E1A</span>
+  </div>
+
+  <div class="tint-family-label">Danger — Terracota</div>
+  <div class="tint-strip">
+    <div style="background:#FAEEEE;"></div><div style="background:#F1D0D0;"></div><div style="background:#E1A0A0;"></div>
+    <div style="background:#D07777;"></div><div style="background:#C46868;"></div><div style="background:#B85C5C;border:2px solid #fff;"></div>
+    <div style="background:#984848;"></div><div style="background:#763838;"></div>
+    <div style="background:#562828;"></div><div style="background:#391A1A;"></div>
+  </div>
+  <div class="tint-hex">
+    <span>#FAEEEE</span><span>#F1D0D0</span><span>#E1A0A0</span><span>#D07777</span><span>#C46868</span>
+    <span>#B85C5C</span><span>#984848</span><span>#763838</span><span>#562828</span><span>#391A1A</span>
+  </div>
+
+  <div class="tint-family-label">Info — Azul agua</div>
+  <div class="tint-strip">
+    <div style="background:#EEF3F8;"></div><div style="background:#D3E0EE;"></div><div style="background:#A6C2DD;"></div>
+    <div style="background:#7DA4CB;"></div><div style="background:#6595C0;"></div><div style="background:#5C8AB8;border:2px solid #fff;"></div>
+    <div style="background:#4A729A;"></div><div style="background:#395978;"></div>
+    <div style="background:#2A4158;"></div><div style="background:#1B2A3A;"></div>
+  </div>
+  <div class="tint-hex">
+    <span>#EEF3F8</span><span>#D3E0EE</span><span>#A6C2DD</span><span>#7DA4CB</span><span>#6595C0</span>
+    <span>#5C8AB8</span><span>#4A729A</span><span>#395978</span><span>#2A4158</span><span>#1B2A3A</span>
+  </div>
+</div>
+
+<!-- ═══ E: SEMANTICOS ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">Semantica</div>
+    <h2>E · Colores Semanticos</h2>
+    <p>Cuatro tokens de feedback. Su significado es convencional — no cambiarlos sin razon de accesibilidad.</p>
+  </div>
+  <div class="g4">
+    <div class="sem-card">
+      <div class="sem-swatch" style="background:#F0F5F1;display:flex;align-items:center;justify-content:center;">
+        <div style="width:40px;height:40px;border-radius:50%;background:#6B9B7A;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;"></div>
+      </div>
+      <div class="sem-body">
+        <div class="sem-name">success</div>
+        <div class="sem-hex">#6B9B7A · 4.6:1 AA</div>
+        <div class="sem-use"> Toasts de exito, badges de estado, confirmacion de guardado.</div>
+        <div class="sem-ban"> Respuestas correctas en cuestionario — sesgo.</div>
+      </div>
+    </div>
+    <div class="sem-card">
+      <div class="sem-swatch" style="background:#FBF6EE;display:flex;align-items:center;justify-content:center;">
+        <div style="width:40px;height:40px;border-radius:50%;background:#C89B5C;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;"></div>
+      </div>
+      <div class="sem-body">
+        <div class="sem-name">warning</div>
+        <div class="sem-hex">#C89B5C · 3.8:1 AA</div>
+        <div class="sem-use"> Alertas de cobertura baja, datos incompletos, acciones reversibles.</div>
+        <div class="sem-ban"> Decoracion, fondos extensos.</div>
+      </div>
+    </div>
+    <div class="sem-card">
+      <div class="sem-swatch" style="background:#FAEEEE;display:flex;align-items:center;justify-content:center;">
+        <div style="width:40px;height:40px;border-radius:50%;background:#B85C5C;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;"></div>
+      </div>
+      <div class="sem-body">
+        <div class="sem-name">danger</div>
+        <div class="sem-hex">#B85C5C · 4.7:1 AA</div>
+        <div class="sem-use"> Errores, acciones destructivas, validacion fallida.</div>
+        <div class="sem-ban"> Opciones de "desacuerdo" — sesgo cognitivo documentado.</div>
+      </div>
+    </div>
+    <div class="sem-card">
+      <div class="sem-swatch" style="background:#EEF3F8;display:flex;align-items:center;justify-content:center;">
+        <div style="width:40px;height:40px;border-radius:50%;background:#5C8AB8;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;">i</div>
+      </div>
+      <div class="sem-body">
+        <div class="sem-name">info</div>
+        <div class="sem-hex">#5C8AB8 · 4.8:1 AA</div>
+        <div class="sem-use"> Tooltips, hints, informacion neutral, onboarding.</div>
+        <div class="sem-ban"> Candidatos ni partidos — collision con primario.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ F: ANTI-CONFLICTO ═══ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-warn">Guardrails</div>
+    <h2>F · Reglas Anti-Conflicto de Hue</h2>
+    <p>Pares cromaticos auditados. Distancia minima aceptable: 20° entre cualquier par en el mismo viewport.</p>
+  </div>
+  <div style="border-radius:10px;overflow:hidden;border:1.5px solid var(--c-border);">
+    <table>
+      <thead><tr>
+        <th>Par de colores</th><th>Distancia hue</th><th>Estado</th><th>Nota</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td>
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#3A9E7A;margin-right:4px;vertical-align:middle;"></span>accent
+            vs
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#166534;margin-right:4px;vertical-align:middle;"></span>ambiental
+          </td>
+          <td class="mono">15°</td>
+          <td><span class="section-tag tag-warn" style="margin:0;">Borderline</span></td>
+          <td style="font-size:10px;">Diferenciado por luminancia (+40%) y forma (boton vs badge circular). Monitorear.</td>
+        </tr>
+        <tr>
+          <td>
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#3A9E7A;margin-right:4px;vertical-align:middle;"></span>accent
+            vs
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0E7490;margin-right:4px;vertical-align:middle;"></span>economico
+          </td>
+          <td class="mono">36°</td>
+          <td><span class="section-tag tag-ok" style="margin:0;">Clear</span></td>
+          <td style="font-size:10px;">Sin conflicto desde migracion eco → cian. Resuelto.</td>
+        </tr>
+        <tr>
+          <td>
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#2E5F7E;margin-right:4px;vertical-align:middle;"></span>primary
+            vs
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#1E40AF;margin-right:4px;vertical-align:middle;"></span>institucional
+          </td>
+          <td class="mono">17°</td>
+          <td><span class="section-tag tag-warn" style="margin:0;">Borderline</span></td>
+          <td style="font-size:10px;">Diferenciado por forma: institucional solo en badge circular, primary en botones rectangulares.</td>
+        </tr>
+        <tr>
+          <td>
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#3A9E7A;margin-right:4px;vertical-align:middle;"></span>serie-s2
+            vs
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#166534;margin-right:4px;vertical-align:middle;"></span>ambiental
+          </td>
+          <td class="mono">15°</td>
+          <td><span class="section-tag tag-warn" style="margin:0;">Borderline</span></td>
+          <td style="font-size:10px;">Nunca aparecen en el mismo viewport (charts no muestran badges de eje simultaneamente).</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div></div>
+<script src="ds-nav.js"></script>
+</body></html>

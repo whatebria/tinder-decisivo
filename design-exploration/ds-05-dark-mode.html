@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>VotoAfin DS — Dark Mode</title>
+<link rel="stylesheet" href="ds-shared.css"/>
+<style>
+.token-row td:nth-child(1){font-family:monospace;font-size:10px;font-weight:700;color:var(--c-text);}
+.lv{font-family:monospace;font-size:10px;}
+.lsw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:middle;margin-right:4px;border:1px solid rgba(0,0,0,.1);}
+.dk-demo{background:#0B1418;border-radius:12px;padding:20px;border:1.5px solid #3A4C55;color:#E8EEEA;}
+.dk-card-inner{background:#1B2830;border-radius:10px;padding:14px;border:1.5px solid #3A4C55;margin:12px 0;}
+.dk-inp{width:100%;background:#1B2830;border:1.5px solid #3A4C55;border-radius:9px;padding:9px 12px;
+  font-size:13px;color:#E8EEEA;outline:none;font-family:inherit;}
+.dk-inp:focus{border-color:#7BB5D4;box-shadow:0 0 0 3px rgba(123,181,212,.25);}
+.rule-item{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--c-border2);}
+.rule-item:last-child{border-bottom:none;}
+.rule-check{width:20px;height:20px;border-radius:6px;background:#D1FAE5;color:#065F46;
+  font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.ax-dm-row{display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.07);}
+.ax-dm-row:last-child{border-bottom:none;}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-logo">VotoAfin DS</div>
+  <div class="sidebar-ver">v1.0 · Agosto 2026</div>
+  <hr/>
+  <div class="sidebar-label">Fundamentos</div>
+  <a href="ds-index.html">Inicio</a>
+  <a href="ds-01-philosophy.html">01 · Filosofia y Principios</a>
+  <a href="ds-02-psychology.html">02 · Psicologia del Usuario</a>
+  <a href="ds-03-benchmarking.html">03 · Benchmarking</a>
+  <hr/>
+  <div class="sidebar-label">Sistema de Color</div>
+  <a href="ds-04-color-system.html">04 · Sistema de Color</a>
+  <a href="ds-05-dark-mode.html">05 · Dark Mode</a>
+  <a href="ds-06-axes.html">06 · Ejes Tematicos</a>
+  <hr/>
+  <div class="sidebar-label">Datos y Visualizacion</div>
+  <a href="ds-07-dataviz.html">07 · Visualizacion de Datos</a>
+  <a href="ds-08-affinity.html">08 · Tiers de Afinidad</a>
+  <hr/>
+  <div class="sidebar-label">Componentes</div>
+  <a href="ds-09-components.html">09 · Component Library</a>
+  <hr/>
+  <div class="sidebar-label">Implementacion</div>
+  <a href="ds-10-tokens.html">10 · Design Tokens</a>
+  <a href="ds-11-screens.html">11 · Validacion por Pantalla</a>
+  <div class="sidebar-bottom">
+    <button class="theme-btn" id="theme-btn">Dark mode</button>
+  </div>
+</nav>
+
+<div class="main"><div class="content">
+
+<div class="page-header">
+  <div class="breadcrumb">Sistema de Color / 05</div>
+  <h1>Dark Mode</h1>
+  <p>Especificacion completa del tema oscuro. Que cambia, que se mantiene y por que.</p>
+</div>
+
+<!-- A: PRINCIPIO -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">Principio General</div>
+    <h2>A · Que cambia y que no</h2>
+  </div>
+  <div class="ins ins-b">
+    <strong>Los badges de ejes tematicos NO cambian en dark mode</strong> — es un invariante de diseno ya implementado en
+    <code>dimensiones.ts</code>. Los badges mantienen su color de fondo identico en ambos temas.
+    Solo cambian el color de texto y el borde de <code>DimensionCard</code>.
+  </div>
+  <div class="ins ins-a" style="margin-top:8px;">
+    Los tints (primary50-900, etc.) <strong>NO se sobreescriben</strong> en el selector
+    <code>.dark</code> — son valores absolutos. El componente elige cual tint usar segun el
+    contexto de tema, no el sistema de tokens.
+  </div>
+  <div class="ins ins-g" style="margin-top:8px;">
+    Implementacion: <code>document.body.classList.toggle('dark')</code>. El selector
+    <code>.dark</code> en <code>ds-shared.css</code> sobreescribe solo las propiedades de superficie,
+    texto y semantica — nunca los ejes ni las series de datos.
+  </div>
+</div>
+
+<!-- B: COMPARACION -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">Tokens</div>
+    <h2>B · Comparacion Light vs Dark</h2>
+    <p>Todos los tokens que cambian entre temas. Los que no aparecen aqui permanecen identicos.</p>
+  </div>
+  <div style="border-radius:10px;overflow:hidden;border:1.5px solid var(--c-border);">
+    <table>
+      <thead><tr><th>Token</th><th>Light value</th><th>Dark value</th></tr></thead>
+      <tbody>
+        <tr class="token-row"><td>--c-bg</td>
+          <td class="lv"><span class="lsw" style="background:#F5F7F5;"></span>#F5F7F5</td>
+          <td class="lv"><span class="lsw" style="background:#0B1418;border-color:#555;"></span>#0B1418</td></tr>
+        <tr class="token-row"><td>--c-bg-mkt</td>
+          <td class="lv"><span class="lsw" style="background:#F0F4F8;"></span>#F0F4F8</td>
+          <td class="lv"><span class="lsw" style="background:#0F1A24;border-color:#555;"></span>#0F1A24</td></tr>
+        <tr class="token-row"><td>--c-surface</td>
+          <td class="lv"><span class="lsw" style="background:#FFFFFF;"></span>#FFFFFF</td>
+          <td class="lv"><span class="lsw" style="background:#1B2830;border-color:#555;"></span>#1B2830</td></tr>
+        <tr class="token-row"><td>--c-surface2</td>
+          <td class="lv"><span class="lsw" style="background:#F9FAFB;"></span>#F9FAFB</td>
+          <td class="lv"><span class="lsw" style="background:#253444;border-color:#555;"></span>#253444</td></tr>
+        <tr class="token-row"><td>--c-border</td>
+          <td class="lv"><span class="lsw" style="background:#DDE4E1;"></span>#DDE4E1</td>
+          <td class="lv"><span class="lsw" style="background:#3A4C55;border-color:#555;"></span>#3A4C55</td></tr>
+        <tr class="token-row"><td>--c-border2</td>
+          <td class="lv"><span class="lsw" style="background:#EEF2EF;"></span>#EEF2EF</td>
+          <td class="lv"><span class="lsw" style="background:#2A3B44;border-color:#555;"></span>#2A3B44</td></tr>
+        <tr class="token-row"><td>--c-text</td>
+          <td class="lv"><span class="lsw" style="background:#1A2B33;"></span>#1A2B33</td>
+          <td class="lv"><span class="lsw" style="background:#E8EEEA;border-color:#555;"></span>#E8EEEA</td></tr>
+        <tr class="token-row"><td>--c-text2</td>
+          <td class="lv"><span class="lsw" style="background:#5A6B73;"></span>#5A6B73</td>
+          <td class="lv"><span class="lsw" style="background:#A8B5AC;border-color:#555;"></span>#A8B5AC</td></tr>
+        <tr class="token-row"><td>--c-text3</td>
+          <td class="lv"><span class="lsw" style="background:#8A9199;"></span>#8A9199</td>
+          <td class="lv"><span class="lsw" style="background:#7C8A80;border-color:#555;"></span>#7C8A80</td></tr>
+        <tr class="token-row"><td>--c-primary</td>
+          <td class="lv"><span class="lsw" style="background:#2E5F7E;"></span>#2E5F7E</td>
+          <td class="lv"><span class="lsw" style="background:#7BB5D4;border-color:#555;"></span>#7BB5D4</td></tr>
+        <tr class="token-row"><td>--c-primary-h</td>
+          <td class="lv"><span class="lsw" style="background:#24506C;"></span>#24506C</td>
+          <td class="lv"><span class="lsw" style="background:#9BC7DF;border-color:#555;"></span>#9BC7DF</td></tr>
+        <tr class="token-row"><td>--c-secondary</td>
+          <td class="lv"><span class="lsw" style="background:#7BA098;"></span>#7BA098</td>
+          <td class="lv"><span class="lsw" style="background:#9BC0B5;border-color:#555;"></span>#9BC0B5</td></tr>
+        <tr class="token-row"><td>--c-accent</td>
+          <td class="lv"><span class="lsw" style="background:#3A9E7A;"></span>#3A9E7A</td>
+          <td class="lv"><span class="lsw" style="background:#5BCEA0;border-color:#555;"></span>#5BCEA0</td></tr>
+        <tr class="token-row"><td>--c-success</td>
+          <td class="lv"><span class="lsw" style="background:#6B9B7A;"></span>#6B9B7A</td>
+          <td class="lv"><span class="lsw" style="background:#8FB89A;border-color:#555;"></span>#8FB89A</td></tr>
+        <tr class="token-row"><td>--c-warning</td>
+          <td class="lv"><span class="lsw" style="background:#C89B5C;"></span>#C89B5C</td>
+          <td class="lv"><span class="lsw" style="background:#D9B378;border-color:#555;"></span>#D9B378</td></tr>
+        <tr class="token-row"><td>--c-danger</td>
+          <td class="lv"><span class="lsw" style="background:#B85C5C;"></span>#B85C5C</td>
+          <td class="lv"><span class="lsw" style="background:#D07777;border-color:#555;"></span>#D07777</td></tr>
+        <tr class="token-row"><td>--c-info</td>
+          <td class="lv"><span class="lsw" style="background:#5C8AB8;"></span>#5C8AB8</td>
+          <td class="lv"><span class="lsw" style="background:#7DA4CB;border-color:#555;"></span>#7DA4CB</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- C: DEMO DARK -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">Demo</div>
+    <h2>C · Demo Visual Dark Mode</h2>
+    <p>Panel siempre oscuro — independiente del toggle de tema de la pagina.</p>
+  </div>
+  <div class="dk-demo">
+    <p style="font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:#7C8A80;margin-bottom:14px;font-weight:700;">
+      Superficie dark · bg #0B1418 · surface #1B2830
+    </p>
+
+    <!-- Botones -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+      <button style="background:#7BB5D4;color:#0B1418;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;">
+        Primary dark
+      </button>
+      <button style="background:#5BCEA0;color:#0B1418;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;">
+        Accent dark
+      </button>
+      <button style="background:transparent;color:#7BB5D4;border:1.5px solid #7BB5D4;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;">
+        Secondary dark
+      </button>
+      <button style="background:transparent;color:#A8B5AC;border:1.5px solid #3A4C55;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;">
+        Ghost dark
+      </button>
+    </div>
+
+    <!-- Card interna -->
+    <div class="dk-card-inner">
+      <p style="font-size:13px;font-weight:700;color:#E8EEEA;margin-bottom:4px;">Card en dark mode</p>
+      <p style="font-size:11px;color:#A8B5AC;line-height:1.6;">
+        Surface <code style="color:#7BB5D4;font-size:10px;">#1B2830</code>, borde
+        <code style="color:#7BB5D4;font-size:10px;">#3A4C55</code>, texto
+        <code style="color:#7BB5D4;font-size:10px;">#E8EEEA</code>.
+        La jerarquia de lectura se mantiene identica al light mode.
+      </p>
+    </div>
+
+    <!-- Input -->
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:11px;font-weight:600;color:#A8B5AC;margin-bottom:5px;">Ejemplo de input dark</label>
+      <input class="dk-inp" type="text" placeholder="Escribe aqui..." value="Valor de ejemplo"/>
+    </div>
+
+    <!-- Chips -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+      <span style="padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(123,181,212,.15);color:#7BB5D4;border:1.5px solid rgba(123,181,212,.35);">Primary</span>
+      <span style="padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(91,206,160,.15);color:#5BCEA0;border:1.5px solid rgba(91,206,160,.35);">Accent</span>
+      <span style="padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(143,184,154,.15);color:#8FB89A;border:1.5px solid rgba(143,184,154,.35);">Success</span>
+      <span style="padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(217,179,120,.15);color:#D9B378;border:1.5px solid rgba(217,179,120,.35);">Warning</span>
+      <span style="padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(208,119,119,.15);color:#D07777;border:1.5px solid rgba(208,119,119,.35);">Danger</span>
+    </div>
+
+    <!-- Toasts -->
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="background:rgba(143,184,154,.12);border:1.5px solid #8FB89A;border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:flex-start;">
+        <span style="color:#8FB89A;font-size:13px;flex-shrink:0;">v</span>
+        <div><strong style="font-size:12px;color:#E8EEEA;">Datos guardados</strong>
+        <p style="font-size:11px;color:#A8B5AC;margin-top:2px;">Los cambios se aplicaron correctamente.</p></div>
+      </div>
+      <div style="background:rgba(208,119,119,.12);border:1.5px solid #D07777;border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:flex-start;">
+        <span style="color:#D07777;font-size:13px;flex-shrink:0;">!</span>
+        <div><strong style="font-size:12px;color:#E8EEEA;">Error de conexion</strong>
+        <p style="font-size:11px;color:#A8B5AC;margin-top:2px;">No se pudo completar la operacion. Reintenta.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- D: EJES EN DARK -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">Ejes</div>
+    <h2>D · Ejes Tematicos en Dark Mode</h2>
+    <p>Los badges son invariantes. Solo texto y borde cambian.</p>
+  </div>
+  <div style="border-radius:10px;overflow:hidden;border:1.5px solid var(--c-border);margin-bottom:16px;">
+    <table>
+      <thead><tr><th>Eje</th><th>Badge (invariante)</th><th>text.light</th><th>text.dark</th><th>border.dark</th></tr></thead>
+      <tbody>
+        <tr><td style="font-size:11px;font-weight:700;">Economico</td>
+          <td><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#0E7490;color:#fff;font-size:9px;font-weight:800;">$</span></td>
+          <td class="lv"><span class="lsw" style="background:#155E75;"></span><span style="font-family:monospace;font-size:9px;">#155E75</span></td>
+          <td class="lv"><span class="lsw" style="background:#67E8F9;border-color:#aaa;"></span><span style="font-family:monospace;font-size:9px;">#67E8F9</span></td>
+          <td class="lv"><span class="lsw" style="background:#67E8F9;border-color:#aaa;"></span><span style="font-family:monospace;font-size:9px;">#67E8F9</span></td></tr>
+        <tr><td style="font-size:11px;font-weight:700;">Social</td>
+          <td><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#B45309;color:#fff;font-size:9px;font-weight:800;">@</span></td>
+          <td class="lv"><span class="lsw" style="background:#92400E;"></span><span style="font-family:monospace;font-size:9px;">#92400E</span></td>
+          <td class="lv"><span class="lsw" style="background:#FCD34D;border-color:#aaa;"></span><span style="font-family:monospace;font-size:9px;">#FCD34D</span></td>
+          <td class="lv"><span class="lsw" style="background:#FCD34D;border-color:#aaa;"></span><span style="font-family:monospace;font-size:9px;">#FCD34D</span></td></tr>
+        <tr><td style="font-size:11px;font-weight:700;">Cultural</td>
+          <td><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#7C3AED;color:#fff;font-size:9px;font-weight:800;">~</span></td>
+          <td class="lv"><span class="lsw" style="background:#7C3AED;"></span><span style="font-family:monospace;font-size:9px;">#7C3AED</span></td>
+          <td class="lv"><span class="lsw" style="background:#C4B5FD;border-color:#aaa;"></span><span style="font-family:monospace;font-size:9px;">#C4B5FD</span></td>
+          <td class="lv"><span class="lsw" style="background:#C4B5FD;border-color:#aaa;"></span><span style="font-family:monospace;font-size:9px;">#C4B5FD</span></td></tr>
+        <tr><td style="font-size:11px;font-weight:700;">Ambiental</td>
+          <td><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#166534;color:#fff;font-size:9px;font-weight:800;">^</span></td>
+          <td class="lv"><span class="lsw" style="background:#166534;"></span><span style="font-family:monospace;font-size:9px;">#166534</span></td>
+          <td class="lv"><span class="lsw" style="background:#86EFAC;border-color:#aaa;"></span><span style="font-family:monospace;font-size:9px;">#86EFAC</span></td>
+          <td class="lv"><span class="lsw" style="background:#86EFAC;border-color:#aaa;"></span><span style="font-family:monospace;font-size:9px;">#86EFAC</span></td></tr>
+        <tr><td style="font-size:11px;font-weight:700;">Institucional</td>
+          <td><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#1E40AF;color:#fff;font-size:9px;font-weight:800;">#</span></td>
+          <td class="lv"><span class="lsw" style="background:#1E40AF;"></span><span style="font-family:monospace;font-size:9px;">#1E40AF</span></td>
+          <td class="lv"><span class="lsw" style="background:#93C5FD;border-color:#aaa;"></span><span style="font-family:monospace;font-size:9px;">#93C5FD</span></td>
+          <td class="lv"><span class="lsw" style="background:#93C5FD;border-color:#aaa;"></span><span style="font-family:monospace;font-size:9px;">#93C5FD</span></td></tr>
+        <tr><td style="font-size:11px;font-weight:700;">Pueblos</td>
+          <td><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#9D174D;color:#fff;font-size:9px;font-weight:800;">P</span></td>
+          <td class="lv"><span class="lsw" style="background:#9D174D;"></span><span style="font-family:monospace;font-size:9px;">#9D174D</span></td>
+          <td class="lv"><span class="lsw" style="background:#F9A8D4;border-color:#aaa;"></span><span style="font-family:monospace;font-size:9px;">#F9A8D4</span></td>
+          <td class="lv"><span class="lsw" style="background:#F9A8D4;border-color:#aaa;"></span><span style="font-family:monospace;font-size:9px;">#F9A8D4</span></td></tr>
+        <tr><td style="font-size:11px;font-weight:700;">Discapacidad</td>
+          <td><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#86198F;color:#fff;font-size:9px;font-weight:800;">D</span></td>
+          <td class="lv"><span class="lsw" style="background:#86198F;"></span><span style="font-family:monospace;font-size:9px;">#86198F</span></td>
+          <td class="lv"><span class="lsw" style="background:#E879F9;border-color:#aaa;"></span><span style="font-family:monospace;font-size:9px;">#E879F9</span></td>
+          <td class="lv"><span class="lsw" style="background:#E879F9;border-color:#aaa;"></span><span style="font-family:monospace;font-size:9px;">#E879F9</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Demo DimensionCards dark -->
+  <div class="dk-demo">
+    <p style="font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:#7C8A80;margin-bottom:12px;font-weight:700;">DimensionCards en Dark Mode</p>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <div style="background:#253444;border-left:4px solid #0E7490;border-radius:8px;padding:9px 12px;display:flex;align-items:center;gap:10px;">
+        <span style="width:22px;height:22px;border-radius:50%;background:#0E7490;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;flex-shrink:0;">$</span>
+        <span style="font-size:11px;font-weight:700;color:#67E8F9;">Economico</span>
+        <span style="font-size:11px;color:#A8B5AC;margin-left:auto;">Politica fiscal, empleo, comercio</span>
+      </div>
+      <div style="background:#253444;border-left:4px solid #B45309;border-radius:8px;padding:9px 12px;display:flex;align-items:center;gap:10px;">
+        <span style="width:22px;height:22px;border-radius:50%;background:#B45309;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;flex-shrink:0;">@</span>
+        <span style="font-size:11px;font-weight:700;color:#FCD34D;">Social</span>
+        <span style="font-size:11px;color:#A8B5AC;margin-left:auto;">Salud, educacion, vivienda</span>
+      </div>
+      <div style="background:#253444;border-left:4px solid #7C3AED;border-radius:8px;padding:9px 12px;display:flex;align-items:center;gap:10px;">
+        <span style="width:22px;height:22px;border-radius:50%;background:#7C3AED;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;flex-shrink:0;">~</span>
+        <span style="font-size:11px;font-weight:700;color:#C4B5FD;">Cultural</span>
+        <span style="font-size:11px;color:#A8B5AC;margin-left:auto;">Arte, lenguas, identidad</span>
+      </div>
+      <div style="background:#253444;border-left:4px solid #166534;border-radius:8px;padding:9px 12px;display:flex;align-items:center;gap:10px;">
+        <span style="width:22px;height:22px;border-radius:50%;background:#166534;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;flex-shrink:0;">^</span>
+        <span style="font-size:11px;font-weight:700;color:#86EFAC;">Ambiental</span>
+        <span style="font-size:11px;color:#A8B5AC;margin-left:auto;">Clima, biodiversidad, recursos</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- E: REGLAS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag tag-brand">Reglas</div>
+    <h2>E · Reglas de Implementacion</h2>
+  </div>
+  <div class="card">
+    <div class="rule-item">
+      <div class="rule-check">1</div>
+      <div><strong style="font-size:12px;">Solo sobreescribir dentro del selector <code>.dark</code></strong>
+      <p style="font-size:11px;color:var(--c-text2);margin-top:2px;">Nunca usar <code>prefers-color-scheme</code> como selector principal — el toggle manual tiene prioridad.</p></div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-check">2</div>
+      <div><strong style="font-size:12px;">Los badges de eje NO se tocan en dark</strong>
+      <p style="font-size:11px;color:var(--c-text2);margin-top:2px;">El fondo del badge es invariante. Solo el texto y borde de la card contenedora cambian.</p></div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-check">3</div>
+      <div><strong style="font-size:12px;">Los colores de dark deben cumplir WCAG AA</strong>
+      <p style="font-size:11px;color:var(--c-text2);margin-top:2px;">Verificar ratio sobre <code>#0B1418</code> (bg) y sobre <code>#1B2830</code> (surface). Primary dark (#7BB5D4) logra 5.5:1 sobre bg dark.</p></div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-check">4</div>
+      <div><strong style="font-size:12px;">Las escalas de tints no se modifican</strong>
+      <p style="font-size:11px;color:var(--c-text2);margin-top:2px;">Los 90 tints son valores absolutos. El componente decide cual usar segun el contexto de tema.</p></div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-check">5</div>
+      <div><strong style="font-size:12px;">Persistir la preferencia en localStorage</strong>
+      <p style="font-size:11px;color:var(--c-text2);margin-top:2px;">Key: <code>ds-theme</code>. Valores: <code>'light'</code> o <code>'dark'</code>. Leer en el <code>DOMContentLoaded</code> inicial.</p></div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-check">6</div>
+      <div><strong style="font-size:12px;">Agregar transicion a los cambios de tema</strong>
+      <p style="font-size:11px;color:var(--c-text2);margin-top:2px;">Los tokens de superficie y texto ya tienen <code>transition:background .2s, color .2s</code> en ds-shared.css. No anadir transicion a colores de eje.</p></div>
+    </div>
+  </div>
+</div>
+
+</div></div>
+<script src="ds-nav.js"></script>
+</body></html>
