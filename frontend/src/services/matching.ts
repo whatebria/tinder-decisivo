@@ -92,6 +92,17 @@ export function getConfianzaBadgeVariant(confianza?: string): BadgeVariant {
   return "danger";
 }
 
+/**
+ * True si el nivel de confianza es TENTATIVA o desconocido (valor por defecto
+ * cuando el backend no devuelve confianza). Centralizado para que si aparecen
+ * nuevos niveles ("PARCIAL", "INSUFICIENTE") el cambio sea en un solo lugar.
+ */
+export function isConfianzaTentativa(confianza?: string): boolean {
+  // Usa || en lugar de ?? para que string vacio tambien defaultee a TENTATIVA.
+  // Un string vacio es tan ambiguo como undefined: sin dato = tentativa.
+  return (confianza || "TENTATIVA").toUpperCase() === "TENTATIVA";
+}
+
 // -- Likert stance color -----------------------------------------------------
 
 /**

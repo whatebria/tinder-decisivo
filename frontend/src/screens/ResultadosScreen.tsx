@@ -38,6 +38,7 @@ import {
   Button,
   Chip,
   CoachMarkTour,
+  Icon,
   Link,
   RankingCard,
   ResultadoHero,
@@ -51,9 +52,11 @@ import {
   formatMatchPercentage,
   getConfianzaBadge,
   getConfianzaBadgeVariant,
+  isConfianzaTentativa,
   getMatchColor,
   sortByMatchDesc,
 } from "../services/matching";
+import { withAlpha } from "../theme/utils";
 import { buildShareText, fromMatchResults } from "../services/share";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
@@ -73,7 +76,10 @@ export function ResultadosScreen({
   // breakpoints son intencionalmente conservadores (>=1000 recien tres
   // columnas) porque cada card lleva un radar 140px + labels; con menos
   // ancho la card se aprieta y el radar pierde legibilidad.
-  const rankingCols = screenWidth < 400 ? 1 : screenWidth < 720 ? 2 : screenWidth < 1000 ? 3 : 4;
+  const rankingCols = useMemo(
+    () => screenWidth < 400 ? 1 : screenWidth < 720 ? 2 : screenWidth < 1000 ? 3 : 4,
+    [screenWidth]
+  );
   const isGuest = useAuthStore((s) => s.isGuest);
   const exitGuestMode = useAuthStore((s) => s.exitGuestMode);
   const perfilQ = usePerfil();
@@ -95,8 +101,17 @@ export function ResultadosScreen({
   const toggleFav = useToggleFavorito();
   const toggleDesc = useToggleDescartado();
 
-  const allResults = activeMutation.data ? sortByMatchDesc(activeMutation.data) : [];
+  const allResults = useMemo(
+    () => activeMutation.data ? sortByMatchDesc(activeMutation.data) : [],
+    [activeMutation.data]
+  );
   const loading = activeMutation.isPending;
+
+  const cardFlexBasis = useMemo(() => {
+    if (rankingCols === 1) return "100%" as const;
+    const gapTotal = (rankingCols - 1) * spacing.sp2;
+    return (screenWidth - gapTotal - spacing.sp4 * 2) / rankingCols;
+  }, [rankingCols, screenWidth]);
 
   const descartadoIds = useMemo(
     () =>
@@ -377,7 +392,7 @@ export function ResultadosScreen({
           <View
             style={[
               styles.ubicacionCard,
-              { backgroundColor: c.warning + "18", borderColor: c.warning },
+              { backgroundColor: withAlpha(c.warning, 0.09), borderColor: c.warning },
             ]}
           >
             <Text style={[styles.ubicacionTitle, { color: c.text }]}>
@@ -412,7 +427,7 @@ export function ResultadosScreen({
 
         {hiddenCount > 0 ? (
           <Link block onPress={() => navigation.navigate("MisGuardados")}>
-            {`${hiddenCount} candidato(s) descartado(s). Ver lista`}
+            {`${hiddenCount} candidato${hiddenCount === 1 ? "" : "s"} descartado${hiddenCount === 1 ? "" : "s"}. Ver lista`}
           </Link>
         ) : null}
 
@@ -450,17 +465,21 @@ export function ResultadosScreen({
             const candidato = top.candidato_data;
             const candId = candidato.id!;
             const isFav = favoritoIds.has(candId);
-            const esTentativa = (top.confianza ?? "TENTATIVA").toUpperCase() === "TENTATIVA";
+            const esTentativa = isConfianzaTentativa(top.confianza ?? undefined);
             return (
               <View style={{ gap: spacing.sp3 }}>
                 {esTentativa ? (
                   <View
                     style={[
                       styles.coverageBanner,
-                      { backgroundColor: c.warning + "22", borderColor: c.warning },
+                      { backgroundColor: withAlpha(c.warning, 0.13), borderColor: c.warning },
                     ]}
                   >
-                    <Text style={{ fontSize: 16, lineHeight: 20 }}>(!)</Text>
+                    <Icon
+                      name="alert"
+                      size={18}
+                      color={c.warning}
+                    />
                     <Text style={[styles.coverageBannerText, { color: c.text }]}>
                       <Text style={{ fontWeight: "700" }}>Resultado preliminar. </Text>
                       Solo se compararon{" "}
@@ -515,15 +534,8 @@ export function ResultadosScreen({
                 const candidato = r.candidato_data;
                 const candId = candidato.id!;
                 const isFav = favoritoIds.has(candId);
-                // Width del card: distribuye el ancho disponible entre las
-                // columnas del grid dejando espacio para los gaps horizontales.
-                // En 1-col ocupa el 100% (flexBasis con string es OK en RN Web,
-                // en RN nativo tomamos numero calculado con screenWidth).
-                const gapTotal = (rankingCols - 1) * spacing.sp2;
-                const cardFlexBasis =
-                  rankingCols === 1
-                    ? ("100%" as unknown as number)
-                    : (screenWidth - gapTotal - spacing.sp4 * 2) / rankingCols;
+                // flexBasis: calculado en el cuerpo del componente (cardFlexBasis)
+                // para no re-ejecutar el calculo por cada item del map.
                 return (
                   <RankingCard
                     key={r.id ?? candId}
