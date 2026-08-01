@@ -40,6 +40,7 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
+import { greetingForHour } from "../../utils/user";
 import { AppIcon } from "../atoms/AppIcon";
 import { Button } from "../atoms/Button";
 import { Icon } from "../atoms/Icon";
@@ -92,7 +93,8 @@ export interface HomeHeroSectionProps {
 
 // -- Helpers ----------------------------------------------------------------
 
-function countdownLabel(days: number): string | null {
+/** Exportada para testing unitario. */
+export function countdownLabel(days: number): string | null {
   if (days < 0) return null;
   if (days === 0) return "Elecciones hoy";
   if (days === 1) return "Elecciones manana";
@@ -100,10 +102,7 @@ function countdownLabel(days: number): string | null {
 }
 
 function greetingByHour(): string {
-  const h = new Date().getHours();
-  if (h < 12) return "Buenos dias";
-  if (h < 20) return "Buenas tardes";
-  return "Buenas noches";
+  return greetingForHour();
 }
 
 // -- Component --------------------------------------------------------------

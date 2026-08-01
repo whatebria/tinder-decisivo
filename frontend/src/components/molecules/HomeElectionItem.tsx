@@ -59,8 +59,8 @@ export interface HomeElectionItemProps {
   disabled?: boolean;
 }
 
-/** Etiqueta y variante del CTA segun estado del cuestionario. */
-function ctaForEstado(
+/** Etiqueta y variante del CTA segun estado del cuestionario. Exportada para testing. */
+export function ctaForEstado(
   estado: EleccionEstado,
   props: Pick<HomeElectionItemProps, "onEmpezar" | "onContinuar" | "onVerResultados">,
 ): { label: string; onPress?: () => void; variant: "primary" | "secondary" | "ghost" } {

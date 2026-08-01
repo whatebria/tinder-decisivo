@@ -59,27 +59,9 @@ import { spacing } from "../theme/spacing";
 import { useThemeColors } from "../theme/useTheme";
 import { sanitizeSnippet } from "../utils/text";
 import { noticiaToDetail } from "../utils/noticia";
+import { deriveInitials, deriveDisplayName } from "../utils/user";
 
 // -- Helpers ------------------------------------------------------------------
-
-/**
- * Deriva las iniciales del usuario a partir de un email prefix.
- * "jenny.venegas" -> "JV" | "jenny" -> "J" | "jenny.venegas.garcia" -> "JV"
- */
-function deriveInitials(emailPrefix: string): string {
-  const parts = emailPrefix.split(".").filter(Boolean);
-  if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0][0].toUpperCase();
-  return (parts[0][0] + parts[1][0]).toUpperCase();
-}
-
-/**
- * Etiqueta del primer nombre a partir del email prefix.
- * "jenny.venegas" -> "jenny" | "jenny" -> "jenny"
- */
-function deriveDisplayName(emailPrefix: string): string {
-  return emailPrefix.split(".")[0];
-}
 
 /**
  * Indexa el resumen del backend por tipo_eleccion_id. Puro y O(N).

@@ -50,7 +50,8 @@ const CONFIGS = {
   sm:   { dim: 48, r: 19, strokeWidth: 4.5 },
 } as const;
 
-function deriveState(value: number, explicit?: ProgressRingState): ProgressRingState {
+/** Exportada para testing unitario. */
+export function deriveState(value: number, explicit?: ProgressRingState): ProgressRingState {
   if (explicit) return explicit;
   if (value >= 1) return "done";
   if (value > 0) return "progress";
