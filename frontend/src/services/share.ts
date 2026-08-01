@@ -8,8 +8,10 @@
 
 import type { MatchResult } from "../api/endpoints";
 
-// URL publica (por ahora hardcodeada; en produccion vendria de env config).
-const APP_URL = "https://tinder-decisivo.cl";
+// URL publica configurable por entorno. Staging/previews deben setear
+// EXPO_PUBLIC_APP_URL para no mandar links de produccion en QA.
+const APP_URL =
+  process.env.EXPO_PUBLIC_APP_URL ?? "https://tinder-decisivo.cl";
 
 // Cuantos matches meter en el texto compartido.
 const TOP_N = 5;
@@ -35,9 +37,17 @@ export interface ShareTextInput {
   matches: ShareableMatch[];
 }
 
-/** Adapter para llamar con MatchResult del API sin castear en cada callsite. */
+/** Adapter type-safe: si MatchResult cambia, TypeScript marca el error aqui,
+ *  no silenciosamente en runtime. */
 export function fromMatchResults(matches: MatchResult[]): ShareableMatch[] {
-  return matches as unknown as ShareableMatch[];
+  return matches.map((m) => ({
+    match_percentage: m.match_percentage,
+    candidato_data: {
+      nombre:   m.candidato_data.nombre,
+      apellido: m.candidato_data.apellido,
+      partido:  m.candidato_data.partido ?? null,
+    },
+  }));
 }
 
 /**

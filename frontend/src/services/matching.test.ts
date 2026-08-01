@@ -7,6 +7,7 @@
 import {
   formatMatchPercentage,
   getConfianzaBadge,
+  getConfianzaBadgeVariant,
   getLikertColor,
   getMatchColor,
   getMatchTier,
@@ -154,6 +155,33 @@ describe("getConfianzaBadge", () => {
 
   test("valor invalido tambien defaultea a TENTATIVA", () => {
     expect(getConfianzaBadge("XYZ").label).toBe("Confianza tentativa");
+  });
+});
+
+describe("getConfianzaBadgeVariant", () => {
+  test("ALTA devuelve success", () => {
+    expect(getConfianzaBadgeVariant("ALTA")).toBe("success");
+  });
+
+  test("MEDIA devuelve warning", () => {
+    expect(getConfianzaBadgeVariant("MEDIA")).toBe("warning");
+  });
+
+  test("TENTATIVA devuelve danger", () => {
+    expect(getConfianzaBadgeVariant("TENTATIVA")).toBe("danger");
+  });
+
+  test("undefined defaultea a danger", () => {
+    expect(getConfianzaBadgeVariant(undefined)).toBe("danger");
+  });
+
+  test("string vacio defaultea a danger", () => {
+    expect(getConfianzaBadgeVariant("")).toBe("danger");
+  });
+
+  test("acepta lowercase (backend puede mandar 'alta')", () => {
+    expect(getConfianzaBadgeVariant("alta")).toBe("success");
+    expect(getConfianzaBadgeVariant("media")).toBe("warning");
   });
 });
 

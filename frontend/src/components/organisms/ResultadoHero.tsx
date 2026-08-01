@@ -155,6 +155,9 @@ export function ResultadoHero({
     [c, scoreColor],
   );
 
+  // Label accesible comun a ambos layouts
+  const a11yLabel = `Tu mejor match: ${nombreCompleto}, ${Math.round(matchPct)}% de afinidad`;
+
   const infoBlock = (
     <>
       <Avatar size="xl" initials={initials} imageUrl={imageUrl ?? undefined} />
@@ -191,7 +194,11 @@ export function ResultadoHero({
   // HORIZONTAL: kicker arriba full-width, luego split 2 cols con info | radar.
   if (isHorizontal) {
     return (
-      <View style={[styles.card, style]}>
+      <View
+        style={[styles.card, style]}
+        accessibilityRole="summary"
+        accessibilityLabel={a11yLabel}
+      >
         <Text style={styles.kicker}>Tu match</Text>
         <View style={styles.splitRow}>
           <View style={[styles.splitCol, styles.splitColLeft]}>
@@ -205,7 +212,11 @@ export function ResultadoHero({
 
   // VERTICAL (mobile): estilo RankingCard XL. Radar entre info y footer.
   return (
-    <View style={[styles.card, styles.cardVertical, style]}>
+    <View
+      style={[styles.card, styles.cardVertical, style]}
+      accessibilityRole="summary"
+      accessibilityLabel={a11yLabel}
+    >
       <Text style={styles.kicker}>Tu match</Text>
       <Avatar size="xl" initials={initials} imageUrl={imageUrl ?? undefined} />
       <Text style={styles.nombre} numberOfLines={2}>

@@ -78,6 +78,20 @@ export function getConfianzaBadge(
   return badges[key] ?? badges.TENTATIVA;
 }
 
+/**
+ * Variante de Badge para nivel de confianza -- para uso con el componente
+ * <Badge variant={...}>. Testeable de forma aislada.
+ * Centralizado aqui para evitar duplicacion en pantallas (DRY, TASK-013).
+ */
+export type BadgeVariant = "success" | "warning" | "danger" | "neutral" | "info";
+
+export function getConfianzaBadgeVariant(confianza?: string): BadgeVariant {
+  const key = (confianza ?? "TENTATIVA").toUpperCase();
+  if (key === "ALTA")  return "success";
+  if (key === "MEDIA") return "warning";
+  return "danger";
+}
+
 // -- Likert stance color -----------------------------------------------------
 
 /**

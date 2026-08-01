@@ -50,6 +50,7 @@ import type { RootStackScreenProps } from "../navigation/types";
 import {
   formatMatchPercentage,
   getConfianzaBadge,
+  getConfianzaBadgeVariant,
   getMatchColor,
   sortByMatchDesc,
 } from "../services/matching";
@@ -61,13 +62,6 @@ import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
-
-function confianzaToBadge(confianza: string | undefined): BadgeVariant {
-  const key = (confianza ?? "TENTATIVA").toUpperCase();
-  if (key === "ALTA") return "success";
-  if (key === "MEDIA") return "warning";
-  return "danger";
-}
 
 export function ResultadosScreen({
   navigation,
@@ -452,9 +446,7 @@ export function ResultadosScreen({
             const pct = Number(top.match_percentage);
             const scoreCol = getMatchColor(pct);
             const conf = getConfianzaBadge(top.confianza);
-            const chartData = breakdownToChartData(
-              top.breakdown_por_eje as BreakdownPorEje | null | undefined,
-            );
+            const chartData = breakdownToChartData(top.breakdown_por_eje);
             const candidato = top.candidato_data;
             const candId = candidato.id!;
             const isFav = favoritoIds.has(candId);
@@ -489,7 +481,7 @@ export function ResultadosScreen({
                   matchColor={scoreCol}
                   ejeScores={chartData}
                   confianzaLabel={`Confianza ${conf.label.toLowerCase()}`}
-                  confianzaVariant={confianzaToBadge(top.confianza)}
+                  confianzaVariant={getConfianzaBadgeVariant(top.confianza ?? undefined)}
                   confianzaSubtext={`${top.preguntas_consideradas} ${top.preguntas_consideradas === 1 ? "pregunta coincide" : "preguntas coinciden"}`}
                   onCta={() => goToDetalle(top)}
                 />
@@ -519,9 +511,7 @@ export function ResultadosScreen({
               {rest.map((r, idx) => {
                 const pct = Number(r.match_percentage);
                 const scoreCol = getMatchColor(pct);
-                const chartData = breakdownToChartData(
-                  r.breakdown_por_eje as BreakdownPorEje | null | undefined,
-                );
+                const chartData = breakdownToChartData(r.breakdown_por_eje);
                 const candidato = r.candidato_data;
                 const candId = candidato.id!;
                 const isFav = favoritoIds.has(candId);
@@ -569,7 +559,7 @@ export function ResultadosScreen({
 
         <View style={styles.footerCol}>
           {filteredResults.length > 0 ? (
-            <Button variant="secondary" onPress={() => setShareOpen(true)}>
+            <Button variant="accent" onPress={() => setShareOpen(true)}>
               Compartir mi ranking
             </Button>
           ) : null}

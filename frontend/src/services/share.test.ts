@@ -1,4 +1,5 @@
-import { buildShareText, type ShareableMatch } from "./share";
+import { buildShareText, fromMatchResults, type ShareableMatch } from "./share";
+import type { MatchResult } from "../api/endpoints";
 
 // Helper para armar mocks sinteticos rapido.
 function m(
@@ -87,5 +88,54 @@ describe("buildShareText", () => {
     const text = buildShareText({ tipoNombre: "Test", matches: [] });
     expect(text).toContain("Sin matches todavia");
     expect(text).toContain("https://tinder-decisivo.cl");
+  });
+});
+
+// -- fromMatchResults (TASK-012) ---------------------------------------------
+
+const mkMatchResult = (
+  nombre: string,
+  apellido: string,
+  partido: string | null,
+  pct: string
+): MatchResult =>
+  ({
+    match_percentage: pct,
+    candidato_data: { nombre, apellido, partido },
+  }) as unknown as MatchResult;
+
+describe("fromMatchResults", () => {
+  it("mapea match_percentage correctamente", () => {
+    const result = fromMatchResults([mkMatchResult("Ana", "Perez", "Partido A", "87")]);
+    expect(result[0].match_percentage).toBe("87");
+  });
+
+  it("mapea nombre y apellido", () => {
+    const result = fromMatchResults([mkMatchResult("Ana", "Perez", "Partido A", "87")]);
+    expect(result[0].candidato_data.nombre).toBe("Ana");
+    expect(result[0].candidato_data.apellido).toBe("Perez");
+  });
+
+  it("preserva partido no-null", () => {
+    const result = fromMatchResults([mkMatchResult("Ana", "Perez", "Partido A", "87")]);
+    expect(result[0].candidato_data.partido).toBe("Partido A");
+  });
+
+  it("partido null se normaliza a null", () => {
+    const result = fromMatchResults([mkMatchResult("Ana", "Perez", null, "87")]);
+    expect(result[0].candidato_data.partido).toBeNull();
+  });
+
+  it("lista vacia devuelve lista vacia", () => {
+    expect(fromMatchResults([])).toEqual([]);
+  });
+
+  it("mantiene el orden de entrada", () => {
+    const result = fromMatchResults([
+      mkMatchResult("Ana", "P", null, "90"),
+      mkMatchResult("Bea", "L", null, "70"),
+    ]);
+    expect(result[0].candidato_data.nombre).toBe("Ana");
+    expect(result[1].candidato_data.nombre).toBe("Bea");
   });
 });

@@ -31,13 +31,16 @@ export type BreakdownPorEje = Partial<
 
 /**
  * Convierte el breakdown al formato que espera RadarChart: eje -> percentage.
+ * Acepta `unknown` para evitar el cast en cada callsite -- el unico cast
+ * vive aqui, documentado, y TypeScript puede validarlo en un solo lugar.
  */
 export function breakdownToChartData(
-  breakdown: BreakdownPorEje | null | undefined
+  breakdown: unknown
 ): Record<string, number> {
-  if (!breakdown) return {};
+  const b = breakdown as BreakdownPorEje | null | undefined;
+  if (!b) return {};
   const result: Record<string, number> = {};
-  for (const [eje, data] of Object.entries(breakdown)) {
+  for (const [eje, data] of Object.entries(b)) {
     if (data) result[eje] = data.porcentaje;
   }
   return result;
