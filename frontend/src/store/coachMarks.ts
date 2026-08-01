@@ -45,6 +45,13 @@ interface CoachMarksState {
   isHydrated: boolean;
   /** userId actual (null = guest o pre-hydrate). Se usa para armar la key. */
   currentUserId: number | null;
+  /**
+   * Timestamp del ultimo resetAll(). Los CoachMarkTour que estaban montados
+   * ANTES de este instante no se muestran hasta que el usuario navegue a la
+   * pantalla de nuevo (el componente se desmonta y remonta, capturando un
+   * mountedAt posterior a lastResetAt).
+   */
+  lastResetAt: number;
 
   hasSeen: (tourId: TourId) => boolean;
   markSeen: (tourId: TourId) => Promise<void>;
@@ -61,6 +68,7 @@ export const useCoachMarksStore = create<CoachMarksState>((set, get) => ({
   seen: {},
   isHydrated: false,
   currentUserId: null,
+  lastResetAt: 0,
 
   hasSeen: (tourId) => get().seen[tourId] === true,
 
@@ -77,7 +85,7 @@ export const useCoachMarksStore = create<CoachMarksState>((set, get) => ({
   },
 
   resetAll: async () => {
-    set({ seen: {} });
+    set({ seen: {}, lastResetAt: Date.now() });
     try {
       await secureStorage.removeItem(keyFor(get().currentUserId));
     } catch {

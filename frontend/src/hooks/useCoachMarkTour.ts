@@ -22,7 +22,7 @@
  *   );
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { COACH_TOURS, type CoachStep, type TourId } from "../content/coachMarks";
 import { useCoachMarksStore } from "../store/coachMarks";
@@ -48,22 +48,34 @@ export function useCoachMarkTour(tourId: TourId): UseCoachMarkTourResult {
   const tour = COACH_TOURS[tourId];
   const isHydrated = useCoachMarksStore((s) => s.isHydrated);
   const alreadySeen = useCoachMarksStore((s) => s.seen[tourId] === true);
+  const lastResetAt = useCoachMarksStore((s) => s.lastResetAt);
   const markSeen = useCoachMarksStore((s) => s.markSeen);
+
+  // Capturamos el instante en que el componente se monto.
+  // Si el usuario hace "Ver tours de nuevo" DESPUES de que este componente
+  // ya estaba montado (lastResetAt > mountedAt), NO mostramos el tour:
+  // el usuario tendra que navegar a esta pantalla de nuevo para verlo.
+  // Cuando vuelva, el componente se remonta con un mountedAt nuevo, posterior
+  // al reset, y el tour aparece con normalidad.
+  const mountedAt = useRef(Date.now());
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Cuando el store se resetea (Config -> Ayuda o cambio de identidad), el
-  // paso actual debe volver a 0 para que el usuario vea el tour desde el
-  // inicio.
   useEffect(() => {
     if (!alreadySeen) setCurrentIndex(0);
   }, [alreadySeen]);
 
   const total = tour.steps.length;
   const isLast = currentIndex >= total - 1;
-  // Safety net: si el store todavia no se hidrato, NO mostramos tours
-  // (evita flash del tour cuando el user ya lo vio en una sesion previa).
-  const visible = isHydrated && !alreadySeen;
+
+  const visible =
+    isHydrated &&
+    !alreadySeen &&
+    // Solo muestra si el componente se monto DESPUES del ultimo reset.
+    // Esto evita que los tours de pantallas ya montadas aparezcan todos
+    // de golpe al hacer "Ver tours de nuevo" desde Config.
+    mountedAt.current >= lastResetAt;
+
   const step = visible ? tour.steps[currentIndex] : null;
 
   const next = useCallback(() => {

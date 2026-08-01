@@ -40,6 +40,7 @@ import {
   Badge,
   type BadgeVariant,
   CoachMarkTour,
+  HomeTopBar,
   ScreenTopBar,
   Toggle,
 } from "../components";
@@ -115,6 +116,8 @@ function matchPctPara(
   return Number.isFinite(n) ? Math.round(n) : null;
 }
 
+type NivelFiltro = "todas" | "identica" | "cercana" | "opuesta";
+
 export function CompararScreen({
   navigation,
 }: RootStackScreenProps<"Comparar">) {
@@ -123,7 +126,7 @@ export function CompararScreen({
   const [candidatoA, setCandidatoA] = useState<Candidato | null>(null);
   const [candidatoB, setCandidatoB] = useState<Candidato | null>(null);
   const [pickerOpen, setPickerOpen] = useState<Slot | null>(null);
-  const [soloDiferencias, setSoloDiferencias] = useState(false);
+  const [nivelFiltro, setNivelFiltro] = useState<NivelFiltro>("todas");
 
   const candidatosQ = useCandidatos();
   const candidatos = candidatosQ.data ?? [];
@@ -147,14 +150,14 @@ export function CompararScreen({
   }, [candidatoA, candidatoB, posturasAQ.data, posturasBQ.data]);
 
   const grupos = useMemo(() => {
-    if (!soloDiferencias) return gruposCompletos;
+    if (nivelFiltro === "todas") return gruposCompletos;
     return gruposCompletos
       .map((g) => ({
         ...g,
-        items: g.items.filter((it) => it.nivel !== "identica"),
+        items: g.items.filter((it) => it.nivel === nivelFiltro),
       }))
       .filter((g) => g.items.length > 0);
-  }, [gruposCompletos, soloDiferencias]);
+  }, [gruposCompletos, nivelFiltro]);
 
   const resumen = useMemo(
     () => calcularResumen(gruposCompletos),
@@ -180,10 +183,7 @@ export function CompararScreen({
         stickyHeaderIndices={[0]}
       >
         <View style={[styles.stickyHead, { backgroundColor: c.bg }]}>
-          <ScreenTopBar
-            title="Comparar candidatos"
-            subtitle={eleccionNombre}
-          />
+          <HomeTopBar brand="Comparar" style={styles.topBar} />
 
           <View style={[styles.candHeader, { backgroundColor: c.card }]}>
             <View style={styles.leftGutter} />
@@ -203,15 +203,41 @@ export function CompararScreen({
           </View>
 
           <View style={styles.toggleRow}>
-            <Text style={[styles.toggleLabel, { color: c.text }]}>
-              Solo mostrar diferencias
-            </Text>
-            <Toggle
-              value={soloDiferencias}
-              onPress={() => setSoloDiferencias((v) => !v)}
-              accessibilityLabel="Filtrar solo diferencias"
-              disabled={!ambosSeleccionados}
-            />
+            {([
+              { value: "todas",    label: "Todas" },
+              { value: "identica", label: "= Identicas" },
+              { value: "cercana",  label: "~ Cercanas" },
+              { value: "opuesta",  label: "X Opuestas" },
+            ] as { value: NivelFiltro; label: string }[]).map((opt) => {
+              const active = nivelFiltro === opt.value;
+              return (
+                <Pressable
+                  key={opt.value}
+                  onPress={() =>
+                    setNivelFiltro(active && opt.value !== "todas" ? "todas" : opt.value)
+                  }
+                  disabled={!ambosSeleccionados}
+                  style={[
+                    styles.filterChip,
+                    { borderColor: c.border, backgroundColor: c.bg },
+                    active && { borderColor: c.primary, backgroundColor: c.primary },
+                    !ambosSeleccionados && { opacity: 0.4 },
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Filtrar: ${opt.label}`}
+                >
+                  <Text
+                    style={[
+                      styles.filterChipText,
+                      { color: c.textSecondary },
+                      active && { color: c.textOnPrimary },
+                    ]}
+                  >
+                    {opt.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </View>
         </View>
 
@@ -275,6 +301,7 @@ export function CompararScreen({
           pickerOpen === "A" ? "Elegir candidato A" : "Elegir candidato B"
         }
         candidatos={candidatos}
+        tiposEleccion={tiposQ.data ?? []}
         excluirId={pickerOpen === "A" ? candidatoB?.id : candidatoA?.id}
         onSelect={handleSelectPicker}
         onClose={() => setPickerOpen(null)}
@@ -414,6 +441,7 @@ const styles = StyleSheet.create({
   },
 
   stickyHead: { gap: spacing.sp2, paddingBottom: spacing.sp2 },
+  topBar: { marginHorizontal: spacing.sp4, marginTop: spacing.sp3 },
 
   candHeader: {
     flexDirection: "row",

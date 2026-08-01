@@ -298,14 +298,11 @@ export function CandidatosScreen({
    */
   const listHeader = (
     <View>
-      <HomeTopBar brand="Candidatos" style={styles.topBar} />
-
-      <View style={styles.headerRow}>
-        <Text style={[styles.h1, { color: c.text }]}>Candidatos</Text>
-        <Text style={[styles.contador, { color: c.textSecondary }]}>
-          {contadorLabel}
-        </Text>
-      </View>
+      <HomeTopBar
+        brand="Candidatos"
+        subtitle={contadorLabel}
+        style={styles.topBar}
+      />
 
       <View style={styles.filterBarWrap}>
         <ScrollView

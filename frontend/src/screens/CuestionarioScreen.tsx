@@ -124,16 +124,17 @@ export function CuestionarioScreen({
         // Footer sticky: siempre visible, nunca dentro del ScrollView.
         footer: {
           flexDirection: "row",
+          flexWrap: "wrap",
           gap: spacing.sp2,
           paddingHorizontal: spacing.sp4,
           paddingTop: spacing.sp3,
-          // safe-area bottom: respeta el home indicator de iPhone.
-          // Math.max garantiza padding minimo incluso en Android (insets.bottom = 0).
           paddingBottom: Math.max(insets.bottom, spacing.sp4),
           backgroundColor: c.bg,
         },
         backSlot: { flex: 1 },
         primarySlot: { flex: 2 },
+        // Boton de resultados parciales: ocupa ancho propio debajo del row principal.
+        partialSlot: { alignItems: "center", paddingTop: spacing.sp1 },
       }),
     [c, insets.bottom],
   );
@@ -163,6 +164,12 @@ export function CuestionarioScreen({
   // reemplazar por la particion real. Por ahora todo es "base".
   const totalPreguntas = preguntas.length;
   const respondidas = Object.keys(respuestas).length;
+
+  // Con 5 respuestas el backend ya puede calcular match (confianza BAJA).
+  // Permitimos enviar parcial sin forzar completar todo el cuestionario.
+  const MIN_PARA_RESULTADO = 5;
+  const puedeVerResultadosParciales =
+    !isGuest && respondidas >= MIN_PARA_RESULTADO && !isLast;
 
   const opcionesLikert = [
     ...opcionesRegulares
@@ -269,7 +276,7 @@ export function CuestionarioScreen({
       <View style={styles.footer}>
         <View style={styles.backSlot}>
           <Button variant="secondary" onPress={() => { prev(); scrollToTop(); }} disabled={isFirst}>
-            Atrás
+            Atras
           </Button>
         </View>
         <View style={styles.primarySlot}>
@@ -280,7 +287,7 @@ export function CuestionarioScreen({
               disabled={!canAdvance || submitting}
               loading={submitting}
             >
-              {submitting ? "Enviando…" : "Enviar"}
+              {submitting ? "Enviando..." : "Enviar"}
             </Button>
           ) : (
             <Button onPress={() => { next(); scrollToTop(); }} disabled={!canAdvance}>
@@ -288,6 +295,19 @@ export function CuestionarioScreen({
             </Button>
           )}
         </View>
+        {puedeVerResultadosParciales ? (
+          <View style={styles.partialSlot}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onPress={handleSubmit}
+              disabled={submitting}
+              loading={submitting}
+            >
+              Ver resultados ({respondidas})
+            </Button>
+          </View>
+        ) : null}
       </View>
       </View>
       </ScreenChrome>

@@ -47,7 +47,7 @@ def _disable_throttling(settings):
 
 @pytest.fixture
 def datos_pesados(db):
-    """Seed completo: territorio + presi + diputados + alcaldes + preguntas.
+    """Seed completo: territorio + presi + diputados + preguntas.
 
     Cada test paga ~10 seg de setup. A cambio: aislamiento total.
     """
@@ -55,5 +55,4 @@ def datos_pesados(db):
     call_command("seed_preguntas_base", verbosity=0)
     call_command("seed_presidenciales_2025", verbosity=0)
     call_command("seed_diputados_2025", verbosity=0)
-    call_command("seed_alcaldes_2024", verbosity=0)
     call_command("seed_preguntas_por_tipo", verbosity=0)

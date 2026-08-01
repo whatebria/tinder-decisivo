@@ -4,7 +4,6 @@ Complementa las 8 preguntas BASE (transversales). Cada tipo tiene 5 preguntas
 tematizadas al nivel/rol:
 - Presidencial: temas nacionales que solo el ejecutivo puede impulsar.
 - Diputados: temas de agenda legislativa.
-- Alcaldes: temas de gestion municipal.
 
 Cada partido tiene un mapping de posturas para cada set de preguntas.
 Los partidos no listados usan las posturas de "Independiente" como fallback.
@@ -148,72 +147,6 @@ PREGUNTAS_DIP_2025 = [
 ]
 
 # ============================================================================
-# ALCALDES 2024 - 5 preguntas
-# ============================================================================
-PREGUNTAS_ALC_2024 = [
-    {
-        "texto": "La comuna debe instalar mas camaras de vigilancia en el espacio publico.",
-        "eje": Pregunta.EJE_SEGURIDAD,
-        "explicacion": (
-            "Debate entre seguridad y privacidad ciudadana. Efectividad real "
-            "cuestionada pero muy demandado electoralmente."
-        ),
-        "repercusiones": {
-            "social": "Sensacion de seguridad vs privacidad.",
-            "economico": "Gasto municipal significativo.",
-        },
-    },
-    {
-        "texto": "La comuna debe priorizar ciclovias y transporte no motorizado por sobre estacionamientos.",
-        "eje": Pregunta.EJE_AMBIENTE,
-        "explicacion": (
-            "Movilidad sustentable vs cultura del auto. Impacta uso del espacio "
-            "publico, contaminacion y estilo de vida barrial."
-        ),
-        "repercusiones": {
-            "ambiental": "Reduce emisiones locales.",
-            "social": "Cambio cultural en habitos de transporte.",
-        },
-    },
-    {
-        "texto": "La comuna debe restringir permisos de construccion en zonas de alta densidad.",
-        "eje": Pregunta.EJE_INSTITUCIONAL,
-        "explicacion": (
-            "'Guettos verticales' vs necesidad de vivienda. Ordenamiento territorial "
-            "que balancea desarrollo economico y calidad de vida barrial."
-        ),
-        "repercusiones": {
-            "economico": "Afecta industria inmobiliaria y precios.",
-            "social": "Preserva o degrada tejido barrial.",
-        },
-    },
-    {
-        "texto": "La comuna debe aumentar presupuesto para programas sociales (adultos mayores, infancia).",
-        "eje": Pregunta.EJE_SOCIEDAD,
-        "explicacion": (
-            "Trade-off entre presupuesto en programas sociales vs infraestructura, "
-            "seguridad u obras publicas. Prioridad valorativa del municipio."
-        ),
-        "repercusiones": {
-            "social": "Impacto directo en grupos vulnerables.",
-            "economico": "Compite con otros gastos municipales.",
-        },
-    },
-    {
-        "texto": "La comuna debe implementar teletrabajo permanente para sus funcionarios municipales.",
-        "eje": Pregunta.EJE_INSTITUCIONAL,
-        "explicacion": (
-            "Modernizacion de la gestion publica local. Balance entre eficiencia, "
-            "atencion presencial al vecino y bienestar del funcionariado."
-        ),
-        "repercusiones": {
-            "social": "Calidad de atencion municipal al vecino.",
-            "institucional": "Modernizacion vs cercania.",
-        },
-    },
-]
-
-# ============================================================================
 # Posturas ESPECIFICAS por partido, por tipo.
 # Valores 1-5. None significa "usar fallback Independiente".
 # ============================================================================
@@ -221,91 +154,73 @@ POSTURAS_ESPECIFICAS = {
     "Partido Comunista": {
         "presi": [5, 1, 2, 4, 2],  # Nueva Const SI, no EEUU, no Defensa, BCCh SI, TLC no
         "dip":   [5, 5, 2, 5, 4],  # Eutanasia SI, no reduccion Congreso, financ publico, humedales, familias
-        "alc":   [3, 5, 5, 5, 3],  # No mas camaras, ciclovias, restringir construccion, social, teletrabajo
     },
     "Frente Amplio": {
         "presi": [5, 2, 2, 4, 3],
         "dip":   [5, 4, 5, 5, 5],
-        "alc":   [3, 5, 4, 5, 4],
     },
     "Convergencia Social": {
         "presi": [5, 2, 2, 4, 3],
         "dip":   [5, 4, 5, 5, 5],
-        "alc":   [3, 5, 4, 5, 4],
     },
     "Federacion Regionalista Verde": {
         "presi": [4, 3, 2, 4, 3],
         "dip":   [5, 4, 5, 5, 4],
-        "alc":   [3, 5, 5, 5, 4],
     },
     "Partido Socialista": {
         "presi": [4, 3, 3, 5, 4],
         "dip":   [5, 3, 4, 4, 3],
-        "alc":   [4, 4, 3, 4, 3],
     },
     "PPD": {
         "presi": [3, 3, 3, 5, 4],
         "dip":   [5, 3, 4, 4, 3],
-        "alc":   [4, 4, 3, 4, 3],
     },
     "Partido Radical": {
         "presi": [3, 3, 3, 5, 4],
         "dip":   [4, 3, 4, 4, 3],
-        "alc":   [4, 4, 3, 4, 3],
     },
     "Democracia Cristiana": {
         "presi": [3, 4, 3, 5, 4],
         "dip":   [2, 3, 4, 4, 2],
-        "alc":   [4, 3, 3, 4, 3],
     },
     "Amarillos por Chile": {
         "presi": [2, 4, 4, 5, 5],
         "dip":   [3, 4, 3, 3, 2],
-        "alc":   [4, 3, 3, 3, 3],
     },
     "Democratas": {
         "presi": [2, 4, 4, 5, 5],
         "dip":   [3, 4, 3, 3, 2],
-        "alc":   [4, 3, 3, 3, 3],
     },
     "Independiente": {
         "presi": [3, 3, 3, 4, 3],
         "dip":   [3, 3, 3, 3, 3],
-        "alc":   [3, 3, 3, 3, 3],
     },
     "Independiente Regional": {
         "presi": [3, 3, 3, 4, 3],
         "dip":   [3, 4, 3, 4, 3],
-        "alc":   [3, 4, 4, 4, 3],
     },
     "Partido de la Gente": {
         "presi": [2, 3, 3, 3, 3],
         "dip":   [3, 5, 3, 3, 2],
-        "alc":   [5, 3, 3, 3, 4],
     },
     "Evopoli": {
         "presi": [1, 4, 4, 5, 5],
         "dip":   [3, 4, 3, 3, 2],
-        "alc":   [4, 3, 2, 3, 4],
     },
     "Renovacion Nacional": {
         "presi": [1, 4, 4, 5, 5],
         "dip":   [2, 4, 2, 3, 2],
-        "alc":   [5, 2, 2, 3, 3],
     },
     "UDI": {
         "presi": [1, 5, 5, 5, 5],
         "dip":   [1, 5, 2, 2, 1],
-        "alc":   [5, 2, 2, 2, 3],
     },
     "Partido Republicano": {
         "presi": [1, 5, 5, 5, 5],
         "dip":   [1, 5, 2, 2, 1],
-        "alc":   [5, 2, 2, 2, 2],
     },
     "Partido Nacional Libertario": {
         "presi": [1, 5, 5, 5, 5],
         "dip":   [3, 5, 2, 2, 2],
-        "alc":   [5, 2, 2, 2, 2],
     },
 }

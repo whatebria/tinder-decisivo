@@ -16,12 +16,14 @@ import { useThemeColors, useThemeShadows } from "../../theme/useTheme";
 
 export interface HomeTopBarProps {
   brand: string;
+  /** Linea secundaria debajo del brand. Util para mostrar contador o contexto. */
+  subtitle?: string;
   /** Handler del botón de notificaciones. Si se omite, no se renderiza. */
   onNotifications?: () => void;
   style?: StyleProp<ViewStyle>;
 }
 
-export function HomeTopBar({ brand, onNotifications, style }: HomeTopBarProps) {
+export function HomeTopBar({ brand, subtitle, onNotifications, style }: HomeTopBarProps) {
   const c = useThemeColors();
   const shadows = useThemeShadows();
 
@@ -43,7 +45,7 @@ export function HomeTopBar({ brand, onNotifications, style }: HomeTopBarProps) {
         },
         brand: {
           flexDirection: "row",
-          alignItems: "center",
+          alignItems: subtitle ? "flex-start" : "center",
           gap: spacing.sp2,
           flex: 1,
         },
@@ -51,6 +53,16 @@ export function HomeTopBar({ brand, onNotifications, style }: HomeTopBarProps) {
           fontSize: 16,
           fontWeight: "700",
           color: c.text,
+        },
+        brandSubtitle: {
+          fontSize: 12,
+          fontWeight: "500",
+          color: c.textSecondary,
+          marginTop: 1,
+        },
+        brandTextBlock: {
+          flexDirection: "column",
+          flex: 1,
         },
         iconBtn: {
           width: 40,
@@ -64,14 +76,21 @@ export function HomeTopBar({ brand, onNotifications, style }: HomeTopBarProps) {
           backgroundColor: c.border2,
         },
       }),
-    [c, shadows],
+    [c, shadows, subtitle],
   );
 
   return (
     <View style={[styles.bar, style]} accessibilityRole="header">
       <View style={styles.brand}>
         <AppIcon size={22} />
-        <Text style={styles.brandText}>{brand}</Text>
+        <View style={styles.brandTextBlock}>
+          <Text style={styles.brandText}>{brand}</Text>
+          {subtitle ? (
+            <Text style={styles.brandSubtitle} numberOfLines={1}>
+              {subtitle}
+            </Text>
+          ) : null}
+        </View>
       </View>
       {onNotifications ? (
         <Pressable

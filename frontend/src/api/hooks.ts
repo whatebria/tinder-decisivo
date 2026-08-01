@@ -179,7 +179,18 @@ export function useMatchesQuery(tipoEleccionId: number | null | undefined) {
   const isAuth = useAuthStore((s) => s.isAuthenticated);
   return useQuery<MatchResult[]>({
     queryKey: queryKeys.matches(tipoEleccionId),
-    queryFn: () => matchCandidatos(tipoEleccionId as number),
+    queryFn: async () => {
+      try {
+        return await matchCandidatos(tipoEleccionId as number);
+      } catch (err) {
+        // 400 = el backend responde "no hay respuestas registradas todavia".
+        // Es un estado valido (el user no hizo el cuestionario aun),
+        // no un error que deba propagarse. Retornamos lista vacia.
+        const status = (err as { response?: { status?: number } })?.response?.status;
+        if (status === 400) return [];
+        throw err;
+      }
+    },
     enabled: tipoEleccionId != null && isAuth,
     staleTime: 60_000,
     retry: 0,

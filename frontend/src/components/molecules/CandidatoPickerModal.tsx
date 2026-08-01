@@ -2,17 +2,29 @@
  * Modal para elegir un candidato de una lista. Usado por el comparador.
  * Client-side: no fetchea, recibe la lista via props.
  *
- * Refactor: usa <Modal> molecule base. El boton "Cerrar" del footer se
- * elimina porque el Modal base ya trae la X en el header (evita redundancia).
+ * Filtros disponibles:
+ *   - Busqueda de texto (nombre / partido)
+ *   - Tipo de eleccion (chips horizontales, single-select)
+ *
+ * El filtro de eleccion es opcional: si `tiposEleccion` no se pasa o esta
+ * vacio, la seccion no se renderiza.
  */
 
 import React, { useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
-import type { Candidato } from "../../api/endpoints";
+import type { Candidato, TipoEleccion } from "../../api/endpoints";
 import { Modal } from "./Modal";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
+import { typography } from "../../theme/typography";
 import { useThemeColors } from "../../theme/useTheme";
 import { nombreCompleto } from "../../utils/candidato";
 
@@ -20,6 +32,8 @@ interface Props {
   visible: boolean;
   title?: string;
   candidatos: Candidato[];
+  /** Tipos de eleccion disponibles para filtrar. Si esta vacio, no se muestra el filtro. */
+  tiposEleccion?: TipoEleccion[];
   /** Candidato ya elegido en OTRO slot (se filtra para evitar A === B). */
   excluirId?: number | null;
   onSelect: (candidato: Candidato) => void;
@@ -30,24 +44,32 @@ export function CandidatoPickerModal({
   visible,
   title = "Elegir candidato",
   candidatos,
+  tiposEleccion = [],
   excluirId,
   onSelect,
   onClose,
 }: Props) {
   const c = useThemeColors();
   const [query, setQuery] = useState("");
+  const [tipoSel, setTipoSel] = useState<number | null>(null);
 
   const filtrados = useMemo(() => {
     const q = query.trim().toLowerCase();
     return candidatos.filter((cand) => {
       if (cand.id == null) return false;
       if (excluirId != null && cand.id === excluirId) return false;
+      if (
+        tipoSel !== null &&
+        !(cand.tipos_eleccion ?? []).includes(tipoSel)
+      ) {
+        return false;
+      }
       if (!q) return true;
       const nombre = nombreCompleto(cand).toLowerCase();
       const partido = (cand.partido ?? "").toLowerCase();
       return nombre.includes(q) || partido.includes(q);
     });
-  }, [candidatos, query, excluirId]);
+  }, [candidatos, query, excluirId, tipoSel]);
 
   const styles = useMemo(
     () =>
@@ -62,6 +84,37 @@ export function CandidatoPickerModal({
           borderColor: c.border,
           color: c.text,
           marginBottom: spacing.sp3,
+        },
+        filterLabel: {
+          ...typography.overline,
+          fontWeight: "700",
+          color: c.textSecondary,
+          marginBottom: spacing.sp2,
+        },
+        chipsRow: {
+          gap: spacing.sp2,
+          paddingBottom: spacing.sp3,
+          alignItems: "center",
+        },
+        chip: {
+          paddingVertical: spacing.sp1,
+          paddingHorizontal: spacing.sp3,
+          borderRadius: radii.rFull,
+          borderWidth: 1,
+          borderColor: c.border,
+          backgroundColor: c.bg,
+        },
+        chipActive: {
+          borderColor: c.primary,
+          backgroundColor: c.primary,
+        },
+        chipText: {
+          fontSize: 13,
+          fontWeight: "500",
+          color: c.textSecondary,
+        },
+        chipTextActive: {
+          color: c.textOnPrimary,
         },
         emptyText: {
           color: c.textSecondary,
@@ -94,6 +147,7 @@ export function CandidatoPickerModal({
   function handleSelect(cand: Candidato) {
     onSelect(cand);
     setQuery("");
+    setTipoSel(null);
   }
 
   return (
@@ -106,6 +160,48 @@ export function CandidatoPickerModal({
         style={styles.search}
         accessibilityLabel="Buscar candidato"
       />
+
+      {tiposEleccion.length > 0 ? (
+        <>
+          <Text style={styles.filterLabel}>Tipo de eleccion</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.chipsRow}
+          >
+            <Pressable
+              onPress={() => setTipoSel(null)}
+              style={[styles.chip, tipoSel === null && styles.chipActive]}
+              accessibilityRole="button"
+              accessibilityLabel="Todas las elecciones"
+            >
+              <Text style={[styles.chipText, tipoSel === null && styles.chipTextActive]}>
+                Todas
+              </Text>
+            </Pressable>
+            {tiposEleccion
+              .filter((t) => t.id != null)
+              .map((t) => (
+                <Pressable
+                  key={t.id}
+                  onPress={() => setTipoSel(tipoSel === t.id ? null : t.id!)}
+                  style={[styles.chip, tipoSel === t.id && styles.chipActive]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Filtrar por ${t.nombre}`}
+                >
+                  <Text
+                    style={[
+                      styles.chipText,
+                      tipoSel === t.id && styles.chipTextActive,
+                    ]}
+                  >
+                    {t.nombre}
+                  </Text>
+                </Pressable>
+              ))}
+          </ScrollView>
+        </>
+      ) : null}
 
       {filtrados.length === 0 ? (
         <Text style={styles.emptyText}>No hay candidatos que coincidan.</Text>

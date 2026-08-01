@@ -10,7 +10,6 @@ ARCHIVOS = [
     ("preguntas_presidencial_2025.csv", "Presidencial 2025", 17),
     ("preguntas_diputados_2025.csv", "Diputados 2025", 15),
     ("preguntas_senadores_2025.csv", "Senadores 2025", 15),
-    ("preguntas_alcaldes_2024.csv", "Alcaldes 2024", 17),
 ]
 
 # Palabras "cargadas" que sesgan hacia intervencionismo/estatismo o hacia mercado
@@ -38,7 +37,7 @@ for archivo, tipo_esperado, count_esperado in ARCHIVOS:
     todas_preguntas.extend(rows)
 
 print(f"\n=== TOTALES ===")
-print(f"Preguntas totales: {len(todas_preguntas)} (esperado 81)")
+print(f"Preguntas totales: {len(todas_preguntas)} (esperado 64)")
 
 # Distribucion por eje (por archivo)
 print(f"\n=== EJES POR ARCHIVO ===")

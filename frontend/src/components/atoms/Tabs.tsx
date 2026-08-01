@@ -1,9 +1,13 @@
 /**
  * Tabs: segmented control con contador opcional. Reactivo al tema.
+ *
+ * El prop `scrollable` envuelve los tabs en un ScrollView horizontal,
+ * util cuando los labels son largos o hay muchos items en pantallas
+ * pequenas (evita que queden cortados o fuera de pantalla).
  */
 
 import React, { useMemo } from "react";
-import { Pressable, StyleSheet, Text, View, type ViewStyle } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from "react-native";
 
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
@@ -20,6 +24,12 @@ export interface TabsProps<T extends string = string> {
   onChange: (v: T) => void;
   items: TabItem<T>[];
   style?: ViewStyle;
+  /**
+   * Si es `true`, los tabs se envuelven en un ScrollView horizontal.
+   * Util cuando el numero de tabs o la longitud de los labels puede
+   * superar el ancho disponible en pantallas pequenas.
+   */
+  scrollable?: boolean;
 }
 
 export function Tabs<T extends string = string>({
@@ -27,6 +37,7 @@ export function Tabs<T extends string = string>({
   onChange,
   items,
   style,
+  scrollable = false,
 }: TabsProps<T>) {
   const c = useThemeColors();
 
@@ -68,8 +79,8 @@ export function Tabs<T extends string = string>({
     [c]
   );
 
-  return (
-    <View style={[s.container, style]}>
+  const inner = (
+    <View style={[s.container, !scrollable && style]}>
       {items.map((it) => {
         const active = it.value === value;
         return (
@@ -77,13 +88,14 @@ export function Tabs<T extends string = string>({
             key={it.value}
             onPress={() => onChange(it.value)}
             accessibilityRole="tab"
-            accessibilityState={{ selected: active }}
             style={[s.tab, active && s.tabActive]}
           >
             <Text style={[s.label, active && s.labelActive]}>{it.label}</Text>
             {typeof it.count === "number" ? (
               <View style={[s.count, active && s.countActive]}>
-                <Text style={[s.countText, active && s.countTextActive]}>{it.count}</Text>
+                <Text style={[s.countText, active && s.countTextActive]}>
+                  {it.count}
+                </Text>
               </View>
             ) : null}
           </Pressable>
@@ -91,4 +103,19 @@ export function Tabs<T extends string = string>({
       })}
     </View>
   );
+
+  if (scrollable) {
+    return (
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={style}
+        contentContainerStyle={{ flexGrow: 0 }}
+      >
+        {inner}
+      </ScrollView>
+    );
+  }
+
+  return inner;
 }

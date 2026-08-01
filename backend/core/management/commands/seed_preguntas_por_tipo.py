@@ -1,10 +1,9 @@
 """
 Seed idempotente de PREGUNTAS ESPECIFICAS por tipo de eleccion.
 
-Crea 5 preguntas para cada uno de los 3 tipos electorales:
+Crea 5 preguntas para cada uno de los 2 tipos electorales:
 - Presidencial 2025
 - Diputados 2025
-- Alcaldes 2024
 
 Y genera posturas para todos los candidatos ya sembrados usando el mapping
 partido -> posturas del modulo _preguntas_por_tipo.
@@ -13,7 +12,7 @@ Uso:
     uv run python manage.py seed_preguntas_por_tipo
     uv run python manage.py seed_preguntas_por_tipo --reset
 
-Requiere: seed_presidenciales_2025, seed_diputados_2025, seed_alcaldes_2024.
+Requiere: seed_presidenciales_2025, seed_diputados_2025.
 """
 
 from django.core.management.base import BaseCommand
@@ -28,7 +27,6 @@ from core.models import (
 
 from ._preguntas_por_tipo import (
     POSTURAS_ESPECIFICAS,
-    PREGUNTAS_ALC_2024,
     PREGUNTAS_DIP_2025,
     PREGUNTAS_PRESI_2025,
 )
@@ -37,7 +35,6 @@ from ._preguntas_por_tipo import (
 SETS = [
     ("Presidencial 2025", PREGUNTAS_PRESI_2025, "presi"),
     ("Diputados 2025",    PREGUNTAS_DIP_2025,   "dip"),
-    ("Alcaldes 2024",     PREGUNTAS_ALC_2024,   "alc"),
 ]
 
 # Opciones 1-5 (mismas que el resto del cuestionario).

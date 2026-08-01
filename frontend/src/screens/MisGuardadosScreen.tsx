@@ -414,6 +414,7 @@ export function MisGuardadosScreen({
         </View>
 
         <Tabs<GuardadoTab>
+          scrollable
           items={[
             { value: "favoritos", label: "Favoritos", count: favoritos.length },
             { value: "descartados", label: "Descartados", count: descartados.length },
