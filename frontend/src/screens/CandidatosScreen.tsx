@@ -248,15 +248,21 @@ export function CandidatosScreen({
 
   // -- Handlers cards ---------------------------------------------------
 
-  const openDetalle = (cand: Candidato) => {
-    const matchPct = matchByCandidato.get(cand.id) ?? null;
-    navigation.navigate("DetalleCandidato", {
-      candidatoId: cand.id,
-      breakdown: null,
-      matchPct,
-      confianza: null,
-    });
-  };
+  // Memoizado con sus dependencias reales para evitar stale closure.
+  // Sin esto, si navigation cambia (re-mount del container), las cards
+  // ya renderizadas por FlatList navegan con la instancia vieja. (BUG-013)
+  const openDetalle = useCallback(
+    (cand: Candidato) => {
+      const matchPct = matchByCandidato.get(cand.id) ?? null;
+      navigation.navigate("DetalleCandidato", {
+        candidatoId: cand.id,
+        breakdown: null,
+        matchPct,
+        confianza: null,
+      });
+    },
+    [matchByCandidato, navigation],
+  );
 
   // -- FlatList helpers -------------------------------------------------
 
@@ -276,8 +282,7 @@ export function CandidatosScreen({
         onPress={() => openDetalle(cand)}
       />
     ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [matchByCandidato],
+    [matchByCandidato, openDetalle], // deps completas — sin eslint-disable (BUG-014)
   );
 
   const keyExtractor = useCallback(
