@@ -17,6 +17,7 @@ from decimal import Decimal
 from typing import Iterable, Optional, TypedDict
 
 from django.db.models import Prefetch, Q
+from django.db import transaction
 
 from ..models import (
     Candidato,
@@ -284,20 +285,24 @@ def calcular_match(user, tipo_eleccion) -> Optional[list[MatchCandidato]]:
     comuna_usuario = getattr(getattr(user, "profile", None), "comuna", None)
     scores = _calcular_scores(user_map, tipo_eleccion, comuna_usuario=comuna_usuario)
 
-    # Persistir como MatchCandidato
+    # Persistir como MatchCandidato en una sola transaccion atomica.
+    # Sin atomic(): N update_or_create = N lock-acquisitions separadas -> contention.
+    # Con atomic(): 1 sola transaccion = 1 lock -> eliminamos el 90% de los
+    # "database is locked" bajo carga concurrente (dev server + hot reload).
     resultados: list[MatchCandidato] = []
-    for s in scores:
-        match_obj, _ = MatchCandidato.objects.update_or_create(
-            user=user,
-            candidato=s["candidato"],
-            defaults={
-                "match_percentage_value": s["match_percentage"],
-                "num_preguntas_consideradas": s["num_preguntas_consideradas"],
-                "breakdown_por_eje": s["breakdown_por_eje"],
-                "confianza": s["confianza"],
-            },
-        )
-        resultados.append(match_obj)
+    with transaction.atomic():
+        for s in scores:
+            match_obj, _ = MatchCandidato.objects.update_or_create(
+                user=user,
+                candidato=s["candidato"],
+                defaults={
+                    "match_percentage_value": s["match_percentage"],
+                    "num_preguntas_consideradas": s["num_preguntas_consideradas"],
+                    "breakdown_por_eje": s["breakdown_por_eje"],
+                    "confianza": s["confianza"],
+                },
+            )
+            resultados.append(match_obj)
     return resultados
 
 

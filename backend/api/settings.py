@@ -99,10 +99,22 @@ WSGI_APPLICATION = "api.wsgi.application"
 DATABASES = {
     "default": dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,          # reusa conexiones 10 min (irrelevante para SQLite)
-        conn_health_checks=True,   # ping antes de usar conexion reciclada
+        # SQLite: conn_max_age=0 (no reusar conexiones). Conexiones persistentes
+        # multiples en SQLite compiten por el write-lock -> OperationalError: database is locked.
+        # Postgres: ajustar a 600 via DATABASE_URL cuando se migre.
+        conn_max_age=0,
+        conn_health_checks=True,
     )
 }
+
+# SQLite: opciones adicionales de concurrencia.
+# timeout=20: espera hasta 20s al write-lock antes de OperationalError
+# (default SQLite = 5s, insuficiente bajo carga leve de dev).
+# WAL mode se activa via signal connection_created en core/apps.py:
+# permite reads concurrentes sin bloquear escrituras.
+if DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
+    DATABASES["default"].setdefault("OPTIONS", {})
+    DATABASES["default"]["OPTIONS"]["timeout"] = 20
 
 
 # ------------------------------------------------------------
