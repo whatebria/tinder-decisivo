@@ -415,26 +415,40 @@ export function useFavoritos(opts?: { enabled?: boolean }) {
  * Toggle idempotente: si el candidato ya es favorito, lo saca. Sino, lo agrega.
  * BUG-039: antes de agregar a favoritos, limpia el estado de descartado si existe
  * (los dos estados son mutuamente excluyentes por definicion de producto).
+ * BUG-045: mutationFn retorna el nuevo estado calculado para que onSuccess
+ * actualice el cache con setQueryData sin esperar un refetch extra.
  */
+type ToggleFavResult = {
+  favoritos: CandidatoFavorito[];
+  descartados: CandidatoDescartado[];
+};
 export function useToggleFavorito() {
   const qc = useQueryClient();
-  return useMutation<void, Error, number>({
-    mutationFn: async (candidatoId: number) => {
+  return useMutation<ToggleFavResult, Error, number>({
+    mutationFn: async (candidatoId: number): Promise<ToggleFavResult> => {
       const favoritos = qc.getQueryData<CandidatoFavorito[]>(queryKeys.favoritos) ?? [];
+      const descartados = qc.getQueryData<CandidatoDescartado[]>(queryKeys.descartados) ?? [];
       const existing = favoritos.find((f) => f.candidato === candidatoId);
       if (existing) {
         await deleteFavorito(existing.id!);
-      } else {
-        // BUG-039: limpiar descartado si existe antes de agregar a favoritos.
-        const descartados = qc.getQueryData<CandidatoDescartado[]>(queryKeys.descartados) ?? [];
-        const descartado = descartados.find((d) => d.candidato === candidatoId);
-        if (descartado) await deleteDescartado(descartado.id!);
-        await addFavorito(candidatoId);
+        return {
+          favoritos: favoritos.filter((f) => f.candidato !== candidatoId),
+          descartados,
+        };
       }
+      // BUG-039: limpiar descartado si existe antes de agregar a favoritos.
+      const descartado = descartados.find((d) => d.candidato === candidatoId);
+      if (descartado) await deleteDescartado(descartado.id!);
+      const nuevo = await addFavorito(candidatoId);
+      return {
+        favoritos: [...favoritos.filter((f) => f.candidato !== candidatoId), nuevo],
+        descartados: descartados.filter((d) => d.candidato !== candidatoId),
+      };
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.favoritos });
-      qc.invalidateQueries({ queryKey: queryKeys.descartados });
+    onSuccess: (result) => {
+      // BUG-045: setQueryData es inmediato, no necesita refetch extra.
+      qc.setQueryData(queryKeys.favoritos, result.favoritos);
+      qc.setQueryData(queryKeys.descartados, result.descartados);
     },
   });
 }
@@ -450,26 +464,38 @@ export function useDescartados(opts?: { enabled?: boolean }) {
   });
 }
 
+// BUG-045: mismo patron que useToggleFavorito -- retorna nuevo estado para setQueryData.
+type ToggleDescResult = {
+  favoritos: CandidatoFavorito[];
+  descartados: CandidatoDescartado[];
+};
 export function useToggleDescartado() {
   const qc = useQueryClient();
-  return useMutation<void, Error, number>({
-    mutationFn: async (candidatoId: number) => {
-      const descartados =
-        qc.getQueryData<CandidatoDescartado[]>(queryKeys.descartados) ?? [];
+  return useMutation<ToggleDescResult, Error, number>({
+    mutationFn: async (candidatoId: number): Promise<ToggleDescResult> => {
+      const descartados = qc.getQueryData<CandidatoDescartado[]>(queryKeys.descartados) ?? [];
+      const favoritos = qc.getQueryData<CandidatoFavorito[]>(queryKeys.favoritos) ?? [];
       const existing = descartados.find((d) => d.candidato === candidatoId);
       if (existing) {
         await deleteDescartado(existing.id!);
-      } else {
-        // BUG-039: limpiar favorito si existe antes de agregar a descartados.
-        const favoritos = qc.getQueryData<CandidatoFavorito[]>(queryKeys.favoritos) ?? [];
-        const favorito = favoritos.find((f) => f.candidato === candidatoId);
-        if (favorito) await deleteFavorito(favorito.id!);
-        await addDescartado(candidatoId);
+        return {
+          favoritos,
+          descartados: descartados.filter((d) => d.candidato !== candidatoId),
+        };
       }
+      // BUG-039: limpiar favorito si existe antes de agregar a descartados.
+      const favorito = favoritos.find((f) => f.candidato === candidatoId);
+      if (favorito) await deleteFavorito(favorito.id!);
+      const nuevo = await addDescartado(candidatoId);
+      return {
+        favoritos: favoritos.filter((f) => f.candidato !== candidatoId),
+        descartados: [...descartados.filter((d) => d.candidato !== candidatoId), nuevo],
+      };
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.favoritos });
-      qc.invalidateQueries({ queryKey: queryKeys.descartados });
+    onSuccess: (result) => {
+      // BUG-045: setQueryData es inmediato, no necesita refetch extra.
+      qc.setQueryData(queryKeys.favoritos, result.favoritos);
+      qc.setQueryData(queryKeys.descartados, result.descartados);
     },
   });
 }
