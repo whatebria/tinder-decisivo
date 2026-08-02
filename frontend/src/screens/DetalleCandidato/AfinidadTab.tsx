@@ -5,9 +5,11 @@
  * Antes estaba embebido en ResumenTab como bloques secundarios.
  *
  * Muestra (en orden):
- *   1. Resumen global: match% + numero de preguntas consideradas (opcional)
- *   2. RadarChart: afinidad por eje tematico (si hay >= 3 ejes)
- *   3. MatchExplanation: detalle dimension a dimension (solo autenticados)
+ *   1. RadarChart: afinidad por eje tematico (si hay >= 3 ejes)
+ *   2. MatchExplanation: detalle dimension a dimension (solo autenticados)
+ *
+ * UX-068: el porcentaje global se omite aqui porque ya aparece en el hero
+ * (ProfileHero). El tab empieza directo en el contenido de valor.
  *
  * Co-located con DetalleCandidatoScreen en screens/DetalleCandidato/.
  * Sin estado propio: todos los datos llegan por props.
@@ -21,7 +23,6 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { MatchExplanation, RadarChart } from "../../components";
-import { formatMatchPercentage } from "../../services/matching";
 import { spacing } from "../../theme/spacing";
 import { typography } from "../../theme/typography";
 import { useThemeColors } from "../../theme/useTheme";
@@ -36,8 +37,6 @@ export interface AfinidadTabProps {
   chartData: Record<string, number>;
   /** Color del match (verde/amarillo/rojo segun porcentaje). */
   scoreCol: string;
-  /** Porcentaje de match global (0-100). */
-  matchPct: number;
   /** El usuario NO es guest: puede ver MatchExplanation. */
   isAuthenticated: boolean;
 }
@@ -46,7 +45,6 @@ export function AfinidadTab({
   candidatoId,
   chartData,
   scoreCol,
-  matchPct,
   isAuthenticated,
 }: AfinidadTabProps) {
   const c = useThemeColors();
@@ -54,24 +52,7 @@ export function AfinidadTab({
 
   return (
     <View style={styles.tabBody}>
-      {/* 1. Resumen global del match */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionLabel, { color: c.textSecondary }]}>
-          Afinidad global
-        </Text>
-        <Text
-          style={[styles.matchPct, { color: scoreCol }]}
-          accessibilityLabel={`Afinidad con este candidato: ${formatMatchPercentage(matchPct)} por ciento`}
-          accessibilityRole="text"
-        >
-          {formatMatchPercentage(matchPct)}%
-        </Text>
-        <Text style={[styles.matchSub, { color: c.textSecondary }]}>
-          Basado en tus respuestas y las posiciones del candidato
-        </Text>
-      </View>
-
-      {/* 2. Radar chart por eje */}
+      {/* 1. Radar chart por eje */}
       {hasRadar ? (
         <View style={styles.section}>
           <Text style={[styles.sectionLabel, { color: c.textSecondary }]}>
@@ -103,12 +84,6 @@ const styles = StyleSheet.create({
     ...typography.overline,
     fontWeight: "700",
   },
-  matchPct: {
-    fontSize: 48,
-    fontWeight: "800",
-    lineHeight: 56,
-  },
-  matchSub: { ...typography.small },
   radarWrap: {
     alignItems: "center",
     paddingVertical: spacing.sp2,

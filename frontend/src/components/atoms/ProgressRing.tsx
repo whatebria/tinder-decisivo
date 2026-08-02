@@ -37,7 +37,10 @@ export interface ProgressRingProps {
   label?: string;
   /** Sub-label debajo del label (ej. "listo"). Solo en size="hero". */
   sublabel?: string;
-  /** Si true, fuerza el icono check (estado done). */
+  /** Color del texto del label central. Default: c.textOnPrimary.
+   * Pasar un color explícito cuando el fondo del contenedor es fijo
+   * (ej: hero sempre #1C3A52 → pasar "#FFFFFF" para WCAG AA en dark mode). */
+  labelColor?: string;
   showCheck?: boolean;
   /** Color del stroke cuando state="done". Default: c.success. */
   doneColor?: string;
@@ -67,6 +70,7 @@ export function ProgressRing({
   showCheck,
   doneColor,
   progressColor,
+  labelColor,
 }: ProgressRingProps) {
   const c = useThemeColors();
   const { dim, r, strokeWidth } = CONFIGS[size];
@@ -133,7 +137,7 @@ export function ProgressRing({
         ) : isHero && label ? (
           <View style={{ alignItems: "center" }}>
             <Text
-              style={{ fontSize: 15, fontWeight: "900", color: c.textOnPrimary, lineHeight: 18 }}
+              style={{ fontSize: 15, fontWeight: "900", color: labelColor ?? c.textOnPrimary, lineHeight: 18 }}
             >
               {label}
             </Text>

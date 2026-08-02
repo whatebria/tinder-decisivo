@@ -240,6 +240,7 @@ export function HomeHeroSection({
             sublabel="listo"
             progressColor={c.brandAccent}
             doneColor={c.brandAccent}
+            labelColor="#FFFFFF"
           />
         ) : null}
       </View>

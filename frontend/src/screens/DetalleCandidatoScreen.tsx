@@ -90,7 +90,9 @@ export function DetalleCandidatoScreen({
   const tipoEleccionId = useCuestionarioStore((s) => s.tipoEleccionId);
   const toast = useToast();
 
-  const [tab, setTab] = useState<PerfilTab>("resumen");
+  // UX-070: AfinidadTab es la tab por defecto cuando hay match.
+  // ResumenTab esta temporalmente oculta (pendiente rediseño + noticias).
+  const [tab, setTab] = useState<PerfilTab>(matchPct != null ? "afinidad" : "posturas");
   const [shareOpen, setShareOpen] = useState(false);
   const [confianzaInfoOpen, setConfianzaInfoOpen] = useState(false);
 
@@ -221,7 +223,9 @@ export function DetalleCandidatoScreen({
           value={tab}
           onChange={setTab}
           items={[
-            { value: "resumen", label: "Resumen" },
+            // UX-070: ResumenTab oculta hasta rediseño + noticias.
+            // Reactivar quitando el comentario. Ver UX-067.
+            // { value: "resumen", label: "Resumen" },
             { value: "posturas", label: "Posturas", count: posturas.length },
             // UX-059: tab Afinidad solo cuando hay match -- evita confusion
             // con pantalla vacia si el user no hizo el cuestionario.
@@ -248,7 +252,6 @@ export function DetalleCandidatoScreen({
             candidatoId={candidatoId}
             chartData={chartData}
             scoreCol={scoreCol}
-            matchPct={matchPct!}
             isAuthenticated={!isGuest}
           />
         ) : null}
