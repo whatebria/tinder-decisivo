@@ -10,7 +10,6 @@
  *   - Tabs (atom) con contadores
  *   - CandidatoPosturas (organism) en la tab Posturas
  *   - MatchExplanation (organism) en el resumen
- *   - NewsCard (molecule) en la tab Noticias
  *   - Modal (molecule) para el info modal de confianza
  *   - Button / IconButton / Icon / Chip / Spinner (atoms)
  *

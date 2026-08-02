@@ -54,7 +54,6 @@ import { useCuestionarioStore } from "../store/cuestionario";
 import { partitionTipos, useElectionsPrefsStore } from "../store/electionsPrefs";
 import { spacing } from "../theme/spacing";
 import { useThemeColors } from "../theme/useTheme";
-import { sanitizeSnippet } from "../utils/text";
 import { deriveInitials, deriveDisplayName } from "../utils/user";
 
 // -- Helpers ------------------------------------------------------------------
