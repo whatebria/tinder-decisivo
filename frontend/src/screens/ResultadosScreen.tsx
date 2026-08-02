@@ -313,8 +313,20 @@ export function ResultadosScreen({
           borderWidth: 1,
           gap: spacing.sp2,
         },
-        ubicacionTitle: { ...typography.small, fontWeight: "700" },
         ubicacionBody: { ...typography.overline, textTransform: "none", letterSpacing: 0, lineHeight: 18 },
+        // UX-071: banner compacto sin fondo pesado.
+        ubicacionBannerRow: {
+          flexDirection: "row",
+          alignItems: "flex-start",
+          gap: spacing.sp1,
+        },
+        ubicacionBannerText: {
+          ...typography.overline,
+          textTransform: "none",
+          letterSpacing: 0,
+          lineHeight: 18,
+          flex: 1,
+        },
         sectionLabel: {
           ...typography.overline,
           color: c.textSecondary,
@@ -464,23 +476,17 @@ export function ResultadosScreen({
           </View>
         ) : null}
 
+        {/* UX-071: banner compacto -- sin card pesada, solo icono + texto + link. */}
         {!isGuest && !comunaUsuario && requiereFiltro ? (
-          <View
-            style={[
-              styles.ubicacionCard,
-              { backgroundColor: withAlpha(c.warning, 0.09), borderColor: c.warning },
-            ]}
-          >
-            <Text style={[styles.ubicacionTitle, { color: c.text }]}>
-              Estas viendo TODOS los candidatos del pais
+          <View style={styles.ubicacionBannerRow}>
+            <Icon name="info" size={14} color={c.warning} />
+            <Text style={[styles.ubicacionBannerText, { color: c.textSecondary }]}>
+              Ves a todos los candidatos del país.{" "}
+              <Link onPress={() => navigation.navigate("Perfil")}>
+                Configura tu comuna
+              </Link>
+              {" "}para ver solo los de tu zona.
             </Text>
-            <Text style={[styles.ubicacionBody, { color: c.textSecondary }]}>
-              Setea tu comuna en Perfil y solo veras a quienes puedes votar
-              (alcaldes de tu comuna, diputados de tu distrito).
-            </Text>
-            <Link block onPress={() => navigation.navigate("Perfil")}>
-              Ir a configurar mi comuna
-            </Link>
           </View>
         ) : null}
 
