@@ -327,11 +327,16 @@ export function useUpdateRespuesta() {
 
 // -- Noticias feed global ---------------------------------------------------
 
-export function useNoticiasFeed(filters: NoticiaFeedFilters = {}) {
+// BUG-024: opts.enabled permite deshabilitar el fetch via feature flag (ej: SHOW_NOTICIAS=false).
+export function useNoticiasFeed(
+  filters: NoticiaFeedFilters = {},
+  opts?: { enabled?: boolean },
+) {
   return useQuery<Noticia[]>({
     queryKey: queryKeys.noticiasFeed(filters),
     queryFn: () => listNoticias(filters),
     staleTime: 60_000,
+    enabled: opts?.enabled ?? true,
   });
 }
 

@@ -20,7 +20,7 @@
  */
 
 import { SHOW_NOTICIAS } from "../constants/features";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 import type { BreakdownPorEje, MiProgresoItem, TipoEleccion } from "../api/endpoints";
@@ -37,6 +37,7 @@ import {
   CoachMarkTour,
   ConfirmModal,
   ElectionCardAdd,
+  EmptyState,
   HomeElectionItem,
   HomeHeroSection,
   HomeMatchLocked,
@@ -98,9 +99,11 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   const electionsActiveIds = useElectionsPrefsStore((s) => s.activeIds);
   const toast = useToast();
 
-  const { data: tipos = [], isLoading: tiposLoading, error } = useTiposEleccion();
+  const tiposQuery = useTiposEleccion();
+  const { data: tipos = [], isLoading: tiposLoading, error } = tiposQuery;
   const { data: progresoItems } = useMisElecciones();
-  const { data: noticias = [] } = useNoticiasFeed();
+  // BUG-024: deshabilitar el fetch cuando SHOW_NOTICIAS=false -- request desperdiciada.
+  const { data: noticias = [] } = useNoticiasFeed({}, { enabled: SHOW_NOTICIAS });
   const reiniciar = useReiniciarCuestionario();
 
   const [tipoAReiniciar, setTipoAReiniciar] = useState<TipoEleccion | null>(null);
@@ -148,21 +151,93 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
     return Math.min(p.respondidas / p.total_preguntas, 1);
   }, [isGuest, activeId, progresoByTipo]);
 
+  // TASK-050 + BUG-023: useCallback para estabilizar props y corregir stale closures.
+  // ORDEN IMPORTANTE: iniciarCuestionario antes de handleHeroCta (dependencia).
+  const iniciarCuestionario = useCallback(
+    async (tipo: TipoEleccion) => {
+      if (!tipo.id) return;
+      const progreso = progresoByTipo.get(tipo.id);
+      const yaCompleto = !isGuest && progreso?.completa === true;
+      try {
+        if (yaCompleto) {
+          await loadForTipoEleccion(tipo.id);
+          navigation.navigate("Resultados");
+          return;
+        }
+        await loadForTipoEleccion(tipo.id);
+        navigation.navigate("Cuestionario");
+      } catch (err) {
+        toast.error("No pudimos cargar las preguntas", getErrorMessage(err));
+      }
+    },
+    [loadForTipoEleccion, progresoByTipo, navigation, isGuest, toast],
+  );
+
+  const handleHeroCta = useCallback(() => {
+    if (mejoresMatches.length > 0) {
+      navigation.navigate("Resultados");
+      return;
+    }
+    const tipo = tiposActivos.find((t) => t.id === activeId) ?? tiposActivos[0];
+    if (tipo) void iniciarCuestionario(tipo);
+  }, [mejoresMatches.length, navigation, tiposActivos, activeId, iniciarCuestionario]);
+
+  const handleConfirmReiniciar = useCallback(async () => {
+    if (!tipoAReiniciar?.id) return;
+    try {
+      await reiniciar.mutateAsync(tipoAReiniciar.id);
+      toast.success("Cuestionario reiniciado");
+      setTipoAReiniciar(null);
+    } catch (err) {
+      toast.error("No pudimos reiniciar", getErrorMessage(err));
+    }
+  }, [reiniciar, tipoAReiniciar, toast]);
+
+  // Novedades: accion sugerida + noticias.
+  // BUG-023: iniciarCuestionario incluida en deps -- elimina el eslint-disable.
+  const novedades: NovedadFeedItem[] = useMemo(() => {
+    const items: NovedadFeedItem[] = [];
+    const tipoSinCuestionario = tiposActivos.find((t) => t.id && t.id !== activeId);
+    if (tipoSinCuestionario) {
+      items.push({
+        key: `action-${tipoSinCuestionario.id}`,
+        kind: "action",
+        icon: "bell",
+        title: `Responde el cuestionario de ${tipoSinCuestionario.nombre}`,
+        subtitle: "Descubre tu top match",
+        ctaLabel: "Ir",
+        onCta: () => void iniciarCuestionario(tipoSinCuestionario),
+      });
+    }
+    if (SHOW_NOTICIAS) {
+      noticias.slice(0, 4).forEach((n) => {
+        items.push({
+          key: `noticia-${n.id}`,
+          kind: "noticia",
+          imageUrl: n.imagen_url,
+          title: sanitizeSnippet(n.titulo),
+          snippet: sanitizeSnippet(n.descripcion),
+          category: n.fuente,
+          when: whenLabel(n.fecha_publicacion),
+          onPress: () =>
+            setSelectedNoticia(
+              noticiaToDetail(n, {
+                when: whenLabel(n.fecha_publicacion),
+                sentiment: "neutral",
+              }),
+            ),
+        });
+      });
+    }
+    return items;
+  }, [tiposActivos, activeId, noticias, iniciarCuestionario]);
+
   // CTA del hero segun estado global
   const heroCta = useMemo(() => {
     if (mejoresMatches.length > 0) return "Ver mis matches";
     if (heroProgress > 0) return "Continuar cuestionario";
     return "Empezar cuestionario";
   }, [mejoresMatches.length, heroProgress]);
-
-  function handleHeroCta() {
-    if (mejoresMatches.length > 0) {
-      navigation.navigate("Resultados");
-      return;
-    }
-    const tipo = tiposActivos.find((t) => t.id === activeId) ?? tiposActivos[0];
-    if (tipo) iniciarCuestionario(tipo);
-  }
 
   // Countdown: dias hasta la eleccion con fecha mas proxima
   const countdownDays = useMemo(() => {
@@ -189,74 +264,6 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   // Mostrar trust section solo para usuarios sin ningun cuestionario iniciado
   const showTrust = !isGuest && mejoresMatches.length === 0 && heroProgress === 0;
 
-  // Al tocar una card de eleccion
-  async function iniciarCuestionario(tipo: TipoEleccion) {
-    if (!tipo.id) return;
-    const progreso = progresoByTipo.get(tipo.id);
-    const yaCompleto = !isGuest && progreso?.completa === true;
-    try {
-      if (yaCompleto) {
-        await loadForTipoEleccion(tipo.id);
-        navigation.navigate("Resultados");
-        return;
-      }
-      await loadForTipoEleccion(tipo.id);
-      navigation.navigate("Cuestionario");
-    } catch (err) {
-      toast.error("No pudimos cargar las preguntas", getErrorMessage(err));
-    }
-  }
-
-  async function handleConfirmReiniciar() {
-    if (!tipoAReiniciar?.id) return;
-    try {
-      await reiniciar.mutateAsync(tipoAReiniciar.id);
-      toast.success("Cuestionario reiniciado");
-      setTipoAReiniciar(null);
-    } catch (err) {
-      toast.error("No pudimos reiniciar", getErrorMessage(err));
-    }
-  }
-
-  // Novedades: accion sugerida + noticias
-  const novedades: NovedadFeedItem[] = useMemo(() => {
-    const items: NovedadFeedItem[] = [];
-    const tipoSinCuestionario = tiposActivos.find((t) => t.id && t.id !== activeId);
-    if (tipoSinCuestionario) {
-      items.push({
-        key: `action-${tipoSinCuestionario.id}`,
-        kind: "action",
-        icon: "bell",
-        title: `Responde el cuestionario de ${tipoSinCuestionario.nombre}`,
-        subtitle: "Descubre tu top match",
-        ctaLabel: "Ir",
-        onCta: () => iniciarCuestionario(tipoSinCuestionario),
-      });
-    }
-    if (SHOW_NOTICIAS) {
-      noticias.slice(0, 4).forEach((n) => {
-        items.push({
-          key: `noticia-${n.id}`,
-          kind: "noticia",
-          imageUrl: n.imagen_url,
-          title: sanitizeSnippet(n.titulo),
-          snippet: sanitizeSnippet(n.descripcion),
-          category: n.fuente,
-          when: whenLabel(n.fecha_publicacion),
-          onPress: () =>
-            setSelectedNoticia(
-              noticiaToDetail(n, {
-                when: whenLabel(n.fecha_publicacion),
-                sentiment: "neutral",
-              }),
-            ),
-        });
-      });
-    }
-    return items;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tiposActivos, activeId, noticias]);
-
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -278,11 +285,28 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
     [c],
   );
 
-  if (tiposLoading) {
+  // BUG-025: separar carga de error -- spinner infinito cuando tiposLoading=true pero error != null.
+  if (tiposLoading && !error) {
     return (
       <AppShell active="home" navigation={navigation}>
         <View style={styles.loadingContainer}>
           <Spinner size="large" />
+        </View>
+      </AppShell>
+    );
+  }
+
+  if (error) {
+    return (
+      <AppShell active="home" navigation={navigation}>
+        <View style={styles.loadingContainer}>
+          <EmptyState
+            icon="info"
+            title="No pudimos cargar las elecciones"
+            description="Revisa tu conexion a internet e intenta de nuevo."
+            actionLabel="Intentar de nuevo"
+            onAction={() => { void tiposQuery.refetch(); }}
+          />
         </View>
       </AppShell>
     );
