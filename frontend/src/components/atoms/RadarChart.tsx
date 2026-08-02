@@ -32,6 +32,27 @@ const RADAR_RADIUS_RATIO_UNLABELED = 0.45;
 const RADAR_LABEL_OFFSET_PX        = 18;
 /** Opacidad del fill del polígono (suave, no sólido). */
 const RADAR_FILL_OPACITY           = 0.25;
+/** Longitud maxima de un label antes de truncar. */
+const RADAR_LABEL_MAX_CHARS        = 12;
+
+/**
+ * UX-061: resuelve el label de un eje con normalizacion defensiva.
+ *
+ * 1. Busca en EJE_LABELS (preferencia, tiene labels curados).
+ * 2. Si no encuentra, aplica sentence-case al raw key para evitar MAYUSCULAS.
+ * 3. Si el resultado supera RADAR_LABEL_MAX_CHARS, trunca con "..." para que
+ *    no salga del viewport SVG.
+ */
+function resolveEjeLabel(eje: string): string {
+  const curated = EJE_LABELS[eje];
+  if (curated) return curated;
+  // Fallback: sentence-case del raw key (ej. "MEDIO_AMBIENTE" -> "Medio ambiente")
+  const normalized = eje.charAt(0).toUpperCase() + eje.slice(1).toLowerCase().replace(/_/g, " ");
+  if (normalized.length > RADAR_LABEL_MAX_CHARS) {
+    return normalized.slice(0, RADAR_LABEL_MAX_CHARS - 1) + "\u2026"; // ellipsis
+  }
+  return normalized;
+}
 
 export interface RadarChartProps {
   data: Record<string, number>;
@@ -60,7 +81,7 @@ interface Point {
  */
 function buildA11yLabel(data: Record<string, number>): string {
   const ejes = Object.entries(data)
-    .map(([k, v]) => `${EJE_LABELS[k] ?? k}: ${Math.round(v)}%`)
+    .map(([k, v]) => `${resolveEjeLabel(k)}: ${Math.round(v)}%`)
     .join(", ");
   return `Grafico de afinidad por eje tematico. ${ejes}.`;
 }
@@ -141,7 +162,7 @@ export function RadarChart({
     ? ejes.map((eje, i) => {
         const angle = startAngle + i * step;
         const labelPos = polarToCartesian(cx, cy, radius + RADAR_LABEL_OFFSET_PX, angle);
-        const label = EJE_LABELS[eje] ?? eje;
+        const label = resolveEjeLabel(eje);
         return (
           <SvgText
             key={i}

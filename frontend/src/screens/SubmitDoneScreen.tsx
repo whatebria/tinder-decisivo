@@ -23,6 +23,7 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { Button, Heading, Link, ScreenChrome, useToast } from "../components";
 import { useTiposEleccion } from "../api/hooks";
+import { queryKeys } from "../api/queryClient";
 import { useElectionsPrefsStore } from "../store/electionsPrefs";
 import { partitionTipos } from "../store/electionsPrefs";
 import { useCuestionarioStore } from "../store/cuestionario";
@@ -30,6 +31,7 @@ import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
 import type { RootStackScreenProps } from "../navigation/types";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function SubmitDoneScreen({
   route,
@@ -38,6 +40,7 @@ export function SubmitDoneScreen({
   const mode = route.params?.mode ?? "eleccion";
   const c = useThemeColors();
   const toast = useToast();
+  const qc = useQueryClient();
   const reset = useCuestionarioStore((s) => s.reset);
   const setTipoEleccion = useCuestionarioStore((s) => s.setTipoEleccion);
   const loadForTipoEleccion = useCuestionarioStore((s) => s.loadForTipoEleccion);
@@ -58,9 +61,12 @@ export function SubmitDoneScreen({
 
   // TASK-059: handlers con useCallback para referencias estables.
   const handleVolver = useCallback(() => {
+    // UX-062: invalidar el progreso de elecciones para que el Home refleje
+    // el estado completado sin necesidad de que el user recargue la pantalla.
+    qc.invalidateQueries({ queryKey: queryKeys.miProgreso });
     reset();
     navigation.reset({ index: 0, routes: [{ name: "Home" }] });
-  }, [reset, navigation]);
+  }, [qc, reset, navigation]);
 
   const handleCtaEleccion = useCallback(() => {
     navigation.replace("Resultados");
