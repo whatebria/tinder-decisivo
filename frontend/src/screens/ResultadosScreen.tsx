@@ -15,7 +15,7 @@
  * En modo guest: POST /match-anonimo/ con respuestas locales (no persiste).
  */
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 
 import { getErrorMessage } from "../api/client";
@@ -203,18 +203,25 @@ export function ResultadosScreen({
     toast.error("No pudimos calcular tus matches", getErrorMessage(activeMutation.error));
   }, [activeMutation.error, toast]);
 
-  async function handleCtaTipoBase() {
-    if (primeraEspecificaActiva?.id != null) {
-      try {
+  // BUG-033: ctaLoading para prevenir doble-press durante el await.
+  const [ctaBaseLoading, setCtaBaseLoading] = useState(false);
+
+  // BUG-033: useCallback + loading state (mismo patron que BUG-029 en SubmitDoneScreen).
+  const handleCtaTipoBase = useCallback(async () => {
+    setCtaBaseLoading(true);
+    try {
+      if (primeraEspecificaActiva?.id != null) {
         setTipoEleccion(primeraEspecificaActiva.id);
         await loadForTipoEleccion(primeraEspecificaActiva.id);
-      } catch {
-        // Fail-safe: el proximo render intentara el match igual.
+      } else {
+        navigation.replace("GestionElecciones");
       }
-    } else {
-      navigation.replace("GestionElecciones");
+    } catch {
+      toast.error("No pudimos cargar los datos");
+    } finally {
+      setCtaBaseLoading(false);
     }
-  }
+  }, [primeraEspecificaActiva, setTipoEleccion, loadForTipoEleccion, navigation, toast]);
 
   function handleVolver() {
     reset();
@@ -361,7 +368,13 @@ export function ResultadosScreen({
               al match de todas las elecciones que actives. Cuanto mas contestes, mas
               precisos son tus matches especificos.
             </Text>
-            <Button onPress={handleCtaTipoBase}>{ctaLabel}</Button>
+            <Button
+              onPress={handleCtaTipoBase}
+              loading={ctaBaseLoading}
+              disabled={ctaBaseLoading}
+            >
+              {ctaLabel}
+            </Button>
             <Link block onPress={handleVolver}>
               Volver al inicio
             </Link>
