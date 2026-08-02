@@ -11,7 +11,7 @@
  * se oculta con aria-hidden.
  */
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { canShareNative, copyToClipboard, shareNative } from "../../services/share";
@@ -29,6 +29,32 @@ interface Props {
   text: string;
   onClose: () => void;
 }
+
+const styles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: spacing.sp4,
+  },
+  card: {
+    width: "100%",
+    padding: spacing.sp4,
+    gap: spacing.sp3,
+    borderRadius: radii.rLg,
+  },
+  title: { ...typography.h3, fontWeight: "700" },
+  subtitle: { ...typography.small },
+  previewBox: {
+    borderRadius: radii.rSm,
+    padding: spacing.sp3,
+    maxHeight: 240,
+    borderLeftWidth: 3,
+  },
+  previewText: { fontSize: 14, lineHeight: 20, fontFamily: "monospace" },
+  actions: { marginTop: spacing.sp2, gap: spacing.sp2 },
+});
 
 export function ShareModal({ visible, text, onClose }: Props) {
   const c = useThemeColors();
@@ -54,47 +80,6 @@ export function ShareModal({ visible, text, onClose }: Props) {
     if (ok) handleClose();
   }
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        backdrop: {
-          flex: 1,
-          backgroundColor: "rgba(0,0,0,0.5)",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: spacing.sp4,
-        },
-        card: {
-          backgroundColor: c.card,
-          borderRadius: radii.rLg,
-          width: "100%",
-          maxWidth: dims.maxWidth,
-          maxHeight: dims.maxHeight,
-          padding: spacing.sp4,
-          gap: spacing.sp3,
-          ...shadows.shLg,
-        },
-        title: { ...typography.h3, fontWeight: "700", color: c.text },
-        subtitle: { ...typography.small, color: c.textSecondary },
-        previewBox: {
-          backgroundColor: c.gray100,
-          borderRadius: radii.rSm,
-          padding: spacing.sp3,
-          maxHeight: 240,
-          borderLeftWidth: 3,
-          borderLeftColor: c.border,
-        },
-        previewText: {
-          fontSize: 14,
-          color: c.text,
-          lineHeight: 20,
-          fontFamily: "monospace",
-        },
-        actions: { marginTop: spacing.sp2, gap: spacing.sp2 },
-      }),
-    [c, shadows, dims],
-  );
-
   return (
     <Modal
       animationType="fade"
@@ -103,14 +88,20 @@ export function ShareModal({ visible, text, onClose }: Props) {
       onRequestClose={handleClose}
     >
       <Pressable style={styles.backdrop} onPress={handleClose}>
-        <Pressable style={styles.card} onPress={(e) => e.stopPropagation()}>
-          <Text style={styles.title}>Compartir mi ranking</Text>
-          <Text style={styles.subtitle}>
+        <Pressable
+          style={[
+            styles.card,
+            { backgroundColor: c.card, maxWidth: dims.maxWidth, maxHeight: dims.maxHeight, ...shadows.shLg },
+          ]}
+          onPress={(e) => e.stopPropagation()}
+        >
+          <Text style={[styles.title, { color: c.text }]}>Compartir mi ranking</Text>
+          <Text style={[styles.subtitle, { color: c.textSecondary }]}>
             Este es el texto que se va a compartir:
           </Text>
 
-          <ScrollView style={styles.previewBox}>
-            <Text style={styles.previewText}>{text}</Text>
+          <ScrollView style={[styles.previewBox, { backgroundColor: c.gray100, borderLeftColor: c.border }]}>
+            <Text style={[styles.previewText, { color: c.text }]}>{text}</Text>
           </ScrollView>
 
           <View style={styles.actions}>

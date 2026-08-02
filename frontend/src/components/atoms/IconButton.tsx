@@ -2,7 +2,7 @@
  * IconButton: pastilla circular con icono. 3 variantes + 3 tamanos. Reactivo al tema.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import {
   Pressable,
   StyleSheet,
@@ -32,6 +32,16 @@ const SIZES = {
   lg: { width: 48, height: 48 },
 } as const;
 
+const styles = StyleSheet.create({
+  base: {
+    borderRadius: radii.rFull,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  pressed: { opacity: 0.75, transform: [{ scale: 0.96 }] },
+  disabled: { opacity: 0.4 },
+});
+
 export function IconButton({
   children,
   variant = "soft",
@@ -46,28 +56,13 @@ export function IconButton({
   // en web (comun en botones de cerrar modal). Ver hooks/useBlurringPress.
   const handlePress = useBlurringPress(onPress);
 
-  const styles = useMemo(() => {
-    const VARIANTS = {
-      soft:         { backgroundColor: c.accent2 },
-      ghost:        { backgroundColor: "transparent" },
-      solid:        { backgroundColor: c.primary },
-      // UX-040: variante destructiva — fondo danger (rojo) para estado activo
-      // de descartar. El azul de "solid" comunica positivo; rojo comunica
-      // descarte activo correctamente.
-      "danger-solid": { backgroundColor: c.danger },
-    } as const;
-    return StyleSheet.create({
-      base: {
-        borderRadius: radii.rFull,
-        alignItems: "center",
-        justifyContent: "center",
-        ...VARIANTS[variant],
-      },
-      pressed: { opacity: 0.75, transform: [{ scale: 0.96 }] },
-      disabled: { opacity: 0.4 },
-    });
-  }, [c, variant]);
-
+  // Variant background computed inline — depends on `variant` prop + theme
+  const VARIANT_BG: Record<IconButtonVariant, string> = {
+    soft: c.accent2,
+    ghost: "transparent",
+    solid: c.primary,
+    "danger-solid": c.danger,
+  };
   const sizeStyle = SIZES[size];
 
   return (
@@ -78,6 +73,7 @@ export function IconButton({
       accessibilityRole="button"
       style={(state) => [
         styles.base,
+        { backgroundColor: VARIANT_BG[variant] },
         sizeStyle,
         state.pressed && !disabled && styles.pressed,
         disabled && styles.disabled,

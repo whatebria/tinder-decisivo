@@ -27,8 +27,7 @@ import { StyleSheet, Text, View, type ViewStyle } from "react-native";
 
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
-import { useThemeColors } from "../../theme/useTheme";
-import { useIsDark } from "../../theme/useTheme";
+import { useThemeColors, useIsDark } from "../../theme/useTheme";
 import { getAffinityColor } from "../../domain/affinity";
 import { Avatar } from "../atoms/Avatar";
 import { Button } from "../atoms/Button";
@@ -72,6 +71,23 @@ export function deriveIniciales(nombreCompleto: string): string {
   return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
 }
 
+const styles = StyleSheet.create({
+  card: {
+    padding: spacing.sp3,
+    borderRadius: radii.rLg,
+    gap: spacing.sp3,
+    borderWidth: 1,
+    flexShrink: 0,
+  },
+  topRow: { flexDirection: "row", gap: spacing.sp3, alignItems: "flex-start" },
+  infoCol: { flex: 1, gap: spacing.sp1 },
+  nombre: { fontSize: 15, fontWeight: "600", lineHeight: 20 },
+  pctRow: { flexDirection: "row", alignItems: "baseline", justifyContent: "flex-end", gap: 2 },
+  pctN: { fontSize: 40, fontWeight: "800", lineHeight: 44 },
+  pctUnit: { fontSize: 18, fontWeight: "700" },
+  contexto: { fontSize: 12, textAlign: "right" },
+});
+
 export function MatchSummaryCard({
   candidatoNombre,
   candidatoFotoUrl,
@@ -87,6 +103,7 @@ export function MatchSummaryCard({
   const c = useThemeColors();
   const isDark = useIsDark();
 
+  // Memoize iniciales (string computation from prop — legitimate)
   const iniciales = useMemo(
     () => deriveIniciales(candidatoNombre),
     [candidatoNombre],
@@ -99,60 +116,13 @@ export function MatchSummaryCard({
    */
   const affinityColor = getAffinityColor(pctRedondeado, isDark);
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        card: {
-          width: fullWidth ? "100%" : CARD_WIDTH,
-          padding: spacing.sp3,
-          borderRadius: radii.rLg,
-          gap: spacing.sp3,
-          backgroundColor: c.card,
-          borderWidth: 1,
-          borderColor: c.border2,
-          flexShrink: 0,
-        },
-        topRow: {
-          flexDirection: "row",
-          gap: spacing.sp3,
-          alignItems: "flex-start",
-        },
-        infoCol: { flex: 1, gap: spacing.sp1 },
-        nombre: {
-          fontSize: 15,
-          fontWeight: "600",
-          color: c.text,
-          lineHeight: 20,
-        },
-        pctRow: {
-          flexDirection: "row",
-          alignItems: "baseline",
-          justifyContent: "flex-end",
-          gap: 2,
-        },
-        pctN: {
-          fontSize: 40,
-          fontWeight: "800",
-          color: affinityColor, // DS-08: tier-based, no c.primary
-          lineHeight: 44,
-        },
-        pctUnit: {
-          fontSize: 18,
-          fontWeight: "700",
-          color: affinityColor, // coherencia con pctN (DS-11 Pantalla 4)
-        },
-        contexto: {
-          fontSize: 12,
-          color: c.textSecondary,
-          textAlign: "right",
-        },
-      }),
-    [c, affinityColor, fullWidth],
-  );
-
   return (
     <View
-      style={[styles.card, style]}
+      style={[
+        styles.card,
+        { width: fullWidth ? "100%" : CARD_WIDTH, backgroundColor: c.card, borderColor: c.border2 },
+        style,
+      ]}
       accessibilityRole="summary"
       accessibilityLabel={
         accessibilityLabel ??
@@ -166,7 +136,7 @@ export function MatchSummaryCard({
           size="lg"
         />
         <View style={styles.infoCol}>
-          <Text style={styles.nombre} numberOfLines={2}>
+          <Text style={[styles.nombre, { color: c.text }]} numberOfLines={2}>
             {candidatoNombre}
           </Text>
           {/* Chip del tipo: se usa el chip inactivo (accent2) para no competir
@@ -176,11 +146,11 @@ export function MatchSummaryCard({
       </View>
 
       <View style={styles.pctRow}>
-        <Text style={styles.pctN}>{pctRedondeado}</Text>
-        <Text style={styles.pctUnit}>%</Text>
+        <Text style={[styles.pctN, { color: affinityColor }]}>{pctRedondeado}</Text>
+        <Text style={[styles.pctUnit, { color: affinityColor }]}>%</Text>
       </View>
 
-      <Text style={styles.contexto}>
+      <Text style={[styles.contexto, { color: c.textSecondary }]}>
         coincides en {preguntasConsideradas} de {totalPreguntas} preguntas
       </Text>
 

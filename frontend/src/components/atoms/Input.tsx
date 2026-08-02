@@ -3,7 +3,7 @@
  * variante error y soporte multiline (usa multiline={true} para textarea).
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import {
   StyleSheet,
   TextInput,
@@ -21,38 +21,38 @@ export interface InputProps extends TextInputProps {
   style?: StyleProp<TextStyle>;
 }
 
+const styles = StyleSheet.create({
+  base: {
+    borderWidth: 1.5,
+    borderRadius: radii.rMd,
+    paddingHorizontal: spacing.sp4,
+    paddingVertical: spacing.sp3,
+    fontSize: 16,
+    minHeight: 48,
+  },
+  multiline: {
+    minHeight: 96,
+    textAlignVertical: "top",
+    paddingTop: spacing.sp3,
+  },
+});
+
 export function Input({ hasError, style, multiline, ...rest }: InputProps) {
   const c = useThemeColors();
-
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        base: {
-          backgroundColor: c.card,
-          borderWidth: 1.5,
-          borderColor: hasError ? c.danger : c.border,
-          borderRadius: radii.rMd,
-          paddingHorizontal: spacing.sp4,
-          paddingVertical: spacing.sp3,
-          fontSize: 16,
-          color: c.text,
-          minHeight: 48,
-        },
-        multiline: {
-          minHeight: 96,
-          textAlignVertical: "top",
-          paddingTop: spacing.sp3,
-        },
-      }),
-    [c, hasError],
-  );
+  // borderColor depends on hasError prop — computed inline
+  const borderColor = hasError ? c.danger : c.border;
 
   return (
     <TextInput
       {...rest}
       multiline={multiline}
       placeholderTextColor={c.textTertiary}
-      style={[styles.base, multiline && styles.multiline, style]}
+      style={[
+        styles.base,
+        { backgroundColor: c.card, borderColor, color: c.text },
+        multiline && styles.multiline,
+        style,
+      ]}
     />
   );
 }
