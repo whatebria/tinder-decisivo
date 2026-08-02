@@ -8,7 +8,6 @@ export { CandidatoPosturas } from "./CandidatoPosturas";
 export { ErrorBoundary } from "./ErrorBoundary";
 
 // Nuevos (Fase 3a)
-export { QuestionCard, type QuestionCardProps } from "./QuestionCard";
 export { CandidateCard, type CandidateCardProps } from "./CandidateCard";
 export {
   ProfileHero,
