@@ -33,8 +33,6 @@ export { Icon, type IconProps, type IconName } from "./Icon";
 export { Heading, type HeadingProps, type HeadingLevel } from "./Heading";
 
 // Nuevos (Fase 5 — Home HUB wireframe)
-export { ElectionCard, type ElectionCardProps, type ElectionCardVariant } from "./ElectionCard";
-export { ElectionCardAdd, type ElectionCardAddProps } from "./ElectionCardAdd";
 export { BookmarkButton, type BookmarkButtonProps } from "./BookmarkButton";
 
 // Nuevos (Fase 5 — BottomNav wireframe)

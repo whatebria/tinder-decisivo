@@ -9,8 +9,8 @@ import React, { useMemo } from "react";
 import { ScrollView, StyleSheet, type ViewStyle } from "react-native";
 
 import { spacing } from "../../theme/spacing";
-import { ElectionCard, type ElectionCardProps } from "../atoms/ElectionCard";
-import { ElectionCardAdd } from "../atoms/ElectionCardAdd";
+import { ElectionCard, type ElectionCardProps } from "./ElectionCard";
+import { ElectionCardAdd } from "./ElectionCardAdd";
 
 export interface ElectionsStripProps {
   elections: Array<ElectionCardProps & { key: string | number }>;

@@ -1,16 +1,16 @@
 /**
  * ElectionCard: card de una eleccion activa en el Home HUB.
  *
- * Basado en design-system-lowfi.html · Home HUB (rediseno 2026-07-28).
+ * Basado en design-system-lowfi.html - Home HUB (rediseno 2026-07-28).
  *
  * 3 variantes:
  *   - active: eleccion actualmente seleccionada (border-2 primary)
  *   - secondary: otra eleccion activa (border-1 gris)
- *   - pending: sin cuestionario respondido aún (progress 0%)
+ *   - pending: sin cuestionario respondido aun (progress 0%)
  *
  * MODO PRINCIPAL (recomendado): pasar `respondidas` + `totalPreguntas`. La
  * card muestra "N de N preguntas" y la progress bar. El porcentaje de match
- * NO se muestra aca — ahora vive en su propio hero card (MatchSummaryCard)
+ * NO se muestra aca -- ahora vive en su propio hero card (MatchSummaryCard)
  * en la seccion "Tus mejores matches" del Home. Razon: separar dos conceptos
  * distintos (avance del cuestionario vs afinidad politica) que antes se
  * mezclaban confundiendo al user.
@@ -30,6 +30,9 @@
  *   - "Completado" (verde) si isCompleted === true
  *   - "Pendiente" (neutro) si isCompleted === false
  *   - Sin badge si isCompleted === undefined (util para skeletons/loading)
+ *
+ * Movido de atoms/ a molecules/ (TASK-060): importa logica de domain/,
+ * lo que lo excluye de ser un atom por definicion.
  */
 
 import React, { useMemo } from "react";
@@ -42,7 +45,7 @@ import {
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
-import { Progress } from "./Progress";
+import { Progress } from "../atoms/Progress";
 
 export type ElectionCardVariant = "active" | "secondary" | "pending";
 

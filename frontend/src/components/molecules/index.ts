@@ -71,3 +71,7 @@ export { ShareOptions, type ShareOptionsProps, type ShareChannel } from "./Share
 export { NovedadesFeed, type NovedadesFeedProps, type NovedadFeedItem } from "./NovedadesFeed";
 export { ElectionsStrip, type ElectionsStripProps } from "./ElectionsStrip";
 
+// Movidos de atoms/ (TASK-060): importan logica de domain/, no son atoms por definicion
+export { ElectionCard, type ElectionCardProps, type ElectionCardVariant } from "./ElectionCard";
+export { ElectionCardAdd, type ElectionCardAddProps } from "./ElectionCardAdd";
+

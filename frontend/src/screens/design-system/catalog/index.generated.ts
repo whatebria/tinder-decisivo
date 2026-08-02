@@ -19,8 +19,8 @@ import showcase_atoms_Checkbox_6 from "../../../components/atoms/Checkbox.showca
 import showcase_atoms_Chip_7 from "../../../components/atoms/Chip.showcase";
 import showcase_atoms_DimensionBadge_8 from "../../../components/atoms/DimensionBadge.showcase";
 import showcase_atoms_Divider_9 from "../../../components/atoms/Divider.showcase";
-import showcase_atoms_ElectionCard_10 from "../../../components/atoms/ElectionCard.showcase";
-import showcase_atoms_ElectionCardAdd_11 from "../../../components/atoms/ElectionCardAdd.showcase";
+import showcase_atoms_ElectionCard_10 from "../../../components/molecules/ElectionCard.showcase";
+import showcase_atoms_ElectionCardAdd_11 from "../../../components/molecules/ElectionCardAdd.showcase";
 import showcase_atoms_Heading_12 from "../../../components/atoms/Heading.showcase";
 import showcase_atoms_Icon_13 from "../../../components/atoms/Icon.showcase";
 import showcase_atoms_IconButton_14 from "../../../components/atoms/IconButton.showcase";
@@ -170,16 +170,16 @@ export const generatedCatalog: CatalogEntry[] = [
   },
   {
     name: "ElectionCard",
-    category: "atoms",
-    path: "atoms/ElectionCard",
-    sourcePath: "src/components/atoms/ElectionCard.tsx",
+    category: "molecules",
+    path: "molecules/ElectionCard",
+    sourcePath: "src/components/molecules/ElectionCard.tsx",
     ...showcase_atoms_ElectionCard_10,
   },
   {
     name: "ElectionCardAdd",
-    category: "atoms",
-    path: "atoms/ElectionCardAdd",
-    sourcePath: "src/components/atoms/ElectionCardAdd.tsx",
+    category: "molecules",
+    path: "molecules/ElectionCardAdd",
+    sourcePath: "src/components/molecules/ElectionCardAdd.tsx",
     ...showcase_atoms_ElectionCardAdd_11,
   },
   {

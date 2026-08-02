@@ -1,8 +1,10 @@
 /**
  * ElectionCardAdd: card dashed "+ Activar {tipo}" en el Home HUB.
  *
- * Basado en design-system-lowfi.html · Home HUB.
+ * Basado en design-system-lowfi.html - Home HUB.
  * Aparece al final del strip para invitar a activar una eleccion nueva.
+ *
+ * Movido de atoms/ a molecules/ (TASK-060): agrupado con ElectionCard.
  */
 
 import React, { useMemo } from "react";
@@ -11,7 +13,7 @@ import { Pressable, StyleSheet, Text, View, type ViewStyle } from "react-native"
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
-import { Icon } from "./Icon";
+import { Icon } from "../atoms/Icon";
 
 export interface ElectionCardAddProps {
   label: string;
