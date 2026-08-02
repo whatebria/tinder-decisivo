@@ -130,14 +130,6 @@ export function CuestionarioScreen({
           gap: spacing.sp2,
           flexWrap: "wrap",
         },
-        noSeLabel: {
-          ...typography.overline,
-          textTransform: "none",
-          letterSpacing: 0,
-          color: c.textTertiary,
-          fontWeight: "500",
-          fontSize: 11,
-        },
         // Footer sticky: siempre visible, nunca dentro del ScrollView.
         footer: {
           flexDirection: "row",
@@ -293,13 +285,12 @@ export function CuestionarioScreen({
             accessibilityLabel="Opciones de respuesta"
           />
 
-          {/* Separador visual + "No se" (UX-017): semanticamente es una
-              abstencion, no una posicion de la escala Likert. Separarla
-              evita el sesgo de posicion documentado en DS-02. */}
+          {/* UX-065: separador sutil, sin header extra para no parecer pregunta
+              distinta. El Divider indica que "No se" es opcion especial dentro
+              del mismo grupo (no escala Likert, sino abstencion). */}
           {opcionNoSeMapped ? (
             <>
-              <Divider style={{ marginVertical: spacing.sp1 }} />
-              <Text style={styles.noSeLabel}>Sin postura definida</Text>
+              <Divider style={{ marginTop: spacing.sp2, marginBottom: spacing.sp1 }} />
               <RadioGroup<number>
                 options={[opcionNoSeMapped]}
                 value={respuesta?.opcionElegidaId ?? null}

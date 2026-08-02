@@ -179,6 +179,10 @@ const dark = {
   warning: "#D9B378",
   danger:  "#D07777",
   info:    "#7DA4CB",
+  // UX-066: info50 como background de banners necesita override dark
+  // (tints son absolutos; info50 luz = #EEF3F8 es ilegible sobre bg oscuro).
+  // info900 = "#1B2A3A" cumple mismo rol de "tinte sutil de info" en dark.
+  info50:  "#1B2A3A",
 } as const;
 
 // Grays invertidos en dark (gray50 = mas sutil = mas oscuro)

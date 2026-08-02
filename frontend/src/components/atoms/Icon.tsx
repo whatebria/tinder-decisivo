@@ -35,7 +35,8 @@ export type IconName =
   | "home"
   | "bookmark"
   | "lock"
-  | "shield";
+  | "shield"
+  | "log-out";
 
 export interface IconProps {
   name: IconName;
@@ -236,6 +237,15 @@ function renderIcon(name: IconName, p: object) {
       // Escudo (datos seguros, SERVEL)
       return (
         <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" {...p} />
+      );
+    case "log-out":
+      // Puerta con flecha saliente (cerrar sesion) - Lucide LogOut
+      return (
+        <>
+          <Path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" {...p} />
+          <Polyline points="16 17 21 12 16 7" {...p} />
+          <Line x1="21" y1="12" x2="9" y2="12" {...p} />
+        </>
       );
   }
 }

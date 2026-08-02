@@ -373,7 +373,7 @@ export function ConfiguracionScreen({
               <NavRow
                 label="Cerrar sesión"
                 variant="danger"
-                iconLeading="lock"
+                iconLeading="log-out"
                 onPress={handleLogout}
               />
             </View>
