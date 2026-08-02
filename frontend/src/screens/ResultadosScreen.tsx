@@ -481,10 +481,14 @@ export function ResultadosScreen({
           <View style={styles.ubicacionBannerRow}>
             <Icon name="info" size={14} color={c.warning} />
             <Text style={[styles.ubicacionBannerText, { color: c.textSecondary }]}>
-              Ves a todos los candidatos del país.{" "}
-              <Link onPress={() => navigation.navigate("Perfil")}>
+              Ves a todos los candidatos del país.{"\ "}
+              <Text
+                onPress={() => navigation.navigate("Perfil")}
+                accessibilityRole="link"
+                style={{ color: c.primary, fontWeight: "600" }}
+              >
                 Configura tu comuna
-              </Link>
+              </Text>
               {" "}para ver solo los de tu zona.
             </Text>
           </View>

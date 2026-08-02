@@ -9,10 +9,10 @@
  * El filtro de eleccion es opcional: si `tiposEleccion` no se pasa o esta
  * vacio, la seccion no se renderiza.
  *
- * BUG-044: la lista de candidatos usa FlatList (virtualizada) en lugar de
- * View + map. El Modal pasa bodyScrollable={false} para evitar el error
- * de VirtualizedList anidada en ScrollView. La busqueda y los chips de
- * filtro viven en ListHeaderComponent.
+ * BUG-044: la lista de candidatos usa FlatList (virtualizada). Los filtros
+ * (search + chips) son siblings de la FlatList dentro de un flex:1 View,
+ * NO ListHeaderComponent. Esto evita que el TextInput pierda el foco en
+ * cada keystroke (FlatList remontar ListHeaderComponent al cambiar ref).
  */
 
 import React, { useCallback, useMemo, useState } from "react";
@@ -48,6 +48,8 @@ interface Props {
 }
 
 const styles = StyleSheet.create({
+  // BUG-044: flex:1 para que FlatList ocupe el espacio disponible del Modal.
+  outerWrap: { flex: 1 },
   search: {
     borderWidth: 1,
     borderRadius: radii.rSm,
@@ -84,8 +86,6 @@ const styles = StyleSheet.create({
   },
   itemName: { fontSize: 15, fontWeight: "600" },
   itemMeta: { fontSize: 12, marginTop: 2 },
-  // BUG-044: el FlatList necesita flex:1 para respetar el maxHeight del Modal.
-  list: { flex: 1 },
 });
 
 export function CandidatoPickerModal({
@@ -106,10 +106,7 @@ export function CandidatoPickerModal({
     return candidatos.filter((cand) => {
       if (cand.id == null) return false;
       if (excluirId != null && cand.id === excluirId) return false;
-      if (
-        tipoSel !== null &&
-        !(cand.tipos_eleccion ?? []).includes(tipoSel)
-      ) {
+      if (tipoSel !== null && !(cand.tipos_eleccion ?? []).includes(tipoSel)) {
         return false;
       }
       if (!q) return true;
@@ -124,68 +121,6 @@ export function CandidatoPickerModal({
     setQuery("");
     setTipoSel(null);
   }, [onSelect]);
-
-  function chipColors(isActive: boolean) {
-    return isActive
-      ? { borderColor: c.primary, backgroundColor: c.primary }
-      : { borderColor: c.border, backgroundColor: c.bg };
-  }
-
-  // BUG-044: header del FlatList = search + chips de tipo.
-  // Memoizar para evitar que el FlatList remonte el header en cada keystroke.
-  const ListHeader = useMemo(() => (
-    <View>
-      <TextInput
-        value={query}
-        onChangeText={setQuery}
-        placeholder="Buscar por nombre o partido..."
-        placeholderTextColor={c.textSecondary}
-        style={[styles.search, { backgroundColor: c.bg, borderColor: c.border, color: c.text }]}
-        accessibilityLabel="Buscar candidato"
-      />
-
-      {tiposEleccion.length > 0 ? (
-        <>
-          <Text style={[styles.filterLabel, { color: c.textSecondary }]}>Tipo de eleccion</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.chipsRow}
-          >
-            <Pressable
-              onPress={() => setTipoSel(null)}
-              style={[styles.chip, chipColors(tipoSel === null)]}
-              accessibilityRole="button"
-              accessibilityLabel="Todas las elecciones"
-            >
-              <Text style={[styles.chipText, { color: tipoSel === null ? c.textOnPrimary : c.textSecondary }]}>
-                Todas
-              </Text>
-            </Pressable>
-            {tiposEleccion
-              .filter((t) => t.id != null)
-              .map((t) => {
-                const isActive = tipoSel === t.id;
-                return (
-                  <Pressable
-                    key={t.id}
-                    onPress={() => setTipoSel(isActive ? null : t.id!)}
-                    style={[styles.chip, chipColors(isActive)]}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Filtrar por ${t.nombre}`}
-                  >
-                    <Text style={[styles.chipText, { color: isActive ? c.textOnPrimary : c.textSecondary }]}>
-                      {t.nombre}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-          </ScrollView>
-        </>
-      ) : null}
-    </View>
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  ), [query, tipoSel, tiposEleccion, c]);
 
   const renderItem = useCallback(({ item: cand }: ListRenderItemInfo<Candidato>) => (
     <Pressable
@@ -205,28 +140,96 @@ export function CandidatoPickerModal({
     </Pressable>
   ), [handleSelect, c]);
 
-  const ListEmpty = useMemo(() => (
+  const keyExtractor = useCallback((cand: Candidato) => String(cand.id), []);
+
+  const ListEmpty = (
     <Text style={[styles.emptyText, { color: c.textSecondary }]}>
       No hay candidatos que coincidan.
     </Text>
-  ), [c.textSecondary]);
+  );
 
   return (
     <Modal visible={visible} onClose={onClose} title={title} bodyScrollable={false}>
-      <FlatList<Candidato>
-        style={styles.list}
-        data={filtrados}
-        keyExtractor={(cand) => String(cand.id)}
-        renderItem={renderItem}
-        ListHeaderComponent={ListHeader}
-        ListEmptyComponent={ListEmpty}
-        // BUG-044: limitar renders iniciales para reducir el delay de apertura.
-        initialNumToRender={15}
-        maxToRenderPerBatch={20}
-        windowSize={5}
-        removeClippedSubviews
-        keyboardShouldPersistTaps="handled"
-      />
+      {/*
+       * BUG-044: search + chips son siblings del FlatList (NO ListHeaderComponent).
+       * Si estuvieran en ListHeaderComponent, FlatList los remontar\u00eda cada vez que
+       * cambie la referencia del elemento -> TextInput perder\u00eda el foco en cada
+       * keystroke.
+       */}
+      <View style={styles.outerWrap}>
+        {/* Filtros fijos: no se remontan */}
+        <View>
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Buscar por nombre o partido..."
+            placeholderTextColor={c.textSecondary}
+            style={[styles.search, { backgroundColor: c.bg, borderColor: c.border, color: c.text }]}
+            accessibilityLabel="Buscar candidato"
+          />
+
+          {tiposEleccion.length > 0 ? (
+            <>
+              <Text style={[styles.filterLabel, { color: c.textSecondary }]}>Tipo de eleccion</Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.chipsRow}
+              >
+                <Pressable
+                  onPress={() => setTipoSel(null)}
+                  style={[
+                    styles.chip,
+                    tipoSel === null
+                      ? { borderColor: c.primary, backgroundColor: c.primary }
+                      : { borderColor: c.border, backgroundColor: c.bg },
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel="Todas las elecciones"
+                >
+                  <Text style={[styles.chipText, { color: tipoSel === null ? c.textOnPrimary : c.textSecondary }]}>
+                    Todas
+                  </Text>
+                </Pressable>
+                {tiposEleccion.filter((t) => t.id != null).map((t) => {
+                  const isActive = tipoSel === t.id;
+                  return (
+                    <Pressable
+                      key={t.id}
+                      onPress={() => setTipoSel(isActive ? null : t.id!)}
+                      style={[
+                        styles.chip,
+                        isActive
+                          ? { borderColor: c.primary, backgroundColor: c.primary }
+                          : { borderColor: c.border, backgroundColor: c.bg },
+                      ]}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Filtrar por ${t.nombre}`}
+                    >
+                      <Text style={[styles.chipText, { color: isActive ? c.textOnPrimary : c.textSecondary }]}>
+                        {t.nombre}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </>
+          ) : null}
+        </View>
+
+        {/* Lista virtualizada: solo los items de candidatos */}
+        <FlatList<Candidato>
+          data={filtrados}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          ListEmptyComponent={ListEmpty}
+          initialNumToRender={15}
+          maxToRenderPerBatch={20}
+          windowSize={5}
+          removeClippedSubviews
+          keyboardShouldPersistTaps="handled"
+        />
+      </View>
     </Modal>
   );
 }

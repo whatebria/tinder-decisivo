@@ -1,0 +1,50 @@
+Nuevo scrape:  1221
+Servel old:    1221
+Parlamentaria: 1221
+
+Solo en NUEVO (no en servel viejo): 0
+Solo en SERVEL viejo (no en nuevo): 0
+En comun nuevo y servel:            1221
+
+Solo en nuevo (no en parlamentaria): 0
+Solo en parl (no en nuevo):          0
+
+LISTAS en nuevo (Top 10):
+   210  'C. Unidad por Chile'
+   206  'K. Cambio por Chile'
+   205  'J. Chile Grande y Unido'
+   186  'I. Partido de la Gente'
+   181  'B. Verdes, Regionalistas y Humanistas'
+    82  'D. Izquierda Ecologista Popular Animalista y Humanista'
+    41  'G. Partido Alianza Verde Popular'
+    33  'A. Partido Ecologista Verde'
+    32  'E. Movimiento Amarillos por Chile'
+    21  'F. Partido de Trabajadores Revolucionarios'
+
+LISTAS en servel viejo (Top 10):
+   210  'C. Unidad por Chile'
+   206  'K. Cambio por Chile'
+   205  'J. Chile Grande y Unido'
+   186  'I. Partido de la Gente'
+   181  'B. Verdes, Regionalistas y Humanistas'
+    82  'D. Izquierda Ecologista Popular Animalista y Humanista'
+    41  'G. Partido Alianza Verde Popular'
+    33  'A. Partido Ecologista Verde'
+    32  'E. Movimiento Amarillos por Chile'
+    21  'F. Partido de Trabajadores Revolucionarios'
+
+PARTIDOS en nuevo (Top 10):
+   186  'De la Gente'
+    71  'Independiente Federación Regionalista Verde Social'
+    64  'Republicano de Chile'
+    63  'Nacional Libertario'
+    55  'Social Cristiano'
+    52  'Renovación Nacional'
+    49  'Federación Regionalista Verde Social'
+    44  'Unión Demócrata Independiente'
+    41  'Alianza Verde Popular'
+    40  'Independiente Humanista'
+
+Sample candidatos SOLO en nuevo (10):
+
+Sample candidatos SOLO en servel viejo (10):
