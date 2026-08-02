@@ -35,7 +35,7 @@ from core.models import Candidato, TipoEleccion
 logger = logging.getLogger(__name__)
 
 REQUIRED_COLUMNS = {"nombre", "apellido", "partido", "tipos_eleccion"}
-OPTIONAL_COLUMNS = {"ciudad", "bio", "propuesta_electoral"}
+OPTIONAL_COLUMNS = {"ciudad", "bio", "propuesta_electoral", "lista_electoral"}
 
 
 class Command(BaseCommand):
@@ -128,6 +128,7 @@ class Command(BaseCommand):
             "ciudad": (row.get("ciudad") or "").strip(),
             "bio": (row.get("bio") or "").strip() or None,
             "propuesta_electoral": (row.get("propuesta_electoral") or "").strip(),
+            "lista_electoral": (row.get("lista_electoral") or "").strip(),
         }
 
         candidato, created = Candidato.objects.update_or_create(

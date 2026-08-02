@@ -50,6 +50,12 @@ class Candidato(models.Model):
     propuesta_electoral = models.TextField(
         help_text="Resumen o texto principal de su propuesta electoral."
     )
+    lista_electoral = models.CharField(
+        max_length=200,
+        blank=True,
+        default="",
+        help_text="Pacto o lista electoral a la que pertenece el candidato (ej. 'C. Unidad por Chile').",
+    )
     profile_picture = models.ImageField(default="assets/default.avif", upload_to="profiles/")
     tipos_eleccion = models.ManyToManyField(TipoEleccion, related_name="candidatos")
 
