@@ -3,7 +3,7 @@
  * Pill activo en primary.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { radii } from "../../theme/radii";
@@ -32,6 +32,21 @@ export interface WeightSelectorProps {
 
 const WEIGHTS: Weight[] = [1, 2, 3, 4, 5];
 
+const styles = StyleSheet.create({
+  row: { flexDirection: "row", gap: spacing.sp2 },
+  pill: {
+    flex: 1,
+    minHeight: 44,
+    // DS hi-fi usa r-md (rect redondeado), NO capsule/rFull.
+    borderRadius: radii.rMd,
+    borderWidth: 1.5,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: spacing.sp2,
+  },
+  text: { fontSize: 13, fontWeight: "500" },
+});
+
 export function WeightSelector({
   value,
   onChange,
@@ -41,30 +56,6 @@ export function WeightSelector({
 }: WeightSelectorProps) {
   const c = useThemeColors();
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        row: { flexDirection: "row", gap: spacing.sp2 },
-        pill: {
-          flex: 1,
-          minHeight: 44,
-          // DS hi-fi usa r-md (rect redondeado), NO capsule/rFull.
-          borderRadius: radii.rMd,
-          borderWidth: 1.5,
-          alignItems: "center",
-          justifyContent: "center",
-          paddingHorizontal: spacing.sp2,
-        },
-        pillDefault: { borderColor: c.border, backgroundColor: c.card },
-        pillSelected: { borderColor: c.primary, backgroundColor: c.primary },
-        text: { fontSize: 13, fontWeight: "500" },
-        // DS hi-fi: inactivo usa color-text-2 (muted), no texto completo.
-        textDefault: { color: c.textSecondary },
-        textSelected: { color: c.textOnPrimary },
-      }),
-    [c],
-  );
-
   return (
     <View
       accessibilityRole="radiogroup"
@@ -73,6 +64,11 @@ export function WeightSelector({
     >
       {WEIGHTS.map((w) => {
         const selected = value === w;
+        // DS hi-fi: inactivo usa color-text-2 (muted), no texto completo.
+        const pillBg = selected ? c.primary : c.card;
+        const pillBorder = selected ? c.primary : c.border;
+        const textColor = selected ? c.textOnPrimary : c.textSecondary;
+
         return (
           <Pressable
             key={w}
@@ -80,11 +76,9 @@ export function WeightSelector({
             accessibilityRole="radio"
             accessibilityState={{ selected }}
             accessibilityLabel={`${labels[w]}, peso ${w} de 5`}
-            style={[styles.pill, selected ? styles.pillSelected : styles.pillDefault]}
+            style={[styles.pill, { backgroundColor: pillBg, borderColor: pillBorder }]}
           >
-            <Text style={[styles.text, selected ? styles.textSelected : styles.textDefault]}>
-              {labels[w]}
-            </Text>
+            <Text style={[styles.text, { color: textColor }]}>{labels[w]}</Text>
           </Pressable>
         );
       })}

@@ -13,7 +13,7 @@
  *   .app-nav.side   .active { background: 10% primary; }
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text } from "react-native";
 
 import { useBlurringPress } from "../../hooks/useBlurringPress";
@@ -50,6 +50,29 @@ function alphaTint(hexColor: string, pct: 8 | 10): string {
   return hexColor;
 }
 
+const styles = StyleSheet.create({
+  wrapBottom: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+    paddingVertical: spacing.sp2,
+    paddingHorizontal: spacing.sp1,
+    minHeight: 56,
+    borderRadius: radii.rSm,
+  },
+  wrapSide: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+    paddingVertical: spacing.sp3,
+    paddingHorizontal: spacing.sp1,
+    minHeight: 56,
+    borderRadius: radii.rLg,
+  },
+  label: { fontSize: 11 },
+});
+
 export function TabBarItem({
   icon,
   label,
@@ -64,46 +87,33 @@ export function TabBarItem({
     ? alphaTint(c.primary, variant === "side" ? 10 : 8)
     : "transparent";
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        wrap: {
-          flex: variant === "bottom" ? 1 : undefined,
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 4,
-          paddingVertical: variant === "side" ? spacing.sp3 : spacing.sp2,
-          paddingHorizontal: spacing.sp1,
-          minHeight: 56,
-          borderRadius: variant === "side" ? radii.rLg : radii.rSm,
-          backgroundColor: activeBg,
-        },
-        label: {
-          fontSize: 11,
-          fontWeight: active ? "600" : "500",
-          color: tint,
-        },
-      }),
-    [active, tint, activeBg, variant],
-  );
-
   // El onPress de un tab tipicamente dispara `navigation.navigate(...)`, lo
   // cual hace que React Navigation aplique aria-hidden a la screen saliente.
   // Si el foco sigue en este Pressable cuando eso pasa, Chromium chilla con
   // WCAG 2.4.3. Blureamos ANTES de invocar el onPress del consumer.
-  // Ver hooks/useBlurringPress.
   const handlePress = useBlurringPress(onPress);
+  const wrapBase = variant === "side" ? styles.wrapSide : styles.wrapBottom;
 
   return (
     <Pressable
-      style={({ pressed }) => [styles.wrap, pressed ? { opacity: 0.6 } : null]}
+      style={({ pressed }) => [
+        wrapBase,
+        { backgroundColor: activeBg },
+        pressed ? { opacity: 0.6 } : null,
+      ]}
       onPress={handlePress}
       accessibilityRole="tab"
       accessibilityState={{ selected: !!active }}
       accessibilityLabel={accessibilityLabel ?? label}
     >
       <Icon name={icon} size={24} color={tint} />
-      <Text style={styles.label} numberOfLines={1}>
+      <Text
+        style={[
+          styles.label,
+          { fontWeight: active ? "600" : "500", color: tint },
+        ]}
+        numberOfLines={1}
+      >
         {label}
       </Text>
     </Pressable>

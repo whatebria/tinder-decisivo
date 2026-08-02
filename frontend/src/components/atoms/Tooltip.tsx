@@ -3,7 +3,7 @@
  * Aparece por 2s y se auto-oculta. Para persistente, usar prop `visible` controlado.
  */
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { radii } from "../../theme/radii";
@@ -22,39 +22,38 @@ export interface TooltipProps {
   style?: StyleProp<ViewStyle>;
 }
 
+const styles = StyleSheet.create({
+  wrap: { position: "relative", alignItems: "center" },
+  bubble: {
+    position: "absolute",
+    maxWidth: 240,
+    paddingHorizontal: spacing.sp3,
+    paddingVertical: spacing.sp2,
+    borderRadius: radii.rSm,
+    zIndex: 1000,
+  },
+  top: { bottom: "100%", marginBottom: spacing.sp2 },
+  bottom: { top: "100%", marginTop: spacing.sp2 },
+  text: { fontSize: 12, lineHeight: 16 },
+});
+
 export function Tooltip({ tip, children, position = "top", visible, style }: TooltipProps) {
   const c = useThemeColors();
   const shadows = useThemeShadows();
   const [internalVisible, setInternalVisible] = useState(false);
-
   const isVisible = visible ?? internalVisible;
-
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        wrap: { position: "relative", alignItems: "center" },
-        bubble: {
-          position: "absolute",
-          maxWidth: 240,
-          backgroundColor: c.text,
-          paddingHorizontal: spacing.sp3,
-          paddingVertical: spacing.sp2,
-          borderRadius: radii.rSm,
-          ...shadows.shMd,
-          zIndex: 1000,
-        },
-        top: { bottom: "100%", marginBottom: spacing.sp2 },
-        bottom: { top: "100%", marginTop: spacing.sp2 },
-        text: { color: c.card, fontSize: 12, lineHeight: 16 },
-      }),
-    [c, shadows],
-  );
 
   return (
     <View style={[styles.wrap, style]}>
       {isVisible ? (
-        <View style={[styles.bubble, position === "top" ? styles.top : styles.bottom]}>
-          <Text style={styles.text}>{tip}</Text>
+        <View
+          style={[
+            styles.bubble,
+            { backgroundColor: c.text, ...shadows.shMd },
+            position === "top" ? styles.top : styles.bottom,
+          ]}
+        >
+          <Text style={[styles.text, { color: c.card }]}>{tip}</Text>
         </View>
       ) : null}
       <Pressable
