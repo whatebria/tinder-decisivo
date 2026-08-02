@@ -66,7 +66,7 @@ import {
   type NoticiaDetail,
 } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
-import { formatMatchPercentage, getMatchColor } from "../services/matching";
+import { confianzaToTier, formatMatchPercentage, getMatchColor } from "../services/matching";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
 import { radii } from "../theme/radii";
@@ -81,12 +81,8 @@ import { SHOW_NOTICIAS } from "../constants/features";
 type PerfilTab = "resumen" | "posturas" | "noticias";
 
 /** Mapea el string de confianza del backend al tier del DS. */
-function confianzaToTier(confianza: string | null): "high" | "mid" | "low" {
-  const v = (confianza ?? "").toUpperCase();
-  if (v === "ALTA") return "high";
-  if (v === "BAJA") return "low";
-  return "mid";
-}
+// (confianzaToTier migrado a services/matching -- TASK-035)
+
 
 export function DetalleCandidatoScreen({
   route,

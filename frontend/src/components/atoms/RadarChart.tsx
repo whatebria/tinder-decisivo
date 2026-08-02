@@ -23,6 +23,16 @@ import Svg, {
 import { useThemeColors } from "../../theme/useTheme";
 import { EJE_LABELS } from "../../domain/dimensiones";
 
+// -- Constantes de layout (TASK-034) -----------------------------------------
+/** Ratio radio/size cuando los labels están visibles (deja margen para el texto). */
+const RADAR_RADIUS_RATIO_LABELED   = 0.35;
+/** Ratio radio/size sin labels (ocupa más espacio disponible). */
+const RADAR_RADIUS_RATIO_UNLABELED = 0.45;
+/** Distancia en px del label al borde exterior del radar. */
+const RADAR_LABEL_OFFSET_PX        = 18;
+/** Opacidad del fill del polígono (suave, no sólido). */
+const RADAR_FILL_OPACITY           = 0.25;
+
 export interface RadarChartProps {
   data: Record<string, number>;
   size?: number;
@@ -81,7 +91,7 @@ export function RadarChart({
   const cx = size / 2;
   const cy = size / 2;
   // Deja margen para labels
-  const radius = showLabels ? size * 0.35 : size * 0.45;
+  const radius = showLabels ? size * RADAR_RADIUS_RATIO_LABELED : size * RADAR_RADIUS_RATIO_UNLABELED;
   const step = (2 * Math.PI) / Math.max(ejes.length, 1);
   // Angulo inicial: arriba (12 en punto)
   const startAngle = -Math.PI / 2;
@@ -130,7 +140,7 @@ export function RadarChart({
   const labels = showLabels
     ? ejes.map((eje, i) => {
         const angle = startAngle + i * step;
-        const labelPos = polarToCartesian(cx, cy, radius + 18, angle);
+        const labelPos = polarToCartesian(cx, cy, radius + RADAR_LABEL_OFFSET_PX, angle);
         const label = EJE_LABELS[eje] ?? eje;
         return (
           <SvgText
@@ -167,7 +177,7 @@ export function RadarChart({
         <Polygon
           points={polygonPoints}
           fill={strokeColor}
-          fillOpacity={0.25}
+          fillOpacity={RADAR_FILL_OPACITY}
           stroke={strokeColor}
           strokeWidth={2}
         />

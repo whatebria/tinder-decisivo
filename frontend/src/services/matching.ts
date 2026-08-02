@@ -148,6 +148,37 @@ export function getLikertColor(
   }
 }
 
+// -- Confianza tier ----------------------------------------------------------
+
+/** Mapa de nivel de confianza (backend) -> tier visual. */
+const CONFIANZA_MAP: Record<string, ConfianzaTier> = {
+  ALTA:  "high",
+  MEDIA: "mid",
+  BAJA:  "low",
+};
+
+/** Tier visual de un nivel de confianza ("high" | "mid" | "low"). */
+export type ConfianzaTier = "high" | "mid" | "low";
+
+/**
+ * Convierte el nivel de confianza del backend a un tier visual.
+ *
+ * - null / string vacío -> "mid" (dato ausente = medio, defensivo)
+ * - "ALTA" -> "high", "MEDIA" -> "mid", "BAJA" -> "low"
+ * - Valor desconocido -> "mid" + warn en DEV (TASK-035)
+ */
+export function confianzaToTier(confianza: string | null): ConfianzaTier {
+  if (!confianza) return "mid";
+  const tier = CONFIANZA_MAP[confianza.toUpperCase()];
+  if (!tier) {
+    if (__DEV__) {
+      console.warn(`[confianzaToTier] valor inesperado: "${confianza}"`);
+    }
+    return "mid";
+  }
+  return tier;
+}
+
 // -- Ordenamiento defensivo --------------------------------------------------
 
 /**

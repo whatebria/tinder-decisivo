@@ -5,6 +5,7 @@
  * Corren en milisegundos.
  */
 import {
+  confianzaToTier,
   formatMatchPercentage,
   getConfianzaBadge,
   getConfianzaBadgeVariant,
@@ -249,6 +250,18 @@ describe("getLikertColor", () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// confianzaToTier (TASK-035)
+// ---------------------------------------------------------------------------
+describe("confianzaToTier", () => {
+  test("ALTA -> high", () => expect(confianzaToTier("ALTA")).toBe("high"));
+  test("alta (minusculas) -> high", () => expect(confianzaToTier("alta")).toBe("high"));
+  test("MEDIA -> mid", () => expect(confianzaToTier("MEDIA")).toBe("mid"));
+  test("BAJA -> low", () => expect(confianzaToTier("BAJA")).toBe("low"));
+  test("null -> mid (dato ausente = defensivo)", () => expect(confianzaToTier(null)).toBe("mid"));
+  test("string vacio -> mid", () => expect(confianzaToTier("")).toBe("mid"));
+  test("valor desconocido -> mid (defensivo)", () => expect(confianzaToTier("DESCONOCIDO")).toBe("mid"));
+});
 describe("sortByMatchDesc", () => {
   const mkResult = (pct: number, id: number) =>
     ({
