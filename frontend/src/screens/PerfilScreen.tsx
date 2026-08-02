@@ -149,6 +149,14 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
                 />
               </View>
 
+              {/* UX-045: nota discreta que informa los campos read-only. */}
+              <Text
+                style={[styles.readOnlyNote, { color: c.textSecondary }]}
+              >
+                El nombre de usuario y el email no se pueden cambiar desde la
+                app.
+              </Text>
+
               {/* Contadores */}
               <SectionTitle title="Mi actividad" />
               <View style={styles.statsRow}>
@@ -346,6 +354,13 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   helpText: { ...typography.small, lineHeight: 20 },
+  // UX-045: nota discreta para campos read-only.
+  readOnlyNote: {
+    ...typography.overline,
+    textTransform: "none",
+    letterSpacing: 0,
+    fontStyle: "italic",
+  },
 
   statsRow: {
     flexDirection: "row",

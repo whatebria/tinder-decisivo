@@ -278,38 +278,52 @@ export function MisGuardadosScreen({
         />
       );
     }
-    return posturas.map((b) => (
-      <View key={`pos-${b.id}`} style={styles.card}>
-        <Text style={styles.cardMeta}>
-          {b.postura_data.candidato_nombre_completo ?? "Candidato"}
-          {b.postura_data.eje_tematico_display
-            ? ` · ${b.postura_data.eje_tematico_display}`
-            : ""}
-        </Text>
-        <Text style={styles.cardTitle}>{b.postura_data.pregunta_texto}</Text>
-        <Text style={styles.cardBody}>
-          Respondio:{" "}
-          <Text style={{ color: c.text, fontWeight: "600" }}>
-            {b.postura_data.opcion_respuesta_texto}
+    return posturas.map((b) => {
+      // UX-050: iniciales a partir del nombre completo del candidato.
+      const nameParts = (b.postura_data.candidato_nombre_completo ?? "").trim().split(/\s+/);
+      const candidatoIniciales = initials(
+        nameParts[0],
+        nameParts.length > 1 ? nameParts[nameParts.length - 1] : undefined,
+      );
+      return (
+        <View key={`pos-${b.id}`} style={styles.card}>
+          {/* Candidato prominente en primer nivel (UX-050). */}
+          <View style={styles.candidatoRow}>
+            <Avatar size="sm" initials={candidatoIniciales} />
+            <View style={styles.candidatoCol}>
+              <Text style={styles.candidatoName} numberOfLines={1}>
+                {b.postura_data.candidato_nombre_completo ?? "Candidato"}
+              </Text>
+              {b.postura_data.eje_tematico_display ? (
+                <Text style={styles.candidatoMetaText}>
+                  {b.postura_data.eje_tematico_display}
+                </Text>
+              ) : null}
+            </View>
+            <BookmarkButton
+              saved
+              onPress={() =>
+                // BUG-022: callbacks de toast para no fallar silenciosamente
+                togglePos.mutate(b.postura, {
+                  onSuccess: () => toast.success("Postura eliminada", "Se quitó de tus guardados."),
+                  onError: (e) => toast.error("No pudimos quitar la postura", getErrorMessage(e)),
+                })
+              }
+              loading={togglePos.isPending}
+              accessibilityLabel="Quitar postura guardada"
+            />
+          </View>
+          {/* Postura en segundo nivel */}
+          <Text style={styles.cardTitle}>{b.postura_data.pregunta_texto}</Text>
+          <Text style={styles.cardBody}>
+            Respondio:{" "}
+            <Text style={{ color: c.text, fontWeight: "600" }}>
+              {b.postura_data.opcion_respuesta_texto}
+            </Text>
           </Text>
-        </Text>
-        <View style={styles.row}>
-          <View />
-          <BookmarkButton
-            saved
-            onPress={() =>
-              // BUG-022: callbacks de toast para no fallar silenciosamente
-              togglePos.mutate(b.postura, {
-                onSuccess: () => toast.success("Postura eliminada", "Se quitó de tus guardados."),
-                onError: (e) => toast.error("No pudimos quitar la postura", getErrorMessage(e)),
-              })
-            }
-            loading={togglePos.isPending}
-            accessibilityLabel="Quitar postura guardada"
-          />
         </View>
-      </View>
-    ));
+      );
+    });
   }
 
   function renderNoticias() {
