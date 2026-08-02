@@ -14,11 +14,11 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import type { MatchResult } from "../../api/endpoints";
-import {
-  BookmarkActions,
-  Icon,
-  ResultadoHero,
-} from "../index";
+// Imports directos para evitar ciclo: organisms/index -> ../index -> organisms/index
+// Ver: https://reactnative.dev/docs/ram-bundles-inline-requires
+import { BookmarkActions } from "../molecules/BookmarkActions";
+import { Icon } from "../atoms/Icon";
+import { ResultadoHero } from "./ResultadoHero";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { typography } from "../../theme/typography";
