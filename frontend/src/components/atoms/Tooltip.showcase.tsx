@@ -1,7 +1,5 @@
 import { View } from "react-native";
 
-// TODO(paso 6 cleanup): mover DemoText a components/ para eliminar esta
-// dependencia inversa components/ -> screens/design-system/.
 import { DemoText } from "../showcase/DemoText";
 import type { CatalogEntry } from "../../screens/design-system/showcase/types";
 import { Tooltip } from "./Tooltip";

@@ -8,9 +8,9 @@
  *   - Descartados: candidatos ocultos del ranking (con opcion restaurar)
  *   - Posturas: posturas puntuales de candidatos que guardaste
  *
- * Filtro por eleccion (chips) encima de los tabs. Por ahora solo "Todas"
- * tiene efecto; el filtrado por tipo de eleccion queda como TODO cuando el
- * backend exponga el field consistentemente en todas las shapes.
+ * Filtro por eleccion (chips) encima de los tabs. Los chips estan ocultos
+ * hasta que el backend exponga tipo_eleccion consistentemente en todos los
+ * bookmarks shapes (ver BUG-021). El estado eleccionFilter se conserva.
  */
 
 import React, { useCallback, useMemo, useState } from "react";

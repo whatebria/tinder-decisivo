@@ -1,7 +1,6 @@
 import React from "react";
 import { View } from "react-native";
 
-// TODO(step 6): DemoText es una util del design-system screen. Considerar mover a `showcase/`.
 import { DemoText } from "../showcase/DemoText";
 import type { CatalogEntry } from "../../screens/design-system/showcase/types";
 import { UbicacionPicker } from "./UbicacionPicker";

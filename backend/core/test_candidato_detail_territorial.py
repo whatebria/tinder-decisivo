@@ -29,11 +29,26 @@ class TestCandidatoDetailTerritorial:
             assert data["alcance_territorial"] == "nacional"
 
     def test_alcalde_expone_comuna_y_region(self, api, datos_pesados):
-        alcalde = Candidato.objects.filter(
-            unidad_territorial__nivel="comunal",
-            unidad_territorial__nombre="Nunoa",
+        # datos_pesados siembra seed_territorio_chile: la UT comunal de Nunoa existe.
+        # El fixture no incluye candidatos comunales (solo presidenciales y diputados),
+        # por lo que se crea uno aqui inline para probar el serializer territorial.
+        # Causa raiz del bug: el test asumia que el seed crearia alcaldes, pero
+        # ningun seed_alcaldes existe. Fix: crear el candidato en el propio test.
+        from core.models import UnidadTerritorial
+        ut_nunoa = UnidadTerritorial.objects.filter(
+            nivel="comunal",
+            nombre="Nunoa",
         ).first()
-        assert alcalde is not None
+        assert ut_nunoa is not None, (
+            "UT comunal 'Nunoa' no encontrada — seed_territorio_chile debe haberla creado"
+        )
+        alcalde = Candidato.objects.create(
+            nombre="Ana",
+            apellido="Alcaldesa",
+            partido="Independiente",
+            propuesta_electoral="Propuesta municipal de prueba.",
+            unidad_territorial=ut_nunoa,
+        )
         resp = api.get(reverse("candidato-detail", args=[alcalde.id]))
         assert resp.status_code == 200
         data = resp.json()
