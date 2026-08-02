@@ -3,9 +3,12 @@
  *
  * Uso tipicamente dentro de una molecule RadioGroup, pero es reusable
  * standalone. `selected` es la fuente de verdad; el `onPress` sube al parent.
+ *
+ * TASK-066: styles a nivel de modulo para valores estaticos;
+ * colores dinamicos (selected, theme) via inline styles.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text, View, type PressableProps } from "react-native";
 
 import { spacing } from "../../theme/spacing";
@@ -16,38 +19,36 @@ export interface RadioProps extends Omit<PressableProps, "children" | "style"> {
   selected: boolean;
 }
 
+// -- Estilos estaticos (modulo-level) -----------------------------------------
+
+const S = StyleSheet.create({
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    minHeight: 44,
+  },
+  dot: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: spacing.sp3,
+  },
+  inner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  label: { fontSize: 16, flexShrink: 1 },
+  disabled: { opacity: 0.5 },
+});
+
+// -- Componente ---------------------------------------------------------------
+
 export function Radio({ label, selected, disabled, ...rest }: RadioProps) {
   const c = useThemeColors();
-
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        row: {
-          flexDirection: "row",
-          alignItems: "center",
-          minHeight: 44,
-        },
-        dot: {
-          width: 20,
-          height: 20,
-          borderRadius: 10,
-          borderWidth: 2,
-          borderColor: selected ? c.primary : c.textTertiary,
-          alignItems: "center",
-          justifyContent: "center",
-          marginRight: spacing.sp3,
-        },
-        inner: {
-          width: 10,
-          height: 10,
-          borderRadius: 5,
-          backgroundColor: c.primary,
-        },
-        label: { fontSize: 16, color: c.text, flexShrink: 1 },
-        disabled: { opacity: 0.5 },
-      }),
-    [c, selected],
-  );
 
   return (
     <Pressable
@@ -55,10 +56,19 @@ export function Radio({ label, selected, disabled, ...rest }: RadioProps) {
       disabled={disabled}
       accessibilityRole="radio"
       accessibilityState={{ selected, disabled: !!disabled }}
-      style={[styles.row, disabled && styles.disabled]}
+      style={[S.row, disabled && S.disabled]}
     >
-      <View style={styles.dot}>{selected ? <View style={styles.inner} /> : null}</View>
-      <Text style={styles.label}>{label}</Text>
+      <View
+        style={[
+          S.dot,
+          { borderColor: selected ? c.primary : c.textTertiary },
+        ]}
+      >
+        {selected ? (
+          <View style={[S.inner, { backgroundColor: c.primary }]} />
+        ) : null}
+      </View>
+      <Text style={[S.label, { color: c.text }]}>{label}</Text>
     </Pressable>
   );
 }
