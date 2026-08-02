@@ -8,8 +8,8 @@
  * eliminar cuenta.
  */
 
-import React, { useMemo, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useCallback, useMemo, useState } from "react";
+import { ScrollView, StyleSheet, StyleProp, TextStyle, Text, View } from "react-native";
 
 import { getErrorMessage } from "../api/client";
 import {
@@ -52,7 +52,8 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
   const [passOpen, setPassOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  async function handleUbicacion(comuna: ComunaInline | null) {
+  // TASK-043: useCallback para referencias estables (handlers pasan como props).
+  const handleUbicacion = useCallback(async (comuna: ComunaInline | null) => {
     try {
       await actualizarComuna.mutateAsync(comuna?.id ?? null);
       toast.success(
@@ -67,9 +68,9 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
         getErrorMessage(err),
       );
     }
-  }
+  }, [actualizarComuna, toast]);
 
-  async function handleCambiarPass(current: string, next: string) {
+  const handleCambiarPass = useCallback(async (current: string, next: string) => {
     try {
       await cambiar.mutateAsync({
         currentPassword: current,
@@ -89,9 +90,9 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
     } catch (err) {
       toast.error("No pudimos cambiar la contraseña", getErrorMessage(err));
     }
-  }
+  }, [cambiar, toast]);
 
-  async function handleEliminar(password: string) {
+  const handleEliminar = useCallback(async (password: string) => {
     try {
       await eliminar.mutateAsync(password);
       toast.success("Cuenta eliminada", "Adios!");
@@ -101,7 +102,7 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
     } catch (err) {
       toast.error("No pudimos eliminar la cuenta", getErrorMessage(err));
     }
-  }
+  }, [eliminar, logout, toast]);
 
   const perfil = perfilQ.data;
 
@@ -276,7 +277,8 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
 interface InfoRowProps {
   label: string;
   value: string;
-  valueStyle?: object;
+  /** TASK-042: tipado correcto -- StyleProp<TextStyle> en lugar de object. */
+  valueStyle?: StyleProp<TextStyle>;
   valueMuted?: boolean;
 }
 

@@ -12,6 +12,7 @@ import Svg, { Circle, Line, Path, Polyline } from "react-native-svg";
 export type IconName =
   | "chevron-right"
   | "chevron-left"
+  | "chevron-down"
   | "check"
   | "close"
   | "info"
@@ -75,6 +76,8 @@ function renderIcon(name: IconName, p: object) {
       return <Polyline points="9 18 15 12 9 6" {...p} />;
     case "chevron-left":
       return <Polyline points="15 18 9 12 15 6" {...p} />;
+    case "chevron-down":
+      return <Polyline points="6 9 12 15 18 9" {...p} />;
     case "check":
       return <Polyline points="20 6 9 17 4 12" {...p} />;
     case "close":

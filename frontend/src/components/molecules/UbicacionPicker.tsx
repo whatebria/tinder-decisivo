@@ -17,11 +17,16 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { ComunaInline, Region } from "../../api/endpoints";
 import { useComunas, useRegiones } from "../../api/hooks";
+import { Icon } from "../atoms/Icon";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { typography } from "../../theme/typography";
 import { useThemeColors } from "../../theme/useTheme";
 import { ListPickerModal, type ListPickerItem } from "./ListPickerModal";
+
+/** TASK-040: texto de carga extraido a constante para evitar string hardcodeado. */
+const LOADING_TEXT = "Cargando...";
+
 
 interface UbicacionPickerProps {
   value: ComunaInline | null;
@@ -210,11 +215,11 @@ function Field({
             { color: muted || isPlaceholder ? c.textSecondary : c.text },
           ]}
         >
-          {loading ? "Cargando..." : value}
+          {/* TASK-040: constante LOADING_TEXT en lugar de string inline. */}
+          {loading ? LOADING_TEXT : value}
         </Text>
-        <Text style={[styles.chevron, { color: c.textSecondary }]}>
-          {"\u25BE"}
-        </Text>
+        {/* TASK-041: Icon chevron-down sustituye el Unicode literal (consistente entre plataformas). */}
+        <Icon name="chevron-down" size={16} color={c.textSecondary} />
       </Pressable>
     </View>
   );
@@ -233,7 +238,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.rMd,
   },
   fieldValue: { ...typography.body, flex: 1 },
-  chevron: { fontSize: 16, marginLeft: spacing.sp2 },
+
   clearBtn: { alignSelf: "flex-start", paddingVertical: spacing.sp2 },
   clearText: { ...typography.small, fontWeight: "600" },
 });

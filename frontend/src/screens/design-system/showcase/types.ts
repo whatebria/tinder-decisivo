@@ -11,7 +11,16 @@
 
 import type { ReactNode } from "react";
 
-export type CatalogCategory = "tokens" | "atoms" | "molecules" | "organisms" | "templates";
+export type CatalogCategory = "tokens" | "atoms" | "molecules" | "organisms" | "templates" | "patterns";
+
+/**
+ * Estado del ciclo de vida de un componente.
+ *   stable      — production-ready, API congelada.
+ *   experimental — en uso pero API puede cambiar.
+ *   deprecated  — existe por compatibilidad; usa la alternativa indicada.
+ *   removed     — ya no existe en el codigo; entrada de referencia historica.
+ */
+export type ComponentStatus = "stable" | "experimental" | "deprecated" | "removed";
 
 export interface PropEntry {
   name: string;
@@ -47,4 +56,22 @@ export interface CatalogEntry {
    * Default: `src/components/{path}.tsx`. Usalo para tokens (`src/theme/{path}.ts`).
    */
   sourcePath?: string;
+
+  // --- Metadatos opcionales (enriquecen el catalogo sin romper el auto-generador) ---
+
+  /** Estado del ciclo de vida. Default: 'stable'. */
+  status?: ComponentStatus;
+  /**
+   * Nombre del componente que reemplaza a este (solo cuando status='deprecated').
+   * Ej: '"MatchTier" en organisms'.
+   */
+  deprecatedBy?: string;
+  /** Cuando NO usar este componente. Guideline de uso negativo. */
+  doNotUse?: string[];
+  /** Notas de accesibilidad: roles, aria, contrastes, tamaños minimos. */
+  a11y?: string[];
+  /** Nombres de otros componentes relacionados (para navegacion cruzada). */
+  relatedTo?: string[];
+  /** Nombre del Design System token / guideline que gobierna este componente. */
+  dsReference?: string;
 }

@@ -1,5 +1,3 @@
-import React from "react";
-
 import type { CatalogEntry } from "../../screens/design-system/showcase/types";
 import { QuestionCard } from "./QuestionCard";
 
@@ -8,47 +6,27 @@ type ShowcaseEntry = Pick<
   "description" | "variants" | "props" | "snippet"
 >;
 
-function QuestionCardDemo() {
-  const [v, setV] = React.useState<string | null>(null);
-  return (
-    <QuestionCard
-      questionNumber={3}
-      totalQuestions={12}
-      category="Salud"
-      question="El Estado deberia aumentar el gasto en salud publica financiado con mas impuestos"
-      options={[
-        { value: "strongly_agree", label: "Muy de acuerdo" },
-        { value: "agree", label: "De acuerdo" },
-        { value: "neutral", label: "Neutral" },
-        { value: "disagree", label: "En desacuerdo" },
-        { value: "strongly_disagree", label: "Muy en desacuerdo" },
-      ]}
-      value={v}
-      onChange={setV}
-      onSkip={() => {}}
-      onPrev={() => {}}
-      onNext={() => {}}
-      nextDisabled={v === null}
-    />
-  );
-}
+const OPCIONES = [
+  { value: 5, label: "Muy de acuerdo" },
+  { value: 4, label: "De acuerdo" },
+  { value: 3, label: "Neutral" },
+  { value: 2, label: "En desacuerdo" },
+  { value: 1, label: "Muy en desacuerdo" },
+];
 
 const showcase: ShowcaseEntry = {
   description:
-    "Corazon del cuestionario. Header (N de M + categoria) + Progress + enunciado + RadioGroup + footer (No se / Volver / Siguiente).",
+    "Corazon del cuestionario. Header con numero de pregunta + Badge de categoria, Progress, enunciado, RadioGroup Likert y footer con Anterior / Siguiente. Composicion pura de atoms/molecules.",
   variants: [
-    { label: "interactive", render: () => <QuestionCardDemo /> },
     {
-      label: "sin categoria ni skip",
+      label: "primera pregunta, sin respuesta",
       render: () => (
-        <QuestionCard
+        <QuestionCard<number>
           questionNumber={1}
-          totalQuestions={5}
-          question="Estas de acuerdo?"
-          options={[
-            { value: "yes", label: "Si" },
-            { value: "no", label: "No" },
-          ]}
+          totalQuestions={20}
+          category="Educacion"
+          question="El Estado debe garantizar educacion gratuita y de calidad en todos los niveles."
+          options={OPCIONES}
           value={null}
           onChange={() => {}}
           onNext={() => {}}
@@ -56,33 +34,52 @@ const showcase: ShowcaseEntry = {
         />
       ),
     },
+    {
+      label: "con respuesta + navegacion completa",
+      render: () => (
+        <QuestionCard<number>
+          questionNumber={7}
+          totalQuestions={20}
+          category="Economia"
+          question="El gobierno debe aumentar el salario minimo por encima de la inflacion."
+          options={OPCIONES}
+          value={4}
+          onChange={() => {}}
+          onPrev={() => {}}
+          onNext={() => {}}
+          onSkip={() => {}}
+          nextDisabled={false}
+        />
+      ),
+    },
   ],
   props: [
     { name: "questionNumber", type: "number", required: true },
     { name: "totalQuestions", type: "number", required: true },
-    { name: "category", type: "string", description: "Se muestra como Badge info." },
+    { name: "category", type: "string", description: "Se muestra como Badge." },
     { name: "question", type: "string", required: true },
     { name: "options", type: "ReadonlyArray<RadioOption<T>>", required: true },
     { name: "value", type: "T | null", required: true },
     { name: "onChange", type: "(v: T) => void", required: true },
-    { name: "onSkip", type: "() => void", description: "Boton solo se renderiza si el handler existe." },
-    { name: "onPrev", type: "() => void", description: "Boton solo se renderiza si el handler existe." },
-    { name: "onNext", type: "() => void", description: "Boton solo se renderiza si el handler existe." },
+    { name: "onSkip", type: "() => void", description: "Muestra boton Omitir." },
+    { name: "onPrev", type: "() => void", description: "Muestra boton Anterior." },
+    { name: "onNext", type: "() => void" },
     { name: "nextDisabled", type: "boolean" },
-    { name: "canGoBack", type: "boolean", defaultValue: "true" },
+    { name: "canGoBack", type: "boolean", description: "Default: true si onPrev existe." },
   ],
   snippet: `import { QuestionCard } from "@/components";
 
-<QuestionCard
-  questionNumber={index + 1}
+<QuestionCard<number>
+  questionNumber={currentIndex + 1}
   totalQuestions={preguntas.length}
   category={pregunta.eje_tematico_display}
   question={pregunta.texto}
-  options={pregunta.opciones.map((o) => ({ value: o.id, label: o.texto }))}
-  value={respuestas[pregunta.id]?.opcion_id ?? null}
-  onChange={(id) => setRespuesta(pregunta.id, id)}
-  onNext={() => goNext()}
-  nextDisabled={!respuestas[pregunta.id]}
+  options={opcionesRegulares}
+  value={opcionId}
+  onChange={setOpcionId}
+  onNext={handleNext}
+  onPrev={handlePrev}
+  nextDisabled={opcionId == null}
 />`,
 };
 
