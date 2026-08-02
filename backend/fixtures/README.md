@@ -127,7 +127,7 @@ Filas con `valor` o `candidato_apellido` vacio se saltan (permite CSV parcial).
 |---|---|---|
 | `texto` | si | Enunciado de la pregunta |
 | `tipo_eleccion` | si | Nombre del TipoEleccion (se auto-crea si no existe) |
-| `eje_tematico` | si | Uno de: `ECONOMIA`, `SOCIEDAD`, `AMBIENTE`, `SEGURIDAD`, `DDHH`, `INTERNACIONAL`, `INSTITUCIONAL`, `OTRO` |
+| `eje_tematico` | si | Uno de: `ECONOMIA`, `SOCIEDAD`, `AMBIENTE`, `SEGURIDAD`, `DDHH`, `INTERNACIONAL`, `INSTITUCIONAL` |
 | `orden` | no | Orden en el cuestionario (default 0) |
 
 ## Como adaptar un CSV de opendata.servel.cl

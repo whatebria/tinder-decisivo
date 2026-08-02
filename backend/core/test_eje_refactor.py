@@ -9,10 +9,10 @@ from core.models import Eje, Pregunta, TipoEleccion
 
 @pytest.mark.django_db
 class TestEjeModel:
-    def test_migration_creo_8_ejes_canonicos(self, datos_pesados):
+    def test_migration_creo_7_ejes_canonicos(self, datos_pesados):
         codigos = set(Eje.objects.values_list("codigo", flat=True))
         canonicos = {"ECONOMIA", "SOCIEDAD", "AMBIENTE", "SEGURIDAD",
-                     "DDHH", "INTERNACIONAL", "INSTITUCIONAL", "OTRO"}
+                     "DDHH", "INTERNACIONAL", "INSTITUCIONAL"}
         assert canonicos.issubset(codigos)
 
     def test_ejes_tienen_color_default(self, datos_pesados):
@@ -61,8 +61,8 @@ class TestEndpointEjes:
         client = APIClient()
         resp = client.get(reverse("eje-list"))
         assert resp.status_code == 200
-        # Al menos los 8 canonicos.
-        assert len(resp.data) >= 8
+        # Al menos los 7 canonicos.
+        assert len(resp.data) >= 7
         # Verificar campos expuestos.
         first = resp.data[0]
         assert set(first.keys()) >= {"id", "codigo", "nombre", "color", "orden", "activo"}

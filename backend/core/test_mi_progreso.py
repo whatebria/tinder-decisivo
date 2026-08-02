@@ -54,7 +54,7 @@ def escenario(db):
     def _pregunta(tipo, texto, orden):
         p = Pregunta.objects.create(
             texto=texto, tipo_eleccion=tipo, orden=orden,
-            eje_tematico=Pregunta.EJE_OTRO,
+            eje_tematico=Pregunta.EJE_INSTITUCIONAL,
         )
         for v in range(1, 6):
             OpcionRespuesta.objects.create(pregunta=p, texto=f"Op {v}", valor=v)

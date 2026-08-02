@@ -43,7 +43,7 @@ def escenario_con_base(db):
     tipo_base = TipoEleccion.objects.create(nombre="Base", es_base=True)
     tipo_pres = TipoEleccion.objects.create(nombre="Presidencial")
 
-    def _crear_preg(tipo, texto, orden, eje=Pregunta.EJE_OTRO):
+    def _crear_preg(tipo, texto, orden, eje=Pregunta.EJE_INSTITUCIONAL):
         p = Pregunta.objects.create(
             texto=texto, tipo_eleccion=tipo, orden=orden, eje_tematico=eje,
         )
