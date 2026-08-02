@@ -46,6 +46,7 @@ import type { Sentiment } from "../components";
 import {
   Button,
   CandidatoPosturas,
+  EmptyState,
   IconButton,
   Icon,
   MatchExplanation,
@@ -105,8 +106,10 @@ export function DetalleCandidatoScreen({
   const candidatoQ = useCandidato(candidatoId);
   const noticiasQ = useNoticiasCandidato(candidatoId);
   const posturasQ = usePosturasCandidato(candidatoId, tipoEleccionId);
-  const favoritosQ = useFavoritos();
-  const descartadosQ = useDescartados();
+  // BUG-030: guests no usan favoritos/descartados (ActionRow no renderiza para ellos).
+  // Evita 2 requests de red por visita en modo invitado.
+  const favoritosQ = useFavoritos({ enabled: !isGuest });
+  const descartadosQ = useDescartados({ enabled: !isGuest });
   const tiposQ = useTiposEleccion();
   const toggleFav = useToggleFavorito();
   const toggleDesc = useToggleDescartado();
@@ -148,16 +151,26 @@ export function DetalleCandidatoScreen({
   }
 
   if (!candidato) {
+    // BUG-031: distinguir error de red (retry disponible) de candidato no encontrado (404).
+    if (candidatoQ.isError) {
+      return (
+        <ScreenChrome>
+          <EmptyState
+            icon="alert"
+            title="No pudimos cargar el perfil"
+            description="Revisa tu conexion e intentalo de nuevo."
+            actionLabel="Reintentar"
+            onAction={() => { void candidatoQ.refetch(); }}
+          />
+        </ScreenChrome>
+      );
+    }
     return (
       <ScreenChrome>
-        <View style={styles.center}>
-          <Text style={[styles.paragraph, styles.centerMuted, { color: c.textSecondary }]}>
-            Candidato no encontrado.
-          </Text>
-          <Button variant="ghost" onPress={() => navigation.goBack()}>
-            Volver
-          </Button>
-        </View>
+        <EmptyState
+          icon="search"
+          title="Candidato no encontrado"
+        />
       </ScreenChrome>
     );
   }
