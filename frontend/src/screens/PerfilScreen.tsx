@@ -209,9 +209,9 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
             ]}
           >
             <Text style={[styles.helpText, { color: c.textSecondary }]}>
-              Setea tu comuna para ver solo los candidatos que puedes votar
-              (alcaldes de tu comuna, diputados de tu distrito, presidenciales).
-              Puedes cambiarla o quitarla cuando quieras.
+              {perfil?.comuna
+                ? "Tu ubicacion permite ver solo los candidatos que puedes votar. Puedes cambiarla cuando quieras."
+                : "Selecciona tu region y comuna para ver solo los candidatos que puedes votar en tu distrito."}
             </Text>
             <UbicacionPicker
               value={perfil?.comuna ?? null}
@@ -232,19 +232,9 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
           <View
             style={[
               styles.dangerZone,
-              { borderColor: c.danger, backgroundColor: tints.danger50 },
+              { borderColor: c.danger },
             ]}
           >
-            <View
-              style={[
-                styles.dangerZoneHeader,
-                { borderBottomColor: c.danger },
-              ]}
-            >
-              <Text style={[styles.dangerZoneTitle, { color: c.danger }]}>
-                Zona de peligro
-              </Text>
-            </View>
             <NavRow
               label="Eliminar mi cuenta"
               variant="danger"
@@ -386,18 +376,10 @@ const styles = StyleSheet.create({
 
   actions: { gap: spacing.sp2 },
   // UX-043: zona de peligro para acciones destructivas
+  // UX-076: sin fondo ni header -- borde danger es suficiente comunicacion.
   dangerZone: {
     borderRadius: radii.rLg,
     borderWidth: 1.5,
     overflow: "hidden",
-  },
-  dangerZoneHeader: {
-    paddingVertical: spacing.sp2,
-    paddingHorizontal: spacing.sp3,
-    borderBottomWidth: 1,
-  },
-  dangerZoneTitle: {
-    ...typography.overline,
-    fontWeight: "800" as const,
   },
 });

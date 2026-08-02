@@ -41,7 +41,6 @@ import { usePerfil } from "../api/hooks";
 import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
-import { tints } from "../theme/colors";
 import { useThemeColors } from "../theme/useTheme";
 
 export function ConfiguracionScreen({
@@ -165,27 +164,12 @@ export function ConfiguracionScreen({
         guestCta: { alignSelf: "stretch" },
 
         // UX-033: DangerZone — enmarca las acciones destructivas (DS-11 P8).
-        // dangerBg no existe como token semantico todavia; se simula con
-        // tints.danger50 (light) que es exactamente el fondo suave de alerta.
+        // UX-076: sin fondo ni header — borde danger es suficiente comunicacion.
         dangerZone: {
           borderRadius: radii.rLg,
           borderWidth: 1.5,
           borderColor: c.danger,
-          backgroundColor: tints.danger50,
           overflow: "hidden",
-        },
-        dangerZoneHeader: {
-          paddingHorizontal: spacing.sp4,
-          paddingVertical: spacing.sp2,
-          borderBottomWidth: 1,
-          borderBottomColor: c.danger,
-        },
-        dangerZoneTitle: {
-          ...typography.overline,
-          fontWeight: "800",
-          color: c.danger,
-          textTransform: "uppercase",
-          letterSpacing: 1,
         },
       }),
     [c],
@@ -364,12 +348,10 @@ export function ConfiguracionScreen({
         ) : null}
 
         {/* UX-033: Zona de peligro (DS-11 P8) -- agrupa acciones destructivas. */}
+        {/* UX-076: sin fondo rojo ni header -- el borde danger comunica suficiente. */}
         {!isGuest ? (
           <View style={[styles.section, { marginTop: spacing.sp3 }]}>
             <View style={styles.dangerZone}>
-              <View style={styles.dangerZoneHeader}>
-                <Text style={styles.dangerZoneTitle}>Zona de peligro</Text>
-              </View>
               <NavRow
                 label="Cerrar sesión"
                 variant="danger"
