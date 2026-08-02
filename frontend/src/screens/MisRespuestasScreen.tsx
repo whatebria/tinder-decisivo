@@ -223,16 +223,6 @@ export function MisRespuestasScreen({
                 <Text style={[styles.intro, { color: c.textSecondary }]}>
                   Toca cualquier pregunta para modificar tu respuesta.
                 </Text>
-                {tipoActivoParaReiniciar ? (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onPress={() => setTipoAReiniciar(tipoActivoParaReiniciar)}
-                    accessibilityLabel={`Reiniciar cuestionario ${tipoActivoParaReiniciar.nombre}`}
-                  >
-                    Reiniciar cuestionario
-                  </Button>
-                ) : null}
               </View>
 
               {/* Secciones por tipo -> grupos por eje -> cards */}
@@ -246,6 +236,59 @@ export function MisRespuestasScreen({
                   />
                 ))}
               </View>
+
+              {/* UX-051: Zona de peligro al final -- señal destructiva clara antes del modal. */}
+              {tipoActivoParaReiniciar ? (
+                <View
+                  style={[
+                    styles.dangerZone,
+                    { borderColor: c.danger, backgroundColor: c.danger50 },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.dangerZoneHeader,
+                      { borderBottomColor: c.danger },
+                    ]}
+                  >
+                    <Text
+                      style={[styles.dangerZoneTitle, { color: c.danger }]}
+                    >
+                      Zona de peligro
+                    </Text>
+                  </View>
+                  <View style={styles.dangerZoneBody}>
+                    <Text
+                      style={[
+                        styles.dangerZoneBodyText,
+                        { color: c.text },
+                      ]}
+                    >
+                      Reiniciar cuestionario{" "}
+                      {tipoActivoParaReiniciar.nombre}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.dangerZoneDesc,
+                        { color: c.textSecondary },
+                      ]}
+                    >
+                      Borra tus respuestas y tu ranking calculado. Tus
+                      favoritos se mantienen.
+                    </Text>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onPress={() =>
+                        setTipoAReiniciar(tipoActivoParaReiniciar)
+                      }
+                      accessibilityLabel={`Reiniciar cuestionario ${tipoActivoParaReiniciar.nombre}`}
+                    >
+                      Reiniciar
+                    </Button>
+                  </View>
+                </View>
+              ) : null}
             </>
           )}
         </ScrollView>
@@ -364,11 +407,18 @@ function RespuestaCard({ respuesta, onPress }: RespuestaCardProps) {
       accessibilityLabel={`Editar respuesta: ${respuesta.pregunta_texto}`}
       accessibilityRole="button"
     >
-      <Text style={[styles.pregunta, { color: c.text }]}>
-        {respuesta.pregunta_texto}
-      </Text>
+      {/* UX-052: fila con chevron a la derecha como affordance de edicion. */}
+      <View style={styles.preguntaRow}>
+        <Text style={[styles.pregunta, { color: c.text, flex: 1 }]}>
+          {respuesta.pregunta_texto}
+        </Text>
+        <Text style={[styles.chevron, { color: c.textTertiary }]}>
+          ›
+        </Text>
+      </View>
       <View style={styles.metaRow}>
-        <Text style={[styles.opActual, { color: c.primary }]}>
+        {/* UX-053: opcion elegida usa c.secondary (verde = confirmado), no c.primary (accion). */}
+        <Text style={[styles.opActual, { color: c.secondary }]}>
           {opActual?.texto ?? "(opcion desconocida)"}
         </Text>
         <Text style={[styles.metaSep, { color: c.textTertiary }]}>·</Text>
@@ -376,9 +426,6 @@ function RespuestaCard({ respuesta, onPress }: RespuestaCardProps) {
           {PESO_LABELS[respuesta.peso] ?? `peso ${respuesta.peso}`}
         </Text>
       </View>
-      <Text style={[styles.hint, { color: c.textTertiary }]}>
-        Toca para editar
-      </Text>
     </Pressable>
   );
 }
@@ -429,6 +476,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     gap: spacing.sp2,
   },
+  // UX-052: fila de pregunta + chevron.
+  preguntaRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: spacing.sp2,
+  },
+  chevron: { fontSize: 20, lineHeight: 24 },
   pregunta: {
     ...typography.body,
     fontWeight: "600",
@@ -445,5 +499,35 @@ const styles = StyleSheet.create({
   },
   metaSep: typography.small,
   metaPeso: typography.small,
-  hint: typography.overline,
+
+  // UX-051: zona de peligro al fondo de pantalla.
+  dangerZone: {
+    borderRadius: radii.rLg,
+    borderWidth: 1.5,
+    overflow: "hidden",
+    marginTop: spacing.sp2,
+  },
+  dangerZoneHeader: {
+    paddingHorizontal: spacing.sp4,
+    paddingVertical: spacing.sp2,
+    borderBottomWidth: 1,
+  },
+  dangerZoneTitle: {
+    ...typography.overline,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+  dangerZoneBody: {
+    padding: spacing.sp4,
+    gap: spacing.sp2,
+  },
+  dangerZoneBodyText: {
+    ...typography.small,
+    fontWeight: "600",
+  },
+  dangerZoneDesc: {
+    ...typography.overline,
+    marginBottom: spacing.sp1,
+  },
 });

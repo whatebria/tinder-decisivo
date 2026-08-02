@@ -51,6 +51,12 @@ export interface MatchSummaryCardProps {
   onVerPerfil: () => void;
   style?: ViewStyle;
   accessibilityLabel?: string;
+  /**
+   * UX-054: en layout vertical (ej: HomeScreen) la card debe ocupar el ancho
+   * completo del contenedor. Sin esta prop mantiene el ancho fijo de 260px
+   * (util en scrolls horizontales).
+   */
+  fullWidth?: boolean;
 }
 
 const CARD_WIDTH = 260;
@@ -76,6 +82,7 @@ export function MatchSummaryCard({
   onVerPerfil,
   style,
   accessibilityLabel,
+  fullWidth = false,
 }: MatchSummaryCardProps) {
   const c = useThemeColors();
   const isDark = useIsDark();
@@ -96,7 +103,7 @@ export function MatchSummaryCard({
     () =>
       StyleSheet.create({
         card: {
-          width: CARD_WIDTH,
+          width: fullWidth ? "100%" : CARD_WIDTH,
           padding: spacing.sp3,
           borderRadius: radii.rLg,
           gap: spacing.sp3,
@@ -140,7 +147,7 @@ export function MatchSummaryCard({
           textAlign: "right",
         },
       }),
-    [c, affinityColor],
+    [c, affinityColor, fullWidth],
   );
 
   return (

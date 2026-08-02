@@ -390,6 +390,7 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
                       return (
                         <MatchSummaryCard
                           key={item.tipo_eleccion_id}
+                          fullWidth
                           candidatoNombre={nombre}
                           candidatoFotoUrl={candidato.profile_picture ?? null}
                           tipoEleccionNombre={item.tipo_eleccion_nombre}

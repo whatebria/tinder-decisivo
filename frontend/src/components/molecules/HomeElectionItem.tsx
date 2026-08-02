@@ -116,7 +116,8 @@ export function HomeElectionItem({
           backgroundColor: c.card,
           borderRadius: radii.rLg,
           borderWidth: 1,
-          borderColor: estado === "en_curso" ? c.primary : c.border2,
+          // UX-055: c.secondary (verde = activo/en progreso), no c.primary (azul = accion).
+          borderColor: estado === "en_curso" ? c.secondary : c.border2,
           padding: spacing.sp4,
         },
         infoCol: {
