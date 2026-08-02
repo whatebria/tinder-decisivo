@@ -80,7 +80,9 @@ export function ConfiguracionScreen({
       StyleSheet.create({
         scroll: { backgroundColor: c.bg, flex: 1 },
         content: {
-          padding: spacing.sp4,
+          // UX-063: padding horizontal/bottom alineado con Candidatos/Comparar.
+          // paddingTop no se usa -- el HomeTopBar lleva su propio marginTop.
+          paddingHorizontal: spacing.sp4,
           paddingBottom: spacing.sp8,
           gap: spacing.sp5,
         },
@@ -196,7 +198,10 @@ export function ConfiguracionScreen({
   return (
     <AppShell active="config" navigation={navigation}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-        <HomeTopBar brand="Configuración" />
+        <HomeTopBar
+          brand="Configuración"
+          style={{ marginTop: spacing.sp3 }}
+        />
 
         {/* 1. Cuenta */}
         {!isGuest ? (

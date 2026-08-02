@@ -39,6 +39,7 @@ import {
   Button,
   Chip,
   CoachMarkTour,
+  CollapsibleFilterSection,
   Icon,
   Link,
   RankingCard,
@@ -497,8 +498,13 @@ export function ResultadosScreen({
         ) : null}
 
         {partidosDisponibles.length > 1 ? (
-          <View style={{ gap: spacing.sp2 }}>
-            <Text style={styles.sectionLabel}>Filtrar por partido</Text>
+          // UX-060: filtro de partido colapsado por defecto para no ocupar espacio
+          // cuando el usuario no lo necesita. summary muestra el estado actual.
+          <CollapsibleFilterSection
+            title="Filtrar por partido"
+            summary={partidoFiltro ?? "Todos"}
+            defaultExpanded={false}
+          >
             <View style={styles.chipRow}>
               <Chip
                 active={partidoFiltro === null}
@@ -518,7 +524,7 @@ export function ResultadosScreen({
                 </Chip>
               ))}
             </View>
-          </View>
+          </CollapsibleFilterSection>
         ) : null}
 
         {top && topColor && topChart ? (
