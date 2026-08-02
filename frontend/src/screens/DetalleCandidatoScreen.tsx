@@ -70,8 +70,10 @@ import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
 import { iniciales, nombreCompleto } from "../utils/candidato";
 import { ResumenTab } from "./DetalleCandidato/ResumenTab";
+import { AfinidadTab } from "./DetalleCandidato/AfinidadTab";
 
-type PerfilTab = "resumen" | "posturas";
+// UX-059: agregado "afinidad" como tercer tab (solo visible cuando hay match).
+type PerfilTab = "resumen" | "posturas" | "afinidad";
 
 /** Mapea el string de confianza del backend al tier del DS. */
 // (confianzaToTier migrado a services/matching -- TASK-035)
@@ -221,6 +223,11 @@ export function DetalleCandidatoScreen({
           items={[
             { value: "resumen", label: "Resumen" },
             { value: "posturas", label: "Posturas", count: posturas.length },
+            // UX-059: tab Afinidad solo cuando hay match -- evita confusion
+            // con pantalla vacia si el user no hizo el cuestionario.
+            ...(hasMatch
+              ? [{ value: "afinidad" as const, label: "Afinidad" }]
+              : []),
           ]}
           style={styles.tabsStretch}
         />
@@ -228,17 +235,21 @@ export function DetalleCandidatoScreen({
         {tab === "resumen" ? (
           <ResumenTab
             candidato={candidato}
-            hasMatch={hasMatch}
-            chartData={chartData}
-            scoreCol={scoreCol}
             posturas={posturas}
-            isGuest={isGuest}
             onVerTodasPosturas={() => setTab("posturas")}
           />
         ) : tab === "posturas" ? (
           <CandidatoPosturas
             posturas={posturas}
             loading={posturasQ.isLoading}
+          />
+        ) : tab === "afinidad" && hasMatch ? (
+          <AfinidadTab
+            candidatoId={candidatoId}
+            chartData={chartData}
+            scoreCol={scoreCol}
+            matchPct={matchPct!}
+            isAuthenticated={!isGuest}
           />
         ) : null}
       </ScrollView>

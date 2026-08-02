@@ -4,9 +4,10 @@
  * Muestra (en orden):
  *   1. Bio del candidato (si existe)
  *   2. Propuesta electoral (si existe)
- *   3. Radar chart de afinidad por eje tematico (si hay match y datos)
- *   4. Posturas destacadas (hasta 3, con color semantico Likert)
- *   5. MatchExplanation (solo usuarios autenticados con match)
+ *   3. Posturas destacadas (hasta 3, con color semantico Likert)
+ *
+ * UX-059: RadarChart y MatchExplanation se movieron a AfinidadTab.
+ * ResumenTab queda enfocado en la informacion biografica/programatica.
  *
  * Co-located con DetalleCandidatoScreen en screens/DetalleCandidato/.
  * Sin estado propio: todos los datos llegan por props.
@@ -16,7 +17,6 @@ import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { Candidato, PosturaCandidatoDetalle } from "../../api/endpoints";
-import { MatchExplanation, RadarChart } from "../../components";
 import { getLikertColor } from "../../services/matching";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
@@ -25,11 +25,7 @@ import { useIsDark, useThemeColors } from "../../theme/useTheme";
 
 export interface ResumenTabProps {
   candidato: Candidato;
-  hasMatch: boolean;
-  chartData: Record<string, number>;
-  scoreCol: string;
   posturas: PosturaCandidatoDetalle[];
-  isGuest: boolean;
   /**
    * UX-041: callback para navegar a la tab de posturas completa.
    * Al recibirlo, se muestra un CTA "Ver las N posturas" bajo el preview.
@@ -39,11 +35,7 @@ export interface ResumenTabProps {
 
 export function ResumenTab({
   candidato,
-  hasMatch,
-  chartData,
-  scoreCol,
   posturas,
-  isGuest,
   onVerTodasPosturas,
 }: ResumenTabProps) {
   const c = useThemeColors();
@@ -71,17 +63,6 @@ export function ResumenTab({
           <Text style={[styles.paragraph, { color: c.text }]}>
             {candidato.propuesta_electoral}
           </Text>
-        </View>
-      ) : null}
-
-      {hasMatch && Object.keys(chartData).length >= 3 ? (
-        <View style={styles.section}>
-          <Text style={[styles.sectionLabel, { color: c.textSecondary }]}>
-            Afinidad por eje tematico
-          </Text>
-          <View style={styles.radarWrap}>
-            <RadarChart data={chartData} size={260} color={scoreCol} />
-          </View>
         </View>
       ) : null}
 
@@ -129,12 +110,6 @@ export function ResumenTab({
           )}
         </View>
       ) : null}
-
-      {!isGuest && hasMatch ? (
-        <View style={styles.section}>
-          <MatchExplanation candidatoId={candidato.id} />
-        </View>
-      ) : null}
     </View>
   );
 }
@@ -147,10 +122,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   paragraph: { ...typography.small },
-  radarWrap: {
-    alignItems: "center",
-    paddingVertical: spacing.sp2,
-  },
   posturasList: { gap: spacing.sp4, marginTop: spacing.sp1 },
   posturaCard: {
     borderWidth: 1,
