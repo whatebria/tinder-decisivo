@@ -18,7 +18,6 @@ export type OpcionRespuesta = Schemas["OpcionRespuesta"];
 export type MatchResult = Schemas["MatchCandidatoResult"];
 export type MiProgresoItem = Schemas["MiProgresoItem"];
 export type MiProgresoTopMatch = Schemas["MiProgresoTopMatch"];
-export type Noticia = Schemas["Noticia"];
 export type EjeTematico = Schemas["EjeTematicoEnum"];
 
 /**
@@ -158,49 +157,6 @@ export async function getMiProgreso(): Promise<MiProgresoItem[]> {
   return data;
 }
 
-// ============================================================
-// Noticias
-// ============================================================
-export interface NoticiaFeedFilters {
-  candidatoId?: number | null;
-  fuente?: string | null;
-  dias?: number | null;
-  q?: string | null;
-}
-
-export async function noticiasPorCandidato(
-  candidatoId: number
-): Promise<Noticia[]> {
-  const { data } = await apiClient.get<Noticia[]>(
-    `/candidatos/${candidatoId}/noticias/`
-  );
-  return data;
-}
-
-/**
- * Feed global de noticias con filtros opcionales.
- *
- * NOTA: /noticias/ es el unico endpoint paginado (PageNumberPagination).
- * Por ahora extraemos `results` y descartamos next/previous — la UI actual
- * muestra las primeras 4. Si en algun momento la Novedades feed necesita
- * scroll infinito, migrar a `useInfiniteQuery` y devolver el objeto entero.
- */
-export async function listNoticias(
-  filters: NoticiaFeedFilters = {}
-): Promise<Noticia[]> {
-  const params: Record<string, string | number> = {};
-  if (filters.candidatoId) params.candidato_id = filters.candidatoId;
-  if (filters.fuente) params.fuente = filters.fuente;
-  if (filters.dias) params.dias = filters.dias;
-  if (filters.q && filters.q.trim()) params.q = filters.q.trim();
-  const { data } = await apiClient.get<{
-    count: number;
-    next: string | null;
-    previous: string | null;
-    results: Noticia[];
-  }>("/noticias/", { params });
-  return data.results;
-}
 
 // ============================================================
 // Bookmarking: favoritos, descartados
@@ -247,30 +203,10 @@ export async function deleteDescartado(descartadoId: number): Promise<void> {
   await apiClient.delete(`/descartados/${descartadoId}/`);
 }
 
-// -- Bookmarks de contenido: noticias y posturas guardadas -----------------
-
-/** Alias del schema: bookmark de una noticia (incluye la noticia embebida). */
-export type NoticiaBookmark = Schemas["NoticiaBookmark"];
+// -- Bookmarks de contenido: posturas guardadas ---------------------------
 
 /** Alias del schema: bookmark de una postura (incluye la postura embebida). */
 export type PosturaBookmark = Schemas["PosturaBookmark"];
-
-export async function listNoticiasBookmarks(): Promise<NoticiaBookmark[]> {
-  const { data } = await apiClient.get<NoticiaBookmark[]>("/noticias-guardadas/");
-  return data;
-}
-
-export async function addNoticiaBookmark(noticiaId: number): Promise<NoticiaBookmark> {
-  const { data } = await apiClient.post<NoticiaBookmark>(
-    "/noticias-guardadas/",
-    { noticia: noticiaId }
-  );
-  return data;
-}
-
-export async function deleteNoticiaBookmark(bookmarkId: number): Promise<void> {
-  await apiClient.delete(`/noticias-guardadas/${bookmarkId}/`);
-}
 
 export async function listPosturasBookmarks(): Promise<PosturaBookmark[]> {
   const { data } = await apiClient.get<PosturaBookmark[]>("/posturas-guardadas/");

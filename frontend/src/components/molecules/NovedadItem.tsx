@@ -2,28 +2,27 @@
  * NovedadItem: item del feed "Novedades" en el Home HUB.
  *
  * Basado en design-system-lowfi.html · Home HUB > Novedades.
- * 3 kinds:
+ * 2 kinds:
  *   - action: acción sugerida (icon + title + sub + button "Ir")
- *   - noticia: thumb + title + snippet + chip categoria + when
  *   - update: avatar + title + subtitle (sin CTA)
+ *
+ * TASK-070: kind "noticia" eliminado tras TASK-039 (YAGNI).
  */
 
 import React, { useMemo } from "react";
-import { Image, Pressable, StyleSheet, Text, View, type ViewStyle } from "react-native";
+import { Pressable, StyleSheet, Text, View, type ViewStyle } from "react-native";
 
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
 import { Icon, type IconName } from "../atoms/Icon";
 import { Avatar } from "../atoms/Avatar";
-import { Chip } from "../atoms/Chip";
 import { Button } from "../atoms/Button";
 
-export type NovedadKind = "action" | "noticia" | "update";
+export type NovedadKind = "action" | "update";
 
 export type NovedadItemProps =
   | ActionProps
-  | NoticiaProps
   | UpdateProps;
 
 interface CommonProps {
@@ -38,15 +37,6 @@ interface ActionProps extends CommonProps {
   subtitle?: string;
   ctaLabel?: string;
   onCta?: () => void;
-}
-
-interface NoticiaProps extends CommonProps {
-  kind: "noticia";
-  imageUrl?: string;
-  title: string;
-  snippet?: string;
-  category?: string;
-  when?: string;
 }
 
 interface UpdateProps extends CommonProps {
@@ -70,12 +60,6 @@ export function NovedadItem(props: NovedadItemProps) {
           backgroundColor: c.card,
         },
         row: { flexDirection: "row", gap: spacing.sp2, alignItems: "center" },
-        thumb: {
-          width: 60,
-          height: 60,
-          borderRadius: radii.rSm,
-          backgroundColor: c.bg,
-        },
         body: { flex: 1, gap: 2 },
         title: {
           fontSize: 14,
@@ -86,13 +70,6 @@ export function NovedadItem(props: NovedadItemProps) {
           fontSize: 12,
           color: c.textSecondary,
         },
-        metaRow: {
-          flexDirection: "row",
-          alignItems: "center",
-          gap: spacing.sp2,
-          marginTop: 4,
-        },
-        when: { fontSize: 10, color: c.textSecondary },
         actionCard: {
           borderColor: c.primary,
         },
@@ -123,32 +100,6 @@ export function NovedadItem(props: NovedadItemProps) {
             {props.ctaLabel ?? "Ir"}
           </Button>
         ) : null}
-      </View>
-    );
-  } else if (props.kind === "noticia") {
-    inner = (
-      <View style={styles.row}>
-        {props.imageUrl ? (
-          <Image source={{ uri: props.imageUrl }} style={styles.thumb} />
-        ) : (
-          <View style={styles.thumb} />
-        )}
-        <View style={styles.body}>
-          <Text style={styles.title} numberOfLines={2}>
-            {props.title}
-          </Text>
-          {props.snippet ? (
-            <Text style={styles.subtitle} numberOfLines={2}>
-              {props.snippet}
-            </Text>
-          ) : null}
-          {(props.category || props.when) ? (
-            <View style={styles.metaRow}>
-              {props.category ? <Chip>{props.category}</Chip> : null}
-              {props.when ? <Text style={styles.when}>{props.when}</Text> : null}
-            </View>
-          ) : null}
-        </View>
       </View>
     );
   } else {

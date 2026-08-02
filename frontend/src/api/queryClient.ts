@@ -29,8 +29,6 @@ export const queryClient = new QueryClient({
  * `["matches"]`) rompen la invalidacion sin warning.
  *
  * CONVENCION de namespaces (evita colisiones por prefix cuando invalidamos):
- *   ["noticias", "feed", ...filtros]      -> feed global
- *   ["noticias", "porCandidato", id]      -> noticias de UN candidato
  *   ["matches", tipoEleccionId]           -> ranking del user
  *   ["match-detalle", candidatoId]        -> explicacion pregunta-a-pregunta
  */
@@ -78,28 +76,8 @@ export const queryKeys = {
     tipoEleccionId: number | null | undefined,
   ) => ["posturas", candidatoId ?? null, tipoEleccionId ?? null] as const,
 
-  // Noticias ----------------------------------------------------------------
-  /** Feed global con filtros. Namespace separado de las de candidato. */
-  noticiasFeed: (filters: {
-    candidatoId?: number | null;
-    fuente?: string | null;
-    dias?: number | null;
-    q?: string | null;
-  }) =>
-    [
-      "noticias",
-      "feed",
-      filters.candidatoId ?? null,
-      filters.fuente ?? null,
-      filters.dias ?? null,
-      filters.q ?? null,
-    ] as const,
-  noticiasCandidato: (id: number) =>
-    ["noticias", "porCandidato", id] as const,
-
   // Bookmarking -------------------------------------------------------------
   favoritos: ["favoritos"] as const,
   descartados: ["descartados"] as const,
-  noticiasBookmarks: ["noticias-bookmarks"] as const,
   posturasBookmarks: ["posturas-bookmarks"] as const,
 };

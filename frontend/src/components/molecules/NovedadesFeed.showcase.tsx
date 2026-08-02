@@ -10,10 +10,10 @@ type ShowcaseEntry = Pick<
 
 const showcase: ShowcaseEntry = {
   description:
-    "Lista vertical de NovedadItems (feed mixto del HUB: action, noticia, update).",
+    "Lista vertical de NovedadItems (feed del HUB: action, update).",
   variants: [
     {
-      label: "3 items mixtos",
+      label: "2 items mixtos",
       render: () => (
         <View style={{ maxWidth: 500 }}>
           <NovedadesFeed
@@ -26,14 +26,6 @@ const showcase: ShowcaseEntry = {
                 subtitle: "Para desbloquear tu match completo",
                 ctaLabel: "Ir",
                 onCta: () => {},
-              },
-              {
-                key: "n1",
-                kind: "noticia",
-                title: "Debate presidencial se realizara el 15 de noviembre",
-                snippet: "El CNTV confirmo la fecha del primer debate obligatorio...",
-                category: "Electoral",
-                when: "hace 2h",
               },
               {
                 key: "u1",
