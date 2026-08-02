@@ -3,7 +3,7 @@
  * Si `imageUrl` está presente, muestra la foto; si no, cae a `initials`.
  */
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import {
   Image,
   StyleSheet,
@@ -39,6 +39,17 @@ export interface AvatarProps {
   accessibilityLabel?: string;
 }
 
+// TASK-066: StyleSheet a nivel de modulo para el layout base (estatico).
+// dimension, backgroundColor y color se aplican inline (dependen de props/tema).
+const s = StyleSheet.create({
+  base: {
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  text: { fontWeight: "600" },
+});
+
 export function Avatar({
   initials,
   imageUrl,
@@ -55,41 +66,24 @@ export function Avatar({
   const [imageFailed, setImageFailed] = useState(false);
   const showImage = !!imageUrl && !imageFailed;
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        base: {
-          width: dim.size,
-          height: dim.size,
-          borderRadius: dim.size / 2,
-          backgroundColor: bg,
-          alignItems: "center",
-          justifyContent: "center",
-          overflow: "hidden",
-        },
-        image: { width: dim.size, height: dim.size },
-        text: { color: fg, fontSize: dim.fontSize, fontWeight: "600" },
-      }),
-    [dim, bg, fg],
-  );
-
   const shown = initials.slice(0, 3).toUpperCase();
+  const circleDim = { width: dim.size, height: dim.size, borderRadius: dim.size / 2 };
 
   return (
     <View
       accessibilityRole="image"
       accessibilityLabel={accessibilityLabel ?? `Avatar ${shown}`}
-      style={[styles.base, style]}
+      style={[s.base, circleDim, { backgroundColor: bg }, style]}
     >
       {showImage ? (
         <Image
           source={{ uri: imageUrl as string }}
-          style={styles.image}
+          style={circleDim}
           onError={() => setImageFailed(true)}
           resizeMode="cover"
         />
       ) : (
-        <Text style={styles.text}>{shown}</Text>
+        <Text style={[s.text, { color: fg, fontSize: dim.fontSize }]}>{shown}</Text>
       )}
     </View>
   );

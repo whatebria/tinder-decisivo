@@ -18,8 +18,8 @@
  *   <Heading level={2} color={c.success}>Enviado</Heading>
  */
 
-import React, { useMemo } from "react";
-import { StyleSheet, Text, type StyleProp, type TextStyle } from "react-native";
+import React from "react";
+import { Text, type StyleProp, type TextStyle } from "react-native";
 
 import { typography } from "../../theme/typography";
 import { useThemeColors } from "../../theme/useTheme";
@@ -43,6 +43,8 @@ export interface HeadingProps {
   accessibilityLiveRegion?: "none" | "polite" | "assertive";
 }
 
+// TASK-066: estilos base a nivel de modulo (los niveles son estaticos).
+// El color dinamico (tema) se aplica inline.
 const LEVEL_STYLES = {
   1: typography.h1,
   2: typography.h2,
@@ -60,20 +62,11 @@ export function Heading({
   const c = useThemeColors();
   const finalColor = color ?? c.text;
 
-  const baseStyle = useMemo(
-    () =>
-      StyleSheet.flatten([
-        LEVEL_STYLES[level],
-        { color: finalColor },
-      ]) as TextStyle,
-    [level, finalColor],
-  );
-
   return (
     <Text
       accessibilityRole="header"
       aria-level={level}
-      style={[baseStyle, style]}
+      style={[LEVEL_STYLES[level], { color: finalColor }, style]}
       numberOfLines={numberOfLines}
       accessibilityLiveRegion={accessibilityLiveRegion}
     >

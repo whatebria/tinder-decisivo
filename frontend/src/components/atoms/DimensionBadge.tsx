@@ -4,7 +4,8 @@
  * Atomo reusable: dado un `dimension` key, resuelve el color de fondo
  * (badge, invariante entre themes) y el icono desde el catalogo de
  * `src/domain/dimensiones.ts`. El texto interior es siempre blanco (chequeado
- * WCAG AA en `dimensiones.test.ts` para los 5 colores).\n *
+ * WCAG AA en `dimensiones.test.ts` para los 5 colores).
+ *
  * Uso tipico:
  *   <DimensionBadge dimension="economico" />          // 24x24 default
  *   <DimensionBadge dimension="social" size="sm" />   // 18x18 compacto
@@ -12,7 +13,7 @@
  *
  * Consumidores: DimensionCard, futuros filters/badges de dimension.
  */
-import React, { useMemo } from "react";
+import React from "react";
 import { StyleSheet, Text, View, type ViewStyle } from "react-native";
 
 import { getDimension, type DimensionKey } from "../../domain/dimensiones";
@@ -32,6 +33,19 @@ const SIZES: Record<DimensionBadgeSize, { box: number; font: number }> = {
   lg: { box: 32, font: 16 },
 };
 
+// TASK-066: estilos de layout a nivel de modulo. Los colores (dim.badge) y
+// dimensiones (size prop) se aplican inline — dependen de props, no del tema.
+const s = StyleSheet.create({
+  container: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  text: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+  },
+});
+
 export function DimensionBadge({
   dimension,
   size = "md",
@@ -40,34 +54,24 @@ export function DimensionBadge({
   const dim = getDimension(dimension);
   const dims = SIZES[size];
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        container: {
+  return (
+    <View
+      style={[
+        s.container,
+        {
           width: dims.box,
           height: dims.box,
           borderRadius: dims.box / 2,
           backgroundColor: dim.badge,
-          justifyContent: "center",
-          alignItems: "center",
         },
-        text: {
-          color: "#FFFFFF",
-          fontSize: dims.font,
-          fontWeight: "700",
-          lineHeight: dims.font + 2,
-        },
-      }),
-    [dim.badge, dims.box, dims.font],
-  );
-
-  return (
-    <View
-      style={[styles.container, style]}
+        style,
+      ]}
       accessibilityRole="image"
       accessibilityLabel={`Dimension ${dim.label}`}
     >
-      <Text style={styles.text}>{dim.icon}</Text>
+      <Text style={[s.text, { fontSize: dims.font, lineHeight: dims.font + 2 }]}>
+        {dim.icon}
+      </Text>
     </View>
   );
 }

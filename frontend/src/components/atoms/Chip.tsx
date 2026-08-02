@@ -2,7 +2,7 @@
  * Chip: pill grande para filtros o tags. Pressable opcional. Reactivo al tema.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import {
   Pressable,
   StyleSheet,
@@ -23,35 +23,29 @@ export interface ChipProps extends Omit<PressableProps, "children" | "style"> {
   style?: ViewStyle;
 }
 
+// TASK-066: valores estaticos a nivel de modulo.
+const s = StyleSheet.create({
+  base: {
+    paddingVertical: spacing.sp2 - 2,
+    paddingHorizontal: spacing.sp3,
+    borderRadius: radii.rFull,
+    alignSelf: "flex-start",
+  },
+  pressed: { opacity: 0.75 },
+  text: { fontSize: 14, fontWeight: "500" },
+});
+
 export function Chip({ children, active, onPress, style, ...rest }: ChipProps) {
   const c = useThemeColors();
 
-  const s = useMemo(
-    () =>
-      StyleSheet.create({
-        base: {
-          paddingVertical: spacing.sp2 - 2,
-          paddingHorizontal: spacing.sp3,
-          borderRadius: radii.rFull,
-          alignSelf: "flex-start",
-        },
-        active: { backgroundColor: c.primary },
-        inactive: { backgroundColor: c.accent2 },
-        pressed: { opacity: 0.75 },
-        text: { fontSize: 14, fontWeight: "500" },
-        textActive: { color: c.textOnPrimary },
-        textInactive: { color: c.text },
-      }),
-    [c]
-  );
-
-  const containerStyle = active ? s.active : s.inactive;
-  const textStyle = active ? s.textActive : s.textInactive;
+  // Colores dinamicos (tema) aplicados inline
+  const bgColor = active ? c.primary : c.accent2;
+  const textColor = active ? c.textOnPrimary : c.text;
 
   if (!onPress) {
     return (
-      <View style={[s.base, containerStyle, style]}>
-        <Text style={[s.text, textStyle]}>{children}</Text>
+      <View style={[s.base, { backgroundColor: bgColor }, style]}>
+        <Text style={[s.text, { color: textColor }]}>{children}</Text>
       </View>
     );
   }
@@ -64,12 +58,12 @@ export function Chip({ children, active, onPress, style, ...rest }: ChipProps) {
       accessibilityState={{ selected: !!active }}
       style={(state) => [
         s.base,
-        containerStyle,
+        { backgroundColor: bgColor },
         state.pressed && s.pressed,
         style,
       ]}
     >
-      <Text style={[s.text, textStyle]}>{children}</Text>
+      <Text style={[s.text, { color: textColor }]}>{children}</Text>
     </Pressable>
   );
 }
