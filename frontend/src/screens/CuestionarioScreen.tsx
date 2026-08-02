@@ -14,7 +14,7 @@
  * "base" hasta que exista el flag. Cuando llegue, cambiamos la partición aquí.
  */
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -47,7 +47,8 @@ import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore, type RespuestaLocal } from "../store/cuestionario";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
-import { useThemeColors } from "../theme/useTheme";
+import { useIsDark, useThemeColors } from "../theme/useTheme";
+import { getDimensionColorsForEje } from "../domain/dimensiones";
 
 /** Delay para que el layout del nuevo contenido se calcule antes de hacer
  *  scroll. Menos de ~100ms puede resultar en scrollToEnd calculando la
@@ -58,6 +59,7 @@ export function CuestionarioScreen({
   navigation,
 }: RootStackScreenProps<"Cuestionario">) {
   const c = useThemeColors();
+  const isDark = useIsDark();
   const insets = useSafeAreaInsets();
   const toast = useToast();
   const scrollRef = useRef<ScrollView>(null);
@@ -212,14 +214,15 @@ export function CuestionarioScreen({
       ? { value: opcionNoSe.id as number, label: opcionNoSe.texto ?? "No sé" }
       : null;
 
-  async function handleSubmit() {
+  // TASK-056: useCallback -- pantalla mas interactiva de la app, re-renders frecuentes.
+  const handleSubmit = useCallback(async () => {
     try {
       await submit({ skipServer: isGuest });
       navigation.replace("SubmitDone", { mode: esTipoBase ? "base" : "eleccion" });
     } catch (err) {
       toast.error("No pudimos guardar tus respuestas", getErrorMessage(err));
     }
-  }
+  }, [submit, isGuest, navigation, esTipoBase, toast]);
 
   /**
    * Selecciona una opcion de respuesta y, si va a aparecer la seccion de
@@ -229,7 +232,7 @@ export function CuestionarioScreen({
    * El delay de 150ms deja que React termine el re-render (y el layout
    * recalcule la altura del ScrollView) antes de ejecutar el scroll.
    */
-  function handleSelectRespuesta(opcionId: number) {
+  const handleSelectRespuesta = useCallback((opcionId: number) => {
     setRespuesta(pregunta.id, opcionId);
     const vaAMostrarPeso = debeMostrarPeso(pregunta.opciones_respuesta, opcionId);
     if (vaAMostrarPeso) {
@@ -237,7 +240,7 @@ export function CuestionarioScreen({
         scrollRef.current?.scrollToEnd({ animated: true });
       }, SCROLL_AFTER_LAYOUT_MS);
     }
-  }
+  }, [setRespuesta, pregunta.id, pregunta.opciones_respuesta]);
 
   /** Vuelve al tope del scroll al cambiar de pregunta. Animado para una
    *  transicion suave; el cambio de contenido ocurre simultaneamente pero
@@ -264,7 +267,17 @@ export function CuestionarioScreen({
       <ScrollView ref={scrollRef} style={styles.scroll} contentContainerStyle={styles.content}>
         <View style={{ gap: spacing.sp2 }}>
           {pregunta.eje_tematico_display ? (
-            <Text style={styles.ejeLabel}>{pregunta.eje_tematico_display}</Text>
+            <Text
+              style={[
+                styles.ejeLabel,
+                // TASK-057: color semantico por eje (DS-08 getDimensionColorsForEje)
+                // -- coherencia visual con el radar chart de DetalleCandidato.
+                // Fallback a c.primary si el eje no tiene color en el DS.
+                { color: getDimensionColorsForEje(pregunta.eje_tematico ?? "", isDark)?.text ?? c.primary },
+              ]}
+            >
+              {pregunta.eje_tematico_display}
+            </Text>
           ) : null}
           <Text style={styles.enunciado}>{pregunta.texto}</Text>
         </View>

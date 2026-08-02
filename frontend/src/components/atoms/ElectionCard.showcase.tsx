@@ -21,6 +21,7 @@ const showcase: ShowcaseEntry = {
   relatedTo: ["ElectionsStrip", "ElectionCardAdd", "MatchSummaryCard"],
   dsReference: "DS-12 Home HUB",
   variants: [
+    {
       label: "active + completado",
       render: () => (
         <ElectionCard

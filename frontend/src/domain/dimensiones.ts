@@ -197,3 +197,39 @@ export const EJE_LABELS: Record<string, string> = {
   INSTITUCIONAL: "Institucional",
   OTRO:          "Otro",
 } as const;
+
+/**
+ * TASK-057: mapeo de EjeTematicoEnum del backend a DimensionKey.
+ *
+ * Los codigos del backend (ECONOMIA, SOCIEDAD...) no coinciden 1:1 con las
+ * DimensionKey del DS (economico, social...). Las entradas sin correspondencia
+ * directa usan la dimension conceptualmente mas cercana.
+ * null = sin correspondencia valida (usar fallback de color).
+ */
+const EJE_TO_DIMENSION_KEY: Record<string, DimensionKey | null> = {
+  ECONOMIA:      "economico",
+  SOCIEDAD:      "social",
+  AMBIENTE:      "ambiental",
+  INSTITUCIONAL: "institucional",
+  // Sin correspondencia directa en el DS actual:
+  SEGURIDAD:     null,
+  DDHH:          null,
+  INTERNACIONAL: null,
+  OTRO:          null,
+};
+
+/**
+ * TASK-057: resuelve los colores de dimension para un codigo de eje del backend.
+ *
+ * A diferencia de `getDimensionColors`, acepta cualquier string y retorna
+ * `null` cuando no hay correspondencia, permitiendo al consumidor usar
+ * su propio fallback.
+ */
+export function getDimensionColorsForEje(
+  ejeCode: string,
+  isDark: boolean,
+): DimensionColors | null {
+  const key = EJE_TO_DIMENSION_KEY[ejeCode] ?? null;
+  if (!key) return null;
+  return getDimensionColors(key, isDark);
+}

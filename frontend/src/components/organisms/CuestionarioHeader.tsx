@@ -18,7 +18,7 @@
  * WCAG 2.2 AA: #FFFFFF sobre #2E5F7E = 5.5:1 (AA). Verificado.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { radii } from "../../theme/radii";
@@ -59,6 +59,71 @@ export interface CuestionarioHeaderProps {
 
 // -- Componente -------------------------------------------------------------
 
+/**
+ * TASK-058: styles a nivel de modulo (useMemo([]) es identico funcionalmente
+ * pero con overhead de closure + comparacion de deps en cada render).
+ * Todos los tokens son constantes de modulo -- sin dependencia de tema ni props.
+ */
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: HEADER_BG,
+    paddingHorizontal: spacing.sp4,
+    paddingTop: spacing.sp2,
+    paddingBottom: spacing.sp3,
+    gap: spacing.sp3,
+  },
+  // -- Fila de navegacion --
+  navRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: spacing.sp2,
+  },
+  btn: {
+    width: 36,
+    height: 36,
+    borderRadius: radii.rSm,
+    borderWidth: 1,
+    borderColor: BTN_BORDER,
+    backgroundColor: BTN_BG,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  btnPlaceholder: { width: 36, height: 36 },
+  centerCol: { flex: 1, alignItems: "center", gap: 2 },
+  titleText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: HEADER_TEXT,
+  },
+  subtitleText: {
+    fontSize: 10,
+    textTransform: "uppercase",
+    letterSpacing: 0.7,
+    fontWeight: "600",
+    color: HEADER_TEXT_SUB,
+  },
+  // -- Barra de progreso --
+  progressTrack: {
+    height: 5,
+    borderRadius: radii.rSm,
+    backgroundColor: PROGRESS_TRACK,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    borderRadius: radii.rSm,
+    backgroundColor: PROGRESS_FILL,
+  },
+  progressLabel: {
+    fontSize: 9,
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+    fontWeight: "600",
+    color: HEADER_TEXT_SUB,
+  },
+});
+
 export function CuestionarioHeader({
   title,
   subtitle,
@@ -72,69 +137,7 @@ export function CuestionarioHeader({
       ? Math.min(1, respondidas / totalPreguntas) * 100
       : 0;
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        container: {
-          backgroundColor: HEADER_BG,
-          paddingHorizontal: spacing.sp4,
-          paddingTop: spacing.sp2,
-          paddingBottom: spacing.sp3,
-          gap: spacing.sp3,
-        },
-        // -- Fila de navegacion --
-        navRow: {
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: spacing.sp2,
-        },
-        btn: {
-          width: 36,
-          height: 36,
-          borderRadius: radii.rSm,
-          borderWidth: 1,
-          borderColor: BTN_BORDER,
-          backgroundColor: BTN_BG,
-          alignItems: "center",
-          justifyContent: "center",
-        },
-        btnPlaceholder: { width: 36, height: 36 },
-        centerCol: { flex: 1, alignItems: "center", gap: 2 },
-        titleText: {
-          fontSize: 13,
-          fontWeight: "600",
-          color: HEADER_TEXT,
-        },
-        subtitleText: {
-          fontSize: 10,
-          textTransform: "uppercase",
-          letterSpacing: 0.7,
-          fontWeight: "600",
-          color: HEADER_TEXT_SUB,
-        },
-        // -- Barra de progreso --
-        progressTrack: {
-          height: 5,
-          borderRadius: radii.rSm,
-          backgroundColor: PROGRESS_TRACK,
-          overflow: "hidden",
-        },
-        progressFill: {
-          height: "100%",
-          borderRadius: radii.rSm,
-          backgroundColor: PROGRESS_FILL,
-        },
-        progressLabel: {
-          fontSize: 9,
-          textTransform: "uppercase",
-          letterSpacing: 0.6,
-          fontWeight: "600",
-          color: HEADER_TEXT_SUB,
-        },
-      }),
-    [],
-  );
+
 
   return (
     <View
