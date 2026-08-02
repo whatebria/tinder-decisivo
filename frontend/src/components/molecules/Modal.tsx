@@ -49,6 +49,12 @@ export interface ModalProps {
   dismissOnBackdrop?: boolean;
   /** Estilo custom para el card. */
   cardStyle?: StyleProp<ViewStyle>;
+  /**
+   * BUG-044: cuando false, el body NO usa ScrollView sino un View plano.
+   * Util para contenido que gestiona su propio scroll (FlatList, FlashList).
+   * Default: true.
+   */
+  bodyScrollable?: boolean;
 }
 
 const styles = StyleSheet.create({
@@ -106,6 +112,7 @@ export function Modal({
   maxWidth,
   dismissOnBackdrop = true,
   cardStyle,
+  bodyScrollable = true,
 }: ModalProps) {
   const c = useThemeColors();
   const shadows = useThemeShadows();
@@ -148,9 +155,13 @@ export function Modal({
                 </IconButton>
               </View>
             ) : null}
-            <ScrollView style={styles.body} contentContainerStyle={{ paddingBottom: spacing.sp2 }}>
-              {children}
-            </ScrollView>
+            {bodyScrollable ? (
+              <ScrollView style={styles.body} contentContainerStyle={{ paddingBottom: spacing.sp2 }}>
+                {children}
+              </ScrollView>
+            ) : (
+              <View style={styles.body}>{children}</View>
+            )}
             {footer ? (
               <View style={[styles.footer, { borderTopColor: c.border2 }]}>{footer}</View>
             ) : null}

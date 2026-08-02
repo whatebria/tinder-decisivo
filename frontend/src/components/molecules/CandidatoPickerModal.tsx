@@ -8,16 +8,23 @@
  *
  * El filtro de eleccion es opcional: si `tiposEleccion` no se pasa o esta
  * vacio, la seccion no se renderiza.
+ *
+ * BUG-044: la lista de candidatos usa FlatList (virtualizada) en lugar de
+ * View + map. El Modal pasa bodyScrollable={false} para evitar el error
+ * de VirtualizedList anidada en ScrollView. La busqueda y los chips de
+ * filtro viven en ListHeaderComponent.
  */
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
+  FlatList,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
+  type ListRenderItemInfo,
 } from "react-native";
 
 import type { Candidato, TipoEleccion } from "../../api/endpoints";
@@ -77,6 +84,8 @@ const styles = StyleSheet.create({
   },
   itemName: { fontSize: 15, fontWeight: "600" },
   itemMeta: { fontSize: 12, marginTop: 2 },
+  // BUG-044: el FlatList necesita flex:1 para respetar el maxHeight del Modal.
+  list: { flex: 1 },
 });
 
 export function CandidatoPickerModal({
@@ -110,11 +119,11 @@ export function CandidatoPickerModal({
     });
   }, [candidatos, query, excluirId, tipoSel]);
 
-  function handleSelect(cand: Candidato) {
+  const handleSelect = useCallback((cand: Candidato) => {
     onSelect(cand);
     setQuery("");
     setTipoSel(null);
-  }
+  }, [onSelect]);
 
   function chipColors(isActive: boolean) {
     return isActive
@@ -122,8 +131,10 @@ export function CandidatoPickerModal({
       : { borderColor: c.border, backgroundColor: c.bg };
   }
 
-  return (
-    <Modal visible={visible} onClose={onClose} title={title}>
+  // BUG-044: header del FlatList = search + chips de tipo.
+  // Memoizar para evitar que el FlatList remonte el header en cada keystroke.
+  const ListHeader = useMemo(() => (
+    <View>
       <TextInput
         value={query}
         onChangeText={setQuery}
@@ -172,33 +183,50 @@ export function CandidatoPickerModal({
           </ScrollView>
         </>
       ) : null}
+    </View>
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), [query, tipoSel, tiposEleccion, c]);
 
-      {filtrados.length === 0 ? (
-        <Text style={[styles.emptyText, { color: c.textSecondary }]}>
-          No hay candidatos que coincidan.
-        </Text>
-      ) : (
-        <View>
-          {filtrados.map((cand) => (
-            <Pressable
-              key={cand.id}
-              onPress={() => handleSelect(cand)}
-              accessibilityRole="button"
-              accessibilityLabel={`Elegir ${nombreCompleto(cand)}`}
-              style={({ pressed }) => [
-                styles.item,
-                { borderBottomColor: c.border },
-                pressed && { backgroundColor: c.bg },
-              ]}
-            >
-              <Text style={[styles.itemName, { color: c.text }]}>{nombreCompleto(cand)}</Text>
-              {cand.partido ? (
-                <Text style={[styles.itemMeta, { color: c.textSecondary }]}>{cand.partido}</Text>
-              ) : null}
-            </Pressable>
-          ))}
-        </View>
-      )}
+  const renderItem = useCallback(({ item: cand }: ListRenderItemInfo<Candidato>) => (
+    <Pressable
+      onPress={() => handleSelect(cand)}
+      accessibilityRole="button"
+      accessibilityLabel={`Elegir ${nombreCompleto(cand)}`}
+      style={({ pressed }) => [
+        styles.item,
+        { borderBottomColor: c.border },
+        pressed && { backgroundColor: c.bg },
+      ]}
+    >
+      <Text style={[styles.itemName, { color: c.text }]}>{nombreCompleto(cand)}</Text>
+      {cand.partido ? (
+        <Text style={[styles.itemMeta, { color: c.textSecondary }]}>{cand.partido}</Text>
+      ) : null}
+    </Pressable>
+  ), [handleSelect, c]);
+
+  const ListEmpty = useMemo(() => (
+    <Text style={[styles.emptyText, { color: c.textSecondary }]}>
+      No hay candidatos que coincidan.
+    </Text>
+  ), [c.textSecondary]);
+
+  return (
+    <Modal visible={visible} onClose={onClose} title={title} bodyScrollable={false}>
+      <FlatList<Candidato>
+        style={styles.list}
+        data={filtrados}
+        keyExtractor={(cand) => String(cand.id)}
+        renderItem={renderItem}
+        ListHeaderComponent={ListHeader}
+        ListEmptyComponent={ListEmpty}
+        // BUG-044: limitar renders iniciales para reducir el delay de apertura.
+        initialNumToRender={15}
+        maxToRenderPerBatch={20}
+        windowSize={5}
+        removeClippedSubviews
+        keyboardShouldPersistTaps="handled"
+      />
     </Modal>
   );
 }
