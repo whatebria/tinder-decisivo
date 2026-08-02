@@ -119,9 +119,8 @@ export function ProgressRing({
       <View
         style={[
           StyleSheet.absoluteFill,
-          { alignItems: "center", justifyContent: "center" },
+          { alignItems: "center", justifyContent: "center", pointerEvents: "none" },
         ]}
-        pointerEvents="none"
       >
         {isDone || showCheck ? (
           // Checkmark U+2713 — texto plano, no emoji
