@@ -86,6 +86,9 @@ export function ProgressRing({
     <View style={{ width: dim, height: dim, position: "relative", flexShrink: 0 }}>
       <Svg width={dim} height={dim} viewBox={`0 0 ${dim} ${dim}`}>
         {/* Track */}
+        {/* transform="rotate(-90 cx cy)" en lugar de rotation+origin para evitar
+            el prop invalido `transform-origin` en React web (RN SVG lo emite
+            como kebab-case, React DOM lo rechaza). */}
         <Circle
           cx={dim / 2}
           cy={dim / 2}
@@ -93,8 +96,7 @@ export function ProgressRing({
           strokeWidth={strokeWidth}
           stroke={c.border2}
           fill="none"
-          rotation="-90"
-          origin={`${dim / 2}, ${dim / 2}`}
+          transform={`rotate(-90 ${dim / 2} ${dim / 2})`}
         />
         {/* Fill */}
         {value > 0 && (
@@ -108,8 +110,7 @@ export function ProgressRing({
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
-            rotation="-90"
-            origin={`${dim / 2}, ${dim / 2}`}
+            transform={`rotate(-90 ${dim / 2} ${dim / 2})`}
           />
         )}
       </Svg>
