@@ -19,7 +19,6 @@ screens/
   DetalleCandidato/
     DetalleCandidatoScreen.tsx   ← screen principal
     ResumenTab.tsx               ← sub-componente co-localizado
-    NoticiasTab.tsx              ← sub-componente co-localizado
 ```
 
 ### Señales de que un componente debería co-localizarse

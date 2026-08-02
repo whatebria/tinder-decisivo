@@ -35,7 +35,6 @@ import {
   useCandidato,
   useDescartados,
   useFavoritos,
-  useNoticiasCandidato,
   usePosturasCandidato,
   useTiposEleccion,
   useToggleDescartado,
@@ -52,8 +51,6 @@ import {
   MatchExplanation,
   MatchTier,
   Modal,
-  NewsCard,
-  NoticiaDetailSheet,
   ProfileHero,
   RadarChart,
   ScreenChrome,
@@ -63,7 +60,6 @@ import {
   Tabs,
   CoachMarkTour,
   useToast,
-  type NoticiaDetail,
 } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import { confianzaToTier, formatMatchPercentage, getMatchColor } from "../services/matching";
@@ -74,11 +70,9 @@ import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
 import { iniciales, nombreCompleto } from "../utils/candidato";
-import { NoticiasTab } from "./DetalleCandidato/NoticiasTab";
 import { ResumenTab } from "./DetalleCandidato/ResumenTab";
-import { SHOW_NOTICIAS } from "../constants/features";
 
-type PerfilTab = "resumen" | "posturas" | "noticias";
+type PerfilTab = "resumen" | "posturas";
 
 /** Mapea el string de confianza del backend al tier del DS. */
 // (confianzaToTier migrado a services/matching -- TASK-035)
@@ -100,7 +94,6 @@ export function DetalleCandidatoScreen({
   const [confianzaInfoOpen, setConfianzaInfoOpen] = useState(false);
 
   const candidatoQ = useCandidato(candidatoId);
-  const noticiasQ = useNoticiasCandidato(candidatoId);
   const posturasQ = usePosturasCandidato(candidatoId, tipoEleccionId);
   // BUG-030: guests no usan favoritos/descartados (ActionRow no renderiza para ellos).
   // Evita 2 requests de red por visita en modo invitado.
@@ -112,7 +105,6 @@ export function DetalleCandidatoScreen({
 
   const candidato = candidatoQ.data ?? null;
   const posturas = posturasQ.data ?? [];
-  const noticias = noticiasQ.data ?? [];
 
   const isFavorito = (favoritosQ.data ?? []).some(
     (f) => f.candidato === candidatoId,
@@ -230,9 +222,6 @@ export function DetalleCandidatoScreen({
           items={[
             { value: "resumen", label: "Resumen" },
             { value: "posturas", label: "Posturas", count: posturas.length },
-            ...(SHOW_NOTICIAS
-              ? [{ value: "noticias" as const, label: "Noticias", count: noticias.length }]
-              : []),
           ]}
           style={styles.tabsStretch}
         />
@@ -252,8 +241,6 @@ export function DetalleCandidatoScreen({
             posturas={posturas}
             loading={posturasQ.isLoading}
           />
-        ) : tab === "noticias" && SHOW_NOTICIAS ? (
-          <NoticiasTab noticias={noticias} />
         ) : null}
       </ScrollView>
 
@@ -481,7 +468,6 @@ const styles = StyleSheet.create({
   // Tabs
   tabsStretch: { alignSelf: "stretch" },
 
-  // Noticias tab — estilos en DetalleCandidato/NoticiasTab.tsx
   // Resumen tab — estilos en DetalleCandidato/ResumenTab.tsx
 
   // paragraph se mantiene aqui: usado en el modal de confianza y en el

@@ -22,7 +22,7 @@ import { MisRespuestasScreen } from "../screens/MisRespuestasScreen";
 import { CompararScreen } from "../screens/CompararScreen";
 import { ConfiguracionScreen } from "../screens/ConfiguracionScreen";
 import { GestionEleccionesScreen } from "../screens/GestionEleccionesScreen";
-import { NoticiasScreen } from "../screens/NoticiasScreen";
+
 import { OnboardingScreen } from "../screens/OnboardingScreen";
 import { PasswordResetConfirmScreen } from "../screens/PasswordResetConfirmScreen";
 import { PasswordResetRequestScreen } from "../screens/PasswordResetRequestScreen";
@@ -64,7 +64,7 @@ export function AppNavigator() {
           <Stack.Screen name="DetalleCandidato" component={DetalleCandidatoScreen} />
           <Stack.Screen name="MisGuardados" component={MisGuardadosScreen} />
           <Stack.Screen name="MisRespuestas" component={MisRespuestasScreen} />
-          <Stack.Screen name="Noticias" component={NoticiasScreen} />
+
           <Stack.Screen name="Candidatos" component={CandidatosScreen} />
           <Stack.Screen name="Comparar" component={CompararScreen} />
           <Stack.Screen name="Perfil" component={PerfilScreen} />

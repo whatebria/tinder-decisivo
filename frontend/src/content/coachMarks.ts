@@ -19,8 +19,7 @@ export type TourId =
   | "comparador"
   | "guardados"
   | "gestionElecciones"
-  | "perfilCandidato"
-  | "noticias";
+  | "perfilCandidato";
 
 /** Un paso individual dentro de un tour. */
 export interface CoachStep {
@@ -180,38 +179,11 @@ const PERFIL_CANDIDATO: CoachTour = {
       highlight: "Sección Posturas",
     },
     {
-      id: "perfil-3",
-      title: "Noticias sobre este candidato",
-      description:
-        "Aquí solo aparecen artículos donde se menciona a este candidato. Buenos o malos, todos: nosotros no elegimos cuáles mostrar.",
-      highlight: "Sección Noticias del candidato",
-    },
-    {
       id: "perfil-4",
       title: "Qué tan seguros estamos del resultado",
       description:
         "Verde: sabemos harto de este candidato. Amarillo: sabemos algo. Rojo: sabemos poco y el resultado es una estimación.",
       highlight: "Etiqueta de confianza",
-    },
-  ],
-};
-
-const NOTICIAS: CoachTour = {
-  id: "noticias",
-  steps: [
-    {
-      id: "noticias-1",
-      title: "Noticias sobre política y candidatos",
-      description:
-        "Aquí encuentras artículos de distintos medios. Te mostramos todo lo que hay disponible.",
-      highlight: "Feed de noticias",
-    },
-    {
-      id: "noticias-2",
-      title: "Filtra para encontrar lo que buscas",
-      description:
-        "Puedes filtrar por candidato mencionado, por medio, por fecha o buscar por palabra. También puedes guardar las que quieras leer después.",
-      highlight: "Barra de filtros",
     },
   ],
 };
@@ -225,5 +197,4 @@ export const COACH_TOURS: Record<TourId, CoachTour> = {
   guardados: GUARDADOS,
   gestionElecciones: GESTION_ELECCIONES,
   perfilCandidato: PERFIL_CANDIDATO,
-  noticias: NOTICIAS,
 };

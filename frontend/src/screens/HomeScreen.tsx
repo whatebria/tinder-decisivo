@@ -19,7 +19,6 @@
  * Modo guest: catalogo sin progreso persistido, CTA siempre "Empezar".
  */
 
-import { SHOW_NOTICIAS } from "../constants/features";
 import React, { useCallback, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
@@ -27,7 +26,6 @@ import type { BreakdownPorEje, MiProgresoItem, TipoEleccion } from "../api/endpo
 import { getErrorMessage } from "../api/client";
 import {
   useMisElecciones,
-  useNoticiasFeed,
   usePerfil,
   useReiniciarCuestionario,
   useTiposEleccion,
@@ -40,12 +38,10 @@ import {
   EmptyState,
   HomeHeroSection,
   MatchSummaryCard,
-  NoticiaDetailSheet,
   NovedadesFeed,
   SectionTitle,
   Spinner,
   useToast,
-  type NoticiaDetail,
   type NovedadFeedItem,
 } from "../components";
 import { HomeElectionItem } from "./Home/HomeElectionItem";
@@ -59,7 +55,6 @@ import { partitionTipos, useElectionsPrefsStore } from "../store/electionsPrefs"
 import { spacing } from "../theme/spacing";
 import { useThemeColors } from "../theme/useTheme";
 import { sanitizeSnippet } from "../utils/text";
-import { noticiaToDetail } from "../utils/noticia";
 import { deriveInitials, deriveDisplayName } from "../utils/user";
 
 // -- Helpers ------------------------------------------------------------------
@@ -74,17 +69,6 @@ function indexProgresoByTipo(
   if (!items) return m;
   for (const it of items) m.set(it.tipo_eleccion_id, it);
   return m;
-}
-
-function whenLabel(dateIso?: string): string {
-  if (!dateIso) return "";
-  const diffMs = Date.now() - new Date(dateIso).getTime();
-  const h = Math.floor(diffMs / (1000 * 60 * 60));
-  if (h < 1) return "hace un momento";
-  if (h < 24) return `hace ${h}h`;
-  const d = Math.floor(h / 24);
-  if (d === 1) return "ayer";
-  return `hace ${d}d`;
 }
 
 // -- Screen -------------------------------------------------------------------
@@ -102,12 +86,9 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   const tiposQuery = useTiposEleccion();
   const { data: tipos = [], isLoading: tiposLoading, error } = tiposQuery;
   const { data: progresoItems } = useMisElecciones();
-  // BUG-024: deshabilitar el fetch cuando SHOW_NOTICIAS=false -- request desperdiciada.
-  const { data: noticias = [] } = useNoticiasFeed({}, { enabled: SHOW_NOTICIAS });
   const reiniciar = useReiniciarCuestionario();
 
   const [tipoAReiniciar, setTipoAReiniciar] = useState<TipoEleccion | null>(null);
-  const [selectedNoticia, setSelectedNoticia] = useState<NoticiaDetail | null>(null);
 
   React.useEffect(() => {
     if (error) toast.error("Error cargando elecciones", getErrorMessage(error));
@@ -194,7 +175,7 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
     }
   }, [reiniciar, tipoAReiniciar, toast]);
 
-  // Novedades: accion sugerida + noticias.
+  // Novedades: acciones sugeridas (cuestionarios pendientes).
   // BUG-023: iniciarCuestionario incluida en deps -- elimina el eslint-disable.
   const novedades: NovedadFeedItem[] = useMemo(() => {
     const items: NovedadFeedItem[] = [];
@@ -210,28 +191,8 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
         onCta: () => void iniciarCuestionario(tipoSinCuestionario),
       });
     }
-    if (SHOW_NOTICIAS) {
-      noticias.slice(0, 4).forEach((n) => {
-        items.push({
-          key: `noticia-${n.id}`,
-          kind: "noticia",
-          imageUrl: n.imagen_url,
-          title: sanitizeSnippet(n.titulo),
-          snippet: sanitizeSnippet(n.descripcion),
-          category: n.fuente,
-          when: whenLabel(n.fecha_publicacion),
-          onPress: () =>
-            setSelectedNoticia(
-              noticiaToDetail(n, {
-                when: whenLabel(n.fecha_publicacion),
-                sentiment: "neutral",
-              }),
-            ),
-        });
-      });
-    }
     return items;
-  }, [tiposActivos, activeId, noticias, iniciarCuestionario]);
+  }, [tiposActivos, activeId, iniciarCuestionario]);
 
   // CTA del hero segun estado global
   const heroCta = useMemo(() => {
@@ -422,8 +383,6 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
               <View>
                 <SectionTitle
                   title="Novedades"
-                  actionLabel={SHOW_NOTICIAS ? "Ver todas" : undefined}
-                  onAction={SHOW_NOTICIAS ? () => navigation.navigate("Noticias") : undefined}
                 />
                 <View style={{ marginTop: spacing.sp3 }}>
                   <NovedadesFeed items={novedades} />
@@ -445,12 +404,6 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
         onConfirm={handleConfirmReiniciar}
         onCancel={() => setTipoAReiniciar(null)}
         variant="danger"
-      />
-
-      <NoticiaDetailSheet
-        visible={selectedNoticia !== null}
-        onClose={() => setSelectedNoticia(null)}
-        noticia={selectedNoticia}
       />
 
       <CoachMarkTour tourId="home" />

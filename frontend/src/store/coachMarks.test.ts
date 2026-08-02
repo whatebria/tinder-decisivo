@@ -93,10 +93,10 @@ describe("useCoachMarksStore", () => {
     it("usa la key 'guest' cuando userId es null", async () => {
       mockedBackend.set(
         "servel_coach_marks_seen_guest",
-        JSON.stringify({ noticias: true }),
+        JSON.stringify({ home: true }),
       );
       await useCoachMarksStore.getState().hydrateFor(null);
-      expect(useCoachMarksStore.getState().seen).toEqual({ noticias: true });
+      expect(useCoachMarksStore.getState().seen).toEqual({ home: true });
       expect(useCoachMarksStore.getState().currentUserId).toBeNull();
     });
 
@@ -175,10 +175,10 @@ describe("useCoachMarksStore", () => {
     it("no crashea si storage falla al escribir", async () => {
       mockedStorage.setItem.mockRejectedValueOnce(new Error("disk full"));
       await expect(
-        useCoachMarksStore.getState().markSeen("noticias"),
+        useCoachMarksStore.getState().markSeen("guardados"),
       ).resolves.toBeUndefined();
       // El estado en memoria igual se actualiza.
-      expect(useCoachMarksStore.getState().hasSeen("noticias")).toBe(true);
+      expect(useCoachMarksStore.getState().hasSeen("guardados")).toBe(true);
     });
   });
 
@@ -231,7 +231,6 @@ describe("useCoachMarksStore", () => {
       "guardados",
       "gestionElecciones",
       "perfilCandidato",
-      "noticias",
     ];
 
     beforeEach(async () => {

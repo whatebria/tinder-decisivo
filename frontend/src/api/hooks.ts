@@ -15,13 +15,11 @@ import {
   actualizarComuna,
   addDescartado,
   addFavorito,
-  addNoticiaBookmark,
   addPosturaBookmark,
   cambiarPassword,
   confirmPasswordReset,
   deleteDescartado,
   deleteFavorito,
-  deleteNoticiaBookmark,
   deletePosturaBookmark,
   eliminarCuenta,
   getMatchDetalle,
@@ -32,15 +30,12 @@ import {
   listDescartados,
   listFavoritos,
   listMisRespuestas,
-  listNoticias,
-  listNoticiasBookmarks,
   listPosturasBookmarks,
   listPosturasCandidato,
   listRegiones,
   listTiposEleccion,
   matchAnonimo,
   matchCandidatos,
-  noticiasPorCandidato,
   preguntasPendientes,
   reiniciarCuestionario,
   requestPasswordReset,
@@ -55,9 +50,6 @@ import {
   type MatchDetalle,
   type MiProgresoItem,
   type MiRespuesta,
-  type Noticia,
-  type NoticiaBookmark,
-  type NoticiaFeedFilters,
   type PasswordResetRequestResponse,
   type Perfil,
   type PosturaBookmark,
@@ -133,17 +125,6 @@ export function useCandidato(id: number) {
       const all = await listCandidatos();
       return all.find((c) => c.id === id) ?? null;
     },
-  });
-}
-
-// -- Noticias por candidato -------------------------------------------------
-
-export function useNoticiasCandidato(id: number) {
-  return useQuery<Noticia[]>({
-    queryKey: queryKeys.noticiasCandidato(id),
-    queryFn: () => noticiasPorCandidato(id),
-    // Si no hay noticias, no reintentar (es normal cuando aun no corriste fetch_noticias)
-    retry: 0,
   });
 }
 
@@ -325,21 +306,6 @@ export function useUpdateRespuesta() {
   });
 }
 
-// -- Noticias feed global ---------------------------------------------------
-
-// BUG-024: opts.enabled permite deshabilitar el fetch via feature flag (ej: SHOW_NOTICIAS=false).
-export function useNoticiasFeed(
-  filters: NoticiaFeedFilters = {},
-  opts?: { enabled?: boolean },
-) {
-  return useQuery<Noticia[]>({
-    queryKey: queryKeys.noticiasFeed(filters),
-    queryFn: () => listNoticias(filters),
-    staleTime: 60_000,
-    enabled: opts?.enabled ?? true,
-  });
-}
-
 // -- Match detalle ----------------------------------------------------------
 
 export function useMatchDetalle(candidatoId: number | undefined) {
@@ -494,35 +460,6 @@ export function useToggleDescartado() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.descartados });
-    },
-  });
-}
-
-// -- Bookmarks de contenido: noticias y posturas guardadas -----------------
-// TASK-047: opts.enabled para activar el fetch solo cuando el tab esta visible.
-export function useNoticiasBookmarks(opts?: { enabled?: boolean }) {
-  const isAuth = useAuthStore((s) => s.isAuthenticated);
-  return useQuery<NoticiaBookmark[]>({
-    queryKey: queryKeys.noticiasBookmarks,
-    queryFn: listNoticiasBookmarks,
-    enabled: isAuth && (opts?.enabled ?? true),
-  });
-}
-
-export function useToggleNoticiaBookmark() {
-  const qc = useQueryClient();
-  return useMutation<void, Error, number>({
-    mutationFn: async (noticiaId: number) => {
-      const list = qc.getQueryData<NoticiaBookmark[]>(queryKeys.noticiasBookmarks) ?? [];
-      const existing = list.find((b) => b.noticia === noticiaId);
-      if (existing) {
-        await deleteNoticiaBookmark(existing.id);
-      } else {
-        await addNoticiaBookmark(noticiaId);
-      }
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.noticiasBookmarks });
     },
   });
 }

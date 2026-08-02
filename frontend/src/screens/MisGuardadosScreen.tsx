@@ -1,15 +1,12 @@
 /**
  * MisGuardadosScreen: vista consolidada de TODO lo que el usuario guardo.
  *
- * Basado en wireframe #11 (design-system-lowfi.html tpl-guardados) + decision
- * de producto: incluye Noticias como 4to tab (el wireframe original solo
- * mencionaba 3, pero mantenemos noticias descubribles aca).
+ * Basado en wireframe #11 (design-system-lowfi.html tpl-guardados).
  *
  * Tabs:
  *   - Favoritos: candidatos marcados como interesantes
  *   - Descartados: candidatos ocultos del ranking (con opcion restaurar)
  *   - Posturas: posturas puntuales de candidatos que guardaste
- *   - Noticias: articulos guardados del feed
  *
  * Filtro por eleccion (chips) encima de los tabs. Por ahora solo "Todas"
  * tiene efecto; el filtrado por tipo de eleccion queda como TODO cuando el
@@ -17,18 +14,15 @@
  */
 
 import React, { useCallback, useMemo, useState } from "react";
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getErrorMessage } from "../api/client";
-import { SHOW_NOTICIAS } from "../constants/features";
 import {
   useDescartados,
   useFavoritos,
-  useNoticiasBookmarks,
   usePosturasBookmarks,
   useToggleDescartado,
   useToggleFavorito,
-  useToggleNoticiaBookmark,
   useTogglePosturaBookmark,
   useTiposEleccion,
 } from "../api/hooks";
@@ -52,7 +46,7 @@ import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
 import { iniciales, nombreCompleto } from "../utils/candidato";
 
-type GuardadoTab = "favoritos" | "descartados" | "posturas" | "noticias";
+type GuardadoTab = "favoritos" | "descartados" | "posturas";
 
 /** Filtro por eleccion. `null` = "Todas". */
 type EleccionFilter = number | null;
@@ -93,17 +87,14 @@ export function MisGuardadosScreen({
   const favoritosQ   = useFavoritos(         { enabled: tab === "favoritos"   });
   const descartadosQ = useDescartados(       { enabled: tab === "descartados" });
   const posturasQ    = usePosturasBookmarks( { enabled: tab === "posturas"    });
-  const noticiasQ    = useNoticiasBookmarks( { enabled: tab === "noticias"    });
 
   const toggleFav = useToggleFavorito();
   const toggleDesc = useToggleDescartado();
   const togglePos = useTogglePosturaBookmark();
-  const toggleNot = useToggleNoticiaBookmark();
 
   const favoritos = favoritosQ.data ?? [];
   const descartados = descartadosQ.data ?? [];
   const posturas = posturasQ.data ?? [];
-  const noticias = noticiasQ.data ?? [];
 
   // Elecciones para el filtro (chips). "Todas" siempre visible.
   const eleccionesChips = useMemo(
@@ -326,54 +317,6 @@ export function MisGuardadosScreen({
     });
   }
 
-  function renderNoticias() {
-    if (noticiasQ.isLoading) return <Spinner size="large" />;
-    if (noticias.length === 0) {
-      return (
-        <EmptyState
-          icon="news"
-          title="Sin noticias guardadas"
-          description="Toca Guardar en el feed de noticias para leerlas despues."
-          actionLabel="Ir a noticias"
-          onAction={() => navigation.navigate("Noticias")}
-        />
-      );
-    }
-    return noticias.map((b) => (
-      <Pressable
-        key={`not-${b.id}`}
-        onPress={() => b.noticia_data.url && Linking.openURL(b.noticia_data.url)}
-        style={styles.card}
-        accessibilityRole="link"
-        accessibilityLabel={`Abrir noticia: ${b.noticia_data.titulo}`}
-      >
-        <Text style={styles.cardTitle} numberOfLines={2}>
-          {b.noticia_data.titulo}
-        </Text>
-        {b.noticia_data.descripcion ? (
-          <Text style={styles.cardBody} numberOfLines={2}>
-            {b.noticia_data.descripcion}
-          </Text>
-        ) : null}
-        <View style={styles.row}>
-          <Text style={styles.cardMeta}>{b.noticia_data.fuente ?? ""}</Text>
-          <BookmarkButton
-            saved
-            onPress={() =>
-              // BUG-022: callbacks de toast para no fallar silenciosamente
-              toggleNot.mutate(b.noticia, {
-                onSuccess: () => toast.success("Noticia eliminada", "Se quitó de tus guardados."),
-                onError: (e) => toast.error("No pudimos quitar la noticia", getErrorMessage(e)),
-              })
-            }
-            loading={toggleNot.isPending}
-            accessibilityLabel={`Quitar noticia guardada: ${b.noticia_data.titulo}`}
-          />
-        </View>
-      </Pressable>
-    ));
-  }
-
   // TASK-048-3: useCallback para referencias estables.
   const handleQuitarFav = useCallback((candidatoId: number) => {
     toggleFav.mutate(candidatoId, {
@@ -398,8 +341,6 @@ export function MisGuardadosScreen({
         return renderDescartados();
       case "posturas":
         return renderPosturas();
-      case "noticias":
-        return SHOW_NOTICIAS ? renderNoticias() : null;
     }
   }
 
@@ -426,9 +367,6 @@ export function MisGuardadosScreen({
             { value: "favoritos", label: "Favoritos", count: favoritos.length },
             { value: "descartados", label: "Descartados", count: descartados.length },
             { value: "posturas", label: "Posturas", count: posturas.length },
-            ...(SHOW_NOTICIAS
-              ? [{ value: "noticias" as const, label: "Noticias", count: noticias.length }]
-              : []),
           ]}
           value={tab}
           onChange={(v) => setTab(v)}

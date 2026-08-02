@@ -28,7 +28,7 @@ export type RootStackParamList = {
   MisGuardados: undefined;
   MisRespuestas: undefined;
   Comparar: undefined;
-  Noticias: undefined;
+
   Candidatos: undefined;
   Perfil: undefined;
   Configuracion: undefined;
