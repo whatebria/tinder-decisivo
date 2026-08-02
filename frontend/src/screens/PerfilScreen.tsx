@@ -110,7 +110,7 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
       <View style={[styles.root, { backgroundColor: c.bg }]}>
         <ScrollView contentContainerStyle={styles.scroll}>
           <ScreenTopBar
-            title="Mi perfil"
+            title="Mis datos"
             subtitle={perfil?.username}
             onBack={() => navigation.goBack()}
           />

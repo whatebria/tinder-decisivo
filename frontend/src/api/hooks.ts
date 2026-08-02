@@ -435,12 +435,13 @@ export function useActualizarComuna() {
 // ============================================================
 
 // -- Favoritos --------------------------------------------------------------
-export function useFavoritos() {
+// TASK-047: opts.enabled para activar el fetch solo cuando el tab esta visible.
+export function useFavoritos(opts?: { enabled?: boolean }) {
   const isAuth = useAuthStore((s) => s.isAuthenticated);
   return useQuery<CandidatoFavorito[]>({
     queryKey: queryKeys.favoritos,
     queryFn: listFavoritos,
-    enabled: isAuth, // Guest no tiene sesion -> no dispara 401.
+    enabled: isAuth && (opts?.enabled ?? true),
   });
 }
 
@@ -468,12 +469,13 @@ export function useToggleFavorito() {
 }
 
 // -- Descartados ------------------------------------------------------------
-export function useDescartados() {
+// TASK-047: opts.enabled para activar el fetch solo cuando el tab esta visible.
+export function useDescartados(opts?: { enabled?: boolean }) {
   const isAuth = useAuthStore((s) => s.isAuthenticated);
   return useQuery<CandidatoDescartado[]>({
     queryKey: queryKeys.descartados,
     queryFn: listDescartados,
-    enabled: isAuth,
+    enabled: isAuth && (opts?.enabled ?? true),
   });
 }
 
@@ -497,12 +499,13 @@ export function useToggleDescartado() {
 }
 
 // -- Bookmarks de contenido: noticias y posturas guardadas -----------------
-export function useNoticiasBookmarks() {
+// TASK-047: opts.enabled para activar el fetch solo cuando el tab esta visible.
+export function useNoticiasBookmarks(opts?: { enabled?: boolean }) {
   const isAuth = useAuthStore((s) => s.isAuthenticated);
   return useQuery<NoticiaBookmark[]>({
     queryKey: queryKeys.noticiasBookmarks,
     queryFn: listNoticiasBookmarks,
-    enabled: isAuth,
+    enabled: isAuth && (opts?.enabled ?? true),
   });
 }
 
@@ -524,12 +527,13 @@ export function useToggleNoticiaBookmark() {
   });
 }
 
-export function usePosturasBookmarks() {
+// TASK-047: opts.enabled para activar el fetch solo cuando el tab esta visible.
+export function usePosturasBookmarks(opts?: { enabled?: boolean }) {
   const isAuth = useAuthStore((s) => s.isAuthenticated);
   return useQuery<PosturaBookmark[]>({
     queryKey: queryKeys.posturasBookmarks,
     queryFn: listPosturasBookmarks,
-    enabled: isAuth,
+    enabled: isAuth && (opts?.enabled ?? true),
   });
 }
 

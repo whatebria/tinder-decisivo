@@ -88,10 +88,12 @@ export function MisGuardadosScreen({
   const [eleccionFilter, setEleccionFilter] = useState<EleccionFilter>(null);
 
   const tiposQ = useTiposEleccion();
-  const favoritosQ = useFavoritos();
-  const descartadosQ = useDescartados();
-  const posturasQ = usePosturasBookmarks();
-  const noticiasQ = useNoticiasBookmarks();
+  // TASK-047: lazy loading por tab -- cada query se activa solo cuando su tab esta visible.
+  // La primera vez que el usuario toca un tab, habra un breve estado de carga esperado.
+  const favoritosQ   = useFavoritos(         { enabled: tab === "favoritos"   });
+  const descartadosQ = useDescartados(       { enabled: tab === "descartados" });
+  const posturasQ    = usePosturasBookmarks( { enabled: tab === "posturas"    });
+  const noticiasQ    = useNoticiasBookmarks( { enabled: tab === "noticias"    });
 
   const toggleFav = useToggleFavorito();
   const toggleDesc = useToggleDescartado();
