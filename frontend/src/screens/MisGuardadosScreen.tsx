@@ -33,6 +33,7 @@ import {
   Button,
   Chip,
   CoachMarkTour,
+  ConfirmModal,
   EmptyState,
   ScreenTopBar,
   Spinner,
@@ -80,6 +81,8 @@ export function MisGuardadosScreen({
 
   const [tab, setTab] = useState<GuardadoTab>("favoritos");
   const [eleccionFilter, setEleccionFilter] = useState<EleccionFilter>(null);
+  // UX-078: pending para confirmar antes de quitar de favoritos.
+  const [quitarFavPending, setQuitarFavPending] = useState<{ id: number; nombre: string } | null>(null);
 
   const tiposQ = useTiposEleccion();
   // TASK-047: lazy loading por tab -- cada query se activa solo cuando su tab esta visible.
@@ -221,7 +224,7 @@ export function MisGuardadosScreen({
         cand,
         <BookmarkButton
           saved
-          onPress={() => cand.id != null && handleQuitarFav(cand.id)}
+          onPress={() => cand.id != null && handleQuitarFav(cand.id, nombreParaCard(cand))}
           loading={toggleFav.isPending}
           accessibilityLabel={`Quitar de favoritos: ${nombreParaCard(cand)}`}
         />,
@@ -318,12 +321,20 @@ export function MisGuardadosScreen({
   }
 
   // TASK-048-3: useCallback para referencias estables.
-  const handleQuitarFav = useCallback((candidatoId: number) => {
-    toggleFav.mutate(candidatoId, {
+  // UX-078: handleQuitarFav solo abre el ConfirmModal; la mutacion va en confirmQuitarFav.
+  const handleQuitarFav = useCallback((candidatoId: number, nombre: string) => {
+    setQuitarFavPending({ id: candidatoId, nombre });
+  }, []);
+
+  const confirmQuitarFav = useCallback(() => {
+    if (!quitarFavPending) return;
+    const { id } = quitarFavPending;
+    setQuitarFavPending(null);
+    toggleFav.mutate(id, {
       onSuccess: () => toast.success("Quitado de favoritos"),
       onError: (e) => toast.error("Error", getErrorMessage(e)),
     });
-  }, [toggleFav, toast]);
+  }, [quitarFavPending, toggleFav, toast]);
 
   const handleRestoreDesc = useCallback((candidatoId: number) => {
     toggleDesc.mutate(candidatoId, {
@@ -377,6 +388,18 @@ export function MisGuardadosScreen({
     </AppShell>
 
       <CoachMarkTour tourId="guardados" />
+
+      {/* UX-078: confirmar antes de quitar de favoritos (accion destructiva). */}
+      <ConfirmModal
+        visible={quitarFavPending !== null}
+        title="Quitar de favoritos"
+        message={`¿Quieres quitar a ${quitarFavPending?.nombre ?? "este candidato"} de tus favoritos?`}
+        confirmLabel="Quitar"
+        variant="danger"
+        loading={toggleFav.isPending}
+        onConfirm={confirmQuitarFav}
+        onCancel={() => setQuitarFavPending(null)}
+      />
     </>
   );
 }
