@@ -248,13 +248,23 @@ export function ResultadosScreen({
   }
 
   function handleToggleFav(candidatoId: number) {
+    const eraFavorito = favoritoIds.has(candidatoId);
     toggleFav.mutate(candidatoId, {
+      onSuccess: () => {
+        if (eraFavorito) toast.info("Eliminado de favoritos");
+        else toast.success("Agregado a favoritos");
+      },
       onError: (e) => toast.error("No pudimos actualizar favoritos", getErrorMessage(e)),
     });
   }
 
   function handleToggleDesc(candidatoId: number) {
+    const eraDescartado = descartadoIds.has(candidatoId);
     toggleDesc.mutate(candidatoId, {
+      onSuccess: () => {
+        if (eraDescartado) toast.info("Descarte eliminado");
+        else toast.success("Candidato descartado");
+      },
       onError: (e) => toast.error("No pudimos actualizar descartados", getErrorMessage(e)),
     });
   }
