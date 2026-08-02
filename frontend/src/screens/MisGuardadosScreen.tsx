@@ -16,7 +16,7 @@
  * backend exponga el field consistentemente en todas las shapes.
  */
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getErrorMessage } from "../api/client";
@@ -168,9 +168,7 @@ export function MisGuardadosScreen({
     [c],
   );
 
-  function initials(nombre?: string, apellido?: string): string {
-    return iniciales({ nombre, apellido });
-  }
+  // TASK-048-1: llamar iniciales() directamente (DRY -- wrapper de 1 linea innecesario).
   function renderCandidatoCard(
     key: string,
     cand: CandidatoLike,
@@ -179,7 +177,7 @@ export function MisGuardadosScreen({
     return (
       <View key={key} style={styles.card}>
         <View style={styles.candidatoRow}>
-          <Avatar size="md" initials={initials(cand.nombre, cand.apellido)} />
+          <Avatar size="md" initials={iniciales({ nombre: cand.nombre, apellido: cand.apellido })} />
           <Pressable
             style={styles.candidatoCol}
             onPress={() =>
@@ -283,10 +281,10 @@ export function MisGuardadosScreen({
     return posturas.map((b) => {
       // UX-050: iniciales a partir del nombre completo del candidato.
       const nameParts = (b.postura_data.candidato_nombre_completo ?? "").trim().split(/\s+/);
-      const candidatoIniciales = initials(
-        nameParts[0],
-        nameParts.length > 1 ? nameParts[nameParts.length - 1] : undefined,
-      );
+      const candidatoIniciales = iniciales({
+        nombre: nameParts[0],
+        apellido: nameParts.length > 1 ? nameParts[nameParts.length - 1] : undefined,
+      });
       return (
         <View key={`pos-${b.id}`} style={styles.card}>
           {/* Candidato prominente en primer nivel (UX-050). */}
@@ -376,21 +374,23 @@ export function MisGuardadosScreen({
     ));
   }
 
-  function handleQuitarFav(candidatoId: number) {
+  // TASK-048-3: useCallback para referencias estables.
+  const handleQuitarFav = useCallback((candidatoId: number) => {
     toggleFav.mutate(candidatoId, {
       onSuccess: () => toast.success("Quitado de favoritos"),
       onError: (e) => toast.error("Error", getErrorMessage(e)),
     });
-  }
+  }, [toggleFav, toast]);
 
-  function handleRestoreDesc(candidatoId: number) {
+  const handleRestoreDesc = useCallback((candidatoId: number) => {
     toggleDesc.mutate(candidatoId, {
       onSuccess: () => toast.success("Restaurado", "El candidato vuelve al ranking."),
       onError: (e) => toast.error("Error", getErrorMessage(e)),
     });
-  }
+  }, [toggleDesc, toast]);
 
-  const currentBody = (() => {
+  // TASK-048-2: renderBody como funcion named (en lugar de IIFE).
+  function renderBody() {
     switch (tab) {
       case "favoritos":
         return renderFavoritos();
@@ -401,7 +401,7 @@ export function MisGuardadosScreen({
       case "noticias":
         return SHOW_NOTICIAS ? renderNoticias() : null;
     }
-  })();
+  }
 
   return (
     <>
@@ -434,7 +434,7 @@ export function MisGuardadosScreen({
           onChange={(v) => setTab(v)}
         />
 
-        {currentBody}
+        {renderBody()}
       </ScrollView>
     </AppShell>
 

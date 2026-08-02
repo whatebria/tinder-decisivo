@@ -22,7 +22,7 @@
  * eje tematico.
  */
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { getErrorMessage } from "../api/client";
@@ -56,6 +56,10 @@ import { useThemeColors } from "../theme/useTheme";
 
 /** "Todas" cuando no hay filtro por tipo. */
 const FILTRO_TODAS: number | "todas" = "todas";
+
+/** TASK-049-2: fallbacks como constantes (evita strings inline en JSX). */
+const OPCION_DESCONOCIDA = "Opcion desconocida";
+const PESO_DESCONOCIDO = "Importancia no especificada";
 
 export function MisRespuestasScreen({
   navigation,
@@ -122,7 +126,8 @@ export function MisRespuestasScreen({
 
   // -- Handlers -------------------------------------------------------------
 
-  async function handleSave(opcionId: number, peso: number) {
+  // TASK-049-4: useCallback para referencias estables.
+  const handleSave = useCallback(async (opcionId: number, peso: number) => {
     if (!editando) return;
     try {
       await update.mutateAsync({
@@ -138,9 +143,9 @@ export function MisRespuestasScreen({
     } catch (err) {
       toast.error("No pudimos guardar", getErrorMessage(err));
     }
-  }
+  }, [update, editando, toast]);
 
-  async function handleConfirmReiniciar() {
+  const handleConfirmReiniciar = useCallback(async () => {
     if (!tipoAReiniciar?.id) return;
     try {
       const result = await reiniciar.mutateAsync(tipoAReiniciar.id);
@@ -155,7 +160,7 @@ export function MisRespuestasScreen({
         getErrorMessage(err),
       );
     }
-  }
+  }, [reiniciar, tipoAReiniciar, toast]);
 
   // -- Render ---------------------------------------------------------------
 
@@ -344,7 +349,10 @@ function TipoSeccion({ tipoNombre, respuestas, onEditar }: TipoSeccionProps) {
       }
       map.get(key)!.items.push(r);
     }
-    return Array.from(map.values());
+    // TASK-049-1: sort alfabetico por eje para orden consistente e independiente del orden de la API.
+    return Array.from(map.values()).sort((a, b) =>
+      a.display.localeCompare(b.display, "es")
+    );
   }, [respuestas]);
 
   return (
@@ -415,11 +423,11 @@ function RespuestaCard({ respuesta, onPress }: RespuestaCardProps) {
       <View style={styles.metaRow}>
         {/* UX-053: opcion elegida usa c.secondary (verde = confirmado), no c.primary (accion). */}
         <Text style={[styles.opActual, { color: c.secondary }]}>
-          {opActual?.texto ?? "(opcion desconocida)"}
+          {opActual?.texto ?? OPCION_DESCONOCIDA}
         </Text>
         <Text style={[styles.metaSep, { color: c.textTertiary }]}>·</Text>
         <Text style={[styles.metaPeso, { color: c.textSecondary }]}>
-          {PESO_LABELS_DISPLAY[respuesta.peso as 0|1|2|3] ?? `peso ${respuesta.peso}`}
+          {PESO_LABELS_DISPLAY[respuesta.peso as 0|1|2|3] ?? PESO_DESCONOCIDO}
         </Text>
       </View>
     </Pressable>
