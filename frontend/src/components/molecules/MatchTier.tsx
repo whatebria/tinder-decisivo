@@ -6,7 +6,7 @@
  * Antes tenia su propio tierFromPercent() con thresholds distintos (BUG: TASK-018).
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { getMatchTier } from "../../services/matching";
@@ -46,6 +46,20 @@ function tierFromPercent(p: number): MatchTierKind {
   return "low";                                    // <40%
 }
 
+const styles = StyleSheet.create({
+  base: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    paddingHorizontal: spacing.sp3,
+    paddingVertical: spacing.sp1,
+    borderRadius: radii.rFull,
+    borderWidth: 1,
+  },
+  text: { fontSize: 12, fontWeight: "600" },
+});
+
+type TierColors = { bg: string; fg: string; border: string };
+
 export function MatchTier({ percent, tier, label, showPercent, style }: MatchTierProps) {
   const c = useThemeColors();
   const isDark = useIsDark();
@@ -53,39 +67,20 @@ export function MatchTier({ percent, tier, label, showPercent, style }: MatchTie
     tier ?? (percent !== undefined ? tierFromPercent(percent) : "mid");
   const displayPercent = showPercent ?? percent !== undefined;
 
-  const styles = useMemo(() => {
-    // Tier medio y bajo usan warning (mostaza) en lugar de info (azul).
-    // El azul ya tiene significado en la app (= el usuario en el radar chart)
-    // y en Chile el azul tiene connotacion partidaria. (TASK-018)
-    const palette: Record<MatchTierKind, { bg: string; fg: string; border: string }> = isDark
-      ? {
-          high: { bg: c.success800, fg: c.success100, border: c.success600 },
-          mid:  { bg: c.warning800, fg: c.warning100, border: c.warning600 },
-          low:  { bg: c.warning800, fg: c.warning100, border: c.warning600 },
-        }
-      : {
-          high: { bg: c.success100, fg: c.success700, border: c.success500 },
-          mid:  { bg: c.warning100, fg: c.warning700, border: c.warning500 },
-          low:  { bg: c.warning100, fg: c.warning700, border: c.warning500 },
-        };
-    return {
-      base: {
-        alignSelf: "flex-start" as const,
-        flexDirection: "row" as const,
-        paddingHorizontal: spacing.sp3,
-        paddingVertical: spacing.sp1,
-        borderRadius: radii.rFull,
-        backgroundColor: palette[resolvedTier].bg,
-        borderWidth: 1,
-        borderColor: palette[resolvedTier].border,
-      },
-      text: {
-        color: palette[resolvedTier].fg,
-        fontSize: 12,
-        fontWeight: "600" as const,
-      },
-    };
-  }, [c, isDark, resolvedTier]);
+  // Tier medio y bajo usan warning (mostaza) en lugar de info (azul).
+  // El azul ya tiene significado en la app (= el usuario en el radar chart)
+  // y en Chile el azul tiene connotacion partidaria. (TASK-018)
+  const darkPalette: Record<MatchTierKind, TierColors> = {
+    high: { bg: c.success800, fg: c.success100, border: c.success600 },
+    mid:  { bg: c.warning800, fg: c.warning100, border: c.warning600 },
+    low:  { bg: c.warning800, fg: c.warning100, border: c.warning600 },
+  };
+  const lightPalette: Record<MatchTierKind, TierColors> = {
+    high: { bg: c.success100, fg: c.success700, border: c.success500 },
+    mid:  { bg: c.warning100, fg: c.warning700, border: c.warning500 },
+    low:  { bg: c.warning100, fg: c.warning700, border: c.warning500 },
+  };
+  const p = (isDark ? darkPalette : lightPalette)[resolvedTier];
 
   const finalLabel =
     label ??
@@ -94,8 +89,11 @@ export function MatchTier({ percent, tier, label, showPercent, style }: MatchTie
       : TIER_LABEL[resolvedTier]);
 
   return (
-    <View accessibilityRole="text" style={[styles.base, style]}>
-      <Text style={styles.text}>{finalLabel}</Text>
+    <View
+      accessibilityRole="text"
+      style={[styles.base, { backgroundColor: p.bg, borderColor: p.border }, style]}
+    >
+      <Text style={[styles.text, { color: p.fg }]}>{finalLabel}</Text>
     </View>
   );
 }

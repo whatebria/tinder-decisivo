@@ -11,7 +11,7 @@
  * Reemplaza tanto a atoms/Link antiguo como al legacy Link.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import {
   Pressable,
   StyleSheet,
@@ -35,46 +35,43 @@ export interface LinkProps extends Omit<PressableProps, "children" | "style"> {
   textStyle?: StyleProp<TextStyle>;
 }
 
+const styles = StyleSheet.create({
+  inline: { alignSelf: "flex-start", paddingVertical: 4 },
+  block: {
+    alignSelf: "stretch",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    minHeight: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  disabled: { opacity: 0.5 },
+  pressed: { opacity: 0.6 },
+});
+
 export function Link({
   children,
   underline = false,
   color,
   block = false,
   disabled,
-  textStyle,
+  textStyle: textStyleProp,
   onPress,
   ...rest
 }: LinkProps) {
   const c = useThemeColors();
   const finalColor = color ?? c.primary;
-  // Blur antes de navegar/cerrar overlays -> evita warning aria-hidden WCAG
-  // 2.4.3 en web. Ver hooks/useBlurringPress.
+  // Blur antes de navegar/cerrar overlays -> evita warning aria-hidden WCAG 2.4.3
   const handlePress = useBlurringPress(onPress);
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        inline: { alignSelf: "flex-start", paddingVertical: 4 },
-        block: {
-          alignSelf: "stretch",
-          paddingVertical: 12,
-          paddingHorizontal: 16,
-          minHeight: 44,
-          alignItems: "center",
-          justifyContent: "center",
-        },
-        text: {
-          color: finalColor,
-          fontSize: block ? 15 : 16,
-          fontWeight: block ? "600" : "500",
-          textDecorationLine: underline ? "underline" : "none",
-          textAlign: block ? "center" : "left",
-        },
-        disabled: { opacity: 0.5 },
-        pressed: { opacity: 0.6 },
-      }),
-    [finalColor, underline, block],
-  );
+  // All text properties are prop-derived — computed plain object (not StyleSheet)
+  const computedTextStyle = {
+    color: finalColor,
+    fontSize: block ? 15 : 16,
+    fontWeight: (block ? "600" : "500") as "600" | "500",
+    textDecorationLine: (underline ? "underline" : "none") as "underline" | "none",
+    textAlign: (block ? "center" : "left") as "center" | "left",
+  };
 
   return (
     <Pressable
@@ -88,7 +85,7 @@ export function Link({
         disabled && styles.disabled,
       ]}
     >
-      <Text style={[styles.text, textStyle]}>{children}</Text>
+      <Text style={[computedTextStyle, textStyleProp]}>{children}</Text>
     </Pressable>
   );
 }

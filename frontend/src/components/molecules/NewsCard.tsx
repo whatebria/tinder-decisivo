@@ -5,7 +5,7 @@
  * Sin gradient (RN no lo soporta nativo). Solid tint por sentiment.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { Badge } from "../atoms/Badge";
@@ -47,6 +47,39 @@ export interface NewsCardProps {
   style?: StyleProp<ViewStyle>;
 }
 
+const styles = StyleSheet.create({
+  card: {
+    flexDirection: "row",
+    gap: spacing.sp4,
+    borderRadius: radii.rLg,
+    padding: spacing.sp4,
+  },
+  thumb: {
+    width: 72,
+    height: 72,
+    borderRadius: radii.rMd,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  thumbGlyph: { width: 32, height: 24, borderWidth: 2, borderRadius: 2 },
+  body: { flex: 1, gap: spacing.sp2 },
+  headline: { fontSize: 15, fontWeight: "600", lineHeight: 20 },
+  snippet: { fontSize: 13, lineHeight: 18 },
+  meta: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: spacing.sp2 },
+  source: { fontSize: 12, fontWeight: "600" },
+  dot: { fontSize: 12 },
+  when: { fontSize: 12 },
+  mentionsRow: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sp1, marginTop: spacing.sp1 },
+  pressed: { opacity: 0.85 },
+});
+
+// Thumb background per sentiment — static map (sentiment is a fixed enum)
+const THUMB_BG: Record<Sentiment, string | undefined> = {
+  positive: undefined, // c.accent2 at render time
+  neutral: undefined,  // c.border2 at render time
+  negative: undefined, // c.card at render time
+};
+
 export function NewsCard({
   headline,
   snippet,
@@ -63,69 +96,37 @@ export function NewsCard({
   const c = useThemeColors();
   const shadows = useThemeShadows();
 
-  const styles = useMemo(() => {
-    const thumbBg: Record<Sentiment, string> = {
-      positive: c.accent2,
-      neutral: c.border2,
-      negative: c.card,
-    };
-    return StyleSheet.create({
-      card: {
-        flexDirection: "row",
-        gap: spacing.sp4,
-        backgroundColor: c.card,
-        borderRadius: radii.rLg,
-        padding: spacing.sp4,
-        ...shadows.shSm,
-      },
-      thumb: {
-        width: 72,
-        height: 72,
-        borderRadius: radii.rMd,
-        backgroundColor: thumbBg[sentiment],
-        alignItems: "center",
-        justifyContent: "center",
-      },
-      thumbGlyph: {
-        width: 32,
-        height: 24,
-        borderWidth: 2,
-        borderColor: c.textSecondary,
-        borderRadius: 2,
-      },
-      body: { flex: 1, gap: spacing.sp2 },
-      headline: { fontSize: 15, fontWeight: "600", color: c.text, lineHeight: 20 },
-      snippet: { fontSize: 13, color: c.textSecondary, lineHeight: 18 },
-      meta: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: spacing.sp2 },
-      source: { fontSize: 12, fontWeight: "600", color: c.text },
-      dot: { fontSize: 12, color: c.textTertiary },
-      when: { fontSize: 12, color: c.textSecondary },
-      mentionsRow: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sp1, marginTop: spacing.sp1 },
-      pressed: { opacity: 0.85 },
-    });
-  }, [c, shadows, sentiment]);
+  // Thumb background and glyph border depend on sentiment + theme
+  const thumbBgMap: Record<Sentiment, string> = {
+    positive: c.accent2,
+    neutral: c.border2,
+    negative: c.card,
+  };
+  const thumbBg = thumbBgMap[sentiment];
 
   const visibleMentions = mentionedCandidates?.slice(0, MAX_MENTIONS_VISIBLE) ?? [];
   const hiddenMentionsCount =
     (mentionedCandidates?.length ?? 0) - visibleMentions.length;
 
+  const cardTheme = { backgroundColor: c.card, ...shadows.shSm };
+
   const content = (
     <>
-      <View style={styles.thumb}>
-        <View style={styles.thumbGlyph} />
+      <View style={[styles.thumb, { backgroundColor: thumbBg }]}>
+        <View style={[styles.thumbGlyph, { borderColor: c.textSecondary }]} />
       </View>
       <View style={styles.body}>
-        <Text style={styles.headline} numberOfLines={2}>
+        <Text style={[styles.headline, { color: c.text }]} numberOfLines={2}>
           {headline}
         </Text>
-        <Text style={styles.snippet} numberOfLines={2}>
+        <Text style={[styles.snippet, { color: c.textSecondary }]} numberOfLines={2}>
           {snippet}
         </Text>
         <View style={styles.meta}>
-          <Text style={styles.source}>{source}</Text>
-          <Text style={styles.dot}>{"·"}</Text>
-          <Text style={styles.when}>{when}</Text>
-          <Text style={styles.dot}>{"·"}</Text>
+          <Text style={[styles.source, { color: c.text }]}>{source}</Text>
+          <Text style={[styles.dot, { color: c.textTertiary }]}>{"·"}</Text>
+          <Text style={[styles.when, { color: c.textSecondary }]}>{when}</Text>
+          <Text style={[styles.dot, { color: c.textTertiary }]}>{"·"}</Text>
           <SentimentBadge sentiment={sentiment} />
         </View>
         {visibleMentions.length > 0 ? (
@@ -163,11 +164,11 @@ export function NewsCard({
         onPress={onPress}
         accessibilityRole="link"
         accessibilityLabel={`Noticia: ${headline}. Fuente ${source}.`}
-        style={(s) => [styles.card, s.pressed && styles.pressed, style]}
+        style={(s) => [styles.card, cardTheme, s.pressed && styles.pressed, style]}
       >
         {content}
       </Pressable>
     );
   }
-  return <View style={[styles.card, style]}>{content}</View>;
+  return <View style={[styles.card, cardTheme, style]}>{content}</View>;
 }
