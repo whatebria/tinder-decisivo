@@ -254,11 +254,13 @@ export function ConfiguracionScreen({
             <NavRow
               label="Mis guardados"
               subtitle="Favoritos, descartados y posturas guardadas"
+              iconLeading="bookmark"
               onPress={() => navigation.navigate("MisGuardados")}
             />
             <NavRow
               label="Mis respuestas"
               subtitle="Ver, editar o reiniciar tus respuestas del cuestionario"
+              iconLeading="check"
               onPress={() => navigation.navigate("MisRespuestas")}
             />
           </View>
@@ -270,6 +272,7 @@ export function ConfiguracionScreen({
           <NavRow
             label="Gestión de elecciones"
             subtitle="Activa o desactiva las elecciones que sigues"
+            iconLeading="bell"
             onPress={() => navigation.navigate("GestionElecciones")}
           />
         </View>
@@ -286,6 +289,7 @@ export function ConfiguracionScreen({
           <NavRow
             label="Ver tours de nuevo"
             subtitle="Reactiva los coach marks explicativos de cada pantalla"
+            iconLeading="info"
             onPress={handleReactivarTours}
           />
         </View>
@@ -297,11 +301,13 @@ export function ConfiguracionScreen({
             <NavRow
               label="Ver Onboarding"
               subtitle="Preview del welcome tour sin efectos en la sesion"
+              iconLeading="info"
               onPress={() => navigation.navigate("OnboardingPreview")}
             />
             <NavRow
               label="Resetear onboarding"
               subtitle="La proxima vez que abras la app veran los slides de nuevo"
+              iconLeading="undo"
               onPress={async () => {
                 await resetOnboarding();
                 toast.info("Onboarding reseteado", "Cierra sesion o recarga para verlo.");
@@ -310,11 +316,13 @@ export function ConfiguracionScreen({
             <NavRow
               label="Design System"
               subtitle="Catalogo interno de atoms, molecules y organisms"
+              iconLeading="columns"
               onPress={() => navigation.navigate("DesignSystem")}
             />
             <NavRow
               label="Django Admin"
               subtitle={ADMIN_URL}
+              iconLeading="gear"
               onPress={() => {
                 Linking.openURL(ADMIN_URL).catch(() => {
                   // Sin toast global aca — el error mas comun es que el
@@ -360,6 +368,7 @@ export function ConfiguracionScreen({
               <NavRow
                 label="Cerrar sesión"
                 variant="danger"
+                iconLeading="lock"
                 onPress={handleLogout}
               />
             </View>

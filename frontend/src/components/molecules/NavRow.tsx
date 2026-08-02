@@ -2,7 +2,7 @@
  * NavRow: box tap-able con label + subtitulo opcional y chevron a la derecha.
  *
  * Es el patron visual dominante del wireframe `tpl-config` (design-system-lowfi.html):
- *   [label + subtitle?]  ------>  [chevron-right]
+ *   [icon?] [label + subtitle?]  ------>  [chevron-right]
  *
  * Se usa para navegar a sub-screens desde una lista de settings. Tambien util
  * para cualquier lista de "items navegables" (Ubicacion, Notificaciones,
@@ -13,8 +13,12 @@
  *   - danger:  color de texto/chevron danger, borde subtle (para acciones
  *              destructivas como "Reiniciar cuestionario" o "Borrar cuenta")
  *
- * NO renderiza avatar ni contenido a la izquierda mas alla del texto — para
- * eso conviene un molecule especifico (ej. AccountRow).
+ * Prop `iconLeading`:
+ *   Icono a la izquierda del label para mejorar la escaneabilidad visual.
+ *   UX-036: ConfiguracionScreen tenia todas las secciones con el mismo peso;
+ *   agregar iconos permite al usuario identificar items sin leer el texto.
+ *
+ * NO renderiza avatar — para eso conviene un molecule especifico (ej. AccountRow).
  */
 
 import React, { useMemo } from "react";
@@ -31,7 +35,7 @@ import { spacing } from "../../theme/spacing";
 import { typography } from "../../theme/typography";
 import { useThemeColors } from "../../theme/useTheme";
 import { useBlurringPress } from "../../hooks/useBlurringPress";
-import { Icon } from "../atoms/Icon";
+import { Icon, type IconName } from "../atoms/Icon";
 
 export type NavRowVariant = "default" | "danger";
 
@@ -43,6 +47,8 @@ export interface NavRowProps
   variant?: NavRowVariant;
   /** Sobrescribe el label como accessibilityLabel si necesitas mas contexto. */
   accessibilityLabel?: string;
+  /** Icono opcional a la izquierda del label. UX-036: mejora escaneabilidad visual. */
+  iconLeading?: IconName;
 }
 
 export function NavRow({
@@ -50,6 +56,7 @@ export function NavRow({
   subtitle,
   variant = "default",
   accessibilityLabel,
+  iconLeading,
   onPress,
   ...pressable
 }: NavRowProps) {
@@ -74,6 +81,9 @@ export function NavRow({
         borderColor: c.border,
         backgroundColor: c.card,
         gap: spacing.sp3,
+      },
+      leadingIcon: {
+        color: isDanger ? c.danger : c.primary,
       },
       textCol: {
         flex: 1,
@@ -102,6 +112,13 @@ export function NavRow({
       {...pressable}
       onPress={handlePress}
     >
+      {iconLeading ? (
+        <Icon
+          name={iconLeading}
+          size={20}
+          color={styles.leadingIcon.color as string}
+        />
+      ) : null}
       <View style={styles.textCol}>
         <Text style={styles.label}>{label}</Text>
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
