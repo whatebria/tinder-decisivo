@@ -74,6 +74,9 @@ export function SubmitDoneScreen({
 
   const handleCtaBase = useCallback(async () => {
     setCtaLoading(true);
+    // BUG-043: invalidar miProgreso antes de navegar para que el Home
+    // refleje el estado correcto al volver desde Resultados.
+    qc.invalidateQueries({ queryKey: queryKeys.miProgreso });
     try {
       if (primeraEspecificaActiva?.id != null) {
         setTipoEleccion(primeraEspecificaActiva.id);
@@ -89,7 +92,7 @@ export function SubmitDoneScreen({
     } finally {
       setCtaLoading(false);
     }
-  }, [primeraEspecificaActiva, setTipoEleccion, loadForTipoEleccion, navigation, toast]);
+  }, [qc, primeraEspecificaActiva, setTipoEleccion, loadForTipoEleccion, navigation, toast]);
 
   // TASK-059: derivados compartidos -- un unico return (DRY).
   const isBase = mode === "base";

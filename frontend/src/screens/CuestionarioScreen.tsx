@@ -49,6 +49,8 @@ import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
 import { useIsDark, useThemeColors } from "../theme/useTheme";
 import { getDimensionColorsForEje } from "../domain/dimensiones";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "../api/queryClient";
 
 /** Delay para que el layout del nuevo contenido se calcule antes de hacer
  *  scroll. Menos de ~100ms puede resultar en scrollToEnd calculando la
@@ -62,6 +64,7 @@ export function CuestionarioScreen({
   const isDark = useIsDark();
   const insets = useSafeAreaInsets();
   const toast = useToast();
+  const qc = useQueryClient();
   const scrollRef = useRef<ScrollView>(null);
   const [infoOpen, setInfoOpen] = useState(false);
   const isGuest = useAuthStore((s) => s.isGuest);
@@ -210,11 +213,18 @@ export function CuestionarioScreen({
   const handleSubmit = useCallback(async () => {
     try {
       await submit({ skipServer: isGuest });
+      // BUG-043: invalidar cache de progreso + respuestas inmediatamente tras
+      // submit para que el Home refleje el estado correcto al volver, sin
+      // esperar a que el usuario navegue y regrese (que forzaba un refetch).
+      if (!isGuest) {
+        qc.invalidateQueries({ queryKey: queryKeys.miProgreso });
+        qc.invalidateQueries({ queryKey: queryKeys.misRespuestasAll });
+      }
       navigation.replace("SubmitDone", { mode: esTipoBase ? "base" : "eleccion" });
     } catch (err) {
       toast.error("No pudimos guardar tus respuestas", getErrorMessage(err));
     }
-  }, [submit, isGuest, navigation, esTipoBase, toast]);
+  }, [submit, isGuest, qc, navigation, esTipoBase, toast]);
 
   /**
    * Selecciona una opcion de respuesta y, si va a aparecer la seccion de
