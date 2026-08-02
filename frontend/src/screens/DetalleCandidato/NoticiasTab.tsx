@@ -27,11 +27,8 @@ import { useThemeColors } from "../../theme/useTheme";
 
 /** Formatea la fecha de publicacion de una noticia para mostrar. */
 function formatWhen(n: Noticia): string {
-  const raw =
-    (n as unknown as { fecha_publicacion?: string }).fecha_publicacion ??
-    (n as unknown as { fecha?: string }).fecha ??
-    (n as unknown as { created_at?: string }).created_at ??
-    "";
+  // TASK-036: fecha_publicacion esta en Schemas["Noticia"] -- sin casts.
+  const raw = n.fecha_publicacion ?? "";
   if (!raw) return "";
   const d = new Date(raw);
   if (Number.isNaN(d.getTime())) return "";
@@ -84,9 +81,7 @@ export function NoticiasTab({ noticias }: { noticias: Noticia[] }) {
                 descripcion: n.descripcion ?? "",
                 url: n.url,
                 fuente: n.fuente,
-                imagenUrl:
-                  (n as unknown as { imagen_url?: string | null }).imagen_url ??
-                  null,
+                imagenUrl: n.imagen_url ?? null,
                 fechaFormateada: cardProps.when,
                 sentiment: cardProps.sentiment,
               })
