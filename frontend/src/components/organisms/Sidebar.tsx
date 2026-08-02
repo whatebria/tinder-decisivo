@@ -12,7 +12,7 @@
  *   .app-nav.side .active { background: 10% primary }
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { StyleSheet, View } from "react-native";
 
 import {
@@ -30,25 +30,19 @@ export interface SidebarProps {
   navigation: AppTabNavigator;
 }
 
+const styles = StyleSheet.create({
+  column: {
+    flexDirection: "column",
+    borderRightWidth: 1,
+    paddingVertical: spacing.sp4,
+    paddingHorizontal: spacing.sp2,
+    gap: spacing.sp1,
+    minWidth: 96,
+  },
+});
+
 export function Sidebar({ active, navigation }: SidebarProps) {
   const c = useThemeColors();
-
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        column: {
-          flexDirection: "column",
-          backgroundColor: c.card,
-          borderRightWidth: 1,
-          borderRightColor: c.border2,
-          paddingVertical: spacing.sp4,
-          paddingHorizontal: spacing.sp2,
-          gap: spacing.sp1,
-          minWidth: 96,
-        },
-      }),
-    [c],
-  );
 
   function handlePress(tab: AppTabDef) {
     if (tab.key === active) return;
@@ -56,7 +50,10 @@ export function Sidebar({ active, navigation }: SidebarProps) {
   }
 
   return (
-    <View style={styles.column} accessibilityRole="tablist">
+    <View
+      style={[styles.column, { backgroundColor: c.card, borderRightColor: c.border2 }]}
+      accessibilityRole="tablist"
+    >
       {APP_TABS.map((t) => (
         <TabBarItem
           key={t.key}

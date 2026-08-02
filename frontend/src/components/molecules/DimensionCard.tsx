@@ -18,7 +18,7 @@
  * Consumidores futuros: comparador de candidatos por eje, breakdown en
  * ResultadoHero, etc.
  */
-import React, { useMemo } from "react";
+import React from "react";
 import { StyleSheet, Text, View, type ViewStyle } from "react-native";
 
 import { DimensionBadge } from "../atoms/DimensionBadge";
@@ -37,6 +37,29 @@ export interface DimensionCardProps {
   style?: ViewStyle;
 }
 
+const styles = StyleSheet.create({
+  card: {
+    borderLeftWidth: 4,
+    borderRadius: radii.rSm,
+    padding: spacing.sp3,
+    marginBottom: spacing.sp2,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: spacing.sp1,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "700",
+    marginLeft: spacing.sp2,
+  },
+  body: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+});
+
 export function DimensionCard({
   dimension,
   children,
@@ -47,45 +70,18 @@ export function DimensionCard({
   const colors = useDimensionColors(dimension);
   const dim = getDimension(dimension);
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        card: {
-          backgroundColor: c.gray100,
-          borderLeftWidth: 4,
-          borderLeftColor: colors.border,
-          borderRadius: radii.rSm,
-          padding: spacing.sp3,
-          marginBottom: spacing.sp2,
-        },
-        header: {
-          flexDirection: "row",
-          alignItems: "center",
-          marginBottom: spacing.sp1,
-        },
-        label: {
-          fontSize: 14,
-          fontWeight: "700",
-          color: colors.text,
-          marginLeft: spacing.sp2,
-        },
-        body: {
-          fontSize: 14,
-          color: c.textSecondary,
-          lineHeight: 20,
-        },
-      }),
-    [c, colors.border, colors.text],
-  );
-
   return (
-    <View style={[styles.card, style]}>
+    <View
+      style={[styles.card, { backgroundColor: c.gray100, borderLeftColor: colors.border }, style]}
+    >
       <View style={styles.header}>
         <DimensionBadge dimension={dimension} size="md" />
-        <Text style={styles.label}>{labelOverride ?? dim.label}</Text>
+        <Text style={[styles.label, { color: colors.text }]}>
+          {labelOverride ?? dim.label}
+        </Text>
       </View>
       {typeof children === "string" ? (
-        <Text style={styles.body}>{children}</Text>
+        <Text style={[styles.body, { color: c.textSecondary }]}>{children}</Text>
       ) : (
         children
       )}

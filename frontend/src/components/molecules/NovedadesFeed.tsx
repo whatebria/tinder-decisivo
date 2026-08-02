@@ -5,7 +5,7 @@
  * Movido de organisms/ a molecules/ (TASK-063): thin wrapper sin logica propia.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { StyleSheet, View, type ViewStyle } from "react-native";
 
 import { spacing } from "../../theme/spacing";
@@ -18,15 +18,11 @@ export interface NovedadesFeedProps {
   style?: ViewStyle;
 }
 
-export function NovedadesFeed({ items, style }: NovedadesFeedProps) {
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        container: { gap: spacing.sp2 },
-      }),
-    [],
-  );
+const styles = StyleSheet.create({
+  container: { gap: spacing.sp2 },
+});
 
+export function NovedadesFeed({ items, style }: NovedadesFeedProps) {
   return (
     <View style={[styles.container, style]}>
       {items.map(({ key, ...props }) => (

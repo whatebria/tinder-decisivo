@@ -3,7 +3,7 @@
  * Si solo hay 1 candidato, la segunda columna es un add-slot.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { Avatar } from "../atoms/Avatar";
@@ -30,78 +30,63 @@ export interface ComparatorProps {
   style?: StyleProp<ViewStyle>;
 }
 
+const styles = StyleSheet.create({
+  row: { flexDirection: "row", gap: spacing.sp3 },
+  col: {
+    flex: 1,
+    borderRadius: radii.rLg,
+    padding: spacing.sp4,
+    position: "relative",
+  },
+  removeBtn: {
+    position: "absolute",
+    top: spacing.sp2,
+    right: spacing.sp2,
+    zIndex: 1,
+  },
+  head: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sp3,
+    marginTop: spacing.sp2,
+    marginBottom: spacing.sp3,
+  },
+  headInfo: { flex: 1 },
+  name: { fontSize: 15, fontWeight: "600" },
+  partido: { fontSize: 12, marginTop: 2 },
+  pct: { fontSize: 20, fontWeight: "700" },
+  chartWrap: { minHeight: 160, alignItems: "center", justifyContent: "center" },
+  addSlot: {
+    flex: 1,
+    borderRadius: radii.rLg,
+    borderWidth: 2,
+    borderStyle: "dashed",
+    padding: spacing.sp5,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.sp2,
+    minHeight: 200,
+  },
+  addPlus: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  addTitle: { fontSize: 14, fontWeight: "600" },
+  addHint: { fontSize: 12, textAlign: "center", marginTop: 2, maxWidth: 180 },
+  pressed: { opacity: 0.85 },
+});
+
 export function Comparator({ slots, onRemove, onAdd, style }: ComparatorProps) {
   const c = useThemeColors();
   const shadows = useThemeShadows();
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        row: { flexDirection: "row", gap: spacing.sp3 },
-        col: {
-          flex: 1,
-          backgroundColor: c.card,
-          borderRadius: radii.rLg,
-          padding: spacing.sp4,
-          ...shadows.shSm,
-          position: "relative",
-        },
-        removeBtn: {
-          position: "absolute",
-          top: spacing.sp2,
-          right: spacing.sp2,
-          zIndex: 1,
-        },
-        head: {
-          flexDirection: "row",
-          alignItems: "center",
-          gap: spacing.sp3,
-          marginTop: spacing.sp2,
-          marginBottom: spacing.sp3,
-        },
-        headInfo: { flex: 1 },
-        name: { fontSize: 15, fontWeight: "600", color: c.text },
-        partido: { fontSize: 12, color: c.textSecondary, marginTop: 2 },
-        pct: { fontSize: 20, fontWeight: "700", color: c.primary },
-        chartWrap: { minHeight: 160, alignItems: "center", justifyContent: "center" },
-        addSlot: {
-          flex: 1,
-          backgroundColor: c.card,
-          borderRadius: radii.rLg,
-          borderWidth: 2,
-          borderStyle: "dashed",
-          borderColor: c.border,
-          padding: spacing.sp5,
-          alignItems: "center",
-          justifyContent: "center",
-          gap: spacing.sp2,
-          minHeight: 200,
-        },
-        addPlus: {
-          width: 48,
-          height: 48,
-          borderRadius: 24,
-          backgroundColor: c.accent2,
-          alignItems: "center",
-          justifyContent: "center",
-        },
-        addTitle: { fontSize: 14, fontWeight: "600", color: c.text },
-        addHint: {
-          fontSize: 12,
-          color: c.textSecondary,
-          textAlign: "center",
-          marginTop: 2,
-          maxWidth: 180,
-        },
-        pressed: { opacity: 0.85 },
-      }),
-    [c, shadows],
-  );
-
   return (
     <View style={[styles.row, style]}>
       {slots.map((slot, i) => (
-        <View key={`${slot.name}-${i}`} style={styles.col}>
+        <View key={`${slot.name}-${i}`} style={[styles.col, { backgroundColor: c.card, ...shadows.shSm }]}>
           {onRemove ? (
             <View style={styles.removeBtn}>
               <IconButton
@@ -117,10 +102,10 @@ export function Comparator({ slots, onRemove, onAdd, style }: ComparatorProps) {
           <View style={styles.head}>
             <Avatar initials={slot.initials} size="sm" />
             <View style={styles.headInfo}>
-              <Text style={styles.name}>{slot.name}</Text>
-              <Text style={styles.partido}>{slot.partido}</Text>
+              <Text style={[styles.name, { color: c.text }]}>{slot.name}</Text>
+              <Text style={[styles.partido, { color: c.textSecondary }]}>{slot.partido}</Text>
             </View>
-            <Text style={styles.pct}>{Math.round(slot.matchPercent)}%</Text>
+            <Text style={[styles.pct, { color: c.primary }]}>{Math.round(slot.matchPercent)}%</Text>
           </View>
           {slot.chart ? <View style={styles.chartWrap}>{slot.chart}</View> : null}
         </View>
@@ -130,13 +115,19 @@ export function Comparator({ slots, onRemove, onAdd, style }: ComparatorProps) {
           onPress={onAdd}
           accessibilityRole="button"
           accessibilityLabel="Agregar candidato para comparar"
-          style={(s) => [styles.addSlot, s.pressed && styles.pressed]}
+          style={(s) => [
+            styles.addSlot,
+            { backgroundColor: c.card, borderColor: c.border },
+            s.pressed && styles.pressed,
+          ]}
         >
-          <View style={styles.addPlus}>
+          <View style={[styles.addPlus, { backgroundColor: c.accent2 }]}>
             <Icon name="plus" color={c.primary} size={24} />
           </View>
-          <Text style={styles.addTitle}>Agregar candidato</Text>
-          <Text style={styles.addHint}>Compara con otro para tomar decisiones</Text>
+          <Text style={[styles.addTitle, { color: c.text }]}>Agregar candidato</Text>
+          <Text style={[styles.addHint, { color: c.textSecondary }]}>
+            Compara con otro para tomar decisiones
+          </Text>
         </Pressable>
       ) : null}
     </View>

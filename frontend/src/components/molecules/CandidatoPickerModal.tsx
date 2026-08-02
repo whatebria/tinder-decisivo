@@ -40,6 +40,45 @@ interface Props {
   onClose: () => void;
 }
 
+const styles = StyleSheet.create({
+  search: {
+    borderWidth: 1,
+    borderRadius: radii.rSm,
+    paddingHorizontal: spacing.sp3,
+    paddingVertical: spacing.sp2,
+    fontSize: 14,
+    marginBottom: spacing.sp3,
+  },
+  filterLabel: {
+    ...typography.overline,
+    fontWeight: "700",
+    marginBottom: spacing.sp2,
+  },
+  chipsRow: {
+    gap: spacing.sp2,
+    paddingBottom: spacing.sp3,
+    alignItems: "center",
+  },
+  chip: {
+    paddingVertical: spacing.sp1,
+    paddingHorizontal: spacing.sp3,
+    borderRadius: radii.rFull,
+    borderWidth: 1,
+  },
+  chipText: { fontSize: 13, fontWeight: "500" },
+  emptyText: {
+    padding: spacing.sp3,
+    textAlign: "center",
+  },
+  item: {
+    paddingVertical: spacing.sp3,
+    paddingHorizontal: spacing.sp2,
+    borderBottomWidth: 1,
+  },
+  itemName: { fontSize: 15, fontWeight: "600" },
+  itemMeta: { fontSize: 12, marginTop: 2 },
+});
+
 export function CandidatoPickerModal({
   visible,
   title = "Elegir candidato",
@@ -71,83 +110,16 @@ export function CandidatoPickerModal({
     });
   }, [candidatos, query, excluirId, tipoSel]);
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        search: {
-          borderWidth: 1,
-          borderRadius: radii.rSm,
-          paddingHorizontal: spacing.sp3,
-          paddingVertical: spacing.sp2,
-          fontSize: 14,
-          backgroundColor: c.bg,
-          borderColor: c.border,
-          color: c.text,
-          marginBottom: spacing.sp3,
-        },
-        filterLabel: {
-          ...typography.overline,
-          fontWeight: "700",
-          color: c.textSecondary,
-          marginBottom: spacing.sp2,
-        },
-        chipsRow: {
-          gap: spacing.sp2,
-          paddingBottom: spacing.sp3,
-          alignItems: "center",
-        },
-        chip: {
-          paddingVertical: spacing.sp1,
-          paddingHorizontal: spacing.sp3,
-          borderRadius: radii.rFull,
-          borderWidth: 1,
-          borderColor: c.border,
-          backgroundColor: c.bg,
-        },
-        chipActive: {
-          borderColor: c.primary,
-          backgroundColor: c.primary,
-        },
-        chipText: {
-          fontSize: 13,
-          fontWeight: "500",
-          color: c.textSecondary,
-        },
-        chipTextActive: {
-          color: c.textOnPrimary,
-        },
-        emptyText: {
-          color: c.textSecondary,
-          padding: spacing.sp3,
-          textAlign: "center",
-        },
-        item: {
-          paddingVertical: spacing.sp3,
-          paddingHorizontal: spacing.sp2,
-          borderBottomWidth: 1,
-          borderBottomColor: c.border,
-        },
-        itemPressed: {
-          backgroundColor: c.bg,
-        },
-        itemName: {
-          fontSize: 15,
-          fontWeight: "600",
-          color: c.text,
-        },
-        itemMeta: {
-          fontSize: 12,
-          marginTop: 2,
-          color: c.textSecondary,
-        },
-      }),
-    [c],
-  );
-
   function handleSelect(cand: Candidato) {
     onSelect(cand);
     setQuery("");
     setTipoSel(null);
+  }
+
+  function chipColors(isActive: boolean) {
+    return isActive
+      ? { borderColor: c.primary, backgroundColor: c.primary }
+      : { borderColor: c.border, backgroundColor: c.bg };
   }
 
   return (
@@ -157,13 +129,13 @@ export function CandidatoPickerModal({
         onChangeText={setQuery}
         placeholder="Buscar por nombre o partido..."
         placeholderTextColor={c.textSecondary}
-        style={styles.search}
+        style={[styles.search, { backgroundColor: c.bg, borderColor: c.border, color: c.text }]}
         accessibilityLabel="Buscar candidato"
       />
 
       {tiposEleccion.length > 0 ? (
         <>
-          <Text style={styles.filterLabel}>Tipo de eleccion</Text>
+          <Text style={[styles.filterLabel, { color: c.textSecondary }]}>Tipo de eleccion</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -171,40 +143,40 @@ export function CandidatoPickerModal({
           >
             <Pressable
               onPress={() => setTipoSel(null)}
-              style={[styles.chip, tipoSel === null && styles.chipActive]}
+              style={[styles.chip, chipColors(tipoSel === null)]}
               accessibilityRole="button"
               accessibilityLabel="Todas las elecciones"
             >
-              <Text style={[styles.chipText, tipoSel === null && styles.chipTextActive]}>
+              <Text style={[styles.chipText, { color: tipoSel === null ? c.textOnPrimary : c.textSecondary }]}>
                 Todas
               </Text>
             </Pressable>
             {tiposEleccion
               .filter((t) => t.id != null)
-              .map((t) => (
-                <Pressable
-                  key={t.id}
-                  onPress={() => setTipoSel(tipoSel === t.id ? null : t.id!)}
-                  style={[styles.chip, tipoSel === t.id && styles.chipActive]}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Filtrar por ${t.nombre}`}
-                >
-                  <Text
-                    style={[
-                      styles.chipText,
-                      tipoSel === t.id && styles.chipTextActive,
-                    ]}
+              .map((t) => {
+                const isActive = tipoSel === t.id;
+                return (
+                  <Pressable
+                    key={t.id}
+                    onPress={() => setTipoSel(isActive ? null : t.id!)}
+                    style={[styles.chip, chipColors(isActive)]}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Filtrar por ${t.nombre}`}
                   >
-                    {t.nombre}
-                  </Text>
-                </Pressable>
-              ))}
+                    <Text style={[styles.chipText, { color: isActive ? c.textOnPrimary : c.textSecondary }]}>
+                      {t.nombre}
+                    </Text>
+                  </Pressable>
+                );
+              })}
           </ScrollView>
         </>
       ) : null}
 
       {filtrados.length === 0 ? (
-        <Text style={styles.emptyText}>No hay candidatos que coincidan.</Text>
+        <Text style={[styles.emptyText, { color: c.textSecondary }]}>
+          No hay candidatos que coincidan.
+        </Text>
       ) : (
         <View>
           {filtrados.map((cand) => (
@@ -215,12 +187,13 @@ export function CandidatoPickerModal({
               accessibilityLabel={`Elegir ${nombreCompleto(cand)}`}
               style={({ pressed }) => [
                 styles.item,
-                pressed && styles.itemPressed,
+                { borderBottomColor: c.border },
+                pressed && { backgroundColor: c.bg },
               ]}
             >
-              <Text style={styles.itemName}>{nombreCompleto(cand)}</Text>
+              <Text style={[styles.itemName, { color: c.text }]}>{nombreCompleto(cand)}</Text>
               {cand.partido ? (
-                <Text style={styles.itemMeta}>{cand.partido}</Text>
+                <Text style={[styles.itemMeta, { color: c.textSecondary }]}>{cand.partido}</Text>
               ) : null}
             </Pressable>
           ))}

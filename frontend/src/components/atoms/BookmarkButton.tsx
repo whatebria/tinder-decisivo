@@ -5,7 +5,7 @@
  * y texto claro. Idempotente: siempre muestra "Guardar" o "Guardado".
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text, type StyleProp, type ViewStyle } from "react-native";
 
 import { radii } from "../../theme/radii";
@@ -21,6 +21,19 @@ export interface BookmarkButtonProps {
   style?: StyleProp<ViewStyle>;
 }
 
+const styles = StyleSheet.create({
+  chip: {
+    paddingVertical: spacing.sp1,
+    paddingHorizontal: spacing.sp3,
+    borderRadius: radii.rFull,
+    borderWidth: 1,
+    alignSelf: "flex-start",
+  },
+  text: { fontSize: 12, fontWeight: "600" },
+  pressed: { opacity: 0.7 },
+  disabled: { opacity: 0.5 },
+});
+
 export function BookmarkButton({
   saved,
   onPress,
@@ -30,35 +43,13 @@ export function BookmarkButton({
 }: BookmarkButtonProps) {
   const c = useThemeColors();
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        chip: {
-          paddingVertical: spacing.sp1,
-          paddingHorizontal: spacing.sp3,
-          borderRadius: radii.rFull,
-          borderWidth: 1,
-          alignSelf: "flex-start",
-        },
-        unsaved: {
-          backgroundColor: "transparent",
-          borderColor: c.border,
-        },
-        savedStyle: {
-          backgroundColor: c.accent2,
-          borderColor: c.primary,
-        },
-        text: { fontSize: 12, fontWeight: "600" },
-        textUnsaved: { color: c.textSecondary },
-        textSaved: { color: c.primary },
-        pressed: { opacity: 0.7 },
-        disabled: { opacity: 0.5 },
-      }),
-    [c]
-  );
-
   const label = saved ? "Guardado" : "Guardar";
   const a11y = accessibilityLabel ?? label;
+
+  const chipColors = saved
+    ? { backgroundColor: c.accent2, borderColor: c.primary }
+    : { backgroundColor: "transparent" as const, borderColor: c.border };
+  const textColor = saved ? c.primary : c.textSecondary;
 
   return (
     <Pressable
@@ -70,13 +61,13 @@ export function BookmarkButton({
       hitSlop={8}
       style={(s) => [
         styles.chip,
-        saved ? styles.savedStyle : styles.unsaved,
+        chipColors,
         s.pressed && styles.pressed,
         loading && styles.disabled,
         style,
       ]}
     >
-      <Text style={[styles.text, saved ? styles.textSaved : styles.textUnsaved]}>{label}</Text>
+      <Text style={[styles.text, { color: textColor }]}>{label}</Text>
     </Pressable>
   );
 }

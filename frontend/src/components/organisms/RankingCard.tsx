@@ -16,7 +16,7 @@
  * RankingCard usa flex 1 y minWidth para respetar el grid.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from "react-native";
 
 import { radii } from "../../theme/radii";
@@ -35,14 +35,40 @@ export interface RankingCardProps {
   matchPct: number;
   matchColor?: string;
   ejeScores?: Record<string, number>;
-  /** Cantidad de preguntas del user que el candidato tambien respondio.
-   *  Sirve para calibrar la confianza del % (ej. 87% sobre 4 vs 87% sobre 12). */
+  /** Cantidad de preguntas del user que el candidato tambien respondio. */
   preguntasConsideradas?: number;
   onPress?: () => void;
   /** Slot para acciones (favorito, descartar, etc.) al pie del card. */
   actions?: React.ReactNode;
   style?: ViewStyle;
 }
+
+const styles = StyleSheet.create({
+  card: {
+    padding: spacing.sp3,
+    borderRadius: radii.rMd,
+    borderWidth: 1,
+    gap: spacing.sp2,
+  },
+  header: { flexDirection: "row", alignItems: "center", gap: spacing.sp2 },
+  rankText: { fontSize: 12, fontWeight: "700", minWidth: 24 },
+  headerBody: { flex: 1, gap: 2, minWidth: 0 },
+  nombre: { fontSize: 13, fontWeight: "600" },
+  partido: { fontSize: 10 },
+  radarWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: spacing.sp1,
+  },
+  scoreFooter: { alignItems: "center", gap: 2 },
+  pct: { fontSize: 28, fontWeight: "700", lineHeight: 32 },
+  cobertura: {
+    ...typography.overline,
+    textTransform: "none",
+    letterSpacing: 0,
+  },
+  actionsWrap: { borderTopWidth: 1, paddingTop: spacing.sp2 },
+});
 
 export function RankingCard({
   rank,
@@ -64,82 +90,17 @@ export function RankingCard({
   const hasRadar = ejeScores && Object.keys(ejeScores).length >= 3;
   const nombreCompleto = `${nombre}${apellido ? ` ${apellido}` : ""}`;
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        card: {
-          padding: spacing.sp3,
-          borderRadius: radii.rMd,
-          borderWidth: 1,
-          borderColor: c.border2,
-          backgroundColor: c.card,
-          gap: spacing.sp2,
-        },
-        // Header: #N + avatar + nombre/partido en una fila compacta.
-        header: {
-          flexDirection: "row",
-          alignItems: "center",
-          gap: spacing.sp2,
-        },
-        rankText: {
-          fontSize: 12,
-          fontWeight: "700",
-          color: c.textSecondary,
-          minWidth: 24,
-        },
-        headerBody: { flex: 1, gap: 2, minWidth: 0 },
-        nombre: {
-          fontSize: 13,
-          fontWeight: "600",
-          color: c.text,
-        },
-        partido: {
-          fontSize: 10,
-          color: c.textSecondary,
-        },
-        // Radar centrado, dominante.
-        radarWrap: {
-          alignItems: "center",
-          justifyContent: "center",
-          paddingVertical: spacing.sp1,
-        },
-        // Footer del score: % grande + cobertura chica.
-        scoreFooter: {
-          alignItems: "center",
-          gap: 2,
-        },
-        pct: {
-          fontSize: 28,
-          fontWeight: "700",
-          color: scoreColor,
-          lineHeight: 32,
-        },
-        cobertura: {
-          ...typography.overline,
-          color: c.textSecondary,
-          textTransform: "none",
-          letterSpacing: 0,
-        },
-        actionsWrap: {
-          borderTopWidth: 1,
-          borderTopColor: c.border,
-          paddingTop: spacing.sp2,
-        },
-      }),
-    [c, scoreColor],
-  );
-
   const pressableContent = (
     <View style={{ gap: spacing.sp2 }}>
       <View style={styles.header}>
-        <Text style={styles.rankText}>#{rank}</Text>
+        <Text style={[styles.rankText, { color: c.textSecondary }]}>#{rank}</Text>
         <Avatar size="sm" initials={initials} imageUrl={imageUrl ?? undefined} />
         <View style={styles.headerBody}>
-          <Text style={styles.nombre} numberOfLines={1}>
+          <Text style={[styles.nombre, { color: c.text }]} numberOfLines={1}>
             {nombreCompleto}
           </Text>
           {partido ? (
-            <Text style={styles.partido} numberOfLines={1}>
+            <Text style={[styles.partido, { color: c.textSecondary }]} numberOfLines={1}>
               {partido}
             </Text>
           ) : null}
@@ -158,9 +119,9 @@ export function RankingCard({
       ) : null}
 
       <View style={styles.scoreFooter}>
-        <Text style={styles.pct}>{Math.round(matchPct)}%</Text>
+        <Text style={[styles.pct, { color: scoreColor }]}>{Math.round(matchPct)}%</Text>
         {preguntasConsideradas != null && preguntasConsideradas > 0 ? (
-          <Text style={styles.cobertura}>
+          <Text style={[styles.cobertura, { color: c.textSecondary }]}>
             {preguntasConsideradas}{" "}
             {preguntasConsideradas === 1
               ? "pregunta coincide"
@@ -172,7 +133,7 @@ export function RankingCard({
   );
 
   return (
-    <View style={[styles.card, style]}>
+    <View style={[styles.card, { backgroundColor: c.card, borderColor: c.border2 }, style]}>
       {onPress ? (
         <Pressable
           onPress={onPress}
@@ -185,7 +146,9 @@ export function RankingCard({
       ) : (
         pressableContent
       )}
-      {actions ? <View style={styles.actionsWrap}>{actions}</View> : null}
+      {actions ? (
+        <View style={[styles.actionsWrap, { borderTopColor: c.border }]}>{actions}</View>
+      ) : null}
     </View>
   );
 }

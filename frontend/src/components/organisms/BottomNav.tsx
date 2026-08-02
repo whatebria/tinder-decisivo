@@ -7,7 +7,7 @@
  *
  * Screens que S1 usan AppShell (y por tanto tienen bottomnav):
  *   Home HUB, Gestion Elecciones, Candidatos, Resultados, Mis Respuestas,
- *   Noticias, Perfil candidato, Perfil empty, Comparador, Config, Editar perfil.
+ *   Perfil candidato, Perfil empty, Comparador, Config, Editar perfil.
  *
  * Screens que NO (full-focus o pre-app, sin nav visible):
  *   Splash, Onboarding, Ubicacion, Login, Signup, Cuestionario, Share modal,
@@ -18,7 +18,7 @@
  *                     radius bottom lg }
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Platform, StyleSheet, View } from "react-native";
 
 import {
@@ -44,26 +44,20 @@ export interface BottomNavProps {
   navigation: AppTabNavigator;
 }
 
+const styles = StyleSheet.create({
+  bar: {
+    flexDirection: "row",
+    alignItems: "stretch",
+    borderTopWidth: 1,
+    // DS: padding 6px 4px 8px. En iOS agregamos safe-area inset abajo.
+    paddingTop: 6,
+    paddingBottom: Platform.OS === "ios" ? spacing.sp3 : 8,
+    paddingHorizontal: spacing.sp1,
+  },
+});
+
 export function BottomNav({ active, navigation }: BottomNavProps) {
   const c = useThemeColors();
-
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        bar: {
-          flexDirection: "row",
-          alignItems: "stretch",
-          backgroundColor: c.card,
-          borderTopWidth: 1,
-          borderTopColor: c.border2,
-          // DS: padding 6px 4px 8px. En iOS agregamos safe-area inset abajo.
-          paddingTop: 6,
-          paddingBottom: Platform.OS === "ios" ? spacing.sp3 : 8,
-          paddingHorizontal: spacing.sp1,
-        },
-      }),
-    [c],
-  );
 
   function handlePress(tab: AppTabDef) {
     if (tab.key === active) return;
@@ -71,7 +65,10 @@ export function BottomNav({ active, navigation }: BottomNavProps) {
   }
 
   return (
-    <View style={styles.bar} accessibilityRole="tablist">
+    <View
+      style={[styles.bar, { backgroundColor: c.card, borderTopColor: c.border2 }]}
+      accessibilityRole="tablist"
+    >
       {APP_TABS.map((t) => (
         <TabBarItem
           key={t.key}

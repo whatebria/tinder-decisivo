@@ -9,13 +9,13 @@
  *
  * Screens que USAN AppShell:
  *   Home HUB, Gestion Elecciones, Resultados, Mis Guardados, Mis Respuestas,
- *   Noticias, Perfil candidato, Perfil empty, Comparador, Config, Editar perfil.
+ *   Perfil candidato, Perfil empty, Comparador, Config, Editar perfil.
  *
  * Screens que NO (full-focus o pre-app, sin nav visible):
  *   Splash, Onboarding, Ubicacion, Login, Signup, Cuestionario, Share modal.
  */
 
-import React, { useMemo, type ReactNode } from "react";
+import React, { type ReactNode } from "react";
 import {
   StyleSheet,
   useWindowDimensions,
@@ -41,6 +41,12 @@ export interface AppShellProps {
   contentStyle?: StyleProp<ViewStyle>;
 }
 
+const styles = StyleSheet.create({
+  rootColumn: { flex: 1, flexDirection: "column" },
+  rootRow: { flex: 1, flexDirection: "row" },
+  content: { flex: 1 },
+});
+
 export function AppShell({
   active,
   navigation,
@@ -51,19 +57,9 @@ export function AppShell({
   const { width } = useWindowDimensions();
   const isWide = width >= SIDEBAR_BREAKPOINT;
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        rootColumn: { flex: 1, flexDirection: "column", backgroundColor: c.bg },
-        rootRow: { flex: 1, flexDirection: "row", backgroundColor: c.bg },
-        content: { flex: 1 },
-      }),
-    [c],
-  );
-
   if (isWide) {
     return (
-      <View style={styles.rootRow}>
+      <View style={[styles.rootRow, { backgroundColor: c.bg }]}>
         <Sidebar active={active} navigation={navigation} />
         <View style={[styles.content, contentStyle]}>{children}</View>
       </View>
@@ -71,7 +67,7 @@ export function AppShell({
   }
 
   return (
-    <View style={styles.rootColumn}>
+    <View style={[styles.rootColumn, { backgroundColor: c.bg }]}>
       <View style={[styles.content, contentStyle]}>{children}</View>
       <BottomNav active={active} navigation={navigation} />
     </View>

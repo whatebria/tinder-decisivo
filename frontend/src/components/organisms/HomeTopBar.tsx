@@ -5,7 +5,7 @@
  * Ref: design-exploration/design-system.html · .topnav (dentro de Template Home)
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { AppIcon } from "../atoms/AppIcon";
@@ -23,70 +23,49 @@ export interface HomeTopBarProps {
   style?: StyleProp<ViewStyle>;
 }
 
+const styles = StyleSheet.create({
+  bar: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sp3,
+    paddingHorizontal: spacing.sp4,
+    paddingVertical: spacing.sp3,
+    borderRadius: radii.rLg,
+    borderWidth: 1,
+    minHeight: 56,
+  },
+  brandRow: {
+    flexDirection: "row",
+    gap: spacing.sp2,
+    flex: 1,
+  },
+  brandText: { fontSize: 16, fontWeight: "700" },
+  brandSubtitle: { fontSize: 12, fontWeight: "500", marginTop: 1 },
+  brandTextBlock: { flexDirection: "column", flex: 1 },
+  iconBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: radii.rSm,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
+
 export function HomeTopBar({ brand, subtitle, onNotifications, style }: HomeTopBarProps) {
   const c = useThemeColors();
   const shadows = useThemeShadows();
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        bar: {
-          flexDirection: "row",
-          alignItems: "center",
-          gap: spacing.sp3,
-          backgroundColor: c.card,
-          paddingHorizontal: spacing.sp4,
-          paddingVertical: spacing.sp3,
-          borderRadius: radii.rLg,
-          borderWidth: 1,
-          borderColor: c.border2,
-          minHeight: 56,
-          ...shadows.shSm,
-        },
-        brand: {
-          flexDirection: "row",
-          alignItems: subtitle ? "flex-start" : "center",
-          gap: spacing.sp2,
-          flex: 1,
-        },
-        brandText: {
-          fontSize: 16,
-          fontWeight: "700",
-          color: c.text,
-        },
-        brandSubtitle: {
-          fontSize: 12,
-          fontWeight: "500",
-          color: c.textSecondary,
-          marginTop: 1,
-        },
-        brandTextBlock: {
-          flexDirection: "column",
-          flex: 1,
-        },
-        iconBtn: {
-          width: 40,
-          height: 40,
-          borderRadius: radii.rSm,
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "transparent",
-        },
-        iconBtnPressed: {
-          backgroundColor: c.border2,
-        },
-      }),
-    [c, shadows, subtitle],
-  );
-
   return (
-    <View style={[styles.bar, style]} accessibilityRole="header">
-      <View style={styles.brand}>
+    <View
+      style={[styles.bar, { backgroundColor: c.card, borderColor: c.border2, ...shadows.shSm }, style]}
+      accessibilityRole="header"
+    >
+      <View style={[styles.brandRow, { alignItems: subtitle ? "flex-start" : "center" }]}>
         <AppIcon size={22} />
         <View style={styles.brandTextBlock}>
-          <Text style={styles.brandText}>{brand}</Text>
+          <Text style={[styles.brandText, { color: c.text }]}>{brand}</Text>
           {subtitle ? (
-            <Text style={styles.brandSubtitle} numberOfLines={1}>
+            <Text style={[styles.brandSubtitle, { color: c.textSecondary }]} numberOfLines={1}>
               {subtitle}
             </Text>
           ) : null}
@@ -97,7 +76,10 @@ export function HomeTopBar({ brand, subtitle, onNotifications, style }: HomeTopB
           onPress={onNotifications}
           accessibilityRole="button"
           accessibilityLabel="Notificaciones"
-          style={({ pressed }) => [styles.iconBtn, pressed && styles.iconBtnPressed]}
+          style={({ pressed }) => [
+            styles.iconBtn,
+            { backgroundColor: pressed ? c.border2 : "transparent" },
+          ]}
         >
           <Icon name="bell" size={20} color={c.text} />
         </Pressable>

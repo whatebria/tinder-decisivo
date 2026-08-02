@@ -3,7 +3,7 @@
  * Uso ideal en flujos multi-paso (cuestionario) o pantallas de detalle.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { Button } from "../atoms/Button";
@@ -21,33 +21,30 @@ export interface TopNavProps {
   style?: StyleProp<ViewStyle>;
 }
 
+const styles = StyleSheet.create({
+  bar: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sp4,
+    paddingHorizontal: spacing.sp4,
+    paddingVertical: spacing.sp3,
+    borderBottomWidth: 1,
+    minHeight: 56,
+  },
+  brand: { fontSize: 16, fontWeight: "700" },
+  progressWrap: { flex: 1, maxWidth: 240 },
+  spacer: { flex: 1 },
+});
+
 export function TopNav({ brand, progress, actionLabel, onAction, style }: TopNavProps) {
   const c = useThemeColors();
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        bar: {
-          flexDirection: "row",
-          alignItems: "center",
-          gap: spacing.sp4,
-          backgroundColor: c.card,
-          paddingHorizontal: spacing.sp4,
-          paddingVertical: spacing.sp3,
-          borderBottomWidth: 1,
-          borderBottomColor: c.border2,
-          minHeight: 56,
-        },
-        brand: { fontSize: 16, fontWeight: "700", color: c.text },
-        progressWrap: { flex: 1, maxWidth: 240 },
-        spacer: { flex: 1 },
-      }),
-    [c],
-  );
-
   return (
-    <View style={[styles.bar, style]} accessibilityRole="header">
-      <Text style={styles.brand}>{brand}</Text>
+    <View
+      style={[styles.bar, { backgroundColor: c.card, borderBottomColor: c.border2 }, style]}
+      accessibilityRole="header"
+    >
+      <Text style={[styles.brand, { color: c.text }]}>{brand}</Text>
       {progress !== undefined ? (
         <View style={styles.progressWrap}>
           <Progress value={progress} />

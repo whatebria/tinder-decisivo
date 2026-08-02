@@ -7,7 +7,7 @@
  * Muestra un fallback minimalista con boton de reintento (recarga el arbol).
  * El fallback usa hooks de tema (dark/light) via el componente funcional interno.
  */
-import React, { useMemo } from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useThemeColors } from "../../theme/useTheme";
@@ -42,50 +42,44 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 }
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  emoji: { fontSize: 48, marginBottom: 12 },
+  title: { fontSize: 22, fontWeight: "800", marginBottom: 8 },
+  message: {
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 24,
+    maxWidth: 400,
+  },
+  button: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  buttonText: { fontWeight: "700", fontSize: 15 },
+});
+
 function ErrorFallback({ error, onReset }: { error: Error; onReset: () => void }) {
   const c = useThemeColors();
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        container: {
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          padding: 24,
-          backgroundColor: c.bg,
-        },
-        emoji: { fontSize: 48, marginBottom: 12 },
-        title: { fontSize: 22, fontWeight: "800", color: c.text, marginBottom: 8 },
-        message: {
-          fontSize: 14,
-          color: c.textSecondary,
-          textAlign: "center",
-          marginBottom: 24,
-          maxWidth: 400,
-        },
-        button: {
-          paddingVertical: 12,
-          paddingHorizontal: 24,
-          borderRadius: 8,
-          backgroundColor: c.primary,
-        },
-        buttonText: { color: c.textOnPrimary, fontWeight: "700", fontSize: 15 },
-      }),
-    [c]
-  );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: c.bg }]}>
       <Text style={styles.emoji}>!</Text>
-      <Text style={styles.title}>Algo se rompio</Text>
-      <Text style={styles.message}>{error.message}</Text>
+      <Text style={[styles.title, { color: c.text }]}>Algo se rompio</Text>
+      <Text style={[styles.message, { color: c.textSecondary }]}>{error.message}</Text>
       <Pressable
-        style={styles.button}
+        style={[styles.button, { backgroundColor: c.primary }]}
         onPress={onReset}
         accessibilityRole="button"
         accessibilityLabel="Reintentar"
       >
-        <Text style={styles.buttonText}>Reintentar</Text>
+        <Text style={[styles.buttonText, { color: c.textOnPrimary }]}>Reintentar</Text>
       </Pressable>
     </View>
   );

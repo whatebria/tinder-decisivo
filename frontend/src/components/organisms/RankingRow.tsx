@@ -6,7 +6,7 @@
  *   #N  [avatar sm]  [nombre / partido]  [mini radar 60]  [pct]
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from "react-native";
 
 import { radii } from "../../theme/radii";
@@ -30,6 +30,21 @@ export interface RankingRowProps {
   style?: ViewStyle;
 }
 
+const styles = StyleSheet.create({
+  card: {
+    padding: spacing.sp3,
+    borderRadius: radii.rMd,
+    borderWidth: 1,
+    gap: spacing.sp2,
+  },
+  row: { flexDirection: "row", alignItems: "center", gap: spacing.sp2 },
+  rankText: { fontSize: 14, fontWeight: "700", minWidth: 28 },
+  body: { flex: 1, gap: 2 },
+  nombre: { fontSize: 14, fontWeight: "600" },
+  partido: { fontSize: 11 },
+  pct: { fontSize: 16, fontWeight: "700", minWidth: 44, textAlign: "right" },
+});
+
 export function RankingRow({
   rank,
   nombre,
@@ -48,59 +63,16 @@ export function RankingRow({
   const scoreColor = matchColor ?? c.text;
   const hasRadar = ejeScores && Object.keys(ejeScores).length >= 3;
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        card: {
-          padding: spacing.sp3,
-          borderRadius: radii.rMd,
-          borderWidth: 1,
-          borderColor: c.border2,
-          backgroundColor: c.card,
-          gap: spacing.sp2,
-        },
-        row: {
-          flexDirection: "row",
-          alignItems: "center",
-          gap: spacing.sp2,
-        },
-        rankText: {
-          fontSize: 14,
-          fontWeight: "700",
-          color: c.textSecondary,
-          minWidth: 28,
-        },
-        body: { flex: 1, gap: 2 },
-        nombre: {
-          fontSize: 14,
-          fontWeight: "600",
-          color: c.text,
-        },
-        partido: {
-          fontSize: 11,
-          color: c.textSecondary,
-        },
-        pct: {
-          fontSize: 16,
-          fontWeight: "700",
-          color: scoreColor,
-          minWidth: 44,
-          textAlign: "right",
-        },
-      }),
-    [c, scoreColor],
-  );
-
   const inner = (
     <View style={styles.row}>
-      <Text style={styles.rankText}>#{rank}</Text>
+      <Text style={[styles.rankText, { color: c.textSecondary }]}>#{rank}</Text>
       <Avatar size="sm" initials={initials} imageUrl={imageUrl ?? undefined} />
       <View style={styles.body}>
-        <Text style={styles.nombre} numberOfLines={1}>
+        <Text style={[styles.nombre, { color: c.text }]} numberOfLines={1}>
           {nombre}{apellido ? ` ${apellido}` : ""}
         </Text>
         {partido ? (
-          <Text style={styles.partido} numberOfLines={1}>
+          <Text style={[styles.partido, { color: c.textSecondary }]} numberOfLines={1}>
             {partido}
           </Text>
         ) : null}
@@ -108,12 +80,12 @@ export function RankingRow({
       {hasRadar ? (
         <RadarChart data={ejeScores!} size={56} color={scoreColor} showLabels={false} />
       ) : null}
-      <Text style={styles.pct}>{Math.round(matchPct)}%</Text>
+      <Text style={[styles.pct, { color: scoreColor }]}>{Math.round(matchPct)}%</Text>
     </View>
   );
 
   return (
-    <View style={[styles.card, style]}>
+    <View style={[styles.card, { backgroundColor: c.card, borderColor: c.border2 }, style]}>
       {onPress ? (
         <Pressable
           onPress={onPress}

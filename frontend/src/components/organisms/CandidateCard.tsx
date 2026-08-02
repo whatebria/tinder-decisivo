@@ -3,7 +3,7 @@
  * + % grande + chevron para ir al detalle.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { Avatar } from "../atoms/Avatar";
@@ -32,6 +32,25 @@ export interface CandidateCardProps {
   style?: StyleProp<ViewStyle>;
 }
 
+const styles = StyleSheet.create({
+  card: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sp4,
+    borderRadius: radii.rLg,
+    padding: spacing.sp4,
+  },
+  info: { flex: 1, gap: spacing.sp1 },
+  name: { fontSize: 16, fontWeight: "600" },
+  partido: { fontSize: 13 },
+  sublabel: { fontSize: 12 },
+  tierWrap: { marginTop: spacing.sp1 },
+  // DS-11 Pantalla 4: el % usa --color-affinity-N (mismo tier que el badge).
+  // Calculado via getMatchColor() para consistencia con el service. (UX-026)
+  pct: { fontSize: 22, fontWeight: "700", marginHorizontal: spacing.sp3 },
+  pressed: { opacity: 0.85 },
+});
+
 export function CandidateCard({
   name,
   partido,
@@ -47,38 +66,13 @@ export function CandidateCard({
 
   const matchColor = matchPercent != null ? getMatchColor(matchPercent) : c.primary;
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        card: {
-          flexDirection: "row",
-          alignItems: "center",
-          gap: spacing.sp4,
-          backgroundColor: c.card,
-          borderRadius: radii.rLg,
-          padding: spacing.sp4,
-          ...shadows.shSm,
-        },
-        info: { flex: 1, gap: spacing.sp1 },
-        name: { fontSize: 16, fontWeight: "600", color: c.text },
-        partido: { fontSize: 13, color: c.textSecondary },
-        sublabel: { fontSize: 12, color: c.textTertiary },
-        tierWrap: { marginTop: spacing.sp1 },
-        // DS-11 Pantalla 4: el % usa --color-affinity-N (mismo tier que el badge).
-        // Calculado via getMatchColor() para consistencia con el service. (UX-026)
-        pct: { fontSize: 22, fontWeight: "700", color: matchColor, marginHorizontal: spacing.sp3 },
-        pressed: { opacity: 0.85 },
-      }),
-    [c, shadows, matchColor],
-  );
-
   const content = (
     <>
       <Avatar initials={initials} backgroundColor={avatarColor} />
       <View style={styles.info}>
-        <Text style={styles.name}>{name}</Text>
-        <Text style={styles.partido}>{partido}</Text>
-        {sublabel ? <Text style={styles.sublabel}>{sublabel}</Text> : null}
+        <Text style={[styles.name, { color: c.text }]}>{name}</Text>
+        <Text style={[styles.partido, { color: c.textSecondary }]}>{partido}</Text>
+        {sublabel ? <Text style={[styles.sublabel, { color: c.textTertiary }]}>{sublabel}</Text> : null}
         {matchPercent !== null ? (
           <View style={styles.tierWrap}>
             <MatchTier percent={matchPercent} showPercent={false} />
@@ -86,11 +80,13 @@ export function CandidateCard({
         ) : null}
       </View>
       {matchPercent !== null ? (
-        <Text style={styles.pct}>{Math.round(matchPercent)}%</Text>
+        <Text style={[styles.pct, { color: matchColor }]}>{Math.round(matchPercent)}%</Text>
       ) : null}
       {onPress ? <Icon name="chevron-right" color={c.textSecondary} size={20} /> : null}
     </>
   );
+
+  const cardStyle = [styles.card, { backgroundColor: c.card, ...shadows.shSm }, style];
 
   if (onPress) {
     return (
@@ -102,11 +98,11 @@ export function CandidateCard({
             ? `${name}, ${partido}, match ${Math.round(matchPercent)}%`
             : `${name}, ${partido}`
         }
-        style={(s) => [styles.card, s.pressed && styles.pressed, style]}
+        style={(s) => [...cardStyle, s.pressed && styles.pressed]}
       >
         {content}
       </Pressable>
     );
   }
-  return <View style={[styles.card, style]}>{content}</View>;
+  return <View style={cardStyle}>{content}</View>;
 }

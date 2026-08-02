@@ -9,7 +9,7 @@
  * TASK-070: kind "noticia" eliminado tras TASK-039 (YAGNI).
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from "react-native";
 
 import { radii } from "../../theme/radii";
@@ -46,51 +46,35 @@ interface UpdateProps extends CommonProps {
   subtitle?: string;
 }
 
+const styles = StyleSheet.create({
+  card: {
+    padding: spacing.sp3,
+    borderRadius: radii.rMd,
+    borderWidth: 1,
+  },
+  row: { flexDirection: "row", gap: spacing.sp2, alignItems: "center" },
+  body: { flex: 1, gap: 2 },
+  title: { fontSize: 14, fontWeight: "600" },
+  subtitle: { fontSize: 12 },
+});
+
 export function NovedadItem(props: NovedadItemProps) {
   const c = useThemeColors();
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        card: {
-          padding: spacing.sp3,
-          borderRadius: radii.rMd,
-          borderWidth: 1,
-          borderColor: c.border2,
-          backgroundColor: c.card,
-        },
-        row: { flexDirection: "row", gap: spacing.sp2, alignItems: "center" },
-        body: { flex: 1, gap: 2 },
-        title: {
-          fontSize: 14,
-          fontWeight: "600",
-          color: c.text,
-        },
-        subtitle: {
-          fontSize: 12,
-          color: c.textSecondary,
-        },
-        actionCard: {
-          borderColor: c.primary,
-        },
-      }),
-    [c],
-  );
+  const borderColor = props.kind === "action" ? c.primary : c.border2;
 
   let inner: React.ReactNode;
-  let cardExtra: ViewStyle | undefined;
 
   if (props.kind === "action") {
-    cardExtra = styles.actionCard;
     inner = (
       <View style={styles.row}>
         <Icon name={props.icon ?? "bell"} size={20} color={c.primary} />
         <View style={styles.body}>
-          <Text style={styles.title} numberOfLines={2}>
+          <Text style={[styles.title, { color: c.text }]} numberOfLines={2}>
             {props.title}
           </Text>
           {props.subtitle ? (
-            <Text style={styles.subtitle} numberOfLines={1}>
+            <Text style={[styles.subtitle, { color: c.textSecondary }]} numberOfLines={1}>
               {props.subtitle}
             </Text>
           ) : null}
@@ -110,11 +94,11 @@ export function NovedadItem(props: NovedadItemProps) {
           initials={props.avatarInitials ?? "??"}
         />
         <View style={styles.body}>
-          <Text style={styles.title} numberOfLines={2}>
+          <Text style={[styles.title, { color: c.text }]} numberOfLines={2}>
             {props.title}
           </Text>
           {props.subtitle ? (
-            <Text style={styles.subtitle} numberOfLines={1}>
+            <Text style={[styles.subtitle, { color: c.textSecondary }]} numberOfLines={1}>
               {props.subtitle}
             </Text>
           ) : null}
@@ -123,19 +107,16 @@ export function NovedadItem(props: NovedadItemProps) {
     );
   }
 
+  const cardStyle = [styles.card, { backgroundColor: c.card, borderColor }, props.style];
+
   if (!props.onPress) {
-    return <View style={[styles.card, cardExtra, props.style]}>{inner}</View>;
+    return <View style={cardStyle}>{inner}</View>;
   }
   return (
     <Pressable
       onPress={props.onPress}
       accessibilityRole="button"
-      style={({ pressed }) => [
-        styles.card,
-        cardExtra,
-        props.style,
-        pressed ? { opacity: 0.85 } : null,
-      ]}
+      style={({ pressed }) => [...cardStyle, pressed ? { opacity: 0.85 } : null]}
     >
       {inner}
     </Pressable>

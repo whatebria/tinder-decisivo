@@ -18,7 +18,7 @@
  * Basado en design-system-lowfi.html - Resultados hero (variantes mobile/desktop).
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import {
   StyleSheet,
   Text,
@@ -60,6 +60,39 @@ export interface ResultadoHeroProps {
   style?: ViewStyle;
 }
 
+const styles = StyleSheet.create({
+  card: {
+    padding: spacing.sp4,
+    borderRadius: radii.rLg,
+    borderWidth: 1,
+    gap: spacing.sp3,
+  },
+  cardVertical: { alignItems: "center" },
+  kicker: {
+    fontSize: 10,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+    fontWeight: "600",
+  },
+  // Layout HORIZONTAL: split en dos columnas.
+  splitRow: { flexDirection: "row", alignItems: "center", gap: spacing.sp4 },
+  splitCol: { flex: 1, gap: spacing.sp2, alignItems: "center" },
+  splitColLeft: { alignItems: "center" },
+  // Textos compartidos.
+  nombre: { fontSize: 20, fontWeight: "700", textAlign: "center" },
+  partido: { fontSize: 13, textAlign: "center" },
+  pct: { fontSize: 44, fontWeight: "800", lineHeight: 48 },
+  confianzaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sp2,
+    flexWrap: "wrap",
+    justifyContent: "center",
+  },
+  confianzaSub: { fontSize: 11 },
+  ctaWrapperStretch: { alignSelf: "stretch", marginTop: spacing.sp2 },
+});
+
 export function ResultadoHero({
   nombre,
   apellido,
@@ -86,91 +119,22 @@ export function ResultadoHero({
   const hasRadar = ejeScores && Object.keys(ejeScores).length >= 3;
   const nombreCompleto = `${nombre}${apellido ? ` ${apellido}` : ""}`;
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        card: {
-          padding: spacing.sp4,
-          borderRadius: radii.rLg,
-          borderWidth: 1,
-          borderColor: c.border2,
-          backgroundColor: c.card,
-          gap: spacing.sp3,
-        },
-        cardVertical: { alignItems: "center" },
-        kicker: {
-          fontSize: 10,
-          textTransform: "uppercase",
-          letterSpacing: 0.8,
-          color: c.textSecondary,
-          fontWeight: "600",
-        },
-        // Layout HORIZONTAL: split en dos columnas.
-        splitRow: {
-          flexDirection: "row",
-          alignItems: "center",
-          gap: spacing.sp4,
-        },
-        splitCol: {
-          flex: 1,
-          gap: spacing.sp2,
-          alignItems: "center",
-        },
-        splitColLeft: {
-          // La info del candidato se centra horizontalmente dentro de su columna,
-          // pero el CTA se estira full-width para tap target grande.
-          alignItems: "center",
-        },
-        // Textos compartidos.
-        nombre: {
-          fontSize: 20,
-          fontWeight: "700",
-          color: c.text,
-          textAlign: "center",
-        },
-        partido: {
-          fontSize: 13,
-          color: c.textSecondary,
-          textAlign: "center",
-        },
-        pct: {
-          fontSize: 44,
-          fontWeight: "800",
-          color: scoreColor,
-          lineHeight: 48,
-        },
-        confianzaRow: {
-          flexDirection: "row",
-          alignItems: "center",
-          gap: spacing.sp2,
-          flexWrap: "wrap",
-          justifyContent: "center",
-        },
-        confianzaSub: {
-          fontSize: 11,
-          color: c.textSecondary,
-        },
-        ctaWrapperStretch: { alignSelf: "stretch", marginTop: spacing.sp2 },
-      }),
-    [c, scoreColor],
-  );
-
   // Label accesible comun a ambos layouts
   const a11yLabel = `Tu mejor match: ${nombreCompleto}, ${Math.round(matchPct)}% de afinidad`;
 
   const infoBlock = (
     <>
       <Avatar size="xl" initials={initials} imageUrl={imageUrl ?? undefined} />
-      <Text style={styles.nombre} numberOfLines={2}>
+      <Text style={[styles.nombre, { color: c.text }]} numberOfLines={2}>
         {nombreCompleto}
       </Text>
-      {partido ? <Text style={styles.partido}>{partido}</Text> : null}
-      <Text style={styles.pct}>{Math.round(matchPct)}%</Text>
+      {partido ? <Text style={[styles.partido, { color: c.textSecondary }]}>{partido}</Text> : null}
+      <Text style={[styles.pct, { color: scoreColor }]}>{Math.round(matchPct)}%</Text>
       {confianzaLabel ? (
         <View style={styles.confianzaRow}>
           <Badge variant={confianzaVariant}>{confianzaLabel}</Badge>
           {confianzaSubtext ? (
-            <Text style={styles.confianzaSub}>{confianzaSubtext}</Text>
+            <Text style={[styles.confianzaSub, { color: c.textSecondary }]}>{confianzaSubtext}</Text>
           ) : null}
         </View>
       ) : null}
@@ -191,15 +155,17 @@ export function ResultadoHero({
     />
   ) : null;
 
+  const cardTheme = { backgroundColor: c.card, borderColor: c.border2 };
+
   // HORIZONTAL: kicker arriba full-width, luego split 2 cols con info | radar.
   if (isHorizontal) {
     return (
       <View
-        style={[styles.card, style]}
+        style={[styles.card, cardTheme, style]}
         accessibilityRole="summary"
         accessibilityLabel={a11yLabel}
       >
-        <Text style={styles.kicker}>Tu match</Text>
+        <Text style={[styles.kicker, { color: c.textSecondary }]}>Tu match</Text>
         <View style={styles.splitRow}>
           <View style={[styles.splitCol, styles.splitColLeft]}>
             {infoBlock}
@@ -213,23 +179,23 @@ export function ResultadoHero({
   // VERTICAL (mobile): estilo RankingCard XL. Radar entre info y footer.
   return (
     <View
-      style={[styles.card, styles.cardVertical, style]}
+      style={[styles.card, styles.cardVertical, cardTheme, style]}
       accessibilityRole="summary"
       accessibilityLabel={a11yLabel}
     >
-      <Text style={styles.kicker}>Tu match</Text>
+      <Text style={[styles.kicker, { color: c.textSecondary }]}>Tu match</Text>
       <Avatar size="xl" initials={initials} imageUrl={imageUrl ?? undefined} />
-      <Text style={styles.nombre} numberOfLines={2}>
+      <Text style={[styles.nombre, { color: c.text }]} numberOfLines={2}>
         {nombreCompleto}
       </Text>
-      {partido ? <Text style={styles.partido}>{partido}</Text> : null}
+      {partido ? <Text style={[styles.partido, { color: c.textSecondary }]}>{partido}</Text> : null}
       {radarBlock}
-      <Text style={styles.pct}>{Math.round(matchPct)}%</Text>
+      <Text style={[styles.pct, { color: scoreColor }]}>{Math.round(matchPct)}%</Text>
       {confianzaLabel ? (
         <View style={styles.confianzaRow}>
           <Badge variant={confianzaVariant}>{confianzaLabel}</Badge>
           {confianzaSubtext ? (
-            <Text style={styles.confianzaSub}>{confianzaSubtext}</Text>
+            <Text style={[styles.confianzaSub, { color: c.textSecondary }]}>{confianzaSubtext}</Text>
           ) : null}
         </View>
       ) : null}

@@ -5,7 +5,7 @@
  * Uso: const actionColors = useActionColors(); <Icon color={actionColors.like} />
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import {
   Pressable,
   StyleSheet,
@@ -33,6 +33,16 @@ const SIZES = {
   info: 48,
 } as const;
 
+const styles = StyleSheet.create({
+  pressed: { transform: [{ scale: 0.94 }], opacity: 0.9 },
+  disabled: { opacity: 0.4 },
+  base: {
+    borderRadius: radii.rFull,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
+
 export function ActionButton({
   children,
   variant,
@@ -43,22 +53,6 @@ export function ActionButton({
   const c = useThemeColors();
   const sh = useThemeShadows();
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        base: {
-          backgroundColor: c.card,
-          borderRadius: radii.rFull,
-          alignItems: "center",
-          justifyContent: "center",
-          ...sh.shMd,
-        },
-        pressed: { transform: [{ scale: 0.94 }], opacity: 0.9 },
-        disabled: { opacity: 0.4 },
-      }),
-    [c, sh]
-  );
-
   const size = SIZES[variant];
 
   return (
@@ -68,7 +62,7 @@ export function ActionButton({
       accessibilityRole="button"
       style={(state) => [
         styles.base,
-        { width: size, height: size },
+        { width: size, height: size, backgroundColor: c.card, ...sh.shMd },
         state.pressed && !disabled && styles.pressed,
         disabled && styles.disabled,
         style,

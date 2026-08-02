@@ -7,7 +7,7 @@
  * Refactor: usa <Modal> molecule base (tokens + dark mode reactivos).
  */
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { Modal } from "./Modal";
@@ -25,6 +25,11 @@ interface Props {
   onSubmit: (currentPassword: string, newPassword: string) => void;
   loading?: boolean;
 }
+
+const styles = StyleSheet.create({
+  message: { fontSize: 14, lineHeight: 20, marginBottom: spacing.sp3 },
+  actions: { gap: spacing.sp2 },
+});
 
 export function CambiarPasswordModal({
   visible,
@@ -56,20 +61,6 @@ export function CambiarPasswordModal({
     onCancel();
   }
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        message: {
-          fontSize: 14,
-          color: c.textSecondary,
-          lineHeight: 20,
-          marginBottom: spacing.sp3,
-        },
-        actions: { gap: spacing.sp2 },
-      }),
-    [c],
-  );
-
   return (
     <Modal
       visible={visible}
@@ -88,7 +79,7 @@ export function CambiarPasswordModal({
         </View>
       }
     >
-      <Text style={styles.message}>
+      <Text style={[styles.message, { color: c.textSecondary }]}>
         Ingresa tu contraseña actual y luego la nueva ({PASSWORD_MIN_LENGTH_MSG.toLowerCase()})
       </Text>
 

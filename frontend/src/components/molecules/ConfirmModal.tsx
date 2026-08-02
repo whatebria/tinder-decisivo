@@ -18,7 +18,7 @@
  * hardcoded (no reactivo al tema, contrast issues en dark mode).
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { Modal } from "./Modal";
@@ -39,6 +39,11 @@ interface Props {
   onCancel: () => void;
   loading?: boolean;
 }
+
+const styles = StyleSheet.create({
+  message: { fontSize: 15, lineHeight: 22 },
+  actions: { gap: spacing.sp2 },
+});
 
 export function ConfirmModal({
   visible,
@@ -65,21 +70,6 @@ export function ConfirmModal({
     onCancel();
   }
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        message: {
-          fontSize: 15,
-          color: c.textSecondary,
-          lineHeight: 22,
-        },
-        actions: {
-          gap: spacing.sp2,
-        },
-      }),
-    [c],
-  );
-
   return (
     <Modal
       visible={visible}
@@ -102,7 +92,7 @@ export function ConfirmModal({
         </View>
       }
     >
-      <Text style={styles.message}>{message}</Text>
+      <Text style={[styles.message, { color: c.textSecondary }]}>{message}</Text>
     </Modal>
   );
 }

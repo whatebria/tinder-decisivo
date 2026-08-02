@@ -35,7 +35,7 @@
  * lo que lo excluye de ser un atom por definicion.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from "react-native";
 
 import {
@@ -92,6 +92,55 @@ export interface ElectionCardProps {
 
 const CARD_WIDTH = 180;
 
+const styles = StyleSheet.create({
+  card: {
+    width: CARD_WIDTH,
+    padding: spacing.sp3,
+    borderRadius: radii.rLg,
+    gap: spacing.sp2,
+    flexShrink: 0,
+  },
+  headRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: spacing.sp2,
+  },
+  titleCol: { flex: 1, gap: 2 },
+  name: { fontSize: 14, fontWeight: "600", lineHeight: 18 },
+  scope: {
+    fontSize: 10,
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+    fontWeight: "600",
+  },
+  baseChip: {
+    alignSelf: "flex-start",
+    paddingHorizontal: spacing.sp2,
+    paddingVertical: 2,
+    borderRadius: radii.rFull,
+    marginTop: 2,
+  },
+  baseChipText: {
+    fontSize: 10,
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+    fontWeight: "700",
+  },
+  badge: {
+    paddingHorizontal: spacing.sp2,
+    paddingVertical: 2,
+    borderRadius: radii.rFull,
+    flexShrink: 0,
+  },
+  badgeText: { fontSize: 11, fontWeight: "700" },
+  matchRow: { flexDirection: "row", alignItems: "baseline", gap: spacing.sp1 },
+  matchN: { fontSize: 22, fontWeight: "700" },
+  matchPct: { fontSize: 12 },
+  pendingText: { fontSize: 11 },
+  progresoText: { fontSize: 13, fontWeight: "600" },
+});
+
 /**
  * Deriva label + colores del badge segun isCompleted. Funcion pura.
  */
@@ -140,115 +189,29 @@ export function ElectionCard({
     !esBase && !modoProgreso && (variant === "pending" || matchPercent == null);
 
   const badge = pickBadge(isCompleted);
-  const badgeColors = useMemo(() => {
-    if (!badge) return null;
-    switch (badge.tone) {
-      case "success":
-        return { bg: c.success, fg: c.textOnPrimary };
-      case "neutral":
-      default:
-        return { bg: c.accent2, fg: c.textSecondary };
-    }
-  }, [badge, c]);
+  const badgeColors = badge
+    ? badge.tone === "success"
+      ? { bg: c.success, fg: c.textOnPrimary }
+      : { bg: c.accent2, fg: c.textSecondary }
+    : null;
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        card: {
-          width: CARD_WIDTH,
-          padding: spacing.sp3,
-          borderRadius: radii.rLg,
-          gap: spacing.sp2,
-          backgroundColor: c.card,
-          borderWidth: isActive ? 2 : 1,
-          borderColor: isActive ? c.primary : c.border2,
-          flexShrink: 0,
-        },
-        headRow: {
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          gap: spacing.sp2,
-        },
-        titleCol: { flex: 1, gap: 2 },
-        name: {
-          fontSize: 14,
-          fontWeight: "600",
-          color: c.text,
-          lineHeight: 18,
-        },
-        scope: {
-          fontSize: 10,
-          textTransform: "uppercase",
-          letterSpacing: 0.6,
-          color: c.textSecondary,
-          fontWeight: "600",
-        },
-        baseChip: {
-          alignSelf: "flex-start",
-          paddingHorizontal: spacing.sp2,
-          paddingVertical: 2,
-          borderRadius: radii.rFull,
-          backgroundColor: c.accent2,
-          marginTop: 2,
-        },
-        baseChipText: {
-          fontSize: 10,
-          textTransform: "uppercase",
-          letterSpacing: 0.6,
-          color: c.primary,
-          fontWeight: "700",
-        },
-        badge: {
-          paddingHorizontal: spacing.sp2,
-          paddingVertical: 2,
-          borderRadius: radii.rFull,
-          flexShrink: 0,
-        },
-        badgeText: {
-          fontSize: 11,
-          fontWeight: "700",
-        },
-        matchRow: {
-          flexDirection: "row",
-          alignItems: "baseline",
-          gap: spacing.sp1,
-        },
-        matchN: {
-          fontSize: 22,
-          fontWeight: "700",
-          color: isActive ? c.primary : c.text,
-        },
-        matchPct: {
-          fontSize: 12,
-          color: c.textSecondary,
-        },
-        pendingText: {
-          fontSize: 11,
-          color: c.textSecondary,
-        },
-        progresoText: {
-          fontSize: 13,
-          fontWeight: "600",
-          color: c.text,
-        },
-      }),
-    [c, isActive],
-  );
+  const cardBorderWidth = isActive ? 2 : 1;
+  const cardBorderColor = isActive ? c.primary : c.border2;
+  const matchNColor = isActive ? c.primary : c.text;
 
   const content = (
-    <View style={[styles.card, style]}>
+    <View style={[styles.card, { backgroundColor: c.card, borderWidth: cardBorderWidth, borderColor: cardBorderColor }, style]}>
       <View style={styles.headRow}>
         <View style={styles.titleCol}>
-          <Text style={styles.name} numberOfLines={2}>
+          <Text style={[styles.name, { color: c.text }]} numberOfLines={2}>
             {name}
           </Text>
           {esBase ? (
-            <View style={styles.baseChip}>
-              <Text style={styles.baseChipText}>Aplica a todas</Text>
+            <View style={[styles.baseChip, { backgroundColor: c.accent2 }]}>
+              <Text style={[styles.baseChipText, { color: c.primary }]}>Aplica a todas</Text>
             </View>
           ) : scope ? (
-            <Text style={styles.scope}>{scope}</Text>
+            <Text style={[styles.scope, { color: c.textSecondary }]}>{scope}</Text>
           ) : null}
         </View>
         {badge && badgeColors ? (
@@ -261,17 +224,17 @@ export function ElectionCard({
       </View>
 
       {esBase ? (
-        <Text style={styles.pendingText}>
+        <Text style={[styles.pendingText, { color: c.textSecondary }]}>
           {baseHint ?? "Mejora tus matches en todas las elecciones"}
         </Text>
       ) : modoProgreso ? (
-        <Text style={styles.progresoText}>{progresoLabel}</Text>
+        <Text style={[styles.progresoText, { color: c.text }]}>{progresoLabel}</Text>
       ) : isPendingLegacy ? (
-        <Text style={styles.pendingText}>{pendingLabel ?? "Sin cuestionario"}</Text>
+        <Text style={[styles.pendingText, { color: c.textSecondary }]}>{pendingLabel ?? "Sin cuestionario"}</Text>
       ) : (
         <View style={styles.matchRow}>
-          <Text style={styles.matchN}>{Math.round(matchPercent ?? 0)}</Text>
-          <Text style={styles.matchPct}>%</Text>
+          <Text style={[styles.matchN, { color: matchNColor }]}>{Math.round(matchPercent ?? 0)}</Text>
+          <Text style={[styles.matchPct, { color: c.textSecondary }]}>%</Text>
         </View>
       )}
 
