@@ -401,8 +401,9 @@ function ActionRow({
 // ---------- Helpers ----------
 
 function buildShareText(cand: Candidato, matchPct: number | null): string {
-  const pct = matchPct != null ? `${Math.round(matchPct)}%` : "?";
-  return `${nombreCompleto(cand)} — ${pct} de afinidad conmigo segun mi cuestionario en TinderPolitico.`;
+  // TASK-038: usar formatMatchPercentage para consistencia con la UI (DRY).
+  const pct = matchPct != null ? formatMatchPercentage(matchPct) : "?";
+  return `${nombreCompleto(cand)} - ${pct} de afinidad conmigo segun mi cuestionario en TinderPolitico.`;
 }
 
 // ---------- Styles ----------
@@ -412,10 +413,6 @@ function buildShareText(cand: Candidato, matchPct: number | null): string {
 //   - radii.rSm..rFull para borderRadius
 //   - typography.* para fontSize/fontWeight/lineHeight
 //
-// Excepcion documentada: styles.matchBig usa un fontSize 40 fuera de la
-// escala tipografica estandar, por diseno explicito del wireframe #13
-// (numero de compatibilidad ultra prominente). Es el UNICO hardcode.
-
 const styles = StyleSheet.create({
   center: {
     flex: 1,
@@ -438,11 +435,8 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sp2,
   },
   matchBig: {
-    // Excepcion: 40 no esta en typography (max display=34), pero el
-    // wireframe pide un numero muy prominente. Documentado arriba.
-    fontSize: 40,
-    fontWeight: "900",
-    lineHeight: 44,
+    // TASK-037: typography.display2 -- fontSize:40 ahora en el sistema.
+    ...typography.display2,
   },
   matchCaption: {
     ...typography.overline,

@@ -14,17 +14,34 @@ import type { OpcionRespuesta, Pregunta } from "../api/endpoints";
 
 export type PesoValue = 0 | 1 | 2 | 3;
 
+/**
+ * TASK-054: fuente unica de verdad para labels de pesos.
+ * - label: etiqueta corta para chips de seleccion (espacio limitado en cuestionario).
+ * - labelLargo: etiqueta completa para display en modal/listados donde hay mas espacio.
+ */
 export interface PesoOption {
   value: PesoValue;
   label: string;
+  labelLargo: string;
 }
 
 export const PESOS: readonly PesoOption[] = [
-  { value: 0, label: "No me importa" },
-  { value: 1, label: "Poco" },
-  { value: 2, label: "Medio" },
-  { value: 3, label: "Mucho" },
+  { value: 0, label: "No me importa",  labelLargo: "No me importa" },
+  { value: 1, label: "Poco",           labelLargo: "Poco importante" },
+  { value: 2, label: "Medio",          labelLargo: "Importante" },
+  { value: 3, label: "Mucho",          labelLargo: "Muy importante" },
 ] as const;
+
+/**
+ * Lookup de labels de display (formato largo) indexado por valor.
+ * Importar en lugar de definir Record<number, string> local en cada consumer.
+ */
+export const PESO_LABELS_DISPLAY: Readonly<Record<PesoValue, string>> = {
+  0: "No me importa",
+  1: "Poco importante",
+  2: "Importante",
+  3: "Muy importante",
+} as const;
 
 export const DEFAULT_PESO: PesoValue = 2;
 

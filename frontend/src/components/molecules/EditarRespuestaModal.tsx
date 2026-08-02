@@ -21,18 +21,13 @@ import { Divider } from "../atoms/Divider";
 import { Link } from "../atoms/Link";
 import { Modal } from "./Modal";
 import { RadioGroup } from "./RadioGroup";
-import { separarOpciones } from "../../services/cuestionario";
+import { PESOS, separarOpciones } from "../../services/cuestionario";
 import { blurActiveElement } from "../../hooks/blurActiveElement";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useIsDark, useThemeColors } from "../../theme/useTheme";
 
-const PESOS: Array<{ value: number; label: string }> = [
-  { value: 0, label: "No me importa" },
-  { value: 1, label: "Poco importante" },
-  { value: 2, label: "Importante" },
-  { value: 3, label: "Muy importante" },
-];
+
 
 interface Props {
   visible: boolean;
@@ -198,7 +193,7 @@ export function EditarRespuestaModal({
 
       <Text style={styles.sectionTitle}>Que tan importante es para ti</Text>
       <RadioGroup<number>
-        options={PESOS.map((p) => ({ value: p.value, label: p.label }))}
+        options={PESOS.map((p) => ({ value: p.value, label: p.labelLargo }))}
         value={peso}
         onChange={setPeso}
         accessibilityLabel="Peso de la respuesta"

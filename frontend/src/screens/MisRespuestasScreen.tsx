@@ -46,17 +46,13 @@ import {
   useToast,
 } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
+import { PESO_LABELS_DISPLAY } from "../services/cuestionario";
 import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
 
-const PESO_LABELS: Record<number, string> = {
-  0: "No me importa",
-  1: "Poco importante",
-  2: "Importante",
-  3: "Muy importante",
-};
+
 
 /** "Todas" cuando no hay filtro por tipo. */
 const FILTRO_TODAS: number | "todas" = "todas";
@@ -423,7 +419,7 @@ function RespuestaCard({ respuesta, onPress }: RespuestaCardProps) {
         </Text>
         <Text style={[styles.metaSep, { color: c.textTertiary }]}>·</Text>
         <Text style={[styles.metaPeso, { color: c.textSecondary }]}>
-          {PESO_LABELS[respuesta.peso] ?? `peso ${respuesta.peso}`}
+          {PESO_LABELS_DISPLAY[respuesta.peso as 0|1|2|3] ?? `peso ${respuesta.peso}`}
         </Text>
       </View>
     </Pressable>

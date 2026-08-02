@@ -20,5 +20,9 @@
  *
  * El codigo de las screens, hooks y endpoints se mantiene intacto.
  * Desactivado: 2026-07-30. Razon: contenido no listo para produccion.
+ *
+ * TASK-039: si esta feature no tiene fecha definida de activacion, evaluar
+ * eliminar NoticiasTab, useNoticiasCandidato, NoticiasScreen y codigo
+ * relacionado (YAGNI). Hacerlo en el mismo PR que esta decision de producto.
  */
 export const SHOW_NOTICIAS = false;

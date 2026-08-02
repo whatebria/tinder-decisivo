@@ -8,7 +8,9 @@
  */
 
 export const typography = {
-  display: { fontSize: 34, fontWeight: "700", lineHeight: 34 * 1.3 },
+  display:  { fontSize: 34, fontWeight: "700", lineHeight: 34 * 1.3 },
+  /** TASK-037: numero de compatibilidad ultra-prominente en DetalleCandidatoScreen. */
+  display2: { fontSize: 40, fontWeight: "900" as const, lineHeight: 44 },
   h1:      { fontSize: 28, fontWeight: "700", lineHeight: 28 * 1.3 },
   h2:      { fontSize: 24, fontWeight: "600", lineHeight: 24 * 1.3 },
   h3:      { fontSize: 20, fontWeight: "600", lineHeight: 20 * 1.4 },
