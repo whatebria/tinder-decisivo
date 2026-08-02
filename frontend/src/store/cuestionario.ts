@@ -26,6 +26,12 @@ interface CuestionarioState {
   respuestas: Record<number, RespuestaLocal>;
   loading: boolean;
   submitting: boolean;
+  /**
+   * UX-056: true una vez que el usuario completa y envia el cuestionario.
+   * Nunca vuelve a false (ni en reset()) para que HomeTrustSection no
+   * reaparezca al reiniciar para usuarios veteranos (misma sesion).
+   */
+  hasEverCompletedCuestionario: boolean;
 
   loadForTipoEleccion: (tipoEleccionId: number) => Promise<void>;
   /** Setea solo el tipoEleccionId sin cargar preguntas (para ir directo a Resultados). */
@@ -48,6 +54,7 @@ export const useCuestionarioStore = create<CuestionarioState>((set, get) => ({
   respuestas: {},
   loading: false,
   submitting: false,
+  hasEverCompletedCuestionario: false,
 
   loadForTipoEleccion: async (tipoEleccionId) => {
     set({ loading: true, tipoEleccionId, currentIndex: 0, respuestas: {} });
@@ -132,6 +139,8 @@ export const useCuestionarioStore = create<CuestionarioState>((set, get) => ({
     set({ submitting: true });
     try {
       await submitRespuestas(payload);
+      // UX-056: marcar que el usuario ya completo al menos una vez.
+      set({ hasEverCompletedCuestionario: true });
     } finally {
       set({ submitting: false });
     }

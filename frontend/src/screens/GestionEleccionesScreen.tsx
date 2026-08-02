@@ -209,7 +209,7 @@ export function GestionEleccionesScreen({
 
       {/* Hero */}
       <View style={styles.heroCol}>
-        <Text style={styles.heroTitle}>Catálogo</Text>
+        {/* UX-049: titulo "Catalogo" eliminado -- duplicaba el titulo del TopBar. */}
         <Text style={styles.heroSubtitle}>
           Activa las elecciones que te interesan. Puedes cambiarlas cuando quieras.
         </Text>

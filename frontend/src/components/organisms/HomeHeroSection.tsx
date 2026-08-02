@@ -58,6 +58,13 @@ const HERO_TEXT_SUB = "rgba(255,255,255,0.55)";
 const HERO_PILL_BG = "rgba(255,255,255,0.10)";
 const HERO_PILL_BORDER = "rgba(255,255,255,0.20)";
 
+// TASK-053: items extraidos a constante de modulo para evitar hardcode inline.
+const TRUST_ITEMS = [
+  { icon: "clock",  text: "~15 min" },
+  { icon: "lock",   text: "100% privado" },
+  { icon: "shield", text: "Datos SERVEL" },
+] as const;
+
 // -- Props ------------------------------------------------------------------
 
 export interface HomeHeroSectionProps {
@@ -287,18 +294,12 @@ export function HomeHeroSection({
 
       {/* 5. Trust meta row */}
       <View style={styles.trustRow}>
-        <View style={styles.trustItem}>
-          <Icon name="clock" size={11} color={HERO_TEXT_SUB} />
-          <Text style={styles.trustText}>~15 min</Text>
-        </View>
-        <View style={styles.trustItem}>
-          <Icon name="lock" size={11} color={HERO_TEXT_SUB} />
-          <Text style={styles.trustText}>100% privado</Text>
-        </View>
-        <View style={styles.trustItem}>
-          <Icon name="shield" size={11} color={HERO_TEXT_SUB} />
-          <Text style={styles.trustText}>Datos SERVEL</Text>
-        </View>
+        {TRUST_ITEMS.map((item) => (
+          <View key={item.text} style={styles.trustItem}>
+            <Icon name={item.icon} size={11} color={HERO_TEXT_SUB} />
+            <Text style={styles.trustText}>{item.text}</Text>
+          </View>
+        ))}
       </View>
     </View>
   );

@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Auditoria Atomic Design -- VotoAfin Frontend</title>
+<link rel="stylesheet" href="ds-shared.css"/>
+<style>
+/* --- Layout hero --- */
+.audit-hero{background:var(--c-hero);padding:28px 36px 24px;color:#fff;margin:-40px -36px 32px;}
+.audit-hero h1{font-size:24px;font-weight:900;margin-bottom:6px;letter-spacing:-.3px;}
+.audit-hero p{font-size:12px;opacity:.65;max-width:740px;line-height:1.7;}
+.meta-chips{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+.meta-chip{font-size:10px;background:rgba(255,255,255,.15);padding:3px 10px;border-radius:20px;border:1px solid rgba(255,255,255,.25);}
+/* --- Section dividers --- */
+.sec-divider{display:flex;align-items:center;gap:12px;margin:40px 0 22px;}
+.sec-divider hr{flex:1;border:none;border-top:1px solid var(--c-border);}
+.sec-divider-lbl{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.7px;color:var(--c-text3);white-space:nowrap;}
+/* --- Inventory table --- */
+.inv-table{width:100%;border-collapse:collapse;font-size:11px;}
+.inv-table th{background:var(--c-surface2);font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text2);padding:6px 10px;text-align:left;border-bottom:1px solid var(--c-border);}
+.inv-table td{padding:6px 10px;border-bottom:1px solid var(--c-border2);vertical-align:top;}
+.inv-table tr:hover td{background:var(--c-surface2);}
+.inv-table .mono{font-family:monospace;font-size:10px;}
+/* --- Layer badges --- */
+.lb{display:inline-block;padding:2px 7px;border-radius:4px;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+.lb-atom{background:#DBEAFE;color:#1D4ED8;}.dark .lb-atom{background:rgba(59,130,246,.2);color:#93C5FD;}
+.lb-mol{background:#F3E8FF;color:#6D28D9;}.dark .lb-mol{background:rgba(124,58,237,.2);color:#C4B5FD;}
+.lb-org{background:#DCFCE7;color:#15803D;}.dark .lb-org{background:rgba(34,197,94,.15);color:#86EFAC;}
+.lb-tpl{background:#FEF3C7;color:#92400E;}.dark .lb-tpl{background:rgba(245,158,11,.15);color:#FCD34D;}
+.lb-scr{background:var(--c-surface2);color:var(--c-text2);}
+.lb-wrong{background:#FEE2E2;color:#991B1B;}.dark .lb-wrong{background:rgba(220,38,38,.2);color:#FCA5A5;}
+.lb-dead{background:#F3F4F6;color:#9CA3AF;text-decoration:line-through;}
+/* --- Violation cards --- */
+.viol{border-radius:10px;padding:12px 14px;margin-bottom:8px;border-left:4px solid;}
+.viol.high{background:var(--c-warning-bg);border-color:var(--c-warning);}
+.viol.med{background:var(--c-info-bg);border-color:var(--c-info);}
+.viol.low{background:var(--c-surface2);border-color:var(--c-border);}
+.viol-title{font-size:12px;font-weight:700;color:var(--c-text);margin-bottom:4px;}
+.viol-body{font-size:11px;color:var(--c-text2);line-height:1.6;}
+.viol-evidence{font-size:10px;font-family:monospace;color:var(--c-text3);margin-top:5px;padding:4px 8px;background:var(--c-surface2);border-radius:4px;}
+/* --- Score cards --- */
+.score-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
+.score-card{border-radius:12px;padding:14px;border:1.5px solid var(--c-border);background:var(--c-surface);}
+.score-name{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text2);margin-bottom:6px;}
+.score-num{font-size:32px;font-weight:900;line-height:1;}
+.score-bar{height:4px;border-radius:2px;background:var(--c-border);margin-top:6px;overflow:hidden;}
+.score-fill{height:100%;border-radius:2px;}
+.score-label{font-size:9px;color:var(--c-text3);margin-top:4px;}
+.score-just{font-size:10px;color:var(--c-text2);margin-top:8px;line-height:1.5;}
+/* --- Antipattern cards --- */
+.anti-card{border-radius:10px;border:1.5px solid var(--c-border);padding:14px;margin-bottom:10px;}
+.anti-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:800;text-transform:uppercase;background:var(--c-warning-bg);color:var(--c-warning);margin-bottom:6px;border:1px solid var(--c-warning);}
+.anti-title{font-size:13px;font-weight:700;color:var(--c-text);margin-bottom:4px;}
+.anti-body{font-size:11px;color:var(--c-text2);line-height:1.6;}
+.anti-files{font-size:10px;font-family:monospace;color:var(--c-text3);margin-top:6px;}
+/* --- Scalability table --- */
+.scale-table{width:100%;border-collapse:collapse;}
+.scale-table th{background:var(--c-surface2);font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text2);padding:7px 12px;text-align:left;border-bottom:1px solid var(--c-border);}
+.scale-table td{padding:8px 12px;font-size:11px;border-bottom:1px solid var(--c-border2);vertical-align:top;}
+.scale-exc{color:#15803D;font-weight:700;}
+.scale-bue{color:var(--c-success);font-weight:700;}
+.scale-mej{color:var(--c-warning);font-weight:700;}
+.scale-def{color:var(--c-danger);font-weight:700;}
+/* --- Architecture diagram --- */
+.arch-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.arch-box{border-radius:10px;border:1.5px solid var(--c-border);overflow:hidden;}
+.arch-box-head{padding:8px 12px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--c-border);}
+.arch-box-body{padding:10px 12px;font-family:monospace;font-size:10px;line-height:1.9;color:var(--c-text2);}
+.arch-atom{background:#DBEAFE;color:#1D4ED8;}
+.arch-mol{background:#F3E8FF;color:#6D28D9;}
+.arch-org{background:#DCFCE7;color:#15803D;}
+.arch-tpl{background:#FEF3C7;color:#92400E;}
+.arch-feat{background:var(--c-surface2);color:var(--c-text2);}
+/* --- Roadmap --- */
+.rm-group{margin-bottom:20px;}
+.rm-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--c-border);}
+.rm-title.high{color:var(--c-danger);}
+.rm-title.med{color:var(--c-warning);}
+.rm-title.low{color:var(--c-text2);}
+.rm-row{display:grid;grid-template-columns:3fr 1fr 1fr 1fr;gap:8px;padding:10px 12px;border-radius:8px;border:1px solid var(--c-border);margin-bottom:6px;background:var(--c-surface);font-size:11px;align-items:start;}
+.rm-row th{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--c-text3);}
+.rm-action{color:var(--c-text);font-weight:600;}
+.rm-meta{color:var(--c-text2);}
+.rm-impact-h{color:var(--c-danger);font-weight:700;}
+.rm-impact-m{color:var(--c-warning);font-weight:700;}
+.rm-impact-l{color:var(--c-success);}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-logo">VotoAfin DS</div>
+  <div class="sidebar-ver">Atomic Design Audit</div>
+  <hr/>
+  <div class="sidebar-label">Secciones</div>
+  <a href="#inventario">Inventario</a>
+  <a href="#validacion">Clasificacion AD</a>
+  <a href="#violaciones">Violaciones</a>
+  <a href="#antipatrones">Antipatrones</a>
+  <a href="#design-system">Design System</a>
+  <a href="#escalabilidad">Escalabilidad</a>
+  <a href="#arquitectura">Arquitectura Ideal</a>
+  <a href="#scores">Scores</a>
+  <a href="#roadmap">Roadmap</a>
+  <div class="sidebar-bottom"><button class="theme-btn" id="theme-btn">Dark mode</button></div>
+</nav>
+<div class="main"><div class="content">
+
+<div class="audit-hero">
+  <div style="opacity:.5;font-size:10px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Auditoria de Arquitectura Frontend &middot; Basada en Codigo Real</div>
+  <h1>Atomic Design &amp; Arquitectura de Componentes</h1>
+  <p>Auditoria completa del frontend de VotoAfin. No se asumen convenciones -- cada clasificacion se verifica leyendo el codigo. Se identifican 4 misclasificaciones criticas, 1 componente muerto en el barrel, 12+ componentes pantalla-especificos incorrectamente en la biblioteca compartida, y 3 antipatrones sistematicos.</p>
+  <div class="meta-chips">
+    <div class="meta-chip">31 atoms</div>
+    <div class="meta-chip">38 molecules</div>
+    <div class="meta-chip">21 organisms</div>
+    <div class="meta-chip">2 templates</div>
+    <div class="meta-chip">18 screens</div>
+    <div class="meta-chip">Codigo verificado en archivo</div>
+  </div>
+</div>
+
+<!-- INVENTARIO -->
+<div id="inventario" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 1 &middot; Inventario de Componentes</div><hr/></div>
+
+<div style="font-size:11px;font-weight:700;color:var(--c-text);margin-bottom:8px;">Atoms/ (31 componentes)</div>
+<table class="inv-table" style="margin-bottom:20px;">
+  <thead><tr><th>Componente</th><th>Tamano</th><th>Clasificacion actual</th><th>Clasificacion correcta</th><th>Evidencia</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">ActionButton</td><td>2.2 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Boton de accion simple con icono</td></tr>
+    <tr><td class="mono">AppIcon</td><td>3.7 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>SVG brand, variantes light/dark</td></tr>
+    <tr><td class="mono">Avatar</td><td>2.7 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Imagen circular con fallback</td></tr>
+    <tr><td class="mono">Badge</td><td>1.8 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Etiqueta de estado</td></tr>
+    <tr><td class="mono">BookmarkButton</td><td>2.3 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Icono toggle favorito</td></tr>
+    <tr><td class="mono">Button</td><td>4.7 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Boton con variants, loading, disabled</td></tr>
+    <tr><td class="mono">Checkbox / Radio / Toggle</td><td>2-2.6 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Controles de seleccion basicos</td></tr>
+    <tr><td class="mono">Chip</td><td>1.9 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Tag seleccionable</td></tr>
+    <tr><td class="mono">DimensionBadge</td><td>2.2 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Badge de eje tematico con color</td></tr>
+    <tr><td class="mono">Divider</td><td>770 B</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Linea separadora</td></tr>
+    <tr style="background:rgba(220,38,38,.04);"><td class="mono"><strong>ElectionCard</strong></td><td><strong>9.2 KB</strong></td><td><span class="lb lb-wrong">Atom (INCORRECTO)</span></td><td><span class="lb lb-mol">Molecule</span></td><td>3 variantes, API legacy/nueva, importa domain/eleccion.ts, logica de negocio, pickBadge helper</td></tr>
+    <tr><td class="mono">ElectionCardAdd</td><td>1.9 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Trigger para agregar eleccion</td></tr>
+    <tr><td class="mono">Heading</td><td>2.1 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Titulo semantico nivel 1/2/3</td></tr>
+    <tr><td class="mono">Icon</td><td>7.8 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>SVG sprite catalog</td></tr>
+    <tr><td class="mono">IconButton</td><td>2.5 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Boton con solo icono</td></tr>
+    <tr><td class="mono">Input</td><td>1.5 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Campo de texto base</td></tr>
+    <tr><td class="mono">Link</td><td>2.7 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Texto presionable estilizado</td></tr>
+    <tr><td class="mono">PageDots</td><td>1.4 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Indicador de paginas</td></tr>
+    <tr><td class="mono">Progress / ProgressRing</td><td>1.5-4.8 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Barras de progreso</td></tr>
+    <tr><td class="mono">RadarChart</td><td>4.9 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Visualizacion SVG pura, sin estado propio</td></tr>
+    <tr><td class="mono">SentimentBadge</td><td>2.1 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Badge positivo/neutral/negativo</td></tr>
+    <tr><td class="mono">Spinner</td><td>730 B</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Loader circular</td></tr>
+    <tr><td class="mono">StatBlock</td><td>1.8 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Valor numerico con label</td></tr>
+    <tr><td class="mono">TabBarItem / Tabs</td><td>3.7-4.0 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>Tabs con estado activo, sin datos</td></tr>
+    <tr><td class="mono">ThemeToggle / Timeline / Tooltip</td><td>1-2.2 KB</td><td><span class="lb lb-atom">Atom</span></td><td><span class="lb lb-atom">Atom</span></td><td>UI primitivos</td></tr>
+  </tbody>
+</table>
+
+<div style="font-size:11px;font-weight:700;color:var(--c-text);margin-bottom:8px;">Molecules/ (38 componentes de produccion)</div>
+<table class="inv-table" style="margin-bottom:20px;">
+  <thead><tr><th>Componente</th><th>Tamano</th><th>Clasificacion actual</th><th>Clasificacion correcta</th><th>Evidencia</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">BookmarkActions</td><td>5.0 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Fav + Desc + Share -- composicion de atoms</td></tr>
+    <tr><td class="mono">BottomSheet</td><td>5.8 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Modal de abajo, sin datos, generico</td></tr>
+    <tr><td class="mono">CambiarPasswordModal</td><td>4.0 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Form de cambio de password, sin fetch interno</td></tr>
+    <tr><td class="mono">CandidatoPickerModal</td><td>6.8 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Picker con filtros, recibe data via props</td></tr>
+    <tr><td class="mono">ChipActivo</td><td>1.6 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-atom">Atom</span></td><td>Chip con badge de estado -- un atom compuesto</td></tr>
+    <tr><td class="mono">CoachMark</td><td>7.0 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Presentacional puro, la logica vive en useCoachMarkTour</td></tr>
+    <tr><td class="mono">CoachMarkTour</td><td>1.6 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Orquestador del tour, usa hook + CoachMark</td></tr>
+    <tr><td class="mono">CollapsibleFilterSection</td><td>2.5 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Seccion colapsable generica</td></tr>
+    <tr><td class="mono">ConfirmModal</td><td>2.8 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Modal de confirmacion generica</td></tr>
+    <tr><td class="mono">DimensionCard</td><td>2.9 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Card de eje tematico con icono + descripcion</td></tr>
+    <tr><td class="mono">EditarRespuestaModal</td><td>5.2 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Modal form sin fetch interno, usa Modal + RadioGroup</td></tr>
+    <tr><td class="mono">EliminarCuentaModal</td><td>3.5 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Flujo destructivo, sin fetch propio</td></tr>
+    <tr><td class="mono">FormField</td><td>1.8 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Label + Input + Error -- composicion clasica</td></tr>
+    <tr style="background:rgba(220,38,38,.04);"><td class="mono"><strong>HomeElectionItem</strong></td><td>6.1 KB</td><td><span class="lb lb-wrong">Molecule (INCORRECTO)</span></td><td><span class="lb lb-scr">Screen-specific</span></td><td>Solo usado en HomeScreen. No reusable fuera del Home.</td></tr>
+    <tr><td class="mono">HomeGreeting</td><td>1.9 KB</td><td><span class="lb lb-wrong">Molecule (INCORRECTO)</span></td><td><span class="lb lb-scr">Screen-specific</span></td><td>Solo usado en HomeScreen.</td></tr>
+    <tr><td class="mono">HomeMatchLocked</td><td>5.2 KB</td><td><span class="lb lb-wrong">Molecule (INCORRECTO)</span></td><td><span class="lb lb-scr">Screen-specific</span></td><td>Solo usado en HomeScreen. Bloque de match bloqueado.</td></tr>
+    <tr><td class="mono">HomeTrustSection</td><td>2.8 KB</td><td><span class="lb lb-wrong">Molecule (INCORRECTO)</span></td><td><span class="lb lb-scr">Screen-specific</span></td><td>Solo usado en HomeScreen. Seccion de trust.</td></tr>
+    <tr><td class="mono">ListPickerModal</td><td>7.1 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Picker generico de lista, sin fetch, reusable</td></tr>
+    <tr><td class="mono">MatchSummaryCard</td><td>6.2 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Card de match para el Home, sin datos, props-only</td></tr>
+    <tr><td class="mono">MatchTier</td><td>3.8 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Chip de nivel de confianza</td></tr>
+    <tr><td class="mono">Modal</td><td>5.3 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Shell generico de modal con header/footer</td></tr>
+    <tr><td class="mono">NavRow</td><td>3.5 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Fila de navegacion con chevron</td></tr>
+    <tr><td class="mono">NewsCard</td><td>5.5 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Card de noticia, props-only</td></tr>
+    <tr><td class="mono">NoticiaDetailSheet</td><td>5.6 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Sheet de detalle de noticia, recibe datos</td></tr>
+    <tr><td class="mono">NovedadItem</td><td>5.1 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Item del feed mixto del Home</td></tr>
+    <tr style="background:rgba(220,38,38,.04);"><td class="mono"><strong>OnboardingEleccionesDemo</strong></td><td>3.4 KB</td><td><span class="lb lb-wrong">Molecule (INCORRECTO)</span></td><td><span class="lb lb-scr">Screen-specific</span></td><td>Solo usado en OnboardingScreen. Demo para el slide 2.</td></tr>
+    <tr style="background:rgba(220,38,38,.04);"><td class="mono"><strong>OnboardingPreguntaDemo</strong></td><td>2.9 KB</td><td><span class="lb lb-wrong">Molecule (INCORRECTO)</span></td><td><span class="lb lb-scr">Screen-specific</span></td><td>Solo usado en OnboardingScreen. Demo para el slide 3.</td></tr>
+    <tr style="background:rgba(220,38,38,.04);"><td class="mono"><strong>OnboardingResultadosDemo</strong></td><td>1.9 KB</td><td><span class="lb lb-wrong">Molecule (INCORRECTO)</span></td><td><span class="lb lb-scr">Screen-specific</span></td><td>Solo usado en OnboardingScreen. Demo para el slide 4.</td></tr>
+    <tr><td class="mono">PosturaItem / PreguntaInfoModal</td><td>5.1 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Items de postura / modal informativo</td></tr>
+    <tr><td class="mono">ProgressSplit / ProgressStepper</td><td>2.8-3.0 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Indicadores de progreso compuestos</td></tr>
+    <tr><td class="mono">RadioGroup</td><td>3.2 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Grupo de radios con estado interno</td></tr>
+    <tr><td class="mono">ScreenTopBar</td><td>2.8 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Barra superior generica, reusable</td></tr>
+    <tr><td class="mono">SectionTitle</td><td>1.9 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Titulo de seccion con action -- composicion simple correcta</td></tr>
+    <tr><td class="mono">ShareModal</td><td>4.2 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Modal de compartir, orquesta ShareOptions</td></tr>
+    <tr><td class="mono">Toast</td><td>4.1 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Notificacion temporal</td></tr>
+    <tr><td class="mono">UbicacionPicker</td><td>6.8 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Picker con filtros locales, sin fetch propio</td></tr>
+    <tr><td class="mono">WeightSelector</td><td>2.7 KB</td><td><span class="lb lb-mol">Molecule</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Selector de peso con chips</td></tr>
+  </tbody>
+</table>
+
+<div style="font-size:11px;font-weight:700;color:var(--c-text);margin-bottom:8px;">Organisms/ (21 componentes)</div>
+<table class="inv-table" style="margin-bottom:20px;">
+  <thead><tr><th>Componente</th><th>Tamano</th><th>Clasificacion actual</th><th>Clasificacion correcta</th><th>Evidencia</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">BottomNav / Sidebar</td><td>2.0-2.7 KB</td><td><span class="lb lb-org">Organism</span></td><td><span class="lb lb-org">Organism</span></td><td>Navegacion principal, reusable en AppShell</td></tr>
+    <tr><td class="mono">CandidateCard</td><td>3.6 KB</td><td><span class="lb lb-org">Organism</span></td><td><span class="lb lb-org">Organism</span></td><td>Card completa de candidato</td></tr>
+    <tr><td class="mono">CandidatoPicker</td><td>5.3 KB</td><td><span class="lb lb-org">Organism</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Props-only, sin fetch. Recibe candidatos[] y tiposEleccion[]. Debatible -- 5.3 KB con filtros locales lo acerca a organism</td></tr>
+    <tr><td class="mono">CandidatoPosturas</td><td>5.9 KB</td><td><span class="lb lb-org">Organism</span></td><td><span class="lb lb-org">Organism</span></td><td>Lista completa de posturas con estados loading/empty</td></tr>
+    <tr><td class="mono">Comparator</td><td>4.7 KB</td><td><span class="lb lb-org">Organism</span></td><td><span class="lb lb-org">Organism</span></td><td>Tabla de comparacion de candidatos</td></tr>
+    <tr><td class="mono">CuestionarioHeader</td><td>6.1 KB</td><td><span class="lb lb-org">Organism</span></td><td><span class="lb lb-org">Organism</span></td><td>Header con progreso, colores de marca fijos, sticky. Correcto como organism aunque es pantalla-especifico de Cuestionario</td></tr>
+    <tr><td class="mono">ElectionsStrip</td><td>1.4 KB</td><td><span class="lb lb-org">Organism</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Solo 1.4 KB, orquesta ElectionCards. Lista thin sin logica propia</td></tr>
+    <tr style="background:rgba(220,38,38,.04);"><td class="mono"><strong>EmptyState</strong></td><td>2.3 KB</td><td><span class="lb lb-wrong">Organism (INCORRECTO)</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Icon + Title + Desc + Button. Generico, sin datos, sin estado. Es una molecule.</td></tr>
+    <tr><td class="mono">ErrorBoundary</td><td>2.6 KB</td><td><span class="lb lb-org">Organism</span></td><td><span class="lb lb-org">Organism</span></td><td>Infraestructura de error, tiene estado React class</td></tr>
+    <tr><td class="mono">FilterBottomSheet</td><td>3.1 KB</td><td><span class="lb lb-org">Organism</span></td><td><span class="lb lb-org">Organism</span></td><td>Sheet de filtros con logica propia</td></tr>
+    <tr><td class="mono">HomeHeroSection</td><td>9.7 KB</td><td><span class="lb lb-org">Organism</span></td><td><span class="lb lb-org">Organism</span></td><td>Bloque hero con progreso, CTA y trust meta. Pantalla-especifico de Home pero correcto como organism</td></tr>
+    <tr><td class="mono">HomeTopBar</td><td>3.2 KB</td><td><span class="lb lb-org">Organism</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Barra superior del Home. Similar a ScreenTopBar pero con logica de brand. 3.2 KB, debatible</td></tr>
+    <tr><td class="mono"><strong>MatchExplanation</strong></td><td>5.8 KB</td><td><span class="lb lb-org">Organism</span></td><td><span class="lb lb-org">Organism</span></td><td>Hace fetch propio (useMatchDetalle con lazy loading). Auto-suficiente. Correcto como organism.</td></tr>
+    <tr style="background:rgba(220,38,38,.04);"><td class="mono"><strong>NovedadesFeed</strong></td><td>968 B</td><td><span class="lb lb-wrong">Organism (INCORRECTO)</span></td><td><span class="lb lb-mol">Molecule</span></td><td>View que mapea NovedadItem. 968 bytes. Cero logica. Un molecule wrapper.</td></tr>
+    <tr><td class="mono">ProfileHero</td><td>3.7 KB</td><td><span class="lb lb-org">Organism</span></td><td><span class="lb lb-org">Organism</span></td><td>Hero de perfil: avatar, nombre, partido, subtitulo</td></tr>
+    <tr style="background:rgba(220,38,38,.04);"><td class="mono"><strong>QuestionCard</strong></td><td>4.2 KB</td><td><span class="lb lb-dead">Organism (MUERTO)</span></td><td><span class="lb lb-dead">DELETE</span></td><td>Cero imports de produccion. TASK-055 abierto. Presente en el barrel.</td></tr>
+    <tr><td class="mono">RankingCard / RankingRow</td><td>3.5-5.7 KB</td><td><span class="lb lb-org">Organism</span></td><td><span class="lb lb-org">Organism</span></td><td>Cards de ranking con radar + acciones. Organismos correctos.</td></tr>
+    <tr><td class="mono">ResultadoHero</td><td>7.7 KB</td><td><span class="lb lb-org">Organism</span></td><td><span class="lb lb-org">Organism</span></td><td>Hero completo del top candidato con radar y badge</td></tr>
+    <tr style="background:rgba(220,38,38,.04);"><td class="mono"><strong>ShareOptions</strong></td><td>3.0 KB</td><td><span class="lb lb-wrong">Organism (INCORRECTO)</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Grid 2x2 de canales sociales. Presentacional puro, sin datos, sin estado. Molecule que vive en ShareModal.</td></tr>
+    <tr><td class="mono">TopMatchSection</td><td>4.7 KB</td><td><span class="lb lb-org">Organism</span></td><td><span class="lb lb-org">Organism</span></td><td>Extraido de REFACTOR-004. Correcto.</td></tr>
+    <tr><td class="mono">TopNav</td><td>2.0 KB</td><td><span class="lb lb-org">Organism</span></td><td><span class="lb lb-mol">Molecule</span></td><td>Barra de navegacion superior thin. 2 KB. Debatible.</td></tr>
+  </tbody>
+</table>
+
+<div style="font-size:11px;font-weight:700;color:var(--c-text);margin-bottom:8px;">Templates/ y Screens/</div>
+<table class="inv-table" style="margin-bottom:20px;">
+  <thead><tr><th>Componente</th><th>Clasificacion</th><th>Evidencia</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">AppShell</td><td><span class="lb lb-tpl">Template</span></td><td>Layout principal con BottomNav + Sidebar. Correcto.</td></tr>
+    <tr><td class="mono">ScreenChrome</td><td><span class="lb lb-tpl">Template</span></td><td>Layout minimo para screens full-focus. Correcto.</td></tr>
+    <tr><td class="mono">HomeScreen, ResultadosScreen, etc. (18 screens)</td><td><span class="lb lb-scr">Pages</span></td><td>Pantallas finales con datos. Correctas.</td></tr>
+    <tr><td class="mono">DetalleCandidato/{ResumenTab, NoticiasTab}</td><td><span class="lb lb-scr">Screen co-located</span></td><td>Sub-componentes co-localizados. Patron correcto y recomendado.</td></tr>
+  </tbody>
+</table>
+
+<!-- VALIDACION ATOMIC DESIGN -->
+<div id="validacion" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 2 &middot; Validacion de Atomic Design</div><hr/></div>
+
+<div class="g3" style="margin-bottom:20px;">
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Atoms -- lo que esta bien</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">La mayoria de los atoms son correctos: Button, Badge, Chip, Icon, Spinner, Progress, RadarChart, Heading, Avatar, Toggle, Radio. Son elementos indivisibles sin datos ni estado de dominio.<br/><br/>RadarChart (4.9 KB) es el unico atom complejo, pero su complejidad es de implementacion SVG, no de logica de negocio -- sigue siendo un primitive presentacional.</div>
+  </div>
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-danger);margin-bottom:8px;">ElectionCard en Atoms -- la violacion mas grave</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;">9.2 KB en atoms/. Evidencia directa:<br/><br/>1. Importa <span style="font-family:monospace;">domain/eleccion.ts</span> (computeProgresoRatio, formatProgresoLabel)<br/>2. 3 variantes de presentacion distintas<br/>3. 2 APIs: nueva (respondidas/totalPreguntas) y legacy (matchPercent/progressPercent) con 3 props marcadas <span style="font-family:monospace;">@deprecated</span><br/>4. Funcion helper interna pickBadge<br/>5. Estado derivado modoProgreso/isPendingLegacy<br/><br/>Un atom no deberia conocer el dominio ni tener una API en proceso de migracion.</div>
+  </div>
+  <div class="card">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-text2);margin-bottom:8px;">Organisms -- clasificaciones incorrectas</div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.7;"><strong>NovedadesFeed</strong> (968 bytes): View que mapea NovedadItem. No tiene logica, no tiene datos, no tiene estado. Un molecule wrapper que vive en organisms/.<br/><br/><strong>EmptyState</strong> (2.3 KB): Icon + Title + Description + Button. Completamente generico, props-only. Molecule.<br/><br/><strong>ShareOptions</strong> (3.0 KB): Grid de canales sociales. Puro, sin estado. Molecule que siempre se usa dentro de ShareModal.</div>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:20px;">
+  <div style="font-size:10px;font-weight:800;text-transform:uppercase;color:var(--c-danger);margin-bottom:8px;">El problema principal: componentes pantalla-especificos en la biblioteca compartida</div>
+  <div class="g2">
+    <div>
+      <div style="font-size:11px;font-weight:700;color:var(--c-text);margin-bottom:4px;">En molecules/ (deberian estar co-localizados con la pantalla)</div>
+      <div style="font-size:11px;color:var(--c-text2);line-height:1.9;">HomeElectionItem -- solo HomeScreen<br/>HomeGreeting -- solo HomeScreen<br/>HomeMatchLocked -- solo HomeScreen<br/>HomeTrustSection -- solo HomeScreen<br/>OnboardingEleccionesDemo -- solo OnboardingScreen<br/>OnboardingPreguntaDemo -- solo OnboardingScreen<br/>OnboardingResultadosDemo -- solo OnboardingScreen</div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:var(--c-text);margin-bottom:4px;">El patron correcto ya existe (DetalleCandidato/)</div>
+      <div style="font-size:11px;color:var(--c-text2);line-height:1.9;">ResumenTab.tsx -- co-localizada<br/>NoticiasTab.tsx -- co-localizada<br/>Cada una con sus propios styles<br/>Sin hooks de datos internos<br/>Props-only, testeable en aislamiento<br/><br/>Este patron es el correcto y ya esta implementado en una pantalla. Solo hay que extenderlo al resto.</div>
+    </div>
+  </div>
+</div>
+
+<!-- VIOLACIONES -->
+<div id="violaciones" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 3 &middot; Violaciones Detectadas</div><hr/></div>
+
+<div class="viol high">
+  <div class="viol-title">V01 -- ElectionCard (atom) importa logica de dominio</div>
+  <div class="viol-body">Un atom que importa del capa de dominio viola la separacion de capas. Los atoms deben ser presentacionales puros. ElectionCard conoce <code>computeProgresoRatio</code> y <code>formatProgresoLabel</code> de domain/eleccion.ts, lo que crea un acoplamiento entre la capa de presentacion basica y la logica de negocio.</div>
+  <div class="viol-evidence">atoms/ElectionCard.tsx L6-7: import { computeProgresoRatio, formatProgresoLabel } from "../../domain/eleccion";</div>
+</div>
+
+<div class="viol high">
+  <div class="viol-title">V02 -- ElectionCard (atom) con API en proceso de migracion -- 3 props @deprecated vivas</div>
+  <div class="viol-body">El componente tiene simultaneamente la API nueva (respondidas + totalPreguntas) y la API legacy (matchPercent + progressPercent + pendingLabel marcadas @deprecated). La documentacion dice "se conserva mientras la HomeScreen migra" pero la migracion parece estancada. Un atom con un modo legacy es un atom con una deuda de diseño activa que contamina su uso.</div>
+  <div class="viol-evidence">atoms/ElectionCard.tsx L62-75: @deprecated matchPercent, @deprecated progressPercent, @deprecated pendingLabel</div>
+</div>
+
+<div class="viol high">
+  <div class="viol-title">V03 -- QuestionCard en el barrel de organisms -- componente muerto exportado</div>
+  <div class="viol-body">QuestionCard tiene cero imports de produccion (verificado con grep en toda la base de codigo). Solo existe en el showcase y en el barrel de organisms. Sigue siendo exportado por organisms/index.ts y por components/index.ts. Cualquier developer que vea el barrel puede asumir que este componente es parte activa del sistema.</div>
+  <div class="viol-evidence">organisms/index.ts: export { QuestionCard } -- grep: cero imports de produccion. TASK-055 documenta el delete pendiente.</div>
+</div>
+
+<div class="viol med">
+  <div class="viol-title">V04 -- 7 componentes pantalla-especificos en molecules/ -- polutan la biblioteca compartida</div>
+  <div class="viol-body">HomeElectionItem, HomeGreeting, HomeMatchLocked, HomeTrustSection, OnboardingEleccionesDemo, OnboardingPreguntaDemo, OnboardingResultadosDemo son todos componentes que nunca se reutilizan fuera de su pantalla de origen. Al vivir en molecules/ dan la impresion de ser reutilizables, complican el discovery, y hacen que la carpeta de molecules sea un mix de componentes genuinamente reutilizables y sub-componentes de pantalla especifica.</div>
+  <div class="viol-evidence">Verificado: ninguno de estos 7 aparece en screens/ distintos al que les da el nombre. El patron correcto es DetalleCandidato/{ResumenTab, NoticiasTab}.</div>
+</div>
+
+<div class="viol med">
+  <div class="viol-title">V05 -- NovedadesFeed (968 bytes) en organisms/ -- devalua la categoria</div>
+  <div class="viol-body">Un organism deberia ser un bloque funcional completo. NovedadesFeed es un View que mapea NovedadItem con un gap. No tiene logica, no tiene datos, no tiene estado. Su presencia en organisms/ hace que el criterio de clasificacion sea ambiguo. Deberia estar en molecules/ o mejor aun, eliminado y reemplazado por un View inline en HomeScreen.</div>
+  <div class="viol-evidence">organisms/NovedadesFeed.tsx: 28 lineas totales incluyendo JSDoc y imports.</div>
+</div>
+
+<div class="viol med">
+  <div class="viol-title">V06 -- EmptyState y ShareOptions en organisms/ -- misclasificacion generica</div>
+  <div class="viol-body">EmptyState es el empty state mas generico posible: Icon + Title + Text + Button opcional. Props-only, sin datos, sin estado. ShareOptions es un grid de cuatro opciones de share. Ambos son composiciones simples de atoms con presentacion clara. Clasificarlos como organisms implica que tienen la complejidad de un bloque funcional completo, lo cual no es cierto.</div>
+</div>
+
+<div class="viol low">
+  <div class="viol-title">V07 -- SectionTitle duplica parcialmente el atom Heading</div>
+  <div class="viol-body">SectionTitle hardcodea fontSize 18 y 16 en lugar de usar typography.h2 y typography.h3 existentes. Heading y SectionTitle se solapan parcialmente -- Heading es el atom semantico, SectionTitle es una molecule con action link. Pero SectionTitle no usa Heading internamente, duplica los valores de font manualmente.</div>
+  <div class="viol-evidence">molecules/SectionTitle.tsx L38: fontSize: level === "h2" ? 18 : 16 -- typography.h2 y typography.h3 tienen estos valores pero no se referencian.</div>
+</div>
+
+<!-- ANTIPATRONES -->
+<div id="antipatrones" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 3b &middot; Antipatrones Detectados</div><hr/></div>
+
+<div class="anti-card">
+  <div class="anti-tag">Universal -- afecta todos los layers</div>
+  <div class="anti-title">useMemo(() =&gt; StyleSheet.create(...), [c]) en lugar de StyleSheet.create modulo-level</div>
+  <div class="anti-body">El 90% de los componentes define sus styles dentro de un useMemo que depende de los colores del tema. Esto recrea el StyleSheet en cada cambio de tema y agrega complejidad innecesaria al render path. El patron correcto (demostrado ya en DetalleCandidatoScreen, ResumenTab, NoticiasTab) es StyleSheet.create a nivel de modulo y pasar los valores dinamicos de color directamente en el style prop donde se usen. El resultado es el mismo, pero el StyleSheet se crea una sola vez en toda la vida de la app.</div>
+  <div class="anti-files">Afecta: ElectionCard, EmptyState, ShareOptions, SectionTitle, HomeElectionItem, OnboardingEleccionesDemo, y ~40 componentes mas.</div>
+</div>
+
+<div class="anti-card">
+  <div class="anti-tag">Molecules -- folder como catch-all</div>
+  <div class="anti-title">La carpeta molecules/ mezcla 4 tipos distintos de componentes</div>
+  <div class="anti-body">Con 76 archivos (38 componentes + 38 showcases), molecules/ contiene: (1) molecules genuinas reutilizables (Modal, RadioGroup, FormField), (2) sub-componentes de pantalla especifica (HomeElectionItem, OnboardingEleccionesDemo), (3) molecules complejas que podrian ser organisms (CandidatoPickerModal, EditarRespuestaModal), y (4) components que podrian ser atoms (ChipActivo). Esta mezcla compromete el discovery y hace que la carpeta sea un todo-vale.</div>
+  <div class="anti-files">76 archivos en molecules/. El patron correcto co-localizacion existe pero solo en DetalleCandidato/.</div>
+</div>
+
+<div class="anti-card">
+  <div class="anti-tag">ElectionCard -- API en migracion congelada</div>
+  <div class="anti-title">God Prop: ElectionCard con 11 props, 3 deprecated, 2 modos de uso</div>
+  <div class="anti-body">ElectionCard acepta respondidas+totalPreguntas (nuevo) Y matchPercent+progressPercent+pendingLabel (legacy). La documentacion dice "mientras la HomeScreen migra" pero no hay evidencia de que esa migracion este en progreso. El componente acumula complejidad de dos eras distintas, lo que dificulta el testing y la documentacion.</div>
+  <div class="anti-files">atoms/ElectionCard.tsx: 11 props, 3 @deprecated, comentario "se conserva por back-compat".</div>
+</div>
+
+<div class="anti-card">
+  <div class="anti-tag">MatchExplanation -- Organism con fetch propio</div>
+  <div class="anti-title">Auto-fetching organism -- patron deliberado, no un antipatron</div>
+  <div class="anti-body">MatchExplanation usa useMatchDetalle internamente con lazy loading (solo fetcha cuando expanded=true). Es un organismo self-contained que gestiona sus propios datos. A diferencia de los componentes que fetchan sin necesidad (useFavoritos en guest), aqui el fetch es lazy y bien justificado. Es la excepcion correcta a la regla de "los componentes no fetchan sus propios datos" -- el JSDoc lo documenta explicitamente.</div>
+  <div class="anti-files">organisms/MatchExplanation.tsx: useMatchDetalle(expanded ? candidatoId : undefined) -- lazy fetch correcto.</div>
+</div>
+
+<!-- DESIGN SYSTEM -->
+<div id="design-system" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 4 &middot; Evaluacion del Design System</div><hr/></div>
+<div class="g2">
+  <div>
+    <div style="font-size:12px;font-weight:800;color:var(--c-success);margin-bottom:10px;">Fortalezas del DS</div>
+    <div class="ins ins-g" style="margin-bottom:8px;"><strong>Sistema de tokens completo.</strong> spacing (sp1-sp9), radii (rSm-rFull), typography (h1-h3, body, small, overline), colors (tema dual light/dark). Todos los componentes los referencian.</div>
+    <div class="ins ins-g" style="margin-bottom:8px;"><strong>Showcases por componente.</strong> Cada atom, molecule y organism tiene su archivo .showcase.tsx. Existe una pantalla de Design System en la app con el catalogo completo. No es Storybook pero cumple su funcion.</div>
+    <div class="ins ins-g" style="margin-bottom:8px;"><strong>TypeScript interfaces para todos los props.</strong> Las APIs son claras y autocompleted.</div>
+    <div class="ins ins-g" style="margin-bottom:8px;"><strong>Barrel export limpio.</strong> import { Button, MatchTier } from "@/components" funciona para todos los consumidores.</div>
+    <div class="ins ins-g" style="margin-bottom:8px;"><strong>Accesibilidad como ciudadana de primera clase.</strong> accessibilityRole, accessibilityLabel, accessibilityState en todos los interactivos. WCAG 2.2 AA documentado en JSDoc.</div>
+  </div>
+  <div>
+    <div style="font-size:12px;font-weight:800;color:var(--c-danger);margin-bottom:10px;">Debilidades del DS</div>
+    <div class="ins ins-r" style="margin-bottom:8px;"><strong>QuestionCard en el barrel.</strong> Un componente muerto que el barrel exporta como si fuera parte activa del sistema. Cualquier developer que vea el autocomplete lo encuentra.</div>
+    <div class="ins ins-r" style="margin-bottom:8px;"><strong>ElectionCard con API dual.</strong> Dos modos de uso simultaneos con documentacion de migracion pendiente. El DS tiene un componente con una deuda activa en su layer mas basico.</div>
+    <div class="ins ins-a" style="margin-bottom:8px;"><strong>SectionTitle no usa typography tokens internamente.</strong> Hardcodea fontSize 18/16 en lugar de typography.h2/h3. Inconsistencia menor pero real.</div>
+    <div class="ins ins-a" style="margin-bottom:8px;"><strong>ShareOptions hardcodea colores de marca externos.</strong> WhatsApp green (#25D366), Twitter blue (#1DA1F2) como strings literales. Justificable para brand colors pero no esta documentado como excepcion.</div>
+    <div class="ins ins-a" style="margin-bottom:8px;"><strong>useMemo para styles es universal pero innecesario.</strong> StyleSheet.create a nivel de modulo es el patron correcto. Existe en DetalleCandidatoScreen pero no en la mayoria de los componentes del DS.</div>
+  </div>
+</div>
+
+<!-- ESCALABILIDAD -->
+<div id="escalabilidad" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 5 &middot; Evaluacion de Escalabilidad</div><hr/></div>
+<table class="scale-table">
+  <thead><tr><th>Aspecto</th><th>Calificacion</th><th>Justificacion</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Mantenibilidad</strong></td>
+      <td><span class="scale-bue">Buena</span></td>
+      <td>Token system, TypeScript, showcases. Se pierde puntos por misclasificaciones que confunden a quien mantiene el codigo.</td>
+    </tr>
+    <tr>
+      <td><strong>Reutilizacion</strong></td>
+      <td><span class="scale-bue">Buena</span></td>
+      <td>La mayoria de los atoms y molecules genuinas son reusables. Los 7 componentes pantalla-especificos en molecules/ son el principal problema -- estan disponibles en el barrel pero solo sirven en un lugar.</td>
+    </tr>
+    <tr>
+      <td><strong>Testabilidad</strong></td>
+      <td><span class="scale-mej">Mejorable</span></td>
+      <td>Los tests existentes cubren logica de dominio y algunos componentes. El patron useMemo-styles hace que StyleSheet cree un objeto nuevo en cada test, lo que dificulta snapshot testing. Los componentes props-only (ResumenTab, NoticiasTab) son las mas testables.</td>
+    </tr>
+    <tr>
+      <td><strong>Escalabilidad</strong></td>
+      <td><span class="scale-mej">Mejorable</span></td>
+      <td>Sin feature co-location convencional, cada nueva pantalla deposita sus sub-componentes en molecules/ u organisms/. A medida que el proyecto crece, estos folders siguen acumulando archivos hasta volverse inmanejables. La excepcion es DetalleCandidato/ pero no es la convencion del proyecto.</td>
+    </tr>
+    <tr>
+      <td><strong>Complejidad</strong></td>
+      <td><span class="scale-bue">Buena</span></td>
+      <td>La separacion domain/ services/ store/ hooks/ api/ es correcta. La complejidad esta contenida. El problema es en components/ especificamente.</td>
+    </tr>
+    <tr>
+      <td><strong>Velocidad de desarrollo futuro</strong></td>
+      <td><span class="scale-mej">Mejorable</span></td>
+      <td>El barrel export y TypeScript aceleran el desarrollo. Pero el molecules/ folder con 76 archivos hace que el discovery sea lento. Un developer nuevo no puede distinguir facilmente que es reutilizable y que es pantalla-especifico.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ARQUITECTURA PROPUESTA -->
+<div id="arquitectura" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 6 &middot; Arquitectura Propuesta</div><hr/></div>
+
+<div class="g2">
+  <div>
+    <div style="font-size:12px;font-weight:700;color:var(--c-text);margin-bottom:8px;">Estructura actual (con problemas)</div>
+    <div style="font-family:monospace;font-size:10px;line-height:1.9;color:var(--c-text2);background:var(--c-surface);border-radius:8px;padding:12px;border:1px solid var(--c-border);">src/<br/>
+  components/<br/>
+  &nbsp;&nbsp;atoms/          (31 comps, 63 archivos)<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;ElectionCard.tsx  &larr; INCORRECTO<br/>
+  &nbsp;&nbsp;molecules/      (38 comps, 76 archivos)<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;HomeElectionItem  &larr; pantalla-esp<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;OnboardingXDemo   &larr; pantalla-esp<br/>
+  &nbsp;&nbsp;organisms/      (21 comps, 43 archivos)<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;QuestionCard.tsx  &larr; MUERTO<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;NovedadesFeed     &larr; deberia ser mol<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;EmptyState        &larr; deberia ser mol<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;ShareOptions      &larr; deberia ser mol<br/>
+  &nbsp;&nbsp;templates/      (2 comps, 5 archivos)<br/>
+  screens/<br/>
+  &nbsp;&nbsp;DetalleCandidato/  &larr; patron CORRECTO<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;ResumenTab.tsx<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;NoticiasTab.tsx<br/>
+  &nbsp;&nbsp;HomeScreen.tsx<br/>
+  &nbsp;&nbsp;OnboardingScreen.tsx<br/>
+  &nbsp;&nbsp;... 16 mas sin co-localizacion
+    </div>
+  </div>
+  <div>
+    <div style="font-size:12px;font-weight:700;color:var(--c-text);margin-bottom:8px;">Estructura propuesta</div>
+    <div style="font-family:monospace;font-size:10px;line-height:1.9;color:var(--c-text2);background:var(--c-surface);border-radius:8px;padding:12px;border:1px solid var(--c-border);">src/<br/>
+  components/<br/>
+  &nbsp;&nbsp;atoms/<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;ElectionCard.tsx  &larr; MOVER a molecules<br/>
+  &nbsp;&nbsp;molecules/<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;ElectionCard.tsx  &larr; (migrar API legacy)<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;EmptyState.tsx    &larr; (mover desde org)<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;NovedadesFeed.tsx &larr; (mover desde org)<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;ShareOptions.tsx  &larr; (mover desde org)<br/>
+  &nbsp;&nbsp;organisms/<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;(sin QuestionCard)<br/>
+  &nbsp;&nbsp;templates/<br/>
+  screens/<br/>
+  &nbsp;&nbsp;Home/<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;HomeScreen.tsx<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;HomeElectionItem.tsx  &larr; co-localizado<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;HomeGreeting.tsx      &larr; co-localizado<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;HomeMatchLocked.tsx   &larr; co-localizado<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;HomeTrustSection.tsx  &larr; co-localizado<br/>
+  &nbsp;&nbsp;Onboarding/<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;OnboardingScreen.tsx<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;OnboardingEleccionesDemo.tsx &larr; co-loc<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;OnboardingPreguntaDemo.tsx   &larr; co-loc<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;OnboardingResultadosDemo.tsx &larr; co-loc<br/>
+  &nbsp;&nbsp;DetalleCandidato/<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;DetalleCandidatoScreen.tsx<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;ResumenTab.tsx    (ya correcto)<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;NoticiasTab.tsx   (ya correcto)<br/>
+  &nbsp;&nbsp;... resto de screens
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px;">
+  <div style="font-size:12px;font-weight:700;color:var(--c-text);margin-bottom:10px;">Por que cada folder existe en la propuesta</div>
+  <div class="g2">
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.8;">
+      <strong>atoms/</strong> -- primitivos sin dominio ni datos. Si necesita importar algo de domain/, no es un atom.<br/>
+      <strong>molecules/</strong> -- composiciones de atoms con posiblemente algo de estado local de presentacion. Sin fetch, sin dominio.<br/>
+      <strong>organisms/</strong> -- bloques funcionales completos. Pueden tener fetch propio (MatchExplanation), estado complejo, o multiples molecules coordinadas.<br/>
+      <strong>templates/</strong> -- layouts. AppShell y ScreenChrome. Raramente cambian.
+    </div>
+    <div style="font-size:11px;color:var(--c-text2);line-height:1.8;">
+      <strong>screens/Home/</strong> -- pantalla + sus sub-componentes exclusivos. El patron DetalleCandidato extendido.<br/>
+      <strong>screens/Onboarding/</strong> -- los tres demos del onboarding co-localizados.<br/>
+      <strong>La regla simple:</strong> si un componente solo se usa en UNA pantalla, vive al lado de esa pantalla. Si se reutiliza en DOS o mas, sube a molecules u organisms segun su complejidad.
+    </div>
+  </div>
+</div>
+
+<!-- SCORES -->
+<div id="scores" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 7 &middot; Score de Madurez</div><hr/></div>
+<div class="score-grid">
+  <div class="score-card">
+    <div class="score-name">Atomic Design</div>
+    <div class="score-num" style="color:var(--c-warning);">6.5</div>
+    <div class="score-bar"><div class="score-fill" style="width:65%;background:var(--c-warning);"></div></div>
+    <div class="score-label">de 10</div>
+    <div class="score-just">Intencion correcta, ejecucion con fisuras: ElectionCard mal ubicada, 7 componentes pantalla-especificos en molecules, 3 misclasificaciones en organisms.</div>
+  </div>
+  <div class="score-card">
+    <div class="score-name">Design System</div>
+    <div class="score-num" style="color:var(--c-success);">7.5</div>
+    <div class="score-bar"><div class="score-fill" style="width:75%;background:var(--c-success);"></div></div>
+    <div class="score-label">de 10</div>
+    <div class="score-just">Tokens completos, showcases, TypeScript, accesibilidad. Se pierde por QuestionCard en el barrel, ElectionCard con API dual, y SectionTitle con hardcodes.</div>
+  </div>
+  <div class="score-card">
+    <div class="score-name">Reutilizacion</div>
+    <div class="score-num" style="color:var(--c-success);">7</div>
+    <div class="score-bar"><div class="score-fill" style="width:70%;background:var(--c-success);"></div></div>
+    <div class="score-label">de 10</div>
+    <div class="score-just">La mayoria de los atoms y molecules genuinas son reutilizables. Los 7 pantalla-especificos en el barrel dan falsa sensacion de reutilizabilidad.</div>
+  </div>
+  <div class="score-card">
+    <div class="score-name">Consistencia</div>
+    <div class="score-num" style="color:var(--c-warning);">6.5</div>
+    <div class="score-bar"><div class="score-fill" style="width:65%;background:var(--c-warning);"></div></div>
+    <div class="score-label">de 10</div>
+    <div class="score-just">El useMemo para styles es universal e inconsistente con el patron correcto de DetalleCandidatoScreen. SectionTitle hardcodea fonts que ya estan en tokens.</div>
+  </div>
+  <div class="score-card">
+    <div class="score-name">Escalabilidad</div>
+    <div class="score-num" style="color:var(--c-warning);">6</div>
+    <div class="score-bar"><div class="score-fill" style="width:60%;background:var(--c-warning);"></div></div>
+    <div class="score-label">de 10</div>
+    <div class="score-just">Sin convencion de co-localizacion establecida, molecules seguira creciendo. El patron correcto existe (DetalleCandidato) pero no es la norma documentada del proyecto.</div>
+  </div>
+  <div class="score-card">
+    <div class="score-name">Mantenibilidad</div>
+    <div class="score-num" style="color:var(--c-success);">7</div>
+    <div class="score-bar"><div class="score-fill" style="width:70%;background:var(--c-success);"></div></div>
+    <div class="score-label">de 10</div>
+    <div class="score-just">TypeScript, tests de dominio, showcases, backlog documentado. Pierde puntos por la deuda activa en ElectionCard y QuestionCard muerto.</div>
+  </div>
+  <div class="score-card">
+    <div class="score-name">Frontend Arch.</div>
+    <div class="score-num" style="color:var(--c-success);">7.5</div>
+    <div class="score-bar"><div class="score-fill" style="width:75%;background:var(--c-success);"></div></div>
+    <div class="score-label">de 10</div>
+    <div class="score-just">domain/, services/, store/, hooks/, api/ bien separados. La separacion de capas es correcta en todo excepto en ElectionCard que viola el boundary atom-dominio.</div>
+  </div>
+  <div class="score-card">
+    <div class="score-name">DX</div>
+    <div class="score-num" style="color:var(--c-success);">7.5</div>
+    <div class="score-bar"><div class="score-fill" style="width:75%;background:var(--c-success);"></div></div>
+    <div class="score-label">de 10</div>
+    <div class="score-just">Barrel export, showcases en app, TypeScript fuerte. El molecules folder de 76 archivos baja el score de discovery. Un developer nuevo tarda en entender que es reutilizable y que no.</div>
+  </div>
+</div>
+
+<!-- ROADMAP -->
+<div id="roadmap" class="sec-divider"><hr/><div class="sec-divider-lbl">Fase 8 &middot; Roadmap de Refactorizacion</div><hr/></div>
+
+<div class="rm-group">
+  <div class="rm-title high">Prioridad Alta -- Bloqueadores arquitectonicos</div>
+  <div style="display:grid;grid-template-columns:3fr 1fr 1fr 1fr;gap:4px;padding:6px 12px;font-size:9px;font-weight:800;text-transform:uppercase;color:var(--c-text3);">
+    <div>Accion</div><div>Esfuerzo</div><div>Impacto</div><div>Riesgo</div>
+  </div>
+  <div class="rm-row">
+    <div><div class="rm-action">DELETE QuestionCard -- organisms + barrel + showcase</div><div class="rm-meta">TASK-055. Cero imports de produccion. Eliminar el archivo, removerlo del barrel, borrar el showcase. Verificar que los tests no lo usan.</div></div>
+    <div class="rm-meta">XS -- 30min</div>
+    <div class="rm-impact-h">Alto</div>
+    <div class="rm-meta">Bajo</div>
+  </div>
+  <div class="rm-row">
+    <div><div class="rm-action">Mover ElectionCard: atoms/ &rarr; molecules/</div><div class="rm-meta">Actualizar import en todos los consumidores. Es un barrel export -- el cambio es transparente para los screens. Eliminar la API legacy tras confirmar que HomeScreen ya no la usa.</div></div>
+    <div class="rm-meta">S -- 2h</div>
+    <div class="rm-impact-h">Alto</div>
+    <div class="rm-meta">Bajo</div>
+  </div>
+  <div class="rm-row">
+    <div><div class="rm-action">Co-localizar sub-componentes de Home: molecules/ &rarr; screens/Home/</div><div class="rm-meta">HomeElectionItem, HomeGreeting, HomeMatchLocked, HomeTrustSection. Mover archivos, actualizar imports en HomeScreen, remover del barrel de molecules. Patron: DetalleCandidato/.</div></div>
+    <div class="rm-meta">S -- 2-3h</div>
+    <div class="rm-impact-h">Alto</div>
+    <div class="rm-meta">Bajo</div>
+  </div>
+  <div class="rm-row">
+    <div><div class="rm-action">Co-localizar demos de Onboarding: molecules/ &rarr; screens/Onboarding/</div><div class="rm-meta">OnboardingEleccionesDemo, OnboardingPreguntaDemo, OnboardingResultadosDemo. Mismo patron que Home. Actualizar imports en OnboardingScreen.</div></div>
+    <div class="rm-meta">XS -- 1h</div>
+    <div class="rm-impact-h">Alto</div>
+    <div class="rm-meta">Bajo</div>
+  </div>
+</div>
+
+<div class="rm-group">
+  <div class="rm-title med">Prioridad Media -- Consistencia arquitectonica</div>
+  <div style="display:grid;grid-template-columns:3fr 1fr 1fr 1fr;gap:4px;padding:6px 12px;font-size:9px;font-weight:800;text-transform:uppercase;color:var(--c-text3);">
+    <div>Accion</div><div>Esfuerzo</div><div>Impacto</div><div>Riesgo</div>
+  </div>
+  <div class="rm-row">
+    <div><div class="rm-action">Mover EmptyState, ShareOptions, NovedadesFeed: organisms/ &rarr; molecules/</div><div class="rm-meta">Actualizar imports (son barrel exports, el impacto en consumidores es minimo). NovedadesFeed: evaluar si el inline en HomeScreen es mas limpio.</div></div>
+    <div class="rm-meta">XS -- 1h</div>
+    <div class="rm-impact-m">Medio</div>
+    <div class="rm-meta">Bajo</div>
+  </div>
+  <div class="rm-row">
+    <div><div class="rm-action">Completar la migracion de ElectionCard al modo nuevo y eliminar props @deprecated</div><div class="rm-meta">Verificar todos los usos de ElectionCard en HomeScreen. Si todos usan respondidas+totalPreguntas, eliminar matchPercent, progressPercent, pendingLabel y el modo legacy del componente.</div></div>
+    <div class="rm-meta">M -- 3-4h</div>
+    <div class="rm-impact-m">Medio</div>
+    <div class="rm-meta">Medio</div>
+  </div>
+  <div class="rm-row">
+    <div><div class="rm-action">SectionTitle: usar typography.h2 y typography.h3 en lugar de hardcodes</div><div class="rm-meta">Cambio de 2 lineas. Eliminar los fontSize: 18/16 hardcodeados.</div></div>
+    <div class="rm-meta">XS -- 15min</div>
+    <div class="rm-impact-m">Bajo</div>
+    <div class="rm-meta">Bajo</div>
+  </div>
+  <div class="rm-row">
+    <div><div class="rm-action">Documentar la convencion de co-localizacion como regla del proyecto</div><div class="rm-meta">Agregar una seccion en el README de components/ que diga explicitamente: "si un componente solo se usa en una pantalla, vive al lado de esa pantalla (ver DetalleCandidato/ como referencia)".</div></div>
+    <div class="rm-meta">XS -- 30min</div>
+    <div class="rm-impact-m">Medio</div>
+    <div class="rm-meta">Bajo</div>
+  </div>
+</div>
+
+<div class="rm-group">
+  <div class="rm-title low">Prioridad Baja -- Optimizaciones y deuda tecnica menor</div>
+  <div style="display:grid;grid-template-columns:3fr 1fr 1fr 1fr;gap:4px;padding:6px 12px;font-size:9px;font-weight:800;text-transform:uppercase;color:var(--c-text3);">
+    <div>Accion</div><div>Esfuerzo</div><div>Impacto</div><div>Riesgo</div>
+  </div>
+  <div class="rm-row">
+    <div><div class="rm-action">Migrar useMemo-styles a StyleSheet.create modulo-level en todos los componentes del DS</div><div class="rm-meta">Se puede hacer componente por componente. Priorizar atoms y molecules. El patron de referencia es DetalleCandidatoScreen. Sin impacto en behavior, solo en performance y legibilidad.</div></div>
+    <div class="rm-meta">L -- 8-12h (gradual)</div>
+    <div class="rm-impact-l">Bajo</div>
+    <div class="rm-meta">Bajo</div>
+  </div>
+  <div class="rm-row">
+    <div><div class="rm-action">Evaluar extraccion de CuestionarioHeader a screens/Cuestionario/</div><div class="rm-meta">CuestionarioHeader es pantalla-especifico de CuestionarioScreen. Co-localizarlo sigue el patron correcto. Es debatible si su complejidad (6.1 KB, colores de marca) justifica mantenerlo en organisms.</div></div>
+    <div class="rm-meta">XS -- 30min</div>
+    <div class="rm-impact-l">Bajo</div>
+    <div class="rm-meta">Bajo</div>
+  </div>
+  <div class="rm-row">
+    <div><div class="rm-action">Documentar ShareOptions con brand colors como excepcion justificada</div><div class="rm-meta">Los colores de WhatsApp, Twitter, etc. son correctos como constantes de marca externa al tema. Agregar un comentario que lo explique, igual que ElectionCard y CuestionarioHeader documentan sus excepciones.</div></div>
+    <div class="rm-meta">XS -- 10min</div>
+    <div class="rm-impact-l">Bajo</div>
+    <div class="rm-meta">Bajo</div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:20px;">
+  <div style="font-size:12px;font-weight:800;color:var(--c-text);margin-bottom:10px;">Quick Wins -- impacto inmediato, esfuerzo minimo</div>
+  <div class="g2">
+    <div>
+      <div style="font-size:11px;color:var(--c-text2);line-height:1.9;">
+        1. <strong>DELETE QuestionCard</strong> -- 30min, elimina codigo muerto del barrel<br/>
+        2. <strong>SectionTitle typography tokens</strong> -- 15min, elimina hardcode<br/>
+        3. <strong>Co-localizar Onboarding demos</strong> -- 1h, limpia molecules de 3 archivos pantalla-especificos<br/>
+        4. <strong>Documentar convencion co-localizacion</strong> -- 30min, previene que se repita el problema
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--c-text2);line-height:1.9;">
+        5. <strong>Co-localizar Home sub-componentes</strong> -- 2-3h, el mayor win en claridad del molecules folder<br/>
+        6. <strong>Mover EmptyState/ShareOptions/NovedadesFeed</strong> -- 1h, correcta la semantica de organisms<br/>
+        7. <strong>Mover ElectionCard a molecules</strong> -- 2h incluyendo la eliminacion de la API legacy<br/>
+        <br/>
+        Total quick wins: <strong>~8-10h</strong>, resuelven la mayoria de las violaciones.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="height:40px;"></div>
+</div></div>
+<script>
+const btn=document.getElementById('theme-btn');
+btn.addEventListener('click',()=>{document.body.classList.toggle('dark');btn.textContent=document.body.classList.contains('dark')?'Light mode':'Dark mode';});
+document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth'});});});
+</script>
+</body>
+</html>

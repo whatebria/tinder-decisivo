@@ -114,9 +114,9 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   }, [error, toast]);
 
   // Datos derivados del perfil
-  const emailPrefix = email ? email.split("@")[0] : null;
-  const displayName = emailPrefix ? deriveDisplayName(emailPrefix) : undefined;
-  const userInitials = emailPrefix ? deriveInitials(emailPrefix) : undefined;
+  // TASK-051: deriveDisplayName/Initials aceptan email completo -- sin split manual.
+  const displayName = email ? deriveDisplayName(email) : undefined;
+  const userInitials = email ? deriveInitials(email) : undefined;
 
   // Solo elecciones activadas por el user
   const { activas: tiposActivos } = useMemo(
@@ -262,7 +262,9 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   }, [activeId, progresoByTipo, tiposActivos]);
 
   // Mostrar trust section solo para usuarios sin ningun cuestionario iniciado
-  const showTrust = !isGuest && mejoresMatches.length === 0 && heroProgress === 0;
+  // UX-056: HomeTrustSection no reaparece al reiniciar si el usuario ya completo antes.
+  const hasEverCompleted = useCuestionarioStore((s) => s.hasEverCompletedCuestionario);
+  const showTrust = !isGuest && mejoresMatches.length === 0 && heroProgress === 0 && !hasEverCompleted;
 
   const styles = useMemo(
     () =>
