@@ -19,7 +19,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { getErrorMessage } from "../api/client";
-import { useTiposEleccion } from "../api/hooks";
+// BUG-026: useTiposEleccion eliminado de CuestionarioScreen -- esTipoBase viene del store.
 import {
   Button,
   Chip,
@@ -77,13 +77,10 @@ export function CuestionarioScreen({
     submit,
   } = useCuestionarioStore();
 
-  // Necesitamos saber si el tipo actual es es_base para redirigir al SubmitDone
-  // en modo correcto (los tipos base no tienen candidatos propios).
-  const { data: tipos = [] } = useTiposEleccion();
-  const esTipoBase = useMemo(() => {
-    if (tipoEleccionId == null) return false;
-    return tipos.find((t) => t.id === tipoEleccionId)?.es_base ?? false;
-  }, [tipos, tipoEleccionId]);
+  // BUG-026: esTipoBase viene del store (seteado en loadForTipoEleccion por el
+  // caller que ya tiene el TipoEleccion completo). Elimina race condition con
+  // useTiposEleccion() que podia devolver [] si el cache estaba vacio al submit.
+  const esTipoBase = useCuestionarioStore((s) => s.esTipoBase);
 
   const pregunta = preguntas[currentIndex];
   const isLast = esUltimaPregunta(currentIndex, preguntas.length);

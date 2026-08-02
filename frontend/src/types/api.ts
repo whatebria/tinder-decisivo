@@ -1067,9 +1067,15 @@ export interface components {
             texto: string;
             /**
              * Format: int64
-             * @description Valor numérico de la opción (ej. 1 al 5 para escalas, 0/1 para sí/no).
+             * @description Valor numerico de la opcion.
              */
             valor: number;
+            /**
+             * @description BUG-027: es_no_se omitido del schema generado pero presente en
+             * el payload del backend (mismo campo que en OpcionRespuesta). Agregado para
+             * habilitar separarOpciones() en EditarRespuestaModal.
+             */
+            es_no_se?: boolean;
         };
         PaginatedNoticiaList: {
             /** @example 123 */

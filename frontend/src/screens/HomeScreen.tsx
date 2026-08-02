@@ -160,11 +160,12 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
       const yaCompleto = !isGuest && progreso?.completa === true;
       try {
         if (yaCompleto) {
-          await loadForTipoEleccion(tipo.id);
+          // BUG-026: pasar esTipoBase al store para eliminar race con useTiposEleccion.
+          await loadForTipoEleccion(tipo.id, tipo.es_base ?? false);
           navigation.navigate("Resultados");
           return;
         }
-        await loadForTipoEleccion(tipo.id);
+        await loadForTipoEleccion(tipo.id, tipo.es_base ?? false);
         navigation.navigate("Cuestionario");
       } catch (err) {
         toast.error("No pudimos cargar las preguntas", getErrorMessage(err));

@@ -36,6 +36,11 @@ export interface HeadingProps {
   style?: StyleProp<TextStyle>;
   /** Cortar a N lineas con ellipsis. Passthrough al Text. */
   numberOfLines?: number;
+  /**
+   * UX-057: para mensajes de estado (WCAG 4.1.3). Passthrough al Text.
+   * Usar "assertive" cuando el heading confirma una accion critica (ej. Listo!).
+   */
+  accessibilityLiveRegion?: "none" | "polite" | "assertive";
 }
 
 const LEVEL_STYLES = {
@@ -50,6 +55,7 @@ export function Heading({
   color,
   style,
   numberOfLines,
+  accessibilityLiveRegion,
 }: HeadingProps) {
   const c = useThemeColors();
   const finalColor = color ?? c.text;
@@ -69,6 +75,7 @@ export function Heading({
       aria-level={level}
       style={[baseStyle, style]}
       numberOfLines={numberOfLines}
+      accessibilityLiveRegion={accessibilityLiveRegion}
     >
       {children}
     </Text>

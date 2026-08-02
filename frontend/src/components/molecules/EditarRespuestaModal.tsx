@@ -17,9 +17,11 @@ import { StyleSheet, Text, View } from "react-native";
 
 import type { MiRespuesta } from "../../api/endpoints";
 import { Button } from "../atoms/Button";
+import { Divider } from "../atoms/Divider";
 import { Link } from "../atoms/Link";
 import { Modal } from "./Modal";
 import { RadioGroup } from "./RadioGroup";
+import { separarOpciones } from "../../services/cuestionario";
 import { blurActiveElement } from "../../hooks/blurActiveElement";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
@@ -104,6 +106,15 @@ export function EditarRespuestaModal({
           lineHeight: 18,
         },
         actions: { gap: spacing.sp2 },
+        noSeLabel: {
+          fontSize: 12,
+          fontWeight: "600",
+          color: c.textSecondary,
+          marginTop: spacing.sp2,
+          marginBottom: spacing.sp1,
+          textTransform: "uppercase",
+          letterSpacing: 0.5,
+        },
       }),
     [c, isDark],
   );
@@ -112,6 +123,22 @@ export function EditarRespuestaModal({
 
   const changed =
     opcionId !== respuesta.opcion_elegida || peso !== respuesta.peso;
+
+  // BUG-027: separar opciones regulares de "No sé" -- consistente con CuestionarioScreen.
+  // OpcionSimple ahora incluye es_no_se? (ver types/api.ts comentario BUG-027).
+  const { regulares, noSe } = separarOpciones(
+    respuesta.opciones as Parameters<typeof separarOpciones>[0]
+  );
+
+  const opcionesRegulares = regulares
+    .slice()
+    .sort((a, b) => (b.valor ?? 0) - (a.valor ?? 0))
+    .map((op) => ({ value: op.id as number, label: op.texto ?? "" }));
+
+  const opcionNoSeMapped =
+    noSe?.id != null
+      ? { value: noSe.id as number, label: noSe.texto ?? "No sé" }
+      : null;
 
   // Blur al elemento con foco ANTES de que el padre haga setState(false).
   // Ver hooks/blurActiveElement para contexto.
@@ -150,15 +177,24 @@ export function EditarRespuestaModal({
       <Text style={styles.pregunta}>{respuesta.pregunta_texto}</Text>
 
       <Text style={styles.sectionTitle}>Tu respuesta</Text>
+      {/* BUG-027: RadioGroup solo con opciones Likert; "No sé" separada con Divider. */}
       <RadioGroup<number>
-        options={respuesta.opciones
-          .slice()
-          .sort((a, b) => b.valor - a.valor)
-          .map((op) => ({ value: op.id, label: op.texto }))}
+        options={opcionesRegulares}
         value={opcionId}
         onChange={setOpcionId}
         accessibilityLabel="Opciones de respuesta"
       />
+      {opcionNoSeMapped ? (
+        <>
+          <Divider style={{ marginVertical: spacing.sp1 }} />
+          <Text style={styles.noSeLabel}>Sin postura definida</Text>
+          <RadioGroup<number>
+            options={[opcionNoSeMapped]}
+            value={opcionId}
+            onChange={setOpcionId}
+          />
+        </>
+      ) : null}
 
       <Text style={styles.sectionTitle}>Que tan importante es para ti</Text>
       <RadioGroup<number>

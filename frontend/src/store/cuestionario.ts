@@ -32,8 +32,14 @@ interface CuestionarioState {
    * reaparezca al reiniciar para usuarios veteranos (misma sesion).
    */
   hasEverCompletedCuestionario: boolean;
+  /**
+   * BUG-026: true si el tipo cargado es es_base. Se setea en loadForTipoEleccion
+   * (donde el caller ya tiene el TipoEleccion completo) para evitar la race
+   * condition con useTiposEleccion() en CuestionarioScreen.
+   */
+  esTipoBase: boolean;
 
-  loadForTipoEleccion: (tipoEleccionId: number) => Promise<void>;
+  loadForTipoEleccion: (tipoEleccionId: number, esTipoBase?: boolean) => Promise<void>;
   /** Setea solo el tipoEleccionId sin cargar preguntas (para ir directo a Resultados). */
   setTipoEleccion: (tipoEleccionId: number) => void;
   setRespuesta: (preguntaId: number, opcionElegidaId: number, peso?: Peso) => void;
@@ -55,9 +61,12 @@ export const useCuestionarioStore = create<CuestionarioState>((set, get) => ({
   loading: false,
   submitting: false,
   hasEverCompletedCuestionario: false,
+  esTipoBase: false,
 
-  loadForTipoEleccion: async (tipoEleccionId) => {
-    set({ loading: true, tipoEleccionId, currentIndex: 0, respuestas: {} });
+  loadForTipoEleccion: async (tipoEleccionId, esTipoBase = false) => {
+    // BUG-026: esTipoBase llega del caller (que ya tiene el TipoEleccion
+    // completo en cache). Elimina la race condition con useTiposEleccion().
+    set({ loading: true, tipoEleccionId, esTipoBase, currentIndex: 0, respuestas: {} });
     try {
       const preguntas = await preguntasPendientes(tipoEleccionId);
       set({ preguntas, loading: false });
