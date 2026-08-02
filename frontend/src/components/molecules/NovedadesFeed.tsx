@@ -1,6 +1,8 @@
 /**
  * NovedadesFeed: lista vertical de NovedadItems (feed mixto del HUB).
- * Basado en design-system-lowfi.html · Home HUB > Novedades.
+ * Basado en design-system-lowfi.html - Home HUB > Novedades.
+ *
+ * Movido de organisms/ a molecules/ (TASK-063): thin wrapper sin logica propia.
  */
 
 import React, { useMemo } from "react";

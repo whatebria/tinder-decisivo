@@ -1,6 +1,8 @@
 /**
  * ShareOptions: grid 2x2 de canales sociales. Se usa dentro de un Modal.
  * Cada opcion tiene su color de marca sutil en el icon circle.
+ *
+ * Movido de organisms/ a molecules/ (TASK-063): composicion presentacional pura sin estado propio.
  */
 
 import React, { useMemo } from "react";

@@ -1,6 +1,8 @@
 /**
  * ElectionsStrip: scroll horizontal de ElectionCards + card "+ Activar" al final.
- * Basado en design-system-lowfi.html · Home HUB > Tus elecciones.
+ * Basado en design-system-lowfi.html - Home HUB > Tus elecciones.
+ *
+ * Movido de organisms/ a molecules/ (TASK-063): thin wrapper sin logica propia.
  */
 
 import React, { useMemo } from "react";

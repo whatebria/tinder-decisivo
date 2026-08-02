@@ -1,6 +1,8 @@
 /**
  * EmptyState: placeholder cuando no hay datos. Icono + titulo + descripcion + CTA opcional.
  * "Nunca aburrido, siempre proactivo" — del design system.
+ *
+ * Movido de organisms/ a molecules/ (TASK-063): composicion simple de atoms, sin fetch propio.
  */
 
 import React, { useMemo } from "react";

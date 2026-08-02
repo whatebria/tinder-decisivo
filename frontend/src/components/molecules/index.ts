@@ -69,3 +69,9 @@ export { HomeElectionItem, type HomeElectionItemProps } from "./HomeElectionItem
 export { HomeMatchLocked, type HomeMatchLockedProps } from "./HomeMatchLocked";
 export { HomeTrustSection } from "./HomeTrustSection";
 
+// Movidos de organisms/ (TASK-063): composiciones simples sin fetch propio
+export { EmptyState, type EmptyStateProps } from "./EmptyState";
+export { ShareOptions, type ShareOptionsProps, type ShareChannel } from "./ShareOptions";
+export { NovedadesFeed, type NovedadesFeedProps, type NovedadFeedItem } from "./NovedadesFeed";
+export { ElectionsStrip, type ElectionsStripProps } from "./ElectionsStrip";
+

@@ -20,18 +20,10 @@ export {
   type ComparatorProps,
   type ComparatorSlot,
 } from "./Comparator";
-export {
-  ShareOptions,
-  type ShareOptionsProps,
-  type ShareChannel,
-} from "./ShareOptions";
 export { TopNav, type TopNavProps } from "./TopNav";
-export { EmptyState, type EmptyStateProps } from "./EmptyState";
 
 // Nuevos (Fase 5 — Home HUB wireframe)
 export { HomeTopBar, type HomeTopBarProps } from "./HomeTopBar";
-export { ElectionsStrip, type ElectionsStripProps } from "./ElectionsStrip";
-export { NovedadesFeed, type NovedadesFeedProps, type NovedadFeedItem } from "./NovedadesFeed";
 
 // Nuevos (Fase 5 — Resultados wireframe)
 export { ResultadoHero, type ResultadoHeroProps } from "./ResultadoHero";
