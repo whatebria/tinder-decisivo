@@ -15,7 +15,9 @@
  * Fondo: surface2 / border sutil para no competir con las secciones de accion.
  * Sin emojis. Solo texto e iconografia SVG inline via Icon atom.
  *
- * WCAG: el contenido es informativo, no interactivo — sin roles de boton.
+ * WCAG: el contenido es informativo, no interactivo -- sin roles de boton.
+ *
+ * Co-localizado en screens/Home/ (TASK-061): solo se usa en HomeScreen.
  */
 
 import React, { useMemo } from "react";
@@ -24,7 +26,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
-import { Icon } from "../atoms/Icon";
+import { Icon } from "../../components/atoms/Icon";
 
 interface TrustItem {
   text: string;

@@ -15,6 +15,8 @@
  *
  * WCAG 2.2 AA: todos los CTAs tienen minHeight 44px.
  * Accesibilidad: toda la card es Pressable con accessibilityLabel compuesto.
+ *
+ * Co-localizado en screens/Home/ (TASK-061): solo se usa en HomeScreen.
  */
 
 import React, { useMemo } from "react";
@@ -34,9 +36,9 @@ import {
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
-import { Button } from "../atoms/Button";
-import { Progress } from "../atoms/Progress";
-import { ProgressRing } from "../atoms/ProgressRing";
+import { Button } from "../../components/atoms/Button";
+import { Progress } from "../../components/atoms/Progress";
+import { ProgressRing } from "../../components/atoms/ProgressRing";
 
 export interface HomeElectionItemProps {
   /** Nombre legible del tipo de eleccion. */

@@ -19,6 +19,8 @@
  *
  * WCAG: CTA con accessibilityRole="button" y label claro.
  * Sin emoji: todo iconico con SVG inline.
+ *
+ * Co-localizado en screens/Home/ (TASK-061): solo se usa en HomeScreen.
  */
 
 import React, { useMemo } from "react";
@@ -27,8 +29,8 @@ import { StyleSheet, Text, View } from "react-native";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
-import { Button } from "../atoms/Button";
-import { Icon } from "../atoms/Icon";
+import { Button } from "../../components/atoms/Button";
+import { Icon } from "../../components/atoms/Icon";
 
 export interface HomeMatchLockedProps {
   /** Texto debajo del headline. Ej: "Faltan 5 preguntas en Presidencial". */

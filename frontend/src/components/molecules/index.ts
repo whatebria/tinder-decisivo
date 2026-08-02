@@ -31,7 +31,6 @@ export {
 export { PosturaItem, type PosturaItemProps, type PosturaMatch } from "./PosturaItem";
 
 // Nuevas (Fase 5 — Home HUB wireframe)
-export { HomeGreeting, type HomeGreetingProps } from "./HomeGreeting";
 export { SectionTitle, type SectionTitleProps } from "./SectionTitle";
 export { NovedadItem, type NovedadItemProps, type NovedadKind } from "./NovedadItem";
 export {
@@ -65,9 +64,6 @@ export { CoachMarkTour, type CoachMarkTourProps } from "./CoachMarkTour";
 export { DimensionCard, type DimensionCardProps } from "./DimensionCard";
 
 // Home HUB rediseno (Fase 10 — Sprint auditoría UX)
-export { HomeElectionItem, type HomeElectionItemProps } from "./HomeElectionItem";
-export { HomeMatchLocked, type HomeMatchLockedProps } from "./HomeMatchLocked";
-export { HomeTrustSection } from "./HomeTrustSection";
 
 // Movidos de organisms/ (TASK-063): composiciones simples sin fetch propio
 export { EmptyState, type EmptyStateProps } from "./EmptyState";

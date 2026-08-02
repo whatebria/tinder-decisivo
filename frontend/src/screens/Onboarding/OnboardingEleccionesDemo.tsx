@@ -1,12 +1,14 @@
 /**
  * OnboardingEleccionesDemo: demo del slide 2 del welcome tour.
  *
- * Componente presentacional puro — sin estado interno, sin API calls.
+ * Componente presentacional puro -- sin estado interno, sin API calls.
  * El padre (OnboardingScreen) provee los datos reales del backend y el
  * handler de toggle conectado a `useElectionsPrefsStore`.
  *
  * Muestra maximo 2 elecciones para garantizar que el slide quepa en
  * pantalla sin scroll vertical (constraint UX-011).
+ *
+ * Co-localizado en screens/Onboarding/ (TASK-062): solo se usa en OnboardingScreen.
  *
  * A11y: los toggles tienen accessibilityLabel individuales.
  * El contenedor tiene role="none" para no fragmentar la a11y del slide.
@@ -15,7 +17,7 @@
 import React, { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import { Toggle } from "../atoms/Toggle";
+import { Toggle } from "../../components/atoms/Toggle";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { typography } from "../../theme/typography";
@@ -31,7 +33,7 @@ export interface OnboardingEleccionesDemoProps {
   tipos: OnboardingEleccionesDemoTipo[];
   /**
    * IDs actualmente activos. `null` = no configurado aun
-   * (todos activos por defecto — refleja el estado inicial del store).
+   * (todos activos por defecto -- refleja el estado inicial del store).
    */
   activeIds: number[] | null;
   /** Llama con el id del tipo que el usuario quiso cambiar. */

@@ -38,10 +38,7 @@ import {
   ConfirmModal,
   ElectionCardAdd,
   EmptyState,
-  HomeElectionItem,
   HomeHeroSection,
-  HomeMatchLocked,
-  HomeTrustSection,
   MatchSummaryCard,
   NoticiaDetailSheet,
   NovedadesFeed,
@@ -51,6 +48,9 @@ import {
   type NoticiaDetail,
   type NovedadFeedItem,
 } from "../components";
+import { HomeElectionItem } from "./Home/HomeElectionItem";
+import { HomeMatchLocked } from "./Home/HomeMatchLocked";
+import { HomeTrustSection } from "./Home/HomeTrustSection";
 import { computeDiasRestantes } from "../domain/eleccion";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";

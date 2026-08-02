@@ -9,14 +9,16 @@
  * La pregunta y las opciones son inventadas para ilustrar el formato.
  * El titulo de la card incluye "Ejemplo" para que el usuario no confunda
  * esto con una pregunta real.
+ *
+ * Co-localizado en screens/Onboarding/ (TASK-062): solo se usa en OnboardingScreen.
  */
 
 import React, { useMemo, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import { Badge } from "../atoms/Badge";
-import { Progress } from "../atoms/Progress";
-import { RadioGroup, type RadioOption } from "./RadioGroup";
+import { Badge } from "../../components/atoms/Badge";
+import { Progress } from "../../components/atoms/Progress";
+import { RadioGroup, type RadioOption } from "../../components/molecules/RadioGroup";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors, useThemeShadows } from "../../theme/useTheme";
@@ -31,7 +33,7 @@ const DEMO_OPCIONES: ReadonlyArray<RadioOption<LikertValue>> = [
 ];
 
 const DEMO_PREGUNTA =
-  "¿El Estado debería financiar educación superior gratuita para todos?";
+  "El Estado deberia financiar educacion superior gratuita para todos?";
 
 export function OnboardingPreguntaDemo() {
   const c = useThemeColors();
@@ -78,7 +80,7 @@ export function OnboardingPreguntaDemo() {
     >
       <View style={styles.head}>
         <Text style={styles.headText}>Pregunta 1 de 12</Text>
-        <Badge variant="info">Educación</Badge>
+        <Badge variant="info">Educacion</Badge>
       </View>
 
       {/* Progress al ~8% para ilustrar inicio del cuestionario */}

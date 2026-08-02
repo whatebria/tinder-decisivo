@@ -53,7 +53,6 @@ import showcase_molecules_DimensionCard_40 from "../../../components/molecules/D
 import showcase_molecules_EditarRespuestaModal_41 from "../../../components/molecules/EditarRespuestaModal.showcase";
 import showcase_molecules_EliminarCuentaModal_42 from "../../../components/molecules/EliminarCuentaModal.showcase";
 import showcase_molecules_FormField_43 from "../../../components/molecules/FormField.showcase";
-import showcase_molecules_HomeGreeting_44 from "../../../components/molecules/HomeGreeting.showcase";
 import showcase_molecules_ListPickerModal_45 from "../../../components/molecules/ListPickerModal.showcase";
 import showcase_molecules_MatchSummaryCard_46 from "../../../components/molecules/MatchSummaryCard.showcase";
 import showcase_molecules_MatchTier_47 from "../../../components/molecules/MatchTier.showcase";
@@ -406,13 +405,6 @@ export const generatedCatalog: CatalogEntry[] = [
     path: "molecules/FormField",
     sourcePath: "src/components/molecules/FormField.tsx",
     ...showcase_molecules_FormField_43,
-  },
-  {
-    name: "HomeGreeting",
-    category: "molecules",
-    path: "molecules/HomeGreeting",
-    sourcePath: "src/components/molecules/HomeGreeting.tsx",
-    ...showcase_molecules_HomeGreeting_44,
   },
   {
     name: "ListPickerModal",

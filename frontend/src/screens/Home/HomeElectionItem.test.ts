@@ -1,5 +1,5 @@
 /**
- * Tests de molecules/HomeElectionItem.tsx — funcion pura ctaForEstado.
+ * Tests de screens/Home/HomeElectionItem.tsx -- funcion pura ctaForEstado.
  *
  * ctaForEstado(estado, props) : { label, onPress?, variant }
  *

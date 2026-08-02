@@ -8,12 +8,14 @@
  *
  * BUG-007: reemplaza la implementacion custom anterior (barra horizontal
  * propietaria) por el componente real del design system.
+ *
+ * Co-localizado en screens/Onboarding/ (TASK-062): solo se usa en OnboardingScreen.
  */
 
 import React from "react";
 import { View } from "react-native";
 
-import { RankingCard } from "../organisms/RankingCard";
+import { RankingCard } from "../../components/organisms/RankingCard";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
 import { getMatchColor } from "../../services/matching";
@@ -49,7 +51,7 @@ export function OnboardingResultadosDemo() {
           apellido={cand.apellido}
           partido={cand.partido}
           matchPct={cand.matchPct}
-              matchColor={getMatchColor(cand.matchPct)}
+          matchColor={getMatchColor(cand.matchPct)}
           style={{ flex: 1, minWidth: 0 }}
         />
       ))}

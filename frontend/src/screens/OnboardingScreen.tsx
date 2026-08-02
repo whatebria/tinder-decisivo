@@ -24,9 +24,9 @@ import {
 } from "react-native";
 
 import { Button, Heading, Link } from "../components";
-import { OnboardingEleccionesDemo } from "../components/molecules/OnboardingEleccionesDemo";
-import { OnboardingPreguntaDemo }   from "../components/molecules/OnboardingPreguntaDemo";
-import { OnboardingResultadosDemo } from "../components/molecules/OnboardingResultadosDemo";
+import { OnboardingEleccionesDemo } from "./Onboarding/OnboardingEleccionesDemo";
+import { OnboardingPreguntaDemo }   from "./Onboarding/OnboardingPreguntaDemo";
+import { OnboardingResultadosDemo } from "./Onboarding/OnboardingResultadosDemo";
 import { WELCOME_SLIDES } from "../content/welcomeTour";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
