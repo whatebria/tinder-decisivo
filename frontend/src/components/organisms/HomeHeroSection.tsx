@@ -36,7 +36,7 @@
  */
 
 import React, { useMemo } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
@@ -94,6 +94,11 @@ export interface HomeHeroSectionProps {
   ctaLabel: string;
   /** Callback del boton CTA. */
   onCta: () => void;
+  /**
+   * BUG-034: callback al tocar el avatar circular. Tipicamente navega a Perfil.
+   * Si se omite, el avatar es no-interactivo (comportamiento anterior).
+   */
+  onAvatarPress?: () => void;
   /** Nombre de la app. Default: "Tinder Decisivo". */
   brand?: string;
 }
@@ -175,6 +180,7 @@ export function HomeHeroSection({
   progressValue = 0,
   ctaLabel,
   onCta,
+  onAvatarPress,
   brand = "Tinder Decisivo",
 }: HomeHeroSectionProps) {
   const c = useThemeColors();
@@ -194,13 +200,20 @@ export function HomeHeroSection({
           <AppIcon size={22} />
           <Text style={styles.brandText}>{brand}</Text>
         </View>
-        <View style={styles.avatar} accessibilityRole="none">
+        <Pressable
+          style={styles.avatar}
+          onPress={onAvatarPress}
+          disabled={!onAvatarPress}
+          accessibilityRole={onAvatarPress ? "button" : "none"}
+          accessibilityLabel={onAvatarPress ? "Ver perfil" : undefined}
+          accessibilityHint={onAvatarPress ? "Navega a tu perfil de usuario" : undefined}
+        >
           {userInitials ? (
             <Text style={styles.avatarText}>{userInitials}</Text>
           ) : (
             <Icon name="user" size={16} color={HERO_TEXT} />
           )}
-        </View>
+        </Pressable>
       </View>
 
       {/* 2. Countdown pill (condicional) */}

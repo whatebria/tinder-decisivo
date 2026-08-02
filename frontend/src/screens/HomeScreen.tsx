@@ -94,9 +94,14 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   }, [error, toast]);
 
   // Datos derivados del perfil
+  // BUG-034: preferir username sobre email para iniciales/displayName --
+  // el username es el identificador elegido por el user y genera iniciales
+  // mas representativas. Fallback a email si username no esta disponible.
   // TASK-051: deriveDisplayName/Initials aceptan email completo -- sin split manual.
-  const displayName = email ? deriveDisplayName(email) : undefined;
-  const userInitials = email ? deriveInitials(email) : undefined;
+  const username = perfilQ.data?.username ?? null;
+  const displaySource = username ?? email ?? null;
+  const displayName = displaySource ? deriveDisplayName(displaySource) : undefined;
+  const userInitials = displaySource ? deriveInitials(displaySource) : undefined;
 
   // Solo elecciones activadas por el user
   const { activas: tiposActivos } = useMemo(
@@ -122,6 +127,18 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
           electionsActiveIds.includes(it.tipo_eleccion_id)),
     );
   }, [progresoItems, electionsActiveIds]);
+
+  // BUG-040: "Tu mejor match" debe mostrar el candidato con el match_percentage
+  // mas alto de TODAS las elecciones completas activas, no solo la primera
+  // de la lista (que podia ser Diputados por orden de insercion en el backend).
+  const topGlobalMatch = useMemo(() => {
+    if (mejoresMatches.length === 0) return null;
+    return mejoresMatches.reduce((best, current) => {
+      const bestPct = Number(best.top_match!.match_percentage);
+      const currPct = Number(current.top_match!.match_percentage);
+      return currPct > bestPct ? current : best;
+    });
+  }, [mejoresMatches]);
 
   // Progreso global: ratio de la eleccion activa (para el ring del hero)
   const heroProgress = useMemo(() => {
@@ -212,6 +229,13 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   // Si el user NO tiene ninguna eleccion completa -> mostrar lock
   const sinMatches = mejoresMatches.length === 0 && tiposActivos.length > 0;
 
+  // BUG-040: derivaciones del top global fuera del JSX para evitar IIFE en render.
+  const topGlobalTop = topGlobalMatch?.top_match ?? null;
+  const topGlobalCandidato = topGlobalTop?.candidato ?? null;
+  const topGlobalNombre = topGlobalCandidato
+    ? `${topGlobalCandidato.nombre} ${topGlobalCandidato.apellido ?? ""}`.trim()
+    : null;
+
   // Cuerpo del mensaje en la lock card
   const lockBody = useMemo(() => {
     if (!activeId) return "Completa el cuestionario para ver tu candidato";
@@ -286,6 +310,7 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
             progressValue={heroProgress}
             ctaLabel={heroCta}
             onCta={handleHeroCta}
+            onAvatarPress={isGuest ? undefined : () => navigation.navigate("Perfil")}
           />
 
           <ScrollView
@@ -345,35 +370,26 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
                         if (tipo) iniciarCuestionario(tipo);
                       }}
                     />
-                  ) : (
-                    mejoresMatches.map((item) => {
-                      const top = item.top_match!;
-                      const candidato = top.candidato;
-                      const nombre = `${candidato.nombre} ${candidato.apellido ?? ""}`.trim();
-                      return (
-                        <MatchSummaryCard
-                          key={item.tipo_eleccion_id}
-                          fullWidth
-                          candidatoNombre={nombre}
-                          candidatoFotoUrl={candidato.profile_picture ?? null}
-                          tipoEleccionNombre={item.tipo_eleccion_nombre}
-                          matchPercent={Number(top.match_percentage)}
-                          preguntasConsideradas={top.preguntas_consideradas}
-                          totalPreguntas={item.total_preguntas}
-                          style={{ marginBottom: spacing.sp3 }}
-                          onVerPerfil={() =>
-                            navigation.navigate("DetalleCandidato", {
-                              candidatoId: candidato.id!,
-                              breakdown:
-                                (top.breakdown_por_eje as BreakdownPorEje | null) ?? null,
-                              matchPct: Number(top.match_percentage),
-                              confianza: top.confianza ?? null,
-                            })
-                          }
-                        />
-                      );
-                    })
-                  )}
+                  ) : topGlobalMatch && topGlobalTop && topGlobalCandidato && topGlobalNombre ? (
+                    <MatchSummaryCard
+                      fullWidth
+                      candidatoNombre={topGlobalNombre}
+                      candidatoFotoUrl={topGlobalCandidato.profile_picture ?? null}
+                      tipoEleccionNombre={topGlobalMatch.tipo_eleccion_nombre}
+                      matchPercent={Number(topGlobalTop.match_percentage)}
+                      preguntasConsideradas={topGlobalTop.preguntas_consideradas}
+                      totalPreguntas={topGlobalMatch.total_preguntas}
+                      onVerPerfil={() =>
+                        navigation.navigate("DetalleCandidato", {
+                          candidatoId: topGlobalCandidato.id!,
+                          breakdown:
+                            (topGlobalTop.breakdown_por_eje as BreakdownPorEje | null) ?? null,
+                          matchPct: Number(topGlobalTop.match_percentage),
+                          confianza: topGlobalTop.confianza ?? null,
+                        })
+                      }
+                    />
+                  ) : null}
                 </View>
               </View>
             ) : null}
