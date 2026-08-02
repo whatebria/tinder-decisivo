@@ -112,6 +112,60 @@ function greetingByHour(): string {
   return greetingForHour();
 }
 
+const styles = StyleSheet.create({
+  hero: {
+    backgroundColor: HERO_BG,
+    paddingHorizontal: spacing.sp4,
+    paddingBottom: spacing.sp5,
+    gap: spacing.sp4,
+  },
+  topRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sp3,
+    paddingTop: spacing.sp4,
+  },
+  brandBlock: { flex: 1, flexDirection: "row", alignItems: "center", gap: spacing.sp2 },
+  brandText: { fontSize: 16, fontWeight: "700", color: HERO_TEXT },
+  avatar: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.30)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarText: { fontSize: 13, fontWeight: "800", color: HERO_TEXT },
+  pill: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sp2,
+    backgroundColor: HERO_PILL_BG,
+    borderWidth: 1,
+    borderColor: HERO_PILL_BORDER,
+    borderRadius: 999,
+    paddingHorizontal: spacing.sp3,
+    paddingVertical: 5,
+  },
+  pillDot: { width: 6, height: 6, borderRadius: 3 },
+  pillText: { fontSize: 12, fontWeight: "600", color: HERO_TEXT },
+  contentRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: spacing.sp4,
+  },
+  textCol: { flex: 1, gap: spacing.sp2 },
+  greeting: { fontSize: 15, fontWeight: "600", color: HERO_TEXT_SUB, lineHeight: 20 },
+  headline: { fontSize: 22, fontWeight: "900", color: HERO_TEXT, lineHeight: 27 },
+  trustRow: { flexDirection: "row", justifyContent: "center", gap: spacing.sp5 },
+  trustItem: { flexDirection: "row", alignItems: "center", gap: 5 },
+  trustText: { fontSize: 11, fontWeight: "600", color: HERO_TEXT_SUB },
+});
+
 // -- Component --------------------------------------------------------------
 
 export function HomeHeroSection({
@@ -131,116 +185,6 @@ export function HomeHeroSection({
     const base = greetingByHour();
     return displayName ? `${base}, ${displayName}` : base;
   }, [displayName]);
-
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        hero: {
-          backgroundColor: HERO_BG,
-          paddingHorizontal: spacing.sp4,
-          paddingBottom: spacing.sp5,
-          gap: spacing.sp4,
-        },
-        // 1. Top row: icon + brand + avatar
-        topRow: {
-          flexDirection: "row",
-          alignItems: "center",
-          gap: spacing.sp3,
-          paddingTop: spacing.sp4,
-        },
-        brandBlock: {
-          flex: 1,
-          flexDirection: "row",
-          alignItems: "center",
-          gap: spacing.sp2,
-        },
-        brandText: {
-          fontSize: 16,
-          fontWeight: "700",
-          color: HERO_TEXT,
-        },
-        avatar: {
-          width: 34,
-          height: 34,
-          borderRadius: 17,
-          backgroundColor: "rgba(255,255,255,0.15)",
-          borderWidth: 1.5,
-          borderColor: "rgba(255,255,255,0.30)",
-          alignItems: "center",
-          justifyContent: "center",
-        },
-        avatarText: {
-          fontSize: 13,
-          fontWeight: "800",
-          color: HERO_TEXT,
-        },
-        // 2. Countdown pill
-        pill: {
-          alignSelf: "flex-start",
-          flexDirection: "row",
-          alignItems: "center",
-          gap: spacing.sp2,
-          backgroundColor: HERO_PILL_BG,
-          borderWidth: 1,
-          borderColor: HERO_PILL_BORDER,
-          borderRadius: 999,
-          paddingHorizontal: spacing.sp3,
-          paddingVertical: 5,
-        },
-        pillDot: {
-          width: 6,
-          height: 6,
-          borderRadius: 3,
-          backgroundColor: c.brandAccent,
-        },
-        pillText: {
-          fontSize: 12,
-          fontWeight: "600",
-          color: HERO_TEXT,
-        },
-        // 3. Hero content row
-        contentRow: {
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: spacing.sp4,
-        },
-        textCol: {
-          flex: 1,
-          gap: spacing.sp2,
-        },
-        greeting: {
-          fontSize: 15,
-          fontWeight: "600",
-          color: HERO_TEXT_SUB,
-          lineHeight: 20,
-        },
-        headline: {
-          fontSize: 22,
-          fontWeight: "900",
-          color: HERO_TEXT,
-          lineHeight: 27,
-        },
-        // 4. CTA wrapper: el Button se estira full-width normalmente
-        // 5. Trust meta row
-        trustRow: {
-          flexDirection: "row",
-          justifyContent: "center",
-          gap: spacing.sp5,
-        },
-        trustItem: {
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 5,
-        },
-        trustText: {
-          fontSize: 11,
-          fontWeight: "600",
-          color: HERO_TEXT_SUB,
-        },
-      }),
-    [c.brandAccent],
-  );
 
   return (
     <View style={styles.hero} accessibilityRole="header">
@@ -262,7 +206,7 @@ export function HomeHeroSection({
       {/* 2. Countdown pill (condicional) */}
       {pillLabel ? (
         <View style={styles.pill}>
-          <View style={styles.pillDot} />
+          <View style={[styles.pillDot, { backgroundColor: c.brandAccent }]} />
           <Text style={styles.pillText}>{pillLabel}</Text>
         </View>
       ) : null}

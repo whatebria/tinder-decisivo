@@ -5,7 +5,7 @@
  * Movido de organisms/ a molecules/ (TASK-063): composicion presentacional pura sin estado propio.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { Icon, type IconName } from "../atoms/Icon";
@@ -33,47 +33,31 @@ const CHANNEL_META: Record<
   copy: { label: "Copiar link", icon: "link", tint: "#F5F5F5", brand: "#616161" },
 };
 
+const styles = StyleSheet.create({
+  grid: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sp3 },
+  option: {
+    flexBasis: "47%",
+    flexGrow: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sp3,
+    borderWidth: 1,
+    borderRadius: radii.rMd,
+    paddingVertical: spacing.sp3,
+    paddingHorizontal: spacing.sp4,
+    minHeight: 56,
+  },
+  iconCircle: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
+  label: { fontSize: 14, fontWeight: "500", flexShrink: 1 },
+  pressed: { opacity: 0.75 },
+});
+
 export function ShareOptions({
   onShare,
   channels = ["whatsapp", "twitter", "email", "copy"],
   style,
 }: ShareOptionsProps) {
   const c = useThemeColors();
-
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        grid: {
-          flexDirection: "row",
-          flexWrap: "wrap",
-          gap: spacing.sp3,
-        },
-        option: {
-          flexBasis: "47%",
-          flexGrow: 1,
-          flexDirection: "row",
-          alignItems: "center",
-          gap: spacing.sp3,
-          backgroundColor: c.card,
-          borderWidth: 1,
-          borderColor: c.border,
-          borderRadius: radii.rMd,
-          paddingVertical: spacing.sp3,
-          paddingHorizontal: spacing.sp4,
-          minHeight: 56,
-        },
-        iconCircle: {
-          width: 36,
-          height: 36,
-          borderRadius: 18,
-          alignItems: "center",
-          justifyContent: "center",
-        },
-        label: { fontSize: 14, fontWeight: "500", color: c.text, flexShrink: 1 },
-        pressed: { opacity: 0.75 },
-      }),
-    [c],
-  );
 
   return (
     <View style={[styles.grid, style]}>
@@ -85,12 +69,16 @@ export function ShareOptions({
             onPress={() => onShare(ch)}
             accessibilityRole="button"
             accessibilityLabel={`Compartir por ${meta.label}`}
-            style={(s) => [styles.option, s.pressed && styles.pressed]}
+            style={(s) => [
+              styles.option,
+              { backgroundColor: c.card, borderColor: c.border },
+              s.pressed && styles.pressed,
+            ]}
           >
             <View style={[styles.iconCircle, { backgroundColor: meta.tint }]}>
               <Icon name={meta.icon} color={meta.brand} size={20} />
             </View>
-            <Text style={styles.label}>{meta.label}</Text>
+            <Text style={[styles.label, { color: c.text }]}>{meta.label}</Text>
           </Pressable>
         );
       })}

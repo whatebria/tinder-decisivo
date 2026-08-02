@@ -10,7 +10,7 @@
  * Recibe los datos ya derivados para evitar recalculos en el render.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import type { MatchResult } from "../../api/endpoints";
@@ -55,6 +55,23 @@ export interface TopMatchSectionProps {
 
 // ---- Componente -----------------------------------------------------------
 
+const styles = StyleSheet.create({
+  wrap: { gap: spacing.sp3 },
+  banner: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: spacing.sp3,
+    padding: spacing.sp3,
+    borderRadius: radii.rMd,
+    borderWidth: 1,
+  },
+  bannerText: {
+    flex: 1,
+    ...typography.small,
+    lineHeight: 18,
+  },
+});
+
 export function TopMatchSection({
   result,
   matchColor,
@@ -73,27 +90,6 @@ export function TopMatchSection({
   const esTentativa = isConfianzaTentativa(result.confianza ?? undefined);
   const candidato = result.candidato_data;
   const candId = candidato.id!;
-
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        wrap: { gap: spacing.sp3 },
-        banner: {
-          flexDirection: "row",
-          alignItems: "flex-start",
-          gap: spacing.sp3,
-          padding: spacing.sp3,
-          borderRadius: radii.rMd,
-          borderWidth: 1,
-        },
-        bannerText: {
-          flex: 1,
-          ...typography.small,
-          lineHeight: 18,
-        },
-      }),
-    [],
-  );
 
   return (
     <View style={styles.wrap}>

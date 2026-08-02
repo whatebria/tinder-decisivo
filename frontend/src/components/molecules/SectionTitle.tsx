@@ -4,7 +4,7 @@
  * Ref: design-exploration/design-system.html · .home-section-title
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { spacing } from "../../theme/spacing";
@@ -21,37 +21,30 @@ export interface SectionTitleProps {
   style?: StyleProp<ViewStyle>;
 }
 
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "baseline",
+    gap: spacing.sp3,
+  },
+  // fontSize computed inline based on `level` prop
+  title: { fontWeight: "600" },
+  link: { fontSize: 14, fontWeight: "600" },
+  linkPressed: { opacity: 0.7 },
+});
+
 export function SectionTitle({ title, level = "h2", actionLabel, onAction, style }: SectionTitleProps) {
   const c = useThemeColors();
-
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        row: {
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "baseline",
-          gap: spacing.sp3,
-        },
-        title: {
-          // TASK-064: usar tokens de tipografia en lugar de fontSize hardcodeado.
-          fontSize: level === "h2" ? typography.h2.fontSize : typography.h3.fontSize,
-          fontWeight: "600",
-          color: c.text,
-        },
-        link: {
-          fontSize: 14,
-          color: c.primary,
-          fontWeight: "600",
-        },
-        linkPressed: { opacity: 0.7 },
-      }),
-    [c, level],
-  );
+  // TASK-064: usar tokens de tipografia en lugar de fontSize hardcodeado.
+  const titleFontSize = level === "h2" ? typography.h2.fontSize : typography.h3.fontSize;
 
   return (
     <View style={[styles.row, style]}>
-      <Text style={styles.title} accessibilityRole="header">
+      <Text
+        style={[styles.title, { fontSize: titleFontSize, color: c.text }]}
+        accessibilityRole="header"
+      >
         {title}
       </Text>
       {actionLabel && onAction ? (
@@ -61,7 +54,7 @@ export function SectionTitle({ title, level = "h2", actionLabel, onAction, style
           accessibilityLabel={actionLabel}
           style={({ pressed }) => (pressed ? styles.linkPressed : null)}
         >
-          <Text style={styles.link}>{`${actionLabel} ›`}</Text>
+          <Text style={[styles.link, { color: c.primary }]}>{`${actionLabel} ›`}</Text>
         </Pressable>
       ) : null}
     </View>

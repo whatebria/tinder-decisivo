@@ -6,7 +6,7 @@
  * Si `extrasTotal` es 0, la barra de extras queda opaca (visualmente muda).
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { StyleSheet, Text, View, type ViewStyle } from "react-native";
 
 import { spacing } from "../../theme/spacing";
@@ -22,6 +22,18 @@ export interface ProgressSplitProps {
   extrasLabel?: string;
   style?: ViewStyle;
 }
+
+const styles = StyleSheet.create({
+  col: { gap: 4 },
+  row: { flexDirection: "row", gap: spacing.sp1, alignItems: "center" },
+  labels: { flexDirection: "row", justifyContent: "space-between" },
+  label: {
+    fontSize: 9,
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+    fontWeight: "600",
+  },
+});
 
 export function ProgressSplit({
   baseDone,
@@ -44,23 +56,6 @@ export function ProgressSplit({
   const baseFlex = Math.max(1, baseTotal);
   const extrasFlex = Math.max(1, extrasTotal);
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        col: { gap: 4 },
-        row: { flexDirection: "row", gap: spacing.sp1, alignItems: "center" },
-        labels: { flexDirection: "row", justifyContent: "space-between" },
-        label: {
-          fontSize: 9,
-          textTransform: "uppercase",
-          letterSpacing: 0.6,
-          color: c.textSecondary,
-          fontWeight: "600",
-        },
-      }),
-    [c],
-  );
-
   return (
     <View style={[styles.col, style]}>
       <View style={styles.row}>
@@ -81,9 +76,11 @@ export function ProgressSplit({
       </View>
       {(baseLabel || (extrasLabel && hasExtras)) ? (
         <View style={styles.labels}>
-          <Text style={styles.label}>{baseLabel ?? `Base (${baseTotal})`}</Text>
+          <Text style={[styles.label, { color: c.textSecondary }]}>
+            {baseLabel ?? `Base (${baseTotal})`}
+          </Text>
           {hasExtras ? (
-            <Text style={styles.label}>
+            <Text style={[styles.label, { color: c.textSecondary }]}>
               {extrasLabel ?? `Extras (${extrasTotal})`}
             </Text>
           ) : null}

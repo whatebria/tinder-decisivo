@@ -15,7 +15,7 @@
  * automaticamente dentro de DimensionCard.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { Modal } from "./Modal";
@@ -43,70 +43,46 @@ interface Props {
   } | null;
 }
 
+// ---- Styles ---------------------------------------------------------------
+
+const styles = StyleSheet.create({
+  eje: {
+    fontSize: 12,
+    fontWeight: "600",
+    marginBottom: spacing.sp2,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  enunciadoBox: {
+    borderRadius: radii.rSm,
+    padding: spacing.sp3,
+    marginBottom: spacing.sp4,
+    borderLeftWidth: 3,
+  },
+  enunciadoText: { fontSize: 14, fontStyle: "italic", lineHeight: 20 },
+  emptyText: { fontSize: 14, fontStyle: "italic", textAlign: "center", padding: spacing.sp5 },
+  section: { marginBottom: spacing.sp4 },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: spacing.sp2,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  bodyText: { fontSize: 15, lineHeight: 22 },
+  disclaimer: {
+    fontSize: 12,
+    fontStyle: "italic",
+    marginTop: spacing.sp2,
+    textAlign: "center",
+    lineHeight: 16,
+  },
+});
+
 // ---- Componente -----------------------------------------------------------
 
 export function PreguntaInfoModal({ visible, onClose, pregunta }: Props) {
   const c = useThemeColors();
-
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        eje: {
-          fontSize: 12,
-          fontWeight: "600",
-          color: c.textSecondary,
-          marginBottom: spacing.sp2,
-          textTransform: "uppercase",
-          letterSpacing: 0.5,
-        },
-        enunciadoBox: {
-          backgroundColor: c.gray100,
-          borderRadius: radii.rSm,
-          padding: spacing.sp3,
-          marginBottom: spacing.sp4,
-          borderLeftWidth: 3,
-          borderLeftColor: c.border,
-        },
-        enunciadoText: {
-          fontSize: 14,
-          color: c.textSecondary,
-          fontStyle: "italic",
-          lineHeight: 20,
-        },
-        emptyText: {
-          fontSize: 14,
-          color: c.textSecondary,
-          fontStyle: "italic",
-          textAlign: "center",
-          padding: spacing.sp5,
-        },
-        section: {
-          marginBottom: spacing.sp4,
-        },
-        sectionTitle: {
-          fontSize: 14,
-          fontWeight: "700",
-          color: c.text,
-          marginBottom: spacing.sp2,
-          textTransform: "uppercase",
-          letterSpacing: 0.5,
-        },
-        bodyText: {
-          fontSize: 15,
-          color: c.textSecondary,
-          lineHeight: 22,
-        },
-        disclaimer: {
-          fontSize: 12,
-          color: c.textTertiary,
-          fontStyle: "italic",
-          marginTop: spacing.sp2,
-          textAlign: "center",
-          lineHeight: 16,
-        },
-      }),
-    [c],
-  );
 
   if (!pregunta) return null;
 
@@ -123,15 +99,15 @@ export function PreguntaInfoModal({ visible, onClose, pregunta }: Props) {
       footer={<Button onPress={onClose}>Entendido</Button>}
     >
       {pregunta.eje_tematico_display ? (
-        <Text style={styles.eje}>{pregunta.eje_tematico_display}</Text>
+        <Text style={[styles.eje, { color: c.textSecondary }]}>{pregunta.eje_tematico_display}</Text>
       ) : null}
 
-      <View style={styles.enunciadoBox}>
-        <Text style={styles.enunciadoText}>{pregunta.texto}</Text>
+      <View style={[styles.enunciadoBox, { backgroundColor: c.gray100, borderLeftColor: c.border }]}>
+        <Text style={[styles.enunciadoText, { color: c.textSecondary }]}>{pregunta.texto}</Text>
       </View>
 
       {!hasContent && (
-        <Text style={styles.emptyText}>
+        <Text style={[styles.emptyText, { color: c.textSecondary }]}>
           Aun no tenemos contexto para esta pregunta. Estamos trabajando en
           ello.
         </Text>
@@ -139,14 +115,14 @@ export function PreguntaInfoModal({ visible, onClose, pregunta }: Props) {
 
       {pregunta.explicacion ? (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>De que se trata</Text>
-          <Text style={styles.bodyText}>{pregunta.explicacion}</Text>
+          <Text style={[styles.sectionTitle, { color: c.text }]}>De que se trata</Text>
+          <Text style={[styles.bodyText, { color: c.textSecondary }]}>{pregunta.explicacion}</Text>
         </View>
       ) : null}
 
       {hasRep && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Repercusiones</Text>
+          <Text style={[styles.sectionTitle, { color: c.text }]}>Repercusiones</Text>
           {DIMENSIONES.map((d) => {
             const texto = rep[d.key];
             if (!texto) return null;
@@ -160,7 +136,7 @@ export function PreguntaInfoModal({ visible, onClose, pregunta }: Props) {
       )}
 
       {hasContent && (
-        <Text style={styles.disclaimer}>
+        <Text style={[styles.disclaimer, { color: c.textTertiary }]}>
           Los textos son informativos y neutrales, no una recomendacion de
           voto. Estan en revision con especialistas.
         </Text>

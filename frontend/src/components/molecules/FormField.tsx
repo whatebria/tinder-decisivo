@@ -3,7 +3,7 @@
  * El bloque completo se anuncia junto en screen readers.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { StyleSheet, Text, View, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
 
 import { Input, type InputProps } from "../atoms/Input";
@@ -23,6 +23,13 @@ export interface FormFieldProps extends Omit<InputProps, "hasError"> {
   labelStyle?: StyleProp<TextStyle>;
 }
 
+const styles = StyleSheet.create({
+  wrap: { marginBottom: spacing.sp4 },
+  label: { fontSize: 14, fontWeight: "500", marginBottom: spacing.sp2 },
+  helper: { fontSize: 12, marginTop: spacing.sp1 },
+  error: { fontSize: 12, marginTop: spacing.sp1 },
+});
+
 export function FormField({
   label,
   helper,
@@ -34,25 +41,14 @@ export function FormField({
   const c = useThemeColors();
   const hasError = !!error;
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        wrap: { marginBottom: spacing.sp4 },
-        label: { fontSize: 14, fontWeight: "500", color: c.text, marginBottom: spacing.sp2 },
-        helper: { fontSize: 12, color: c.textSecondary, marginTop: spacing.sp1 },
-        error: { fontSize: 12, color: c.danger, marginTop: spacing.sp1 },
-      }),
-    [c],
-  );
-
   return (
     <View style={[styles.wrap, containerStyle]}>
-      <Text style={[styles.label, labelStyle]}>{label}</Text>
+      <Text style={[styles.label, { color: c.text }, labelStyle]}>{label}</Text>
       <Input hasError={hasError} accessibilityLabel={label} {...inputProps} />
       {hasError ? (
-        <Text style={styles.error}>{error}</Text>
+        <Text style={[styles.error, { color: c.danger }]}>{error}</Text>
       ) : helper ? (
-        <Text style={styles.helper}>{helper}</Text>
+        <Text style={[styles.helper, { color: c.textSecondary }]}>{helper}</Text>
       ) : null}
     </View>
   );

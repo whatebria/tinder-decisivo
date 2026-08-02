@@ -7,7 +7,7 @@
  * Movido de atoms/ a molecules/ (TASK-060): agrupado con ElectionCard.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from "react-native";
 
 import { radii } from "../../theme/radii";
@@ -22,6 +22,22 @@ export interface ElectionCardAddProps {
   accessibilityLabel?: string;
 }
 
+const styles = StyleSheet.create({
+  card: {
+    width: 140,
+    minHeight: 100,
+    padding: spacing.sp3,
+    borderRadius: radii.rLg,
+    borderWidth: 2,
+    borderStyle: "dashed",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.sp2,
+    flexShrink: 0,
+  },
+  label: { fontSize: 11, textAlign: "center" },
+});
+
 export function ElectionCardAdd({
   label,
   onPress,
@@ -30,35 +46,10 @@ export function ElectionCardAdd({
 }: ElectionCardAddProps) {
   const c = useThemeColors();
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        card: {
-          width: 140,
-          minHeight: 100,
-          padding: spacing.sp3,
-          borderRadius: radii.rLg,
-          borderWidth: 2,
-          borderColor: c.border2,
-          borderStyle: "dashed",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: spacing.sp2,
-          flexShrink: 0,
-        },
-        label: {
-          fontSize: 11,
-          color: c.textSecondary,
-          textAlign: "center",
-        },
-      }),
-    [c],
-  );
-
   const content = (
-    <View style={[styles.card, style]}>
+    <View style={[styles.card, { borderColor: c.border2 }, style]}>
       <Icon name="plus" size={28} color={c.textSecondary} />
-      <Text style={styles.label} numberOfLines={2}>
+      <Text style={[styles.label, { color: c.textSecondary }]} numberOfLines={2}>
         {label}
       </Text>
     </View>

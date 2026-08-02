@@ -5,7 +5,7 @@
  * Movido de organisms/ a molecules/ (TASK-063): composicion simple de atoms, sin fetch propio.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { Button } from "../atoms/Button";
@@ -25,6 +25,21 @@ export interface EmptyStateProps {
   style?: StyleProp<ViewStyle>;
 }
 
+const styles = StyleSheet.create({
+  wrap: { alignItems: "center", padding: spacing.sp6, gap: spacing.sp3 },
+  iconBg: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: spacing.sp2,
+  },
+  title: { fontSize: 18, fontWeight: "600", textAlign: "center" },
+  desc: { fontSize: 14, textAlign: "center", lineHeight: 20, maxWidth: 320 },
+  cta: { marginTop: spacing.sp3, minWidth: 200 },
+});
+
 export function EmptyState({
   icon = "search",
   title,
@@ -35,48 +50,15 @@ export function EmptyState({
 }: EmptyStateProps) {
   const c = useThemeColors();
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        wrap: {
-          alignItems: "center",
-          padding: spacing.sp6,
-          gap: spacing.sp3,
-        },
-        iconBg: {
-          width: 64,
-          height: 64,
-          borderRadius: 32,
-          backgroundColor: c.accent2,
-          alignItems: "center",
-          justifyContent: "center",
-          marginBottom: spacing.sp2,
-        },
-        title: {
-          fontSize: 18,
-          fontWeight: "600",
-          color: c.text,
-          textAlign: "center",
-        },
-        desc: {
-          fontSize: 14,
-          color: c.textSecondary,
-          textAlign: "center",
-          lineHeight: 20,
-          maxWidth: 320,
-        },
-        cta: { marginTop: spacing.sp3, minWidth: 200 },
-      }),
-    [c],
-  );
-
   return (
     <View style={[styles.wrap, style]}>
-      <View style={styles.iconBg}>
+      <View style={[styles.iconBg, { backgroundColor: c.accent2 }]}>
         <Icon name={icon} color={c.primary} size={28} />
       </View>
-      <Text style={styles.title}>{title}</Text>
-      {description ? <Text style={styles.desc}>{description}</Text> : null}
+      <Text style={[styles.title, { color: c.text }]}>{title}</Text>
+      {description ? (
+        <Text style={[styles.desc, { color: c.textSecondary }]}>{description}</Text>
+      ) : null}
       {actionLabel && onAction ? (
         <View style={styles.cta}>
           <Button variant="primary" onPress={onAction}>

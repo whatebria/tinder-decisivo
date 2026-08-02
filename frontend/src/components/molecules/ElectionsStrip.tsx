@@ -5,7 +5,7 @@
  * Movido de organisms/ a molecules/ (TASK-063): thin wrapper sin logica propia.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { ScrollView, StyleSheet, type ViewStyle } from "react-native";
 
 import { spacing } from "../../theme/spacing";
@@ -20,13 +20,9 @@ export interface ElectionsStripProps {
 }
 
 export function ElectionsStrip({ elections, addOptions = [], style }: ElectionsStripProps) {
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        container: { flexDirection: "row", gap: spacing.sp2, paddingBottom: 4 },
-      }),
-    [],
-  );
+  const styles = StyleSheet.create({
+    container: { flexDirection: "row", gap: spacing.sp2, paddingBottom: 4 },
+  });
 
   return (
     <ScrollView

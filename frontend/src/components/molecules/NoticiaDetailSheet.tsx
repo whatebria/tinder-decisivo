@@ -10,7 +10,7 @@
  *   - Footer sticky: Guardar (si logged in) + Abrir noticia original
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Image, Linking, StyleSheet, Text, View } from "react-native";
 
 import { Badge } from "../atoms/Badge";
@@ -51,6 +51,36 @@ export interface NoticiaDetailSheetProps {
   bookmarkLoading?: boolean;
 }
 
+const styles = StyleSheet.create({
+  heroImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: radii.rMd,
+    marginBottom: spacing.sp4,
+  },
+  meta: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: spacing.sp2,
+    marginBottom: spacing.sp3,
+  },
+  source: { fontSize: 13, fontWeight: "700" },
+  dot: { fontSize: 13 },
+  when: { fontSize: 13 },
+  title: { fontSize: 20, fontWeight: "700", lineHeight: 28, marginBottom: spacing.sp3 },
+  descripcion: { fontSize: 15, lineHeight: 24, marginBottom: spacing.sp5 },
+  candidatosLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+    marginBottom: spacing.sp2,
+  },
+  candidatosRow: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sp2, marginBottom: spacing.sp5 },
+  bookmarkWrap: { marginBottom: spacing.sp3 },
+});
+
 export function NoticiaDetailSheet({
   visible,
   onClose,
@@ -60,60 +90,6 @@ export function NoticiaDetailSheet({
   bookmarkLoading = false,
 }: NoticiaDetailSheetProps) {
   const c = useThemeColors();
-
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        heroImage: {
-          width: "100%",
-          height: 200,
-          borderRadius: radii.rMd,
-          marginBottom: spacing.sp4,
-          backgroundColor: c.border2,
-        },
-        meta: {
-          flexDirection: "row",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: spacing.sp2,
-          marginBottom: spacing.sp3,
-        },
-        source: { fontSize: 13, fontWeight: "700", color: c.text },
-        dot: { fontSize: 13, color: c.textTertiary },
-        when: { fontSize: 13, color: c.textSecondary },
-        title: {
-          fontSize: 20,
-          fontWeight: "700",
-          color: c.text,
-          lineHeight: 28,
-          marginBottom: spacing.sp3,
-        },
-        descripcion: {
-          fontSize: 15,
-          color: c.text,
-          lineHeight: 24,
-          marginBottom: spacing.sp5,
-        },
-        candidatosLabel: {
-          fontSize: 11,
-          fontWeight: "700",
-          color: c.textSecondary,
-          textTransform: "uppercase",
-          letterSpacing: 0.6,
-          marginBottom: spacing.sp2,
-        },
-        candidatosRow: {
-          flexDirection: "row",
-          flexWrap: "wrap",
-          gap: spacing.sp2,
-          marginBottom: spacing.sp5,
-        },
-        bookmarkWrap: {
-          marginBottom: spacing.sp3,
-        },
-      }),
-    [c],
-  );
 
   if (!noticia) return null;
 
@@ -146,7 +122,7 @@ export function NoticiaDetailSheet({
       {noticia.imagenUrl ? (
         <Image
           source={{ uri: noticia.imagenUrl }}
-          style={styles.heroImage}
+          style={[styles.heroImage, { backgroundColor: c.border2 }]}
           resizeMode="cover"
           accessibilityIgnoresInvertColors
           accessible
@@ -157,21 +133,21 @@ export function NoticiaDetailSheet({
       <View style={styles.meta}>
         {noticia.fuente ? (
           <>
-            <Text style={styles.source}>{noticia.fuente}</Text>
-            <Text style={styles.dot}>{"·"}</Text>
+            <Text style={[styles.source, { color: c.text }]}>{noticia.fuente}</Text>
+            <Text style={[styles.dot, { color: c.textTertiary }]}>{"·"}</Text>
           </>
         ) : null}
-        <Text style={styles.when}>{noticia.fechaFormateada}</Text>
-        <Text style={styles.dot}>{"·"}</Text>
+        <Text style={[styles.when, { color: c.textSecondary }]}>{noticia.fechaFormateada}</Text>
+        <Text style={[styles.dot, { color: c.textTertiary }]}>{"·"}</Text>
         <SentimentBadge sentiment={noticia.sentiment} />
       </View>
 
-      <Text style={styles.title}>{noticia.titulo}</Text>
-      <Text style={styles.descripcion}>{noticia.descripcion}</Text>
+      <Text style={[styles.title, { color: c.text }]}>{noticia.titulo}</Text>
+      <Text style={[styles.descripcion, { color: c.text }]}>{noticia.descripcion}</Text>
 
       {noticia.candidatosMencionados && noticia.candidatosMencionados.length > 0 ? (
         <>
-          <Text style={styles.candidatosLabel}>Candidatos mencionados</Text>
+          <Text style={[styles.candidatosLabel, { color: c.textSecondary }]}>Candidatos mencionados</Text>
           <View style={styles.candidatosRow}>
             {noticia.candidatosMencionados.map((cand) => (
               <Badge key={cand.id} variant="neutral">
