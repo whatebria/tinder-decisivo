@@ -12,10 +12,10 @@
 import React from "react";
 import { Text, View } from "react-native";
 
-import { useThemeColors } from "../../../../theme/useTheme";
-import { spacing } from "../../../../theme/spacing";
-import { typography } from "../../../../theme/typography";
-import type { CatalogEntry } from "../../showcase/types";
+import { useThemeColors } from "../../../theme/useTheme";
+import { spacing } from "../../../theme/spacing";
+import { typography } from "../../../theme/typography";
+import type { CatalogEntry } from "../showcase/types";
 
 // ---------------------------------------------------------------------------
 // Primitiva de documentacion de patron
