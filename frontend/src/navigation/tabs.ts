@@ -16,6 +16,8 @@ export interface AppTabDef {
   route: string;
   icon: IconName;
   label: string;
+  /** Label para lectores de pantalla (VoiceOver/TalkBack). Por defecto usa `label`. */
+  a11yLabel?: string;
 }
 
 /**
@@ -28,7 +30,8 @@ const ALL_TABS: readonly AppTabDef[] = [
   { key: "candidatos", route: "Candidatos",    icon: "user",    label: "Candidatos" },
   { key: "comparar",   route: "Comparar",      icon: "columns", label: "Comparar" },
   { key: "noticias",   route: "Noticias",      icon: "news",    label: "Noticias" },
-  { key: "config",     route: "Configuracion", icon: "gear",    label: "Config" },
+  // UX-037: a11yLabel completo para VoiceOver/TalkBack (el label visible es abreviado).
+  { key: "config",     route: "Configuracion", icon: "gear",    label: "Config", a11yLabel: "Configuraci\u00f3n" },
 ];
 
 export const APP_TABS: readonly AppTabDef[] = ALL_TABS.filter(

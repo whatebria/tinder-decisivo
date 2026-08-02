@@ -492,6 +492,17 @@ export function ResultadosScreen({
             onToggleDesc={handleToggleDesc}
             loadingBookmarks={toggleFav.isPending || toggleDesc.isPending}
           />
+        ) : partidoFiltro ? (
+          // UX-058: empty state especifico cuando el filtro de partido elimina todos los
+          // resultados. Informamos al user y damos salida directa para limpiar el filtro.
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptyText}>
+              No hay candidatos de {partidoFiltro} en tu ranking visible.
+            </Text>
+            <Button variant="ghost" onPress={() => setPartidoFiltro(null)}>
+              Ver todos los partidos
+            </Button>
+          </View>
         ) : (
           <Text style={styles.emptyText}>
             No hay candidatos para mostrar. Intenta nuevamente más tarde.

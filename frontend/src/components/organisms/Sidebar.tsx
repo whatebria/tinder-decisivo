@@ -65,6 +65,7 @@ export function Sidebar({ active, navigation }: SidebarProps) {
           active={t.key === active}
           onPress={() => handlePress(t)}
           variant="side"
+          accessibilityLabel={t.a11yLabel ?? t.label}
         />
       ))}
     </View>

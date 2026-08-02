@@ -80,6 +80,7 @@ export function BottomNav({ active, navigation }: BottomNavProps) {
           active={t.key === active}
           onPress={() => handlePress(t)}
           variant="bottom"
+          accessibilityLabel={t.a11yLabel ?? t.label}
         />
       ))}
     </View>
