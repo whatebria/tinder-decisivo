@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Backlog Ejecutable — Tinder Decisivo</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class'}</script>
+<style>
+  body{background:#0d1117;color:#e6edf3;font-family:system-ui,sans-serif}
+  .card-hover:hover{transform:translateY(-1px);box-shadow:0 4px 24px rgba(59,130,246,.15)}
+  .card-hover{transition:all .2s ease}
+  details>summary{cursor:pointer;list-style:none}
+  details>summary::-webkit-details-marker{display:none}
+  details[open]>.chevron{transform:rotate(180deg)}
+  .chevron{transition:transform .2s ease;display:inline-block}
+  .filter-btn.active{ring:2px;ring-offset:2px}
+  .epic-section{display:block}.epic-section.hidden{display:none}
+  .issue-card{display:block}.issue-card.hidden-filter{display:none}
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:#161b22}
+  ::-webkit-scrollbar-thumb{background:#30363d;border-radius:3px}
+  .tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:9999px;font-size:11px;font-weight:600;letter-spacing:.03em}
+  .gherkin{background:#161b22;border-left:3px solid #30363d;padding:12px;border-radius:4px;font-size:12px;font-family:monospace;white-space:pre-wrap;color:#8b949e}
+  .dep-chip{display:inline-block;background:#1f2937;border:1px solid #374151;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;color:#93c5fd}
+  .sprint-cell{padding:8px 12px;border-bottom:1px solid #21262d;vertical-align:top}
+  .metric-card{background:#161b22;border:1px solid #21262d;border-radius:12px;padding:20px;text-align:center}
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900 border-b border-gray-700 shadow-lg" style="background:#0d1117">
+  <div class="max-w-screen-2xl mx-auto px-4 py-3">
+    <div class="flex flex-wrap items-center gap-3">
+      <div class="flex items-center gap-2 mr-4">
+        <span class="text-lg"></span>
+        <span class="font-bold text-white text-sm">Tinder Decisivo</span>
+        <span class="text-gray-500 text-xs">Backlog Q3 2026</span>
+      </div>
+      <!-- Epic filters -->
+      <div class="flex flex-wrap gap-1 items-center">
+        <span class="text-gray-500 text-xs mr-1">Epic:</span>
+        <button onclick="filterEpic('all')" id="ef-all" class="filter-btn active tag bg-blue-900 text-blue-200 border border-blue-700 hover:bg-blue-800">Todos</button>
+        <button onclick="filterEpic('1')" id="ef-1" class="filter-btn tag bg-gray-800 text-gray-300 border border-gray-600 hover:bg-gray-700">E1 Matching</button>
+        <button onclick="filterEpic('2')" id="ef-2" class="filter-btn tag bg-gray-800 text-gray-300 border border-gray-600 hover:bg-gray-700">E2 Cuestionario</button>
+        <button onclick="filterEpic('3')" id="ef-3" class="filter-btn tag bg-gray-800 text-gray-300 border border-gray-600 hover:bg-gray-700">E3 Home</button>
+        <button onclick="filterEpic('4')" id="ef-4" class="filter-btn tag bg-gray-800 text-gray-300 border border-gray-600 hover:bg-gray-700">E4 Candidatos</button>
+        <button onclick="filterEpic('5')" id="ef-5" class="filter-btn tag bg-gray-800 text-gray-300 border border-gray-600 hover:bg-gray-700">E5 DesignSys</button>
+        <button onclick="filterEpic('6')" id="ef-6" class="filter-btn tag bg-gray-800 text-gray-300 border border-gray-600 hover:bg-gray-700">E6 Architecture</button>
+        <button onclick="filterEpic('7')" id="ef-7" class="filter-btn tag bg-gray-800 text-gray-300 border border-gray-600 hover:bg-gray-700">E7 A11y</button>
+        <button onclick="filterEpic('8')" id="ef-8" class="filter-btn tag bg-gray-800 text-gray-300 border border-gray-600 hover:bg-gray-700">E8 Backend</button>
+      </div>
+      <div class="w-px h-5 bg-gray-700 mx-1"></div>
+      <!-- Priority filters -->
+      <div class="flex flex-wrap gap-1 items-center">
+        <span class="text-gray-500 text-xs mr-1">Prioridad:</span>
+        <button onclick="filterPrio('all')" id="pf-all" class="filter-btn active tag bg-blue-900 text-blue-200 border border-blue-700 hover:bg-blue-800">Todas</button>
+        <button onclick="filterPrio('P0')" id="pf-P0" class="filter-btn tag bg-red-900 text-red-200 border border-red-700 hover:bg-red-800">P0</button>
+        <button onclick="filterPrio('P1')" id="pf-P1" class="filter-btn tag bg-orange-900 text-orange-200 border border-orange-700 hover:bg-orange-800">P1</button>
+        <button onclick="filterPrio('P2')" id="pf-P2" class="filter-btn tag bg-yellow-900 text-yellow-200 border border-yellow-700 hover:bg-yellow-800">P2</button>
+        <button onclick="filterPrio('P3')" id="pf-P3" class="filter-btn tag bg-gray-700 text-gray-300 border border-gray-500 hover:bg-gray-600">P3</button>
+      </div>
+      <div class="ml-auto text-xs text-gray-500" id="counter">38 issues</div>
+    </div>
+  </div>
+</nav>
+
+<div class="max-w-screen-2xl mx-auto px-4 pt-24 pb-16">
+
+<!-- ═══ HERO ═══ -->
+<div class="mb-10 rounded-2xl p-8 border border-gray-700" style="background:linear-gradient(135deg,#0d2137 0%,#0d1117 100%)">
+  <div class="flex items-start justify-between flex-wrap gap-4">
+    <div>
+      <div class="flex items-center gap-3 mb-2">
+        <span class="text-3xl"></span>
+        <h1 class="text-3xl font-black text-white">Backlog Ejecutable</h1>
+        <span class="tag bg-blue-900 text-blue-300 border border-blue-700 text-sm">v1.0 · 2026-08</span>
+      </div>
+      <p class="text-gray-400 text-base max-w-2xl">App de matching político-electoral para Chile. Backlog priorizado, con Gherkin, dependencias y roadmap de 5 sprints.</p>
+    </div>
+    <div class="flex gap-3 flex-wrap">
+      <div class="metric-card"><div class="text-3xl font-black text-white">38</div><div class="text-xs text-gray-400 mt-1">Total Issues</div></div>
+      <div class="metric-card"><div class="text-3xl font-black text-red-400">2</div><div class="text-xs text-gray-400 mt-1">P0 Críticos</div></div>
+      <div class="metric-card"><div class="text-3xl font-black text-orange-400">11</div><div class="text-xs text-gray-400 mt-1">P1 Altos</div></div>
+      <div class="metric-card"><div class="text-3xl font-black text-yellow-400">17</div><div class="text-xs text-gray-400 mt-1">P2 Medios</div></div>
+      <div class="metric-card"><div class="text-3xl font-black text-gray-400">8</div><div class="text-xs text-gray-400 mt-1">P3 Bajos</div></div>
+    </div>
+  </div>
+  <!-- Type breakdown -->
+  <div class="flex flex-wrap gap-2 mt-6 pt-6 border-t border-gray-700">
+    <span class="tag bg-red-900/50 text-red-300 border border-red-800"> Bugs: 14</span>
+    <span class="tag bg-purple-900/50 text-purple-300 border border-purple-800"> UX: 14</span>
+    <span class="tag bg-cyan-900/50 text-cyan-300 border border-cyan-800"> Tech Debt: 8</span>
+    <span class="tag bg-green-900/50 text-green-300 border border-green-800"> Product Decision: 1</span>
+    <span class="tag bg-blue-900/50 text-blue-300 border border-blue-800"> Quick Wins: 8</span>
+    <span class="tag bg-orange-900/50 text-orange-300 border border-orange-800"> Bloqueadores activos: 4</span>
+  </div>
+</div>
+
+<!-- ═══ ISSUES POR EPIC ═══ -->
+<div id="epics-container"></div>
+
+<!-- ═══ QUICK WINS ═══ -->
+<section class="mb-10">
+  <div class="flex items-center gap-3 mb-4">
+    <span class="text-2xl"></span>
+    <h2 class="text-2xl font-bold text-white">Quick Wins</h2>
+    <span class="tag bg-green-900 text-green-300 border border-green-700">XS/S · Alto Impacto · Deploy rápido</span>
+  </div>
+  <p class="text-gray-400 text-sm mb-4">Issues de estimación XS/S que generan impacto inmediato. Ideales para Sprint 1 en paralelo con P0s.</p>
+  <div id="quickwins-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"></div>
+</section>
+
+<!-- ═══ TECHNICAL DEBT ═══ -->
+<section class="mb-10">
+  <div class="flex items-center gap-3 mb-4">
+    <span class="text-2xl"></span>
+    <h2 class="text-2xl font-bold text-white">Technical Debt</h2>
+    <span class="tag bg-orange-900 text-orange-300 border border-orange-700">8 tasks · Arquitectura + Design System</span>
+  </div>
+  <p class="text-gray-400 text-sm mb-4">Deuda técnica acumulada. No bloquea features actuales pero degrada la velocidad del equipo.</p>
+  <div id="techdebt-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"></div>
+</section>
+
+<!-- ═══ DEPENDENCIAS ═══ -->
+<section class="mb-10">
+  <div class="flex items-center gap-3 mb-6">
+    <span class="text-2xl"></span>
+    <h2 class="text-2xl font-bold text-white">Mapa de Dependencias</h2>
+  </div>
+  <div class="rounded-xl border border-gray-700 overflow-x-auto" style="background:#161b22">
+    <table class="w-full text-sm">
+      <thead>
+        <tr style="background:#0d2137">
+          <th class="sprint-cell text-left text-blue-300 font-bold">Issue</th>
+          <th class="sprint-cell text-left text-blue-300 font-bold">Bloqueado por</th>
+          <th class="sprint-cell text-left text-blue-300 font-bold">Bloquea a</th>
+          <th class="sprint-cell text-left text-blue-300 font-bold">Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="hover:bg-gray-800/30"><td class="sprint-cell font-bold text-red-400">PRODUCT-001</td><td class="sprint-cell text-gray-400">—</td><td class="sprint-cell"><span class="dep-chip">BUG-035</span> <span class="dep-chip">BUG-036</span> <span class="dep-chip">BUG-037</span> <span class="dep-chip">BUG-043</span></td><td class="sprint-cell"><span class="tag bg-red-900 text-red-300"> Bloqueador</span></td></tr>
+        <tr class="hover:bg-gray-800/30"><td class="sprint-cell font-bold text-red-400">BUG-042</td><td class="sprint-cell text-gray-400">—</td><td class="sprint-cell"><span class="dep-chip">PRODUCT-001</span> <span class="dep-chip">BUG-037</span></td><td class="sprint-cell"><span class="tag bg-red-900 text-red-300"> Crítico</span></td></tr>
+        <tr class="hover:bg-gray-800/30"><td class="sprint-cell font-bold text-orange-400">BUG-035</td><td class="sprint-cell"><span class="dep-chip">PRODUCT-001</span></td><td class="sprint-cell text-gray-400">—</td><td class="sprint-cell"><span class="tag bg-orange-900 text-orange-300"> Bloqueado</span></td></tr>
+        <tr class="hover:bg-gray-800/30"><td class="sprint-cell font-bold text-orange-400">BUG-036</td><td class="sprint-cell"><span class="dep-chip">PRODUCT-001</span> <span class="dep-chip">BUG-042</span></td><td class="sprint-cell text-gray-400">—</td><td class="sprint-cell"><span class="tag bg-orange-900 text-orange-300"> Bloqueado</span></td></tr>
+        <tr class="hover:bg-gray-800/30"><td class="sprint-cell font-bold text-orange-400">BUG-037</td><td class="sprint-cell"><span class="dep-chip">BUG-042</span></td><td class="sprint-cell text-gray-400">—</td><td class="sprint-cell"><span class="tag bg-orange-900 text-orange-300"> Bloqueado</span></td></tr>
+        <tr class="hover:bg-gray-800/30"><td class="sprint-cell font-bold text-orange-400">BUG-043</td><td class="sprint-cell"><span class="dep-chip">PRODUCT-001</span></td><td class="sprint-cell"><span class="dep-chip">UX-062</span></td><td class="sprint-cell"><span class="tag bg-orange-900 text-orange-300"> Bloqueado</span></td></tr>
+        <tr class="hover:bg-gray-800/30"><td class="sprint-cell font-bold text-yellow-400">UX-062</td><td class="sprint-cell"><span class="dep-chip">BUG-043</span></td><td class="sprint-cell text-gray-400">—</td><td class="sprint-cell"><span class="tag bg-yellow-900 text-yellow-300"> Dependiente</span></td></tr>
+        <tr class="hover:bg-gray-800/30"><td class="sprint-cell font-bold text-yellow-400">UX-065</td><td class="sprint-cell"><span class="dep-chip">BUG-027</span></td><td class="sprint-cell text-gray-400">—</td><td class="sprint-cell"><span class="tag bg-yellow-900 text-yellow-300"> Dependiente</span></td></tr>
+        <tr class="hover:bg-gray-800/30"><td class="sprint-cell font-bold text-green-400">BUG-041</td><td class="sprint-cell text-gray-400">—</td><td class="sprint-cell text-gray-400">—</td><td class="sprint-cell"><span class="tag bg-green-900 text-green-300"> Listo para ejecutar</span></td></tr>
+        <tr class="hover:bg-gray-800/30"><td class="sprint-cell font-bold text-green-400">BUG-038</td><td class="sprint-cell text-gray-400">—</td><td class="sprint-cell text-gray-400">—</td><td class="sprint-cell"><span class="tag bg-green-900 text-green-300"> Listo para ejecutar</span></td></tr>
+        <tr class="hover:bg-gray-800/30"><td class="sprint-cell font-bold text-green-400">BUG-039</td><td class="sprint-cell text-gray-400">—</td><td class="sprint-cell text-gray-400">—</td><td class="sprint-cell"><span class="tag bg-green-900 text-green-300"> Listo para ejecutar</span></td></tr>
+        <tr class="hover:bg-gray-800/30"><td class="sprint-cell font-bold text-gray-400">TASK-060</td><td class="sprint-cell text-gray-400">—</td><td class="sprint-cell"><span class="dep-chip">TASK-061</span></td><td class="sprint-cell"><span class="tag bg-gray-700 text-gray-300"> Independiente</span></td></tr>
+        <tr class="hover:bg-gray-800/30"><td class="sprint-cell font-bold text-gray-400">UX-003</td><td class="sprint-cell text-gray-400">—</td><td class="sprint-cell text-gray-400">—</td><td class="sprint-cell"><span class="tag bg-gray-700 text-gray-300"> Independiente</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ ROADMAP ═══ -->
+<section class="mb-10">
+  <div class="flex items-center gap-3 mb-6">
+    <span class="text-2xl"></span>
+    <h2 class="text-2xl font-bold text-white">Roadmap · 5 Sprints</h2>
+    <span class="tag bg-blue-900 text-blue-300 border border-blue-700">~9 semanas</span>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+
+    <div class="rounded-xl border-2 border-red-700 overflow-hidden" style="background:#1a0a0a">
+      <div class="px-4 py-3 flex items-center gap-2" style="background:#2d0a0a">
+        <span class="text-red-400 font-black text-sm">Sprint 1</span>
+        <span class="text-gray-500 text-xs">1 semana</span>
+      </div>
+      <div class="p-4">
+        <div class="text-red-300 font-bold text-xs mb-3 uppercase tracking-wider">P0s + Quick Wins Críticos</div>
+        <div class="space-y-2">
+          <div class="dep-chip block text-red-400 border-red-800" style="background:#2d0a0a"> BUG-042 — POST 500</div>
+          <div class="dep-chip block text-red-400 border-red-800" style="background:#2d0a0a"> PRODUCT-001 — Flujo base</div>
+          <div class="dep-chip block text-orange-400 border-orange-800" style="background:#1f1200"> BUG-041 — ProgressRing A11y</div>
+          <div class="dep-chip block text-orange-400 border-orange-800" style="background:#1f1200"> BUG-039 — Fav+Descartar mutex</div>
+          <div class="dep-chip block text-orange-400 border-orange-800" style="background:#1f1200"> BUG-038 — Modal comuna presi</div>
+          <div class="dep-chip block text-yellow-400 border-yellow-800" style="background:#1a1400"> UX-062 — Volver al inicio</div>
+          <div class="dep-chip block text-yellow-400 border-yellow-800" style="background:#1a1400"> UX-066 — Filtro dark mode</div>
+        </div>
+        <div class="mt-3 pt-3 border-t border-gray-700 text-xs text-gray-400">Velocidad objetivo: <strong class="text-white">M+M+S+S+S+XS+XS</strong></div>
+      </div>
+    </div>
+
+    <div class="rounded-xl border-2 border-orange-700 overflow-hidden" style="background:#1a1000">
+      <div class="px-4 py-3 flex items-center gap-2" style="background:#2d1a00">
+        <span class="text-orange-400 font-black text-sm">Sprint 2</span>
+        <span class="text-gray-500 text-xs">2 semanas</span>
+      </div>
+      <div class="p-4">
+        <div class="text-orange-300 font-bold text-xs mb-3 uppercase tracking-wider">Flujo Matching Completo</div>
+        <div class="space-y-2">
+          <div class="dep-chip block" style="background:#1f1200">BUG-035 — Ver resultado prematuro</div>
+          <div class="dep-chip block" style="background:#1f1200">BUG-036 — Base 100% error</div>
+          <div class="dep-chip block" style="background:#1f1200">BUG-037 — Error mid-flow</div>
+          <div class="dep-chip block" style="background:#1f1200">BUG-043 — CTA stale post-base</div>
+          <div class="dep-chip block" style="background:#1f1200">BUG-026 — esTipoBase race cond.</div>
+          <div class="dep-chip block" style="background:#1f1200">UX-003 — CandidatosScreen perf</div>
+        </div>
+        <div class="mt-3 pt-3 border-t border-gray-700 text-xs text-gray-400">Requiere PRODUCT-001 finalizado del Sprint 1</div>
+      </div>
+    </div>
+
+    <div class="rounded-xl border-2 border-yellow-700 overflow-hidden" style="background:#1a1500">
+      <div class="px-4 py-3 flex items-center gap-2" style="background:#2d2500">
+        <span class="text-yellow-400 font-black text-sm">Sprint 3</span>
+        <span class="text-gray-500 text-xs">2 semanas</span>
+      </div>
+      <div class="p-4">
+        <div class="text-yellow-300 font-bold text-xs mb-3 uppercase tracking-wider">Results + Candidates + Home</div>
+        <div class="space-y-2">
+          <div class="dep-chip block">BUG-040 — Top match incorrecto</div>
+          <div class="dep-chip block">UX-059 — Tab Match/Afinidad</div>
+          <div class="dep-chip block">UX-061 — RadarChart etiquetas</div>
+          <div class="dep-chip block">UX-058 — Filtro sin reset</div>
+          <div class="dep-chip block">BUG-034 — Avatar sin nav</div>
+          <div class="dep-chip block">UX-065 — "No sé" visual</div>
+          <div class="dep-chip block">UX-064 — Header transparente</div>
+          <div class="dep-chip block">UX-063 — TopBar padding</div>
+        </div>
+        <div class="mt-3 pt-3 border-t border-gray-700 text-xs text-gray-400">UX-065 requiere BUG-027 resuelto</div>
+      </div>
+    </div>
+
+    <div class="rounded-xl border-2 border-blue-700 overflow-hidden" style="background:#0a0f1a">
+      <div class="px-4 py-3 flex items-center gap-2" style="background:#0d1a2d">
+        <span class="text-blue-400 font-black text-sm">Sprint 4</span>
+        <span class="text-gray-500 text-xs">2 semanas</span>
+      </div>
+      <div class="p-4">
+        <div class="text-blue-300 font-bold text-xs mb-3 uppercase tracking-wider">Design System + A11y</div>
+        <div class="space-y-2">
+          <div class="dep-chip block">TASK-064 — SectionTitle tokens</div>
+          <div class="dep-chip block">TASK-066 — useMemo→StyleSheet</div>
+          <div class="dep-chip block">UX-038 — RadarChart a11y</div>
+          <div class="dep-chip block">UX-024 — ResultadoHero label</div>
+          <div class="dep-chip block">UX-057 — SubmitDone LiveRegion</div>
+          <div class="dep-chip block">TASK-067 — AppShell active null</div>
+          <div class="dep-chip block">UX-060 — Filtro colapsable</div>
+        </div>
+        <div class="mt-3 pt-3 border-t border-gray-700 text-xs text-gray-400">TASK-066 requiere diseño previo de tokens dinámicos</div>
+      </div>
+    </div>
+
+    <div class="rounded-xl border-2 border-gray-600 overflow-hidden" style="background:#111318">
+      <div class="px-4 py-3 flex items-center gap-2" style="background:#1a1f2a">
+        <span class="text-gray-400 font-black text-sm">Sprint 5</span>
+        <span class="text-gray-500 text-xs">2 semanas</span>
+      </div>
+      <div class="p-4">
+        <div class="text-gray-300 font-bold text-xs mb-3 uppercase tracking-wider">Atomic Design Refactor</div>
+        <div class="space-y-2">
+          <div class="dep-chip block">TASK-060 — ElectionCard→mols</div>
+          <div class="dep-chip block">TASK-061 — Co-loc Home comps</div>
+          <div class="dep-chip block">TASK-062 — Co-loc Onboarding</div>
+          <div class="dep-chip block">TASK-063 — Mover 4 organisms</div>
+          <div class="dep-chip block">TASK-055 — QuestionCard remove</div>
+          <div class="dep-chip block">TASK-065 — README components</div>
+          <div class="dep-chip block">BUG-024 — Noticias enabled</div>
+          <div class="dep-chip block">BUG-030 — Favoritos enabled</div>
+          <div class="dep-chip block">BUG-031 — Error 404 vs 500</div>
+          <div class="dep-chip block">UX-056 — HomeTrustSection</div>
+        </div>
+        <div class="mt-3 pt-3 border-t border-gray-700 text-xs text-gray-400">Refactor puro — feature flags off</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ BACKLOG PRIORIZADO ═══ -->
+<section class="mb-10">
+  <div class="flex items-center gap-3 mb-6">
+    <span class="text-2xl"></span>
+    <h2 class="text-2xl font-bold text-white">Backlog Priorizado Completo</h2>
+  </div>
+  <div class="rounded-xl border border-gray-700 overflow-x-auto" style="background:#161b22">
+    <table class="w-full text-xs">
+      <thead>
+        <tr style="background:#0d2137">
+          <th class="sprint-cell text-left text-blue-300 font-bold w-6">#</th>
+          <th class="sprint-cell text-left text-blue-300 font-bold">Issue</th>
+          <th class="sprint-cell text-left text-blue-300 font-bold">Título</th>
+          <th class="sprint-cell text-left text-blue-300 font-bold">Tipo</th>
+          <th class="sprint-cell text-left text-blue-300 font-bold">Prio</th>
+          <th class="sprint-cell text-left text-blue-300 font-bold">Est</th>
+          <th class="sprint-cell text-left text-blue-300 font-bold">Epic</th>
+          <th class="sprint-cell text-left text-blue-300 font-bold">Sprint</th>
+          <th class="sprint-cell text-left text-blue-300 font-bold">Riesgo</th>
+          <th class="sprint-cell text-left text-blue-300 font-bold">Impacto</th>
+        </tr>
+      </thead>
+      <tbody id="backlog-table"></tbody>
+    </table>
+  </div>
+</section>
+
+</div><!-- /max-w -->
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════
+const EPICS = {
+  '1': {name:'Matching & Results Experience', icon:'', color:'blue'},
+  '2': {name:'Questionnaire Experience', icon:'', color:'purple'},
+  '3': {name:'Home Experience', icon:'', color:'green'},
+  '4': {name:'Candidates & Compare', icon:'', color:'yellow'},
+  '5': {name:'Design System & Visual', icon:'', color:'pink'},
+  '6': {name:'Atomic Design & Architecture', icon:'', color:'orange'},
+  '7': {name:'Accessibility', icon:'', color:'teal'},
+  '8': {name:'Backend & API', icon:'', color:'red'},
+};
+
+const ISSUES = [
+  // ─── EPIC 1 ───
+  {id:'BUG-042',epic:'1',prio:'P0',type:'Bug',est:'M',risk:'Alto',impact:'Alto',sprint:1,area:'Backend+Frontend',
+   title:'POST 500 en /api/v1/match-candidatos/ para senador y presidencial',
+   screens:['ResultadosScreen'],files:['frontend/src/api/endpoints.ts','backend/core/views/'],
+   problem:'POST http://localhost:8010/api/v1/match-candidatos/ devuelve 500 al entrar al cuestionario de senador y presidencial.',
+   solution:'Investigar logs backend. Verificar serialización de datos. Agregar manejo de error explícito en frontend con retry.',
+   gherkin:`Given el usuario completa el cuestionario presidencial o de senador
+When la app llama a POST /api/v1/match-candidatos/
+Then debe recibir 200 con el ranking de candidatos, no un 500`,
+   deps:['PRODUCT-001'],blocks:['PRODUCT-001','BUG-037'],quickwin:false,techDebt:false},
+
+  {id:'PRODUCT-001',epic:'1',prio:'P0',type:'Product Decision',est:'L',risk:'Alto',impact:'Alto',sprint:1,area:'Product+Frontend+Backend',
+   title:'Definir flujo oficial de preguntas base → resultados',
+   screens:['CuestionarioScreen','ResultadosScreen','SubmitDoneScreen','HomeScreen'],files:['frontend/src/screens/'],
+   problem:'El comportamiento al completar solo preguntas base es ambiguo. Genera bugs en cascada (BUG-035/036/037/043). Las preguntas base aplican a todas las elecciones.',
+   solution:'Opción A: matches de base en todas las elecciones con tabs. Opción B: bloquear hasta tener preguntas específicas + N base mínimo.',
+   gherkin:`Given el usuario completó 100% del cuestionario base sin preguntas específicas
+When toca "Ver resultados"
+Then debe ver ranking por elección activa (Opción A)
+OR ver mensaje claro de por qué no puede ver resultados (Opción B)`,
+   deps:[],blocks:['BUG-035','BUG-036','BUG-037','BUG-043'],quickwin:false,techDebt:false},
+
+  {id:'BUG-035',epic:'1',prio:'P1',type:'Bug',est:'M',risk:'Medio',impact:'Alto',sprint:2,area:'Frontend',
+   title:'"Ver resultado" prematuro: error + navega igual + título "Diputados 2025" incorrecto',
+   screens:['CuestionarioScreen','ResultadosScreen'],files:['frontend/src/screens/CuestionarioScreen.tsx','frontend/src/screens/ResultadosScreen.tsx'],
+   problem:'Al tocar "Ver resultado" con pocas preguntas: (1) error "no pudimos calcular", (2) navega igual, (3) título muestra "Diputados 2025" aunque venía de cuestionario base.',
+   solution:'Si no llega al mínimo → bloquear navegación + mensaje inline. tipoEleccionId debe resolverse del cuestionario activo.',
+   gherkin:`Given el usuario respondió menos de N preguntas
+When toca "Ver resultado"
+Then el botón debe estar deshabilitado O mostrar mensaje sin navegar
+And si navega, el título debe mostrar la elección correcta`,
+   deps:['PRODUCT-001'],blocks:[],quickwin:false,techDebt:false},
+
+  {id:'BUG-036',epic:'1',prio:'P1',type:'Bug',est:'M',risk:'Alto',impact:'Alto',sprint:2,area:'Backend+Frontend',
+   title:'Cuestionario base 100% completado da error "no pudimos calcular matches"',
+   screens:['SubmitDoneScreen','ResultadosScreen'],files:['frontend/src/screens/ResultadosScreen.tsx','backend/'],
+   problem:'Al completar 100% del cuestionario base y querer ver resultados, el sistema devuelve error. El endpoint puede estar rechazando cálculos para tipo base.',
+   solution:'El backend debe soportar matches para tipo base (aplica a todas las elecciones). El frontend debe redirigir correctamente post-base.',
+   gherkin:`Given el usuario completó 100% del cuestionario base
+When el sistema intenta calcular matches
+Then debe devolver resultados válidos para todas las elecciones activas, no un error`,
+   deps:['PRODUCT-001','BUG-042'],blocks:[],quickwin:false,techDebt:false},
+
+  {id:'BUG-037',epic:'1',prio:'P1',type:'Bug',est:'M',risk:'Medio',impact:'Alto',sprint:2,area:'Frontend',
+   title:'Error de match aparece MID-FLOW durante el cuestionario',
+   screens:['CuestionarioScreen'],files:['frontend/src/screens/HomeScreen.tsx','frontend/src/api/hooks.ts'],
+   problem:'El toast "no pudimos calcular tu match" aparece mientras el usuario responde preguntas, antes de tocar "Ver resultado". Algún hook hace polling en background.',
+   solution:'Agregar enabled:false a todas las queries de matching mientras CuestionarioScreen está activa. Verificar que ResultadosScreen no se pre-monta.',
+   gherkin:`Given el usuario está en CuestionarioScreen respondiendo preguntas
+When no ha tocado "Ver resultado"
+Then NO debe aparecer ningún error de matching ni toast de cálculo fallido`,
+   deps:['BUG-042'],blocks:[],quickwin:false,techDebt:false},
+
+  {id:'BUG-038',epic:'1',prio:'P1',type:'Bug',est:'S',risk:'Bajo',impact:'Alto',sprint:1,area:'Frontend',
+   title:'Modal "setea tu comuna" aparece en elecciones presidenciales',
+   screens:['ResultadosScreen'],files:['frontend/src/screens/ResultadosScreen.tsx','frontend/src/domain/eleccion.ts'],
+   problem:'La condición para mostrar el modal de ubicación no verifica si la elección requiere filtro geográfico. Las presidenciales son nacionales.',
+   solution:'Agregar helper esTipoNacional(tipoEleccion) en domain/eleccion.ts. Condicionar: if (!userUbicacion && !esTipoNacional(tipo))',
+   gherkin:`Given el usuario está viendo resultados de la elección presidencial
+When no tiene su comuna configurada
+Then NO debe aparecer el modal "setea tu comuna"
+And el modal solo aparece para diputados, alcaldes, concejales`,
+   deps:[],blocks:[],quickwin:true,techDebt:false},
+
+  {id:'BUG-039',epic:'1',prio:'P1',type:'Bug',est:'S',risk:'Medio',impact:'Alto',sprint:1,area:'Frontend',
+   title:'Candidato puede ser favorito Y descartado simultáneamente',
+   screens:['DetalleCandidatoScreen','ResultadosScreen','MisGuardadosScreen'],files:['frontend/src/components/molecules/BookmarkActions.tsx','frontend/src/store/'],
+   problem:'Los toggles de favorito y descartado son independientes. Un candidato puede quedar en ambas listas sin exclusión mutua.',
+   solution:'Al activar favorito → remover de descartados (y viceversa) antes de aplicar el nuevo estado.',
+   gherkin:`Given un candidato está marcado como descartado
+When el usuario lo marca como favorito
+Then debe dejar de estar descartado automáticamente
+And no debe aparecer en ambas listas en MisGuardadosScreen`,
+   deps:[],blocks:[],quickwin:true,techDebt:false},
+
+  {id:'BUG-040',epic:'1',prio:'P2',type:'Bug',est:'S',risk:'Bajo',impact:'Medio',sprint:3,area:'Frontend',
+   title:'"Tu mejor match" en Home muestra candidato de Diputados en lugar del global más alto',
+   screens:['HomeScreen'],files:['frontend/src/screens/HomeScreen.tsx'],
+   problem:'Toma el primer resultado de la primera elección activa (Diputados) en lugar del candidato con mayor % de todas las elecciones.',
+   solution:'Hacer flatMap de todos los top_candidatos de todas las elecciones y ordenar por match_percentage descendente.',
+   gherkin:`Given el usuario tiene matches en presidencial (87%) y diputados (62%)
+When ve "Tu mejor match" en Home
+Then debe mostrar el candidato presidencial con 87%, no el de diputados`,
+   deps:[],blocks:[],quickwin:false,techDebt:false},
+
+  {id:'UX-058',epic:'1',prio:'P2',type:'UX',est:'XS',risk:'Bajo',impact:'Medio',sprint:3,area:'Frontend',
+   title:'Filtro partido en resultados sin CTA reset cuando filteredResults = 0',
+   screens:['ResultadosScreen'],files:['frontend/src/screens/ResultadosScreen.tsx'],
+   problem:'Cuando el filtro de partido deja filteredResults en 0, el empty state no tiene botón para limpiar. El usuario queda atrapado.',
+   solution:'Detectar si el vacío es por filtro activo → mostrar Button ghost "Ver todos los partidos" + nombre del partido en el mensaje.',
+   gherkin:`Given el usuario filtra por un partido sin candidatos visibles
+When filteredResults === 0
+Then debe aparecer un botón "Limpiar filtro" o "Ver todos los partidos"`,
+   deps:[],blocks:[],quickwin:true,techDebt:false},
+
+  {id:'UX-059',epic:'1',prio:'P2',type:'UX',est:'M',risk:'Bajo',impact:'Alto',sprint:3,area:'Frontend',
+   title:'"¿Por qué tenemos este match?" merece su propio tab en DetalleCandidato',
+   screens:['DetalleCandidatoScreen'],files:['frontend/src/screens/DetalleCandidatoScreen.tsx','frontend/src/screens/DetalleCandidato/ResumenTab.tsx'],
+   problem:'MatchExplanation está embebida sin jerarquía visual clara. El usuario quiere explorarla con dedicación.',
+   solution:'Agregar tab "Match"/"Afinidad" con: % global, radar chart, MatchExplanation por dimensión, preguntas donde coincidieron/divergieron.',
+   gherkin:`Given el usuario está en el perfil de un candidato
+When toca el tab "Match" o "Afinidad"
+Then ve el detalle de afinidad desglosado por eje temático`,
+   deps:[],blocks:[],quickwin:false,techDebt:false},
+
+  {id:'UX-060',epic:'1',prio:'P3',type:'UX',est:'XS',risk:'Bajo',impact:'Bajo',sprint:4,area:'Frontend',
+   title:'Filtro de partido en ResultadosScreen debe ser colapsable',
+   screens:['ResultadosScreen'],files:['frontend/src/screens/ResultadosScreen.tsx'],
+   problem:'El filtro de partido siempre visible ocupa espacio y puede empujar el contenido.',
+   solution:'Envolver en CollapsibleFilterSection o mover a FilterBottomSheet.',
+   gherkin:`Given el usuario está en ResultadosScreen
+When no quiere filtrar por partido
+Then puede colapsar la sección de filtros para ver más resultados`,
+   deps:[],blocks:[],quickwin:false,techDebt:false},
+
+  {id:'UX-061',epic:'1',prio:'P2',type:'UX',est:'S',risk:'Bajo',impact:'Medio',sprint:3,area:'Frontend',
+   title:'RadarChart etiquetas en MAYÚSCULAS inconsistentes + texto cortado',
+   screens:['ResultadosScreen','DetalleCandidatoScreen'],files:['frontend/src/components/atoms/RadarChart.tsx'],
+   problem:'(1) Etiquetas de ejes en MAYÚSCULAS inconsistentes según backend. (2) Nombres largos fuera del viewport SVG.',
+   solution:'Normalizar con sentenceCase() antes de pasar al RadarChart. Reducir fontSize o wrapping para nombres > 12 chars.',
+   gherkin:`Given el radar chart muestra ejes temáticos
+When los datos llegan con distintos formatos
+Then todas las etiquetas deben ser "Título" (capitalización consistente)
+And ninguna etiqueta debe quedar fuera del área visible del SVG`,
+   deps:[],blocks:[],quickwin:false,techDebt:false},
+
+  {id:'TASK-067',epic:'1',prio:'P3',type:'Tech Debt',est:'XS',risk:'Bajo',impact:'Bajo',sprint:4,area:'Frontend',
+   title:'ResultadosScreen AppShell active="home" en screen sin tab propia',
+   screens:['ResultadosScreen'],files:['frontend/src/screens/ResultadosScreen.tsx'],
+   problem:'active="home" cuando ResultadosScreen no tiene tab propia. Patrón inconsistente con otras screens secundarias.',
+   solution:'Cambiar a active={null} o documentar como excepción intencional.',
+   deps:[],blocks:[],quickwin:true,techDebt:true},
+
+  // ─── EPIC 2 ───
+  {id:'UX-064',epic:'2',prio:'P2',type:'UX',est:'S',risk:'Medio',impact:'Medio',sprint:3,area:'Frontend+Design System',
+   title:'CuestionarioHeader azul demasiado dominante, hacer transparente',
+   screens:['CuestionarioScreen'],files:['frontend/src/components/organisms/CuestionarioHeader.tsx'],
+   problem:'Fondo #2E5F7E del header roba atención. La barra de progreso debería ser el único protagonista visual.',
+   solution:'Cambiar fondo a transparente o muy sutil (rgba). Mantener barra de progreso como protagonista. Verificar contraste WCAG.',
+   gherkin:`Given el usuario está en CuestionarioScreen respondiendo
+When mira la pantalla
+Then el elemento más prominente debe ser la pregunta, no el header
+And la barra de progreso debe ser claramente visible`,
+   deps:[],blocks:[],quickwin:false,techDebt:false},
+
+  {id:'UX-065',epic:'2',prio:'P2',type:'UX',est:'XS',risk:'Bajo',impact:'Medio',sprint:3,area:'Frontend',
+   title:'"No sé / Prefiero no responder" parece pregunta separada del Likert',
+   screens:['CuestionarioScreen'],files:['frontend/src/screens/CuestionarioScreen.tsx','frontend/src/components/molecules/RadioGroup.tsx'],
+   problem:'La opción "No sé" aparece visualmente separada del grupo Likert, pareciendo una sección diferente.',
+   solution:'Integrar "No sé" en el mismo RadioGroup con Divider sutil antes de ella, claramente parte del mismo grupo pero distinguible.',
+   gherkin:`Given el usuario ve las opciones de una pregunta
+When mira todas las opciones incluyendo "No sé"
+Then debe quedar claro que es una opción del mismo grupo, no una pregunta aparte
+And debe haber un separador visual sutil (no gap grande) dentro del mismo bloque`,
+   deps:['BUG-027'],blocks:[],quickwin:true,techDebt:false},
+
+  {id:'BUG-026',epic:'2',prio:'P2',type:'Bug',est:'M',risk:'Medio',impact:'Alto',sprint:2,area:'Frontend',
+   title:'esTipoBase derivado de query asíncrona en 3 screens (race condition)',
+   screens:['CuestionarioScreen','ResultadosScreen','SubmitDoneScreen'],files:['frontend/src/screens/CuestionarioScreen.tsx','frontend/src/store/cuestionario.ts'],
+   problem:'esTipoBase depende de useTiposEleccion() que puede no haber terminado al hacer submit, causando comportamiento incorrecto.',
+   solution:'Mover esTipoBase al store de cuestionario donde se conoce el tipo al iniciar.',
+   gherkin:`Given el usuario completa el cuestionario
+When toca "Finalizar" o "Ver resultado"
+Then el sistema debe saber si es cuestionario base o específico, sin depender de una query asíncrona`,
+   deps:[],blocks:[],quickwin:false,techDebt:false},
+
+  {id:'BUG-043',epic:'2',prio:'P1',type:'Bug',est:'S',risk:'Medio',impact:'Alto',sprint:2,area:'Frontend',
+   title:'Home: "Continuar cuestionario" persiste post-base / cache stale',
+   screens:['HomeScreen','SubmitDoneScreen'],files:['frontend/src/screens/HomeScreen.tsx','frontend/src/screens/SubmitDoneScreen.tsx','frontend/src/api/hooks.ts'],
+   problem:'Post-base: (1) CTA sigue diciendo "Continuar cuestionario", (2) al tocarlo dice "no hay más preguntas", (3) solo se actualiza al cambiar de vista. Contador muestra valores intermedios erróneos (10→19→20).',
+   solution:'Invalidar queryClient en handlers de submit/completar. Invalidar misElecciones, resultados y progreso en SubmitDoneScreen.',
+   gherkin:`Given el usuario completó el cuestionario base
+When regresa a HomeScreen sin recargar la app
+Then el CTA debe mostrar "Ver mis matches" inmediatamente, sin requerir cambio de vista
+And el contador debe mostrar el número correcto desde el primer render`,
+   deps:['PRODUCT-001'],blocks:['UX-062'],quickwin:false,techDebt:false},
+
+  {id:'UX-062',epic:'2',prio:'P2',type:'UX',est:'XS',risk:'Bajo',impact:'Medio',sprint:1,area:'Frontend',
+   title:'"Volver al inicio" post-cuestionario parece perder respuestas',
+   screens:['SubmitDoneScreen','HomeScreen'],files:['frontend/src/screens/SubmitDoneScreen.tsx','frontend/src/api/hooks.ts'],
+   problem:'Al volver al Home, las elecciones siguen mostrando "pendiente" hasta recargar. Las respuestas sí se guardan pero el feedback es confuso.',
+   solution:'queryClient.invalidateQueries(["mis-elecciones","resultados"]) al ejecutar handleVolver en SubmitDoneScreen.',
+   gherkin:`Given el usuario completó el cuestionario y toca "Volver al inicio"
+When llega al HomeScreen
+Then la elección debe aparecer como "Completada" inmediatamente, sin necesidad de recargar`,
+   deps:['BUG-043'],blocks:[],quickwin:true,techDebt:false},
+
+  // ─── EPIC 3 ───
+  {id:'BUG-034',epic:'3',prio:'P2',type:'Bug',est:'S',risk:'Bajo',impact:'Medio',sprint:3,area:'Frontend',
+   title:'Avatar del Home no navega a perfil + inicial a veces es placeholder',
+   screens:['HomeScreen'],files:['frontend/src/components/organisms/HomeHeroSection.tsx','frontend/src/utils/user.ts'],
+   problem:'El círculo con la inicial del usuario tiene affordance de botón pero no hace nada al tocarlo. La inicial a veces es un placeholder genérico.',
+   solution:'Pasar onAvatarPress prop → navigation.navigate("Perfil"). Asegurar que deriveInitials() use perfil.nombre con fallback claro.',
+   gherkin:`Given el usuario ve el círculo con su inicial en HomeHeroSection
+When lo toca
+Then navega directamente a PerfilScreen
+And la inicial mostrada siempre coincide con el nombre real del usuario autenticado`,
+   deps:[],blocks:[],quickwin:false,techDebt:false},
+
+  {id:'BUG-041',epic:'3',prio:'P1',type:'Bug',est:'XS',risk:'Bajo',impact:'Alto',sprint:1,area:'Frontend+Accessibility',
+   title:'ProgressRing label negro en dark mode (WCAG AA fail)',
+   screens:['HomeScreen'],files:['frontend/src/components/atoms/ProgressRing.tsx','frontend/src/components/organisms/HomeHeroSection.tsx'],
+   problem:'El porcentaje dentro del ProgressRing usa color negro que no contrasta sobre #1C3A52 en dark mode.',
+   solution:'El label del ProgressRing sobre fondo hero debe usar "#FFFFFF" fijo (como el resto del hero) en lugar de c.text.',
+   gherkin:`Given el usuario está en dark mode en HomeScreen
+When mira el ProgressRing en el hero
+Then el número de porcentaje debe ser legible (contraste mínimo 4.5:1 sobre #1C3A52)`,
+   deps:[],blocks:[],quickwin:true,techDebt:false},
+
+  {id:'BUG-024',epic:'3',prio:'P2',type:'Bug',est:'XS',risk:'Bajo',impact:'Bajo',sprint:5,area:'Frontend',
+   title:'useNoticiasFeed/useNoticiasCandidato activos aunque SHOW_NOTICIAS=false',
+   screens:['HomeScreen','DetalleCandidatoScreen'],files:['frontend/src/screens/HomeScreen.tsx','frontend/src/api/hooks.ts'],
+   problem:'Las queries de noticias se ejecutan aunque SHOW_NOTICIAS=false, desperdiciando requests de red.',
+   solution:'Pasar enabled: SHOW_NOTICIAS a ambos hooks.',
+   gherkin:`Given SHOW_NOTICIAS es false
+When el usuario navega por la app
+Then no debe realizarse ninguna request de red a los endpoints de noticias`,
+   deps:[],blocks:[],quickwin:false,techDebt:false},
+
+  {id:'UX-056',epic:'3',prio:'P3',type:'UX',est:'XS',risk:'Bajo',impact:'Bajo',sprint:5,area:'Frontend',
+   title:'HomeTrustSection reaparece al reiniciar cuestionario',
+   screens:['HomeScreen'],files:['frontend/src/screens/HomeScreen.tsx','frontend/src/screens/Home/HomeTrustSection.tsx'],
+   problem:'La sección "trust meta" (15min, privado, SERVEL) reaparece cuando el usuario reinicia el cuestionario, aunque ya la vio.',
+   solution:'Ocultar HomeTrustSection cuando el usuario ya completó al menos un cuestionario previamente, no solo cuando tiene matchPercent > 0.',
+   deps:[],blocks:[],quickwin:false,techDebt:false},
+
+  // ─── EPIC 4 ───
+  {id:'BUG-030',epic:'4',prio:'P2',type:'Bug',est:'XS',risk:'Bajo',impact:'Bajo',sprint:5,area:'Frontend',
+   title:'useFavoritos/useDescartados activos para usuarios guest',
+   screens:['DetalleCandidatoScreen'],files:['frontend/src/screens/DetalleCandidatoScreen.tsx','frontend/src/api/hooks.ts'],
+   problem:'Los hooks de favoritos y descartados se ejecutan para usuarios guest aunque el resultado nunca se usa.',
+   solution:'Pasar enabled: !isGuest a ambos hooks.',
+   deps:[],blocks:[],quickwin:false,techDebt:false},
+
+  {id:'BUG-031',epic:'4',prio:'P3',type:'Bug',est:'S',risk:'Bajo',impact:'Bajo',sprint:5,area:'Frontend',
+   title:'Error de red y candidato inexistente muestran el mismo mensaje',
+   screens:['DetalleCandidatoScreen'],files:['frontend/src/screens/DetalleCandidatoScreen.tsx'],
+   problem:'Un error de red (500) y un candidato no encontrado (404) muestran el mismo mensaje genérico sin opción de retry.',
+   solution:'Distinguir tipo de error: 404 → EmptyState "Este candidato no existe". 5xx/network → error inline con Button "Reintentar".',
+   deps:[],blocks:[],quickwin:false,techDebt:false},
+
+  {id:'UX-066',epic:'4',prio:'P2',type:'UX',est:'XS',risk:'Bajo',impact:'Medio',sprint:1,area:'Frontend',
+   title:'Mensaje bajo filtro en CandidatosScreen sin dark mode',
+   screens:['CandidatosScreen'],files:['frontend/src/screens/CandidatosScreen.tsx'],
+   problem:'Un mensaje o banner debajo del filtro usa colores hardcodeados que no se adaptan al dark mode. Ilegible en modo oscuro.',
+   solution:'Reemplazar colores hardcodeados por tokens de useThemeColors().',
+   deps:[],blocks:[],quickwin:true,techDebt:false},
+
+  {id:'UX-063',epic:'4',prio:'P3',type:'UX',est:'S',risk:'Bajo',impact:'Bajo',sprint:3,area:'Frontend+Design System',
+   title:'TopBar de Candidatos y Comparar tiene padding/altura distinta a Configuración',
+   screens:['CandidatosScreen','CompararScreen','ConfiguracionScreen'],files:['frontend/src/components/molecules/ScreenTopBar.tsx'],
+   problem:'El TopBar en Candidatos y Comparar se ve más pequeño o apretado que en Configuración. Inconsistencia entre tabs.',
+   solution:'Definir minHeight:56 como token de altura de topbar y aplicar consistentemente en todos los ScreenTopBar.',
+   gherkin:`Given el usuario navega entre los tabs Candidatos, Comparar y Configuración
+When mira la barra superior de cada pantalla
+Then todas deben tener la misma altura y padding visual`,
+   deps:[],blocks:[],quickwin:false,techDebt:false},
+
+  {id:'UX-003',epic:'4',prio:'P1',type:'Performance',est:'M',risk:'Medio',impact:'Alto',sprint:2,area:'Frontend+Performance',
+   title:'CandidatosScreen sin virtualización (1229 nodos DOM)',
+   screens:['CandidatosScreen'],files:['frontend/src/screens/CandidatosScreen.tsx'],
+   problem:'Renderiza ~1229 nodos DOM sin FlashList ni virtualización. Performance degradada en dispositivos lentos.',
+   solution:'Migrar FlatList a FlashList con estimatedItemSize.',
+   deps:[],blocks:[],quickwin:false,techDebt:false},
+
+  // ─── EPIC 5 ───
+  {id:'TASK-064',epic:'5',prio:'P3',type:'Tech Debt',est:'XS',risk:'Bajo',impact:'Bajo',sprint:4,area:'Frontend+Design System',
+   title:'SectionTitle usa fontSize hardcodeado en lugar de typography tokens',
+   screens:[],files:['frontend/src/components/molecules/SectionTitle.tsx'],
+   problem:'fontSize:18 y fontSize:16 hardcodeados en lugar de typography.h2/h3.',
+   solution:'Reemplazar por typography.h2 y typography.h3.',
+   deps:[],blocks:[],quickwin:false,techDebt:true},
+
+  {id:'TASK-066',epic:'5',prio:'P3',type:'Tech Debt',est:'M',risk:'Bajo',impact:'Bajo',sprint:4,area:'Frontend+Performance',
+   title:'Migrar useMemo-styles a StyleSheet.create módulo-level (10 componentes)',
+   screens:[],files:['Múltiples atoms y molecules'],
+   problem:'useMemo(() => StyleSheet.create(...), [c]) recrea StyleSheets en cada cambio de tema en lugar de una vez al cargar el módulo.',
+   solution:'Migrar a StyleSheet.create módulo-level + usar StyleSheet.flatten para valores dinámicos puntuales.',
+   deps:[],blocks:[],quickwin:false,techDebt:true},
+
+  // ─── EPIC 6 ───
+  {id:'TASK-060',epic:'6',prio:'P1',type:'Refactor',est:'M',risk:'Medio',impact:'Medio',sprint:5,area:'Architecture',
+   title:'ElectionCard mal ubicado en atoms/ → mover a molecules/',
+   screens:[],files:['frontend/src/components/atoms/ElectionCard.tsx'],
+   problem:'ElectionCard importa domain/eleccion.ts, tiene 3 variantes y 3 props @deprecated. Los átomos no deben tener lógica de dominio.',
+   solution:'Mover a molecules/ElectionCard.tsx. Eliminar las 3 props deprecadas. Actualizar imports.',
+   gherkin:`Given un desarrollador busca ElectionCard
+When lo busca en atoms/
+Then no debe encontrarlo — debe estar en molecules/ con API limpia sin props deprecated`,
+   deps:[],blocks:['TASK-061'],quickwin:false,techDebt:true},
+
+  {id:'TASK-061',epic:'6',prio:'P1',type:'Refactor',est:'M',risk:'Medio',impact:'Medio',sprint:5,area:'Architecture',
+   title:'Co-localizar sub-componentes de Home a screens/Home/',
+   screens:[],files:['frontend/src/components/molecules/HomeElectionItem.tsx','HomeMatchLocked.tsx','HomeTrustSection.tsx'],
+   problem:'Componentes específicos de HomeScreen viven en molecules/ compartido.',
+   solution:'Mover a frontend/src/screens/Home/ siguiendo el patrón de DetalleCandidato/.',
+   deps:['TASK-060'],blocks:[],quickwin:false,techDebt:true},
+
+  {id:'TASK-062',epic:'6',prio:'P1',type:'Refactor',est:'S',risk:'Bajo',impact:'Bajo',sprint:5,area:'Architecture',
+   title:'Co-localizar demos de Onboarding a screens/Onboarding/',
+   screens:[],files:['OnboardingEleccionesDemo.tsx','OnboardingPreguntaDemo.tsx','OnboardingResultadosDemo.tsx'],
+   problem:'Demos de Onboarding-específicos viven en molecules/ compartido.',
+   solution:'Mover a frontend/src/screens/Onboarding/.',
+   deps:[],blocks:[],quickwin:false,techDebt:true},
+
+  {id:'TASK-063',epic:'6',prio:'P2',type:'Refactor',est:'M',risk:'Medio',impact:'Medio',sprint:5,area:'Architecture',
+   title:'Mover EmptyState, ShareOptions, NovedadesFeed, ElectionsStrip de organisms/ a molecules/',
+   screens:[],files:['organisms/EmptyState.tsx','organisms/ShareOptions.tsx','organisms/NovedadesFeed.tsx','organisms/ElectionsStrip.tsx'],
+   problem:'Estos 4 componentes son presentacionales puros sin fetch propio. No cumplen el contrato de organism.',
+   solution:'Mover a molecules/. Actualizar barrel y todos los imports.',
+   deps:[],blocks:[],quickwin:false,techDebt:true},
+
+  {id:'TASK-065',epic:'6',prio:'P2',type:'Documentation',est:'XS',risk:'Bajo',impact:'Medio',sprint:5,area:'Documentation',
+   title:'Documentar convención de co-localización en README de components/',
+   screens:[],files:['frontend/src/components/README.md (crear)'],
+   problem:'No existe documentación de la convención de co-localización. Los developers no saben cuándo ir a molecules/ vs co-localizar en screens/.',
+   solution:'Crear README con reglas claras: cuándo ir a atoms/, molecules/, organisms/, cuándo co-localizar en screens/.',
+   deps:[],blocks:[],quickwin:false,techDebt:true},
+
+  {id:'TASK-055',epic:'6',prio:'P3',type:'Tech Debt',est:'XS',risk:'Bajo',impact:'Bajo',sprint:5,area:'Architecture',
+   title:'QuestionCard es dead code, eliminar componente',
+   screens:[],files:['frontend/src/components/organisms/QuestionCard.tsx'],
+   problem:'QuestionCard nunca se usa en producción. El cuestionario usa CuestionarioScreen directamente con RadioGroup.',
+   solution:'Eliminar el archivo. La showcase ya fue removida del catálogo.',
+   deps:[],blocks:[],quickwin:false,techDebt:true},
+
+  // ─── EPIC 7 ───
+  {id:'UX-038',epic:'7',prio:'P2',type:'Accessibility',est:'S',risk:'Bajo',impact:'Medio',sprint:4,area:'Accessibility',
+   title:'RadarChart sin accesibilidad (WCAG 1.1.1)',
+   screens:['ResultadosScreen','DetalleCandidatoScreen'],files:['frontend/src/components/atoms/RadarChart.tsx'],
+   problem:'El gráfico SVG no tiene accessibilityLabel ni accessibilityRole, invisible para screen readers.',
+   solution:'Agregar accessibilityRole="image" + accessibilityLabel descriptivo con los 3 ejes de mayor afinidad.',
+   deps:[],blocks:[],quickwin:false,techDebt:false},
+
+  {id:'UX-024',epic:'7',prio:'P2',type:'Accessibility',est:'XS',risk:'Bajo',impact:'Medio',sprint:4,area:'Accessibility',
+   title:'ResultadoHero sin accessibilityLabel completo',
+   screens:['ResultadosScreen'],files:['frontend/src/components/organisms/ResultadoHero.tsx'],
+   problem:'El hero del candidato top no tiene accessibilityLabel completo (nombre + partido + match%).',
+   solution:'Agregar accessibilityLabel="{nombre} {apellido}, {partido}, {match}% de afinidad".',
+   deps:[],blocks:[],quickwin:false,techDebt:false},
+
+  {id:'UX-057',epic:'7',prio:'P3',type:'Accessibility',est:'XS',risk:'Bajo',impact:'Bajo',sprint:4,area:'Accessibility',
+   title:'SubmitDoneScreen sin accessibilityLiveRegion en "¡Listo!" (WCAG 4.1.3)',
+   screens:['SubmitDoneScreen'],files:['frontend/src/screens/SubmitDoneScreen.tsx'],
+   problem:'El Heading "¡Listo!" no tiene accessibilityLiveRegion="polite" para anunciarse a screen readers al montar.',
+   solution:'Agregar accessibilityLiveRegion="polite" al Heading.',
+   deps:[],blocks:[],quickwin:false,techDebt:false},
+
+  // ─── EPIC 8 ───
+  {id:'BUG-042-be',epic:'8',prio:'P0',type:'Bug',est:'M',risk:'Alto',impact:'Alto',sprint:1,area:'Backend',
+   title:'[Backend] POST 500 en /api/v1/match-candidatos/ para senador y presidencial',
+   screens:['ResultadosScreen'],files:['backend/core/views/','backend/core/serializers/'],
+   problem:'Ver BUG-042. Investigar stack trace del 500, revisar serialización de candidatos de tipo senador/presidencial.',
+   solution:'Revisar logs Django/FastAPI. Verificar que los modelos de senador y presidencial tienen los campos esperados por el serializador.',
+   gherkin:`Given el backend recibe POST /api/v1/match-candidatos/ con tipo=senador o tipo=presidencial
+When procesa la request
+Then debe devolver 200 con el ranking calculado, no 500
+And el error no debe aparecer en producción sin manejo en el frontend`,
+   deps:[],blocks:['BUG-036'],quickwin:false,techDebt:false},
+];
+
+// ─── HELPERS ───
+const prioColors={
+  P0:'bg-red-900 text-red-300 border-red-700',
+  P1:'bg-orange-900 text-orange-300 border-orange-700',
+  P2:'bg-yellow-900 text-yellow-300 border-yellow-700',
+  P3:'bg-gray-700 text-gray-300 border-gray-600'
+};
+const typeColors={
+  'Bug':'bg-red-900/60 text-red-300','UX':'bg-purple-900/60 text-purple-300',
+  'Tech Debt':'bg-orange-900/60 text-orange-300','Refactor':'bg-blue-900/60 text-blue-300',
+  'Product Decision':'bg-green-900/60 text-green-300','Performance':'bg-cyan-900/60 text-cyan-300',
+  'Documentation':'bg-indigo-900/60 text-indigo-300','Accessibility':'bg-teal-900/60 text-teal-300'
+};
+const estColors={XS:'text-green-400',S:'text-lime-400',M:'text-yellow-400',L:'text-orange-400',XL:'text-red-400'};
+const epicBorderColor={'1':'border-blue-700','2':'border-purple-700','3':'border-green-700','4':'border-yellow-700','5':'border-pink-700','6':'border-orange-700','7':'border-teal-700','8':'border-red-700'};
+const epicHeaderBg={'1':'#0d1a2d','2':'#150d2d','3':'#0a1a0f','4':'#1a1800','5':'#1a0a1a','6':'#1a1000','7':'#001a1a','8':'#1a0a0a'};
+
+function renderIssueCard(issue) {
+  const filesHtml = (issue.files||[]).map(f=>`<code class="text-xs text-gray-400 bg-gray-800 px-2 py-0.5 rounded">${f}</code>`).join(' ');
+  const screensHtml = (issue.screens||[]).map(s=>`<span class="tag bg-gray-800 text-gray-400" style="font-size:10px">${s}</span>`).join(' ');
+  const depsHtml = (issue.deps||[]).map(d=>`<span class="dep-chip">${d}</span>`).join(' ');
+  const blocksHtml = (issue.blocks||[]).map(d=>`<span class="dep-chip" style="border-color:#92400e;color:#fca5a5">${d}</span>`).join(' ');
+  const gherkinHtml = issue.gherkin ? `<div class="gherkin mt-3">${issue.gherkin}</div>` : '';
+  const solutionHtml = issue.solution ? `<div class="mt-2"><span class="text-green-400 text-xs font-bold"> Solución:</span> <span class="text-gray-300 text-xs">${issue.solution}</span></div>` : '';
+  const depsSection = (issue.deps&&issue.deps.length)||(issue.blocks&&issue.blocks.length) ? `
+    <div class="flex flex-wrap gap-2 mt-2 text-xs">
+      ${issue.deps.length?`<div><span class="text-gray-500">Bloqueado por:</span> ${depsHtml}</div>`:''}
+      ${issue.blocks.length?`<div><span class="text-gray-500">Bloquea a:</span> ${blocksHtml}</div>`:''}
+    </div>` : '';
+
+  return `<div class="issue-card card-hover rounded-xl border border-gray-700 mb-3 overflow-hidden" style="background:#161b22" data-epic="${issue.epic}" data-prio="${issue.prio}">
+    <div class="px-4 py-3 flex flex-wrap items-start gap-2 border-b border-gray-700" style="background:#0d1117">
+      <div class="flex items-center gap-2 flex-1 min-w-0">
+        <span class="font-mono font-bold text-sm text-blue-400 shrink-0">${issue.id}</span>
+        <span class="text-sm text-white font-semibold leading-tight">${issue.title}</span>
+      </div>
+      <div class="flex flex-wrap gap-1.5 shrink-0">
+        <span class="tag border ${prioColors[issue.prio]}">${issue.prio}</span>
+        <span class="tag ${typeColors[issue.type]||'bg-gray-700 text-gray-300'}">${issue.type}</span>
+        <span class="tag bg-gray-800 ${estColors[issue.est]} border border-gray-600">${issue.est}</span>
+      </div>
+    </div>
+    <div class="px-4 py-3">
+      <div class="flex flex-wrap gap-3 text-xs text-gray-500 mb-2">
+        ${issue.area?`<span> ${issue.area}</span>`:''}
+        <span class="${issue.risk==='Alto'?'text-red-400':issue.risk==='Medio'?'text-yellow-400':'text-green-400'}"> Riesgo: ${issue.risk}</span>
+        <span class="${issue.impact==='Alto'?'text-orange-400':issue.impact==='Medio'?'text-yellow-400':'text-gray-400'}"> Impacto: ${issue.impact}</span>
+        <span class="text-blue-400"> Sprint ${issue.sprint}</span>
+      </div>
+      ${screensHtml?`<div class="flex flex-wrap gap-1 mb-2">${screensHtml}</div>`:''}
+      <details>
+        <summary class="flex items-center gap-2 text-xs text-blue-400 hover:text-blue-300 py-1 select-none">
+          <span class="chevron">▼</span> Ver detalles completos
+        </summary>
+        <div class="mt-3 space-y-2">
+          ${issue.problem?`<div><span class="text-red-400 text-xs font-bold"> Problema:</span> <span class="text-gray-300 text-xs">${issue.problem}</span></div>`:''}
+          ${solutionHtml}
+          ${gherkinHtml}
+          ${filesHtml?`<div class="flex flex-wrap gap-1 mt-2">${filesHtml}</div>`:''}
+          ${depsSection}
+        </div>
+      </details>
+    </div>
+  </div>`;
+}
+
+function renderEpicSection(epicId) {
+  const e = EPICS[epicId];
+  const issues = ISSUES.filter(i=>i.epic===epicId);
+  if(!issues.length) return '';
+  const borderClass = epicBorderColor[epicId]||'border-gray-700';
+  const cards = issues.map(renderIssueCard).join('');
+  return `<div class="epic-section mb-8" id="epic-section-${epicId}" data-epic="${epicId}">
+    <details open>
+      <summary class="flex items-center gap-3 mb-4 cursor-pointer select-none">
+        <div class="flex items-center gap-3 flex-1">
+          <span class="text-2xl">${e.icon}</span>
+          <h2 class="text-xl font-bold text-white">Epic ${epicId}: ${e.name}</h2>
+          <span class="tag bg-gray-800 text-gray-400 border border-gray-600">${issues.length} issues</span>
+          <span class="tag ${issues.filter(i=>i.prio==='P0').length?'bg-red-900 text-red-300':'bg-gray-800 text-gray-500'} border border-gray-600">
+            P0:${issues.filter(i=>i.prio==='P0').length} P1:${issues.filter(i=>i.prio==='P1').length} P2:${issues.filter(i=>i.prio==='P2').length} P3:${issues.filter(i=>i.prio==='P3').length}
+          </span>
+        </div>
+        <span class="chevron text-gray-400">▼</span>
+      </summary>
+      <div class="border-l-2 pl-4 ${borderClass}">${cards}</div>
+    </details>
+  </div>`;
+}
+
+function renderQuickWins() {
+  const qw = ISSUES.filter(i=>i.quickwin);
+  document.getElementById('quickwins-container').innerHTML = qw.map(renderIssueCard).join('');
+}
+
+function renderTechDebt() {
+  const td = ISSUES.filter(i=>i.techDebt);
+  document.getElementById('techdebt-container').innerHTML = td.map(renderIssueCard).join('');
+}
+
+function renderEpics() {
+  const container = document.getElementById('epics-container');
+  container.innerHTML = Object.keys(EPICS).map(renderEpicSection).join('');
+}
+
+function renderBacklogTable() {
+  const sorted = [...ISSUES].sort((a,b)=>{
+    const order={P0:0,P1:1,P2:2,P3:3};
+    return (order[a.prio]-order[b.prio])||a.sprint-b.sprint;
+  });
+  const prioRow={P0:'border-l-2 border-red-600',P1:'border-l-2 border-orange-600',P2:'border-l-2 border-yellow-600',P3:'border-l-2 border-gray-600'};
+  const html = sorted.map((i,idx)=>`<tr class="hover:bg-gray-800/30 ${prioRow[i.prio]||''}">
+    <td class="sprint-cell text-gray-500">${idx+1}</td>
+    <td class="sprint-cell font-mono font-bold text-blue-400 text-xs">${i.id}</td>
+    <td class="sprint-cell text-gray-200 text-xs max-w-xs">${i.title}</td>
+    <td class="sprint-cell"><span class="tag ${typeColors[i.type]||'bg-gray-700 text-gray-300'}" style="font-size:10px">${i.type}</span></td>
+    <td class="sprint-cell"><span class="tag border ${prioColors[i.prio]}" style="font-size:10px">${i.prio}</span></td>
+    <td class="sprint-cell font-bold ${estColors[i.est]}">${i.est}</td>
+    <td class="sprint-cell text-gray-400 text-xs">${EPICS[i.epic]?EPICS[i.epic].icon+' E'+i.epic:''}</td>
+    <td class="sprint-cell"><span class="tag bg-blue-900/40 text-blue-300" style="font-size:10px">S${i.sprint}</span></td>
+    <td class="sprint-cell text-xs ${i.risk==='Alto'?'text-red-400':i.risk==='Medio'?'text-yellow-400':'text-green-400'}">${i.risk}</td>
+    <td class="sprint-cell text-xs ${i.impact==='Alto'?'text-orange-400':i.impact==='Medio'?'text-yellow-400':'text-gray-400'}">${i.impact}</td>
+  </tr>`).join('');
+  document.getElementById('backlog-table').innerHTML = html;
+}
+
+// ─── FILTERS ───
+let currentEpic='all', currentPrio='all';
+
+function filterEpic(epic) {
+  currentEpic = epic;
+  document.querySelectorAll('[id^="ef-"]').forEach(b=>{
+    b.className='filter-btn tag bg-gray-800 text-gray-300 border border-gray-600 hover:bg-gray-700';
+  });
+  const btn=document.getElementById('ef-'+epic);
+  if(btn) btn.className='filter-btn active tag bg-blue-900 text-blue-200 border border-blue-700';
+  applyFilters();
+}
+
+function filterPrio(prio) {
+  currentPrio = prio;
+  document.querySelectorAll('[id^="pf-"]').forEach(b=>{
+    b.className='filter-btn tag bg-gray-800 text-gray-300 border border-gray-600 hover:bg-gray-700';
+  });
+  const colors={P0:'bg-red-900 text-red-200 border-red-700',P1:'bg-orange-900 text-orange-200 border-orange-700',P2:'bg-yellow-900 text-yellow-200 border-yellow-700',P3:'bg-gray-700 text-gray-300 border-gray-500',all:'bg-blue-900 text-blue-200 border-blue-700'};
+  const btn=document.getElementById('pf-'+prio);
+  if(btn) btn.className=`filter-btn active tag ${colors[prio]||colors.all}`;
+  applyFilters();
+}
+
+function applyFilters() {
+  let visible=0;
+  document.querySelectorAll('.issue-card').forEach(card=>{
+    const e=card.dataset.epic, p=card.dataset.prio;
+    const showE = currentEpic==='all'||e===currentEpic;
+    const showP = currentPrio==='all'||p===currentPrio;
+    card.classList.toggle('hidden-filter',!(showE&&showP));
+    if(showE&&showP) visible++;
+  });
+  document.querySelectorAll('.epic-section').forEach(sec=>{
+    const e=sec.dataset.epic;
+    const hasVisible = currentEpic==='all'||e===currentEpic;
+    sec.classList.toggle('hidden',!hasVisible);
+  });
+  document.getElementById('counter').textContent=visible+' issues';
+}
+
+// ─── INIT ───
+document.addEventListener('DOMContentLoaded',()=>{
+  renderEpics();
+  renderQuickWins();
+  renderTechDebt();
+  renderBacklogTable();
+});
+</script>
+</body>
+</html>
