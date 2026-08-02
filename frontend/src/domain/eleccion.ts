@@ -109,3 +109,28 @@ export function formatDiasRestantesChip(
   if (dias === 0) return "hoy";
   return `${dias}d`;
 }
+
+// -- Filtro territorial -----------------------------------------------------
+
+/**
+ * Determina si un tipo de eleccion requiere filtro territorial (commune/distrito).
+ *
+ * Las elecciones de alcance nacional — Presidencial y Plebiscito — presentan
+ * los mismos candidatos a todos los votantes del pais: el filtro de comuna es
+ * irrelevante y la banner "setea tu comuna" seria confusa.
+ *
+ * Heuristica basada en el campo `nombre` porque el schema de TipoEleccion no
+ * incluye un campo de scope explicito. Si el backend agrega uno (ej. `alcance`),
+ * reemplazar este helper sin tocar las screens.
+ *
+ * NOTA: conservadora por defecto — devuelve `true` si no hay coincidencia,
+ * ya que el filtro territorial es la norma, no la excepcion.
+ */
+const NOMBRES_NACIONALES_RE = /presidencial|plebiscito/i;
+
+export function requiereFiltroTerritorial(
+  nombreTipo: string | null | undefined,
+): boolean {
+  if (!nombreTipo) return true;
+  return !NOMBRES_NACIONALES_RE.test(nombreTipo);
+}

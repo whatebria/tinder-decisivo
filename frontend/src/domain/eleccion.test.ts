@@ -10,12 +10,62 @@ import {
   deriveEleccionEstado,
   formatDiasRestantesChip,
   formatProgresoLabel,
+  requiereFiltroTerritorial,
 } from "./eleccion";
 
 describe("deriveEleccionEstado", () => {
   test("sin_empezar cuando respondidas=0", () => {
     expect(deriveEleccionEstado({ respondidas: 0, total: 12 })).toBe("sin_empezar");
   });
+
+describe("requiereFiltroTerritorial", () => {
+  // Casos que NO requieren filtro (alcance nacional)
+  test("false para 'Presidencial 2025'", () => {
+    expect(requiereFiltroTerritorial("Presidencial 2025")).toBe(false);
+  });
+
+  test("false para 'presidencial' (case-insensitive)", () => {
+    expect(requiereFiltroTerritorial("presidencial")).toBe(false);
+  });
+
+  test("false para 'Plebiscito Nacional'", () => {
+    expect(requiereFiltroTerritorial("Plebiscito Nacional")).toBe(false);
+  });
+
+  test("false para 'PLEBISCITO' (case-insensitive)", () => {
+    expect(requiereFiltroTerritorial("PLEBISCITO")).toBe(false);
+  });
+
+  // Casos que SI requieren filtro territorial
+  test("true para 'Diputados 2025'", () => {
+    expect(requiereFiltroTerritorial("Diputados 2025")).toBe(true);
+  });
+
+  test("true para 'Alcaldes'", () => {
+    expect(requiereFiltroTerritorial("Alcaldes")).toBe(true);
+  });
+
+  test("true para 'Concejales'", () => {
+    expect(requiereFiltroTerritorial("Concejales")).toBe(true);
+  });
+
+  test("true para 'Senadores'", () => {
+    expect(requiereFiltroTerritorial("Senadores")).toBe(true);
+  });
+
+  // Casos borde
+  test("true cuando nombre es null (conservador)", () => {
+    expect(requiereFiltroTerritorial(null)).toBe(true);
+  });
+
+  test("true cuando nombre es undefined (conservador)", () => {
+    expect(requiereFiltroTerritorial(undefined)).toBe(true);
+  });
+
+  test("true cuando nombre es string vacio (conservador)", () => {
+    expect(requiereFiltroTerritorial("")).toBe(true);
+  });
+});
 
   test("sin_empezar cuando total=0 (defensivo)", () => {
     expect(deriveEleccionEstado({ respondidas: 0, total: 0 })).toBe("sin_empezar");

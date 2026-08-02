@@ -17,6 +17,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { useIsFocused } from "@react-navigation/native";
 
 import { getErrorMessage } from "../api/client";
 import { breakdownToChartData, type BreakdownPorEje } from "../api/endpoints";
@@ -63,11 +64,13 @@ import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
+import { requiereFiltroTerritorial } from "../domain/eleccion";
 
 export function ResultadosScreen({
   navigation,
 }: RootStackScreenProps<"Resultados">) {
   const c = useThemeColors();
+  const isFocused = useIsFocused(); // BUG-037: guard toast solo cuando el screen esta visible.
   const { width: screenWidth } = useWindowDimensions();
   // Grid del ranking: 1 col en pantallas apretadas (iPhone SE-ish),
   // 2 col en telefonos normales, 3 en tablets, 4 en desktop. Los
@@ -164,14 +167,21 @@ export function ResultadosScreen({
     [tiposQ.data, tipoEleccionId],
   );
 
-  // Guardia: los tipos con es_base=true (Preguntas generales) no tienen candidatos propios.
-  // Sus respuestas se aplican transversalmente al match de otras elecciones. Aterrizar
-  // en Resultados con un tipo base es un caso de borde (back button, deep link viejo,
-  // navegacion inconsistente) que resolvemos con UI dedicada + CTA para redirigir.
-  const esTipoBase = useMemo(
-    () => (tiposQ.data ?? []).find((t) => t.id === tipoEleccionId)?.es_base ?? false,
-    [tiposQ.data, tipoEleccionId],
+  // BUG-038: las elecciones presidenciales y plebiscitos tienen candidatos nacionales;
+  // el banner de "setea tu comuna" es incorrecto para ellas. Si el nombre no esta
+  // en la lista filtrada (tipo base, deep link roto, etc.) somos conservadores: true.
+  const requiereFiltro = useMemo(
+    () => requiereFiltroTerritorial(tipoNombre),
+    [tipoNombre],
   );
+
+  // BUG-036: useTiposEleccion filtra es_base=true en su selector, entonces
+  // tiposQ.data nunca contiene el tipo base y esTipoBase siempre evaluaria false.
+  // Leemos el flag directamente del store donde loadForTipoEleccion lo setea
+  // con el valor correcto ANTES de que se monte este screen.
+  const esTipoBase = useCuestionarioStore((s) => s.esTipoBase);
+
+  // Para CTA de redireccion dentro del guard de tipo base.
   const activeIds = useElectionsPrefsStore((s) => s.activeIds);
   const setTipoEleccion = useCuestionarioStore((s) => s.setTipoEleccion);
   const loadForTipoEleccion = useCuestionarioStore((s) => s.loadForTipoEleccion);
@@ -202,11 +212,14 @@ export function ResultadosScreen({
 
   useEffect(() => {
     if (!activeMutation.error) return;
+    // BUG-037: si el screen no esta en foco (ej. el user volvio al cuestionario
+    // con el back button), no mostramos el toast para no interrumpir la UX.
+    if (!isFocused) return;
     // Silenciamos el toast si el error viene del guardia backend (ya tenemos UI dedicada).
     const errAny = activeMutation.error as { response?: { data?: { code?: string } } };
     if (errAny?.response?.data?.code === "tipo_base_sin_candidatos") return;
     toast.error("No pudimos calcular tus matches", getErrorMessage(activeMutation.error));
-  }, [activeMutation.error, toast]);
+  }, [activeMutation.error, isFocused, toast]);
 
   // BUG-033: ctaLoading para prevenir doble-press durante el await.
   const [ctaBaseLoading, setCtaBaseLoading] = useState(false);
@@ -392,6 +405,34 @@ export function ResultadosScreen({
   // top, topPct, topColor, topChart, rest: derivados antes del return
   // en el cuerpo del componente (fuera del IIFE, REFACTOR-004).
 
+  // BUG-035: si la mutation fallo y no hay datos previos, mostramos un empty
+  // state dedicado en lugar del ranking vacio + toast generico. Mensaje
+  // contextual: el user necesita completar el cuestionario de ESTA eleccion.
+  if (activeMutation.error && !activeMutation.data) {
+    return (
+      <AppShell active={null} navigation={navigation}>
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+          <ScreenTopBar
+            title={tipoNombre}
+            subtitle="Tus resultados"
+            onBack={() => navigation.goBack()}
+          />
+          <View style={styles.emptyBox}>
+            <Text style={[styles.emptyTitle, { color: c.text }]}>
+              Aún no hay suficientes respuestas
+            </Text>
+            <Text style={styles.emptyText}>
+              Para calcular tus matches en {tipoNombre} necesitas responder
+              las preguntas de esa eleccion. Las preguntas generales ayudan,
+              pero no alcanzan solas.
+            </Text>
+            <Button onPress={handleVolver}>Volver al inicio</Button>
+          </View>
+        </ScrollView>
+      </AppShell>
+    );
+  }
+
   return (
     <>
       <AppShell active={null} navigation={navigation}>
@@ -412,7 +453,7 @@ export function ResultadosScreen({
           </View>
         ) : null}
 
-        {!isGuest && !comunaUsuario ? (
+        {!isGuest && !comunaUsuario && requiereFiltro ? (
           <View
             style={[
               styles.ubicacionCard,
@@ -432,7 +473,7 @@ export function ResultadosScreen({
           </View>
         ) : null}
 
-        {!isGuest && comunaUsuario ? (
+        {!isGuest && comunaUsuario && requiereFiltro ? (
           <View
             style={[
               styles.ubicacionCard,

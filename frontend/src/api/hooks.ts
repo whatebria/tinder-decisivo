@@ -413,8 +413,8 @@ export function useFavoritos(opts?: { enabled?: boolean }) {
 
 /**
  * Toggle idempotente: si el candidato ya es favorito, lo saca. Sino, lo agrega.
- * Consulta el cache actual para decidir el side de la mutation.
- * Invalida el cache al final para que las UIs se actualicen.
+ * BUG-039: antes de agregar a favoritos, limpia el estado de descartado si existe
+ * (los dos estados son mutuamente excluyentes por definicion de producto).
  */
 export function useToggleFavorito() {
   const qc = useQueryClient();
@@ -425,11 +425,16 @@ export function useToggleFavorito() {
       if (existing) {
         await deleteFavorito(existing.id!);
       } else {
+        // BUG-039: limpiar descartado si existe antes de agregar a favoritos.
+        const descartados = qc.getQueryData<CandidatoDescartado[]>(queryKeys.descartados) ?? [];
+        const descartado = descartados.find((d) => d.candidato === candidatoId);
+        if (descartado) await deleteDescartado(descartado.id!);
         await addFavorito(candidatoId);
       }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.favoritos });
+      qc.invalidateQueries({ queryKey: queryKeys.descartados });
     },
   });
 }
@@ -455,10 +460,15 @@ export function useToggleDescartado() {
       if (existing) {
         await deleteDescartado(existing.id!);
       } else {
+        // BUG-039: limpiar favorito si existe antes de agregar a descartados.
+        const favoritos = qc.getQueryData<CandidatoFavorito[]>(queryKeys.favoritos) ?? [];
+        const favorito = favoritos.find((f) => f.candidato === candidatoId);
+        if (favorito) await deleteFavorito(favorito.id!);
         await addDescartado(candidatoId);
       }
     },
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.favoritos });
       qc.invalidateQueries({ queryKey: queryKeys.descartados });
     },
   });
