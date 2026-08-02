@@ -8,6 +8,7 @@ import React, { useMemo } from "react";
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { spacing } from "../../theme/spacing";
+import { typography } from "../../theme/typography";
 import { useThemeColors } from "../../theme/useTheme";
 
 export interface SectionTitleProps {
@@ -33,7 +34,8 @@ export function SectionTitle({ title, level = "h2", actionLabel, onAction, style
           gap: spacing.sp3,
         },
         title: {
-          fontSize: level === "h2" ? 18 : 16,
+          // TASK-064: usar tokens de tipografia en lugar de fontSize hardcodeado.
+          fontSize: level === "h2" ? typography.h2.fontSize : typography.h3.fontSize,
           fontWeight: "600",
           color: c.text,
         },

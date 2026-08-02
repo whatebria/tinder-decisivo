@@ -339,7 +339,7 @@ export function ResultadosScreen({
 
   if (loading) {
     return (
-      <AppShell active="home" navigation={navigation}>
+      <AppShell active={null} navigation={navigation}>
         <View style={[styles.scroll, styles.loadingBox]}>
           <Spinner size="large" />
           <Text style={styles.loadingText}>Calculando tus matches…</Text>
@@ -357,7 +357,7 @@ export function ResultadosScreen({
       ? `Ver mis matches en ${primeraEspecificaActiva.nombre}`
       : "Activar una elección";
     return (
-      <AppShell active="home" navigation={navigation}>
+      <AppShell active={null} navigation={navigation}>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
           <ScreenTopBar
             title={tipoNombre}
@@ -394,7 +394,7 @@ export function ResultadosScreen({
 
   return (
     <>
-      <AppShell active="home" navigation={navigation}>
+      <AppShell active={null} navigation={navigation}>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <ScreenTopBar
           title={tipoNombre}
