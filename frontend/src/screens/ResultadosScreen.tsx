@@ -192,6 +192,11 @@ export function ResultadosScreen({
     } else {
       authMutation.mutate(tipoEleccionId);
     }
+    // BUG-032: mutate y getRespuestasParaAnonimo son referencias estables.
+    // React Query garantiza estabilidad de mutate entre renders.
+    // getRespuestasParaAnonimo es un selector de Zustand con referencia estable.
+    // Se omiten intencionalmente para que el efecto solo re-ejecute cuando
+    // cambia la eleccion activa o el modo (autenticado vs. invitado).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tipoEleccionId, isGuest, esTipoBase]);
 
