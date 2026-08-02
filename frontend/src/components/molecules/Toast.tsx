@@ -45,83 +45,7 @@ const ToastContext = createContext<ToastContextValue | null>(null);
 
 const AUTO_DISMISS_MS = 4000;
 
-export function ToastProvider({ children }: { children: React.ReactNode }) {
-  const c = useThemeColors();
-  const shadows = useThemeShadows();
-  const [toasts, setToasts] = useState<Toast[]>([]);
-  const nextId = useRef(1);
-  const insets = useSafeAreaInsets();
-
-  const VARIANT_STYLES: Record<ToastVariant, { bg: string; fg: string }> = useMemo(
-    () => ({
-      success: { bg: c.success, fg: c.textOnPrimary },
-      error: { bg: c.danger, fg: c.textOnPrimary },
-      info: { bg: c.primary, fg: c.textOnPrimary },
-    }),
-    [c]
-  );
-
-  const dismiss = useCallback((id: number) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []);
-
-  const show = useCallback(
-    (variant: ToastVariant, title: string, detail?: string) => {
-      const id = nextId.current++;
-      setToasts((prev) => [...prev, { id, title, detail, variant }]);
-      setTimeout(() => dismiss(id), AUTO_DISMISS_MS);
-    },
-    [dismiss]
-  );
-
-  const value = useMemo<ToastContextValue>(
-    () => ({
-      show,
-      success: (t, d) => show("success", t, d),
-      error: (t, d) => show("error", t, d),
-      info: (t, d) => show("info", t, d),
-    }),
-    [show]
-  );
-
-  return (
-    <ToastContext.Provider value={value}>
-      {children}
-      <View
-        style={[styles.container, { top: insets.top + 12, pointerEvents: "box-none" }]}
-      >
-        {toasts.map((t) => {
-          const style = VARIANT_STYLES[t.variant];
-          return (
-            <Pressable
-              key={t.id}
-              onPress={() => dismiss(t.id)}
-              style={[styles.toast, shadows.shSm, { backgroundColor: style.bg }]}
-              accessibilityRole="alert"
-              accessibilityLabel={`${t.variant}: ${t.title}`}
-            >
-              <Text style={[styles.title, { color: style.fg }]} numberOfLines={2}>
-                {t.title}
-              </Text>
-              {t.detail ? (
-                <Text style={[styles.detail, { color: style.fg }]} numberOfLines={3}>
-                  {t.detail}
-                </Text>
-              ) : null}
-            </Pressable>
-          );
-        })}
-      </View>
-    </ToastContext.Provider>
-  );
-}
-
-export function useToast(): ToastContextValue {
-  const ctx = useContext(ToastContext);
-  if (!ctx) throw new Error("useToast debe usarse dentro de <ToastProvider>");
-  return ctx;
-}
-
+// TASK-066: layout estatico a nivel de modulo. Colores dinamicos inline.
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
@@ -148,3 +72,81 @@ const styles = StyleSheet.create({
     opacity: 0.95,
   },
 });
+
+export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const c = useThemeColors();
+  const shadows = useThemeShadows();
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const nextId = useRef(1);
+  const insets = useSafeAreaInsets();
+
+  // Objeto plano, no necesita useMemo -- el tema no cambia frecuentemente
+  // y la evaluacion es O(1). useMemo aqui solo anade overhead de closure.
+  const VARIANT_STYLES: Record<ToastVariant, { bg: string; fg: string }> = {
+    success: { bg: c.success, fg: c.textOnPrimary },
+    error: { bg: c.danger, fg: c.textOnPrimary },
+    info: { bg: c.primary, fg: c.textOnPrimary },
+  };
+
+  const dismiss = useCallback((id: number) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  const show = useCallback(
+    (variant: ToastVariant, title: string, detail?: string) => {
+      const id = nextId.current++;
+      setToasts((prev) => [...prev, { id, title, detail, variant }]);
+      setTimeout(() => dismiss(id), AUTO_DISMISS_MS);
+    },
+    [dismiss]
+  );
+
+  // useMemo correcto: memoiza el valor del contexto para evitar re-renders
+  // innecesarios de todos los consumidores cuando ToastProvider re-renders.
+  const value = useMemo<ToastContextValue>(
+    () => ({
+      show,
+      success: (t, d) => show("success", t, d),
+      error: (t, d) => show("error", t, d),
+      info: (t, d) => show("info", t, d),
+    }),
+    [show]
+  );
+
+  return (
+    <ToastContext.Provider value={value}>
+      {children}
+      <View
+        style={[styles.container, { top: insets.top + 12, pointerEvents: "box-none" }]}
+      >
+        {toasts.map((t) => {
+          const vstyle = VARIANT_STYLES[t.variant];
+          return (
+            <Pressable
+              key={t.id}
+              onPress={() => dismiss(t.id)}
+              style={[styles.toast, shadows.shSm, { backgroundColor: vstyle.bg }]}
+              accessibilityRole="alert"
+              accessibilityLabel={`${t.variant}: ${t.title}`}
+            >
+              <Text style={[styles.title, { color: vstyle.fg }]} numberOfLines={2}>
+                {t.title}
+              </Text>
+              {t.detail ? (
+                <Text style={[styles.detail, { color: vstyle.fg }]} numberOfLines={3}>
+                  {t.detail}
+                </Text>
+              ) : null}
+            </Pressable>
+          );
+        })}
+      </View>
+    </ToastContext.Provider>
+  );
+}
+
+export function useToast(): ToastContextValue {
+  const ctx = useContext(ToastContext);
+  if (!ctx) throw new Error("useToast debe usarse dentro de <ToastProvider>");
+  return ctx;
+}

@@ -2,7 +2,7 @@
  * Button: 5 variantes x 3 tamanos. Reactivo al tema (light/dark).
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -33,6 +33,33 @@ export interface ButtonProps extends Omit<PressableProps, "children" | "style"> 
   style?: StyleProp<ViewStyle>;
 }
 
+// TASK-066: valores completamente estaticos a nivel de modulo.
+// Layout base, estados y dimensiones no dependen del tema.
+const s = StyleSheet.create({
+  base: { borderRadius: radii.rMd, alignItems: "center", justifyContent: "center" },
+  fullWidth: { alignSelf: "stretch" },
+  pressed: { opacity: 0.85 },
+  disabled: { opacity: 0.5 },
+  inner: { flexDirection: "row", alignItems: "center", justifyContent: "center" },
+  text: { fontWeight: "600", textAlign: "center" },
+});
+
+// Dimensiones (spacing tokens) son estaticas -- no dependen del tema.
+const SIZES = {
+  sm: {
+    container: { paddingVertical: spacing.sp2, paddingHorizontal: spacing.sp4, minHeight: 36 },
+    text: { fontSize: 14 },
+  },
+  md: {
+    container: { paddingVertical: spacing.sp3, paddingHorizontal: spacing.sp5, minHeight: 48 },
+    text: { fontSize: 16 },
+  },
+  lg: {
+    container: { paddingVertical: spacing.sp4, paddingHorizontal: spacing.sp6, minHeight: 56 },
+    text: { fontSize: 18 },
+  },
+} as const;
+
 export function Button({
   children,
   variant = "primary",
@@ -53,63 +80,40 @@ export function Button({
   // hooks/useBlurringPress.
   const handlePress = useBlurringPress(onPress);
 
-  const { variantStyle, sizeStyle, styles } = useMemo(() => {
-    const VARIANTS = {
-      primary: {
-        container: { backgroundColor: c.primary, borderColor: c.primary, borderWidth: 1.5 },
-        text: { color: c.textOnPrimary },
-      },
-      secondary: {
-        container: { backgroundColor: "transparent", borderColor: c.primary, borderWidth: 1.5 },
-        text: { color: c.primary },
-      },
-      ghost: {
-        container: { backgroundColor: "transparent", borderColor: c.border, borderWidth: 1 },
-        text: { color: c.textSecondary },
-      },
-      danger: {
-        container: { backgroundColor: c.danger, borderColor: c.danger, borderWidth: 1.5 },
-        text: { color: c.textOnPrimary },
-      },
-      success: {
-        container: { backgroundColor: c.success, borderColor: c.success, borderWidth: 1.5 },
-        text: { color: c.textOnPrimary },
-      },
-      accent: {
-        // DS-11: CTA hero Home, lock overlay, compartir. Max 3x por viewport.
-        // Usa brandAccent (#3A9E7A light / #5BCEA0 dark) en vez de c.accent
-        // que es solo el tint de hover (#A8C5B5).
-        container: { backgroundColor: c.brandAccent, borderColor: c.brandAccent, borderWidth: 1.5 },
-        text: { color: "#FFFFFF" },
-      },
-    } as const;
-    const SIZES = {
-      sm: {
-        container: { paddingVertical: spacing.sp2, paddingHorizontal: spacing.sp4, minHeight: 36 },
-        text: { fontSize: 14 },
-      },
-      md: {
-        container: { paddingVertical: spacing.sp3, paddingHorizontal: spacing.sp5, minHeight: 48 },
-        text: { fontSize: 16 },
-      },
-      lg: {
-        container: { paddingVertical: spacing.sp4, paddingHorizontal: spacing.sp6, minHeight: 56 },
-        text: { fontSize: 18 },
-      },
-    } as const;
-    return {
-      variantStyle: VARIANTS[variant],
-      sizeStyle: SIZES[size],
-      styles: StyleSheet.create({
-        base: { borderRadius: radii.rMd, alignItems: "center", justifyContent: "center" },
-        fullWidth: { alignSelf: "stretch" },
-        pressed: { opacity: 0.85 },
-        disabled: { opacity: 0.5 },
-        inner: { flexDirection: "row", alignItems: "center", justifyContent: "center" },
-        text: { fontWeight: "600", textAlign: "center" },
-      }),
-    };
-  }, [c, variant, size]);
+  // Colores del tema: objetos planos (sin StyleSheet.create -- ya tienen las
+  // props en formato correcto para el style prop de RN).
+  const VARIANTS = {
+    primary: {
+      container: { backgroundColor: c.primary, borderColor: c.primary, borderWidth: 1.5 },
+      text: { color: c.textOnPrimary },
+    },
+    secondary: {
+      container: { backgroundColor: "transparent", borderColor: c.primary, borderWidth: 1.5 },
+      text: { color: c.primary },
+    },
+    ghost: {
+      container: { backgroundColor: "transparent", borderColor: c.border, borderWidth: 1 },
+      text: { color: c.textSecondary },
+    },
+    danger: {
+      container: { backgroundColor: c.danger, borderColor: c.danger, borderWidth: 1.5 },
+      text: { color: c.textOnPrimary },
+    },
+    success: {
+      container: { backgroundColor: c.success, borderColor: c.success, borderWidth: 1.5 },
+      text: { color: c.textOnPrimary },
+    },
+    accent: {
+      // DS-11: CTA hero Home, lock overlay, compartir. Max 3x por viewport.
+      // Usa brandAccent (#3A9E7A light / #5BCEA0 dark) en vez de c.accent
+      // que es solo el tint de hover (#A8C5B5).
+      container: { backgroundColor: c.brandAccent, borderColor: c.brandAccent, borderWidth: 1.5 },
+      text: { color: "#FFFFFF" },
+    },
+  } as const;
+
+  const variantStyle = VARIANTS[variant];
+  const sizeStyle = SIZES[size];
 
   return (
     <Pressable
@@ -118,16 +122,16 @@ export function Button({
       disabled={isDisabled}
       accessibilityRole="button"
       style={(state) => [
-        styles.base,
+        s.base,
         variantStyle.container,
         sizeStyle.container,
-        fullWidth && styles.fullWidth,
-        state.pressed && !isDisabled && styles.pressed,
-        isDisabled && styles.disabled,
+        fullWidth && s.fullWidth,
+        state.pressed && !isDisabled && s.pressed,
+        isDisabled && s.disabled,
         style,
       ]}
     >
-      <View style={styles.inner}>
+      <View style={s.inner}>
         {loading ? (
           <ActivityIndicator
             color={variantStyle.text.color}
@@ -137,7 +141,7 @@ export function Button({
         ) : leftIcon ? (
           <View style={{ marginRight: spacing.sp2 }}>{leftIcon}</View>
         ) : null}
-        <Text style={[styles.text, variantStyle.text, sizeStyle.text]}>{children}</Text>
+        <Text style={[s.text, variantStyle.text, sizeStyle.text]}>{children}</Text>
         {rightIcon ? <View style={{ marginLeft: spacing.sp2 }}>{rightIcon}</View> : null}
       </View>
     </Pressable>

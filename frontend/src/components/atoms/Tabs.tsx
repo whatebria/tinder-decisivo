@@ -11,7 +11,7 @@
  *                  con labels largos como "Descartados" / "Posturas").
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from "react-native";
 
 import { radii } from "../../theme/radii";
@@ -42,6 +42,36 @@ export interface TabsProps<T extends string = string> {
   activeColor?: string;
 }
 
+// TASK-066: layout y dimensiones estaticas a nivel de modulo.
+// Colores dinamicos (tema + activeColor) se aplican inline.
+const s = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    padding: 4,
+    borderRadius: radii.rMd,
+    gap: 2,
+    alignSelf: "flex-start",
+  },
+  tab: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sp2,
+    paddingVertical: spacing.sp2,
+    paddingHorizontal: spacing.sp4,
+    borderRadius: radii.rSm,
+  },
+  label: { fontSize: 14, fontWeight: "500" },
+  count: {
+    minWidth: 20,
+    height: 20,
+    paddingHorizontal: 6,
+    borderRadius: radii.rFull,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  countText: { fontSize: 11, fontWeight: "600" },
+});
+
 export function Tabs<T extends string = string>({
   value,
   onChange,
@@ -54,46 +84,8 @@ export function Tabs<T extends string = string>({
   // TASK-031: usa activeColor si se provee, fallback a c.primary.
   const resolvedActiveColor = activeColor ?? c.primary;
 
-  const s = useMemo(
-    () =>
-      StyleSheet.create({
-        container: {
-          flexDirection: "row",
-          padding: 4,
-          backgroundColor: c.border2,
-          borderRadius: radii.rMd,
-          gap: 2,
-          alignSelf: "flex-start",
-        },
-        tab: {
-          flexDirection: "row",
-          alignItems: "center",
-          gap: spacing.sp2,
-          paddingVertical: spacing.sp2,
-          paddingHorizontal: spacing.sp4,
-          borderRadius: radii.rSm,
-        },
-        tabActive: { backgroundColor: c.card },
-        label: { fontSize: 14, fontWeight: "500", color: c.textSecondary },
-        labelActive: { color: resolvedActiveColor },
-        count: {
-          minWidth: 20,
-          height: 20,
-          paddingHorizontal: 6,
-          borderRadius: radii.rFull,
-          backgroundColor: c.border,
-          alignItems: "center",
-          justifyContent: "center",
-        },
-        countActive: { backgroundColor: resolvedActiveColor },
-        countText: { fontSize: 11, fontWeight: "600", color: c.textSecondary },
-        countTextActive: { color: c.textOnPrimary },
-      }),
-    [c, resolvedActiveColor]
-  );
-
   const inner = (
-    <View style={[s.container, !scrollable && style]}>
+    <View style={[s.container, { backgroundColor: c.border2 }, !scrollable && style]}>
       {items.map((it) => {
         const active = it.value === value;
         return (
@@ -101,12 +93,19 @@ export function Tabs<T extends string = string>({
             key={it.value}
             onPress={() => onChange(it.value)}
             accessibilityRole="tab"
-            style={[s.tab, active && s.tabActive]}
+            style={[s.tab, active && { backgroundColor: c.card }]}
           >
-            <Text style={[s.label, active && s.labelActive]}>{it.label}</Text>
+            <Text style={[s.label, { color: active ? resolvedActiveColor : c.textSecondary }]}>
+              {it.label}
+            </Text>
             {typeof it.count === "number" ? (
-              <View style={[s.count, active && s.countActive]}>
-                <Text style={[s.countText, active && s.countTextActive]}>
+              <View
+                style={[
+                  s.count,
+                  { backgroundColor: active ? resolvedActiveColor : c.border },
+                ]}
+              >
+                <Text style={[s.countText, { color: active ? c.textOnPrimary : c.textSecondary }]}>
                   {it.count}
                 </Text>
               </View>

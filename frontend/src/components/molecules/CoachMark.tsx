@@ -14,7 +14,7 @@
  * anuncien, hit slop generoso en los botones y contraste WCAG AA verificado.
  */
 
-import React, { useMemo, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal as RNModal,
   Pressable,
@@ -49,6 +49,82 @@ export interface CoachMarkProps {
 const HIGHLIGHT_LABEL = "Fíjate en";
 const STEP_LABEL_SEPARATOR = "de";
 
+// TASK-066: valores estaticos a nivel de modulo.
+// Colores dinamicos (c.card, c.accent2, c.primary, c.text, shadows.shLg)
+// se aplican inline en el JSX para evitar StyleSheet.create en cada render.
+const s = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.55)",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    padding: spacing.sp4,
+  },
+  card: {
+    width: "100%",
+    maxWidth: 480,
+    borderRadius: radii.rLg,
+    padding: spacing.sp5,
+    marginBottom: spacing.sp6,
+    gap: spacing.sp3,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    minHeight: 20,
+  },
+  stepChip: {
+    alignSelf: "flex-start",
+    paddingHorizontal: spacing.sp3,
+    paddingVertical: spacing.sp1,
+    borderRadius: radii.rFull,
+  },
+  stepChipText: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "700",
+    lineHeight: 26,
+  },
+  description: {
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  highlightBadge: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: spacing.sp2,
+    paddingHorizontal: spacing.sp3,
+    paddingVertical: spacing.sp2,
+    borderRadius: radii.rSm,
+    borderLeftWidth: 3,
+  },
+  highlightLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  highlightText: {
+    flex: 1,
+    fontSize: 13,
+    fontStyle: "italic",
+  },
+  actions: {
+    flexDirection: "row",
+    gap: spacing.sp3,
+    marginTop: spacing.sp2,
+  },
+  actionSlot: {
+    flex: 1,
+  },
+});
+
 export function CoachMark({
   visible,
   step,
@@ -74,8 +150,6 @@ export function CoachMark({
     return () => clearTimeout(t);
   }, [visible]);
 
-  const styles = useMemo(() => buildStyles(c, shadows), [c, shadows]);
-
   if (!visible || !step) return null;
 
   const showBack = currentIndex > 0;
@@ -95,7 +169,7 @@ export function CoachMark({
       {/* Backdrop clickeable = skip (sin bloquear la pantalla completa). */}
       {/* disabled=true los primeros 500ms (fade-in) para no interceptar clicks */}
       <Pressable
-        style={styles.backdrop}
+        style={s.backdrop}
         onPress={showSkip ? onSkip : onNext}
         accessibilityLabel="Cerrar coach mark"
         disabled={!interactive}
@@ -104,43 +178,48 @@ export function CoachMark({
         <Pressable
           onPress={() => {}}
           disabled={!interactive}
-          style={styles.card}
+          style={[s.card, { backgroundColor: c.card }, shadows.shLg]}
           accessibilityRole="alert"
           accessibilityLabel={`${step.title}. ${step.description}`}
         >
-          <View style={styles.header}>
+          <View style={s.header}>
             {total > 1 ? (
-              <View style={styles.stepChip}>
-                <Text style={styles.stepChipText}>{stepLabel}</Text>
+              <View style={[s.stepChip, { backgroundColor: c.accent2 }]}>
+                <Text style={[s.stepChipText, { color: c.primary }]}>{stepLabel}</Text>
               </View>
             ) : (
               <View />
             )}
           </View>
 
-          <Text style={styles.title}>{step.title}</Text>
-          <Text style={styles.description}>{step.description}</Text>
+          <Text style={[s.title, { color: c.text }]}>{step.title}</Text>
+          <Text style={[s.description, { color: c.textSecondary }]}>{step.description}</Text>
 
-          <View style={styles.highlightBadge}>
-            <Text style={styles.highlightLabel}>{HIGHLIGHT_LABEL}</Text>
-            <Text style={styles.highlightText}>{step.highlight}</Text>
+          <View
+            style={[
+              s.highlightBadge,
+              { backgroundColor: c.accent2, borderLeftColor: c.primary },
+            ]}
+          >
+            <Text style={[s.highlightLabel, { color: c.primary }]}>{HIGHLIGHT_LABEL}</Text>
+            <Text style={[s.highlightText, { color: c.text }]}>{step.highlight}</Text>
           </View>
 
-          <View style={styles.actions}>
+          <View style={s.actions}>
             {showBack ? (
-              <View style={styles.actionSlot}>
+              <View style={s.actionSlot}>
                 <Button variant="ghost" size="md" onPress={onBack}>
                   Atrás
                 </Button>
               </View>
             ) : showSkip ? (
-              <View style={styles.actionSlot}>
+              <View style={s.actionSlot}>
                 <Button variant="ghost" size="md" onPress={onSkip}>
                   Cerrar
                 </Button>
               </View>
             ) : null}
-            <View style={styles.actionSlot}>
+            <View style={s.actionSlot}>
               <Button variant="primary" size="md" onPress={onNext}>
                 {nextLabel}
               </Button>
@@ -150,92 +229,4 @@ export function CoachMark({
       </Pressable>
     </RNModal>
   );
-}
-
-function buildStyles(
-  c: ReturnType<typeof useThemeColors>,
-  shadows: ReturnType<typeof useThemeShadows>,
-) {
-  return StyleSheet.create({
-    backdrop: {
-      flex: 1,
-      backgroundColor: "rgba(0,0,0,0.55)",
-      justifyContent: "flex-end",
-      alignItems: "center",
-      padding: spacing.sp4,
-    },
-    card: {
-      width: "100%",
-      maxWidth: 480,
-      backgroundColor: c.card,
-      borderRadius: radii.rLg,
-      padding: spacing.sp5,
-      marginBottom: spacing.sp6,
-      gap: spacing.sp3,
-      ...shadows.shLg,
-    },
-    header: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      minHeight: 20,
-    },
-    stepChip: {
-      alignSelf: "flex-start",
-      paddingHorizontal: spacing.sp3,
-      paddingVertical: spacing.sp1,
-      borderRadius: radii.rFull,
-      backgroundColor: c.accent2,
-    },
-    stepChipText: {
-      fontSize: 11,
-      fontWeight: "700",
-      letterSpacing: 0.5,
-      textTransform: "uppercase",
-      color: c.primary,
-    },
-    title: {
-      fontSize: 20,
-      fontWeight: "700",
-      color: c.text,
-      lineHeight: 26,
-    },
-    description: {
-      fontSize: 15,
-      lineHeight: 22,
-      color: c.textSecondary,
-    },
-    highlightBadge: {
-      flexDirection: "row",
-      alignItems: "baseline",
-      gap: spacing.sp2,
-      paddingHorizontal: spacing.sp3,
-      paddingVertical: spacing.sp2,
-      borderRadius: radii.rSm,
-      backgroundColor: c.accent2,
-      borderLeftWidth: 3,
-      borderLeftColor: c.primary,
-    },
-    highlightLabel: {
-      fontSize: 11,
-      fontWeight: "700",
-      textTransform: "uppercase",
-      letterSpacing: 0.5,
-      color: c.primary,
-    },
-    highlightText: {
-      flex: 1,
-      fontSize: 13,
-      color: c.text,
-      fontStyle: "italic",
-    },
-    actions: {
-      flexDirection: "row",
-      gap: spacing.sp3,
-      marginTop: spacing.sp2,
-    },
-    actionSlot: {
-      flex: 1,
-    },
-  });
 }
