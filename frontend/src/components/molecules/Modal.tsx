@@ -8,7 +8,7 @@
  * EditarRespuestaModal, CandidatoPickerModal.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import {
   KeyboardAvoidingView,
   Modal as RNModal,
@@ -51,6 +51,52 @@ export interface ModalProps {
   cardStyle?: StyleProp<ViewStyle>;
 }
 
+const styles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: spacing.sp4,
+  },
+  // width/maxWidth/maxHeight applied inline (derived from hook at runtime)
+  card: {
+    width: "100%",
+    borderRadius: radii.rLg,
+    overflow: "hidden",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.sp5,
+    paddingVertical: spacing.sp4,
+    borderBottomWidth: 1,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "600",
+    flexShrink: 1,
+    marginRight: spacing.sp3,
+  },
+  body: {
+    // flexShrink permite que el ScrollView respete el maxHeight del card:
+    // header y footer ocupan su alto natural (fixed), el body toma el
+    // resto y scrollea internamente cuando el contenido lo supera.
+    flexShrink: 1,
+    paddingHorizontal: spacing.sp5,
+    paddingVertical: spacing.sp4,
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: spacing.sp2,
+    paddingHorizontal: spacing.sp5,
+    paddingVertical: spacing.sp4,
+    borderTopWidth: 1,
+  },
+});
+
 export function Modal({
   visible,
   onClose,
@@ -68,62 +114,6 @@ export function Modal({
   const handleClose = useBlurBeforeClose(onClose);
   const effectiveMaxWidth = maxWidth ?? dims.maxWidth;
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        backdrop: {
-          flex: 1,
-          backgroundColor: "rgba(0,0,0,0.45)",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: spacing.sp4,
-        },
-        card: {
-          width: "100%",
-          maxWidth: effectiveMaxWidth,
-          maxHeight: dims.maxHeight,
-          backgroundColor: c.card,
-          borderRadius: radii.rLg,
-          ...shadows.shLg,
-          overflow: "hidden",
-        },
-        header: {
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          paddingHorizontal: spacing.sp5,
-          paddingVertical: spacing.sp4,
-          borderBottomWidth: 1,
-          borderBottomColor: c.border2,
-        },
-        title: {
-          fontSize: 18,
-          fontWeight: "600",
-          color: c.text,
-          flexShrink: 1,
-          marginRight: spacing.sp3,
-        },
-        body: {
-          // flexShrink permite que el ScrollView respete el maxHeight del card:
-          // header y footer ocupan su alto natural (fixed), el body toma el
-          // resto y scrollea internamente cuando el contenido lo supera.
-          flexShrink: 1,
-          paddingHorizontal: spacing.sp5,
-          paddingVertical: spacing.sp4,
-        },
-        footer: {
-          flexDirection: "row",
-          justifyContent: "flex-end",
-          gap: spacing.sp2,
-          paddingHorizontal: spacing.sp5,
-          paddingVertical: spacing.sp4,
-          borderTopWidth: 1,
-          borderTopColor: c.border2,
-        },
-      }),
-    [c, shadows, effectiveMaxWidth, dims.maxHeight],
-  );
-
   return (
     <RNModal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
       <KeyboardAvoidingView
@@ -137,10 +127,17 @@ export function Modal({
           onPress={dismissOnBackdrop ? handleClose : undefined}
           accessibilityRole="none"
         >
-          <Pressable onPress={() => {}} style={[styles.card, cardStyle]}>
+          <Pressable
+            onPress={() => {}}
+            style={[
+              styles.card,
+              { maxWidth: effectiveMaxWidth, maxHeight: dims.maxHeight, backgroundColor: c.card, ...shadows.shLg },
+              cardStyle,
+            ]}
+          >
             {title ? (
-              <View style={styles.header}>
-                <Text style={styles.title}>{title}</Text>
+              <View style={[styles.header, { borderBottomColor: c.border2 }]}>
+                <Text style={[styles.title, { color: c.text }]}>{title}</Text>
                 <IconButton
                   onPress={handleClose}
                   accessibilityLabel="Cerrar"
@@ -154,7 +151,9 @@ export function Modal({
             <ScrollView style={styles.body} contentContainerStyle={{ paddingBottom: spacing.sp2 }}>
               {children}
             </ScrollView>
-            {footer ? <View style={styles.footer}>{footer}</View> : null}
+            {footer ? (
+              <View style={[styles.footer, { borderTopColor: c.border2 }]}>{footer}</View>
+            ) : null}
           </Pressable>
         </Pressable>
       </KeyboardAvoidingView>

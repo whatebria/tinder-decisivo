@@ -1,33 +1,55 @@
 /**
- * RadioGroup: grupo de opciones de seleccion unica. Options grandes y
- * espaciadas, con hover suave y borde primary en la seleccionada.
- *
- * Ideal para el cuestionario ("Muy de acuerdo" ... "Muy en desacuerdo").
+ * RadioGroup: grupo de opciones Likert con accesibilidad ARIA.
+ * Genérico sobre <T> — el valor de cada opcion puede ser number, string, etc.
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
 import { useThemeColors } from "../../theme/useTheme";
 
-export interface RadioOption<T extends string | number = string> {
+export interface RadioOption<T> {
   value: T;
   label: string;
   disabled?: boolean;
 }
 
-export interface RadioGroupProps<T extends string | number = string> {
+export interface RadioGroupProps<T> {
   options: ReadonlyArray<RadioOption<T>>;
   value: T | null;
-  onChange: (v: T) => void;
-  /** Label accesible del grupo entero. */
+  onChange: (value: T) => void;
   accessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
 }
 
-export function RadioGroup<T extends string | number = string>({
+const styles = StyleSheet.create({
+  wrap: { gap: spacing.sp2 },
+  opt: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: spacing.sp4,
+    paddingVertical: spacing.sp3,
+    minHeight: 52,
+    borderRadius: radii.rMd,
+    borderWidth: 1.5,
+  },
+  dot: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: spacing.sp3,
+  },
+  inner: { width: 10, height: 10, borderRadius: 5 },
+  label: { fontSize: 16, flexShrink: 1 },
+  disabled: { opacity: 0.5 },
+});
+
+export function RadioGroup<T>({
   options,
   value,
   onChange,
@@ -35,45 +57,6 @@ export function RadioGroup<T extends string | number = string>({
   style,
 }: RadioGroupProps<T>) {
   const c = useThemeColors();
-
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        wrap: { gap: spacing.sp2 },
-        opt: {
-          flexDirection: "row",
-          alignItems: "center",
-          paddingHorizontal: spacing.sp4,
-          paddingVertical: spacing.sp3,
-          minHeight: 52,
-          borderRadius: radii.rMd,
-          borderWidth: 1.5,
-          backgroundColor: c.card,
-        },
-        optDefault: { borderColor: c.border },
-        optSelected: { borderColor: c.primary, backgroundColor: c.accent2 },
-        dot: {
-          width: 20,
-          height: 20,
-          borderRadius: 10,
-          borderWidth: 2,
-          alignItems: "center",
-          justifyContent: "center",
-          marginRight: spacing.sp3,
-        },
-        dotDefault: { borderColor: c.textTertiary },
-        dotSelected: { borderColor: c.primary },
-        inner: {
-          width: 10,
-          height: 10,
-          borderRadius: 5,
-          backgroundColor: c.primary,
-        },
-        label: { fontSize: 16, color: c.text, flexShrink: 1 },
-        disabled: { opacity: 0.5 },
-      }),
-    [c],
-  );
 
   return (
     <View
@@ -92,14 +75,19 @@ export function RadioGroup<T extends string | number = string>({
             accessibilityState={{ selected, disabled: !!opt.disabled }}
             style={[
               styles.opt,
-              selected ? styles.optSelected : styles.optDefault,
+              {
+                borderColor: selected ? c.primary : c.border,
+                backgroundColor: selected ? c.accent2 : c.card,
+              },
               opt.disabled && styles.disabled,
             ]}
           >
-            <View style={[styles.dot, selected ? styles.dotSelected : styles.dotDefault]}>
-              {selected ? <View style={styles.inner} /> : null}
+            <View style={[styles.dot, { borderColor: selected ? c.primary : c.textTertiary }]}>
+              {selected ? (
+                <View style={[styles.inner, { backgroundColor: c.primary }]} />
+              ) : null}
             </View>
-            <Text style={styles.label}>{opt.label}</Text>
+            <Text style={[styles.label, { color: c.text }]}>{opt.label}</Text>
           </Pressable>
         );
       })}

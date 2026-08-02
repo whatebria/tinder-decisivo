@@ -8,7 +8,7 @@
  * Refactor: usa <Modal> molecule base (tokens + dark mode reactivos).
  */
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { Modal } from "./Modal";
@@ -29,6 +29,18 @@ interface Props {
   loading?: boolean;
 }
 
+const styles = StyleSheet.create({
+  warning: {
+    fontSize: 14,
+    lineHeight: 20,
+    padding: spacing.sp3,
+    borderRadius: radii.rSm,
+    borderLeftWidth: 3,
+  },
+  form: { gap: spacing.sp2, marginTop: spacing.sp1 },
+  actions: { gap: spacing.sp2 },
+});
+
 export function EliminarCuentaModal({
   visible,
   onCancel,
@@ -44,7 +56,6 @@ export function EliminarCuentaModal({
     password.length > 0 && palabra === PALABRA_MAGICA && !loading;
 
   // Blur al elemento con foco ANTES de que el padre haga setState(false).
-  // Ver hooks/blurActiveElement para contexto.
   function handleCancel() {
     blurActiveElement();
     setPassword("");
@@ -57,24 +68,8 @@ export function EliminarCuentaModal({
     onSubmit(password);
   }
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        warning: {
-          fontSize: 14,
-          color: isDark ? c.danger100 : c.danger700,
-          lineHeight: 20,
-          backgroundColor: isDark ? c.danger800 : c.danger50,
-          padding: spacing.sp3,
-          borderRadius: radii.rSm,
-          borderLeftWidth: 3,
-          borderLeftColor: c.danger,
-        },
-        form: { gap: spacing.sp2, marginTop: spacing.sp1 },
-        actions: { gap: spacing.sp2 },
-      }),
-    [c, isDark],
-  );
+  const warningBg = isDark ? c.danger800 : c.danger50;
+  const warningTextColor = isDark ? c.danger100 : c.danger700;
 
   return (
     <Modal
@@ -99,7 +94,7 @@ export function EliminarCuentaModal({
         </View>
       }
     >
-      <Text style={styles.warning}>
+      <Text style={[styles.warning, { color: warningTextColor, backgroundColor: warningBg, borderLeftColor: c.danger }]}>
         Esta accion es PERMANENTE. Se borran tus respuestas, tu ranking,
         tus favoritos, descartados y tu voto final. No hay vuelta atras.
       </Text>

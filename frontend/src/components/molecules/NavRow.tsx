@@ -21,7 +21,7 @@
  * NO renderiza avatar — para eso conviene un molecule especifico (ej. AccountRow).
  */
 
-import React, { useMemo } from "react";
+import React from "react";
 import {
   Pressable,
   StyleSheet,
@@ -51,6 +51,21 @@ export interface NavRowProps
   iconLeading?: IconName;
 }
 
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: spacing.sp3,
+    borderRadius: radii.rMd,
+    borderWidth: 1,
+    gap: spacing.sp3,
+  },
+  textCol: { flex: 1, gap: spacing.sp1 },
+  label: { ...typography.body, fontWeight: "600" },
+  subtitle: { ...typography.overline, textTransform: "none", letterSpacing: 0 },
+});
+
 export function NavRow({
   label,
   subtitle,
@@ -62,72 +77,33 @@ export function NavRow({
 }: NavRowProps) {
   const c = useThemeColors();
   // Blur antes de navegar -> evita warning aria-hidden WCAG 2.4.3 en web.
-  // Ver hooks/useBlurringPress.
   const handlePress = useBlurringPress(onPress);
-
-  const styles = useMemo(() => {
-    const isDanger = variant === "danger";
-    const labelColor = isDanger ? c.danger : c.text;
-    const chevronColor = isDanger ? c.danger : c.textSecondary;
-
-    return StyleSheet.create({
-      row: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: spacing.sp3,
-        borderRadius: radii.rMd,
-        borderWidth: 1,
-        borderColor: c.border,
-        backgroundColor: c.card,
-        gap: spacing.sp3,
-      },
-      leadingIcon: {
-        color: isDanger ? c.danger : c.primary,
-      },
-      textCol: {
-        flex: 1,
-        gap: spacing.sp1,
-      },
-      label: {
-        ...typography.body,
-        fontWeight: "600",
-        color: labelColor,
-      },
-      subtitle: {
-        ...typography.overline,
-        textTransform: "none",
-        letterSpacing: 0,
-        color: c.textSecondary,
-      },
-      chevronBox: { color: chevronColor },
-    });
-  }, [c, variant]);
+  const isDanger = variant === "danger";
+  const labelColor = isDanger ? c.danger : c.text;
+  const accentColor = isDanger ? c.danger : c.primary;
+  const chevronColor = isDanger ? c.danger : c.textSecondary;
 
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
-      style={({ pressed }) => [styles.row, { opacity: pressed ? 0.7 : 1 }]}
+      style={({ pressed }) => [
+        styles.row,
+        { borderColor: c.border, backgroundColor: c.card, opacity: pressed ? 0.7 : 1 },
+      ]}
       {...pressable}
       onPress={handlePress}
     >
       {iconLeading ? (
-        <Icon
-          name={iconLeading}
-          size={20}
-          color={styles.leadingIcon.color as string}
-        />
+        <Icon name={iconLeading} size={20} color={accentColor} />
       ) : null}
       <View style={styles.textCol}>
-        <Text style={styles.label}>{label}</Text>
-        {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+        <Text style={[styles.label, { color: labelColor }]}>{label}</Text>
+        {subtitle ? (
+          <Text style={[styles.subtitle, { color: c.textSecondary }]}>{subtitle}</Text>
+        ) : null}
       </View>
-      <Icon
-        name="chevron-right"
-        size={20}
-        color={styles.chevronBox.color as string}
-      />
+      <Icon name="chevron-right" size={20} color={chevronColor} />
     </Pressable>
   );
 }
