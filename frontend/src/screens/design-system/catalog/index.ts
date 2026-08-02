@@ -16,9 +16,11 @@
 
 import type { CatalogEntry } from "../showcase/types";
 import { generatedCatalog } from "./index.generated";
+import { patternsCatalog } from "./patterns";
 import { tokensCatalog } from "./tokens";
 
 export const catalog: CatalogEntry[] = [
   ...tokensCatalog,
   ...generatedCatalog,
+  ...patternsCatalog,
 ];

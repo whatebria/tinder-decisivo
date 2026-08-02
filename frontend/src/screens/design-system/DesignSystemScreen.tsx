@@ -74,8 +74,11 @@ export function DesignSystemScreen({ navigation }: Props) {
       molecules: [],
       organisms: [],
       templates: [],
+      patterns: [],
     };
-    for (const e of filtered) map[e.category].push(e);
+    for (const e of filtered) {
+      if (map[e.category]) map[e.category].push(e);
+    }
     return map;
   }, [filtered]);
 
@@ -129,8 +132,9 @@ export function DesignSystemScreen({ navigation }: Props) {
     molecules: "Moleculas",
     organisms: "Organismos",
     templates: "Templates",
+    patterns: "Patrones UX",
   };
-  const CATEGORY_ORDER = ["tokens", "atoms", "molecules", "organisms", "templates"] as const;
+  const CATEGORY_ORDER = ["tokens", "atoms", "molecules", "organisms", "templates", "patterns"] as const;
 
   return (
     <SafeAreaView style={styles.root} edges={["top"]}>

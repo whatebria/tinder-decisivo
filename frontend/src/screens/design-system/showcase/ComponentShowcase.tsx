@@ -17,7 +17,36 @@ import { useThemeColors, useThemeShadows } from "../../../theme/useTheme";
 import { CodeBlock } from "./CodeBlock";
 import { PropsTable } from "./PropsTable";
 import { VariantGrid } from "./VariantGrid";
-import type { CatalogEntry } from "./types";
+import type { CatalogEntry, ComponentStatus } from "./types";
+
+// ---------------------------------------------------------------------------
+// Badge de estado del componente
+// ---------------------------------------------------------------------------
+
+const STATUS_STYLES: Record<ComponentStatus, { bg: string; text: string; label: string }> = {
+  stable:       { bg: "#dcfce7", text: "#166534", label: "Estable" },
+  experimental: { bg: "#fef9c3", text: "#854d0e", label: "Experimental" },
+  deprecated:   { bg: "#fee2e2", text: "#991b1b", label: "Deprecado" },
+  removed:      { bg: "#f3f4f6", text: "#6b7280", label: "Eliminado" },
+};
+
+function StatusBadge({ status }: { status: ComponentStatus }) {
+  const s = STATUS_STYLES[status];
+  return (
+    <View
+      style={{
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 99,
+        backgroundColor: s.bg,
+        alignSelf: "flex-start",
+      }}
+      accessibilityLabel={`Estado: ${s.label}`}
+    >
+      <Text style={{ fontSize: 11, fontWeight: "700", color: s.text }}>{s.label}</Text>
+    </View>
+  );
+}
 
 interface ComponentShowcaseProps {
   entry: CatalogEntry;
@@ -28,6 +57,8 @@ export function ComponentShowcase({ entry }: ComponentShowcaseProps) {
   const shadows = useThemeShadows();
   const [propsOpen, setPropsOpen] = useState(false);
   const [codeOpen, setCodeOpen] = useState(false);
+  const [doNotOpen, setDoNotOpen] = useState(false);
+  const [a11yOpen, setA11yOpen] = useState(false);
 
   const styles = useMemo(
     () =>
@@ -122,12 +153,57 @@ export function ComponentShowcase({ entry }: ComponentShowcaseProps) {
         <View style={styles.titleRow}>
           <Text style={styles.name}>{entry.name}</Text>
           <Text style={styles.path}>{entry.sourcePath ?? `src/components/${entry.path}.tsx`}</Text>
+          {entry.status && entry.status !== "stable" ? (
+            <StatusBadge status={entry.status} />
+          ) : null}
         </View>
         <Text style={styles.description}>{entry.description}</Text>
+        {entry.deprecatedBy ? (
+          <Text style={[styles.description, { color: c.danger, marginTop: spacing.sp1 }]}>
+            Usar en su lugar: {entry.deprecatedBy}
+          </Text>
+        ) : null}
+        {entry.dsReference ? (
+          <Text style={[styles.description, { color: c.textTertiary, marginTop: spacing.sp1 }]}>
+            ■ {entry.dsReference}
+          </Text>
+        ) : null}
       </View>
 
       <Text style={styles.sectionLabel}>Variantes</Text>
       <VariantGrid variants={entry.variants} />
+
+      {entry.doNotUse && entry.doNotUse.length > 0 ? (
+        <CollapsibleSection
+          label="Cuando NO usar"
+          open={false}
+          onToggle={() => setDoNotOpen((v) => !v)}
+          styles={styles}
+          forceOpen={doNotOpen}
+        >
+          <View style={{ gap: spacing.sp1 }}>
+            {entry.doNotUse.map((rule, i) => (
+              <Text key={i} style={[styles.description, { color: c.danger }]}> {rule}</Text>
+            ))}
+          </View>
+        </CollapsibleSection>
+      ) : null}
+
+      {entry.a11y && entry.a11y.length > 0 ? (
+        <CollapsibleSection
+          label="Accesibilidad"
+          open={false}
+          onToggle={() => setA11yOpen((v) => !v)}
+          styles={styles}
+          forceOpen={a11yOpen}
+        >
+          <View style={{ gap: spacing.sp1 }}>
+            {entry.a11y.map((note, i) => (
+              <Text key={i} style={[styles.description, { color: c.info }]}> {note}</Text>
+            ))}
+          </View>
+        </CollapsibleSection>
+      ) : null}
 
       <CollapsibleSection
         label="Props"
@@ -160,6 +236,8 @@ interface CollapsibleSectionProps {
   onToggle: () => void;
   styles: ReturnType<typeof StyleSheet.create<any>>;
   children: React.ReactNode;
+  /** Permite que el caller controle el estado abierto externamente. */
+  forceOpen?: boolean;
 }
 
 function CollapsibleSection({
@@ -169,23 +247,25 @@ function CollapsibleSection({
   onToggle,
   styles,
   children,
+  forceOpen,
 }: CollapsibleSectionProps) {
+  const isOpen = forceOpen !== undefined ? forceOpen : open;
   return (
     <>
       <Pressable
         onPress={onToggle}
         accessibilityRole="button"
-        accessibilityState={{ expanded: open }}
-        accessibilityLabel={`${open ? "Ocultar" : "Mostrar"} ${label}`}
+        accessibilityState={{ expanded: isOpen }}
+        accessibilityLabel={`${isOpen ? "Ocultar" : "Mostrar"} ${label}`}
         style={({ pressed }) => [styles.toggleRow, pressed && styles.togglePressed]}
       >
-        <Text style={styles.toggleChevron}>{open ? "\u25BE" : "\u25B8"}</Text>
+        <Text style={styles.toggleChevron}>{isOpen ? "\u25BE" : "\u25B8"}</Text>
         <Text style={styles.toggleLabel}>{label}</Text>
         {count !== undefined ? (
           <Text style={styles.toggleCount}>{count}</Text>
         ) : null}
       </Pressable>
-      {open ? <View style={styles.collapsibleBody}>{children}</View> : null}
+      {isOpen ? <View style={styles.collapsibleBody}>{children}</View> : null}
     </>
   );
 }

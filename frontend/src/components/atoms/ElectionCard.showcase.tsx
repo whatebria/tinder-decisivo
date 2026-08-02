@@ -3,14 +3,24 @@ import { ElectionCard } from "./ElectionCard";
 
 type ShowcaseEntry = Pick<
   CatalogEntry,
-  "description" | "variants" | "props" | "snippet"
+  "description" | "variants" | "props" | "snippet" | "status" | "doNotUse" | "relatedTo" | "dsReference"
 >;
 
 const showcase: ShowcaseEntry = {
   description:
-    "Card de eleccion activa en Home HUB. 3 variantes (active, secondary, pending). Badge de estado (Completado/Pendiente) si isCompleted esta definido.",
+    "Card de eleccion activa en el Home HUB. 3 variantes (active, secondary, pending). Badge de estado (Completado/Pendiente) si isCompleted esta definido. " +
+    "ATENCION: ubicacion atoms/ es incorrecta — pendiente mover a molecules/ (TASK-060).",
+
+  status: "experimental",
+
+  doNotUse: [
+    "No pasar matchPercent + progressPercent (modo legacy): usar respondidas + totalPreguntas.",
+    "No instanciar directamente en pantallas: usar ElectionsStrip que gestiona la lista completa.",
+  ],
+
+  relatedTo: ["ElectionsStrip", "ElectionCardAdd", "MatchSummaryCard"],
+  dsReference: "DS-12 Home HUB",
   variants: [
-    {
       label: "active + completado",
       render: () => (
         <ElectionCard
@@ -83,6 +93,10 @@ const showcase: ShowcaseEntry = {
     { name: "baseHint", type: "string", description: "Texto explicativo para cards esBase. Default: 'Mejora tus matches en todas las elecciones'." },
     { name: "variant", type: "\"active\" | \"secondary\" | \"pending\"", defaultValue: "\"secondary\"" },
     { name: "onPress", type: "() => void" },
+    // --- Props legacy (deprecadas) ---
+    { name: "matchPercent", type: "number | null", description: "@deprecated. Usar respondidas + totalPreguntas. Se ignora si respondidas esta definido." },
+    { name: "progressPercent", type: "number", description: "@deprecated. Usar respondidas + totalPreguntas." },
+    { name: "pendingLabel", type: "string", description: "@deprecated. Texto alt cuando no hay match." },
   ],
   snippet: `import { ElectionCard } from "@/components";
 
