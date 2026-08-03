@@ -226,7 +226,7 @@ export function AfinidadTab({
             Afinidad por eje tematico
           </Text>
           <View style={styles.radarWrap}>
-            <RadarChart data={chartData} size={180} color={scoreCol} />
+            <RadarChart data={chartData} size={300} color={scoreCol} />
           </View>
         </View>
       ) : null}

@@ -149,7 +149,7 @@ export function ResultadoHero({
   const radarBlock = hasRadar ? (
     <RadarChart
       data={ejeScores!}
-      size={isHorizontal ? 140 : 120}
+      size={isHorizontal ? 260 : 240}
       color={scoreColor}
       showLabels
     />
