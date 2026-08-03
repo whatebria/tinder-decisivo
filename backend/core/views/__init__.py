@@ -38,12 +38,15 @@ from .noticias import (
     NoticiaListCreateView,
 )
 from .eje import EjeListView
-from .perfil import ActualizarComunaView, CambiarPasswordView, PerfilView
+from .perfil import ActualizarComunaView, CambiarEmailView, CambiarPasswordView, CambiarUsernameView, PerfilView
 from .unidad_territorial import UnidadTerritorialListView
 from .territorio import ComunaListView, RegionListView
 
 __all__ = [
     "ActualizarComunaView",
+    "CambiarEmailView",
+    "CambiarPasswordView",
+    "CambiarUsernameView",
     "CandidatoDescartadoViewSet",
     "CandidatoDetailView",
     "CandidatoFavoritoViewSet",

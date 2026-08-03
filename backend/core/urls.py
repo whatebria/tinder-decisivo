@@ -33,6 +33,8 @@ from .views import (
     ReiniciarCuestionarioView,
     SubmitUserAnswersView,
     TipoEleccionListView,
+    CambiarUsernameView,
+    CambiarEmailView,
 )
 
 router = DefaultRouter()
@@ -62,6 +64,16 @@ urlpatterns = [
         "perfil/cambiar-password/",
         CambiarPasswordView.as_view(),
         name="perfil-cambiar-password",
+    ),
+    path(
+        "perfil/username/",
+        CambiarUsernameView.as_view(),
+        name="perfil-cambiar-username",
+    ),
+    path(
+        "perfil/email/",
+        CambiarEmailView.as_view(),
+        name="perfil-cambiar-email",
     ),
     path(
         "perfil/comuna/",

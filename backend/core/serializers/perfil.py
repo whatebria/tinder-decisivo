@@ -54,3 +54,21 @@ class CambiarPasswordSerializer(serializers.Serializer):
 
 class EliminarCuentaSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
+
+
+class CambiarUsernameSerializer(serializers.Serializer):
+    current_password = serializers.CharField(write_only=True)
+    new_username = serializers.CharField(
+        min_length=3,
+        max_length=30,
+        write_only=True,
+        help_text="Solo letras, numeros, puntos y guiones bajos (3-30 chars).",
+    )
+
+
+class CambiarEmailSerializer(serializers.Serializer):
+    current_password = serializers.CharField(write_only=True)
+    new_email = serializers.EmailField(
+        write_only=True,
+        help_text="Nuevo email del usuario. Debe ser unico.",
+    )

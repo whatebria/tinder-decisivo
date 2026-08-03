@@ -294,6 +294,30 @@ export async function cambiarPassword(
   return data;
 }
 
+/** UX-074: cambia el username verificando la password actual. */
+export async function cambiarUsername(
+  currentPassword: string,
+  newUsername: string
+): Promise<{ username: string }> {
+  const { data } = await apiClient.patch<{ username: string }>(
+    "/perfil/username/",
+    { current_password: currentPassword, new_username: newUsername }
+  );
+  return data;
+}
+
+/** UX-074: cambia el email verificando la password actual. */
+export async function cambiarEmail(
+  currentPassword: string,
+  newEmail: string
+): Promise<{ email: string }> {
+  const { data } = await apiClient.patch<{ email: string }>(
+    "/perfil/email/",
+    { current_password: currentPassword, new_email: newEmail }
+  );
+  return data;
+}
+
 export async function eliminarCuenta(password: string): Promise<void> {
   await apiClient.delete("/perfil/", { data: { password } });
 }

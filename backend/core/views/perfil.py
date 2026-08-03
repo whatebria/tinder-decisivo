@@ -17,7 +17,9 @@ from ..models import (
 )
 from ..serializers.perfil import (
     ActualizarComunaSerializer,
+    CambiarEmailSerializer,
     CambiarPasswordSerializer,
+    CambiarUsernameSerializer,
     ComunaInlineSerializer,
     EliminarCuentaSerializer,
     PerfilSerializer,
@@ -25,7 +27,9 @@ from ..serializers.perfil import (
 from ..services.perfil import (
     PerfilError,
     actualizar_comuna,
+    cambiar_email,
     cambiar_password,
+    cambiar_username,
     eliminar_cuenta,
 )
 
@@ -154,3 +158,60 @@ class ActualizarComunaView(APIView):
             status=status.HTTP_200_OK,
         )
 
+
+class CambiarUsernameView(APIView):
+    """PATCH /perfil/username/: cambia el nombre de usuario verificando la password actual."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+        request=CambiarUsernameSerializer,
+        responses={
+            200: OpenApiResponse(description="Username actualizado"),
+            400: OpenApiResponse(description="Password incorrecta, formato invalido o username en uso"),
+        },
+    )
+    def patch(self, request):
+        serializer = CambiarUsernameSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            cambiar_username(
+                request.user,
+                serializer.validated_data["new_username"],
+                serializer.validated_data["current_password"],
+            )
+        except PerfilError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"username": request.user.username}, status=status.HTTP_200_OK)
+
+
+class CambiarEmailView(APIView):
+    """PATCH /perfil/email/: cambia el email verificando la password actual."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+        request=CambiarEmailSerializer,
+        responses={
+            200: OpenApiResponse(description="Email actualizado"),
+            400: OpenApiResponse(description="Password incorrecta, email invalido o en uso"),
+        },
+    )
+    def patch(self, request):
+        serializer = CambiarEmailSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            cambiar_email(
+                request.user,
+                serializer.validated_data["new_email"],
+                serializer.validated_data["current_password"],
+            )
+        except PerfilError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"email": request.user.email}, status=status.HTTP_200_OK)

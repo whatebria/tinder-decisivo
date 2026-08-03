@@ -9,6 +9,7 @@ export { ConfirmModal } from "./ConfirmModal";
 export { PreguntaInfoModal } from "./PreguntaInfoModal";
 export { ShareModal } from "./ShareModal";
 export { CambiarPasswordModal } from "./CambiarPasswordModal";
+export { CambiarDatoModal, type CambiarDatoModalProps } from "./CambiarDatoModal";
 export { EliminarCuentaModal } from "./EliminarCuentaModal";
 export { EditarRespuestaModal } from "./EditarRespuestaModal";
 export { BookmarkActions } from "./BookmarkActions";

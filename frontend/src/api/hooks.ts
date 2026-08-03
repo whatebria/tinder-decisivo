@@ -16,7 +16,9 @@ import {
   addDescartado,
   addFavorito,
   addPosturaBookmark,
+  cambiarEmail,
   cambiarPassword,
+  cambiarUsername,
   confirmPasswordReset,
   deleteDescartado,
   deleteFavorito,
@@ -350,6 +352,34 @@ export function useCambiarPassword() {
   >({
     mutationFn: ({ currentPassword, newPassword }) =>
       cambiarPassword(currentPassword, newPassword),
+  });
+}
+
+/** UX-074: cambia el username del usuario. Invalida el perfil en cache. */
+export function useCambiarUsername() {
+  const qc = useQueryClient();
+  return useMutation<
+    { username: string },
+    Error,
+    { currentPassword: string; newUsername: string }
+  >({
+    mutationFn: ({ currentPassword, newUsername }) =>
+      cambiarUsername(currentPassword, newUsername),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.perfil }),
+  });
+}
+
+/** UX-074: cambia el email del usuario. Invalida el perfil en cache. */
+export function useCambiarEmail() {
+  const qc = useQueryClient();
+  return useMutation<
+    { email: string },
+    Error,
+    { currentPassword: string; newEmail: string }
+  >({
+    mutationFn: ({ currentPassword, newEmail }) =>
+      cambiarEmail(currentPassword, newEmail),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.perfil }),
   });
 }
 

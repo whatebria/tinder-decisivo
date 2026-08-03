@@ -2,6 +2,7 @@
 
 Cubre:
 - Cambio de password (con verificacion del password actual)
+- Cambio de username y email (con verificacion del password actual)
 - Eliminacion de cuenta (con verificacion de password)
 - Actualizacion de comuna (con auto-invalidacion de matches cacheados)
 
@@ -11,6 +12,7 @@ logica de dominio).
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Optional
 
@@ -21,6 +23,10 @@ from django.db import transaction
 from rest_framework.authtoken.models import Token
 
 from core.models import Comuna, MatchCandidato, UserProfile
+
+# Regex de username: letras, numeros, punto y guion bajo.
+# Sin punto/guion al inicio o final. 3-30 chars.
+_USERNAME_RE = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9._]{1,28}[a-zA-Z0-9]$|^[a-zA-Z0-9]{1,30}$")
 
 
 class PerfilError(Exception):
@@ -80,6 +86,76 @@ def eliminar_cuenta(user: User, password: str) -> None:
     with transaction.atomic():
         user.delete()
 
+
+def cambiar_username(user: User, new_username: str, current_password: str) -> None:
+    """Cambia el username del usuario tras verificar la password actual.
+
+    Validaciones:
+    - La password actual debe ser correcta.
+    - El username debe tener 3-30 chars, solo [a-zA-Z0-9._].
+    - No puede empezar/terminar con punto o guion bajo.
+    - No puede estar ya en uso por otro usuario.
+    - No puede ser identico al username actual.
+
+    Raises:
+        PerfilError: si alguna validacion falla.
+    """
+    if not user.check_password(current_password):
+        raise PerfilError("La contraseña es incorrecta.")
+
+    new_username = new_username.strip()
+
+    if not (3 <= len(new_username) <= 30):
+        raise PerfilError("El nombre de usuario debe tener entre 3 y 30 caracteres.")
+
+    if not _USERNAME_RE.match(new_username):
+        raise PerfilError(
+            "Solo se permiten letras, números, puntos y guiones bajos. "
+            "No puede empezar ni terminar con punto o guion bajo."
+        )
+
+    if new_username == user.username:
+        raise PerfilError("El nuevo nombre de usuario es igual al actual.")
+
+    if User.objects.filter(username__iexact=new_username).exclude(pk=user.pk).exists():
+        raise PerfilError("Ese nombre de usuario ya está en uso.")
+
+    user.username = new_username
+    user.save(update_fields=["username"])
+
+
+def cambiar_email(user: User, new_email: str, current_password: str) -> None:
+    """Cambia el email del usuario tras verificar la password actual.
+
+    No requiere verificacion por link (la app no tiene SMTP configurado).
+    El cambio es inmediato pero requiere la password actual como confirmacion
+    para prevenir cambios por tokens comprometidos.
+
+    Validaciones:
+    - La password actual debe ser correcta.
+    - El email debe tener formato valido.
+    - No puede estar en uso por otro usuario.
+    - No puede ser identico al email actual.
+
+    Raises:
+        PerfilError: si alguna validacion falla.
+    """
+    if not user.check_password(current_password):
+        raise PerfilError("La contraseña es incorrecta.")
+
+    new_email = new_email.strip().lower()
+
+    if not new_email:
+        raise PerfilError("El email no puede estar vacío.")
+
+    if new_email == (user.email or "").lower():
+        raise PerfilError("El nuevo email es igual al actual.")
+
+    if User.objects.filter(email__iexact=new_email).exclude(pk=user.pk).exists():
+        raise PerfilError("Ese email ya está en uso por otra cuenta.")
+
+    user.email = new_email
+    user.save(update_fields=["email"])
 
 @dataclass
 class ActualizarComunaResult:

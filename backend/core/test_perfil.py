@@ -1,4 +1,4 @@
-"""Tests del perfil de usuario (info, cambio password, eliminar cuenta)."""
+"""Tests del perfil de usuario (info, cambio password, eliminar cuenta, cambiar username/email)."""
 
 import pytest
 from django.contrib.auth.models import User
@@ -17,7 +17,9 @@ from core.models import (
 )
 from core.services.perfil import (
     PerfilError,
+    cambiar_email,
     cambiar_password,
+    cambiar_username,
     eliminar_cuenta,
 )
 
@@ -201,3 +203,148 @@ class TestEliminarCuentaAPI:
         )
         assert resp.status_code == 400
         assert User.objects.filter(id=user.id).exists()
+
+
+# ---------------------------------------------------------------------------
+# Service: cambiar_username
+# ---------------------------------------------------------------------------
+class TestCambiarUsername:
+    def test_username_correcto_cambia(self, user, db):
+        cambiar_username(user, "nuevo_user", "ActualPass123!")
+        user.refresh_from_db()
+        assert user.username == "nuevo_user"
+
+    def test_password_incorrecta_falla(self, user, db):
+        with pytest.raises(PerfilError, match="incorrecta"):
+            cambiar_username(user, "nuevo_user", "WrongPass")
+
+    def test_username_igual_al_actual_falla(self, user, db):
+        with pytest.raises(PerfilError, match="igual al actual"):
+            cambiar_username(user, "jenny", "ActualPass123!")
+
+    def test_username_muy_corto_falla(self, user, db):
+        with pytest.raises(PerfilError, match="entre 3 y 30"):
+            cambiar_username(user, "ab", "ActualPass123!")
+
+    def test_username_con_espacios_falla(self, user, db):
+        with pytest.raises(PerfilError):
+            cambiar_username(user, "user name", "ActualPass123!")
+
+    def test_username_duplicado_falla(self, user, db):
+        User.objects.create_user(username="otro_user", password="Pass123!")
+        with pytest.raises(PerfilError, match="ya est"):
+            cambiar_username(user, "otro_user", "ActualPass123!")
+
+    def test_username_duplicado_case_insensitive(self, user, db):
+        User.objects.create_user(username="OTRO_USER", password="Pass123!")
+        with pytest.raises(PerfilError, match="ya est"):
+            cambiar_username(user, "otro_user", "ActualPass123!")
+
+
+class TestCambiarUsernameAPI:
+    def test_requiere_auth(self, db):
+        client = APIClient()
+        resp = client.patch(
+            reverse("perfil-cambiar-username"),
+            {"current_password": "X", "new_username": "nuevo"},
+            format="json",
+        )
+        assert resp.status_code == 401
+
+    def test_flow_ok(self, auth_client, user):
+        resp = auth_client.patch(
+            reverse("perfil-cambiar-username"),
+            {"current_password": "ActualPass123!", "new_username": "nuevo_user"},
+            format="json",
+        )
+        assert resp.status_code == 200
+        assert resp.data["username"] == "nuevo_user"
+        user.refresh_from_db()
+        assert user.username == "nuevo_user"
+
+    def test_password_incorrecta_400(self, auth_client, user):
+        resp = auth_client.patch(
+            reverse("perfil-cambiar-username"),
+            {"current_password": "Wrong", "new_username": "nuevo_user"},
+            format="json",
+        )
+        assert resp.status_code == 400
+        user.refresh_from_db()
+        assert user.username == "jenny"  # sin cambios
+
+    def test_username_en_uso_400(self, auth_client, user, db):
+        User.objects.create_user(username="tomado", password="Pass123!")
+        resp = auth_client.patch(
+            reverse("perfil-cambiar-username"),
+            {"current_password": "ActualPass123!", "new_username": "tomado"},
+            format="json",
+        )
+        assert resp.status_code == 400
+
+
+# ---------------------------------------------------------------------------
+# Service: cambiar_email
+# ---------------------------------------------------------------------------
+class TestCambiarEmail:
+    def test_email_correcto_cambia(self, user, db):
+        cambiar_email(user, "nuevo@example.com", "ActualPass123!")
+        user.refresh_from_db()
+        assert user.email == "nuevo@example.com"
+
+    def test_normaliza_email_a_lowercase(self, user, db):
+        cambiar_email(user, "NUEVO@Example.COM", "ActualPass123!")
+        user.refresh_from_db()
+        assert user.email == "nuevo@example.com"
+
+    def test_password_incorrecta_falla(self, user, db):
+        with pytest.raises(PerfilError, match="incorrecta"):
+            cambiar_email(user, "nuevo@example.com", "Wrong")
+
+    def test_email_igual_al_actual_falla(self, user, db):
+        with pytest.raises(PerfilError, match="igual al actual"):
+            cambiar_email(user, "jenny@example.com", "ActualPass123!")
+
+    def test_email_duplicado_falla(self, user, db):
+        User.objects.create_user(username="otro", email="otro@example.com", password="Pass123!")
+        with pytest.raises(PerfilError, match="ya est"):
+            cambiar_email(user, "otro@example.com", "ActualPass123!")
+
+
+class TestCambiarEmailAPI:
+    def test_requiere_auth(self, db):
+        client = APIClient()
+        resp = client.patch(
+            reverse("perfil-cambiar-email"),
+            {"current_password": "X", "new_email": "x@y.com"},
+            format="json",
+        )
+        assert resp.status_code == 401
+
+    def test_flow_ok(self, auth_client, user):
+        resp = auth_client.patch(
+            reverse("perfil-cambiar-email"),
+            {"current_password": "ActualPass123!", "new_email": "nuevo@example.com"},
+            format="json",
+        )
+        assert resp.status_code == 200
+        assert resp.data["email"] == "nuevo@example.com"
+        user.refresh_from_db()
+        assert user.email == "nuevo@example.com"
+
+    def test_password_incorrecta_400(self, auth_client, user):
+        resp = auth_client.patch(
+            reverse("perfil-cambiar-email"),
+            {"current_password": "Wrong", "new_email": "nuevo@example.com"},
+            format="json",
+        )
+        assert resp.status_code == 400
+        user.refresh_from_db()
+        assert user.email == "jenny@example.com"  # sin cambios
+
+    def test_email_invalido_400(self, auth_client):
+        resp = auth_client.patch(
+            reverse("perfil-cambiar-email"),
+            {"current_password": "ActualPass123!", "new_email": "no-es-un-email"},
+            format="json",
+        )
+        assert resp.status_code == 400

@@ -1,11 +1,13 @@
 /**
  * PerfilScreen: info del usuario + contadores + acciones (cambiar password,
- * eliminar cuenta).
+ * cambiar username, cambiar email, eliminar cuenta).
  *
  * REFACTOR-005: ThemeToggle y Cerrar sesion se eliminaron de esta pantalla
  * (ambos ya estan en ConfiguracionScreen). PerfilScreen retiene solo lo que
- * es especifico del perfil: ubicacion electoral, cambiar contrasena y
+ * es especifico del perfil: ubicacion electoral, cambiar datos de cuenta y
  * eliminar cuenta.
+ *
+ * UX-074: los campos username y email ahora son editables desde la app.
  */
 
 import React, { useCallback, useMemo, useState } from "react";
@@ -14,13 +16,16 @@ import { ScrollView, StyleSheet, StyleProp, TextStyle, Text, View } from "react-
 import { getErrorMessage } from "../api/client";
 import {
   useActualizarComuna,
+  useCambiarEmail,
   useCambiarPassword,
+  useCambiarUsername,
   useEliminarCuenta,
   usePerfil,
 } from "../api/hooks";
 import {
   AppShell,
   Button,
+  CambiarDatoModal,
   CambiarPasswordModal,
   Divider,
   EliminarCuentaModal,
@@ -46,11 +51,15 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
   const logout = useAuthStore((s) => s.logout);
   const perfilQ = usePerfil();
   const cambiar = useCambiarPassword();
+  const cambiarUser = useCambiarUsername();
+  const cambiarMail = useCambiarEmail();
   const eliminar = useEliminarCuenta();
   const actualizarComuna = useActualizarComuna();
   const toast = useToast();
   const [passOpen, setPassOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [usernameOpen, setUsernameOpen] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
 
   // TASK-043: useCallback para referencias estables (handlers pasan como props).
   const handleUbicacion = useCallback(async (comuna: ComunaInline | null) => {
@@ -91,6 +100,31 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
       toast.error("No pudimos cambiar la contraseña", getErrorMessage(err));
     }
   }, [cambiar, toast]);
+
+  // UX-074: handlers para cambio de username y email.
+  const handleCambiarUsername = useCallback(async (newValue: string, currentPassword: string) => {
+    try {
+      await cambiarUser.mutateAsync({ currentPassword, newUsername: newValue });
+      setUsernameOpen(false);
+      requestAnimationFrame(() =>
+        toast.success("Nombre de usuario actualizado", `Ahora eres @${newValue}.`)
+      );
+    } catch (err) {
+      toast.error("No pudimos cambiar el usuario", getErrorMessage(err));
+    }
+  }, [cambiarUser, toast]);
+
+  const handleCambiarEmail = useCallback(async (newValue: string, currentPassword: string) => {
+    try {
+      await cambiarMail.mutateAsync({ currentPassword, newEmail: newValue });
+      setEmailOpen(false);
+      requestAnimationFrame(() =>
+        toast.success("Email actualizado", `Ahora tu email es ${newValue}.`)
+      );
+    } catch (err) {
+      toast.error("No pudimos cambiar el email", getErrorMessage(err));
+    }
+  }, [cambiarMail, toast]);
 
   const handleEliminar = useCallback(async (password: string) => {
     try {
@@ -134,10 +168,21 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
                   value={perfil.username}
                   valueStyle={typography.h3}
                 />
+                <NavRow
+                  label="Cambiar usuario"
+                  onPress={() => setUsernameOpen(true)}
+                  accessibilityLabel="Cambiar nombre de usuario"
+                />
+                <Divider />
                 <InfoRow
                   label="Email"
                   value={perfil.email || "(sin email registrado)"}
                   valueStyle={typography.body}
+                />
+                <NavRow
+                  label="Cambiar email"
+                  onPress={() => setEmailOpen(true)}
+                  accessibilityLabel="Cambiar email"
                 />
                 <InfoRow
                   label="Miembro desde"
@@ -149,14 +194,6 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
                   valueMuted
                 />
               </View>
-
-              {/* UX-045: nota discreta que informa los campos read-only. */}
-              <Text
-                style={[styles.readOnlyNote, { color: c.textSecondary }]}
-              >
-                El nombre de usuario y el email no se pueden cambiar desde la
-                app.
-              </Text>
 
               {/* Contadores */}
               <SectionTitle title="Mi actividad" />
@@ -248,6 +285,26 @@ export function PerfilScreen({ navigation }: RootStackScreenProps<"Perfil">) {
           onCancel={() => setPassOpen(false)}
           onSubmit={handleCambiarPass}
           loading={cambiar.isPending}
+        />
+        {/* UX-074: modales para cambio de username y email. */}
+        <CambiarDatoModal
+          visible={usernameOpen}
+          title="Cambiar usuario"
+          fieldLabel="Nuevo nombre de usuario"
+          fieldHelper="3–30 caracteres. Solo letras, números, puntos y guiones bajos."
+          emailMode={false}
+          loading={cambiarUser.isPending}
+          onCancel={() => setUsernameOpen(false)}
+          onSubmit={handleCambiarUsername}
+        />
+        <CambiarDatoModal
+          visible={emailOpen}
+          title="Cambiar email"
+          fieldLabel="Nuevo email"
+          emailMode
+          loading={cambiarMail.isPending}
+          onCancel={() => setEmailOpen(false)}
+          onSubmit={handleCambiarEmail}
         />
         <EliminarCuentaModal
           visible={deleteOpen}
