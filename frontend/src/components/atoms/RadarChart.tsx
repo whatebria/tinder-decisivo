@@ -43,7 +43,7 @@ const RADAR_CHAR_WIDTH_RATIO      = 0.55;
 const RADAR_LABEL_HALF_WIDTH_PX   =
   Math.ceil((RADAR_LABEL_MAX_CHARS * RADAR_LABEL_FONT_PX * RADAR_CHAR_WIDTH_RATIO) / 2);
 /** Distancia en px del borde del poligono al centro del label. */
-const RADAR_LABEL_OFFSET_PX       = 48;
+const RADAR_LABEL_OFFSET_PX       = 24;
 /**
  * Padding total reservado en cada lado del SVG para los labels cuando
  * showLabels=true. El radio del poligono = (size/2) - RADAR_LABEL_PAD.
