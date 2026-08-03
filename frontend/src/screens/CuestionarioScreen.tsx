@@ -407,8 +407,8 @@ export function CuestionarioScreen({
 
       <ConfirmModal
         visible={confirmBackOpen}
-        title="\u00bfSalir del cuestionario?"
-        message="Tienes respuestas sin enviar. Si sales, tu progreso no se guardar\u00e1 en el servidor hasta que presiones Enviar."
+        title="¿Salir del cuestionario?"
+        message="Tienes respuestas sin enviar. Si sales, tu progreso no se guardará en el servidor hasta que presiones Enviar."
         confirmLabel="Salir"
         cancelLabel="Seguir respondiendo"
         variant="danger"
