@@ -47,7 +47,7 @@ import {
 import { HomeElectionItem } from "./Home/HomeElectionItem";
 import { HomeMatchLocked } from "./Home/HomeMatchLocked";
 import { HomeTrustSection } from "./Home/HomeTrustSection";
-import { computeDiasRestantes } from "../domain/eleccion";
+import { computeDiasRestantes, sortTiposByPriority } from "../domain/eleccion";
 import type { RootStackScreenProps } from "../navigation/types";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
@@ -103,13 +103,20 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
   const displayName = displaySource ? deriveDisplayName(displaySource) : undefined;
   const userInitials = displaySource ? deriveInitials(displaySource) : undefined;
 
-  // Solo elecciones activadas por el user
+  // Solo elecciones activadas por el user, ordenadas por prioridad.
+  // La primera es la eleccion principal: aparece primera en la fila,
+  // define el progreso del hero y es la prioridad en novedades.
   const { activas: tiposActivos } = useMemo(
     () => partitionTipos(tipos, electionsActiveIds),
     [tipos, electionsActiveIds],
   );
 
-  const activeId = activeTipoId ?? tiposActivos[0]?.id ?? null;
+  const tiposOrdenados = useMemo(
+    () => sortTiposByPriority(tiposActivos),
+    [tiposActivos],
+  );
+
+  const activeId = activeTipoId ?? tiposOrdenados[0]?.id ?? null;
 
   const progresoByTipo = useMemo(
     () => indexProgresoByTipo(progresoItems),
@@ -176,9 +183,9 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
       navigation.navigate("Resultados");
       return;
     }
-    const tipo = tiposActivos.find((t) => t.id === activeId) ?? tiposActivos[0];
+    const tipo = tiposOrdenados.find((t) => t.id === activeId) ?? tiposOrdenados[0];
     if (tipo) void iniciarCuestionario(tipo);
-  }, [mejoresMatches.length, navigation, tiposActivos, activeId, iniciarCuestionario]);
+  }, [mejoresMatches.length, navigation, tiposOrdenados, activeId, iniciarCuestionario]);
 
   const handleConfirmReiniciar = useCallback(async () => {
     if (!tipoAReiniciar?.id) return;
@@ -191,24 +198,26 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
     }
   }, [reiniciar, tipoAReiniciar, toast]);
 
-  // Novedades: acciones sugeridas (cuestionarios pendientes).
-  // BUG-023: iniciarCuestionario incluida en deps -- elimina el eslint-disable.
+  // Novedades: sugiere el primer cuestionario incompleto en orden de prioridad
+  // (excluyendo el activeId que ya esta en el hero).
   const novedades: NovedadFeedItem[] = useMemo(() => {
     const items: NovedadFeedItem[] = [];
-    const tipoSinCuestionario = tiposActivos.find((t) => t.id && t.id !== activeId);
-    if (tipoSinCuestionario) {
+    const proximoTipo = tiposOrdenados.find(
+      (t) => t.id && t.id !== activeId && !progresoByTipo.get(t.id)?.completa,
+    );
+    if (proximoTipo) {
       items.push({
-        key: `action-${tipoSinCuestionario.id}`,
+        key: `action-${proximoTipo.id}`,
         kind: "action",
         icon: "bell",
-        title: `Responde el cuestionario de ${tipoSinCuestionario.nombre}`,
+        title: `Responde el cuestionario de ${proximoTipo.nombre}`,
         subtitle: "Descubre tu top match",
         ctaLabel: "Ir",
-        onCta: () => void iniciarCuestionario(tipoSinCuestionario),
+        onCta: () => void iniciarCuestionario(proximoTipo),
       });
     }
     return items;
-  }, [tiposActivos, activeId, iniciarCuestionario]);
+  }, [tiposOrdenados, activeId, progresoByTipo, iniciarCuestionario]);
 
   // CTA del hero segun estado global
   const heroCta = useMemo(() => {
@@ -219,15 +228,14 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
 
   // Countdown: dias hasta la eleccion con fecha mas proxima
   const countdownDays = useMemo(() => {
-    const fechas = tiposActivos
+    const fechas = tiposOrdenados
       .map((t) => computeDiasRestantes(t.fecha_eleccion ?? null))
       .filter((d): d is number => d !== null && d >= 0);
     if (fechas.length === 0) return null;
     return Math.min(...fechas);
-  }, [tiposActivos]);
+  }, [tiposOrdenados]);
 
-  // Si el user NO tiene ninguna eleccion completa -> mostrar lock
-  const sinMatches = mejoresMatches.length === 0 && tiposActivos.length > 0;
+  const sinMatches = mejoresMatches.length === 0 && tiposOrdenados.length > 0;
 
   // BUG-040: derivaciones del top global fuera del JSX para evitar IIFE en render.
   const topGlobalTop = topGlobalMatch?.top_match ?? null;
@@ -242,9 +250,9 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
     const p = progresoByTipo.get(activeId);
     if (!p) return "Completa el cuestionario para ver tu candidato";
     const faltan = p.total_preguntas - p.respondidas;
-    const tipo = tiposActivos.find((t) => t.id === activeId);
+    const tipo = tiposOrdenados.find((t) => t.id === activeId);
     return `Faltan ${faltan} pregunta${faltan !== 1 ? "s" : ""} en ${tipo?.nombre ?? "el cuestionario"}`;
-  }, [activeId, progresoByTipo, tiposActivos]);
+  }, [activeId, progresoByTipo, tiposOrdenados]);
 
   // Mostrar trust section solo para usuarios sin ningun cuestionario iniciado
   // UX-056: HomeTrustSection no reaparece al reiniciar si el usuario ya completo antes.
@@ -318,15 +326,15 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            {tiposActivos.length === 0 ? null : (
+            {tiposOrdenados.length === 0 ? null : (
               <View>
                 <SectionTitle
-                  title={`Tus elecciones (${tiposActivos.length})`}
+                  title={`Tus elecciones (${tiposOrdenados.length})`}
                   actionLabel="Gestionar"
                   onAction={() => navigation.navigate("GestionElecciones")}
                 />
                 <View style={{ gap: spacing.sp3, marginTop: spacing.sp3 }}>
-                  {tiposActivos.map((tipo) => {
+                  {tiposOrdenados.map((tipo) => {
                     const progreso = tipo.id ? progresoByTipo.get(tipo.id) : undefined;
                     const yaCompleto = !isGuest && progreso?.completa === true;
                     return (
@@ -357,7 +365,7 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
               </View>
             )}
 
-            {tiposActivos.length > 0 ? (
+            {tiposOrdenados.length > 0 ? (
               <View>
                 <SectionTitle title="Tu mejor match" />
                 <View style={{ marginTop: spacing.sp3 }}>
@@ -366,7 +374,7 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
                       body={lockBody}
                       onContinuar={() => {
                         const tipo =
-                          tiposActivos.find((t) => t.id === activeId) ?? tiposActivos[0];
+                          tiposOrdenados.find((t) => t.id === activeId) ?? tiposOrdenados[0];
                         if (tipo) iniciarCuestionario(tipo);
                       }}
                     />

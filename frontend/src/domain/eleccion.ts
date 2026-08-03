@@ -110,6 +110,49 @@ export function formatDiasRestantesChip(
   return `${dias}d`;
 }
 
+// -- Orden de prioridad de elecciones --------------------------------------
+
+/**
+ * DEBUG: orden de prioridad para las elecciones 2025.
+ * Cuando el backend exponga un campo `prioridad` o `orden`, reemplazar
+ * la heuristica de nombre por ese campo sin tocar los consumers.
+ */
+const DEBUG_PRIORITY_NAMES = ["presidencial", "diputados", "senadores"] as const;
+
+function debugPriorityIndex(nombre: string): number {
+  const lower = nombre.toLowerCase();
+  const idx = DEBUG_PRIORITY_NAMES.findIndex((n) => lower.includes(n));
+  return idx === -1 ? DEBUG_PRIORITY_NAMES.length : idx;
+}
+
+export interface TipoEleccionMinimo {
+  nombre: string;
+  fecha_eleccion?: string | null;
+}
+
+/**
+ * Ordena tipos de eleccion por prioridad de presentacion:
+ *   1. DEBUG: Presidencial → Diputados → Senadores (heuristica por nombre).
+ *   2. Fecha mas proxima primero (sin fecha al final).
+ *
+ * Devuelve una NUEVA lista — no muta el array original.
+ * Cuando el backend exponga `prioridad`, reemplazar debugPriorityIndex por ese.
+ */
+export function sortTiposByPriority<T extends TipoEleccionMinimo>(tipos: T[]): T[] {
+  return [...tipos].sort((a, b) => {
+    const pA = debugPriorityIndex(a.nombre);
+    const pB = debugPriorityIndex(b.nombre);
+    if (pA !== pB) return pA - pB;
+    // Empate de prioridad: fecha mas proxima primero, sin fecha al final.
+    const dA = computeDiasRestantes(a.fecha_eleccion);
+    const dB = computeDiasRestantes(b.fecha_eleccion);
+    if (dA === null && dB === null) return 0;
+    if (dA === null) return 1;
+    if (dB === null) return -1;
+    return dA - dB;
+  });
+}
+
 // -- Filtro territorial -----------------------------------------------------
 
 /**
