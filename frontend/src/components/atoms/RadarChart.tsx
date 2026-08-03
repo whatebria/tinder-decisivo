@@ -1,13 +1,13 @@
 /**
- * RadarChart: polígono SVG que muestra el score por eje temático.
+ * RadarChart: poligono SVG que muestra el score por eje tematico.
  *
  * Sirve para visualizar el breakdown de match de un candidato.
  * Usa react-native-svg (funciona en iOS, Android y web).
  *
  * Props:
  * - data: Record<ejeName, percentage 0-100>
- * - size: pixels del cuadrado contenedor
- * - color: color del polígono (default primary)
+ * - size: pixels del poligono (el SVG renderiza mas grande cuando showLabels=true)
+ * - color: color del poligono (default primary)
  * - showLabels: si muestra los nombres de los ejes alrededor
  */
 
@@ -23,45 +23,49 @@ import Svg, {
 import { useThemeColors } from "../../theme/useTheme";
 import { EJE_LABELS } from "../../domain/dimensiones";
 
-// -- Constantes de layout (TASK-034) -----------------------------------------
+// -- Constantes de layout (TASK-034) ------------------------------------------
+
+/** El poligono ocupa este ratio de `size` desde el centro hacia cada vertice. */
+const RADAR_POLYGON_RATIO         = 0.45;
 /**
- * Ratio radio/size cuando los labels estan visibles.
- * Valor mas alto que antes (0.35 -> 0.42) porque el viewBox con padding
- * reduce el area visual; subimos el ratio para compensar y mantener el
- * poligono a un tamano razonable.
+ * Distancia en px reales del borde del poligono al centro del label.
+ * Espacio visual entre el poligono y el texto.
  */
-const RADAR_RADIUS_RATIO_LABELED   = 0.42;
-/** Ratio radio/size sin labels (ocupa mas espacio disponible). */
-const RADAR_RADIUS_RATIO_UNLABELED = 0.45;
-/** Distancia en coordenadas del label al borde exterior del radar. */
-const RADAR_LABEL_OFFSET_PX        = 48;
+const RADAR_LABEL_OFFSET_PX       = 20;
+/**
+ * Estimado de la mitad del ancho del label mas largo a fontSize=11.
+ * "Institucional" @ 11px ~ 84px de ancho -> mitad ~ 42px.
+ */
+const RADAR_LABEL_HALF_WIDTH_PX   = 42;
+/**
+ * UX-061 (fix definitivo): padding fisico en cada lado del area de poligono.
+ * El SVG se infla por este valor en cada borde cuando showLabels=true, de modo
+ * que los labels tienen espacio real sin tricks de viewBox.
+ *   svgSize = size + RADAR_LABEL_PAD * 2
+ * Los llamadores reciben un SVG fisicamente mas grande.
+ */
+const RADAR_LABEL_PAD             = RADAR_LABEL_OFFSET_PX + RADAR_LABEL_HALF_WIDTH_PX; // 62px
+/** Tamano de fuente visual de los labels (px reales, sin escalar). */
+const RADAR_LABEL_FONT_PX         = 11;
 /** Opacidad del fill del poligono (suave, no solido). */
-const RADAR_FILL_OPACITY           = 0.25;
+const RADAR_FILL_OPACITY          = 0.25;
 /** Longitud maxima de un label antes de truncar (cubre "Institucional" = 13 chars). */
-const RADAR_LABEL_MAX_CHARS        = 14;
-/**
- * UX-061 (fix definitivo): padding extra en el sistema de coordenadas del
- * viewBox de la SVG. Permite que los labels que caen cerca del borde no
- * queden cortados por el viewport de la SVG, sin cambiar el tamano visual
- * del componente (width/height siguen siendo `size`).
- */
-const RADAR_LABEL_PAD              = 40;
+const RADAR_LABEL_MAX_CHARS       = 14;
 
 /**
  * UX-061: resuelve el label de un eje con normalizacion defensiva.
  *
  * 1. Busca en EJE_LABELS (preferencia, tiene labels curados).
  * 2. Si no encuentra, aplica sentence-case al raw key para evitar MAYUSCULAS.
- * 3. Si el resultado supera RADAR_LABEL_MAX_CHARS, trunca con "..." para que
- *    no salga del viewport SVG.
+ * 3. Si supera RADAR_LABEL_MAX_CHARS, trunca con "..." .
  */
 function resolveEjeLabel(eje: string): string {
   const curated = EJE_LABELS[eje];
   if (curated) return curated;
-  // Fallback: sentence-case del raw key (ej. "MEDIO_AMBIENTE" -> "Medio ambiente")
-  const normalized = eje.charAt(0).toUpperCase() + eje.slice(1).toLowerCase().replace(/_/g, " ");
+  const normalized =
+    eje.charAt(0).toUpperCase() + eje.slice(1).toLowerCase().replace(/_/g, " ");
   if (normalized.length > RADAR_LABEL_MAX_CHARS) {
-    return normalized.slice(0, RADAR_LABEL_MAX_CHARS - 1) + "\u2026"; // ellipsis
+    return normalized.slice(0, RADAR_LABEL_MAX_CHARS - 1) + "\u2026";
   }
   return normalized;
 }
@@ -88,8 +92,6 @@ interface Point {
 /**
  * UX-038: genera un accessibilityLabel textual para lectores de pantalla.
  * WCAG 1.1.1 Nivel A: todo contenido no-texto necesita alternativa textual.
- *
- * Ejemplo: "Grafico de afinidad por eje tematico. Economia: 72%, Sociedad: 85%."
  */
 function buildA11yLabel(data: Record<string, number>): string {
   const ejes = Object.entries(data)
@@ -121,29 +123,23 @@ export function RadarChart({
   const c = useThemeColors();
   const strokeColor = color ?? c.primary;
   const ejes = useMemo(() => Object.keys(data), [data]);
-  const cx = size / 2;
-  const cy = size / 2;
-  // Deja margen para labels
-  const radius = showLabels ? size * RADAR_RADIUS_RATIO_LABELED : size * RADAR_RADIUS_RATIO_UNLABELED;
-  const step = (2 * Math.PI) / Math.max(ejes.length, 1);
-  // Angulo inicial: arriba (12 en punto)
-  const startAngle = -Math.PI / 2;
 
   if (ejes.length < 3) {
     return null; // radar no tiene sentido con menos de 3 ejes
   }
 
-  // UX-061: viewBox padding para que los labels no queden cortados.
-  // vbScale = cuanto se achica 1 unidad de coordenada al renderizarse en `size` px.
-  // labelFontSize compensa el escalado para que el texto aparezca siempre a 11px visuales.
-  const svgPad = showLabels ? RADAR_LABEL_PAD : 0;
-  const vbSize = size + svgPad * 2;
-  const vbScale = size / vbSize;
-  const labelFontSize = Math.round(11 / vbScale); // 11px visuales sin importar el padding
+  // El SVG fisico es mas grande que `size` cuando hay labels para que el
+  // texto tenga espacio real sin viewBox tricks.
+  const svgSize = showLabels ? size + RADAR_LABEL_PAD * 2 : size;
+  const cx = svgSize / 2;
+  const cy = svgSize / 2;
+  // El radio del poligono se basa en `size`, no en `svgSize`.
+  // El padding extra es exclusivamente para los labels.
+  const radius = size * RADAR_POLYGON_RATIO;
+  const step = (2 * Math.PI) / Math.max(ejes.length, 1);
+  const startAngle = -Math.PI / 2; // arriba (12 en punto)
 
-  // Grid: circulos concentricos + lineas radiales
-  // Grid: poligonos concentricos (uno por nivel) en vez de circulos,
-  // para un look angular en lugar del circular original.
+  // Grid: poligonos concentricos para look angular (no circulos).
   const gridPolygons = Array.from({ length: levels }, (_, i) => {
     const r = ((i + 1) / levels) * radius;
     const pts = ejes
@@ -163,6 +159,7 @@ export function RadarChart({
     );
   });
 
+  // Lineas radiales desde el centro a cada vertice.
   const gridLines = ejes.map((_, i) => {
     const angle = startAngle + i * step;
     const p = polarToCartesian(cx, cy, radius, angle);
@@ -179,7 +176,7 @@ export function RadarChart({
     );
   });
 
-  // Polígono de datos
+  // Poligono de datos.
   const dataPoints: Point[] = ejes.map((eje, i) => {
     const angle = startAngle + i * step;
     const value = Math.max(0, Math.min(100, data[eje] ?? 0));
@@ -188,28 +185,32 @@ export function RadarChart({
   });
   const polygonPoints = dataPoints.map((p) => `${p.x},${p.y}`).join(" ");
 
-  // Vertices marcados
+  // Vertices marcados con un punto.
   const vertexDots = dataPoints.map((p, i) => (
     <Circle key={i} cx={p.x} cy={p.y} r={3} fill={strokeColor} />
   ));
 
-  // Labels de los ejes
+  // Labels de los ejes — posicionados en el area de padding exterior al poligono.
   const labels = showLabels
     ? ejes.map((eje, i) => {
         const angle = startAngle + i * step;
-        const labelPos = polarToCartesian(cx, cy, radius + RADAR_LABEL_OFFSET_PX, angle);
-        const label = resolveEjeLabel(eje);
+        const labelPos = polarToCartesian(
+          cx,
+          cy,
+          radius + RADAR_LABEL_OFFSET_PX,
+          angle
+        );
         return (
           <SvgText
             key={i}
             x={labelPos.x}
             y={labelPos.y}
-            fontSize={labelFontSize}
+            fontSize={RADAR_LABEL_FONT_PX}
             fill={c.textSecondary}
             textAnchor="middle"
             alignmentBaseline="middle"
           >
-            {label}
+            {resolveEjeLabel(eje)}
           </SvgText>
         );
       })
@@ -217,13 +218,10 @@ export function RadarChart({
 
   return (
     <Svg
-      width={size}
-      height={size}
-      viewBox={`${-svgPad} ${-svgPad} ${vbSize} ${vbSize}`}
+      width={svgSize}
+      height={svgSize}
       accessibilityRole="image"
       accessibilityLabel={
-        // null o "" -> decorativo, no anuncia nada al lector de pantalla.
-        // undefined -> genera la descripcion automatica a partir de los datos.
         accessibilityLabelProp != null
           ? accessibilityLabelProp
           : buildA11yLabel(data)
