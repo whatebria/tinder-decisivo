@@ -74,7 +74,7 @@ export function LoginScreen({ navigation }: RootStackScreenProps<"Login">) {
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
-      <Heading level={1}>Servel</Heading>
+      <Heading level={1}>VotoAFin</Heading>
       <Text style={styles.subtitle}>
         Ingresa a tu cuenta para encontrar tu candidato ideal.
       </Text>
