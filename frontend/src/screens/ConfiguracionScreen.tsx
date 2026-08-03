@@ -43,6 +43,18 @@ import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
 
+// -- Estilos estaticos (sin dependencia de tema) -- nivel modulo para que
+// Fast Refresh los recargue siempre, sin quedar atrapados en useMemo([c]).
+// UX-063: topBar identico a CandidatosScreen y CompararScreen.
+const styles = StyleSheet.create({
+  content: { paddingBottom: spacing.sp8, gap: spacing.sp5 },
+  topBar:  { marginHorizontal: spacing.sp4, marginTop: spacing.sp3 },
+  section: { gap: spacing.sp2, paddingHorizontal: spacing.sp4 },
+  accountCta: { marginTop: spacing.sp2, alignSelf: "stretch" },
+  statItem:   { alignItems: "center", gap: spacing.sp1 },
+  guestCta:   { alignSelf: "stretch" },
+});
+
 export function ConfiguracionScreen({
   navigation,
 }: RootStackScreenProps<"Configuracion">) {
@@ -74,20 +86,11 @@ export function ConfiguracionScreen({
     );
   }, [resetCoachMarks, toast]);
 
-  const styles = useMemo(
+  const dynStyles = useMemo(
     () =>
       StyleSheet.create({
         scroll: { backgroundColor: c.bg, flex: 1 },
-        content: {
-          // UX-063: sin paddingHorizontal aqui -- cada hijo gestiona su propio
-          // margen horizontal para consistencia con Candidatos y Comparar.
-          paddingBottom: spacing.sp8,
-          gap: spacing.sp5,
-        },
-        // UX-063: mismo patron que CandidatosScreen y CompararScreen.
-        topBar: { marginHorizontal: spacing.sp4, marginTop: spacing.sp3 },
-
-        // Cuenta card (patron wireframe: avatar centrado + info + CTA)
+        // Cuenta card
         accountCard: {
           padding: spacing.sp4,
           borderRadius: radii.rLg,
@@ -97,26 +100,9 @@ export function ConfiguracionScreen({
           alignItems: "center",
           gap: spacing.sp2,
         },
-        accountName: {
-          ...typography.h3,
-          fontWeight: "700",
-          color: c.text,
-          textAlign: "center",
-        },
-        accountEmail: {
-          ...typography.small,
-          color: c.textSecondary,
-          textAlign: "center",
-        },
-        accountCta: { marginTop: spacing.sp2, alignSelf: "stretch" },
-
-        // Bloques de secciones
-        section: { gap: spacing.sp2, paddingHorizontal: spacing.sp4 },
-
-        // Footer (cerrar sesion)
-        logoutWrap: { marginTop: spacing.sp3 },
-
-        // UX-034: stats row dentro del accountCard.
+        accountName: { ...typography.h3, fontWeight: "700", color: c.text, textAlign: "center" },
+        accountEmail: { ...typography.small, color: c.textSecondary, textAlign: "center" },
+        // UX-034: stats
         statRow: {
           flexDirection: "row",
           justifyContent: "space-around",
@@ -126,13 +112,7 @@ export function ConfiguracionScreen({
           marginTop: spacing.sp2,
           paddingTop: spacing.sp3,
         },
-        statItem: { alignItems: "center", gap: spacing.sp1 },
-        statValue: {
-          ...typography.h3,
-          fontWeight: "700",
-          color: c.primary,
-          textAlign: "center",
-        },
+        statValue: { ...typography.h3, fontWeight: "700", color: c.primary, textAlign: "center" },
         statLabel: {
           ...typography.overline,
           textTransform: "none",
@@ -140,8 +120,7 @@ export function ConfiguracionScreen({
           color: c.textSecondary,
           textAlign: "center",
         },
-
-        // UX-035: card hero para modo invitado.
+        // UX-035: guest
         guestCard: {
           padding: spacing.sp5,
           borderRadius: radii.rLg,
@@ -151,27 +130,10 @@ export function ConfiguracionScreen({
           alignItems: "center",
           gap: spacing.sp3,
         },
-        guestTitle: {
-          ...typography.h3,
-          fontWeight: "700",
-          color: c.text,
-          textAlign: "center",
-        },
-        guestSubtitle: {
-          ...typography.small,
-          color: c.textSecondary,
-          textAlign: "center",
-        },
-        guestCta: { alignSelf: "stretch" },
-
-        // UX-033: DangerZone — enmarca las acciones destructivas (DS-11 P8).
-        // UX-076: sin fondo ni header — borde danger es suficiente comunicacion.
-        dangerZone: {
-          borderRadius: radii.rLg,
-          borderWidth: 1.5,
-          borderColor: c.danger,
-          overflow: "hidden",
-        },
+        guestTitle: { ...typography.h3, fontWeight: "700", color: c.text, textAlign: "center" },
+        guestSubtitle: { ...typography.small, color: c.textSecondary, textAlign: "center" },
+        // UX-033/076: DangerZone
+        dangerZone: { borderRadius: radii.rLg, borderWidth: 1.5, borderColor: c.danger, overflow: "hidden" },
       }),
     [c],
   );
@@ -182,7 +144,7 @@ export function ConfiguracionScreen({
 
   return (
     <AppShell active="config" navigation={navigation}>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+      <ScrollView style={dynStyles.scroll} contentContainerStyle={styles.content}>
         <HomeTopBar
           brand="Configuración"
           style={styles.topBar}
@@ -192,36 +154,36 @@ export function ConfiguracionScreen({
         {!isGuest ? (
           <View style={styles.section}>
             <SectionTitle title="Cuenta" />
-            <View style={styles.accountCard}>
+            <View style={dynStyles.accountCard}>
               <Avatar initials={initials} size="lg" />
-              <Text style={styles.accountName} numberOfLines={1}>
+              <Text style={dynStyles.accountName} numberOfLines={1}>
                 {username}
               </Text>
               {email ? (
-                <Text style={styles.accountEmail} numberOfLines={1}>
+                <Text style={dynStyles.accountEmail} numberOfLines={1}>
                   {email}
                 </Text>
               ) : null}
               {/* UX-034: contadores de actividad — datos reales del backend. */}
               {perfilQ.data?.contadores ? (
-                <View style={styles.statRow}>
+                <View style={dynStyles.statRow}>
                   <View style={styles.statItem}>
-                    <Text style={styles.statValue}>
+                    <Text style={dynStyles.statValue}>
                       {perfilQ.data.contadores.respuestas}
                     </Text>
-                    <Text style={styles.statLabel}>Respuestas</Text>
+                    <Text style={dynStyles.statLabel}>Respuestas</Text>
                   </View>
                   <View style={styles.statItem}>
-                    <Text style={styles.statValue}>
+                    <Text style={dynStyles.statValue}>
                       {perfilQ.data.contadores.favoritos}
                     </Text>
-                    <Text style={styles.statLabel}>Favoritos</Text>
+                    <Text style={dynStyles.statLabel}>Favoritos</Text>
                   </View>
                   <View style={styles.statItem}>
-                    <Text style={styles.statValue}>
+                    <Text style={dynStyles.statValue}>
                       {perfilQ.data.contadores.descartados}
                     </Text>
-                    <Text style={styles.statLabel}>Descartados</Text>
+                    <Text style={dynStyles.statLabel}>Descartados</Text>
                   </View>
                 </View>
               ) : null}
@@ -328,11 +290,11 @@ export function ConfiguracionScreen({
         {isGuest ? (
           <View style={styles.section}>
             <SectionTitle title="Modo invitado" />
-            <View style={styles.guestCard}>
-              <Text style={styles.guestTitle}>
+            <View style={dynStyles.guestCard}>
+              <Text style={dynStyles.guestTitle}>
                 ¿Listo para guardar tu progreso?
               </Text>
-              <Text style={styles.guestSubtitle}>
+              <Text style={dynStyles.guestSubtitle}>
                 Crea una cuenta gratis para guardar favoritos, descartados y
                 comparar tu match entre dispositivos.
               </Text>
@@ -352,7 +314,7 @@ export function ConfiguracionScreen({
         {/* UX-076: sin fondo rojo ni header -- el borde danger comunica suficiente. */}
         {!isGuest ? (
           <View style={[styles.section, { marginTop: spacing.sp3 }]}>
-            <View style={styles.dangerZone}>
+            <View style={dynStyles.dangerZone}>
               <NavRow
                 label="Cerrar sesión"
                 variant="danger"
