@@ -79,12 +79,13 @@ export function ConfiguracionScreen({
       StyleSheet.create({
         scroll: { backgroundColor: c.bg, flex: 1 },
         content: {
-          // UX-063: padding horizontal/bottom alineado con Candidatos/Comparar.
-          // paddingTop no se usa -- el HomeTopBar lleva su propio marginTop.
-          paddingHorizontal: spacing.sp4,
+          // UX-063: sin paddingHorizontal aqui -- cada hijo gestiona su propio
+          // margen horizontal para consistencia con Candidatos y Comparar.
           paddingBottom: spacing.sp8,
           gap: spacing.sp5,
         },
+        // UX-063: mismo patron que CandidatosScreen y CompararScreen.
+        topBar: { marginHorizontal: spacing.sp4, marginTop: spacing.sp3 },
 
         // Cuenta card (patron wireframe: avatar centrado + info + CTA)
         accountCard: {
@@ -110,7 +111,7 @@ export function ConfiguracionScreen({
         accountCta: { marginTop: spacing.sp2, alignSelf: "stretch" },
 
         // Bloques de secciones
-        section: { gap: spacing.sp2 },
+        section: { gap: spacing.sp2, paddingHorizontal: spacing.sp4 },
 
         // Footer (cerrar sesion)
         logoutWrap: { marginTop: spacing.sp3 },
@@ -184,7 +185,7 @@ export function ConfiguracionScreen({
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <HomeTopBar
           brand="Configuración"
-          style={{ marginTop: spacing.sp3 }}
+          style={styles.topBar}
         />
 
         {/* 1. Cuenta */}
