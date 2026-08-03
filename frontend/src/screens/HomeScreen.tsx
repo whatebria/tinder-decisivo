@@ -361,7 +361,7 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
                         name={tipo.nombre}
                         scope={tipo.descripcion ?? undefined}
                         respondidas={progreso?.respondidas ?? 0}
-                        totalPreguntas={progreso?.total_preguntas ?? 0}
+                        totalPreguntas={progreso?.total_preguntas ?? tipo.total_preguntas ?? 0}
                         onEmpezar={() => iniciarCuestionario(tipo)}
                         onContinuar={() => iniciarCuestionario(tipo)}
                         onVerResultados={

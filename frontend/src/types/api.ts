@@ -1251,6 +1251,8 @@ export interface components {
             anio?: number | null;
             /** @description Si es True, las preguntas de este tipo se agregan a TODAS las elecciones. Usado para preguntas transversales de valores/ideologia que se responden una sola vez. */
             es_base?: boolean;
+            /** @description Total de preguntas activas para este tipo de eleccion. */
+            readonly total_preguntas?: number;
         };
         UnidadTerritorial: {
             readonly id: number;

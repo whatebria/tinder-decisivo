@@ -12,6 +12,14 @@ class EjeSerializer(serializers.ModelSerializer):
 
 
 class TipoEleccionSerializer(serializers.ModelSerializer):
+    # Conteo de preguntas activas para este tipo de eleccion.
+    # Permite al frontend mostrar "X preguntas" incluso antes de que
+    # el usuario haya iniciado el cuestionario (sin MiProgresoItem).
+    total_preguntas = serializers.SerializerMethodField()
+
+    def get_total_preguntas(self, obj) -> int:
+        return obj.preguntas.count()
+
     class Meta:
         model = TipoEleccion
         fields = "__all__"
