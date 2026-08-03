@@ -249,7 +249,12 @@ export function ResultadosScreen({
 
   function handleToggleFav(candidatoId: number) {
     const eraFavorito = favoritoIds.has(candidatoId);
-    toggleFav.mutate(candidatoId, {
+    const vars = {
+      candidatoId,
+      existingFavId: favoritosQ.data?.find((f) => f.candidato === candidatoId)?.id,
+      existingDescId: descartadosQ.data?.find((d) => d.candidato === candidatoId)?.id,
+    };
+    toggleFav.mutate(vars, {
       onSuccess: () => {
         if (eraFavorito) toast.info("Eliminado de favoritos");
         else toast.success("Agregado a favoritos");
@@ -260,7 +265,12 @@ export function ResultadosScreen({
 
   function handleToggleDesc(candidatoId: number) {
     const eraDescartado = descartadoIds.has(candidatoId);
-    toggleDesc.mutate(candidatoId, {
+    const vars = {
+      candidatoId,
+      existingDescId: descartadosQ.data?.find((d) => d.candidato === candidatoId)?.id,
+      existingFavId: favoritosQ.data?.find((f) => f.candidato === candidatoId)?.id,
+    };
+    toggleDesc.mutate(vars, {
       onSuccess: () => {
         if (eraDescartado) toast.info("Descarte eliminado");
         else toast.success("Candidato descartado");

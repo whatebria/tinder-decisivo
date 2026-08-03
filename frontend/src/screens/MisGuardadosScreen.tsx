@@ -330,18 +330,26 @@ export function MisGuardadosScreen({
     if (!quitarFavPending) return;
     const { id } = quitarFavPending;
     setQuitarFavPending(null);
-    toggleFav.mutate(id, {
-      onSuccess: () => toast.success("Quitado de favoritos"),
-      onError: (e) => toast.error("Error", getErrorMessage(e)),
-    });
-  }, [quitarFavPending, toggleFav, toast]);
+    const existingFav = favoritos.find((f) => f.candidato === id);
+    toggleFav.mutate(
+      { candidatoId: id, existingFavId: existingFav?.id, existingDescId: undefined },
+      {
+        onSuccess: () => toast.success("Quitado de favoritos"),
+        onError: (e) => toast.error("Error", getErrorMessage(e)),
+      },
+    );
+  }, [quitarFavPending, toggleFav, favoritos, toast]);
 
   const handleRestoreDesc = useCallback((candidatoId: number) => {
-    toggleDesc.mutate(candidatoId, {
-      onSuccess: () => toast.success("Restaurado", "El candidato vuelve al ranking."),
-      onError: (e) => toast.error("Error", getErrorMessage(e)),
-    });
-  }, [toggleDesc, toast]);
+    const existingDesc = descartados.find((d) => d.candidato === candidatoId);
+    toggleDesc.mutate(
+      { candidatoId, existingDescId: existingDesc?.id, existingFavId: undefined },
+      {
+        onSuccess: () => toast.success("Restaurado", "El candidato vuelve al ranking."),
+        onError: (e) => toast.error("Error", getErrorMessage(e)),
+      },
+    );
+  }, [toggleDesc, descartados, toast]);
 
   // TASK-048-2: renderBody como funcion named (en lugar de IIFE).
   function renderBody() {

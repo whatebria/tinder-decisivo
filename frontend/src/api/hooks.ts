@@ -413,42 +413,69 @@ export function useFavoritos(opts?: { enabled?: boolean }) {
 
 /**
  * Toggle idempotente: si el candidato ya es favorito, lo saca. Sino, lo agrega.
- * BUG-039: antes de agregar a favoritos, limpia el estado de descartado si existe
- * (los dos estados son mutuamente excluyentes por definicion de producto).
- * BUG-045: mutationFn retorna el nuevo estado calculado para que onSuccess
- * actualice el cache con setQueryData sin esperar un refetch extra.
+ * BUG-039: antes de agregar a favoritos, limpia el estado de descartado si existe.
+ * BUG-045: optimistic update -- el cache se actualiza ANTES de la respuesta del
+ * servidor. Si falla, se revierte al snapshot previo.
+ *
+ * El caller DEBE pasar existingFavId/existingDescId para que mutationFn no lea
+ * el cache (que ya fue modificado por onMutate) y tome la accion correcta.
  */
-type ToggleFavResult = {
-  favoritos: CandidatoFavorito[];
-  descartados: CandidatoDescartado[];
+export type FavToggleVars = {
+  candidatoId: number;
+  /** id del CandidatoFavorito a borrar. undefined = agregar. */
+  existingFavId: number | undefined;
+  /** id del CandidatoDescartado a limpiar (BUG-039). undefined = no hay. */
+  existingDescId: number | undefined;
+};
+type FavToggleCtx = {
+  prevFavoritos: CandidatoFavorito[] | undefined;
+  prevDescartados: CandidatoDescartado[] | undefined;
 };
 export function useToggleFavorito() {
   const qc = useQueryClient();
-  return useMutation<ToggleFavResult, Error, number>({
-    mutationFn: async (candidatoId: number): Promise<ToggleFavResult> => {
-      const favoritos = qc.getQueryData<CandidatoFavorito[]>(queryKeys.favoritos) ?? [];
-      const descartados = qc.getQueryData<CandidatoDescartado[]>(queryKeys.descartados) ?? [];
-      const existing = favoritos.find((f) => f.candidato === candidatoId);
-      if (existing) {
-        await deleteFavorito(existing.id!);
-        return {
-          favoritos: favoritos.filter((f) => f.candidato !== candidatoId),
-          descartados,
-        };
+  return useMutation<CandidatoFavorito | null, Error, FavToggleVars, FavToggleCtx>({
+    mutationFn: async ({ candidatoId, existingFavId, existingDescId }) => {
+      if (existingFavId !== undefined) {
+        await deleteFavorito(existingFavId);
+        return null; // eliminado -- onSuccess no necesita reconciliar
       }
-      // BUG-039: limpiar descartado si existe antes de agregar a favoritos.
-      const descartado = descartados.find((d) => d.candidato === candidatoId);
-      if (descartado) await deleteDescartado(descartado.id!);
-      const nuevo = await addFavorito(candidatoId);
-      return {
-        favoritos: [...favoritos.filter((f) => f.candidato !== candidatoId), nuevo],
-        descartados: descartados.filter((d) => d.candidato !== candidatoId),
-      };
+      // BUG-039: limpiar descartado existente antes de agregar.
+      if (existingDescId !== undefined) await deleteDescartado(existingDescId);
+      return addFavorito(candidatoId); // retorna el entry real con id del servidor
     },
-    onSuccess: (result) => {
-      // BUG-045: setQueryData es inmediato, no necesita refetch extra.
-      qc.setQueryData(queryKeys.favoritos, result.favoritos);
-      qc.setQueryData(queryKeys.descartados, result.descartados);
+    onMutate: async ({ candidatoId, existingFavId, existingDescId }) => {
+      // Cancelar refetches en curso para que no pisoteen el estado optimista.
+      await qc.cancelQueries({ queryKey: queryKeys.favoritos });
+      await qc.cancelQueries({ queryKey: queryKeys.descartados });
+      const prevFavoritos = qc.getQueryData<CandidatoFavorito[]>(queryKeys.favoritos);
+      const prevDescartados = qc.getQueryData<CandidatoDescartado[]>(queryKeys.descartados);
+      if (existingFavId !== undefined) {
+        // Optimistic remove
+        qc.setQueryData<CandidatoFavorito[]>(queryKeys.favoritos,
+          (old) => (old ?? []).filter((f) => f.candidato !== candidatoId));
+      } else {
+        // Optimistic add (placeholder sin id real -- onSuccess lo reemplaza)
+        qc.setQueryData<CandidatoFavorito[]>(queryKeys.favoritos,
+          (old) => [...(old ?? []).filter((f) => f.candidato !== candidatoId),
+            { id: -1, candidato: candidatoId, fecha_agregado: "", candidato_data: {} as never }]);
+        // BUG-039: limpiar desc del cache inmediatamente si lo habia
+        if (existingDescId !== undefined) {
+          qc.setQueryData<CandidatoDescartado[]>(queryKeys.descartados,
+            (old) => (old ?? []).filter((d) => d.candidato !== candidatoId));
+        }
+      }
+      return { prevFavoritos, prevDescartados };
+    },
+    onSuccess: (nuevo, { candidatoId }) => {
+      if (nuevo) {
+        // Reemplazar el placeholder optimista con el entry real del servidor.
+        qc.setQueryData<CandidatoFavorito[]>(queryKeys.favoritos,
+          (old) => [...(old ?? []).filter((f) => f.candidato !== candidatoId), nuevo]);
+      }
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prevFavoritos !== undefined) qc.setQueryData(queryKeys.favoritos, ctx.prevFavoritos);
+      if (ctx?.prevDescartados !== undefined) qc.setQueryData(queryKeys.descartados, ctx.prevDescartados);
     },
   });
 }
@@ -464,38 +491,55 @@ export function useDescartados(opts?: { enabled?: boolean }) {
   });
 }
 
-// BUG-045: mismo patron que useToggleFavorito -- retorna nuevo estado para setQueryData.
-type ToggleDescResult = {
-  favoritos: CandidatoFavorito[];
-  descartados: CandidatoDescartado[];
+// BUG-045: mismo patron optimistic que useToggleFavorito.
+export type DescToggleVars = {
+  candidatoId: number;
+  existingDescId: number | undefined;
+  existingFavId: number | undefined;
+};
+type DescToggleCtx = {
+  prevFavoritos: CandidatoFavorito[] | undefined;
+  prevDescartados: CandidatoDescartado[] | undefined;
 };
 export function useToggleDescartado() {
   const qc = useQueryClient();
-  return useMutation<ToggleDescResult, Error, number>({
-    mutationFn: async (candidatoId: number): Promise<ToggleDescResult> => {
-      const descartados = qc.getQueryData<CandidatoDescartado[]>(queryKeys.descartados) ?? [];
-      const favoritos = qc.getQueryData<CandidatoFavorito[]>(queryKeys.favoritos) ?? [];
-      const existing = descartados.find((d) => d.candidato === candidatoId);
-      if (existing) {
-        await deleteDescartado(existing.id!);
-        return {
-          favoritos,
-          descartados: descartados.filter((d) => d.candidato !== candidatoId),
-        };
+  return useMutation<CandidatoDescartado | null, Error, DescToggleVars, DescToggleCtx>({
+    mutationFn: async ({ candidatoId, existingDescId, existingFavId }) => {
+      if (existingDescId !== undefined) {
+        await deleteDescartado(existingDescId);
+        return null;
       }
-      // BUG-039: limpiar favorito si existe antes de agregar a descartados.
-      const favorito = favoritos.find((f) => f.candidato === candidatoId);
-      if (favorito) await deleteFavorito(favorito.id!);
-      const nuevo = await addDescartado(candidatoId);
-      return {
-        favoritos: favoritos.filter((f) => f.candidato !== candidatoId),
-        descartados: [...descartados.filter((d) => d.candidato !== candidatoId), nuevo],
-      };
+      if (existingFavId !== undefined) await deleteFavorito(existingFavId);
+      return addDescartado(candidatoId);
     },
-    onSuccess: (result) => {
-      // BUG-045: setQueryData es inmediato, no necesita refetch extra.
-      qc.setQueryData(queryKeys.favoritos, result.favoritos);
-      qc.setQueryData(queryKeys.descartados, result.descartados);
+    onMutate: async ({ candidatoId, existingDescId, existingFavId }) => {
+      await qc.cancelQueries({ queryKey: queryKeys.favoritos });
+      await qc.cancelQueries({ queryKey: queryKeys.descartados });
+      const prevFavoritos = qc.getQueryData<CandidatoFavorito[]>(queryKeys.favoritos);
+      const prevDescartados = qc.getQueryData<CandidatoDescartado[]>(queryKeys.descartados);
+      if (existingDescId !== undefined) {
+        qc.setQueryData<CandidatoDescartado[]>(queryKeys.descartados,
+          (old) => (old ?? []).filter((d) => d.candidato !== candidatoId));
+      } else {
+        qc.setQueryData<CandidatoDescartado[]>(queryKeys.descartados,
+          (old) => [...(old ?? []).filter((d) => d.candidato !== candidatoId),
+            { id: -1, candidato: candidatoId, fecha_descartado: "", candidato_data: {} as never }]);
+        if (existingFavId !== undefined) {
+          qc.setQueryData<CandidatoFavorito[]>(queryKeys.favoritos,
+            (old) => (old ?? []).filter((f) => f.candidato !== candidatoId));
+        }
+      }
+      return { prevFavoritos, prevDescartados };
+    },
+    onSuccess: (nuevo, { candidatoId }) => {
+      if (nuevo) {
+        qc.setQueryData<CandidatoDescartado[]>(queryKeys.descartados,
+          (old) => [...(old ?? []).filter((d) => d.candidato !== candidatoId), nuevo]);
+      }
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prevFavoritos !== undefined) qc.setQueryData(queryKeys.favoritos, ctx.prevFavoritos);
+      if (ctx?.prevDescartados !== undefined) qc.setQueryData(queryKeys.descartados, ctx.prevDescartados);
     },
   });
 }
