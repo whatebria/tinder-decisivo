@@ -142,9 +142,25 @@ export function RadarChart({
   const labelFontSize = Math.round(11 / vbScale); // 11px visuales sin importar el padding
 
   // Grid: circulos concentricos + lineas radiales
-  const gridCircles = Array.from({ length: levels }, (_, i) => {
+  // Grid: poligonos concentricos (uno por nivel) en vez de circulos,
+  // para un look angular en lugar del circular original.
+  const gridPolygons = Array.from({ length: levels }, (_, i) => {
     const r = ((i + 1) / levels) * radius;
-    return <Circle key={i} cx={cx} cy={cy} r={r} stroke={c.border} strokeWidth={1} fill="none" />;
+    const pts = ejes
+      .map((_, j) => {
+        const p = polarToCartesian(cx, cy, r, startAngle + j * step);
+        return `${p.x},${p.y}`;
+      })
+      .join(" ");
+    return (
+      <Polygon
+        key={i}
+        points={pts}
+        stroke={c.border}
+        strokeWidth={1}
+        fill="none"
+      />
+    );
   });
 
   const gridLines = ejes.map((_, i) => {
@@ -214,7 +230,7 @@ export function RadarChart({
       }
     >
       <G>
-        {gridCircles}
+        {gridPolygons}
         {gridLines}
         <Polygon
           points={polygonPoints}
