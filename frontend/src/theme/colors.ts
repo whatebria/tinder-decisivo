@@ -203,18 +203,21 @@ const graysDark = {
 // Public exports
 // ============================================================================
 
-/** Todos los tokens del theme light (semanticos + grays + tints). */
+/** Todos los tokens del theme light (semanticos + grays + tints).
+ * `light` va al final para que cualquier override semantico gane sobre los tints base. */
 export const colors = {
-  ...light,
-  ...grays,
   ...tints,
+  ...grays,
+  ...light,
 } as const;
 
-/** Solo los overrides del theme dark. Los tints no se overridean (son valores absolutos). */
+/** Solo los overrides del theme dark. Los tints no se overridean (son valores absolutos),
+ * salvo las excepciones declaradas en `dark` (ej. info50). Por eso `dark` va al final
+ * del spread: sus overrides semanticos ganan sobre los tints base. */
 export const colorsDark = {
-  ...dark,
-  ...graysDark,
   ...tints,
+  ...graysDark,
+  ...dark,
 } as const;
 
 export type ColorKey = keyof typeof colors;
