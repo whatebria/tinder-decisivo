@@ -42,14 +42,21 @@ const RADAR_CHAR_WIDTH_RATIO      = 0.55;
  */
 const RADAR_LABEL_HALF_WIDTH_PX   =
   Math.ceil((RADAR_LABEL_MAX_CHARS * RADAR_LABEL_FONT_PX * RADAR_CHAR_WIDTH_RATIO) / 2);
-/** Distancia en px del borde del poligono al centro del label. */
-const RADAR_LABEL_OFFSET_PX       = 24;
 /**
- * Padding total reservado en cada lado del SVG para los labels cuando
- * showLabels=true. El radio del poligono = (size/2) - RADAR_LABEL_PAD.
- * Derivado: no agregar numeros aqui, agregar en las constantes de arriba.
+ * Offset del label expresado como fraccion del radio del poligono.
+ * labelRadius = radius * (1 + RADAR_LABEL_OFFSET_RATIO)
+ * Escala proporcionalmente al tamano del chart: no hay que tocar
+ * ningun size en los callers cuando se quiere mas/menos espacio.
+ * Para ajustar el espaciado: solo cambiar este valor.
  */
-const RADAR_LABEL_PAD             = RADAR_LABEL_OFFSET_PX + RADAR_LABEL_HALF_WIDTH_PX;
+const RADAR_LABEL_OFFSET_RATIO    = 0.28;
+/**
+ * Padding reservado en cada lado del SVG para los labels cuando showLabels=true.
+ * Solo necesita acomodar el texto — el offset ya es relativo al radio.
+ * Derivado de las constantes de fuente: cambia automaticamente si cambia
+ * el font size o el max chars.
+ */
+const RADAR_LABEL_PAD             = RADAR_LABEL_HALF_WIDTH_PX;
 /** Opacidad del fill del poligono. */
 const RADAR_FILL_OPACITY          = 0.25;
 /**
@@ -169,11 +176,11 @@ export function RadarChart({
     <Circle key={i} cx={p.x} cy={p.y} r={3} fill={strokeColor} />
   ));
 
-  // Labels — posicionados en el area de padding exterior al poligono.
+  // Labels — offset proporcional al radio: escala automaticamente con el tamano del chart.
   const labels = showLabels
     ? ejes.map((eje, i) => {
         const angle = startAngle + i * step;
-        const labelPos = polarToCartesian(cx, cy, radius + RADAR_LABEL_OFFSET_PX, angle);
+        const labelPos = polarToCartesian(cx, cy, radius * (1 + RADAR_LABEL_OFFSET_RATIO), angle);
         return (
           <SvgText
             key={i}
