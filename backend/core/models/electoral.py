@@ -56,6 +56,29 @@ class Candidato(models.Model):
         default="",
         help_text="Pacto o lista electoral a la que pertenece el candidato (ej. 'C. Unidad por Chile').",
     )
+    # --- Datos oficiales (enriquecidos desde API Senado / fuentes externas) ---
+    parlid = models.CharField(
+        max_length=20,
+        blank=True,
+        default="",
+        help_text="ID oficial del parlamentario en el sistema del Senado/Camara.",
+    )
+    email = models.EmailField(
+        blank=True,
+        default="",
+        help_text="Email de contacto oficial.",
+    )
+    curriculum_url = models.URLField(
+        blank=True,
+        default="",
+        help_text="URL al curriculum oficial en senado.cl o camara.cl.",
+    )
+    fono = models.CharField(
+        max_length=50,
+        blank=True,
+        default="",
+        help_text="Teléfono de contacto oficial.",
+    )
     profile_picture = models.ImageField(default="assets/default.avif", upload_to="profiles/")
     tipos_eleccion = models.ManyToManyField(TipoEleccion, related_name="candidatos")
 
