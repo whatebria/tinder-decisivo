@@ -305,6 +305,7 @@ export function CandidatosScreen({
       <HomeTopBar
         brand="Candidatos"
         subtitle={contadorLabel}
+        variant="flat"
         style={styles.topBar}
       />
 
@@ -519,10 +520,8 @@ export function CandidatosScreen({
 
 const styles = StyleSheet.create({
   // container eliminado: FlatList es ahora el scroll root con style inline.
-  topBar: {
-    marginHorizontal: spacing.sp4,
-    marginTop: spacing.sp3,
-  },
+  // UX-063: flat — sin card, sin marginHorizontal, separador inferior.
+  topBar: { marginTop: spacing.sp3 },
   headerRow: {
     flexDirection: "row",
     alignItems: "baseline",

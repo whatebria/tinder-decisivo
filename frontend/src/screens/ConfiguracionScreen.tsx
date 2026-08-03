@@ -48,7 +48,8 @@ import { useThemeColors } from "../theme/useTheme";
 // UX-063: topBar identico a CandidatosScreen y CompararScreen.
 const styles = StyleSheet.create({
   content: { paddingBottom: spacing.sp8, gap: spacing.sp5 },
-  topBar:  { marginHorizontal: spacing.sp4, marginTop: spacing.sp3 },
+  // UX-063: flat — sin card, sin marginHorizontal, separador inferior.
+  topBar:  { marginTop: spacing.sp3 },
   section: { gap: spacing.sp2, paddingHorizontal: spacing.sp4 },
   accountCta: { marginTop: spacing.sp2, alignSelf: "stretch" },
   statItem:   { alignItems: "center", gap: spacing.sp1 },
@@ -147,6 +148,7 @@ export function ConfiguracionScreen({
       <ScrollView style={dynStyles.scroll} contentContainerStyle={styles.content}>
         <HomeTopBar
           brand="Configuración"
+          variant="flat"
           style={styles.topBar}
         />
 

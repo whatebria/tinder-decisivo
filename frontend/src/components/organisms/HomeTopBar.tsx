@@ -1,6 +1,11 @@
 /**
- * HomeTopBar: barra superior del Home. Brand con AppIcon (radar+persona) + notif button.
+ * HomeTopBar: barra superior de los tabs principales.
  * Distinta a TopNav (que es para flujos multi-paso con progress).
+ *
+ * Variantes:
+ *   "card" (default) — card flotante con sombra y border-radius. Usada en Home.
+ *   "flat"           — barra plana full-width con separador inferior.
+ *                      Usada en Candidatos, Comparar y Configuracion.
  *
  * Ref: design-exploration/design-system.html · .topnav (dentro de Template Home)
  */
@@ -20,27 +25,41 @@ export interface HomeTopBarProps {
   subtitle?: string;
   /** Handler del botón de notificaciones. Si se omite, no se renderiza. */
   onNotifications?: () => void;
+  /**
+   * "card" (default) — card flotante con fondo, sombra y border-radius.
+   * "flat"           — barra plana full-width con separador inferior, sin sombra.
+   */
+  variant?: "card" | "flat";
   style?: StyleProp<ViewStyle>;
 }
 
 const styles = StyleSheet.create({
-  bar: {
+  // -- Partes compartidas --
+  barBase: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sp3,
     paddingHorizontal: spacing.sp4,
     paddingVertical: spacing.sp3,
-    borderRadius: radii.rLg,
-    borderWidth: 1,
     minHeight: 56,
   },
+  // -- Variante card (Home) --
+  barCard: {
+    borderRadius: radii.rLg,
+    borderWidth: 1,
+  },
+  // -- Variante flat (Candidatos, Comparar, Config) --
+  barFlat: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  // -- Contenido interno --
   brandRow: {
     flexDirection: "row",
     gap: spacing.sp2,
     flex: 1,
   },
-  brandText: { fontSize: 16, fontWeight: "700" },
-  brandSubtitle: { fontSize: 12, fontWeight: "500", marginTop: 1 },
+  brandText:      { fontSize: 16, fontWeight: "700" },
+  brandSubtitle:  { fontSize: 12, fontWeight: "500", marginTop: 1 },
   brandTextBlock: { flexDirection: "column", flex: 1 },
   iconBtn: {
     width: 40,
@@ -51,15 +70,24 @@ const styles = StyleSheet.create({
   },
 });
 
-export function HomeTopBar({ brand, subtitle, onNotifications, style }: HomeTopBarProps) {
+export function HomeTopBar({
+  brand,
+  subtitle,
+  onNotifications,
+  variant = "card",
+  style,
+}: HomeTopBarProps) {
   const c = useThemeColors();
   const shadows = useThemeShadows();
 
+  const isFlat = variant === "flat";
+
+  const barStyle = isFlat
+    ? [styles.barBase, styles.barFlat, { borderBottomColor: c.border }, style]
+    : [styles.barBase, styles.barCard, { backgroundColor: c.card, borderColor: c.border2, ...shadows.shSm }, style];
+
   return (
-    <View
-      style={[styles.bar, { backgroundColor: c.card, borderColor: c.border2, ...shadows.shSm }, style]}
-      accessibilityRole="header"
-    >
+    <View style={barStyle} accessibilityRole="header">
       <View style={[styles.brandRow, { alignItems: subtitle ? "flex-start" : "center" }]}>
         <AppIcon size={22} />
         <View style={styles.brandTextBlock}>

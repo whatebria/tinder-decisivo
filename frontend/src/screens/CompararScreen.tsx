@@ -175,7 +175,7 @@ export function CompararScreen({
         stickyHeaderIndices={[0]}
       >
         <View style={[styles.stickyHead, { backgroundColor: c.bg }]}>
-          <HomeTopBar brand="Comparar" style={styles.topBar} />
+          <HomeTopBar brand="Comparar" variant="flat" style={styles.topBar} />
 
           <View style={[styles.candHeader, { backgroundColor: c.card }]}>
             <CandidatoHeaderSlot
@@ -425,7 +425,8 @@ const styles = StyleSheet.create({
   },
 
   stickyHead: { gap: spacing.sp2, paddingBottom: spacing.sp2 },
-  topBar: { marginHorizontal: spacing.sp4, marginTop: spacing.sp3 },
+  // UX-063: flat — sin card, sin marginHorizontal, separador inferior.
+  topBar: { marginTop: spacing.sp3 },
 
   candHeader: {
     flexDirection: "row",
