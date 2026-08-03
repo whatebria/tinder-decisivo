@@ -19,6 +19,12 @@ interface ElectionsPrefsState {
   isHydrated: boolean;
 
   hydrate: () => Promise<void>;
+  /**
+   * Persiste `allTipoIds` como selección inicial solo si `activeIds` es todavía
+   * `null` (usuario nunca configuró). Llamar al completar el onboarding para
+   * que la selección quede explícita aunque el usuario no haya tocado nada.
+   */
+  initializeIfNull: (allTipoIds: number[]) => Promise<void>;
   toggle: (tipoId: number, allTipoIds: number[]) => Promise<void>;
   activate: (tipoId: number, allTipoIds: number[]) => Promise<void>;
   deactivate: (tipoId: number, allTipoIds: number[]) => Promise<void>;
@@ -45,6 +51,12 @@ export const useElectionsPrefsStore = create<ElectionsPrefsState>((set, get) => 
     } catch {
       set({ activeIds: null, isHydrated: true });
     }
+  },
+
+  initializeIfNull: async (allTipoIds) => {
+    if (get().activeIds !== null || allTipoIds.length === 0) return;
+    await persist(allTipoIds);
+    set({ activeIds: allTipoIds });
   },
 
   toggle: async (tipoId, allTipoIds) => {

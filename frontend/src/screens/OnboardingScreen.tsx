@@ -69,6 +69,7 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding"> | RootSta
   const allTipoIds = tipos.map((t) => t.id).filter((id): id is number => id != null);
   const activeIds = useElectionsPrefsStore((s) => s.activeIds);
   const toggleEleccion = useElectionsPrefsStore((s) => s.toggle);
+  const initializeElections = useElectionsPrefsStore((s) => s.initializeIfNull);
 
   function handleToggleEleccion(id: number) {
     toggleEleccion(id, allTipoIds);
@@ -80,6 +81,7 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding"> | RootSta
   /** Salta al auth stack aterrizando en Login (default). */
   async function finishToLogin() {
     if (isPreview) { props.navigation.goBack(); return; }
+    await initializeElections(allTipoIds);
     setPendingAuthTarget(null);
     await markSeen();
   }
@@ -87,6 +89,7 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding"> | RootSta
   /** Salta al auth stack aterrizando directo en Register. */
   async function finishToRegister() {
     if (isPreview) { props.navigation.goBack(); return; }
+    await initializeElections(allTipoIds);
     setPendingAuthTarget("Register");
     await markSeen();
   }
@@ -94,6 +97,7 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding"> | RootSta
   /** Entra al main stack en modo invitado. */
   async function finishAsGuest() {
     if (isPreview) { props.navigation.goBack(); return; }
+    await initializeElections(allTipoIds);
     setPendingAuthTarget(null);
     await markSeen();
     enterGuestMode();
