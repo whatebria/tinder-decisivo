@@ -12,6 +12,7 @@ import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { PosturaCandidatoDetalle } from "../../api/endpoints";
 import { getLikertColor } from "../../services/matching";
+import { BookmarkButton } from "../atoms/BookmarkButton";
 import { Spinner } from "../atoms/Spinner";
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
@@ -21,6 +22,11 @@ import { useIsDark, useThemeColors } from "../../theme/useTheme";
 interface Props {
   posturas: PosturaCandidatoDetalle[];
   loading?: boolean;
+  /** UX-080: IDs de posturas que el usuario ya tiene guardadas. */
+  bookmarkedIds?: Set<number>;
+  /** UX-080: callback al guardar/quitar una postura. Omitir para ocultar el botón. */
+  onToggleBookmark?: (posturaId: number) => void;
+  bookmarkLoading?: boolean;
 }
 
 /** Extrae URLs de la justificacion (formato "... (https://...)" comun en fixtures). */
@@ -30,7 +36,7 @@ function extractUrl(justificacion: string | null | undefined): string | null {
   return match ? match[0] : null;
 }
 
-export function CandidatoPosturas({ posturas, loading }: Props) {
+export function CandidatoPosturas({ posturas, loading, bookmarkedIds, onToggleBookmark, bookmarkLoading = false }: Props) {
   const c = useThemeColors();
   const isDark = useIsDark();
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
@@ -127,6 +133,22 @@ export function CandidatoPosturas({ posturas, loading }: Props) {
                     {isOpen ? "Toca para cerrar" : "Toca para ver justificacion"}
                   </Text>
                 ) : null}
+
+                {/* UX-080: bookmark button — solo si el padre pasa el handler. */}
+                {onToggleBookmark != null ? (
+                  <View style={styles.bookmarkRow}>
+                    <BookmarkButton
+                      saved={bookmarkedIds?.has(p.id) ?? false}
+                      onPress={() => onToggleBookmark(p.id)}
+                      loading={bookmarkLoading}
+                      accessibilityLabel={
+                        bookmarkedIds?.has(p.id)
+                          ? `Quitar postura guardada: ${p.pregunta_texto}`
+                          : `Guardar postura: ${p.pregunta_texto}`
+                      }
+                    />
+                  </View>
+                ) : null}
               </Pressable>
             );
           })}
@@ -172,5 +194,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0,
     marginTop: spacing.sp1,
     fontStyle: "italic",
+  },
+  // UX-080: bookmark alineado al borde derecho de la card.
+  bookmarkRow: {
+    alignItems: "flex-end",
+    marginTop: spacing.sp1,
   },
 });

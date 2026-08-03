@@ -35,9 +35,11 @@ import {
   useDescartados,
   useFavoritos,
   usePosturasCandidato,
+  usePosturasBookmarks,
   useTiposEleccion,
   useToggleDescartado,
   useToggleFavorito,
+  useTogglePosturaBookmark,
   type FavToggleVars,
   type DescToggleVars,
 } from "../api/hooks";
@@ -106,6 +108,14 @@ export function DetalleCandidatoScreen({
   const tiposQ = useTiposEleccion();
   const toggleFav = useToggleFavorito();
   const toggleDesc = useToggleDescartado();
+  // UX-080: bookmarks de posturas (lazy: solo se activa en tab posturas).
+  const posturasBookQ = usePosturasBookmarks({ enabled: !isGuest && tab === "posturas" });
+  const togglePosturaBook = useTogglePosturaBookmark();
+  const bookmarkedPosturaIds = useMemo(
+    () => new Set((posturasBookQ.data ?? []).map((b) => b.postura)),
+    [posturasBookQ.data],
+  );
+
 
   const candidato = candidatoQ.data ?? null;
   const posturas = posturasQ.data ?? [];
@@ -265,6 +275,17 @@ export function DetalleCandidatoScreen({
           <CandidatoPosturas
             posturas={posturas}
             loading={posturasQ.isLoading}
+            bookmarkedIds={isGuest ? undefined : bookmarkedPosturaIds}
+            onToggleBookmark={isGuest ? undefined : (id) => {
+              togglePosturaBook.mutate(id, {
+                onSuccess: () => toast.success(
+                  bookmarkedPosturaIds.has(id) ? "Postura quitada" : "Postura guardada",
+                  bookmarkedPosturaIds.has(id) ? undefined : "La verás en Mis Guardados → Posturas.",
+                ),
+                onError: (e) => toast.error("No pudimos guardar la postura", String(e)),
+              });
+            }}
+            bookmarkLoading={togglePosturaBook.isPending}
           />
         ) : tab === "afinidad" && hasMatch ? (
           <AfinidadTab
