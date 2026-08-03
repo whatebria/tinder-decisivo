@@ -111,9 +111,9 @@ export function RankingCard({
         <View style={styles.radarWrap}>
           <RadarChart
             data={ejeScores!}
-            size={140}
+            size={260}
             color={scoreColor}
-            showLabels={false}
+            showLabels
           />
         </View>
       ) : null}
