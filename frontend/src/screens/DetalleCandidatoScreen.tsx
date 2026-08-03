@@ -206,21 +206,19 @@ export function DetalleCandidatoScreen({
             loadingDesc={toggleDesc.isPending}
             onToggleFav={() => {
               const eraFavorito = isFavorito;
-              const nombre = `${candidato.nombre} ${candidato.apellido ?? ""}`.trim();
               toggleFav.mutate(candidatoId, {
                 onSuccess: () => eraFavorito
-                  ? toast.info("Quitado de favoritos", nombre)
-                  : toast.success("Agregado a favoritos", nombre),
+                  ? toast.info("Quitado de favoritos")
+                  : toast.success("Guardado en favoritos"),
                 onError: (e) => toast.error("Error", getErrorMessage(e)),
               });
             }}
             onToggleDesc={() => {
               const eraDescartado = isDescartado;
-              const nombre = `${candidato.nombre} ${candidato.apellido ?? ""}`.trim();
               toggleDesc.mutate(candidatoId, {
                 onSuccess: () => eraDescartado
-                  ? toast.info("Candidato restaurado", nombre)
-                  : toast.info("Candidato descartado", nombre),
+                  ? toast.info("Candidato restaurado")
+                  : toast.info("Candidato descartado"),
                 onError: (e) => toast.error("Error", getErrorMessage(e)),
               });
             }}
