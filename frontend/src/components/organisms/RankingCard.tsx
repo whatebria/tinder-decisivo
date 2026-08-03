@@ -113,7 +113,7 @@ export function RankingCard({
             data={ejeScores!}
             size={140}
             color={scoreColor}
-            showLabels={false}
+            showLabels
           />
         </View>
       ) : null}
