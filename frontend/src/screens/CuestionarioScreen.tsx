@@ -172,7 +172,13 @@ export function CuestionarioScreen({
           {
             text: "Salir",
             style: "destructive",
-            onPress: () => navigation.dispatch(e.data.action),
+            onPress: () => {
+              // Marcar antes del dispatch para que cuando beforeRemove
+              // se vuelva a disparar (comportamiento de React Navigation),
+              // el listener lo deje pasar sin interceptar.
+              allowLeaveRef.current = true;
+              navigation.dispatch(e.data.action);
+            },
           },
         ]
       );
