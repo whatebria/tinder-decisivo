@@ -47,10 +47,13 @@ import { useThemeColors } from "../theme/useTheme";
 // Fast Refresh los recargue siempre, sin quedar atrapados en useMemo([c]).
 // UX-063: topBar identico a CandidatosScreen y CompararScreen.
 const styles = StyleSheet.create({
-  content: { paddingBottom: spacing.sp8, gap: spacing.sp5 },
+  // paddingHorizontal: sp4 alinea el topBar con Candidatos/Comparar
+  // (ambos tienen padding: sp4 en su contenedor de scroll/FlatList).
+  content: { paddingHorizontal: spacing.sp4, paddingBottom: spacing.sp8, gap: spacing.sp5 },
   // UX-063: flat — sin card, sin marginHorizontal, separador inferior.
   topBar:  { marginTop: spacing.sp3 },
-  section: { gap: spacing.sp2, paddingHorizontal: spacing.sp4 },
+  // Sin paddingHorizontal propio — lo hereda del contenedor (content).
+  section: { gap: spacing.sp2 },
   accountCta: { marginTop: spacing.sp2, alignSelf: "stretch" },
   statItem:   { alignItems: "center", gap: spacing.sp1 },
   guestCta:   { alignSelf: "stretch" },
