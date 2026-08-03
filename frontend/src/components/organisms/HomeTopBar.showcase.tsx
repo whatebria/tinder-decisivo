@@ -10,8 +10,8 @@ const showcase: ShowcaseEntry = {
   description:
     "Top bar del Home. Brand con icono heart + notif button. Distinta a TopNav (que es para flujos multi-paso).",
   variants: [
-    { label: "solo brand", render: () => <HomeTopBar brand="Tinder Decisivo" /> },
-    { label: "con notificaciones", render: () => <HomeTopBar brand="Tinder Decisivo" onNotifications={() => {}} /> },
+    { label: "solo brand", render: () => <HomeTopBar brand="VotoAFin" /> },
+    { label: "con notificaciones", render: () => <HomeTopBar brand="VotoAFin" onNotifications={() => {}} /> },
   ],
   props: [
     { name: "brand", type: "string", required: true },
@@ -20,7 +20,7 @@ const showcase: ShowcaseEntry = {
   snippet: `import { HomeTopBar } from "@/components";
 
 <HomeTopBar
-  brand="Tinder Decisivo"
+  brand="VotoAFin"
   onNotifications={() => navigate("Notificaciones")}
 />`,
 };

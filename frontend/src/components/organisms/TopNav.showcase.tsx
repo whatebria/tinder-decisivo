@@ -10,7 +10,7 @@ const showcase: ShowcaseEntry = {
   description:
     "Header minimalista para flujos multi-paso o detalle. Brand + progress opcional + accion opcional.",
   variants: [
-    { label: "solo brand", render: () => <TopNav brand="Tinder Decisivo" /> },
+    { label: "solo brand", render: () => <TopNav brand="VotoAFin" /> },
     { label: "con progress", render: () => <TopNav brand="Cuestionario" progress={0.4} /> },
     { label: "con action", render: () => <TopNav brand="Editar perfil" actionLabel="Cerrar" onAction={() => {}} /> },
     { label: "completo", render: () => <TopNav brand="Cuestionario" progress={0.75} actionLabel="Cerrar" onAction={() => {}} /> },

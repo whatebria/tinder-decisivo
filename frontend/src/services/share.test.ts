@@ -21,7 +21,7 @@ describe("buildShareText", () => {
       matches: [m("Ana", "Perez", "Partido A", 75)],
     });
     expect(text).toContain("Presidencial 2025");
-    expect(text.startsWith("Mis matches en Tinder Decisivo")).toBe(true);
+    expect(text.startsWith("Mis matches en VotoAFin")).toBe(true);
   });
 
   it("ordena por porcentaje descendente", () => {

@@ -99,7 +99,7 @@ export interface HomeHeroSectionProps {
    * Si se omite, el avatar es no-interactivo (comportamiento anterior).
    */
   onAvatarPress?: () => void;
-  /** Nombre de la app. Default: "Tinder Decisivo". */
+  /** Nombre de la app. Default: "VotoAFin". */
   brand?: string;
 }
 

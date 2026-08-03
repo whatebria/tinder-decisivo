@@ -1,5 +1,5 @@
 /**
- * Cliente HTTP tipado para la API Servel.
+ * Cliente HTTP tipado para la API VotoAFin.
  *
  * - Base URL configurable via EXPO_PUBLIC_API_BASE.
  * - Autenticacion dual (TASK-003):

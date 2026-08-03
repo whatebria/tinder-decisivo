@@ -25,7 +25,7 @@ const showcase: ShowcaseEntry = {
   ],
   snippet: `import { Heading } from "@/components";
 
-<Heading level={1}>Servel</Heading>
+<Heading level={1}>VotoAFin</Heading>
 <Heading level={2} color={c.success}>Enviado</Heading>`,
 };
 

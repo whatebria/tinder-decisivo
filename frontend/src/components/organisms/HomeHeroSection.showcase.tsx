@@ -99,7 +99,7 @@ const showcase: ShowcaseEntry = {
     { name: "countdownDays", type: "number | null", description: "Dias hasta la proxima eleccion. null u omitido = oculta el CountdownPill." },
     { name: "onCta", type: "() => void", required: true },
     { name: "ctaLabel", type: "string", required: true },
-    { name: "brand", type: "string", defaultValue: '"Tinder Decisivo"', description: "Nombre de la app en la TopRow." },
+    { name: "brand", type: "string", defaultValue: '"VotoAFin"', description: "Nombre de la app en la TopRow." },
   ],
 
   snippet: `import { HomeHeroSection } from "@/components";

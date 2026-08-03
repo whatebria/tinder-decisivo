@@ -14,7 +14,7 @@
  *   aria-level se ignora silenciosamente (safe).
  *
  * Uso tipico:
- *   <Heading level={1}>Servel</Heading>
+ *   <Heading level={1}>VotoAFin</Heading>
  *   <Heading level={2} color={c.success}>Enviado</Heading>
  */
 

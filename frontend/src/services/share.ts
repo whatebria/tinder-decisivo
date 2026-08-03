@@ -55,16 +55,16 @@ export function fromMatchResults(matches: MatchResult[]): ShareableMatch[] {
  *
  * Ejemplo:
  *
- *   Mis matches en Tinder Decisivo - Presidencial 2025:
+ *   Mis matches en VotoAFin - Presidencial 2025:
  *
  *   1. Ana Perez (Partido A) - 75%
  *   2. Bea Lopez (Partido B) - 68%
  *   3. Carla Rios (Partido C) - 52%
  *
- *   Encuentra tu match en https://tinder-decisivo.cl
+ *   Encuentra tu match en https://votoafin.cl
  */
 export function buildShareText({ tipoNombre, matches }: ShareTextInput): string {
-  const header = `Mis matches en Tinder Decisivo - ${tipoNombre}:`;
+  const header = `Mis matches en VotoAFin - ${tipoNombre}:`;
   const top = [...matches]
     .sort((a, b) => Number(b.match_percentage) - Number(a.match_percentage))
     .slice(0, TOP_N);
@@ -98,7 +98,7 @@ export function canShareNative(): boolean {
  * Intenta compartir con la API nativa del navegador/OS. Devuelve true si
  * arranco el share, false si no esta soportado o fue cancelado.
  */
-export async function shareNative(text: string, title = "Tinder Decisivo"): Promise<boolean> {
+export async function shareNative(text: string, title = "VotoAFin"): Promise<boolean> {
   if (!canShareNative()) return false;
   try {
     await (navigator as Navigator).share({ title, text });

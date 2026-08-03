@@ -1,5 +1,5 @@
 /**
- * Endpoints tipados de la API Servel.
+ * Endpoints tipados de la API VotoAFin.
  *
  * Cada funcion aca es un wrapper thin sobre apiClient con tipos derivados
  * del schema OpenAPI (src/types/api.ts).
