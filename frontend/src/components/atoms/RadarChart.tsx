@@ -133,6 +133,14 @@ export function RadarChart({
     return null; // radar no tiene sentido con menos de 3 ejes
   }
 
+  // UX-061: viewBox padding para que los labels no queden cortados.
+  // vbScale = cuanto se achica 1 unidad de coordenada al renderizarse en `size` px.
+  // labelFontSize compensa el escalado para que el texto aparezca siempre a 11px visuales.
+  const svgPad = showLabels ? RADAR_LABEL_PAD : 0;
+  const vbSize = size + svgPad * 2;
+  const vbScale = size / vbSize;
+  const labelFontSize = Math.round(11 / vbScale); // 11px visuales sin importar el padding
+
   // Grid: circulos concentricos + lineas radiales
   const gridCircles = Array.from({ length: levels }, (_, i) => {
     const r = ((i + 1) / levels) * radius;
@@ -180,7 +188,7 @@ export function RadarChart({
             key={i}
             x={labelPos.x}
             y={labelPos.y}
-            fontSize={11}
+            fontSize={labelFontSize}
             fill={c.textSecondary}
             textAnchor="middle"
             alignmentBaseline="middle"
@@ -190,13 +198,6 @@ export function RadarChart({
         );
       })
     : null;
-
-  // UX-061: el viewBox se extiende RADAR_LABEL_PAD unidades extra en cada
-  // lado cuando hay labels. El SVG sigue renderizandose a `size x size` px,
-  // pero el sistema de coordenadas interno es mas amplio, por lo que los
-  // labels cercanos al borde no quedan cortados por el viewport.
-  const svgPad = showLabels ? RADAR_LABEL_PAD : 0;
-  const vbSize = size + svgPad * 2;
 
   return (
     <Svg
