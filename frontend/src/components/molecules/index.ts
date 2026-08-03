@@ -4,7 +4,7 @@
  */
 
 // Existentes (Fase 0)
-export { ToastProvider, useToast, type ToastVariant } from "./Toast";
+export { ToastProvider, useToast, type ToastVariant, type ToastOptions } from "./Toast";
 export { ConfirmModal } from "./ConfirmModal";
 export { PreguntaInfoModal } from "./PreguntaInfoModal";
 export { ShareModal } from "./ShareModal";

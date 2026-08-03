@@ -27,18 +27,28 @@ import { useThemeColors, useThemeShadows } from "../../theme/useTheme";
 
 export type ToastVariant = "success" | "error" | "info";
 
+/** Opciones opcionales para personalizar un toast. */
+export interface ToastOptions {
+  /** Milisegundos hasta auto-cerrar. Default: 4000. */
+  duration?: number;
+  /** Boton de accion inline (ej: "Deshacer"). */
+  action?: { label: string; onPress: () => void };
+}
+
 interface Toast {
   id: number;
   title: string;
   detail?: string;
   variant: ToastVariant;
+  duration: number;
+  action?: { label: string; onPress: () => void };
 }
 
 interface ToastContextValue {
-  show: (variant: ToastVariant, title: string, detail?: string) => void;
-  success: (title: string, detail?: string) => void;
-  error: (title: string, detail?: string) => void;
-  info: (title: string, detail?: string) => void;
+  show: (variant: ToastVariant, title: string, detail?: string, opts?: ToastOptions) => void;
+  success: (title: string, detail?: string, opts?: ToastOptions) => void;
+  error: (title: string, detail?: string, opts?: ToastOptions) => void;
+  info: (title: string, detail?: string, opts?: ToastOptions) => void;
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null);
@@ -71,6 +81,19 @@ const styles = StyleSheet.create({
     marginTop: 2,
     opacity: 0.95,
   },
+  actionBtn: {
+    marginTop: 8,
+    alignSelf: "flex-start",
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.6)",
+  },
+  actionLabel: {
+    fontSize: 13,
+    fontWeight: "700",
+  },
 });
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
@@ -93,10 +116,11 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const show = useCallback(
-    (variant: ToastVariant, title: string, detail?: string) => {
+    (variant: ToastVariant, title: string, detail?: string, opts?: ToastOptions) => {
       const id = nextId.current++;
-      setToasts((prev) => [...prev, { id, title, detail, variant }]);
-      setTimeout(() => dismiss(id), AUTO_DISMISS_MS);
+      const duration = opts?.duration ?? AUTO_DISMISS_MS;
+      setToasts((prev) => [...prev, { id, title, detail, variant, duration, action: opts?.action }]);
+      setTimeout(() => dismiss(id), duration);
     },
     [dismiss]
   );
@@ -106,9 +130,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<ToastContextValue>(
     () => ({
       show,
-      success: (t, d) => show("success", t, d),
-      error: (t, d) => show("error", t, d),
-      info: (t, d) => show("info", t, d),
+      success: (t, d, o) => show("success", t, d, o),
+      error: (t, d, o) => show("error", t, d, o),
+      info: (t, d, o) => show("info", t, d, o),
     }),
     [show]
   );
@@ -136,6 +160,18 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 <Text style={[styles.detail, { color: vstyle.fg }]} numberOfLines={3}>
                   {t.detail}
                 </Text>
+              ) : null}
+              {t.action ? (
+                <Pressable
+                  onPress={() => { t.action!.onPress(); dismiss(t.id); }}
+                  style={styles.actionBtn}
+                  accessibilityRole="button"
+                  accessibilityLabel={t.action.label}
+                >
+                  <Text style={[styles.actionLabel, { color: vstyle.fg }]}>
+                    {t.action.label}
+                  </Text>
+                </Pressable>
               ) : null}
             </Pressable>
           );

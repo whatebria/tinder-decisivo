@@ -33,17 +33,15 @@ import {
 } from "../api/hooks";
 import {
   Badge,
-  type BadgeVariant,
   BookmarkActions,
   AppShell,
   Button,
   Chip,
   CoachMarkTour,
-  CollapsibleFilterSection,
+  FilterBottomSheet,
   Icon,
   Link,
   RankingCard,
-  ResultadoHero,
   ScreenTopBar,
   ShareModal,
   Spinner,
@@ -52,7 +50,6 @@ import {
 } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
 import {
-  formatMatchPercentage,
   getMatchColor,
   sortByMatchDesc,
 } from "../services/matching";
@@ -97,6 +94,7 @@ export function ResultadosScreen({
   const activeMutation = isGuest ? guestMutation : authMutation;
   const tiposQ = useTiposEleccion();
   const [shareOpen, setShareOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false); // UX-085
 
   const favoritosQ = useFavoritos();
   const descartadosQ = useDescartados();
@@ -272,8 +270,30 @@ export function ResultadosScreen({
     };
     toggleDesc.mutate(vars, {
       onSuccess: () => {
-        if (eraDescartado) toast.info("Descarte eliminado");
-        else toast.success("Candidato descartado");
+        if (eraDescartado) {
+          toast.info("Descarte eliminado");
+        } else {
+          // UX-084: toast con undo (5s) al descartar.
+          toast.info(
+            "Candidato descartado",
+            "Ya no aparece en tu ranking.",
+            {
+              duration: 5000,
+              action: {
+                label: "Deshacer",
+                onPress: () => {
+                  const existingDesc = descartadosQ.data?.find((d) => d.candidato === candidatoId);
+                  if (!existingDesc) return;
+                  toggleDesc.mutate({
+                    candidatoId,
+                    existingDescId: existingDesc.id,
+                    existingFavId: undefined,
+                  });
+                },
+              },
+            },
+          );
+        }
       },
       onError: (e) => toast.error("No pudimos actualizar descartados", getErrorMessage(e)),
     });
@@ -347,6 +367,19 @@ export function ResultadosScreen({
         rankGrid: {
           flexDirection: "row",
           flexWrap: "wrap",
+          gap: spacing.sp2,
+        },
+        // UX-082: ubicacion compacta en una sola linea post-hero.
+        comunaCompacta: {
+          ...typography.overline,
+          textTransform: "none",
+          letterSpacing: 0,
+          lineHeight: 18,
+        },
+        // UX-085: barra de filtro con chip + reset.
+        filterBarRow: {
+          flexDirection: "row",
+          alignItems: "center",
           gap: spacing.sp2,
         },
         emptyText: {
@@ -486,7 +519,36 @@ export function ResultadosScreen({
           </View>
         ) : null}
 
-        {/* UX-071: banner compacto -- sin card pesada, solo icono + texto + link. */}
+        {/* UX-081: hero primero, sin bloqueo de banners. */}
+        {top && topColor && topChart ? (
+          <TopMatchSection
+            result={top}
+            matchColor={topColor}
+            chartData={topChart}
+            isFavorito={favoritoIds.has(top.candidato_data.id!)}
+            isGuest={isGuest}
+            onDetalle={() => goToDetalle(top)}
+            onToggleFav={handleToggleFav}
+            onToggleDesc={handleToggleDesc}
+            loadingBookmarks={toggleFav.isPending || toggleDesc.isPending}
+          />
+        ) : partidoFiltro ? (
+          // UX-058: empty state especifico cuando el filtro de partido elimina todos los resultados.
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptyText}>
+              No hay candidatos de {partidoFiltro} en tu ranking visible.
+            </Text>
+            <Button variant="ghost" onPress={() => setPartidoFiltro(null)}>
+              Ver todos los partidos
+            </Button>
+          </View>
+        ) : (
+          <Text style={styles.emptyText}>
+            No hay candidatos para mostrar. Intenta nuevamente más tarde.
+          </Text>
+        )}
+
+        {/* UX-082: ubicacion compacta, post-hero, no bloquea el contenido principal. */}
         {!isGuest && !comunaUsuario && requiereFiltro ? (
           <View style={styles.ubicacionBannerRow}>
             <Icon name="info" size={14} color={c.warning} />
@@ -505,86 +567,35 @@ export function ResultadosScreen({
         ) : null}
 
         {!isGuest && comunaUsuario && requiereFiltro ? (
-          <View
-            style={[
-              styles.ubicacionCard,
-              { backgroundColor: c.card, borderColor: c.border },
-            ]}
-          >
-            <Text style={[styles.ubicacionBody, { color: c.textSecondary }]}>
-              Mostrando candidatos filtrados para {comunaUsuario.nombre}, Distrito{" "}
-              {comunaUsuario.distrito_numero}.
+          <Text style={[styles.comunaCompacta, { color: c.textSecondary }]}>
+            Filtrando por {comunaUsuario.nombre}, Distrito {comunaUsuario.distrito_numero}.{"\ "}
+            <Text
+              onPress={() => navigation.navigate("Perfil")}
+              accessibilityRole="link"
+              style={{ color: c.primary, fontWeight: "600" }}
+            >
+              Cambiar
             </Text>
-            <Link block onPress={() => navigation.navigate("Perfil")}>
-              Cambiar mi comuna
-            </Link>
-          </View>
-        ) : null}
-
-        {hiddenCount > 0 ? (
-          <Link block onPress={() => navigation.navigate("MisGuardados")}>
-            {`${hiddenCount} candidato${hiddenCount === 1 ? "" : "s"} descartado${hiddenCount === 1 ? "" : "s"}. Ver lista`}
-          </Link>
-        ) : null}
-
-        {partidosDisponibles.length > 1 ? (
-          // UX-060: filtro de partido colapsado por defecto para no ocupar espacio
-          // cuando el usuario no lo necesita. summary muestra el estado actual.
-          <CollapsibleFilterSection
-            title="Filtrar por partido"
-            summary={partidoFiltro ?? "Todos"}
-            defaultExpanded={false}
-          >
-            <View style={styles.chipRow}>
-              <Chip
-                active={partidoFiltro === null}
-                onPress={() => setPartidoFiltro(null)}
-                accessibilityLabel="Todos los partidos"
-              >
-                Todos
-              </Chip>
-              {partidosDisponibles.map((p) => (
-                <Chip
-                  key={p}
-                  active={partidoFiltro === p}
-                  onPress={() => setPartidoFiltro(p)}
-                  accessibilityLabel={`Filtrar por ${p}`}
-                >
-                  {p}
-                </Chip>
-              ))}
-            </View>
-          </CollapsibleFilterSection>
-        ) : null}
-
-        {top && topColor && topChart ? (
-          <TopMatchSection
-            result={top}
-            matchColor={topColor}
-            chartData={topChart}
-            isFavorito={favoritoIds.has(top.candidato_data.id!)}
-            isGuest={isGuest}
-            onDetalle={() => goToDetalle(top)}
-            onToggleFav={handleToggleFav}
-            onToggleDesc={handleToggleDesc}
-            loadingBookmarks={toggleFav.isPending || toggleDesc.isPending}
-          />
-        ) : partidoFiltro ? (
-          // UX-058: empty state especifico cuando el filtro de partido elimina todos los
-          // resultados. Informamos al user y damos salida directa para limpiar el filtro.
-          <View style={styles.emptyBox}>
-            <Text style={styles.emptyText}>
-              No hay candidatos de {partidoFiltro} en tu ranking visible.
-            </Text>
-            <Button variant="ghost" onPress={() => setPartidoFiltro(null)}>
-              Ver todos los partidos
-            </Button>
-          </View>
-        ) : (
-          <Text style={styles.emptyText}>
-            No hay candidatos para mostrar. Intenta nuevamente más tarde.
           </Text>
-        )}
+        ) : null}
+
+        {/* UX-085: chip Filtros + FilterBottomSheet (patron CandidatosScreen). */}
+        {partidosDisponibles.length > 1 ? (
+          <View style={styles.filterBarRow}>
+            <Chip
+              onPress={() => setFiltersOpen(true)}
+              active={partidoFiltro !== null}
+              accessibilityLabel={`Filtrar por partido${partidoFiltro ? `: ${partidoFiltro}` : ""}`}
+            >
+              {partidoFiltro ? `Partido: ${partidoFiltro}` : "Filtrar por partido"}
+            </Chip>
+            {partidoFiltro ? (
+              <Chip onPress={() => setPartidoFiltro(null)} accessibilityLabel="Limpiar filtro de partido">
+                X
+              </Chip>
+            ) : null}
+          </View>
+        ) : null}
 
         {rest.length > 0 ? (
           <View style={{ gap: spacing.sp2 }}>
@@ -638,6 +649,12 @@ export function ResultadosScreen({
               Compartir mi ranking
             </Button>
           ) : null}
+          {/* UX-083: link de descartados movido al footer, no bloquea el hero. */}
+          {hiddenCount > 0 ? (
+            <Link block onPress={() => navigation.navigate("MisGuardados")}>
+              {`${hiddenCount} candidato${hiddenCount === 1 ? "" : "s"} descartado${hiddenCount === 1 ? "" : "s"} oculto${hiddenCount === 1 ? "" : "s"} - ver lista`}
+            </Link>
+          ) : null}
           <Link block onPress={() => navigation.navigate("Comparar")}>
             Comparar candidatos
           </Link>
@@ -647,6 +664,38 @@ export function ResultadosScreen({
         </View>
       </ScrollView>
       </AppShell>
+
+      {/* UX-085: FilterBottomSheet para partido (patron CandidatosScreen). */}
+      {partidosDisponibles.length > 1 ? (
+        <FilterBottomSheet
+          visible={filtersOpen}
+          onClose={() => setFiltersOpen(false)}
+          filtrosActivosCount={partidoFiltro !== null ? 1 : 0}
+          resultadosCount={filteredResults.length}
+          onLimpiar={() => setPartidoFiltro(null)}
+          title="Filtrar resultados"
+        >
+          <View style={styles.chipRow}>
+            <Chip
+              active={partidoFiltro === null}
+              onPress={() => setPartidoFiltro(null)}
+              accessibilityLabel="Todos los partidos"
+            >
+              Todos
+            </Chip>
+            {partidosDisponibles.map((p) => (
+              <Chip
+                key={p}
+                active={partidoFiltro === p}
+                onPress={() => { setPartidoFiltro(p); setFiltersOpen(false); }}
+                accessibilityLabel={`Filtrar por ${p}`}
+              >
+                {p}
+              </Chip>
+            ))}
+          </View>
+        </FilterBottomSheet>
+      ) : null}
 
       <ShareModal
         visible={shareOpen}
