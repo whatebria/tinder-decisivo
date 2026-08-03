@@ -78,7 +78,14 @@ class Command(BaseCommand):
         preguntas_base = list(
             Pregunta.objects.filter(tipo_eleccion=tipo_base).order_by("orden")
         )
-        assert len(preguntas_base) == 8
+        # Nota: el seed usa las primeras N preguntas base (donde N = len de posturas
+        # por partido en _data_candidatos_ficticios). Puede haber mas preguntas
+        # base que posturas -- solo cubrimos las originales para no romper la seed.
+        if len(preguntas_base) < 1:
+            self.stdout.write(self.style.ERROR(
+                "No hay preguntas base. Corre seed_preguntas_base primero."
+            ))
+            return
 
         # Distritos ya deben existir.
         distritos = list(Distrito.objects.order_by("numero"))

@@ -4,11 +4,10 @@
  * Usa react-native-svg (funciona en iOS, Android y web).
  *
  * CONTRATO DE LA PROP `size`:
- *   `size` es el footprint total del SVG en px — incluyendo el espacio para
- *   labels cuando showLabels=true. El llamador siempre sabe exactamente
- *   cuanto espacio ocupa el componente: width = height = size.
- *   El radio del poligono se calcula internamente para caber dentro de ese
- *   espacio dejando margen para los labels.
+ *   `size` es el footprint total del SVG en px (width = height = size).
+ *   El llamador siempre sabe exactamente cuanto espacio ocupa el componente.
+ *   El radio del poligono y la posicion de los labels se calculan
+ *   internamente para que todo quepa sin desbordamiento.
  */
 
 import React, { useMemo } from "react";
@@ -26,45 +25,34 @@ import { EJE_LABELS } from "../../domain/dimensiones";
 // -- Constantes de layout (TASK-034) ------------------------------------------
 
 /** Tamano de fuente visual de los labels en px. */
-const RADAR_LABEL_FONT_PX         = 11;
+const RADAR_LABEL_FONT_PX       = 11;
 /** Longitud maxima de un label antes de truncar. */
-const RADAR_LABEL_MAX_CHARS       = 14;
+const RADAR_LABEL_MAX_CHARS     = 14;
 /**
- * Estimado del ancho de un caracter a RADAR_LABEL_FONT_PX.
- * 0.55 es un ratio conservador para la mayoria de fuentes sans-serif.
- * Si cambia RADAR_LABEL_FONT_PX, este estimado escala automaticamente.
+ * Ratio conservador de ancho de caracter relativo al font size.
+ * Si cambia RADAR_LABEL_FONT_PX, el estimado de ancho escala automaticamente.
  */
-const RADAR_CHAR_WIDTH_RATIO      = 0.55;
+const RADAR_CHAR_WIDTH_RATIO    = 0.55;
 /**
- * Mitad del ancho del label mas largo posible (RADAR_LABEL_MAX_CHARS chars).
- * Se deriva de las constantes anteriores — no es un numero magico standalone.
- * Cambia automaticamente si se ajusta el font size o el max chars.
+ * Mitad del ancho del label mas largo posible.
+ * Se deriva de las constantes de fuente — no es un numero magico standalone.
+ * Se actualiza automaticamente si cambia font size o max chars.
  */
-const RADAR_LABEL_HALF_WIDTH_PX   =
+const RADAR_LABEL_HALF_WIDTH_PX =
   Math.ceil((RADAR_LABEL_MAX_CHARS * RADAR_LABEL_FONT_PX * RADAR_CHAR_WIDTH_RATIO) / 2);
 /**
- * Offset del label expresado como fraccion del radio del poligono.
- * labelRadius = radius * (1 + RADAR_LABEL_OFFSET_RATIO)
- * Escala proporcionalmente al tamano del chart: no hay que tocar
- * ningun size en los callers cuando se quiere mas/menos espacio.
- * Para ajustar el espaciado: solo cambiar este valor.
+ * Espaciado entre borde del poligono y centro del label, como fraccion del radio.
+ * labelCenter = radius * (1 + RADAR_LABEL_OFFSET_RATIO)
+ *
+ * El radio se resuelve para que los labels quepan exactamente en el SVG:
+ *   radius = (cx - RADAR_LABEL_HALF_WIDTH_PX) / (1 + RADAR_LABEL_OFFSET_RATIO)
+ *
+ * Consecuencia: cambiar este valor ajusta el espaciado SIN desbordamiento
+ * y SIN necesitar tocar los `size` en los callers.
  */
-const RADAR_LABEL_OFFSET_RATIO    = 0.32;
-/**
- * Padding reservado en cada lado del SVG para los labels cuando showLabels=true.
- * Solo necesita acomodar el texto — el offset ya es relativo al radio.
- * Derivado de las constantes de fuente: cambia automaticamente si cambia
- * el font size o el max chars.
- */
-const RADAR_LABEL_PAD             = RADAR_LABEL_HALF_WIDTH_PX;
+const RADAR_LABEL_OFFSET_RATIO  = 0.28;
 /** Opacidad del fill del poligono. */
-const RADAR_FILL_OPACITY          = 0.25;
-/**
- * Cuando showLabels=false el poligono puede ocupar mas del area disponible
- * (no necesita dejar margen para texto). Este ratio extra se aplica sobre
- * el radio base calculado sin labels.
- */
-const RADAR_NO_LABEL_RADIUS_BONUS = 1.1;
+const RADAR_FILL_OPACITY        = 0.25;
 
 /**
  * UX-061: resuelve el label de un eje con normalizacion defensiva.
@@ -85,12 +73,11 @@ function resolveEjeLabel(eje: string): string {
 }
 
 export interface RadarChartProps {
+  data: Record<string, number>;
   /**
    * Footprint total del SVG en px (width = height = size).
-   * El llamador siempre sabe exactamente cuanto espacio ocupa el componente.
-   * El radio del poligono se calcula internamente.
+   * El radio del poligono y la posicion de labels se calculan internamente.
    */
-  data: Record<string, number>;
   size?: number;
   color?: string;
   showLabels?: boolean;
@@ -98,7 +85,7 @@ export interface RadarChartProps {
   /**
    * UX-038: alternativa textual para lectores de pantalla (WCAG 1.1.1 Nivel A).
    * Default: descripcion automatica generada desde `data`.
-   * null o "" -> decorativo, lector de pantalla ignora el elemento.
+   * null -> decorativo, lector de pantalla ignora el elemento.
    */
   accessibilityLabel?: string | null;
 }
@@ -130,16 +117,24 @@ export function RadarChart({
 
   if (ejes.length < 3) return null;
 
-  // Centro del SVG — siempre el centro geometrico de `size`.
   const cx = size / 2;
   const cy = size / 2;
 
-  // Radio del poligono: se calcula desde el centro descontando el margen
-  // necesario para los labels. Si no hay labels, el poligono puede crecer.
-  const baseRadius = cx - (showLabels ? RADAR_LABEL_PAD : 0);
-  const radius = showLabels ? baseRadius : baseRadius * RADAR_NO_LABEL_RADIUS_BONUS;
+  /**
+   * Radio garantizado para que los labels no desborden el SVG.
+   *
+   * Con labels: despejamos `radius` de la restriccion:
+   *   label_right_edge = cx + radius*(1+RATIO) + HALF_WIDTH <= size = 2*cx
+   *   → radius = (cx - HALF_WIDTH) / (1 + RATIO)
+   *
+   * Sin labels: el poligono ocupa el 88% del espacio disponible
+   * (margen minimo para que los puntos de vertice no queden cortados).
+   */
+  const radius = showLabels
+    ? (cx - RADAR_LABEL_HALF_WIDTH_PX) / (1 + RADAR_LABEL_OFFSET_RATIO)
+    : cx * 0.88;
 
-  const step = (2 * Math.PI) / Math.max(ejes.length, 1);
+  const step       = (2 * Math.PI) / Math.max(ejes.length, 1);
   const startAngle = -Math.PI / 2; // 12 en punto
 
   // Grid: poligonos concentricos (look angular, no circulos).
@@ -158,9 +153,7 @@ export function RadarChart({
   const gridLines = ejes.map((_, i) => {
     const angle = startAngle + i * step;
     const p = polarToCartesian(cx, cy, radius, angle);
-    return (
-      <Line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke={c.border} strokeWidth={1} />
-    );
+    return <Line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke={c.border} strokeWidth={1} />;
   });
 
   // Poligono de datos.
@@ -176,10 +169,10 @@ export function RadarChart({
     <Circle key={i} cx={p.x} cy={p.y} r={3} fill={strokeColor} />
   ));
 
-  // Labels — offset proporcional al radio: escala automaticamente con el tamano del chart.
+  // Labels — posicion garantizada dentro del SVG por la formula del radio.
   const labels = showLabels
     ? ejes.map((eje, i) => {
-        const angle = startAngle + i * step;
+        const angle    = startAngle + i * step;
         const labelPos = polarToCartesian(cx, cy, radius * (1 + RADAR_LABEL_OFFSET_RATIO), angle);
         return (
           <SvgText

@@ -121,7 +121,7 @@ export function TopMatchSection({
         matchPct={pct}
         matchColor={matchColor}
         ejeScores={chartData}
-        confianzaLabel={`Confianza ${conf.label.toLowerCase()}`}
+        confianzaLabel={conf.label}
         confianzaVariant={getConfianzaBadgeVariant(result.confianza ?? undefined)}
         confianzaSubtext={`${result.preguntas_consideradas} ${
           result.preguntas_consideradas === 1 ? "pregunta coincide" : "preguntas coinciden"

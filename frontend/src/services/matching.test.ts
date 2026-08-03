@@ -137,13 +137,13 @@ describe("getConfianzaBadge", () => {
 
   test("MEDIA devuelve badge warning", () => {
     const badge = getConfianzaBadge("MEDIA");
-    expect(badge.label).toBe("Confianza media");
+    expect(badge.label).toBe("Media confianza");
     expect(badge.color).toBe(colors.warning);
   });
 
   test("TENTATIVA devuelve badge danger", () => {
     const badge = getConfianzaBadge("TENTATIVA");
-    expect(badge.label).toBe("Confianza tentativa");
+    expect(badge.label).toBe("Baja confianza");
     expect(badge.color).toBe(colors.danger);
   });
 
@@ -152,11 +152,11 @@ describe("getConfianzaBadge", () => {
   });
 
   test("undefined defaultea a TENTATIVA (defensivo)", () => {
-    expect(getConfianzaBadge(undefined).label).toBe("Confianza tentativa");
+    expect(getConfianzaBadge(undefined).label).toBe("Baja confianza");
   });
 
   test("valor invalido tambien defaultea a TENTATIVA", () => {
-    expect(getConfianzaBadge("XYZ").label).toBe("Confianza tentativa");
+    expect(getConfianzaBadge("XYZ").label).toBe("Baja confianza");
   });
 });
 

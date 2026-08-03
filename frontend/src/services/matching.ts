@@ -72,8 +72,8 @@ export function getConfianzaBadge(
   const key = (confianza ?? "TENTATIVA").toUpperCase() as ConfianzaLevel;
   const badges: Record<ConfianzaLevel, ConfianzaBadge> = {
     ALTA: { label: "Alta confianza", color: palette.success },
-    MEDIA: { label: "Confianza media", color: palette.warning },
-    TENTATIVA: { label: "Confianza tentativa", color: palette.danger },
+    MEDIA: { label: "Media confianza", color: palette.warning },
+    TENTATIVA: { label: "Baja confianza", color: palette.danger },
   };
   return badges[key] ?? badges.TENTATIVA;
 }

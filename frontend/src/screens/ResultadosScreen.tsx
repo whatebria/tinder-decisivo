@@ -42,6 +42,7 @@ import {
   Icon,
   Link,
   RankingCard,
+  RankingRow,
   ScreenTopBar,
   ShareModal,
   Spinner,
@@ -95,6 +96,8 @@ export function ResultadosScreen({
   const tiposQ = useTiposEleccion();
   const [shareOpen, setShareOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false); // UX-085
+  /** UX: vista del ranking -- compacta (filas) o expandida (cards con radar). */
+  const [rankView, setRankView] = useState<"row" | "card">("row");
 
   const favoritosQ = useFavoritos();
   const descartadosQ = useDescartados();
@@ -362,6 +365,12 @@ export function ResultadosScreen({
           color: c.textSecondary,
           fontWeight: "600",
         },
+        rankHeader: {
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        },
+        viewToggle: { flexDirection: "row", gap: spacing.sp1 },
         chipRow: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sp1 },
         rankList: { gap: spacing.sp2 },
         rankGrid: {
@@ -599,8 +608,26 @@ export function ResultadosScreen({
 
         {rest.length > 0 ? (
           <View style={{ gap: spacing.sp2 }}>
-            <Text style={styles.sectionLabel}>Ranking completo</Text>
-            <View style={styles.rankGrid}>
+            <View style={styles.rankHeader}>
+              <Text style={styles.sectionLabel}>Ranking completo</Text>
+              <View style={styles.viewToggle}>
+                <Chip
+                  onPress={() => setRankView("row")}
+                  active={rankView === "row"}
+                  accessibilityLabel="Vista compacta"
+                >
+                  Lista
+                </Chip>
+                <Chip
+                  onPress={() => setRankView("card")}
+                  active={rankView === "card"}
+                  accessibilityLabel="Vista en tarjetas"
+                >
+                  Tarjetas
+                </Chip>
+              </View>
+            </View>
+            <View style={rankView === "card" ? styles.rankGrid : styles.rankList}>
               {rest.map((r, idx) => {
                 const pct = Number(r.match_percentage);
                 const scoreCol = getMatchColor(pct);
@@ -610,7 +637,7 @@ export function ResultadosScreen({
                 const isFav = favoritoIds.has(candId);
                 // flexBasis: calculado en el cuerpo del componente (cardFlexBasis)
                 // para no re-ejecutar el calculo por cada item del map.
-                return (
+                return rankView === "card" ? (
                   <RankingCard
                     key={r.id ?? candId}
                     rank={idx + 2}
@@ -624,6 +651,31 @@ export function ResultadosScreen({
                     preguntasConsideradas={r.preguntas_consideradas}
                     onPress={() => goToDetalle(r)}
                     style={{ flexBasis: cardFlexBasis, flexGrow: 1, minWidth: 0 }}
+                    actions={
+                      !isGuest ? (
+                        <BookmarkActions
+                          isFavorito={isFav}
+                          isDescartado={false}
+                          onToggleFavorito={() => handleToggleFav(candId)}
+                          onToggleDescartado={() => handleToggleDesc(candId)}
+                          loading={toggleFav.isPending || toggleDesc.isPending}
+                          size="sm"
+                        />
+                      ) : null
+                    }
+                  />
+                ) : (
+                  <RankingRow
+                    key={r.id ?? candId}
+                    rank={idx + 2}
+                    nombre={candidato.nombre}
+                    apellido={candidato.apellido}
+                    partido={candidato.partido}
+                    imageUrl={candidato.profile_picture}
+                    matchPct={pct}
+                    matchColor={scoreCol}
+                    ejeScores={chartData}
+                    onPress={() => goToDetalle(r)}
                     actions={
                       !isGuest ? (
                         <BookmarkActions

@@ -64,7 +64,7 @@ import {
   useToast,
 } from "../components";
 import type { RootStackScreenProps } from "../navigation/types";
-import { confianzaToTier, formatMatchPercentage, getMatchColor } from "../services/matching";
+import { confianzaToTier, formatMatchPercentage, getConfianzaBadge, getMatchColor } from "../services/matching";
 import { useAuthStore } from "../store/auth";
 import { useCuestionarioStore } from "../store/cuestionario";
 import { radii } from "../theme/radii";
@@ -356,7 +356,7 @@ function MatchBlock({
         <View style={styles.confianzaRow}>
           <MatchTier
             tier={confianzaToTier(confianza)}
-            label={`Confianza ${confianza.toLowerCase()}`}
+            label={getConfianzaBadge(confianza ?? undefined).label}
           />
           <IconButton
             variant="ghost"

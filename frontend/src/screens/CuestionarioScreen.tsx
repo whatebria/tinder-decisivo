@@ -14,8 +14,8 @@
  * "base" hasta que exista el flag. Cuando llegue, cambiamos la partición aquí.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { getErrorMessage } from "../api/client";
@@ -152,6 +152,29 @@ export function CuestionarioScreen({
     [c, insets.bottom],
   );
 
+  // Interceptar back gesture/hardware back: pedir confirmacion si hay respuestas.
+  // Sin esto, el usuario pierde el progreso de la sesion sin advertencia.
+  const respondidas = Object.keys(respuestas).length;
+  useEffect(() => {
+    if (respondidas === 0) return;
+    const unsub = navigation.addListener("beforeRemove", (e) => {
+      e.preventDefault();
+      Alert.alert(
+        "\u00bfSalir del cuestionario?",
+        "Tienes respuestas sin enviar. Si sales, tu progreso no se guardar\u00e1 en el servidor hasta que presiones Enviar.",
+        [
+          { text: "Seguir respondiendo", style: "cancel" },
+          {
+            text: "Salir",
+            style: "destructive",
+            onPress: () => navigation.dispatch(e.data.action),
+          },
+        ]
+      );
+    });
+    return unsub;
+  }, [navigation, respondidas]);
+
   if (loading) {
     return (
       <ScreenChrome>
@@ -191,7 +214,7 @@ export function CuestionarioScreen({
   // TODO: cuando el backend exponga preguntas base vs extras por tipoEleccion,
   // reemplazar por la particion real. Por ahora todo es "base".
   const totalPreguntas = preguntas.length;
-  const respondidas = Object.keys(respuestas).length;
+  // respondidas: definido antes del useEffect de beforeRemove (comparten scope).
 
   // Con 10 respuestas el backend ya puede calcular match con confianza media.
   // Solo aplica en cuestionarios especificos: en modo base el boton conduciria

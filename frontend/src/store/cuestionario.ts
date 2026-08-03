@@ -66,7 +66,20 @@ export const useCuestionarioStore = create<CuestionarioState>((set, get) => ({
   loadForTipoEleccion: async (tipoEleccionId, esTipoBase = false) => {
     // BUG-026: esTipoBase llega del caller (que ya tiene el TipoEleccion
     // completo en cache). Elimina la race condition con useTiposEleccion().
-    set({ loading: true, tipoEleccionId, esTipoBase, currentIndex: 0, respuestas: {} });
+    //
+    // Preservar progreso: si el usuario vuelve al mismo tipo con respuestas
+    // en progreso, NO las reseteamos. Esto mantiene el avance si navegan
+    // atras y regresan sin haber ido a otra eleccion.
+    const state = get();
+    const mismotipo = state.tipoEleccionId === tipoEleccionId;
+    const tieneProgreso = mismotipo && Object.keys(state.respuestas).length > 0;
+    set({
+      loading: true,
+      tipoEleccionId,
+      esTipoBase,
+      currentIndex: tieneProgreso ? state.currentIndex : 0,
+      respuestas: tieneProgreso ? state.respuestas : {},
+    });
     try {
       const preguntas = await preguntasPendientes(tipoEleccionId);
       set({ preguntas, loading: false });
