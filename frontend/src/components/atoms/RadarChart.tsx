@@ -24,16 +24,28 @@ import { useThemeColors } from "../../theme/useTheme";
 import { EJE_LABELS } from "../../domain/dimensiones";
 
 // -- Constantes de layout (TASK-034) -----------------------------------------
-/** Ratio radio/size cuando los labels están visibles (deja margen para el texto). */
-const RADAR_RADIUS_RATIO_LABELED   = 0.35;
-/** Ratio radio/size sin labels (ocupa más espacio disponible). */
+/**
+ * Ratio radio/size cuando los labels estan visibles.
+ * Valor mas alto que antes (0.35 -> 0.42) porque el viewBox con padding
+ * reduce el area visual; subimos el ratio para compensar y mantener el
+ * poligono a un tamano razonable.
+ */
+const RADAR_RADIUS_RATIO_LABELED   = 0.42;
+/** Ratio radio/size sin labels (ocupa mas espacio disponible). */
 const RADAR_RADIUS_RATIO_UNLABELED = 0.45;
-/** Distancia en px del label al borde exterior del radar. */
-const RADAR_LABEL_OFFSET_PX        = 18;
-/** Opacidad del fill del polígono (suave, no sólido). */
+/** Distancia en coordenadas del label al borde exterior del radar. */
+const RADAR_LABEL_OFFSET_PX        = 14;
+/** Opacidad del fill del poligono (suave, no solido). */
 const RADAR_FILL_OPACITY           = 0.25;
-/** Longitud maxima de un label antes de truncar. */
-const RADAR_LABEL_MAX_CHARS        = 12;
+/** Longitud maxima de un label antes de truncar (cubre "Institucional" = 13 chars). */
+const RADAR_LABEL_MAX_CHARS        = 14;
+/**
+ * UX-061 (fix definitivo): padding extra en el sistema de coordenadas del
+ * viewBox de la SVG. Permite que los labels que caen cerca del borde no
+ * queden cortados por el viewport de la SVG, sin cambiar el tamano visual
+ * del componente (width/height siguen siendo `size`).
+ */
+const RADAR_LABEL_PAD              = 40;
 
 /**
  * UX-061: resuelve el label de un eje con normalizacion defensiva.
@@ -179,10 +191,18 @@ export function RadarChart({
       })
     : null;
 
+  // UX-061: el viewBox se extiende RADAR_LABEL_PAD unidades extra en cada
+  // lado cuando hay labels. El SVG sigue renderizandose a `size x size` px,
+  // pero el sistema de coordenadas interno es mas amplio, por lo que los
+  // labels cercanos al borde no quedan cortados por el viewport.
+  const svgPad = showLabels ? RADAR_LABEL_PAD : 0;
+  const vbSize = size + svgPad * 2;
+
   return (
     <Svg
       width={size}
       height={size}
+      viewBox={`${-svgPad} ${-svgPad} ${vbSize} ${vbSize}`}
       accessibilityRole="image"
       accessibilityLabel={
         // null o "" -> decorativo, no anuncia nada al lector de pantalla.
