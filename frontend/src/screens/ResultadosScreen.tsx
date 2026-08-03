@@ -77,7 +77,7 @@ export function ResultadosScreen({
   // columnas) porque cada card lleva un radar 140px + labels; con menos
   // ancho la card se aprieta y el radar pierde legibilidad.
   const rankingCols = useMemo(
-    () => screenWidth < 400 ? 1 : screenWidth < 720 ? 2 : screenWidth < 1000 ? 3 : 4,
+    () => screenWidth < 600 ? 1 : screenWidth < 720 ? 2 : screenWidth < 1000 ? 3 : 4,
     [screenWidth]
   );
   const isGuest = useAuthStore((s) => s.isGuest);
