@@ -181,7 +181,7 @@ export function HomeHeroSection({
   ctaLabel,
   onCta,
   onAvatarPress,
-  brand = "Tinder Decisivo",
+  brand = "VotoAFin",
 }: HomeHeroSectionProps) {
   const c = useThemeColors();
   const hasRing = progressValue > 0;
