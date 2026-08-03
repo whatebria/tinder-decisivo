@@ -152,12 +152,17 @@ export function CuestionarioScreen({
     [c, insets.bottom],
   );
 
+  // Ref para que handleSubmit pueda indicarle al listener beforeRemove
+  // que la navegacion es intencional (submit exitoso) y no debe interceptarse.
+  const allowLeaveRef = useRef(false);
+
   // Interceptar back gesture/hardware back: pedir confirmacion si hay respuestas.
   // Sin esto, el usuario pierde el progreso de la sesion sin advertencia.
   const respondidas = Object.keys(respuestas).length;
   useEffect(() => {
     if (respondidas === 0) return;
     const unsub = navigation.addListener("beforeRemove", (e) => {
+      if (allowLeaveRef.current) return; // submit exitoso -> dejar pasar
       e.preventDefault();
       Alert.alert(
         "\u00bfSalir del cuestionario?",
@@ -244,6 +249,9 @@ export function CuestionarioScreen({
         qc.invalidateQueries({ queryKey: queryKeys.miProgreso });
         qc.invalidateQueries({ queryKey: queryKeys.misRespuestasAll });
       }
+      // Marcar que la navegacion es intencional antes del replace para que
+      // el listener beforeRemove no la intercepte con el dialog de confirmacion.
+      allowLeaveRef.current = true;
       navigation.replace("SubmitDone", { mode: esTipoBase ? "base" : "eleccion" });
     } catch (err) {
       toast.error("No pudimos guardar tus respuestas", getErrorMessage(err));
