@@ -71,7 +71,7 @@ import { radii } from "../theme/radii";
 import { spacing } from "../theme/spacing";
 import { typography } from "../theme/typography";
 import { useThemeColors } from "../theme/useTheme";
-import { iniciales, nombreCompleto } from "../utils/candidato";
+import { iniciales, nombreCompleto, territorialLabel } from "../utils/candidato";
 import { ResumenTab } from "./DetalleCandidato/ResumenTab";
 import { AfinidadTab } from "./DetalleCandidato/AfinidadTab";
 
@@ -193,7 +193,7 @@ export function DetalleCandidatoScreen({
           name={nombreCompleto(candidato)}
           initials={iniciales(candidato)}
           partido={candidato.partido ?? "Independiente"}
-          subtitle={hasMatch ? "Perfil basado en tus respuestas" : "Aun sin match calculado"}
+          subtitle={territorialLabel(candidato) ?? (hasMatch ? "Perfil basado en tus respuestas" : "Sin información territorial")}
           tilt="default"
         />
 
