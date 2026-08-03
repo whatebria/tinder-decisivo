@@ -49,7 +49,7 @@ const RADAR_LABEL_HALF_WIDTH_PX   =
  * ningun size en los callers cuando se quiere mas/menos espacio.
  * Para ajustar el espaciado: solo cambiar este valor.
  */
-const RADAR_LABEL_OFFSET_RATIO    = 0.28;
+const RADAR_LABEL_OFFSET_RATIO    = 0.24;
 /**
  * Padding reservado en cada lado del SVG para los labels cuando showLabels=true.
  * Solo necesita acomodar el texto — el offset ya es relativo al radio.
