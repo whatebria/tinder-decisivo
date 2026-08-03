@@ -34,7 +34,7 @@ const RADAR_RADIUS_RATIO_LABELED   = 0.42;
 /** Ratio radio/size sin labels (ocupa mas espacio disponible). */
 const RADAR_RADIUS_RATIO_UNLABELED = 0.45;
 /** Distancia en coordenadas del label al borde exterior del radar. */
-const RADAR_LABEL_OFFSET_PX        = 26;
+const RADAR_LABEL_OFFSET_PX        = 40;
 /** Opacidad del fill del poligono (suave, no solido). */
 const RADAR_FILL_OPACITY           = 0.25;
 /** Longitud maxima de un label antes de truncar (cubre "Institucional" = 13 chars). */
