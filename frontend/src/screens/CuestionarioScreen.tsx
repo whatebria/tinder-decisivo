@@ -193,10 +193,11 @@ export function CuestionarioScreen({
   const totalPreguntas = preguntas.length;
   const respondidas = Object.keys(respuestas).length;
 
-  // Con 5 respuestas el backend ya puede calcular match (confianza BAJA).
-  // Permitimos enviar parcial sin forzar completar todo el cuestionario.
+  // Con 10 respuestas el backend ya puede calcular match con confianza media.
+  // Solo aplica en cuestionarios especificos: en modo base el boton conduciria
+  // a resultados de OTRA eleccion, lo cual es confuso (PRODUCT-001).
   const puedeVerResultadosParciales =
-    !isGuest && respondidas >= MIN_RESPUESTAS_PARA_RESULTADO && !isLast;
+    !isGuest && !esTipoBase && respondidas >= MIN_RESPUESTAS_PARA_RESULTADO && !isLast;
 
   // Separo regulares y "No se" para poder insertar un Divider entre ellos
   // (UX-017). Ambos grupos comparten value / onChange para estado unificado.

@@ -46,10 +46,11 @@ export const PESO_LABELS_DISPLAY: Readonly<Record<PesoValue, string>> = {
 export const DEFAULT_PESO: PesoValue = 2;
 
 /** Minimo de respuestas para habilitar la vista de resultados parciales.
- *  Regla de negocio: con 5+ respuestas el backend puede calcular match
- *  con confianza BAJA. Centralizado aqui para evitar magic numbers en UI.
+ *  PRODUCT-001 (2026-08-02): subido de 5 a 10 — con menos de 10 el matching
+ *  no es suficientemente confiable para mostrarlo como resultado parcial.
+ *  Centralizado aqui como fuente unica de verdad; no usar magic numbers en UI.
  */
-export const MIN_RESPUESTAS_PARA_RESULTADO = 5;
+export const MIN_RESPUESTAS_PARA_RESULTADO = 10;
 
 // -- Opciones -----------------------------------------------------------------
 
