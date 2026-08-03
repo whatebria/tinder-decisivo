@@ -369,7 +369,7 @@ export function MisGuardadosScreen({
       <View style={styles.topBarWrapper}>
         <ScreenTopBar
           title="Mis guardados"
-          subtitle="Favoritos y descartados"
+          subtitle="Guardados"
           onBack={() => navigation.goBack()}
         />
       </View>
