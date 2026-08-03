@@ -40,8 +40,8 @@ export interface OnboardingEleccionesDemoProps {
   onToggle: (id: number) => void;
 }
 
-/** Max items visibles para no requerir scroll (constraint UX-011). */
-const MAX_VISIBLE = 2;
+/** Max items visibles (constraint UX-011 -- DEBUG: 3 para mostrar las elecciones 2025). */
+const MAX_VISIBLE = 3;
 
 export function OnboardingEleccionesDemo({
   tipos,

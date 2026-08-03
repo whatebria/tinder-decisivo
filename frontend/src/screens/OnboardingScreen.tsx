@@ -67,6 +67,9 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding"> | RootSta
   const tiposQ = useTiposEleccion();
   const tipos = tiposQ.data ?? [];
   const allTipoIds = tipos.map((t) => t.id).filter((id): id is number => id != null);
+  // DEBUG: solo elecciones 2025 activas por defecto en el onboarding.
+  const tipos2025 = tipos.filter((t) => t.anio === 2025);
+  const tipos2025Ids = tipos2025.map((t) => t.id).filter((id): id is number => id != null);
   const activeIds = useElectionsPrefsStore((s) => s.activeIds);
   const toggleEleccion = useElectionsPrefsStore((s) => s.toggle);
   const initializeElections = useElectionsPrefsStore((s) => s.initializeIfNull);
@@ -81,7 +84,7 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding"> | RootSta
   /** Salta al auth stack aterrizando en Login (default). */
   async function finishToLogin() {
     if (isPreview) { props.navigation.goBack(); return; }
-    await initializeElections(allTipoIds);
+    await initializeElections(tipos2025Ids);
     setPendingAuthTarget(null);
     await markSeen();
   }
@@ -89,7 +92,7 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding"> | RootSta
   /** Salta al auth stack aterrizando directo en Register. */
   async function finishToRegister() {
     if (isPreview) { props.navigation.goBack(); return; }
-    await initializeElections(allTipoIds);
+    await initializeElections(tipos2025Ids);
     setPendingAuthTarget("Register");
     await markSeen();
   }
@@ -97,7 +100,7 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding"> | RootSta
   /** Entra al main stack en modo invitado. */
   async function finishAsGuest() {
     if (isPreview) { props.navigation.goBack(); return; }
-    await initializeElections(allTipoIds);
+    await initializeElections(tipos2025Ids);
     setPendingAuthTarget(null);
     await markSeen();
     enterGuestMode();
@@ -259,7 +262,7 @@ export function OnboardingScreen(_: RootStackScreenProps<"Onboarding"> | RootSta
                   {textContent}
                   {slide.id === "welcome-2" && (
                     <OnboardingEleccionesDemo
-                      tipos={tipos}
+                      tipos={tipos2025}
                       activeIds={activeIds}
                       onToggle={handleToggleEleccion}
                     />
