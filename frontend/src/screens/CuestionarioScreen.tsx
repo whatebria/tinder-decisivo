@@ -14,7 +14,7 @@
  * "base" hasta que exista el flag. Cuando llegue, cambiamos la partición aquí.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -152,38 +152,23 @@ export function CuestionarioScreen({
     [c, insets.bottom],
   );
 
-  // Ref para que handleSubmit pueda indicarle al listener beforeRemove
-  // que la navegacion es intencional (submit exitoso) y no debe interceptarse.
-  const allowLeaveRef = useRef(false);
-
-  // Interceptar back gesture/hardware back: pedir confirmacion si hay respuestas.
-  // Sin esto, el usuario pierde el progreso de la sesion sin advertencia.
   const respondidas = Object.keys(respuestas).length;
-  useEffect(() => {
-    if (respondidas === 0) return;
-    const unsub = navigation.addListener("beforeRemove", (e) => {
-      if (allowLeaveRef.current) return; // submit exitoso -> dejar pasar
-      e.preventDefault();
-      Alert.alert(
-        "\u00bfSalir del cuestionario?",
-        "Tienes respuestas sin enviar. Si sales, tu progreso no se guardar\u00e1 en el servidor hasta que presiones Enviar.",
-        [
-          { text: "Seguir respondiendo", style: "cancel" },
-          {
-            text: "Salir",
-            style: "destructive",
-            onPress: () => {
-              // Marcar antes del dispatch para que cuando beforeRemove
-              // se vuelva a disparar (comportamiento de React Navigation),
-              // el listener lo deje pasar sin interceptar.
-              allowLeaveRef.current = true;
-              navigation.dispatch(e.data.action);
-            },
-          },
-        ]
-      );
-    });
-    return unsub;
+
+  // Confirmar antes de salir si hay respuestas en progreso.
+  // Manejo directo en el handler: mas simple y predecible que beforeRemove.
+  const handleBack = useCallback(() => {
+    if (respondidas === 0) {
+      navigation.goBack();
+      return;
+    }
+    Alert.alert(
+      "\u00bfSalir del cuestionario?",
+      "Tienes respuestas sin enviar. Si sales, tu progreso no se guardar\u00e1 en el servidor hasta que presiones Enviar.",
+      [
+        { text: "Seguir respondiendo", style: "cancel" },
+        { text: "Salir", style: "destructive", onPress: () => navigation.goBack() },
+      ]
+    );
   }, [navigation, respondidas]);
 
   if (loading) {
@@ -225,7 +210,7 @@ export function CuestionarioScreen({
   // TODO: cuando el backend exponga preguntas base vs extras por tipoEleccion,
   // reemplazar por la particion real. Por ahora todo es "base".
   const totalPreguntas = preguntas.length;
-  // respondidas: definido antes del useEffect de beforeRemove (comparten scope).
+  // respondidas: calculado aqui para compartirlo con handleBack.
 
   // Con 10 respuestas el backend ya puede calcular match con confianza media.
   // Solo aplica en cuestionarios especificos: en modo base el boton conduciria
@@ -255,9 +240,6 @@ export function CuestionarioScreen({
         qc.invalidateQueries({ queryKey: queryKeys.miProgreso });
         qc.invalidateQueries({ queryKey: queryKeys.misRespuestasAll });
       }
-      // Marcar que la navegacion es intencional antes del replace para que
-      // el listener beforeRemove no la intercepte con el dialog de confirmacion.
-      allowLeaveRef.current = true;
       navigation.replace("SubmitDone", { mode: esTipoBase ? "base" : "eleccion" });
     } catch (err) {
       toast.error("No pudimos guardar tus respuestas", getErrorMessage(err));
@@ -300,7 +282,7 @@ export function CuestionarioScreen({
           subtitle={formatSubtitleCuestionario(currentIndex, totalPreguntas)}
           respondidas={respondidas}
           totalPreguntas={totalPreguntas}
-          onBack={() => navigation.goBack()}
+          onBack={handleBack}
           onInfo={() => setInfoOpen(true)}
         />
 
