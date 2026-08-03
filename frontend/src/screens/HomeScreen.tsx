@@ -183,9 +183,16 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
       navigation.navigate("Resultados");
       return;
     }
-    const tipo = tiposOrdenados.find((t) => t.id === activeId) ?? tiposOrdenados[0];
-    if (tipo) void iniciarCuestionario(tipo);
-  }, [mejoresMatches.length, navigation, tiposOrdenados, activeId, iniciarCuestionario]);
+    // BUG-043: si la eleccion activa ya esta completa (heroProgress === 1),
+    // activeId apunta al cuestionario terminado -- buscar el siguiente incompleto
+    // en orden de prioridad para no intentar reiniciar uno sin preguntas.
+    const tipoIncompleto = tiposOrdenados.find((t) => {
+      if (!t.id) return false;
+      const p = progresoByTipo.get(t.id);
+      return !p || p.completa !== true;
+    });
+    if (tipoIncompleto) void iniciarCuestionario(tipoIncompleto);
+  }, [mejoresMatches.length, navigation, tiposOrdenados, progresoByTipo, iniciarCuestionario]);
 
   const handleConfirmReiniciar = useCallback(async () => {
     if (!tipoAReiniciar?.id) return;
@@ -219,12 +226,23 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
     return items;
   }, [tiposOrdenados, activeId, progresoByTipo, iniciarCuestionario]);
 
-  // CTA del hero segun estado global
+  // CTA del hero segun estado global.
+  // BUG-043: heroProgress >= 1 NO implica matches -- puede ser el cuestionario
+  // base completo sin eleccion especifica. En ese caso buscar la siguiente
+  // eleccion incompleta en orden de prioridad y sugerirla.
   const heroCta = useMemo(() => {
     if (mejoresMatches.length > 0) return "Ver mis matches";
+    if (heroProgress >= 1) {
+      const siguiente = tiposOrdenados.find((t) => {
+        if (!t.id) return false;
+        const p = progresoByTipo.get(t.id);
+        return !p || p.completa !== true;
+      });
+      return siguiente ? `Empezar ${siguiente.nombre}` : "Empezar cuestionario";
+    }
     if (heroProgress > 0) return "Continuar cuestionario";
     return "Empezar cuestionario";
-  }, [mejoresMatches.length, heroProgress]);
+  }, [mejoresMatches.length, heroProgress, tiposOrdenados, progresoByTipo]);
 
   // Countdown: dias hasta la eleccion con fecha mas proxima
   const countdownDays = useMemo(() => {
@@ -373,8 +391,13 @@ export function HomeScreen({ navigation }: RootStackScreenProps<"Home">) {
                     <HomeMatchLocked
                       body={lockBody}
                       onContinuar={() => {
-                        const tipo =
-                          tiposOrdenados.find((t) => t.id === activeId) ?? tiposOrdenados[0];
+                        // BUG-043: usar la primera incompleta, no activeId
+                        // que puede apuntar al cuestionario ya terminado.
+                        const tipo = tiposOrdenados.find((t) => {
+                          if (!t.id) return false;
+                          const p = progresoByTipo.get(t.id);
+                          return !p || p.completa !== true;
+                        }) ?? tiposOrdenados[0];
                         if (tipo) iniciarCuestionario(tipo);
                       }}
                     />
