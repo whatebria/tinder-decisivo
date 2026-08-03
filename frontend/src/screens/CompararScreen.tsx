@@ -419,7 +419,7 @@ function FilaComparacion({
 
 const styles = StyleSheet.create({
   scroll: {
-    padding: spacing.sp4,
+    paddingHorizontal: spacing.sp4,
     paddingBottom: spacing.sp7,
     gap: spacing.sp3,
   },

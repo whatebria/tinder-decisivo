@@ -560,7 +560,7 @@ const styles = StyleSheet.create({
   },
 
   listWrap: {
-    padding: spacing.sp4,
+    paddingHorizontal: spacing.sp4,
     paddingBottom: spacing.sp9,
   },
   itemSeparator: { height: spacing.sp3 },

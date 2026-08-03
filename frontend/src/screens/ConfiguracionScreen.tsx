@@ -49,7 +49,7 @@ import { useThemeColors } from "../theme/useTheme";
 const styles = StyleSheet.create({
   // paddingHorizontal: sp4 alinea el topBar con Candidatos/Comparar
   // (ambos tienen padding: sp4 en su contenedor de scroll/FlatList).
-  content: { padding: spacing.sp4, paddingBottom: spacing.sp8, gap: spacing.sp5 },
+  content: { paddingHorizontal: spacing.sp4, paddingBottom: spacing.sp8, gap: spacing.sp5 },
   // UX-063: flat — sin card, sin marginHorizontal, separador inferior.
   topBar:  { marginTop: spacing.sp3 },
   // Sin paddingHorizontal propio — lo hereda del contenedor (content).
