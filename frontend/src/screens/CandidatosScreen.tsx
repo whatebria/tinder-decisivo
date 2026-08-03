@@ -534,7 +534,7 @@ const styles = StyleSheet.create({
   h1: { ...typography.h2, fontWeight: "800" },
   contador: { ...typography.small, fontWeight: "600" },
 
-  filterBarWrap: { marginBottom: spacing.sp2 },
+  filterBarWrap: { marginTop: spacing.sp3, marginBottom: spacing.sp2 },
   filterBarRow: {
     paddingHorizontal: spacing.sp4,
     gap: spacing.sp2,
