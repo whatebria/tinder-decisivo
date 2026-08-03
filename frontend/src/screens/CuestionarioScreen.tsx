@@ -15,7 +15,7 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { getErrorMessage } from "../api/client";
@@ -24,6 +24,7 @@ import {
   Button,
   Chip,
   CoachMarkTour,
+  ConfirmModal,
   CuestionarioHeader,
   Divider,
   ScreenChrome,
@@ -67,6 +68,7 @@ export function CuestionarioScreen({
   const qc = useQueryClient();
   const scrollRef = useRef<ScrollView>(null);
   const [infoOpen, setInfoOpen] = useState(false);
+  const [confirmBackOpen, setConfirmBackOpen] = useState(false);
   const isGuest = useAuthStore((s) => s.isGuest);
   const {
     preguntas,
@@ -155,20 +157,13 @@ export function CuestionarioScreen({
   const respondidas = Object.keys(respuestas).length;
 
   // Confirmar antes de salir si hay respuestas en progreso.
-  // Manejo directo en el handler: mas simple y predecible que beforeRemove.
+  // Usa ConfirmModal en lugar de Alert.alert() -- Alert es no-op en RN Web.
   const handleBack = useCallback(() => {
     if (respondidas === 0) {
       navigation.goBack();
       return;
     }
-    Alert.alert(
-      "\u00bfSalir del cuestionario?",
-      "Tienes respuestas sin enviar. Si sales, tu progreso no se guardar\u00e1 en el servidor hasta que presiones Enviar.",
-      [
-        { text: "Seguir respondiendo", style: "cancel" },
-        { text: "Salir", style: "destructive", onPress: () => navigation.goBack() },
-      ]
-    );
+    setConfirmBackOpen(true);
   }, [navigation, respondidas]);
 
   if (loading) {
@@ -408,6 +403,17 @@ export function CuestionarioScreen({
         visible={infoOpen}
         onClose={() => setInfoOpen(false)}
         pregunta={pregunta}
+      />
+
+      <ConfirmModal
+        visible={confirmBackOpen}
+        title="\u00bfSalir del cuestionario?"
+        message="Tienes respuestas sin enviar. Si sales, tu progreso no se guardar\u00e1 en el servidor hasta que presiones Enviar."
+        confirmLabel="Salir"
+        cancelLabel="Seguir respondiendo"
+        variant="danger"
+        onConfirm={() => { setConfirmBackOpen(false); navigation.goBack(); }}
+        onCancel={() => setConfirmBackOpen(false)}
       />
 
       <CoachMarkTour tourId="cuestionario" />
