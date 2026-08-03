@@ -204,16 +204,26 @@ export function DetalleCandidatoScreen({
             isDescartado={isDescartado}
             loadingFav={toggleFav.isPending}
             loadingDesc={toggleDesc.isPending}
-            onToggleFav={() =>
+            onToggleFav={() => {
+              const eraFavorito = isFavorito;
+              const nombre = `${candidato.nombre} ${candidato.apellido ?? ""}`.trim();
               toggleFav.mutate(candidatoId, {
+                onSuccess: () => eraFavorito
+                  ? toast.info("Quitado de favoritos", nombre)
+                  : toast.success("Agregado a favoritos", nombre),
                 onError: (e) => toast.error("Error", getErrorMessage(e)),
-              })
-            }
-            onToggleDesc={() =>
+              });
+            }}
+            onToggleDesc={() => {
+              const eraDescartado = isDescartado;
+              const nombre = `${candidato.nombre} ${candidato.apellido ?? ""}`.trim();
               toggleDesc.mutate(candidatoId, {
+                onSuccess: () => eraDescartado
+                  ? toast.info("Candidato restaurado", nombre)
+                  : toast.info("Candidato descartado", nombre),
                 onError: (e) => toast.error("Error", getErrorMessage(e)),
-              })
-            }
+              });
+            }}
             onShare={() => setShareOpen(true)}
           />
         ) : null}
