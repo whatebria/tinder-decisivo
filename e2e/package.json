@@ -1,5 +1,5 @@
 {
-  "name": "servel-e2e",
+  "name": "votoafin-e2e",
   "version": "0.1.0",
   "private": true,
   "description": "E2E tests con Playwright para Servel (Tinder Decisivo).",

@@ -452,7 +452,7 @@ function ActionRow({
 function buildShareText(cand: Candidato, matchPct: number | null): string {
   // TASK-038: usar formatMatchPercentage para consistencia con la UI (DRY).
   const pct = matchPct != null ? formatMatchPercentage(matchPct) : "?";
-  return `${nombreCompleto(cand)} - ${pct} de afinidad conmigo segun mi cuestionario en TinderPolitico.`;
+  return `${nombreCompleto(cand)} - ${pct} de afinidad conmigo segun mi cuestionario en VotoAFin.`;
 }
 
 // ---------- Styles ----------

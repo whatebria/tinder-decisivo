@@ -42,7 +42,7 @@
  *     sin blur en vez de crashear.
  */
 
-const INSTALLED_FLAG = "__servel_aria_hidden_focus_guard__";
+const INSTALLED_FLAG = "__votoafin_aria_hidden_focus_guard__";
 
 export function installAriaHiddenFocusGuard(): void {
   if (typeof Element === "undefined") return;

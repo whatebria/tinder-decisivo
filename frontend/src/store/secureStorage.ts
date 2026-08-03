@@ -17,7 +17,7 @@ import * as SecureStore from "expo-secure-store";
 const isWeb = Platform.OS === "web";
 
 /** Clave del token de autenticacion. En web, ops son no-op (cookie httpOnly). */
-export const AUTH_TOKEN_STORAGE_KEY = "servel_auth_token";
+export const AUTH_TOKEN_STORAGE_KEY = "votoafin_auth_token";
 
 export const secureStorage = {
   async getItem(key: string): Promise<string | null> {

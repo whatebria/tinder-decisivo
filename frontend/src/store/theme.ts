@@ -12,7 +12,7 @@ import { secureStorage } from "./secureStorage";
 
 export type ThemeMode = "light" | "dark" | "system";
 
-const THEME_KEY = "servel_theme_mode";
+const THEME_KEY = "votoafin_theme_mode";
 
 interface ThemeState {
   mode: ThemeMode;

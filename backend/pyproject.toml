@@ -1,5 +1,5 @@
 [project]
-name = "servel-backend"
+name = "votoafin-backend"
 version = "0.1.0"
 description = "API REST para Servel - matching votante/candidato"
 requires-python = ">=3.10"

@@ -12,7 +12,7 @@ import { create } from "zustand";
 
 import { secureStorage } from "./secureStorage";
 
-const ONBOARDING_KEY = "servel_onboarding_seen";
+const ONBOARDING_KEY = "votoafin_onboarding_seen";
 
 /** Destino al que debe navegar el auth stack tras el swap. */
 export type PendingAuthTarget = "Login" | "Register";

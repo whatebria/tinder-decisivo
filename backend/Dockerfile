@@ -2,10 +2,10 @@
 # Multi-stage build para produccion. Imagen final ~150MB.
 #
 # Build local:
-#   docker build -t servel-backend:local -f backend/Dockerfile backend/
+#   docker build -t votoafin-backend:local -f backend/Dockerfile backend/
 # Run local:
 #   docker run --rm -p 8000:8000 -e SECRET_KEY=dev -e DEBUG=False \
-#       -e DATABASE_URL=sqlite:///db.sqlite3 servel-backend:local
+#       -e DATABASE_URL=sqlite:///db.sqlite3 votoafin-backend:local
 
 # ---------- Stage 1: builder ----------
 FROM python:3.13-slim AS builder

@@ -22,7 +22,7 @@ import { secureStorage, AUTH_TOKEN_STORAGE_KEY } from "./secureStorage";
 const isWeb = Platform.OS === "web";
 
 const TOKEN_KEY = AUTH_TOKEN_STORAGE_KEY; // re-export alias para claridad interna
-const USER_ID_KEY = "servel_user_id";
+const USER_ID_KEY = "votoafin_user_id";
 
 interface AuthState {
   token: string | null;

@@ -4,7 +4,7 @@
  *
  * Modelo:
  *   - Cada identidad (userId autenticado o "guest") tiene su propia lista de
- *     tours vistos, en la key `servel_coach_marks_seen_${userId|guest}`.
+ *     tours vistos, en la key `votoafin_coach_marks_seen_${userId|guest}`.
  *   - App.tsx llama `hydrateFor(userId)` al hidratar el auth y cada vez que
  *     cambia la identidad (login, logout, entrar/salir de guest).
  *   - `markSeen` escribe async a storage; `resetAll` borra la key y limpia
@@ -30,7 +30,7 @@ import { create } from "zustand";
 import type { TourId } from "../content/coachMarks";
 import { secureStorage } from "./secureStorage";
 
-const KEY_PREFIX = "servel_coach_marks_seen_";
+const KEY_PREFIX = "votoafin_coach_marks_seen_";
 const GUEST_ID = "guest";
 
 /** Mapa tourId -> visto (true). Los no-vistos simplemente no aparecen. */

@@ -96,7 +96,7 @@ export default function App() {
     // excede el viewport deja ver el color del contenedor padre (blanco por
     // default) al scrollear porque el contenedor interno con `flex:1` se colapsa
     // al viewport y no pinta mas alla.
-    const STYLE_ID = "__servel_theme_bg__";
+    const STYLE_ID = "__votoafin_theme_bg__";
     let styleEl = doc.getElementById(STYLE_ID) as HTMLStyleElement | null;
     if (!styleEl) {
       styleEl = doc.createElement("style");

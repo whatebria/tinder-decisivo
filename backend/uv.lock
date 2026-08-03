@@ -893,7 +893,7 @@ wheels = [
 ]
 
 [[package]]
-name = "servel-backend"
+name = "votoafin-backend"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

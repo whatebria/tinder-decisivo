@@ -74,13 +74,13 @@ describe("useCoachMarksStore", () => {
       expect(s.isHydrated).toBe(true);
       expect(s.currentUserId).toBe(42);
       expect(mockedStorage.getItem).toHaveBeenCalledWith(
-        "servel_coach_marks_seen_42",
+        "votoafin_coach_marks_seen_42",
       );
     });
 
     it("carga tours vistos previamente para el userId", async () => {
       mockedBackend.set(
-        "servel_coach_marks_seen_7",
+        "votoafin_coach_marks_seen_7",
         JSON.stringify({ home: true, resultados: true }),
       );
       await useCoachMarksStore.getState().hydrateFor(7);
@@ -92,7 +92,7 @@ describe("useCoachMarksStore", () => {
 
     it("usa la key 'guest' cuando userId es null", async () => {
       mockedBackend.set(
-        "servel_coach_marks_seen_guest",
+        "votoafin_coach_marks_seen_guest",
         JSON.stringify({ home: true }),
       );
       await useCoachMarksStore.getState().hydrateFor(null);
@@ -102,11 +102,11 @@ describe("useCoachMarksStore", () => {
 
     it("aisla identidades: cambiar de userId recarga desde otra key", async () => {
       mockedBackend.set(
-        "servel_coach_marks_seen_1",
+        "votoafin_coach_marks_seen_1",
         JSON.stringify({ home: true }),
       );
       mockedBackend.set(
-        "servel_coach_marks_seen_2",
+        "votoafin_coach_marks_seen_2",
         JSON.stringify({ comparador: true }),
       );
 
@@ -118,7 +118,7 @@ describe("useCoachMarksStore", () => {
     });
 
     it("recupera de JSON corrupto sin crashear", async () => {
-      mockedBackend.set("servel_coach_marks_seen_9", "{ not json");
+      mockedBackend.set("votoafin_coach_marks_seen_9", "{ not json");
       await useCoachMarksStore.getState().hydrateFor(9);
       expect(useCoachMarksStore.getState().seen).toEqual({});
       expect(useCoachMarksStore.getState().isHydrated).toBe(true);
@@ -126,7 +126,7 @@ describe("useCoachMarksStore", () => {
 
     it("ignora payloads que no sean objeto plain (array, string, etc)", async () => {
       mockedBackend.set(
-        "servel_coach_marks_seen_5",
+        "votoafin_coach_marks_seen_5",
         JSON.stringify(["home", "resultados"]),
       );
       await useCoachMarksStore.getState().hydrateFor(5);
@@ -148,7 +148,7 @@ describe("useCoachMarksStore", () => {
     it("persiste a storage en la key de la identidad actual", async () => {
       await useCoachMarksStore.getState().markSeen("home");
       expect(mockedStorage.setItem).toHaveBeenCalledWith(
-        "servel_coach_marks_seen_100",
+        "votoafin_coach_marks_seen_100",
         JSON.stringify({ home: true }),
       );
     });
@@ -185,7 +185,7 @@ describe("useCoachMarksStore", () => {
   describe("resetAll", () => {
     beforeEach(async () => {
       mockedBackend.set(
-        "servel_coach_marks_seen_50",
+        "votoafin_coach_marks_seen_50",
         JSON.stringify({ home: true, resultados: true }),
       );
       await useCoachMarksStore.getState().hydrateFor(50);
@@ -200,9 +200,9 @@ describe("useCoachMarksStore", () => {
     it("borra la key de storage de la identidad actual", async () => {
       await useCoachMarksStore.getState().resetAll();
       expect(mockedStorage.removeItem).toHaveBeenCalledWith(
-        "servel_coach_marks_seen_50",
+        "votoafin_coach_marks_seen_50",
       );
-      expect(mockedBackend.has("servel_coach_marks_seen_50")).toBe(false);
+      expect(mockedBackend.has("votoafin_coach_marks_seen_50")).toBe(false);
     });
 
     it("permite volver a marcar tours despues del reset", async () => {
