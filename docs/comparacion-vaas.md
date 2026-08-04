@@ -65,7 +65,7 @@ detalladas mas abajo.
 | **Voto Informado** | CL | ~2013 | intermitente (por eleccion) | perfiles comparativos, no algoritmo formal | no | variable | curado + candidatos | parcial | comparacion lado a lado | no aplica | no |
 | **electionCompass** | internacional | ~2010s | activo (por eleccion) | 5 (Likert) | opcional | ~30 | curado academico | limitado | mapa 2D | limitado | no |
 | **Decide Chile** | CL | ~2017-2021 | discontinuado / dormido | 5 (Likert) | si | ~20 | curado | limitado | ranking | limitado | no |
-| **VotoAFin** | CL | 2026 | MVP en desarrollo | 5 (Likert) + No se | si (0-3, 4 niveles) | 12 (v0.1) | curado con fuentes obligatorias | si (URL + justificacion en cada postura) | ranking + radar por eje + confianza | roadmap v0.3 | **si (AGPL-3.0)** |
+| **VotoAFin** | CL | 2026 | MVP en desarrollo | 5 (Likert) + No se | si (0-3, 4 niveles) | 8 base + 5 por tipo (presi/dip) | curado con fuentes obligatorias | si (URL + justificacion en cada postura) | ranking + radar por eje + confianza | **si** (AfinidadTab: por pregunta) | **si (AGPL-3.0)** |
 
 ---
 
@@ -148,8 +148,10 @@ mucha data para calibrar los ejes.
 n dimensiones tematicas. Permite ver que un candidato coincide contigo
 en economia pero no en DDHH, por ejemplo.
 
-**VotoAFin**: ranking + radar por 7 ejes + badge de confianza.
-No tiene mapa 2D (feature pendiente si se decide agregar).
+**VotoAFin**: ranking + radar por 7 ejes + badge de confianza +
+**AfinidadTab** (breakdown pregunta a pregunta con postura del candidato vs
+tu respuesta, via `candidatos/{id}/match-detalle/`). No tiene mapa 2D
+(feature pendiente si se decide agregar).
 
 ### Explicabilidad ("¿por que este match?")
 
@@ -161,13 +163,10 @@ oficial.
 
 **iSideWith**: muestra en que preguntas concuerdas y en cuales no.
 
-**VotoAFin** (v0.1): no muestra todavia la explicabilidad
-detallada — solo el porcentaje global y el radar por eje. Sprint 14
-del roadmap prevé agregar:
-- Mostrar que preguntas subieron/bajaron el match
-- Simulador "cambia tu respuesta y ve como cambia el match"
-
-Esto lo llevaria al nivel de explicabilidad de Wahl-O-Mat.
+**VotoAFin** (implementado): la `AfinidadTab` en `DetalleCandidatoScreen`
+muestra pregunta a pregunta — tu respuesta vs postura del candidato, con el
+nombre de la pregunta y un indicador visual de coincidencia. Esto lo coloca
+al nivel de Wahl-O-Mat en explicabilidad basica.
 
 ### Codigo abierto
 
@@ -238,16 +237,17 @@ Servel/PNUD para pasar a modelo institucional.
 
 ### Debilidades relativas
 
-1. **Numero de preguntas bajo (12 vs 30-75 de otros)**: menos
-   resolucion. Roadmap: crecer a 20-30 en v0.2 con posturas verificadas.
+1. **Numero de preguntas moderado (hasta 13 por tipo vs 30-75 de otros)**: menos
+   resolucion que VAAs academicos. Base de 8 preguntas transversales + 5 especificas
+   por tipo de eleccion. Roadmap: crecer a 20-30 preguntas base en v0.2.
 
 2. **Sin mapa 2D**: Kieskompas y Smartvote lo tienen y es visualmente
    atractivo. Requiere calibracion academica de los ejes. Roadmap:
    considerar para v1.0.
 
-3. **Explicabilidad detallada pendiente**: v0.1 solo muestra global +
-   radar. Wahl-O-Mat y Smartvote son mejores aca. Sprint 14 esta
-   planeado.
+3. **Explicabilidad sin simulador de cambios**: el detalle por pregunta
+   esta implementado (AfinidadTab). Falta el simulador "cambia tu respuesta y
+   ve como cambia el match" previsto para Sprint 14.
 
 4. **Data draft**: 72 posturas con confianza baja/media en muchas
    filas. Ninguno de los VAAs consolidados vive con este problema —
@@ -258,8 +258,9 @@ Servel/PNUD para pasar a modelo institucional.
    federales alemanas de 2021. Cambiar la balanza requiere alianza
    institucional o viralizacion muy fuerte.
 
-6. **Sin cobertura parlamentaria/regional**: solo Presidencial en el
-   MVP. Smartvote y Wahl-O-Mat cubren varios niveles. Roadmap v0.4.
+6. **Cobertura electoral limitada**: cubre Presidencial 2025 y Diputados 2025.
+   Falta cobertura municipal/regional. Smartvote y Wahl-O-Mat cubren
+   varios niveles. Roadmap v0.4.
 
 ---
 
@@ -267,9 +268,9 @@ Servel/PNUD para pasar a modelo institucional.
 
 Cosas concretas para robar a otros:
 
-- **De Wahl-O-Mat**: el sistema de "compara mi respuesta con la del
-  partido lado a lado". Convertirlo en feature explicability para
-  Sprint 14.
+- **De Wahl-O-Mat**: el "simulador de cambios" (si cambias tu respuesta,
+  como cambia el match). El breakdown por pregunta ya esta implementado.
+  Roadmap Sprint 14: agregar el simulador interactivo.
 
 - **De Smartvote**: el "smartmap" (mapa 2D). Evaluar si vale la pena
   para v1.0.

@@ -967,11 +967,11 @@ de separar estilos estáticos a nivel de módulo y solo los dinámicos inline.
 
 ### DT-07: CandidatoPicker lento (BUG-044)
 El picker de candidatos en CompararScreen es lento al abrir el modal y al filtrar.
-**Estado:** Pendiente (P1).
+**Estado:** RESUELTO 2026-08-02 — FlatList virtualizada + useMemo para candidatos filtrados. Ver `CandidatoPickerModal.tsx`.
 
 ### DT-08: ResumenTab en DetalleCandidato
 UX-070: la tab Resumen debe ocultarse temporalmente; AfinidadTab debe ser la primera.
-**Estado:** Pendiente (P1).
+**Estado:** RESUELTO 2026-08-02 (commit ca70bc4) — ResumenTab oculta del Tabs nav; AfinidadTab es el default cuando hay match. Pendiente: rediseño de ResumenTab cuando se integren noticias.
 
 ---
 
