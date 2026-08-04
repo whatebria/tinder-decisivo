@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VotoAFin — Tesis UTFSM | Jenifer Castillo</title>
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      background: #f9f8f6;
+      color: #1a1a1a;
+      line-height: 1.8;
+      counter-reset: figure;
+    }
+
+    /* ===== LAYOUT ===== */
+    .page { max-width: 900px; margin: 0 auto; background: #fff; box-shadow: 0 2px 32px rgba(0,0,0,.10); }
+
+    /* ===== COVER ===== */
+    .cover {
+      background: linear-gradient(160deg, #1C3A52 0%, #0d2236 55%, #162e44 100%);
+      color: #fff;
+      padding: 80px 60px 70px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cover::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: repeating-linear-gradient(
+        -45deg, rgba(255,255,255,.02) 0px, rgba(255,255,255,.02) 1px, transparent 1px, transparent 12px
+      );
+    }
+    .cover-institution {
+      font-size: .85rem; letter-spacing: .18em; text-transform: uppercase;
+      color: rgba(255,255,255,.7); margin-bottom: 8px;
+    }
+    .cover-university {
+      font-size: 1.3rem; font-weight: 700; letter-spacing: .04em;
+      color: #fff; margin-bottom: 4px;
+    }
+    .cover-department {
+      font-size: .9rem; color: rgba(255,255,255,.65); margin-bottom: 48px;
+    }
+    .cover-divider {
+      width: 60px; height: 2px; background: rgba(255,255,255,.3); margin: 0 auto 40px;
+    }
+    .cover h1 {
+      font-size: 1.85rem; font-weight: 700; line-height: 1.3;
+      color: #fff; margin-bottom: 16px; max-width: 720px; margin-left: auto; margin-right: auto;
+    }
+    .cover-subtitle {
+      font-size: 1.05rem; color: rgba(255,255,255,.7); font-style: italic;
+      margin-bottom: 56px;
+    }
+    .cover-meta { border-top: 1px solid rgba(255,255,255,.2); padding-top: 32px; }
+    .cover-meta-row { display: flex; justify-content: center; gap: 60px; flex-wrap: wrap; }
+    .cover-meta-item { text-align: center; }
+    .cover-meta-label { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.5); margin-bottom: 4px; }
+    .cover-meta-value { font-size: .95rem; color: rgba(255,255,255,.9); }
+
+    /* ===== ABSTRACT ===== */
+    .abstract {
+      background: #f0f4f8;
+      border-left: 5px solid #1C3A52;
+      margin: 48px 60px;
+      padding: 32px 36px;
+      border-radius: 0 8px 8px 0;
+    }
+    .abstract h2 {
+      font-size: 1rem; letter-spacing: .12em; text-transform: uppercase;
+      color: #1C3A52; margin-bottom: 16px;
+    }
+    .abstract p { font-size: .95rem; color: #333; text-align: justify; }
+    .keywords {
+      margin: 24px 60px 0;
+      font-size: .88rem; color: #555;
+    }
+    .keywords strong { color: #1C3A52; }
+
+    /* ===== TOC ===== */
+    .toc {
+      margin: 48px 60px;
+      padding: 28px 32px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    .toc h2 { font-size: 1rem; letter-spacing: .1em; text-transform: uppercase; color: #1C3A52; margin-bottom: 20px; }
+    .toc ol { padding-left: 24px; }
+    .toc li { margin: 6px 0; }
+    .toc a { color: #1C3A52; text-decoration: none; font-size: .95rem; }
+    .toc a:hover { text-decoration: underline; }
+    .toc .toc-sub { padding-left: 20px; list-style-type: lower-alpha; }
+
+    /* ===== BODY CONTENT ===== */
+    .content { padding: 0 60px 80px; }
+
+    /* ===== HEADINGS ===== */
+    h1.section-title {
+      font-size: 1.6rem; font-weight: 700; color: #fff;
+      background: #1C3A52;
+      margin: 56px -60px 40px;
+      padding: 24px 60px;
+    }
+    h2.section-title {
+      font-size: 1.25rem; font-weight: 700; color: #1C3A52;
+      border-bottom: 2px solid #1C3A52;
+      padding-bottom: 8px;
+      margin: 40px 0 20px;
+    }
+    h3.section-title {
+      font-size: 1.05rem; font-weight: 700; color: #1a1a1a;
+      margin: 32px 0 14px;
+    }
+    h4.section-title {
+      font-size: .95rem; font-weight: 700; color: #333;
+      margin: 24px 0 10px; font-style: italic;
+    }
+
+    /* ===== TEXT ===== */
+    p { margin: 0 0 16px; text-align: justify; }
+    em { font-style: italic; }
+    strong { font-weight: 700; }
+
+    /* ===== LISTS ===== */
+    ul, ol { margin: 0 0 18px 28px; }
+    li { margin-bottom: 6px; }
+
+    /* ===== BLOCKQUOTE ===== */
+    blockquote {
+      border-left: 4px solid #1C3A52;
+      margin: 24px 0;
+      padding: 12px 24px;
+      background: #f5f8fb;
+      font-style: italic;
+      color: #444;
+      border-radius: 0 4px 4px 0;
+    }
+
+    /* ===== TABLES ===== */
+    .table-wrapper { overflow-x: auto; margin: 24px 0 28px; }
+    table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+    th {
+      background: #1C3A52; color: #fff;
+      padding: 10px 14px; text-align: left;
+      font-weight: 600; font-size: .82rem; letter-spacing: .04em;
+    }
+    td { padding: 9px 14px; border-bottom: 1px solid #e5e5e5; vertical-align: top; }
+    tr:nth-child(even) td { background: #f7f9fb; }
+    tr:hover td { background: #eef3f7; }
+    td strong { color: #1C3A52; }
+
+    /* ===== CALLOUT BOXES ===== */
+    .callout {
+      border: 1px solid #b8d0e8;
+      background: #f0f6fc;
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin: 24px 0;
+    }
+    .callout.warning { border-color: #f0c070; background: #fffbf0; }
+    .callout.success { border-color: #90c090; background: #f0f8f0; }
+    .callout p:last-child { margin-bottom: 0; }
+    .callout-title { font-weight: 700; color: #1C3A52; margin-bottom: 8px; font-size: .9rem; letter-spacing: .06em; text-transform: uppercase; }
+
+    /* ===== STATS HIGHLIGHT ===== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin: 24px 0;
+    }
+    .stat-box {
+      background: #1C3A52;
+      color: #fff;
+      padding: 20px 16px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .stat-number { font-size: 2rem; font-weight: 700; line-height: 1; }
+    .stat-label { font-size: .8rem; color: rgba(255,255,255,.75); margin-top: 6px; }
+
+    /* ===== DECISION CARD ===== */
+    .decision {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+    .decision-header {
+      background: #1C3A52; color: #fff;
+      padding: 10px 18px;
+      font-size: .88rem; font-weight: 700;
+    }
+    .decision-body { padding: 16px 18px; font-size: .92rem; }
+    .decision-body p:last-child { margin-bottom: 0; }
+
+    /* ===== SECTION SEPARATOR ===== */
+    .section-divider {
+      border: none; border-top: 1px solid #ddd;
+      margin: 48px 0;
+    }
+
+    /* ===== BIBLIOGRAPHY ===== */
+    .bibliography { font-size: .9rem; }
+    .bibliography h3 { font-size: 1rem; color: #1C3A52; margin: 28px 0 12px; border-bottom: 1px solid #ddd; padding-bottom: 6px; }
+    .bibliography .ref {
+      padding: 8px 0 8px 28px;
+      text-indent: -28px;
+      border-bottom: 1px dotted #eee;
+      line-height: 1.6;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: #1C3A52; color: rgba(255,255,255,.7);
+      text-align: center;
+      padding: 24px 60px;
+      font-size: .82rem;
+    }
+
+    /* ===== PRINT ===== */
+    @media print {
+      body { background: #fff; }
+      .page { box-shadow: none; }
+      h1.section-title { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      th, .stat-box, .cover, .decision-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+
+    @media (max-width: 700px) {
+      .cover, .content, .abstract, .keywords, .toc { padding-left: 24px; padding-right: 24px; }
+      h1.section-title { margin-left: -24px; margin-right: -24px; padding-left: 24px; padding-right: 24px; }
+      .cover-meta-row { gap: 28px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+<!-- ==================== PORTADA ==================== -->
+<div class="cover">
+  <p class="cover-institution">Trabajo de Título · Ingeniería en Informática</p>
+  <p class="cover-university">Universidad Técnica Federico Santa María</p>
+  <p class="cover-department">Departamento de Informática · Valparaíso, Chile</p>
+  <div class="cover-divider"></div>
+  <h1>VotoAFin: Diseño e Implementación de una Aplicación de Asistencia para el Voto Informado en el Contexto Electoral Chileno</h1>
+  <p class="cover-subtitle">Borrador de Tesis · Primera versión completa</p>
+  <div class="cover-meta">
+    <div class="cover-meta-row">
+      <div class="cover-meta-item">
+        <p class="cover-meta-label">Autora</p>
+        <p class="cover-meta-value">Jenifer Castillo</p>
+      </div>
+      <div class="cover-meta-item">
+        <p class="cover-meta-label">Carrera</p>
+        <p class="cover-meta-value">Ingeniería en Informática</p>
+      </div>
+      <div class="cover-meta-item">
+        <p class="cover-meta-label">Fecha</p>
+        <p class="cover-meta-value">Agosto 2026</p>
+      </div>
+      <div class="cover-meta-item">
+        <p class="cover-meta-label">Profesor Guía</p>
+        <p class="cover-meta-value">Por confirmar</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== RESUMEN ==================== -->
+<div class="abstract">
+  <h2>Resumen Ejecutivo</h2>
+  <p>Chile atravesó entre 2020 y 2024 un período de densidad electoral sin precedentes en su historia democrática reciente: ocho procesos electorales en cuatro años, incluyendo dos plebiscitos constitucionales, elecciones presidenciales y parlamentarias, y comicios municipales y regionales. Este escenario desencadenó un fenómeno documentado de fatiga electoral que se expresó de manera cuantificable en los indicadores de participación informada: apenas el 21% del electorado se reconocía como "muy informado" antes de las elecciones municipales de octubre de 2024, y los sufragios nulos para alcalde crecieron un 460% entre 2021 y 2024. El 81% del electorado declaraba exposición semanal o mayor a contenido desinformativo, y en el levantamiento de campo realizado en el área metropolitana de Valparaíso, el 100% de las personas entrevistadas había tenido contacto directo con información electoral falsa.</p>
+  <p>Este trabajo presenta el proceso de investigación, diseño e implementación de <strong>VotoAFin</strong>, una Voting Advice Application (VAA) de código abierto, orientada al contexto electoral chileno, con enfoque mobile-first. La metodología adoptada fue iterativa e incremental, organizada en fases de investigación empírica, diseño de experiencia centrada en el usuario, construcción por sprints con validación continua, y auditoría técnica y documental. El resultado es un producto en estado de MVP funcional, con arquitectura cliente-servidor, contrato de API formalizado mediante OpenAPI 3.1, suite de tests automatizados, y licencia AGPL-3.0.</p>
+</div>
+<div class="keywords">
+  <strong>Palabras clave:</strong> Voting Advice Application, participación ciudadana, desinformación electoral, matching político, ingeniería de producto, experiencia de usuario, aplicaciones móviles, Chile, AGPL.
+</div>
+
+<!-- ==================== TOC ==================== -->
+<div class="toc">
+  <h2>Tabla de Contenidos</h2>
+  <ol>
+    <li><a href="#s1">Introducción</a></li>
+    <li><a href="#s2">Definición del Problema</a></li>
+    <li><a href="#s3">Propuesta de Solución</a></li>
+    <li><a href="#s4">Objetivos</a></li>
+    <li><a href="#s5">Metodología</a></li>
+    <li><a href="#s6">Marco Teórico</a></li>
+    <li><a href="#s7">Estado del Arte</a></li>
+    <li><a href="#s8">Desarrollo</a>
+      <ol class="toc-sub">
+        <li>Historia del Proyecto</li>
+        <li>Diseño de Experiencia</li>
+        <li>Arquitectura Conceptual</li>
+        <li>Decisiones Tecnológicas</li>
+        <li>Construcción del Sistema</li>
+        <li>Desafíos Principales</li>
+        <li>Lecciones Aprendidas</li>
+        <li>Resultados Obtenidos</li>
+      </ol>
+    </li>
+    <li><a href="#s9">Conclusiones</a></li>
+    <li><a href="#s10">Bibliografía</a></li>
+  </ol>
+</div>
+
+<div class="content">
+
+<!-- ==================== SECCIÓN 1 ==================== -->
+<h1 class="section-title" id="s1">1. Introducción</h1>
+
+<h2 class="section-title">1.1 Contexto General</h2>
+<p>Las democracias contemporáneas enfrentan un desafío estructural que trasciende las diferencias entre sistemas de gobierno y contextos geopolíticos: la brecha creciente entre la complejidad de la oferta electoral y la capacidad efectiva de los ciudadanos para procesarla de manera informada. Esta brecha no es nueva, pero se ha agudizado en la última década como resultado de la confluencia de tres fuerzas simultáneas: la proliferación de fuentes de información no verificadas en el ecosistema digital, la densificación de los calendarios electorales en muchos países, y la disminución de la confianza ciudadana en las instituciones políticas y mediáticas tradicionales.</p>
+<p>Chile no es una excepción a este fenómeno. Por el contrario, en el período 2020–2024 constituyó un caso de estudio particularmente significativo, en el que la acumulación de ocho procesos electorales en cuatro años generó condiciones que los analistas comenzaron a denominar <em>fatiga electoral</em>: una disminución progresiva del interés y la disposición ciudadana a invertir tiempo y atención en cada nueva convocatoria.</p>
+
+<h2 class="section-title">1.2 Motivación</h2>
+<p>El proyecto nació en el marco del curso de Emprendimiento de la carrera de Ingeniería en Informática de la Universidad Técnica Federico Santa María. El equipo inicial, integrado por Jenifer Castillo, Patricio De Lima y Alonso Sánchez, seleccionó la desinformación electoral como área de investigación por su relevancia social directa y por la posibilidad de abordarla desde la ingeniería con impacto medible.</p>
+<p>Lo que comenzó como un trabajo académico de investigación evolucionó de manera orgánica hacia el diseño de una propuesta de solución, luego hacia un prototipo de experiencia, y finalmente hacia la implementación de un sistema funcional completo. La motivación central no fue tecnológica sino cívica: la tecnología fue el medio, no el fin.</p>
+
+<h2 class="section-title">1.3 Relevancia del Problema</h2>
+<p>La desinformación electoral y el déficit informativo de los votantes tienen consecuencias directamente observables en los indicadores de calidad democrática: aumento de votos nulos y en blanco, decisiones de voto basadas en identidades partidarias superficiales antes que en posiciones programáticas, y erosión de la confianza en las instituciones.</p>
+<p>El problema presenta características que lo hacen abordable desde la ingeniería: es un problema de acceso, procesamiento y presentación de información — tres dimensiones en las que las aplicaciones de software pueden intervenir de manera concreta y medible.</p>
+
+<h2 class="section-title">1.4 Visión General de la Solución</h2>
+<p>VotoAFin es una Voting Advice Application que permite a los ciudadanos seleccionar el tipo de elección de su interés, responder un cuestionario sobre política pública con opción de ponderar sus temas por importancia, y obtener un ranking de afinidad con los candidatos, desglosado por siete ejes temáticos y acompañado de un indicador de confianza del resultado. La plataforma es de código abierto bajo licencia AGPL-3.0 y opera sobre una arquitectura multiplataforma (web, iOS y Android desde una misma base de código).</p>
+
+<hr class="section-divider">
+
+<!-- ==================== SECCIÓN 2 ==================== -->
+<h1 class="section-title" id="s2">2. Definición del Problema</h1>
+
+<h2 class="section-title">2.1 Situación Actual del Ecosistema Electoral Chileno</h2>
+
+<h3 class="section-title">2.1.1 Densidad electoral y fatiga ciudadana</h3>
+<p>Entre octubre de 2020 y noviembre de 2024, los ciudadanos chilenos habilitados para votar fueron convocados a las urnas en ocho ocasiones distintas. Esta acumulación no tuvo precedentes en la historia democrática reciente del país. El académico Claudio Fuentes, de la Escuela de Ciencia Política de la Universidad Diego Portales, sintetizó las causas del fenómeno en una tríada que se volvió referencia en el análisis del período: <strong>desinformación, desinterés y desconfianza</strong>.</p>
+
+<h3 class="section-title">2.1.2 El déficit de información: evidencia cuantitativa</h3>
+<p>El Informe Claves Ipsos N°33, elaborado en el contexto de las elecciones municipales de octubre de 2024, ofreció una medición directa del nivel real de información del electorado chileno:</p>
+
+<div class="stats-grid">
+  <div class="stat-box"><div class="stat-number">21%</div><div class="stat-label">Se sentía "muy informado" antes de las municipales 2024</div></div>
+  <div class="stat-box"><div class="stat-number">83%</div><div class="stat-label">Sabía que se elegía alcalde (el cargo más visible)</div></div>
+  <div class="stat-box"><div class="stat-number">42%</div><div class="stat-label">Aún no había decidido su voto para alcalde</div></div>
+  <div class="stat-box"><div class="stat-number">68%</div><div class="stat-label">No había decidido su voto para consejero regional</div></div>
+</div>
+
+<h3 class="section-title">2.1.3 La desinformación como factor agravante</h3>
+<p>El estudio <em>Fake News y Desinformación en Chile y LatAm</em> de Activa Knowledge for Action cuantificó la magnitud del problema:</p>
+<ul>
+  <li>El <strong>71%</strong> concordaba con que <em>"la desinformación es una amenaza para nuestra democracia"</em>.</li>
+  <li>El <strong>52%</strong> se encontraba con información que creía falsa <em>todos los días o casi todos los días</em>.</li>
+  <li>El <strong>79%</strong> de los chilenos declaraba no confiar en los políticos para obtener información precisa.</li>
+  <li>El <strong>81%</strong> del electorado estaba expuesto a contenido desinformativo con frecuencia semanal o mayor.</li>
+</ul>
+
+<h3 class="section-title">2.1.4 El impacto sobre la calidad del voto</h3>
+
+<div class="table-wrapper">
+<table>
+  <thead>
+    <tr><th>Cargo</th><th>Votos nulos 2021</th><th>Votos nulos 2024</th><th>Variación</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Alcalde</td><td>1,93%</td><td>10,80%</td><td><strong>+460%</strong></td></tr>
+    <tr><td>Gobernador</td><td>6,13%</td><td>17,80%</td><td>+190%</td></tr>
+    <tr><td>Concejal</td><td>5,74%</td><td>21,46%</td><td>+274%</td></tr>
+    <tr><td>Consejero Regional</td><td>13,10%</td><td>25,78%</td><td>+97%</td></tr>
+  </tbody>
+</table>
+</div>
+<p>En los procesos constitucionales, el SERVEL registró <strong>2.119.506 sufragios nulos</strong>, equivalentes al <strong>16,98%</strong> del total de votos emitidos.</p>
+
+<h2 class="section-title">2.2 Contexto Tecnológico: las Herramientas Existentes</h2>
+<p>El ecosistema de información electoral institucional en Chile contaba con algunos recursos, pero todos presentaban limitaciones significativas para el usuario promedio:</p>
+<ul>
+  <li><strong>Guías del SERVEL:</strong> documentos extensos con perfiles textuales de candidatos, sin mecanismos de comparación personalizada ni algoritmos de afinidad. Fuentes de información pasiva.</li>
+  <li><strong>Voto Informado:</strong> operación intermitente, sin matching algorítmico formal y sin verificación sistemática de posturas.</li>
+  <li><strong>Decide Chile:</strong> discontinuada e inactiva al momento de inicio del proyecto.</li>
+  <li><strong>Plataformas internacionales:</strong> sin cobertura profunda del contexto electoral chileno.</li>
+</ul>
+
+<h2 class="section-title">2.3 El Perfil de los Usuarios Afectados</h2>
+<p>La investigación de campo identificó tres segmentos de votantes con mayor vulnerabilidad frente al déficit informativo: <strong>jóvenes votantes</strong> (alta exposición a desinformación digital, mayor potencial de adopción tecnológica), <strong>adultos mayores</strong> (dificultad para evaluar la confiabilidad de fuentes digitales), y <strong>votantes indecisos</strong> (buscan información en el período previo inmediato, cuando el flujo de contenido manipulador es más intenso).</p>
+
+<h2 class="section-title">2.4 Por Qué el Problema Merece Ser Abordado</h2>
+<p>La participación electoral desinformada tiene consecuencias que trascienden el acto individual del voto. En un sistema representativo, la calidad de la información con que los ciudadanos ejercen su derecho electoral determina en última instancia la calidad de la representación que obtienen.</p>
+<p>El problema, además, presenta características que lo hacen abordable desde la ingeniería: es un problema de acceso, procesamiento y presentación de información — tres dimensiones donde el software puede intervenir de manera concreta y medible.</p>
+
+<hr class="section-divider">
+
+<!-- ==================== SECCIÓN 3 ==================== -->
+<h1 class="section-title" id="s3">3. Propuesta de Solución</h1>
+
+<h2 class="section-title">3.1 Concepto General</h2>
+<p>VotoAFin es una Voting Advice Application diseñada específicamente para el contexto electoral chileno. Su función central es actuar como intermediario informado entre la oferta electoral disponible y la necesidad de decisión del votante. El concepto no parte del candidato como unidad de presentación, sino del <em>tema</em>: el sistema le muestra primero preguntas sobre política pública, le solicita la posición personal del usuario, y solo después produce el resultado del matching.</p>
+<p>Este orden de presentación es deliberado: reduce el peso de los sesgos de identificación partidaria y favorece la evaluación basada en posiciones programáticas.</p>
+
+<h2 class="section-title">3.2 Propuesta de Valor</h2>
+
+<div class="decision">
+  <div class="decision-header">① Transparencia metodológica</div>
+  <div class="decision-body"><p>El algoritmo de cálculo de afinidad es público, documentado y auditable. Cualquier ciudadano u organización puede verificar cómo se calculan los resultados.</p></div>
+</div>
+<div class="decision">
+  <div class="decision-header">② Trazabilidad de las posturas</div>
+  <div class="decision-body"><p>Cada postura asignada a un candidato debe estar respaldada por una fuente primaria verificable. El sistema rechaza posturas sin justificación ni fuente, y es explícito sobre el nivel de confianza de cada una.</p></div>
+</div>
+<div class="decision">
+  <div class="decision-header">③ Ponderación por importancia</div>
+  <div class="decision-body"><p>El usuario puede indicar qué temas le importan más para su decisión de voto. El algoritmo ajusta el cálculo de afinidad en función de esa ponderación declarada.</p></div>
+</div>
+<div class="decision">
+  <div class="decision-header">④ Indicador de confianza del resultado</div>
+  <div class="decision-body"><p>Un match calculado sobre tres preguntas tiene menos certeza que uno calculado sobre doce. VotoAFin comunica esta diferencia activamente, a diferencia de la mayoría de las VAAs que presentan el porcentaje como valor absoluto.</p></div>
+</div>
+<div class="decision">
+  <div class="decision-header">⑤ Código abierto (AGPL-3.0)</div>
+  <div class="decision-body"><p>Cualquier versión modificada desplegada públicamente debe compartir sus cambios. Coherente con el argumento de que la tecnología electoral es infraestructura de interés público.</p></div>
+</div>
+
+<h2 class="section-title">3.3 Beneficios Esperados</h2>
+<ul>
+  <li><strong>Corto plazo (funcional):</strong> el usuario que completa el cuestionario dispone de información estructurada y comparativa sobre los candidatos que ninguna herramienta local proveía de manera equivalente.</li>
+  <li><strong>Mediano plazo (educativo):</strong> al exponer al usuario a las posturas de los candidatos en siete ejes temáticos con justificación y fuente, la plataforma contribuye a elevar la calidad del debate sobre las dimensiones relevantes de la representación política.</li>
+  <li><strong>Largo plazo (sistémico):</strong> una plataforma con metodología transparente puede convertirse en estándar de referencia que presione a los candidatos hacia mayor especificidad y consistencia en sus declaraciones programáticas.</li>
+</ul>
+
+<hr class="section-divider">
+
+<!-- ==================== SECCIÓN 4 ==================== -->
+<h1 class="section-title" id="s4">4. Objetivos</h1>
+
+<h2 class="section-title">4.1 Objetivo General</h2>
+<p>Diseñar e implementar una Voting Advice Application de código abierto orientada al contexto electoral chileno, que permita a los ciudadanos comparar sus posturas personales sobre política pública con las posiciones documentadas de los candidatos, obteniendo un resultado de afinidad transparente, ponderado por preferencias y contextualizado por nivel de confianza.</p>
+
+<h2 class="section-title">4.2 Objetivos Específicos</h2>
+<ol>
+  <li><strong>Investigar y caracterizar</strong> el fenómeno del déficit informativo electoral en Chile, mediante revisión de evidencia secundaria y levantamiento de campo, estableciendo la magnitud y causas del problema.</li>
+  <li><strong>Analizar el estado del arte</strong> en Voting Advice Applications a nivel internacional y local, identificando fortalezas, debilidades y brechas aplicables al contexto chileno.</li>
+  <li><strong>Diseñar la experiencia de usuario</strong> desde la perspectiva de los segmentos de votantes afectados, asegurando un flujo comprensible, accesible y eficiente para usuarios sin conocimiento político especializado.</li>
+  <li><strong>Definir un algoritmo de matching</strong> que compare las respuestas del usuario con las posturas de los candidatos de manera transparente, considerando ponderación por importancia declarada y produciendo un indicador de confianza del resultado.</li>
+  <li><strong>Implementar el sistema completo</strong> mediante una arquitectura cliente-servidor con frontend multiplataforma y backend REST, aplicando principios de ingeniería que garanticen mantenibilidad, extensibilidad y seguridad.</li>
+  <li><strong>Establecer un modelo de datos y verificación</strong> que asegure la trazabilidad de las posturas asignadas a los candidatos, requiriendo justificación y fuente primaria verificable para cada entrada.</li>
+  <li><strong>Documentar el proceso</strong> de manera que el sistema sea comprensible para contribuidores externos, adaptable a otros contextos electorales latinoamericanos, y replicable como base para proyectos similares.</li>
+</ol>
+
+<hr class="section-divider">
+
+<!-- ==================== SECCIÓN 5 ==================== -->
+<h1 class="section-title" id="s5">5. Metodología</h1>
+
+<h2 class="section-title">5.1 Enfoque General</h2>
+<p>El proyecto adoptó un enfoque de desarrollo <strong>iterativo e incremental</strong>, orientado por los principios de ingeniería centrada en el usuario y mínima funcionalidad viable (MVP). Este enfoque reconoce que en proyectos donde los requerimientos evolucionan con el proceso de construcción, la planificación rígida de largo plazo genera más fricción que valor.</p>
+<p>Los principios de ingeniería que guiaron las decisiones técnicas durante todo el proceso fueron: <strong>DRY</strong> (Don't Repeat Yourself), <strong>YAGNI</strong> (You Aren't Gonna Need It), <strong>KISS</strong> (Keep It Simple, Stupid), y <strong>SOLID</strong>.</p>
+
+<h2 class="section-title">5.2 Fases del Proyecto</h2>
+
+<h3 class="section-title">Fase 1 — Investigación y Definición del Problema (2024)</h3>
+<p>Revisión sistemática de fuentes secundarias, levantamiento de campo con 12 entrevistas en el área metropolitana de Valparaíso, síntesis del problema y primera propuesta conceptual.</p>
+<p><em>Entregable:</em> caracterización documentada del problema con datos cuantitativos y cualitativos de respaldo.</p>
+
+<h3 class="section-title">Fase 2 — Diseño de la Solución (2025 — primer semestre)</h3>
+<p>Prototipado de experiencia, evaluación de la metáfora de interacción (swipe bidireccional), identificación de sus limitaciones, reformulación conceptual hacia VAA, y definición de requerimientos funcionales.</p>
+<p><em>Entregable:</em> especificación de diseño del sistema VAA, con definición de la mecánica de cuestionario, el modelo de ejes temáticos y el concepto de matching.</p>
+
+<h3 class="section-title">Fase 3 — Construcción Incremental (2025 — segundo semestre / 2026)</h3>
+<p>Configuración de entorno y arquitectura base, construcción del modelo de datos, implementación del algoritmo de matching, desarrollo de la interfaz, verificación de integridad de datos, refactorización continua, implementación de features adicionales y construcción de la suite de tests.</p>
+<p><em>Entregable:</em> sistema funcional en estado de MVP con 17 pantallas de frontend, 19 modelos de datos, ~31 endpoints REST, 370 tests automatizados y documentación técnica.</p>
+
+<h3 class="section-title">Fase 4 — Auditoría y Documentación (2026 — agosto)</h3>
+<p>Auditoría de 37 documentos técnicos contra el código fuente real, actualización de la documentación, y generación de documentación académica del proyecto.</p>
+<p><em>Entregable:</em> repositorio con documentación verificada y coherente con el código fuente.</p>
+
+<h2 class="section-title">5.3 Levantamiento de Requerimientos</h2>
+<p>Los requerimientos del sistema se obtuvieron mediante tres mecanismos complementarios: requerimientos derivados del problema (la caracterización empírica definió las propiedades esenciales de la solución), requerimientos derivados del análisis comparativo (el estudio de VAAs internacionales identificó funcionalidades probadas y brechas), y requerimientos emergentes durante la construcción (registrados como issues con descripción, criterios de aceptación y prioridad).</p>
+
+<h2 class="section-title">5.4 Validación</h2>
+<p>La validación se realizó en múltiples niveles: validación funcional end-to-end en cada sprint; validación de datos mediante verificación de posturas contra fuentes primarias y etiquetado de nivel de confianza; validación de contrato de API mediante generación automática de tipos TypeScript desde el esquema OpenAPI; validación automatizada con suite de 370 tests; y validación de accesibilidad siguiendo las pautas WCAG 2.2 nivel AA.</p>
+
+<hr class="section-divider">
+
+<!-- ==================== SECCIÓN 6 ==================== -->
+<h1 class="section-title" id="s6">6. Marco Teórico</h1>
+
+<h2 class="section-title">6.1 Voting Advice Applications (VAA)</h2>
+
+<h3 class="section-title">6.1.1 Definición y origen</h3>
+<p>Una Voting Advice Application es una herramienta digital diseñada para asistir a los ciudadanos en el proceso de decisión electoral mediante la comparación sistemática de las posturas del votante con las posiciones de los partidos o candidatos en competencia (Garzia y Marschall, 2014). Las VAAs tienen historia documentada desde 1989, cuando ProDemos de los Países Bajos lanzó la primera versión de StemWijzer.</p>
+
+<h3 class="section-title">6.1.2 Impacto político documentado</h3>
+<p>La literatura politológica estima que las VAAs pueden influir en entre el 2% y el 6% de los votos emitidos en procesos donde tienen alta adopción (Ruusuvirta y Rosema, 2009). Wahl-O-Mat registró más de 21 millones de usos durante las elecciones federales alemanas de 2021, con investigaciones que sugieren que su uso incrementa tanto la participación como la información ciudadana sobre los programas de los partidos.</p>
+
+<h3 class="section-title">6.1.3 Componentes fundamentales de una VAA</h3>
+<ul>
+  <li><strong>El cuestionario de posiciones:</strong> preguntas sobre política pública, con escalas Likert de 3, 4 o 5 puntos.</li>
+  <li><strong>El repositorio de posturas:</strong> base de datos de la posición de cada candidato en cada pregunta (autodeclarada, curada por terceros, o mixta).</li>
+  <li><strong>El algoritmo de matching:</strong> función que compara respuestas del usuario con posturas de los candidatos y produce un indicador de afinidad.</li>
+  <li><strong>La visualización de resultados:</strong> rankings con porcentajes, mapas de posicionamiento en dos ejes, o gráficos de radar temático.</li>
+</ul>
+
+<h2 class="section-title">6.2 Sistemas de Recomendación y Matching</h2>
+<p>Las VAAs pertenecen a la categoría de sistemas de <strong>filtrado basado en conocimiento</strong>: utilizan las posturas explícitas del usuario como especificación de preferencias y comparan esta especificación con las características de los candidatos disponibles. No dependen de historiales de comportamiento ni de comparaciones entre usuarios.</p>
+<p>El cálculo de afinidad puede modelarse como una función de similaridad entre el vector de respuestas del usuario y el vector de posturas de cada candidato. La elección de la métrica de distancia (Manhattan, Euclidiana, coseno) es una decisión de diseño con implicaciones directas en los resultados.</p>
+
+<h2 class="section-title">6.3 Toma de Decisiones Asistida</h2>
+<p>La psicología cognitiva identifica que los seres humanos enfrentan limitaciones estructurales al procesar conjuntos de opciones complejas con múltiples atributos (Kahneman, 2011). Las VAAs son un caso particular de sistemas de soporte a la decisión (DSS) aplicado al dominio electoral: no reemplazan la decisión del ciudadano, sino que proveen información estructurada que reduce la carga cognitiva del proceso decisional.</p>
+<p>La distinción entre <em>asistencia a la decisión</em> y <em>prescripción de la decisión</em> es fundamental en el diseño de una VAA: el sistema no dice al usuario por quién votar, le muestra con quién coincide más según sus propias posturas declaradas.</p>
+
+<h2 class="section-title">6.4 Experiencia de Usuario en Aplicaciones Cívicas</h2>
+<p>El diseño centrado en el usuario (UCD) es un proceso iterativo que parte de las necesidades, capacidades y contextos de los usuarios objetivo para orientar cada decisión de diseño (Norman, 2013). Para VotoAFin, las implicaciones del UCD son concretas: el cuestionario debe ser comprensible sin conocimiento político previo, el resultado debe ser interpretable sin formación estadística, y el flujo debe minimizar la fricción.</p>
+<p>El estándar <strong>WCAG 2.2 nivel AA</strong> fue adoptado como requerimiento de accesibilidad no negociable, reconociendo que una VAA accesible solo para ciertos perfiles de usuarios excluye a los segmentos que más podrían beneficiarse de la asistencia a la decisión.</p>
+
+<h2 class="section-title">6.5 Arquitectura de Software para Aplicaciones de Escala Cívica</h2>
+<p>El principio de separación de responsabilidades establece que los distintos aspectos funcionales de un sistema deben estar encapsulados en módulos independientes. En el contexto de una VAA, esto es crítico para la auditabilidad: si el algoritmo de cálculo está entremezclado con la capa de presentación, resulta difícil para terceros verificar que el sistema opera sin favoritismos ocultos.</p>
+<p>El diseño de APIs con contratos formales (OpenAPI) permite la evolución independiente de los componentes y es la base de la interoperabilidad en una plataforma cívica con múltiples potenciales consumidores.</p>
+
+<hr class="section-divider">
+
+<!-- ==================== SECCIÓN 7 ==================== -->
+<h1 class="section-title" id="s7">7. Estado del Arte</h1>
+
+<h2 class="section-title">7.1 Panorama Internacional de VAAs</h2>
+
+<h3 class="section-title">7.1.1 StemWijzer (Países Bajos, 1989)</h3>
+<p>La VAA más antigua del mundo. Escala de tres puntos, ~30 preguntas, posturas curadas por ProDemos en colaboración con los partidos. Demuestra que la utilidad de una VAA no requiere complejidad algorítmica: con una escala de tres puntos ha informado la decisión electoral de decenas de millones de holandeses desde 1989.</p>
+
+<h3 class="section-title">7.1.2 Wahl-O-Mat (Alemania, 2002)</h3>
+<p>El estándar de referencia entre VAAs europeas. 38 preguntas, mecanismo de doble peso, posturas autodeclaradas y revisadas, con justificaciones escritas disponibles para cada postura. El nivel de explicabilidad más avanzado del grupo: el usuario puede ver, pregunta por pregunta, la respuesta de cada partido con su justificación oficial. Más de 21 millones de usos en las federales de 2021.</p>
+
+<h3 class="section-title">7.1.3 Smartvote (Suiza, 2003)</h3>
+<p>La VAA con el cuestionario más extenso (hasta 75 preguntas) y la visualización más sofisticada: el "Smartmap", un mapa de posicionamiento en dos ejes que ubica al usuario y a los candidatos en el espacio político. Demuestra el potencial de los mapas bidimensionales, pero requiere calibración académica rigurosa.</p>
+
+<h3 class="section-title">7.1.4 Vote Compass y iSideWith</h3>
+<p>Vote Compass (2011, Canadá/Australia) se distingue por su modelo de distribución mediante alianzas con medios de comunicación nacionales, demostando que la distribución supera a la sofisticación técnica como factor de alcance. iSideWith (2012, global) es la VAA de mayor alcance geográfico, con cobertura superficial de decenas de países.</p>
+
+<h2 class="section-title">7.2 Contexto Chileno</h2>
+<p><strong>Voto Informado</strong> ofrece perfiles comparables pero sin matching algorítmico formal y con operación intermitente. <strong>Decide Chile</strong> incorporaba matching Likert pero fue discontinuada, ilustrando el desafío de sostenibilidad de las iniciativas ciudadanas sin respaldo institucional.</p>
+
+<h2 class="section-title">7.3 Análisis Comparativo</h2>
+
+<div class="table-wrapper">
+<table>
+  <thead>
+    <tr><th>VAA</th><th>País</th><th>Escala</th><th>Peso</th><th>Fuentes citadas</th><th>Radar</th><th>Open Source</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>StemWijzer</td><td>NL</td><td>3 puntos</td><td>Sí (2 niv.)</td><td>Parcial</td><td>No</td><td>No</td></tr>
+    <tr><td>Wahl-O-Mat</td><td>DE</td><td>3 puntos</td><td>Sí (doble)</td><td>Sí</td><td>No</td><td>No</td></tr>
+    <tr><td>Smartvote</td><td>CH</td><td>4 puntos</td><td>Sí (0-2)</td><td>Parcial</td><td>Sí</td><td>Parcial</td></tr>
+    <tr><td>Vote Compass</td><td>CA/AU</td><td>5 puntos</td><td>Sí</td><td>Limitado</td><td>No</td><td>No</td></tr>
+    <tr><td>iSideWith</td><td>Global</td><td>Múltiple</td><td>Sí</td><td>Limitado</td><td>No</td><td>No</td></tr>
+    <tr><td>Voto Informado</td><td>CL</td><td>Sin alg.</td><td>No</td><td>Parcial</td><td>No</td><td>No</td></tr>
+    <tr><td>Decide Chile</td><td>CL</td><td>5 puntos</td><td>Sí</td><td>Limitado</td><td>No</td><td>No</td></tr>
+    <tr><td><strong>VotoAFin</strong></td><td><strong>CL</strong></td><td><strong>5+No sé</strong></td><td><strong>Sí (4 niv.)</strong></td><td><strong>Sí (URL oblig.)</strong></td><td><strong>Sí (7 ejes)</strong></td><td><strong>Sí (AGPL-3.0)</strong></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 class="section-title">7.4 Brechas Identificadas</h2>
+<ul>
+  <li><strong>Vacío en el mercado local:</strong> no existía en Chile una VAA activa con metodología transparente y datos actualizados.</li>
+  <li><strong>Transparencia de posturas:</strong> ninguna VAA chilena anterior requería fuentes verificables a nivel técnico.</li>
+  <li><strong>Código abierto:</strong> ninguna VAA internacional relevante publica su código completo bajo licencia libre.</li>
+  <li><strong>Indicador de confianza:</strong> ninguna VAA analizada comunica activamente la diferencia entre un match calculado sobre pocas vs. muchas preguntas.</li>
+</ul>
+
+<hr class="section-divider">
+
+<!-- ==================== SECCIÓN 8 ==================== -->
+<h1 class="section-title" id="s8">8. Desarrollo</h1>
+
+<h2 class="section-title">8.1 Historia del Proyecto: del Problema a la Solución</h2>
+
+<h3 class="section-title">8.1.1 Etapa I — Investigación del problema (Emprendimiento I, 2024)</h3>
+<p>El equipo inicial (Jenifer Castillo, Patricio De Lima y Alonso Sánchez) realizó una revisión sistemática de fuentes secundarias y un levantamiento de campo con 12 entrevistas en el área metropolitana de Valparaíso. Los hallazgos confirmaron la relevancia empírica del problema: el 100% de los entrevistados había tenido contacto con información electoral falsa; el 83% se informaba principalmente por redes sociales; solo la mitad conocía a los candidatos en competencia.</p>
+<p>La conclusión de esta etapa articuló la oportunidad de diseño: <em>"existe espacio para una herramienta que reúna información confiable sobre candidatos y elecciones y la haga accesible para todos"</em>.</p>
+
+<h3 class="section-title">8.1.2 Etapa II — Primera propuesta de solución (Emprendimiento II, 2024)</h3>
+<p>El segundo trabajo reformuló el problema incluyendo el desinterés estructural como factor agravante. La hipótesis fue que una aplicación con mecánicas de gamificación podría superar la barrera del desinterés. El prototipo conceptual incorporaba autenticación con RUT y Clave Única, directorio de partidos y candidatos, y mecánicas de puntos por participación cívica.</p>
+<p>La evaluación posterior identificó tres limitaciones estructurales: requerimientos de integración con infraestructura estatal difíciles de cumplir para un proyecto independiente; la gamificación añadía complejidad sin abordar el problema central; y el foco en el atractivo desplazaba la necesidad real, que era información estructurada sobre posturas de candidatos.</p>
+
+<h3 class="section-title">8.1.3 Etapa III — El prototipo de swipe (2024-2025)</h3>
+<p>La tercera etapa experimentó con la metáfora de swipe bidireccional: tarjetas con candidatos deslizables hacia la izquierda (no me interesa) o la derecha (me interesa). La evaluación rápida reveló la limitación fundamental: el <strong>swipe binario no puede capturar la riqueza de posiciones políticas sobre temas complejos</strong>. Más fundamentalmente, el swipe estaba orientado al candidato, no a los temas, reforzando los sesgos de identificación personal o partidaria que el proyecto pretendía superar.</p>
+
+<h3 class="section-title">8.1.4 Etapa IV — Reformulación hacia VAA y consolidación (2025-2026)</h3>
+<p>La pregunta de diseño central cambió: de <em>"¿cómo hacer atractiva la presentación del candidato?"</em> a <em>"¿cómo medir la coincidencia entre las posturas declaradas del votante y las posiciones documentadas del candidato?"</em>. Este cambio de pregunta implicó adoptar el modelo conceptual de las Voting Advice Applications. El nombre del proyecto evolucionó hacia <strong>VotoAFin</strong>, expresando directamente el propósito del sistema.</p>
+
+<h2 class="section-title">8.2 Diseño de la Experiencia de Usuario</h2>
+
+<h3 class="section-title">8.2.1 Principios de diseño</h3>
+<ul>
+  <li><strong>Claridad sobre atractivo:</strong> donde compiten claridad del mensaje y atractivo visual, se prioriza la claridad.</li>
+  <li><strong>Flujo mínimo viable:</strong> el camino desde el ingreso hasta el resultado debe ser lo más corto posible. Cada pantalla adicional es una oportunidad de abandono.</li>
+  <li><strong>Resultado accionable:</strong> el resultado debe ser interpretable sin formación estadística o política.</li>
+</ul>
+
+<h3 class="section-title">8.2.2 Flujo de usuario</h3>
+<ol>
+  <li>Registro o inicio de sesión (sin RUT ni vinculación con el Estado).</li>
+  <li>Selección del tipo de elección (presidencial, parlamentaria, etc.).</li>
+  <li>Cuestionario: 12 preguntas con escala Likert de cinco puntos + opción "No sé" + indicador opcional de importancia.</li>
+  <li>Envío de respuestas y cálculo del ranking.</li>
+  <li>Resultados: candidatos ordenados por porcentaje de coincidencia con indicador de confianza.</li>
+  <li>Detalle de candidato: perfil, radar de afinidad por siete ejes, posturas con justificación y fuente, noticias recientes.</li>
+  <li>Guardado y comparación: favoritos, descartados, comparación entre candidatos.</li>
+</ol>
+
+<h3 class="section-title">8.2.3 El diseño del cuestionario</h3>
+<p>El balance entre extensión y tasa de completitud es el principal desafío de diseño en una VAA. Para el MVP se definieron 12 preguntas en siete ejes temáticos: Economía, Sociedad, Ambiente, Seguridad, Derechos Humanos, Internacional e Institucional.</p>
+<p>La escala de respuesta utiliza cinco puntos más una opción explícita <em>"No sé"</em> que excluye la pregunta del cálculo. Esta distinción es significativa: la respuesta neutral implica posición intermedia; la respuesta <em>"No sé"</em> implica ausencia de información, y el sistema no debe penalizar ni favorecer a ningún candidato por esa omisión.</p>
+<p>Cada pregunta incorpora un modal de contexto educativo con explicación general y análisis de repercusiones en cinco dimensiones (económica, social, cultural, ambiental e institucional), redactado en tono neutral.</p>
+
+<h2 class="section-title">8.3 Arquitectura Conceptual del Sistema</h2>
+
+<h3 class="section-title">8.3.1 Modelo cliente-servidor</h3>
+<p>VotoAFin adopta la arquitectura cliente-servidor como modelo fundamental. El <strong>servidor (backend)</strong> es responsable de la persistencia de datos, el cálculo de los matches, la autenticación y la exposición de la API. El <strong>cliente (frontend)</strong> es responsable de la presentación y la captura de respuestas, sin lógica de negocio crítica. Esta separación es fundamental para la auditabilidad: el algoritmo de cálculo, el componente central en términos de impacto político, reside exclusivamente en el servidor.</p>
+
+<h3 class="section-title">8.3.2 El modelo de datos</h3>
+<p>El sistema organiza su información en cuatro dominios conceptuales:</p>
+<ul>
+  <li><strong>Catálogo electoral:</strong> tipos de elección, candidatos, preguntas por eje temático, opciones de respuesta.</li>
+  <li><strong>Interacción del usuario:</strong> respuestas al cuestionario con pesos, resultados del matching, favoritos y descartados.</li>
+  <li><strong>Territorio:</strong> regiones, distritos, comunas y unidades territoriales que contextualizan la relevancia de cada candidato.</li>
+  <li><strong>Perfil y contenido:</strong> perfil del usuario, noticias asociadas a candidatos, marcadores de noticias y posturas.</li>
+</ul>
+
+<h3 class="section-title">8.3.3 El algoritmo de matching</h3>
+<p>El algoritmo opera sobre cuatro componentes:</p>
+<ol>
+  <li><strong>Comparación posición a posición:</strong> para cada pregunta respondida por el usuario con postura del candidato disponible, se calcula la distancia entre posiciones y se normaliza a escala de coincidencia entre 0 y 1.</li>
+  <li><strong>Aplicación del peso:</strong> el resultado se multiplica por el multiplicador del nivel de importancia indicado por el usuario (cuatro niveles con multiplicadores diferenciados).</li>
+  <li><strong>Cobertura y confianza:</strong> se registra cuántas preguntas participaron efectivamente en el cálculo, determinando el nivel de confianza del resultado.</li>
+  <li><strong>Desglose por eje:</strong> el algoritmo calcula el porcentaje de coincidencia para cada uno de los siete ejes temáticos, produciendo el vector que alimenta el gráfico de radar.</li>
+</ol>
+<p>El diseño priorizó la <strong>explicabilidad</strong> por sobre la sofisticación matemática: cualquier ciudadano con comprensión básica de proporciones puede entender cómo se calcula el resultado.</p>
+
+<h3 class="section-title">8.3.4 El contrato de API</h3>
+<p>La comunicación entre frontend y backend se establece mediante una API REST documentada con el estándar <strong>OpenAPI 3.1</strong>. El esquema es generado automáticamente por el backend y consumido por el frontend para generar tipos TypeScript. Cuando el backend cambia el esquema de un endpoint, la regeneración de tipos produce errores de compilación que señalan exactamente los sitios del código donde la incompatibilidad debe resolverse.</p>
+
+<h2 class="section-title">8.4 Decisiones Tecnológicas</h2>
+
+<div class="table-wrapper">
+<table>
+  <thead>
+    <tr><th>Capa</th><th>Tecnología elegida</th><th>Alternativas consideradas</th><th>Razón principal</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Backend framework</td>
+      <td><strong>Django 5.2 + DRF</strong></td>
+      <td>FastAPI</td>
+      <td>Panel de administración integrado (requerimiento funcional para curaduría de datos); madurez y ecosistema probados.</td>
+    </tr>
+    <tr>
+      <td>Base de datos</td>
+      <td><strong>SQLite (dev) / PostgreSQL (prod)</strong></td>
+      <td>MySQL</td>
+      <td>SQLite reduce fricción de onboarding; PostgreSQL es estándar industrial para concurrencia en producción.</td>
+    </tr>
+    <tr>
+      <td>Frontend framework</td>
+      <td><strong>Expo + React Native + TypeScript</strong></td>
+      <td>PWA pura, Flutter</td>
+      <td>Un solo codebase para web, iOS y Android; TypeScript strict garantiza integridad del contrato de tipos.</td>
+    </tr>
+    <tr>
+      <td>Estado del servidor</td>
+      <td><strong>TanStack Query v5</strong></td>
+      <td>SWR, useEffect manual</td>
+      <td>Caché automática, deduplicación, retry y estados de carga sin boilerplate.</td>
+    </tr>
+    <tr>
+      <td>Estado del cliente</td>
+      <td><strong>Zustand</strong></td>
+      <td>Redux, Context+useReducer</td>
+      <td>Mínimo boilerplate; YAGNI — el estado del cliente no justifica la industria pesada de Redux.</td>
+    </tr>
+    <tr>
+      <td>Licencia</td>
+      <td><strong>AGPL-3.0</strong></td>
+      <td>MIT, GPL-2.0</td>
+      <td>Garantiza que versiones modificadas desplegadas públicamente deban publicar su código. Coherente con la naturaleza de tecnología electoral de interés público.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 class="section-title">8.5 Construcción del Sistema por Fases</h2>
+
+<h3 class="section-title">8.5.1 Fase inicial: del prototipo al MVP</h3>
+<p>El punto de partida fue el proyecto entregado en el ramo de Aplicaciones Móviles: una arquitectura funcional pero con un problema crítico — el flujo end-to-end fallaba porque <strong>no había posturas de candidatos cargadas en la base de datos</strong>. Los matches devolvían 0% para todos los candidatos. El sistema era arquitectónicamente correcto pero vacío de datos reales.</p>
+
+<h3 class="section-title">8.5.2 El problema de los datos de posturas</h3>
+<div class="callout warning">
+  <p class="callout-title">Principio establecido</p>
+  <p>Un intento inicial de inferir posturas de candidatos desde estereotipos ideológicos fue detectado e inmediatamente rechazado por la autora del proyecto: las inferencias ideológicas no son posturas verificadas y pueden ser tanto incorrectas como sesgadas. En un sistema electoral, la diferencia es crítica.</p>
+</div>
+<p>La decisión resultante fue implementar un protocolo de importación con validación técnica obligatoria: cada entrada debe incluir justificación textual (mínimo 20 caracteres) y URL de fuente primaria verificable. Las posturas no completamente verificadas fueron marcadas con nivel de confianza BAJA, y el sistema los comunica como tales al usuario. Este episodio estableció el principio que atraviesa todo el diseño: <strong>si hay incertidumbre, se muestra la incertidumbre</strong>.</p>
+
+<h3 class="section-title">8.5.3 Refactorización hacia capas limpias</h3>
+<p>La refactorización organizó el sistema en tres capas en el frontend: <strong>capa de servicios</strong> (lógica pura sin dependencias de React — testeable con Jest sin renderizado), <strong>capa de datos</strong> (hooks de React Query con caché automática), y <strong>capa de presentación</strong> (pantallas que leen hooks y servicios, sin lógica de negocio propia).</p>
+<p>El beneficio medido más tangible: los tests unitarios que operan directamente sobre los servicios corren <strong>30 veces más rápido</strong> que los tests de integración que pasan por el stack completo.</p>
+
+<h3 class="section-title">8.5.4 Seguridad y autenticación</h3>
+<p>El sistema utiliza tokens de autenticación con dos adaptaciones por contexto:</p>
+<ul>
+  <li><strong>Web (navegador):</strong> cookie httpOnly con SameSite=Lax y Secure. El código JavaScript nunca accede al token en texto claro, mitigando ataques XSS.</li>
+  <li><strong>Nativo (iOS/Android):</strong> almacenamiento seguro del sistema operativo (Keychain/EncryptedSharedPreferences), inaccesible para otras aplicaciones.</li>
+</ul>
+<p>Los tokens tienen tiempo de vida configurable (defecto: 7 días). Las contraseñas se almacenan hasheadas con PBKDF2 (estándar por defecto de Django).</p>
+
+<h3 class="section-title">8.5.5 Accesibilidad y diseño visual</h3>
+<p>La paleta de colores para los indicadores de afinidad utiliza cinco niveles con gradaciones verificadas para cumplir el mínimo de contraste 4,5:1 exigido por WCAG 2.2 AA, tanto en modo claro como en modo oscuro. Los tamaños de elementos táctiles en el cuestionario se establecieron en un mínimo de 44×44 puntos.</p>
+
+<h2 class="section-title">8.6 Evolución del Proyecto: Métricas</h2>
+
+<div class="table-wrapper">
+<table>
+  <thead>
+    <tr><th>Métrica</th><th>Sprint 8 (base)</th><th>Sesiones A-F (actual)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Commits en main</td><td>2</td><td><strong>212</strong></td></tr>
+    <tr><td>Tests automatizados</td><td>46</td><td><strong>370</strong></td></tr>
+    <tr><td>Endpoints REST</td><td>11</td><td><strong>~31</strong></td></tr>
+    <tr><td>Modelos de datos</td><td>8</td><td><strong>19</strong></td></tr>
+    <tr><td>Pantallas del frontend</td><td>7</td><td><strong>17</strong></td></tr>
+    <tr><td>Componentes UI reutilizables</td><td>7</td><td><strong>~89</strong></td></tr>
+    <tr><td>Hooks de datos</td><td>6</td><td><strong>30</strong></td></tr>
+    <tr><td>Issues resueltos del backlog</td><td>0</td><td><strong>~230</strong></td></tr>
+    <tr><td>Hallazgos de seguridad resueltos</td><td>0</td><td><strong>17/17</strong></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 class="section-title">8.7 Desafíos Principales</h2>
+
+<h3 class="section-title">8.7.1 El desafío de los datos</h3>
+<p>Las posiciones públicas de los candidatos chilenos no están sistematizadas en ninguna base de datos abierta. Es necesario consultar una multiplicidad de fuentes primarias: declaraciones en entrevistas, votaciones registradas en el portal del Congreso, plataformas de campaña oficiales, compromisos en debates. Este trabajo de curaduría es intensivo en tiempo humano y no puede ser automatizado de manera confiable.</p>
+
+<h3 class="section-title">8.7.2 El desafío de la neutralidad</h3>
+<p>Diseñar preguntas sobre política pública genuinamente neutrales es considerablemente más difícil de lo que parece. El lenguaje mismo es un campo político: la elección de términos, el encuadre de la pregunta y el orden de las opciones de respuesta pueden introducir sesgos sutiles que afectan los resultados.</p>
+
+<h3 class="section-title">8.7.3 El desafío de la sostenibilidad</h3>
+<p>Las VAAs de origen ciudadano en Chile han enfrentado históricamente el problema de la sostenibilidad: requieren actualización constante con cada proceso electoral, y sin financiamiento estable, tienden a deteriorarse. Decide Chile es el ejemplo más reciente. La respuesta actual de VotoAFin es la apertura del código y el diseño modular de datos. El camino a largo plazo incluye la búsqueda de alianzas institucionales.</p>
+
+<h2 class="section-title">8.8 Lecciones Aprendidas</h2>
+
+<h3 class="section-title">De producto</h3>
+<ul>
+  <li><strong>La pregunta de diseño determina la solución.</strong> El cambio más importante no fue técnico sino conceptual: pasar de "cómo hacer atractivo al candidato" a "cómo medir la coincidencia entre posturas". Este cambio generó una solución fundamentalmente distinta.</li>
+  <li><strong>Los datos son el producto, el algoritmo es el envoltorio.</strong> La calidad de las posturas de los candidatos determina la calidad del resultado más que cualquier sofisticación del algoritmo.</li>
+</ul>
+
+<h3 class="section-title">De ingeniería</h3>
+<ul>
+  <li><strong>La separación de responsabilidades tiene valor medible.</strong> Tests 30 veces más rápidos, eliminación de duplicación entre pantallas, verificación del algoritmo independiente de la interfaz.</li>
+  <li><strong>El contrato de API como disciplina de integración.</strong> La generación automática de tipos desde OpenAPI eliminó una categoría completa de errores que de otro modo solo se manifiestan en tiempo de ejecución.</li>
+  <li><strong>La deuda técnica documentada es manejable; la no documentada no.</strong> El proyecto adoptó la práctica de documentar explícitamente las áreas de deuda conocida, distinguiéndolas de las áreas completas.</li>
+</ul>
+
+<h3 class="section-title">De contexto cívico</h3>
+<ul>
+  <li><strong>La transparencia es un requerimiento funcional, no una característica.</strong> En un contexto electoral, la confianza del usuario en el sistema es condición necesaria para que sea útil.</li>
+  <li><strong>El diseño para contextos de alta incertidumbre requiere honestidad explícita.</strong> Comunicar activamente la incertidumbre protege la credibilidad del sistema a largo plazo.</li>
+</ul>
+
+<h2 class="section-title">8.9 Resultados Obtenidos</h2>
+<p>Al momento de escritura de este documento, VotoAFin es un sistema funcional en estado de MVP con las siguientes capacidades verificadas:</p>
+
+<div class="callout success">
+  <p class="callout-title">Estado actual del sistema</p>
+  <ul>
+    <li>Flujo completo de registro → cuestionario → cálculo → resultados, funcionando en web.</li>
+    <li>Candidatos presidenciales y 140 diputados 2025 cargados, con posturas etiquetadas por nivel de confianza.</li>
+    <li>370 tests automatizados cubriendo servicios de negocio y endpoints de la API.</li>
+    <li>37 documentos técnicos auditados y actualizados contra el código fuente real.</li>
+    <li>Sistema de código abierto bajo AGPL-3.0 con documentación para onboarding de contribuidores.</li>
+    <li>Repositorio público: <strong>github.com/whatebria/tinder-decisivo</strong></li>
+  </ul>
+</div>
+
+<hr class="section-divider">
+
+<!-- ==================== SECCIÓN 9 ==================== -->
+<h1 class="section-title" id="s9">9. Conclusiones</h1>
+
+<h2 class="section-title">9.1 Cumplimiento de Objetivos</h2>
+<p>El objetivo general fue cumplido en su dimensión técnica: existe un sistema funcional que implementa la mecánica de cuestionario, cálculo de matching con ponderación e indicador de confianza, visualización de resultados y exploración de perfiles de candidatos. De los siete objetivos específicos, seis fueron alcanzados completamente y uno parcialmente (documentación orientada a contribuidores externos).</p>
+
+<h2 class="section-title">9.2 Valor Generado</h2>
+<ul>
+  <li><strong>Valor de producto:</strong> un sistema funcional que no existía en Chile. Cualquier votante que lo utilice dispone de información estructurada y comparativa sobre los candidatos que ninguna herramienta local proveía de manera equivalente.</li>
+  <li><strong>Valor académico:</strong> conocimiento documentado sobre el problema de la desinformación electoral en Chile, el diseño de VAAs en contextos de información incompleta, y la aplicación de principios de ingeniería de software a productos de interés cívico.</li>
+  <li><strong>Valor de infraestructura:</strong> base técnica de código abierto reutilizable por otros grupos para construir instancias de la plataforma adaptadas a otros contextos electorales latinoamericanos.</li>
+</ul>
+
+<h2 class="section-title">9.3 Limitaciones Actuales</h2>
+<ul>
+  <li><strong>Verificación de datos:</strong> parte de las posturas tienen nivel de confianza medio o bajo. El ideal es verificación completa antes del lanzamiento público.</li>
+  <li><strong>Escala de preguntas:</strong> 12 preguntas es funcional pero limitado en resolución comparado con VAAs consolidadas (Wahl-O-Mat tiene 38, Smartvote hasta 75).</li>
+  <li><strong>Cobertura electoral:</strong> el MVP cubre presidencial y diputados. Las elecciones municipales —donde los índices de desinformación son más altos— no están cubiertas aún.</li>
+  <li><strong>Sostenibilidad:</strong> el modelo actual es de proyecto personal sin respaldo institucional.</li>
+  <li><strong>Tests de frontend:</strong> la suite de tests cubre el backend de manera sólida, pero el frontend tiene cobertura de tests automatizados prácticamente nula.</li>
+</ul>
+
+<h2 class="section-title">9.4 Trabajo Futuro (Roadmap)</h2>
+
+<div class="table-wrapper">
+<table>
+  <thead>
+    <tr><th>Versión</th><th>Foco</th><th>Descripción</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>v0.2</strong></td><td>Datos verificados</td><td>Verificación de todas las posturas con fuentes primarias, expansión del cuestionario a 20-30 preguntas, changelog público de verificaciones.</td></tr>
+    <tr><td><strong>v0.3</strong></td><td>Explicabilidad</td><td>Mostrar qué preguntas causaron que un candidato rankeara alto o bajo. Simulador interactivo de sensibilidad del resultado.</td></tr>
+    <tr><td><strong>v0.4</strong></td><td>Expansión</td><td>Elecciones municipales y regionales, notificaciones personalizadas, onboarding del lado del candidato.</td></tr>
+    <tr><td><strong>v1.0</strong></td><td>Lanzamiento público</td><td>Hosting en producción, pruebas de carga para tráfico de día de elección, internacionalización (español, Mapuzugun, Aymara).</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 class="section-title">9.5 Reflexión Final</h2>
+<p>Este proyecto comenzó con una observación simple: los ciudadanos chilenos enfrentaban decisiones electorales complejas sin herramientas adecuadas para tomarlas de manera informada. Terminó con un sistema funcional que intenta resolver ese problema de manera técnicamente sólida, metodológicamente transparente y éticamente responsable.</p>
+<p>El proceso enseñó que la ingeniería de productos de interés público exige un estándar diferente al de los productos comerciales convencionales. En un producto comercial, el fracaso en comunicar la incertidumbre de un resultado es un problema de experiencia de usuario. En un producto electoral, es un problema de integridad democrática.</p>
+<blockquote>La tecnología electoral no debería ser propiedad de nadie. Debería ser infraestructura pública, auditable, y construida con los mismos estándares de rigor y transparencia que esperamos de cualquier otro proceso de interés democrático. VotoAFin es un paso pequeño pero concreto en esa dirección.</blockquote>
+
+<hr class="section-divider">
+
+<!-- ==================== BIBLIOGRAFÍA ==================== -->
+<h1 class="section-title" id="s10">10. Bibliografía</h1>
+
+<div class="bibliography">
+
+<h3>Libros y monografías</h3>
+<div class="ref">Garzia, D. y Marschall, S. (Eds.) (2014). <em>Matching Voters with Parties and Candidates: Voting Advice Applications in Comparative Perspective</em>. ECPR Press.</div>
+<div class="ref">Kahneman, D. (2011). <em>Thinking, Fast and Slow</em>. Farrar, Straus and Giroux.</div>
+<div class="ref">Martin, R. C. (2002). <em>Agile Software Development, Principles, Patterns, and Practices</em>. Prentice Hall.</div>
+<div class="ref">Martin, R. C. (2017). <em>Clean Architecture: A Craftsman's Guide to Software Structure and Design</em>. Prentice Hall.</div>
+<div class="ref">Norman, D. A. (2013). <em>The Design of Everyday Things</em> (Revised and Expanded Edition). Basic Books.</div>
+<div class="ref">Power, D. J. (2002). <em>Decision Support Systems: Concepts and Resources for Managers</em>. Quorum Books.</div>
+<div class="ref">Ricci, F., Rokach, L. y Shapira, B. (Eds.) (2011). <em>Recommender Systems Handbook</em>. Springer.</div>
+<div class="ref">Hunt, A. y Thomas, D. (1999). <em>The Pragmatic Programmer: From Journeyman to Master</em>. Addison-Wesley.</div>
+<div class="ref">Beck, K. (2000). <em>Extreme Programming Explained: Embrace Change</em>. Addison-Wesley.</div>
+<div class="ref">Cohn, M. (2009). <em>Succeeding with Agile: Software Development Using Scrum</em>. Addison-Wesley.</div>
+<div class="ref">Cockburn, A. (2005). <em>Hexagonal Architecture</em>. Recuperado de: https://alistair.cockburn.us/hexagonal-architecture/</div>
+
+<h3>Artículos académicos</h3>
+<div class="ref">Marschall, S. y Schmidt, C. K. (2010). The impact of Voting Indicator Applications on voters' decision-making. <em>Politische Vierteljahresschrift</em>, 51(3), 495–516.</div>
+<div class="ref">Ruusuvirta, O. y Rosema, M. (2009). Do online vote selectors influence electoral participation and the direction of the vote? Ponencia presentada en la Conferencia Anual de la Asociación de Estudios Electorales del Reino Unido, Manchester.</div>
+<div class="ref">Walgrave, S., Nuytemans, M. y Pepermans, K. (2009). Voting aid applications and the effect of VAAs on party preference formation. <em>Acta Politica</em>, 44(3), 214–226.</div>
+<div class="ref">Fivaz, J. y Nadig, G. (2010). Impact of Voting Advice Applications (VAAs) on voter turnout and their potential use for civic education. <em>Policy y Internet</em>, 2(4), 167–200.</div>
+<div class="ref">Mahéo, V.-A. y Gauvin, J.-F. (2018). Partisan cues and attitude change: evidence from a Vote Advice Application. <em>Political Communication</em>, 35(3), 465–483.</div>
+
+<h3>Informes y documentos institucionales</h3>
+<div class="ref">Activa Knowledge for Action. (2023). <em>Fake News y Desinformación en Chile y LatAm</em>. Santiago: Activa Research.</div>
+<div class="ref">Ipsos Chile. (2024). <em>Claves Ipsos N°33: Conocimiento y preparación del electorado para las elecciones municipales de octubre 2024</em>. Santiago: Ipsos.</div>
+<div class="ref">Servicio Electoral de Chile (SERVEL). (2024). <em>Resultados y estadísticas — Elecciones municipales y regionales 2024</em>. Santiago: SERVEL.</div>
+<div class="ref">PNUD Chile. (2024). <em>Informe de participación ciudadana en procesos electorales 2020-2024</em>. Santiago: PNUD.</div>
+
+<h3>Estándares técnicos y especificaciones</h3>
+<div class="ref">W3C. (2023). <em>Web Content Accessibility Guidelines (WCAG) 2.2</em>. Recuperado de: https://www.w3.org/TR/WCAG22/</div>
+<div class="ref">Fielding, R. T. (2000). <em>Architectural Styles and the Design of Network-based Software Architectures</em> [Tesis doctoral]. University of California, Irvine.</div>
+<div class="ref">OpenAPI Initiative. (2021). <em>OpenAPI Specification 3.1.0</em>. Recuperado de: https://spec.openapis.org/oas/latest.html</div>
+<div class="ref">Heroku. (2011). <em>The Twelve-Factor App</em>. Recuperado de: https://12factor.net</div>
+<div class="ref">Peters, T. (2004). <em>PEP 20 — The Zen of Python</em>. Python.org. Recuperado de: https://peps.python.org/pep-0020/</div>
+
+<h3>Fuentes sobre VAAs</h3>
+<div class="ref">ProDemos. (2024). <em>StemWijzer: Methodologie en verantwoording</em>. Den Haag: ProDemos. Recuperado de: https://www.stemwijzer.nl</div>
+<div class="ref">Bundeszentrale für politische Bildung (BpB). (2024). <em>Wahl-O-Mat: Wissenschaftliche Begleitung</em>. Bonn: BpB. Recuperado de: https://www.wahl-o-mat.de</div>
+<div class="ref">Politools. (2024). <em>Smartvote: Methodology</em>. Zurich: Politools. Recuperado de: https://www.smartvote.ch</div>
+<div class="ref">iSideWith. (2024). <em>How iSideWith Works</em>. Recuperado de: https://www.isidewith.com</div>
+
+<h3>Fuentes del proyecto</h3>
+<div class="ref">Castillo, J., De Lima, P. y Sánchez, A. (2024a). <em>Desinformación en los Procesos Electorales</em> [Trabajo de Emprendimiento I]. Universidad Técnica Federico Santa María, Valparaíso.</div>
+<div class="ref">Castillo, J., De Lima, P. y Sánchez, A. (2024b). <em>Desinterés en los Procesos Electorales</em> [Trabajo de Emprendimiento II]. Universidad Técnica Federico Santa María, Valparaíso.</div>
+<div class="ref">Castillo, J. (2026). <em>Historia y Evolución del Proyecto VotoAFin</em>. Repositorio GitHub: whatebria/tinder-decisivo. Recuperado de: https://github.com/whatebria/tinder-decisivo</div>
+<div class="ref">Castillo, J. (2026). <em>Comparación con VAAs Internacionales — VotoAFin</em>. Repositorio GitHub: whatebria/tinder-decisivo.</div>
+
+</div><!-- /bibliography -->
+
+</div><!-- /content -->
+
+<footer>
+  <p>VotoAFin — Borrador de Tesis de Pregrado · Ingeniería en Informática · Universidad Técnica Federico Santa María · Agosto 2026</p>
+  <p style="margin-top:6px;">Autora: Jenifer Castillo &nbsp;·&nbsp; Repositorio: github.com/whatebria/tinder-decisivo &nbsp;·&nbsp; Licencia AGPL-3.0</p>
+</footer>
+
+</div><!-- /page -->
+</body>
+</html>
