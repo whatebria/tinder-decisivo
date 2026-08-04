@@ -12,6 +12,9 @@ pip-delete-this-directory.txt
 .coverage
 htmlcov/
 
+# PDF extractions — imágenes intermedias pesadas, derivadas de los PDFs fuente
+documentacion_tesis/pdf_pages/
+
 # Dataset / scrapers (archivos grandes no relevantes para el repositorio principal)
 dataset/powerbi-scraper/api_dumps/
 dataset/powerbi-scraper/api_dumps_v8/
