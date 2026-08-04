@@ -33,7 +33,8 @@ core/services/
 |-- __init__.py       (re-exports opcional, hoy vacio)
 |-- matching.py       (algoritmo de match)  <- ver 04-algoritmo-matching.md
 |-- respuestas.py     (reiniciar, editar respuestas)
-|-- perfil.py         (cambiar password, eliminar cuenta)
+|-- perfil.py         (cambiar password/username/email, eliminar cuenta, actualizar comuna)
+|-- tipos.py          (cache de tipos base: get_base_tipo_ids / invalidar_cache_base_tipo_ids)
 `-- password_reset.py (flujo de reset con email)
 ```
 
@@ -71,7 +72,6 @@ Borra respuestas + matches del user **para un tipo de eleccion**.
 Sobreviven al reset:
 - `CandidatoFavorito`
 - `CandidatoDescartado`
-- `DecisionFinal`
 - Datos de otros tipos de eleccion
 
 Motivacion UX: si el user cambia de opinion y quiere responder de nuevo, no
@@ -102,7 +102,7 @@ Todo dentro de `transaction.atomic()` para consistencia.
 
 ## `services/perfil.py`
 
-###ar_password(user, current_password, new_password) -> None`
+### `cambiar_password(user, current_password, new_password) -> None`
 
 Cambia la password del usuario. Requiere el password actual para prevenir
 "cambio ajeno con token robado" (si alguien tuvo acceso al token, todavia no
@@ -122,9 +122,41 @@ Borra la cuenta del usuario. Requiere password como confirmacion.
 
 **CASCADE de Django** todos los objetos relacionados:
 `RespuestaUsuario`, `MatchCandidato`, `CandidatoFavorito`, `CandidatoDescartado`,
-`DecisionFinal`, `PasswordResetToken`, `Token` (DRF auth).
+`PasswordResetToken`, `Token` (DRF auth).
 
 Todo dentro de `transaction.atomic()`.
+
+### `cambiar_username(user, new_username, current_password) -> None`
+
+Cambia el username. Requiere password actual. Valida unicidad del nuevo username.
+Raises `PerfilError`.
+
+### `cambiar_email(user, new_email, current_password) -> None`
+
+Cambia el email. Requiere password actual. Valida formato y unicidad del nuevo email.
+Raises `PerfilError`.
+
+### `actualizar_comuna(user, comuna_id) -> ActualizarComunaResult`
+
+Actualiza (o limpia) la comuna del perfil del usuario. Si `comuna_id=None`, desvincula.
+Devuelve `ActualizarComunaResult` con la comuna actualizada (o `None`).
+
+---
+
+## `services/tipos.py`
+
+Cache de tipos base. Evita repetir `TipoEleccion.objects.filter(es_base=True)` en cada request.
+
+### `get_base_tipo_ids() -> list[int]`
+
+Devuelve los IDs de todos los `TipoEleccion` con `es_base=True`. Cache TTL 1h en
+Django cache framework. En miss: query + set. Resultado siempre ordenado para hashabilidad.
+
+### `invalidar_cache_base_tipo_ids() -> None`
+
+Borra la key del cache. Llamado por signal `post_save`/`post_delete` de `TipoEleccion`
+(ver `models/electoral.py`) para garantizar zero staleness tras cambios en el admin.
+Es idempotente: no falla si la key no existe.
 
 ---
 
