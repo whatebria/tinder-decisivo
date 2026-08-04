@@ -11,7 +11,7 @@ import type { MatchResult } from "../api/endpoints";
 // URL publica configurable por entorno. Staging/previews deben setear
 // EXPO_PUBLIC_APP_URL para no mandar links de produccion en QA.
 const APP_URL =
-  process.env.EXPO_PUBLIC_APP_URL ?? "https://tinder-decisivo.cl";
+  process.env.EXPO_PUBLIC_APP_URL ?? "https://votoafin.cl";
 
 // Cuantos matches meter en el texto compartido.
 const TOP_N = 5;

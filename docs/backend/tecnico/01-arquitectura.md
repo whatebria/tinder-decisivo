@@ -92,7 +92,7 @@ Todo se lee del `.env` via `python-decouple`. Ver `.env.example` para el listado
 | `CORS_ALLOWED_ORIGINS` | `""` | CSV. En `DEBUG=True` se ignora y se permite todo |
 | `EMAIL_BACKEND` | `console` | `smtp` en prod |
 | `EMAIL_HOST/PORT/TLS/USER/PASSWORD` | - | Solo prod |
-| `DEFAULT_FROM_EMAIL` | `no-reply@tinder-decisivo.cl` | |
+| `DEFAULT_FROM_EMAIL` | `no-reply@votoafin.cl` | |
 | `PASSWORD_RESET_URL_BASE` | `http://localhost:8081/reset-password` | URL del frontend que recibe el token |
 
 ### Bloques importantes

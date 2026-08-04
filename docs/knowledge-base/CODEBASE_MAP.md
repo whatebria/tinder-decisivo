@@ -1,15 +1,15 @@
-# Codebase Knowledge Map — tinder-decisivo
+# Codebase Knowledge Map — VotoAFin (repo: tinder-decisivo)
 
 > Generado por: codebase-knowledge-mapper
-> Inputs: root_path=tinder-decisivo/, focus=[frontend, architecture], depth=quick
-> Fases ejecutadas: 1 (Inventario), 2 (Sistemas), 6 (Arquitectura)
+> Actualizado: 2026-07-31 — verificado contra código actual
 > Fuente: 100% codigo real — cero inferencias no verificadas
+> Nombre del producto: **VotoAFin** (renombrado desde «Tinder Decisivo» / «Servel»)
 
 ---
 
 ## Resumen Ejecutivo
 
-**tinder-decisivo** es una aplicacion movil + web que permite a ciudadanos comparar sus posturas politicas con las de candidatos electorales, a traves de un cuestionario de opciones en escala 1-5 con pesos por pregunta. El usuario responde el cuestionario, obtiene un ranking de candidatos ordenado por porcentaje de coincidencia, y puede explorar el detalle del match pregunta a pregunta. El sistema soporta usuarios autenticados (match persistido) y usuarios guest (match anonimo en memoria). El proyecto es fullstack: frontend Expo/React Native con soporte web, backend Django REST Framework con SQLite.
+**VotoAFin** es una aplicacion movil + web que permite a ciudadanos comparar sus posturas politicas con las de candidatos electorales, a traves de un cuestionario de opciones en escala 1-5 con pesos por pregunta. El usuario responde el cuestionario, obtiene un ranking de candidatos ordenado por porcentaje de coincidencia, y puede explorar el detalle del match pregunta a pregunta. El sistema soporta usuarios autenticados (match persistido) y usuarios guest (match anonimo en memoria). El proyecto es fullstack: frontend Expo/React Native con soporte web, backend Django REST Framework con SQLite.
 
 **Estado de madurez:** MVP avanzado — core funcional completo, cobertura de tests significativa, design system establecido, deuda tecnica baja.
 
@@ -51,7 +51,7 @@ tinder-decisivo/
 
 **Componentes:**
 - `frontend/src/store/auth.ts` — store Zustand con `isAuthenticated`, `isGuest`
-- `frontend/src/store/secureStorage.ts` — `expo-secure-store` + clave `servel_auth_token`
+- `frontend/src/store/secureStorage.ts` — `expo-secure-store` + clave `votoafin_auth_token`
 - `frontend/src/navigation/AppNavigator.tsx` — guard central: onboarding / auth stack / main stack
 - `backend/core/models/auth.py` — modelo `PasswordResetToken`
 - `backend/api/urls.py` — endpoints: `register/`, `login/`, `logout/`, `password-reset/request/`, `password-reset/confirm/`
@@ -136,7 +136,7 @@ tinder-decisivo/
 **Objetivo:** Mostrar el ranking de candidatos ordenado por afinidad y permitir filtros.
 
 **Componentes:**
-- `frontend/src/screens/ResultadosScreen.tsx` (24.8 KB — el archivo mas grande del proyecto)
+- `frontend/src/screens/ResultadosScreen.tsx` (28.8 KB — el archivo mas grande del proyecto)
 - `frontend/src/api/hooks.ts` — `useMatchesQuery()`, `useFavoritos()`, `useDescartados()`, `useToggleFavorito()`, `useToggleDescartado()`
 - `frontend/src/components/organisms/RankingCard.tsx`, `RankingRow.tsx`, `ResultadoHero.tsx`, `TopMatchSection.tsx`
 
@@ -273,14 +273,14 @@ src/
   hooks/        ← custom hooks de UI (blur, coach marks, modals, dimensions)
   navigation/   ← AppNavigator + tipos de rutas
   screens/      ← una pantalla = un archivo (flat, sin anidado por feature)
-  services/     ← (directorio existe, pendiente verificar contenido)
+  services/     ← logica de dominio pura (sin HTTP): comparar.ts, cuestionario.ts, matching.ts, share.ts
   store/        ← stores Zustand (uno por dominio)
   theme/        ← tokens del design system
   types/        ← tipos TypeScript (incluyendo api.ts generado desde OpenAPI)
   utils/        ← helpers utilitarios
 ```
 
-**Observacion:** No hay feature folders. Las screens son flat (17 archivos). Funciona bien en el tamano actual; si el proyecto escala mucho podria necesitar reorganizacion.
+**Observacion:** No hay feature folders. Las screens raiz son flat (17 archivos). Existen sub-directorios co-localizados: `screens/Home/` (HomeElectionItem, HomeTrustSection, HomeMatchLocked) y `screens/DetalleCandidato/` (ResumenTab, AfinidadTab). Funciona bien en el tamano actual.
 
 ---
 
@@ -305,12 +305,12 @@ Cada componente tiene un `.showcase.tsx` colocado junto al componente (no en dir
 
 | Store | Que guarda | Por que global |
 |---|---|---|
-| `useAuthStore` | `isAuthenticated`, `isGuest`, token | Necesario en navigator + todos los hooks auth-gated |
-| `useOnboardingStore` | `hasSeen`, `pendingAuthTarget` | Persiste entre sesiones, controla routing inicial |
-| `useCuestionarioStore` | progreso del cuestionario en curso | Navegacion entre preguntas sin perder estado |
+| `useAuthStore` | `isAuthenticated`, `isGuest`, `userId` (key: `votoafin_user_id`) | Necesario en navigator + todos los hooks auth-gated |
+| `useOnboardingStore` | `hasSeen`, `pendingAuthTarget` (key: `votoafin_onboarding_seen`) | Persiste entre sesiones, controla routing inicial |
+| `useCuestionarioStore` | progreso del cuestionario en curso, `esTipoBase` | Navegacion entre preguntas sin perder estado |
 | `useElectionsPrefsStore` | tipo de eleccion seleccionado | Filtro global que afecta matches y preguntas |
-| `useCoachMarksStore` | estado del tour de coach marks | Persiste cuales tours se completaron |
-| `useThemeStore` | tema claro/oscuro | Afecta a todos los componentes |
+| `useCoachMarksStore` | tours vistos (key: `votoafin_coach_marks_seen_*`) | Persiste cuales tours se completaron |
+| `useThemeStore` | tema claro/oscuro (key: `votoafin_theme_mode`) | Afecta a todos los componentes |
 
 **TanStack React Query 5** para server state (fetch + mutations + cache).
 
@@ -423,17 +423,17 @@ n >= 10 -> ALTA
 | Componente | Por que es critico |
 |---|---|
 | `AppNavigator.tsx` | Control total del routing — un bug aca rompe toda la app |
-| `ResultadosScreen.tsx` (24.8 KB) | Pantalla mas usada y mas grande — concentra logica de filtros, favoritos, descartados |
-| `HomeHeroSection.tsx` (9.2 KB) | Primera pantalla post-login — muestra estado del match actual |
-| `CuestionarioScreen.tsx` (14.2 KB) | Flujo central — captura las respuestas que alimentan el matching |
+| `ResultadosScreen.tsx` (28.8 KB) | Pantalla mas usada y mas grande — concentra logica de filtros, favoritos, descartados |
+| `HomeHeroSection.tsx` (9.3 KB) | Primera pantalla post-login — muestra estado del match actual |
+| `CuestionarioScreen.tsx` (15.2 KB) | Flujo central — captura las respuestas que alimentan el matching |
 | `matching.py` (16.9 KB) | Core del producto — el algoritmo de matching completo |
-| `api/hooks.ts` (21.2 KB) | 28 hooks — toda la comunicacion frontend/backend pasa por aqui |
+| `api/hooks.ts` (22.1 KB) | 30 hooks — toda la comunicacion frontend/backend pasa por aqui |
 
 ---
 
 ## Hooks de API Criticos
 
-Todos viven en `frontend/src/api/hooks.ts` (21.2 KB). Patron: React Query wrapeado.
+Todos viven en `frontend/src/api/hooks.ts` (22.1 KB, 30 hooks). Patron: React Query wrapeado.
 
 | Hook | Tipo | Para que |
 |---|---|---|
@@ -445,6 +445,8 @@ Todos viven en `frontend/src/api/hooks.ts` (21.2 KB). Patron: React Query wrapea
 | `useToggleDescartado()` | Mutation | Descartar candidato |
 | `useFavoritos()` | Query | Lista de favoritos para MisGuardados |
 | `useMisRespuestas(tipoEleccionId)` | Query | Ver respuestas propias en MisRespuestas |
+| `useReiniciarCuestionario()` | Mutation | Reinicia el cuestionario de un tipo de eleccion |
+| `useMisElecciones()` | Query | Progreso del usuario por tipo de eleccion (incluye `total_preguntas`) |
 
 ---
 
@@ -454,11 +456,12 @@ Encontrada con grep en el codigo, nada inventado:
 
 | Ubicacion | Tipo | Detalle |
 |---|---|---|
-| `CuestionarioScreen.tsx:191` | TODO | Backend no expone preguntas base vs extra por tipoEleccion — logica pendiente en frontend |
-| `ResultadosScreen.tsx:211` | eslint-disable | `react-hooks/exhaustive-deps` deshabilitado — documentado como BUG-032, intencional por ahora |
+| `ResultadosScreen.tsx` | eslint-disable | `react-hooks/exhaustive-deps` deshabilitado — documentado como BUG-032, intencional por ahora |
 | `CandidatoPickerModal.showcase.tsx:26` | eslint-disable | `@typescript-eslint/no-explicit-any` en showcase (menor) |
 | `ErrorBoundary.tsx:31` | eslint-disable | `no-console` (logging de errores en boundary, aceptable) |
-| BUG-045 (abierto P1) | Falta optimistic update | Toggle favorito/descartado tarda ~1 seg — referencias en issues/BUG-045 |
+| BUG-045 | Falta optimistic update | Toggle favorito/descartado tarda ~1 seg |
+
+**Resuelto:** El TODO de `CuestionarioScreen.tsx:191` (preguntas base vs extras) quedo resuelto via `esTipoBase` en el store.
 
 **Observacion:** La cantidad de deuda es baja para el tamano del proyecto. Los `eslint-disable` estan documentados y referenciados a issues.
 
@@ -468,7 +471,7 @@ Encontrada con grep en el codigo, nada inventado:
 
 | Riesgo | Severidad | Detalle |
 |---|---|---|
-| `ResultadosScreen.tsx` muy grande | MEDIA | 24.8 KB — si sigue creciendo, candidato a split |
+| `ResultadosScreen.tsx` muy grande | MEDIA | 28.8 KB — crecio 4KB, candidato a split si supera 35KB |
 | SQLite en produccion | MEDIA | db.sqlite3 de 11.9 MB en el repo — ok para dev, revisar si hay plan de migracion para prod |
 | Sin lazy loading en navigator | BAJA | Todas las screens se importan al inicio — impacto en cold start si el proyecto escala |
 | Seed de UnidadTerritorial incompleta | BAJA | Filtro territorial hace fail-open (muestra todos), no falla — pero silencioso |
@@ -501,11 +504,19 @@ Encontrada con grep en el codigo, nada inventado:
 4. **OpenAPI como contrato** — El backend genera el schema, el frontend lo consume via `openapi-typescript`. Los tipos de API son generados, no escritos a mano.
 5. **Token en cookie httpOnly (web) + SecureStore (nativo)** — Decision deliberada por seguridad. Requiere `localhost` (no `127.0.0.1`) en web dev.
 6. **SQLite para dev** — No hay config de Postgres detectada. Probablemente intencional para simplicidad de setup.
+7. **Nombre del producto: VotoAFin** — Renombrado completamente desde "Tinder Decisivo" y "Servel". Las storage keys usan prefijo `votoafin_`. El repo git sigue llamandose `tinder-decisivo`.
+8. **total_preguntas en TipoEleccion** — Agregado via `SerializerMethodField`, disponible sin que el usuario haya iniciado el cuestionario. Usado en `HomeHeroSection` para mostrar el progreso real.
+9. **territorialLabel() en utils/candidato.ts** — Funcion pura para construir etiqueta de ubicacion del candidato. Usada en `DetalleCandidatoScreen`.
+10. **ConfirmModal reemplaza Alert.alert()** — `Alert.alert()` es no-op en React Native Web. El cuestionario usa `<ConfirmModal>` para la confirmacion de salida.
+11. **Vista lista/tarjetas en Resultados** — `ResultadosScreen` tiene estado `rankView: "row" | "card"`. `RankingRow` es la vista compacta por defecto; `RankingCard` es la expandida con radar chart.
 
 ### Preguntas Abiertas para el Equipo
 
 1. Hay plan de migracion de SQLite a Postgres para produccion?
-2. El TODO en `CuestionarioScreen.tsx:191` (preguntas base vs extras por tipoEleccion) — cuando se implementa?
-3. Los `templates/` en components — tienen contenido? No se verifico en este analisis quick.
-4. El directorio `services/` en `frontend/src/` — que tiene? Podria solaparse con `api/`.
-5. Existe algun sistema de feature flags? No se encontro patron de feature flags en el codigo.
+2. Existe algun sistema de feature flags? No se encontro patron de feature flags en el codigo.
+
+### Preguntas Anteriores Respondidas
+
+- **services/ en frontend:** 4 modulos: `comparar.ts`, `cuestionario.ts`, `matching.ts`, `share.ts` — logica de dominio pura, con tests. No se solapa con `api/`.
+- **templates/ en components:** `AppShell.tsx` + `ScreenChrome.tsx`.
+- **TODO CuestionarioScreen.tsx (preguntas base vs extras):** Resuelto via campo `esTipoBase` en el store.

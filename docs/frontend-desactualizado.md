@@ -1,6 +1,6 @@
-# Documentación técnica del Frontend — Tinder Decisivo
+# Documentación técnica del Frontend — VotoAFin
 
-> Referencia técnica completa del cliente móvil/web de la app Tinder Decisivo (repo `servel-main`).
+> Referencia técnica completa del cliente móvil/web de la app VotoAFin (repo `servel-main`).
 > Todo lo descrito aquí se deriva estrictamente del código fuente en `frontend/`.
 
 ---
@@ -986,7 +986,7 @@ Reglas de nivel (basado en `Math.abs(a.valor - b.valor)` de la escala Likert 1..
 Arma el texto para compartir top matches + wrappers de plataforma.
 
 ```ts
-APP_URL = "https://tinder-decisivo.cl"    // constante de módulo
+APP_URL = "https://VotoAFin.cl"    // constante de módulo
 TOP_N = 5                                  // matches incluidos
 
 buildShareText({tipoNombre, matches}) → string   // formato WhatsApp/mail-friendly
@@ -999,13 +999,13 @@ copyToClipboard(text)                → Promise<boolean>
 
 Formato del texto (deliberadamente sin markdown, sin emojis):
 ```
-Mis matches en Tinder Decisivo - Presidencial 2025:
+Mis matches en VotoAFin - Presidencial 2025:
 
 1. Ana Perez (Partido A) - 75%
 2. Bea Lopez (Partido B) - 68%
 3. Carla Rios (Partido C) - 52%
 
-Encuentra tu match en https://tinder-decisivo.cl
+Encuentra tu match en https://VotoAFin.cl
 ```
 
 ---
@@ -1602,7 +1602,7 @@ Fuente: `frontend/AGENTS.md`. Reglas duras que aplican a cualquier PR / agente:
   selector en una respuesta nueva. Los dos contextos son distintos y conviven, pero son
   valores diferentes para lo que semánticamente es "el peso default".
 
-* **`APP_URL` hardcoded** — `services/share.ts` usa `"https://tinder-decisivo.cl"`
+* **`APP_URL` hardcoded** — `services/share.ts` usa `"https://VotoAFin.cl"`
   como constante de módulo, sin fallback por env var.
 
 * **`SecureStore` en web** — en `Platform.OS === "web"` el wrapper `secureStorage` cae a

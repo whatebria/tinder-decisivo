@@ -1,12 +1,13 @@
-# Knowledge Base — Frontend Exhaustivo
+# Knowledge Base — Frontend Exhaustivo (VotoAFin)
 > Generado por `codebase-knowledge-mapper` | focus: frontend + architecture + design-system + atomic-design + business-rules | depth: exhaustive
-> Fecha: 2026-08-02
+> Actualizado: 2026-07-31 — verificado contra código actual
+> Nombre del producto: **VotoAFin** (repo: tinder-decisivo)
 
 ---
 
 ## Resumen Ejecutivo
 
-**tinder-decisivo** es una aplicación mobile (React Native / Expo) + web (Expo Web) para matching político.
+**VotoAFin** es una aplicación mobile (React Native / Expo) + web (Expo Web) para matching político.
 Permite a ciudadanos responder un cuestionario sobre sus posturas, y el sistema compara esas posturas
 con las declaradas por los candidatos para cada elección activa.
 
@@ -335,7 +336,7 @@ function requiereFiltroTerritorial(nombre: string): boolean {
 ### F-07: Compartir ranking
 - **Objetivo:** Compartir resultado vía apps nativas o clipboard
 - **Pantallas:** `ResultadosScreen` → `ShareModal`
-- **Reglas:** Top 5 candidatos, usa `EXPO_PUBLIC_APP_URL` o fallback a `tinder-decisivo.cl`
+- **F-07: Compartir ranking** — URL fallback: `"https://votoafin.cl"` (actualizado desde `tinder-decisivo.cl`)
 - **Estado de madurez:**  Maduro
 
 ### F-08: Perfil de candidato con tabs
@@ -679,7 +680,7 @@ Tiene guard de `mountedAt > lastResetAt` para evitar re-mostrar tours de pantall
 - `calcularResumen(comparaciones)` → {identicas, cercanas, opuestas, soloUno, ninguno}
 
 ### `services/share.ts`
-- `APP_URL` → `EXPO_PUBLIC_APP_URL` o `"https://tinder-decisivo.cl"`
+- `APP_URL` → `EXPO_PUBLIC_APP_URL` o `"https://votoafin.cl"`
 - `TOP_N = 5` → máximo de candidatos en el texto compartido
 - `buildShareText({tipoNombre, matches})` → string formateado
 - `fromMatchResults(results)` → transforma resultados al shape de `buildShareText`

@@ -1,4 +1,4 @@
-# Como funciona Tinder Decisivo — version para todos
+# Como funciona VotoAFin — version para todos
 
 > Guia sin tecnicismos. Escrita para tu mama, tu abuelo, tu companera de
 > trabajo que no programa. Si algo no se entiende, es culpa nuestra, no tuya.
@@ -18,7 +18,7 @@ Podrias:
   cuentas de la luz? ¿como manejarias el patio? ¿que reglas pondrias?")
   y ver quien coincide mas contigo.
 
-**Tinder Decisivo hace exactamente lo tercero, pero con candidatos y
+**VotoAFin hace exactamente lo tercero, pero con candidatos y
 politicas publicas.**
 
 ---

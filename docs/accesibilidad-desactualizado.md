@@ -1,4 +1,4 @@
-# Accesibilidad - Tinder-Decisivo
+# Accesibilidad - VotoAFin
 
 > Requisitos WCAG 2.2 Nivel AA por componente y por pantalla.
 > Documento vivo. Ultima revision: 2026-07-28.

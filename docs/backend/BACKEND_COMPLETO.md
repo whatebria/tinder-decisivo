@@ -1,4 +1,4 @@
-# Backend Servel — Documentación completa
+# Backend VotoAFin — Documentación completa
 
 > Referencia exhaustiva y descriptiva de todo el código del backend Django ubicado en `backend/`. Este doc describe el estado actual del código; no incluye historia ni comparaciones con versiones anteriores.
 >
@@ -28,7 +28,7 @@ Secciones 1-7 viven en este archivo. Secciones 8-11 estan en archivos hermanos p
 Entry point estándar de Django. Setea `DJANGO_SETTINGS_MODULE=api.settings` y delega en `execute_from_command_line(sys.argv)`. Solo tiene el `main()` boilerplate por default.
 
 ### `pyproject.toml`
-Metadatos del proyecto `servel-backend` v0.1.0, descripción `"API REST para Servel - matching votante/candidato"`, Python `>=3.10`.
+Metadatos del proyecto `votoafin-backend` v0.1.0, descripción `"API REST de VotoAFin - matching votante/candidato"`, Python `>=3.10`.
 
 Dependencias (runtime):
 - `django>=5.2,<5.3`
@@ -61,7 +61,7 @@ Plantilla comentada de variables de entorno. Secciones:
 - **CORS**: `CORS_ALLOWED_ORIGINS` (default `http://localhost:19006,http://localhost:8081`), `CORS_ALLOWED_ORIGIN_REGEXES` opcional. Comentario aclara que "nunca se abre a `*`".
 - **Auth**: `TOKEN_TTL_DAYS` (default 30).
 - **i18n**: `TIME_ZONE=America/Santiago`, `LANGUAGE_CODE=es-cl`.
-- **Email**: `EMAIL_BACKEND` (default console para dev), `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USE_TLS`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `DEFAULT_FROM_EMAIL=no-reply@tinder-decisivo.cl`, `PASSWORD_RESET_URL_BASE=http://localhost:8081/reset-password`.
+- **Email**: `EMAIL_BACKEND` (default console para dev), `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USE_TLS`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `DEFAULT_FROM_EMAIL=no-reply@votoafin.cl`, `PASSWORD_RESET_URL_BASE=http://localhost:8081/reset-password`.
 - **Hardening prod**: `SECURE_SSL_REDIRECT`, `SECURE_HSTS_SECONDS` (comentados por default).
 
 ### `Dockerfile`
@@ -93,7 +93,7 @@ Configuración de Django. Usa `python-decouple` para leer variables de entorno y
 - **AUTH_PASSWORD_VALIDATORS**: `UserAttributeSimilarity`, `MinimumLength` con `min_length=10` (comentario cita NIST 800-63B), `CommonPassword`, `NumericPassword`.
 - **i18n**: `LANGUAGE_CODE=es-cl`, `TIME_ZONE=America/Santiago`, `USE_I18N=True`, `USE_TZ=True`.
 - **Static/Media**: `STATIC_URL="static/"`, `MEDIA_URL="/media/"`, `MEDIA_ROOT=BASE_DIR/media`. `DEFAULT_AUTO_FIELD="django.db.models.BigAutoField"`.
-- **CACHES**: LocMem cache (`servel-locmem`). Comentario indica que para multi-worker migrar a Redis.
+- **CACHES**: LocMem cache (`votoafin-locmem`). Comentario indica que para multi-worker migrar a Redis.
 - **Email**: variables de entorno; default backend console.
 - **DRF**:
   - `TOKEN_TTL_DAYS` configurable (default 30).
@@ -103,7 +103,7 @@ Configuración de Django. Usa `python-decouple` para leer variables de entorno y
   - `DEFAULT_SCHEMA_CLASS = "drf_spectacular.openapi.AutoSchema"`.
   - Throttles: `AnonRateThrottle`, `UserRateThrottle`, `ScopedRateThrottle`.
   - Rates: `anon: 60/min`, `user: 300/min`, `login: 5/min`, `register: 10/hour`, `password_reset: 3/hour`.
-- **SPECTACULAR_SETTINGS**: title `"Servel API"`, version `"1.0.0"`, `SCHEMA_PATH_PREFIX=r"/api/v1"`, `COMPONENT_SPLIT_REQUEST=True`.
+- **SPECTACULAR_SETTINGS**: title `"VotoAFin API"`, version `"1.0.0"`, `SCHEMA_PATH_PREFIX=r"/api/v1"`, `COMPONENT_SPLIT_REQUEST=True`.
 - **CORS**: `CORS_ALLOWED_ORIGINS` y `CORS_ALLOWED_ORIGIN_REGEXES` desde `.env`, sin fallback a `*`.
 - **Hardening prod** (solo si `DEBUG=False`): `SECURE_SSL_REDIRECT`, `SECURE_HSTS_SECONDS=31536000`, HSTS con subdomains y preload, `SECURE_CONTENT_TYPE_NOSNIFF`, `SECURE_REFERRER_POLICY="same-origin"`, cookies `Secure`/`HttpOnly`/`SameSite=Lax`, `SECURE_PROXY_SSL_HEADER=("HTTP_X_FORWARDED_PROTO","https")`, `X_FRAME_OPTIONS="DENY"`.
 - **Sentry**: se activa solo si hay `SENTRY_DSN`. Integraciones: `DjangoIntegration`, `LoggingIntegration(level=None, event_level=None)`. `traces_sample_rate` configurable (default 0.1). `send_default_pii=False`.
@@ -707,7 +707,7 @@ Servicio de reset de password (dominio puro, sin HTTP).
 #### Helpers privados
 - `_create_token(user)`: `secrets.token_urlsafe(48)` → crea `PasswordResetToken` con `expires_at=default_expires_at()`.
 - `_build_reset_link(token)`: `f"{settings.PASSWORD_RESET_URL_BASE}?token={token}"` (default `http://localhost:8081/reset-password`).
-- `_send_reset_email(user, reset_link)`: `send_mail` con subject `"Tinder Decisivo - Restablecer tu contrasena"`, body multilinea que incluye username, link y TTL en horas. `fail_silently=False`.
+- `_send_reset_email(user, reset_link)`: `send_mail` con subject `"VotoAFin - Restablecer tu contrasena"`, body multilinea que incluye username, link y TTL en horas. `fail_silently=False`.
 
 ---
 

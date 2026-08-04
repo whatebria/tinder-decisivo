@@ -87,9 +87,9 @@ no por host ni puerto:
 |----------|---------|:-------------:|:----------------:|
 | `localhost:8082` | `localhost:8010` | Sí |  |
 | `localhost:8082` | `127.0.0.1:8010` | **No** |  |
-| `tinder-decisivo.cl` | `api.tinder-decisivo.cl` | Sí |  |
-| `tinder-decisivo.cl` | `backend.fly.dev` | **No** |  |
-| `app.tinder-decisivo.cl` | `api.tinder-decisivo.cl` | Sí |  |
+| `VotoAFin.cl` | `api.VotoAFin.cl` | Sí |  |
+| `VotoAFin.cl` | `backend.fly.dev` | **No** |  |
+| `app.VotoAFin.cl` | `api.VotoAFin.cl` | Sí |  |
 
 > **Por qué `localhost` ≠ `127.0.0.1`**: aunque ambos resuelven a la
 > misma IP, son hostnames distintos. El browser los trata como sitios
@@ -101,13 +101,13 @@ no por host ni puerto:
 > **El frontend y el backend deben compartir el mismo dominio registrable.**
 
 Ejemplos válidos:
-- `tinder-decisivo.cl` + `api.tinder-decisivo.cl`
-- `www.tinder-decisivo.cl` + `api.tinder-decisivo.cl`
-- `tinder-decisivo.cl` + `tinder-decisivo.cl/api/` (mismo host, rutas distintas)
+- `VotoAFin.cl` + `api.VotoAFin.cl`
+- `www.VotoAFin.cl` + `api.VotoAFin.cl`
+- `VotoAFin.cl` + `VotoAFin.cl/api/` (mismo host, rutas distintas)
 
 Ejemplos inválidos (rompen la autenticación web):
-- `tinder-decisivo.cl` + `mi-backend.fly.dev`
-- `tinder-decisivo.cl` + `tinder-decisivo.vercel.app`
+- `VotoAFin.cl` + `mi-backend.fly.dev`
+- `VotoAFin.cl` + `VotoAFin.vercel.app`
 - `localhost:3000` + `127.0.0.1:8000`
 
 ---
@@ -128,7 +128,7 @@ SECRET_KEY=<genera-una-clave-aleatoria-larga>
 DEBUG=False
 
 # Dominios que Django acepta en el header Host
-ALLOWED_HOSTS=tinder-decisivo.cl,api.tinder-decisivo.cl,www.tinder-decisivo.cl
+ALLOWED_HOSTS=VotoAFin.cl,api.VotoAFin.cl,www.VotoAFin.cl
 
 # ─── Entorno ──────────────────────────────────────────────────────────────────
 # Activa guards de seguridad (no permite DEBUG=True si es prod/production)
@@ -140,7 +140,7 @@ DATABASE_URL=postgres://usuario:password@host:5432/nombre_db
 
 # ─── CORS ─────────────────────────────────────────────────────────────────────
 # Exactamente el origen del frontend web. Sin trailing slash.
-CORS_ALLOWED_ORIGINS=https://tinder-decisivo.cl,https://www.tinder-decisivo.cl
+CORS_ALLOWED_ORIGINS=https://VotoAFin.cl,https://www.VotoAFin.cl
 
 # ─── Autenticación ────────────────────────────────────────────────────────────
 # Duración del token en días (7 es el default, no bajar de 1)
@@ -151,13 +151,13 @@ EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
 EMAIL_HOST=smtp.tuproveedor.com
 EMAIL_PORT=587
 EMAIL_USE_TLS=True
-EMAIL_HOST_USER=no-reply@tinder-decisivo.cl
+EMAIL_HOST_USER=no-reply@VotoAFin.cl
 EMAIL_HOST_PASSWORD=<password-del-smtp>
-DEFAULT_FROM_EMAIL=no-reply@tinder-decisivo.cl
+DEFAULT_FROM_EMAIL=no-reply@VotoAFin.cl
 
 # URL base que se incluye en el email de "olvidé mi contraseña"
 # Debe apuntar a donde corre el frontend en producción
-PASSWORD_RESET_URL_BASE=https://tinder-decisivo.cl/reset-password
+PASSWORD_RESET_URL_BASE=https://VotoAFin.cl/reset-password
 
 # ─── Zona horaria ─────────────────────────────────────────────────────────────
 TIME_ZONE=America/Santiago
@@ -184,21 +184,21 @@ se inyecta en el **tiempo de build**, no en runtime.
 
 ```bash
 # Para build web (Expo)
-EXPO_PUBLIC_API_BASE=https://api.tinder-decisivo.cl/api/v1
+EXPO_PUBLIC_API_BASE=https://api.VotoAFin.cl/api/v1
 ```
 
 **Cómo setearla según la plataforma de deployment:**
 
 ```bash
 # Si buildeás manualmente
-EXPO_PUBLIC_API_BASE=https://api.tinder-decisivo.cl/api/v1 npx expo export -p web
+EXPO_PUBLIC_API_BASE=https://api.VotoAFin.cl/api/v1 npx expo export -p web
 
 # En un Dockerfile de frontend
-ENV EXPO_PUBLIC_API_BASE=https://api.tinder-decisivo.cl/api/v1
+ENV EXPO_PUBLIC_API_BASE=https://api.VotoAFin.cl/api/v1
 
 # En GitHub Actions / CI
 env:
-  EXPO_PUBLIC_API_BASE: https://api.tinder-decisivo.cl/api/v1
+  EXPO_PUBLIC_API_BASE: https://api.VotoAFin.cl/api/v1
 ```
 
 > **Importante**: `EXPO_PUBLIC_*` es el prefijo que Expo usa para exponer
@@ -214,7 +214,7 @@ En producción siempre debe estar seteada.
 ## 4. Escenario A — mismo dominio (recomendado)
 
 Este es el escenario recomendado. Frontend y backend comparten el mismo
-dominio raíz (`tinder-decisivo.cl`). La cookie `SameSite=Lax` funciona
+dominio raíz (`VotoAFin.cl`). La cookie `SameSite=Lax` funciona
 sin cambios en el código.
 
 ### Arquitectura
@@ -222,14 +222,14 @@ sin cambios en el código.
 ```
 Usuario
   │
-  ├─ https://tinder-decisivo.cl          → Expo Web (frontend estático)
+  ├─ https://VotoAFin.cl          → Expo Web (frontend estático)
   │                                          Servido por Nginx o CDN
   │
-  └─ https://api.tinder-decisivo.cl      → Django (backend)
+  └─ https://api.VotoAFin.cl      → Django (backend)
                                              Gunicorn detrás de Nginx
 ```
 
-Ambos son subdominios de `tinder-decisivo.cl` → mismo sitio →
+Ambos son subdominios de `VotoAFin.cl` → mismo sitio →
 cookie enviada automáticamente en todos los requests.
 
 ### DNS
@@ -237,31 +237,31 @@ cookie enviada automáticamente en todos los requests.
 Crear dos registros A (o CNAME si usas un proxy como Cloudflare):
 
 ```
-tinder-decisivo.cl      A    <IP del servidor frontend>
-api.tinder-decisivo.cl  A    <IP del servidor backend>
+VotoAFin.cl      A    <IP del servidor frontend>
+api.VotoAFin.cl  A    <IP del servidor backend>
 ```
 
 Si ambos corren en el mismo servidor:
 
 ```
-tinder-decisivo.cl      A    <IP del servidor>
-api.tinder-decisivo.cl  A    <IP del servidor>
+VotoAFin.cl      A    <IP del servidor>
+api.VotoAFin.cl  A    <IP del servidor>
 ```
 
 ### Nginx — ejemplo de configuración
 
 ```nginx
-# /etc/nginx/sites-available/tinder-decisivo
+# /etc/nginx/sites-available/VotoAFin
 
 # Frontend (Expo Web — archivos estáticos)
 server {
     listen 443 ssl;
-    server_name tinder-decisivo.cl www.tinder-decisivo.cl;
+    server_name VotoAFin.cl www.VotoAFin.cl;
 
-    ssl_certificate     /etc/letsencrypt/live/tinder-decisivo.cl/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/tinder-decisivo.cl/privkey.pem;
+    ssl_certificate     /etc/letsencrypt/live/VotoAFin.cl/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/VotoAFin.cl/privkey.pem;
 
-    root /var/www/tinder-decisivo/frontend/dist;
+    root /var/www/VotoAFin/frontend/dist;
     index index.html;
 
     # SPA: cualquier ruta no encontrada sirve index.html
@@ -279,10 +279,10 @@ server {
 # Backend (Django vía Gunicorn)
 server {
     listen 443 ssl;
-    server_name api.tinder-decisivo.cl;
+    server_name api.VotoAFin.cl;
 
-    ssl_certificate     /etc/letsencrypt/live/api.tinder-decisivo.cl/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/api.tinder-decisivo.cl/privkey.pem;
+    ssl_certificate     /etc/letsencrypt/live/api.VotoAFin.cl/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api.VotoAFin.cl/privkey.pem;
 
     location / {
         proxy_pass         http://127.0.0.1:8000;
@@ -294,14 +294,14 @@ server {
 
     # Archivos media (fotos de candidatos, etc.)
     location /media/ {
-        alias /var/www/tinder-decisivo/backend/media/;
+        alias /var/www/VotoAFin/backend/media/;
     }
 }
 
 # Redirect HTTP → HTTPS
 server {
     listen 80;
-    server_name tinder-decisivo.cl www.tinder-decisivo.cl api.tinder-decisivo.cl;
+    server_name VotoAFin.cl www.VotoAFin.cl api.VotoAFin.cl;
     return 301 https://$host$request_uri;
 }
 ```
@@ -312,14 +312,14 @@ server {
 
 ```bash
 DEBUG=False
-ALLOWED_HOSTS=tinder-decisivo.cl,www.tinder-decisivo.cl,api.tinder-decisivo.cl
-CORS_ALLOWED_ORIGINS=https://tinder-decisivo.cl,https://www.tinder-decisivo.cl
+ALLOWED_HOSTS=VotoAFin.cl,www.VotoAFin.cl,api.VotoAFin.cl
+CORS_ALLOWED_ORIGINS=https://VotoAFin.cl,https://www.VotoAFin.cl
 ```
 
 **`backend/core/authentication.py`**: sin cambios.
 `SameSite=Lax` funciona correctamente con este esquema de dominios.
 
-**Frontend**: setear `EXPO_PUBLIC_API_BASE=https://api.tinder-decisivo.cl/api/v1`
+**Frontend**: setear `EXPO_PUBLIC_API_BASE=https://api.VotoAFin.cl/api/v1`
 en el proceso de build.
 
 ---
@@ -331,14 +331,14 @@ completamente distintos (por ejemplo, frontend en Vercel y backend en
 Fly.io, Railway, o un VPS).
 
 ```
-Frontend:  https://tinder-decisivo.cl       (dominio propio)
+Frontend:  https://VotoAFin.cl       (dominio propio)
 Backend:   https://mi-backend.fly.dev       (dominio del proveedor)
 ```
 
 ### Por qué es problemático
 
 Con `SameSite=Lax`, la cookie seteada por `fly.dev` **no se envía**
-en requests XHR desde `tinder-decisivo.cl`. Son dominios distintos.
+en requests XHR desde `VotoAFin.cl`. Son dominios distintos.
 El backend recibe requests sin cookie → 401 → la app bota al login.
 
 ### Solución: SameSite=None + Secure
@@ -384,7 +384,7 @@ Django-cors-headers ya está instalado, solo requiere configuración:
 
 ```bash
 # backend/.env
-CORS_ALLOWED_ORIGINS=https://tinder-decisivo.cl,https://www.tinder-decisivo.cl
+CORS_ALLOWED_ORIGINS=https://VotoAFin.cl,https://www.VotoAFin.cl
 ```
 
 Y verificar que `CORS_ALLOW_CREDENTIALS=True` esté en `settings.py`
@@ -416,18 +416,18 @@ Para un VPS de 2 núcleos: 5 workers.
 ### 6.2 Backend — Systemd (para que sobreviva reinicios)
 
 ```ini
-# /etc/systemd/system/tinder-decisivo-backend.service
+# /etc/systemd/system/VotoAFin-backend.service
 
 [Unit]
-Description=Tinder Decisivo Backend (Gunicorn)
+Description=VotoAFin Backend (Gunicorn)
 After=network.target
 
 [Service]
 User=www-data
 Group=www-data
-WorkingDirectory=/var/www/tinder-decisivo/backend
-EnvironmentFile=/var/www/tinder-decisivo/backend/.env
-ExecStart=/var/www/tinder-decisivo/backend/.venv/bin/gunicorn \
+WorkingDirectory=/var/www/VotoAFin/backend
+EnvironmentFile=/var/www/VotoAFin/backend/.env
+ExecStart=/var/www/VotoAFin/backend/.venv/bin/gunicorn \
     api.wsgi:application \
     --workers 3 \
     --bind 127.0.0.1:8000
@@ -439,8 +439,8 @@ WantedBy=multi-user.target
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable tinder-decisivo-backend
-sudo systemctl start tinder-decisivo-backend
+sudo systemctl enable VotoAFin-backend
+sudo systemctl start VotoAFin-backend
 ```
 
 ### 6.3 Frontend — Build de Expo Web
@@ -452,12 +452,12 @@ cd frontend/
 npm install
 
 # Build de producción
-EXPO_PUBLIC_API_BASE=https://api.tinder-decisivo.cl/api/v1 \
+EXPO_PUBLIC_API_BASE=https://api.VotoAFin.cl/api/v1 \
     npx expo export -p web
 
 # El output queda en frontend/dist/
 # Copiar al servidor:
-rsync -av dist/ usuario@servidor:/var/www/tinder-decisivo/frontend/dist/
+rsync -av dist/ usuario@servidor:/var/www/VotoAFin/frontend/dist/
 ```
 
 ### 6.4 HTTPS con Let's Encrypt
@@ -468,9 +468,9 @@ sudo apt install certbot python3-certbot-nginx
 
 # Emitir certificados
 sudo certbot --nginx \
-    -d tinder-decisivo.cl \
-    -d www.tinder-decisivo.cl \
-    -d api.tinder-decisivo.cl
+    -d VotoAFin.cl \
+    -d www.VotoAFin.cl \
+    -d api.VotoAFin.cl
 
 # Auto-renovación (certbot lo configura automáticamente vía cron)
 sudo certbot renew --dry-run
@@ -490,7 +490,7 @@ python manage.py migrate
 python manage.py collectstatic --no-input
 
 # Reiniciar Gunicorn para cargar el código nuevo
-sudo systemctl restart tinder-decisivo-backend
+sudo systemctl restart VotoAFin-backend
 ```
 
 ---
@@ -579,15 +579,15 @@ Verificar que el response del login incluye el header
 
 **Síntoma**: la consola muestra algo como:
 ```
-Access to XMLHttpRequest at 'https://api.tinder-decisivo.cl/api/v1/token-auth/'
-from origin 'https://tinder-decisivo.cl' has been blocked by CORS policy
+Access to XMLHttpRequest at 'https://api.VotoAFin.cl/api/v1/token-auth/'
+from origin 'https://VotoAFin.cl' has been blocked by CORS policy
 ```
 
 **Causa**: el origen del frontend no está en `CORS_ALLOWED_ORIGINS`.
 
 **Fix**: agregar el origen exacto al `.env` del backend:
 ```bash
-CORS_ALLOWED_ORIGINS=https://tinder-decisivo.cl,https://www.tinder-decisivo.cl
+CORS_ALLOWED_ORIGINS=https://VotoAFin.cl,https://www.VotoAFin.cl
 ```
 
 Reiniciar Gunicorn después del cambio.
@@ -603,15 +603,15 @@ Reiniciar Gunicorn después del cambio.
 
 **Fix**: agregar el dominio al `.env`:
 ```bash
-ALLOWED_HOSTS=api.tinder-decisivo.cl,tinder-decisivo.cl
+ALLOWED_HOSTS=api.VotoAFin.cl,VotoAFin.cl
 ```
 
 ---
 
 ### "La app carga pero las rutas directas dan 404"
 
-**Síntoma**: entrar a `https://tinder-decisivo.cl` funciona, pero ir
-directamente a `https://tinder-decisivo.cl/resultados` da 404.
+**Síntoma**: entrar a `https://VotoAFin.cl` funciona, pero ir
+directamente a `https://VotoAFin.cl/resultados` da 404.
 
 **Causa**: Nginx no está configurado para servir `index.html` como
 fallback para rutas del SPA.

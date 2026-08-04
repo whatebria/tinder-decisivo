@@ -125,7 +125,7 @@ Ver `05-servicios.md#services/password_reset.py`.
 Configuracion en settings:
 - `EMAIL_BACKEND` = `console` en dev (imprime al stdout), `smtp` en prod.
 - `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `EMAIL_USE_TLS`.
-- `DEFAULT_FROM_EMAIL` = `no-reply@tinder-decisivo.cl`.
+- `DEFAULT_FROM_EMAIL` = `no-reply@votoafin.cl`.
 
 Template del email en `services/password_reset.py::_send_reset_email`. Contenido:
 

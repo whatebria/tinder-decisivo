@@ -206,7 +206,7 @@ Buscar en la terminal donde corre `runserver`:
 ```
 From: no-reply@tinder-decisivo.cl
 To: juan@example.cl
-Subject: Tinder Decisivo - Restablecer tu contrasena
+Subject: VotoAFin - Restablecer tu contrasena
 ...
 http://localhost:8081/reset-password?token=abc123...
 ```
@@ -227,7 +227,7 @@ En dev, CORS esta abierto (`DEBUG=True` permite todo).
 
 En prod: setear en `.env`:
 ```
-CORS_ALLOWED_ORIGINS=https://app.tinder-decisivo.cl,https://tinder-decisivo.cl
+CORS_ALLOWED_ORIGINS=https://app.votoafin.cl,https://votoafin.cl
 ```
 
 ### Los tests se cuelgan / tardan una eternidad

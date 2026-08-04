@@ -175,7 +175,7 @@ def _send_reset_email(user: User, reset_link: str) -> None:
     En dev usa console backend (imprime al stdout).
     En prod usa el EMAIL_BACKEND configurado (SMTP).
     """
-    subject = "Tinder Decisivo - Restablecer tu contrasena"
+    subject = "VotoAFin - Restablecer tu contrasena"
     body = (
         f"Hola {user.username},\n\n"
         f"Recibimos una solicitud para restablecer tu contrasena. "
@@ -183,9 +183,9 @@ def _send_reset_email(user: User, reset_link: str) -> None:
         f"{reset_link}\n\n"
         f"Este link expira en {PasswordResetToken.TTL_HOURS} hora(s). "
         f"Si no fuiste tu, ignora este email.\n\n"
-        f"Equipo Tinder Decisivo"
+        f"Equipo VotoAFin"
     )
-    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@tinder-decisivo.cl")
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@votoafin.cl")
 
     send_mail(
         subject=subject,

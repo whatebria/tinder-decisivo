@@ -1,6 +1,6 @@
 # Como esta hecha la app — version para todos
 
-> Explicacion sin tecnicismos de las dos mitades de Tinder Decisivo:
+> Explicacion sin tecnicismos de las dos mitades de VotoAFin:
 > lo que ves en la pantalla y lo que pasa por atras.
 
 ---
@@ -52,7 +52,7 @@ Sus tareas:
 - **Traducir los datos** en algo visual (barras de progreso, radar,
   colores segun el porcentaje de match)
 
-**Tinder Decisivo tiene 7 pantallas principales**:
+**VotoAFin tiene 7 pantallas principales**:
 
 1. **Login** — para entrar con tu usuario
 2. **Registrarse** — si aun no tienes cuenta

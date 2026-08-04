@@ -8,7 +8,7 @@
 
 ## Overview
 
-Tinder Decisivo es un sistema cliente-servidor clasico:
+VotoAFin es un sistema cliente-servidor clasico:
 
 ```
 +---------------------------+           +----------------------------+

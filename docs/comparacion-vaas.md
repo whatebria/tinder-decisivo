@@ -1,6 +1,6 @@
 # Comparacion con VAAs internacionales
 
-> Analisis de Tinder Decisivo frente a los Voting Advice Applications
+> Analisis de VotoAFin frente a los Voting Advice Applications
 > (VAAs) mas relevantes del mundo. El objetivo es ubicar el proyecto en
 > el mapa competitivo, entender que aprender de otros, e identificar
 > nichos que hoy no estan cubiertos.
@@ -30,7 +30,7 @@ Bajos), por lo que no son un gadget menor.
 
 ## Metodologia de comparacion
 
-Se evaluaron 10 VAAs (9 externos + Tinder Decisivo) en 12 dimensiones:
+Se evaluaron 10 VAAs (9 externos + VotoAFin) en 12 dimensiones:
 
 | Dimension | Que mide |
 |-----------|----------|
@@ -65,7 +65,7 @@ detalladas mas abajo.
 | **Voto Informado** | CL | ~2013 | intermitente (por eleccion) | perfiles comparativos, no algoritmo formal | no | variable | curado + candidatos | parcial | comparacion lado a lado | no aplica | no |
 | **electionCompass** | internacional | ~2010s | activo (por eleccion) | 5 (Likert) | opcional | ~30 | curado academico | limitado | mapa 2D | limitado | no |
 | **Decide Chile** | CL | ~2017-2021 | discontinuado / dormido | 5 (Likert) | si | ~20 | curado | limitado | ranking | limitado | no |
-| **Tinder Decisivo** | CL | 2026 | MVP en desarrollo | 5 (Likert) + No se | si (0-3, 4 niveles) | 12 (v0.1) | curado con fuentes obligatorias | si (URL + justificacion en cada postura) | ranking + radar por eje + confianza | roadmap v0.3 | **si (AGPL-3.0)** |
+| **VotoAFin** | CL | 2026 | MVP en desarrollo | 5 (Likert) + No se | si (0-3, 4 niveles) | 12 (v0.1) | curado con fuentes obligatorias | si (URL + justificacion en cada postura) | ranking + radar por eje + confianza | roadmap v0.3 | **si (AGPL-3.0)** |
 
 ---
 
@@ -81,7 +81,7 @@ skip.
 - StemWijzer y Wahl-O-Mat usan escalas de 3 puntos (mas simple, menos
   resolucion)
 - Smartvote y iSideWith usan 4 puntos o multiple choice contextual
-- Tinder Decisivo usa Likert 5 + una opcion explicita "No se" que se
+- VotoAFin usa Likert 5 + una opcion explicita "No se" que se
   excluye del calculo (mas honesto que forzar un neutral)
 
 **Trade-off**: mas puntos en la escala dan mas resolucion pero
@@ -91,14 +91,14 @@ Likert 5 es el sweet spot.
 ### Ponderacion por importancia
 
 **Con peso**: Wahl-O-Mat (doble), Smartvote (0-2), Vote Compass, iSideWith,
-StemWijzer (importante/normal), Tinder Decisivo (0-3 con multiplicadores
+StemWijzer (importante/normal), VotoAFin (0-3 con multiplicadores
 0.5x-2.0x).
 
 **Sin peso**: Kieskompas, electionCompass (usan sus mapas 2D como forma
 alternativa de expresar prioridad — donde te ubicas geometricamente ya
 implica que temas te importan).
 
-**Tinder Decisivo**: tiene la escala de peso mas granular del grupo
+**VotoAFin**: tiene la escala de peso mas granular del grupo
 (4 niveles con multiplicador multiplicativo, no aditivo). Es explicito
 sobre como se convierte en el calculo.
 
@@ -111,14 +111,14 @@ Tres modelos:
    candidato es la fuente. Desventaja: pueden mentir o dar respuestas
    estrategicas.
 
-2. **Curado por terceros** (Kieskompas, Vote Compass, Tinder Decisivo):
+2. **Curado por terceros** (Kieskompas, Vote Compass, VotoAFin):
    un equipo independiente revisa declaraciones, votos, plataformas
    oficiales y asigna una postura. Ventaja: mas objetivo. Desventaja:
    trabajo intenso, sesgos posibles del equipo curador.
 
 3. **Mixto** (StemWijzer, iSideWith): combinacion de ambos.
 
-**Tinder Decisivo**: modelo curado con **fuentes obligatorias** — cada
+**VotoAFin**: modelo curado con **fuentes obligatorias** — cada
 postura debe tener URL de fuente publica y justificacion minima
 (validado por el import command). Es una de las pocas apps que
 enforcea esto a nivel de codigo.
@@ -129,7 +129,7 @@ La mayoria de VAAs muestran solo la postura (si/no/likert) sin
 justificar por que se asigno esa respuesta al candidato. Wahl-O-Mat y
 Smartvote son los mas explicitos con justificaciones cortas.
 
-**Tinder Decisivo** enforce justificacion + URL en cada postura
+**VotoAFin** enforce justificacion + URL en cada postura
 mediante validaciones en el import. Ademas, con el sistema de posturas
 draft con confianza marcada (ALTA/MEDIA/BAJA) es transparente sobre su
 propia incertidumbre — algo que ningun otro VAA hace explicitamente
@@ -144,11 +144,11 @@ ubican al usuario y a los partidos en dos ejes (tipicamente izq-der +
 progresista-conservador). Muy poderoso conceptualmente, pero requiere
 mucha data para calibrar los ejes.
 
-**Radar por eje** (Smartvote, Tinder Decisivo): grafico de arana con
+**Radar por eje** (Smartvote, VotoAFin): grafico de arana con
 n dimensiones tematicas. Permite ver que un candidato coincide contigo
 en economia pero no en DDHH, por ejemplo.
 
-**Tinder Decisivo**: ranking + radar por 7 ejes + badge de confianza.
+**VotoAFin**: ranking + radar por 7 ejes + badge de confianza.
 No tiene mapa 2D (feature pendiente si se decide agregar).
 
 ### Explicabilidad ("¿por que este match?")
@@ -161,7 +161,7 @@ oficial.
 
 **iSideWith**: muestra en que preguntas concuerdas y en cuales no.
 
-**Tinder Decisivo** (v0.1): no muestra todavia la explicabilidad
+**VotoAFin** (v0.1): no muestra todavia la explicabilidad
 detallada — solo el porcentaje global y el radar por eje. Sprint 14
 del roadmap prevé agregar:
 - Mostrar que preguntas subieron/bajaron el match
@@ -176,7 +176,7 @@ completo bajo licencia libre**. Wahl-O-Mat publica solo su dataset de
 respuestas partidarias. Smartvote publica parte de sus datasets.
 StemWijzer, Kieskompas, Vote Compass, iSideWith son 100% cerrados.
 
-**Tinder Decisivo es open source bajo AGPL-3.0** — una eleccion
+**VotoAFin es open source bajo AGPL-3.0** — una eleccion
 deliberada. La AGPL fuerza a que cualquier deploy publico modificado
 comparta sus cambios, lo que es coherente con la idea de que la
 tecnologia electoral es infraestructura de interes publico. Este es
@@ -196,17 +196,17 @@ Impacto practico:
 - **ONG especializada**: StemWijzer (ProDemos), Smartvote (Politools)
 - **Comercial / ad-supported**: iSideWith, electionCompass
 - **Ciudadano voluntario / proyecto personal**: Decide Chile,
-  Tinder Decisivo (en su estado actual)
+  VotoAFin (en su estado actual)
 
 **El modelo ciudadano tiene un problema conocido**: la sostenibilidad.
 Decide Chile murio por falta de mantenimiento. Voto Informado esta
-intermitente. Es un riesgo real que Tinder Decisivo debe planear —
+intermitente. Es un riesgo real que VotoAFin debe planear —
 posible camino: alianza con universidad chilena, ONG civica, o
 Servel/PNUD para pasar a modelo institucional.
 
 ---
 
-## Nichos que Tinder Decisivo cubre y otros no
+## Nichos que VotoAFin cubre y otros no
 
 ### Fortalezas unicas o poco comunes
 
@@ -228,7 +228,7 @@ Servel/PNUD para pasar a modelo institucional.
    basico (una linea por partido, no dimensiones).
 
 5. **Diseno mobile-first cross-platform**: la mayoria de VAAs
-   son webs desktop responsivas. Tinder Decisivo va a mobile app
+   son webs desktop responsivas. VotoAFin va a mobile app
    nativo desde v2 con el mismo codebase.
 
 6. **Espanol chileno neutro**: todos los VAAs latam existentes o son
@@ -291,7 +291,7 @@ Cosas concretas para robar a otros:
 
 ---
 
-## Como se posiciona Tinder Decisivo
+## Como se posiciona VotoAFin
 
 **Nicho declarado**: matcher electoral chileno, mobile-first, open
 source, transparente sobre incertidumbre, con contexto educativo por
@@ -351,7 +351,7 @@ Literatura academica recomendada para profundizar:
 ## Consideraciones finales
 
 Este documento es un snapshot en un momento del tiempo. Los VAAs
-mencionados evolucionan constantemente. Tinder Decisivo tambien.
+mencionados evolucionan constantemente. VotoAFin tambien.
 
 **Sugerencia**: reeditar este documento cada 6-12 meses, especialmente:
 - Antes de una eleccion presidencial (para ver quien mas esta jugando)
@@ -364,6 +364,6 @@ oficial y se corrige.
 
 ---
 
-_Version 1.0 — 2026-07-25. Autor: equipo Tinder Decisivo._
+_Version 1.0 — 2026-07-25. Autor: equipo VotoAFin._
 _Snapshot del conocimiento al momento de escritura; verificar contra
 fuentes primarias antes de citar academicamente._

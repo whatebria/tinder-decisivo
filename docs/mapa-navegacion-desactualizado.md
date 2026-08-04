@@ -1,4 +1,4 @@
-# Mapa de navegación · Tinder-Decisivo
+# Mapa de navegación · VotoAFin
 
 > Referencia canonica del flujo de navegación de la app.
 > Ultima revisión: 2026-07-26 · Vive junto al design system en `frontend/design-exploration/design-system-lowfi.html`.

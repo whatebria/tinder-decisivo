@@ -1,6 +1,6 @@
 # Documentacion del backend
 
-Guia completa del backend Django/DRF de Tinder Decisivo (Servel).
+Guia completa del backend Django/DRF de **VotoAFin** (repo: tinder-decisivo).
 
 Esta carpeta contiene docs **especificas del backend**, en detalle y separadas
 por tema. Hay tres vistas paralelas segun tu audiencia y proposito:
@@ -42,10 +42,10 @@ Para audiencia no tecnica: usuarios avanzados, tesis capitulo de contexto, produ
 
 ## Relacion con otras docs
 
-- Docs generales del sistema (front + back combinados): [`../doc-tecnica.md`](../doc-tecnica.md), [`../sistema-tecnico.md`](../sistema-tecnico.md), [`../sistema-simple.md`](../sistema-simple.md).
-- Algoritmo de matching en profundidad conceptual: [`../algoritmo-tecnico.md`](../algoritmo-tecnico.md), [`../algoritmo-simple.md`](../algoritmo-simple.md).
+- Docs generales del sistema (front + back combinados): [`../sistema-tecnico.md`](../sistema-tecnico.md), [`../sistema-simple.md`](../sistema-simple.md).
+- Algoritmo de matching en profundidad conceptual: [`../algoritmo-tecnico-desactualizado.md`](../algoritmo-tecnico-desactualizado.md) *(pendiente actualizacion)*, [`../algoritmo-simple-desactualizado.md`](../algoritmo-simple-desactualizado.md) *(pendiente actualizacion)*.
 - Buenas practicas de codigo: [`../buenas-practicas.md`](../buenas-practicas.md).
-- Estado del proyecto y sprints: [`../estado-actual.md`](../estado-actual.md), [`../sprints.md`](../sprints.md).
+- Estado del proyecto y sprints: [`../estado-actual-desactualizado.md`](../estado-actual-desactualizado.md) *(pendiente actualizacion)*, [`../sprints.md`](../sprints.md).
 
 Los docs de `docs/backend/` complementan (no reemplazan) los generales:
 son mas granulares y hablan solo del backend.
