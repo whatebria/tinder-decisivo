@@ -98,6 +98,8 @@ Internacionalmente, las Voting Advice Applications llevan más de tres décadas 
 
 El presente trabajo surge de la convicción de que demostrar la viabilidad técnica de esta clase de infraestructura cívica — con código abierto, algoritmo documentado y criterios de accesibilidad — constituye un aporte concreto al ecosistema democrático chileno, independientemente de los ciclos de adopción institucional que puedan seguir.
 
+Importante es señalar que el origen de este proyecto no fue la revisión de literatura internacional sobre VAAs, sino una investigación empírica desarrollada en el contexto del curso de Emprendimiento de la carrera. Esa investigación — que incluyó una inmersión en terreno con doce entrevistas en las comunas de Playa Ancha, Viña del Mar y Quilpué — reveló que el 100% de los entrevistados había tenido contacto con noticias falsas sobre candidatos electorales, y que aproximadamente tres de cada cuatro personas se informaba por redes sociales en lugar de por canales oficiales verificados (Castillo, De Lima y Sánchez, 2024a). Fue ese hallazgo de campo — y no una hipótesis tecnológica preexistente — el que determinó que el problema era real, urgente y resoluble mediante ingeniería.
+
 ### 1.3 Relevancia del problema
 
 La relevancia del problema se justifica desde tres perspectivas complementarias.
@@ -114,7 +116,9 @@ El problema central que motiva este trabajo es la ausencia, en el ecosistema dig
 
 Los intentos previos — *Decide Chile*, *Vota Inteligente*, *Votamos Todos* y *Voto Informado* — han cumplido una o dos de estas características, pero ninguno las ha integrado en un único sistema sostenible. El resultado es que cada ciclo electoral encuentra a los votantes chilenos en la misma situación de partida, sin herramientas comparativas confiables y sin capital acumulado de experiencias previas.
 
-### 1.5 Visión general de la solución
+Esta situación tiene consecuencias medibles. Según datos del Informe Claves Ipsos N°33 correspondiente a las elecciones municipales de octubre de 2024, solo el **21% de los encuestados** se reconocía como *muy informado* sobre las elecciones, mientras el 79% restante no creía conocer lo suficiente. El porcentaje de votantes sin decisión de voto llegaba al 42% para el cargo de alcalde — el de mayor visibilidad — y al 68% para consejeros regionales. Estas cifras son consistentes con el hallazgo de campo de la investigación inicial de Emprendimiento, en la que el 50% de los doce entrevistados no sabía qué cargos se elegirían en el proceso electoral próximo (Castillo et al., 2024a).
+
+El impacto sobre la calidad del sufragio es igualmente medible: los votos nulos y en blanco para el cargo de alcalde aumentaron un **460%** entre las elecciones municipales de 2021 y las de 2024 (de 1,93% a 10,8%). En las elecciones constitucionales previas, se registraron más de dos millones de sufragios nulos, equivalentes al 16,98% del total. El académico Claudio Fuentes de la Universidad Diego Portales sintetizó las causas del fenómeno como las tres “D”: **desinformación, desinterés y desconfianza** — las mismas tres dimensiones que el trabajo de Emprendimiento identificó de manera independiente en su investigación de campo (Castillo et al., 2024a; 2024b).
 
 *VotoAFin* propone resolver esta brecha mediante una aplicación que pregunta al votante su opinión sobre políticas públicas concretas, organizadas en siete ejes temáticos — Economía, Sociedad, Ambiente, Seguridad, Derechos Humanos, Política Internacional y Reforma Institucional — y compara sistemáticamente esas respuestas con las posturas documentadas de los candidatos en competencia.
 
@@ -175,6 +179,56 @@ Es tecnológicamente resoluble. El estado del arte en ingeniería de software, d
 Es socialmente relevante. Herramientas comparativas bien diseñadas tienen efectos documentados sobre la participación electoral y la coherencia entre preferencias del votante y decisión de voto. Treinta años de investigación politológica sobre VAAs en Europa demuestran que estas aplicaciones son capaces de reducir la asimetría informativa de manera medible y de movilizar segmentos del electorado que de otra forma no participarían activamente en la deliberación programática.
 
 Es políticamente neutro cuando está bien diseñado. Una herramienta que documenta públicamente su algoritmo, publica las posturas de todos los candidatos con sus fuentes verificables, y no tiene financiamiento partidario ni agenda editorial, puede ser percibida como recurso útil por votantes de todo el espectro ideológico. La neutralidad no es un marketing; es una propiedad de diseño que se garantiza con código abierto y auditoría pública.
+
+---
+
+## 2b. Origen y Evolución de la Propuesta
+
+### 2b.1 Identificación inicial del problema — curso de Emprendimiento
+
+Este proyecto no tuvo su origen en una decisión de desarrollar una aplicación. Tuvo su origen en una investigación académica realizada en el curso de Emprendimiento de la carrera de Ingeniería en Informática de la UTFSM, cuyo problema de estudio fue la *desinformación en los procesos electorales* en Chile (Castillo, De Lima y Sánchez, 2024a).
+
+La investigación combinó análisis de evidencia secundaria — datos del estudio de Activa Knowledge for Action sobre fake news en Chile y LatAm, el Informe Claves Ipsos N°33 y registros oficiales del SERVEL — con una inmersión en terreno que incluyó entrevistas cortas aplicadas a **doce personas** en las comunas de **Playa Ancha, Viña del Mar y Quilpué**.
+
+Los datos secundarios revelaron la dimensión cuantitativa del problema: el 52% del electorado se encontraba con desinformación electoral todos los días o casi todos los días; el 71% creía que la desinformación era una amenaza para la democracia; y los votos nulos y en blanco en el cargo de alcalde habían aumentado un 460% entre 2021 y 2024, con 2.119.506 sufragios nulos en las elecciones constitucionales (16,98% del total). El académico Claudio Fuentes de la UDP sintetizó las causas como las tres “D”: **desinformación, desinterés y desconfianza**.
+
+Las entrevistas de campo aportaron la textura cualitativa: el **100% de los doce entrevistados** había visto o conocía la existencia de noticias falsas sobre candidatos electorales; aproximadamente tres de cada cuatro se informaban por redes sociales en lugar de por canales oficiales; y la mitad no sabía qué cargos se elegirían en el proceso electoral próximo. El único canal oficial identificado como referente — el sitio web del SERVEL — era desconocido o no consultado por la mayoría.
+
+La oportunidad identificada fue precisa: *"Diseñar e implementar herramientas y estrategias que permitan a los ciudadanos acceder a información confiable, clara y oportuna sobre elecciones, candidatos y propuestas"* (Castillo et al., 2024a).
+
+### 2b.2 Refinamiento del problema — del dato al diseño
+
+El segundo trabajo de Emprendimiento (Castillo et al., 2024b) desplazó el foco desde la comprensión del problema hacia el diseño de una propuesta concreta. El título — *“Desinterés en los Procesos Electorales”* — reflejó un refinamiento conceptual importante: el problema no era solo la desinformación activa, sino la combinación de desinformación con desinterés estructural. Las personas no estaban motivadas para informarse, no confiaban en los medios formales para hacerlo, y el 79% no creía conocer lo suficiente sobre política (dato IPSO citado en Castillo et al., 2024b).
+
+La hipótesis de solución que emergió fue que una aplicación que combinara **educación cívica con elementos de gamificación** podría superar la barrera del desinterés. El prototipo construido en Visily AI mostró una aplicación con autenticación mediante RUT y Clave Única, directorio de partidos políticos, preguntas sobre candidatos y elecciones regionales, y un sistema de puntos y recompensas para motivar la participación. Esta propuesta reconocía explícitamente sus limitaciones: uso estacional, dificultad de masificación, y desafíos en la gestión de la imparcialidad.
+
+### 2b.3 El prototipo móvil — explorar candidatos por deslizamiento
+
+En el curso de Desarrollo de Aplicaciones Móviles se materializó la primera versión ejecutable. La hipótesis operativa era que la barrera de entrada al conocimiento de los candidatos podía reducirse al mínimo simplificando la interacción a un gesto familiar: el deslizamiento lateral (*swipe*). El votante ve la tarjeta de un candidato, desliza hacia la derecha si le parece interesante, hacia la izquierda si no. Rápido, intuitivo, con cero fricción.
+
+Este prototipo — denominado informalmente *“Tinder Electoral”* durante su desarrollo — usaba candidatos ficticios, perfiles con imagen y propuestas básicas, y la mecánica de swipe como único modo de interacción.
+
+### 2b.4 Limitaciones del enfoque inicial
+
+Dos limitaciones críticas se revelaron durante el desarrollo y la reflexión posterior.
+
+La primera fue **epistemológica**: el mecanismo de swipe reduce cada respuesta a una decisión binaria (*me interesa / no me interesa*). Esto es funcionalmente adecuado para seleccionar contactos sociales, pero es algorítmicamente inadecuado para calcular afinidad programática. La posición de un votante sobre políticas públicas rara vez es binaria: las personas tienen posiciones matizadas que una escala de cinco puntos captura con fidelidad y que el swipe simplemente borra.
+
+La segunda fue **de datos**: las posturas asignadas a los candidatos ficticios habían sido generadas por inferencia ideológica estereotípica — sin verificación contra fuentes primarias. Un sistema que genera recomendaciones electorales basadas en datos fabricados no asesora al votante: lo desinfoma de una manera más sofisticada que una noticia falsa en redes sociales, porque la presentación algorítmica genera una ilusión de rigor que el contenido no respalda.
+
+### 2b.5 Evolución hacia el modelo VAA
+
+Estas limitaciones condujeron a una reformulación de la pregunta de diseño central. La pregunta original había sido *¿cómo hacer más entretenido el proceso de conocer candidatos?* La nueva pregunta fue: *¿cómo ayudar al votante a descubrir con cuál candidato está más alineado programáticamente, con la menor carga cognitiva posible y con la mayor precisión que los datos disponibles permitan?*
+
+Este desplazamiento produjo el tránsito desde una aplicación de exploración de candidatos hacia una *Voting Advice Application* (VAA), apoyado en la investigación del estado del arte internacional en estas herramientas y en la literatura politológica sobre su impacto. El swipe fue eliminado. El dataset fabricado fue eliminado. El algoritmo cuadrático ponderado, el modelo territorial polimórfico y el indicador de confianza fueron diseñados desde cero.
+
+La diferencia fundamental entre el prototipo de deslizamiento y la VAA final no es de interfaz: es epistemológica. El prototipo buscaba reducir la carga cognitiva haciendo la exploración más entretenida. La VAA reduce la carga cognitiva haciendo el proceso más eficiente y el resultado más preciso.
+
+### 2b.6 Consolidación de la propuesta actual
+
+El sistema VotoAFin que se documenta en este trabajo es el resultado de ese proceso de cuatro etapas: investigación del problema, propuesta de solución gamificada, prototipo móvil con swipe, y reformulación como VAA con algoritmo documentado. Cada etapa entregó aprendizajes que la siguiente incorporó, y cada limitación identificada con honestidad produjo una decisión de diseño más fundamentada.
+
+Este proceso histórico no es un detalle biográfico del proyecto: es su justificación metodológica. Demuestra que la solución actual no fue diseñada a priori sino emergida de evidencia: primero la evidencia del problema (las entrevistas, los datos de Ipsos y SERVEL), luego la evidencia del prototipo (las limitaciones del swipe y del dataset fabricado), y finalmente la evidencia académica sobre cómo las VAAs más efectivas del mundo resuelven esos mismos problemas.
 
 ---
 
@@ -421,13 +475,19 @@ El principal riesgo de la propuesta frente a las alternativas internacionales co
 
 ## 8. Desarrollo
 
-### 8.1 Descubrimiento del problema — de la observación al proyecto
+### 8.1 Descubrimiento del problema — del trabajo de campo al proyecto de tesis
 
-El proyecto tiene su origen en una situación concreta: la preparación de un ramo de Aplicaciones Móviles donde se trabajó con un prototipo inicial de comparación electoral. Ese prototipo demostró la viabilidad técnica básica de un sistema de matching para elecciones chilenas, pero también reveló sus limitaciones: el algoritmo era opaco, las posturas de candidatos habían sido generadas sin verificación contra fuentes primarias, y la arquitectura inicial no era extensible a múltiples procesos electorales.
+El proceso que culminó en VotoAFin atravesó cuatro etapas académicas sucesivas, cada una de las cuales aportó aprendizajes que determinaron las decisiones de la siguiente.
 
-La decisión de evolucionar ese prototipo hacia un trabajo de tesis surgió del reconocimiento de que el problema de asimetría de información electoral en Chile era real, que la brecha tecnológica era técnicamente resoluble, y que documentar ese proceso con rigor de ingeniería podía producir un aporte de valor más allá del contexto académico inmediato.
+**Primera etapa — investigación del problema (Emprendimiento I).** La investigación inicial sobre *desinformación en los procesos electorales* (Castillo et al., 2024a) estableció la magnitud empírica del problema mediante análisis de fuentes secundarias y doce entrevistas de campo en Playa Ancha, Viña del Mar y Quilpué. El hallazgo más contundente fue que el 100% de los entrevistados había tenido contacto con noticias falsas sobre candidatos electorales, y que el 83% se informaba preferentemente por redes sociales en lugar de por canales oficiales. Paralelamente, la evidencia cuantitativa mostró que solo el 21% del electorado se reconocía como muy informado, y que los votos nulos habían aumentado un 460% entre 2021 y 2024. Esta investigación identificó explícitamente la oportunidad: construir una herramienta que reuniera información confiable sobre candidatos y elecciones, accesible para todos.
 
-El hallazgo más temprano y más significativo de esta fase fue que el dataset inicial de posturas era inválido. Las posiciones asignadas a cada candidato habían sido generadas por inferencia ideológica estereotípica — *si un candidato es de derecha, entonces su postura en aborto es X* — sin verificación contra declaraciones públicas reales. Esta práctica, aunque conveniente para demostración técnica, producía un sistema que podía asesorar a los votantes basándose en datos fabricados. La decisión de eliminar completamente ese dataset y reconstruirlo con verificación obligatoria de fuentes primarias fue la primera decisión de diseño fundamental del proyecto, con consecuencias en la arquitectura del sistema de importación de datos.
+**Segunda etapa — propuesta de solución gamificada (Emprendimiento II).** El segundo trabajo (Castillo et al., 2024b) tradujo los hallazgos en una propuesta de producto: una aplicación móvil con autenticación por Clave Única, preguntas sobre candidatos y elecciones regionales, y un sistema de puntos y recompensas para motivar la participación. El prototipo en Visily AI mostraba pantallas de inicio de sesión institucional y directorio de partidos políticos. Esta propuesta reconocía sus propias limitaciones: uso estacional, dificultad de masificación, y el desafío no trivial de gestionar la imparcialidad en un contexto político polarizado.
+
+**Tercera etapa — prototipo móvil con swipe (Aplicaciones Móviles).** La implementación del primer prototipo ejecutable expresó la hipótesis de que la barrera de entrada al conocimiento de los candidatos podía reducirse al mínimo mediante una mecánica de deslizamiento lateral: el votante ve la tarjeta de un candidato y desliza según su reacción inmediata. La ejecución reveló dos limitaciones críticas: la mecánica binaria del swipe era algorítmicamente incompatible con un cálculo de afinidad que requiere escala de cinco puntos; y el dataset de posturas había sido generado por inferencia ideológica estereotípica, sin verificación contra fuentes primarias.
+
+**Cuarta etapa — reformulación como VAA (proyecto de tesis).** La identificación de esas limitaciones condujo a una reformulación de la pregunta de diseño: no *¿cómo hacer más entretenido el proceso de conocer candidatos?* sino *¿cómo ayudar al votante a descubrir su afinidad programática con la mayor precisión posible y la menor carga cognitiva razonable?* La respuesta fue el modelo VAA con algoritmo cuadrático ponderado, dataset con validación obligatoria de fuentes primarias, y modelo territorial polimórfico para cobertura multi-nivel.
+
+La decisión de eliminar completamente el dataset de posturas fabricadas y reconstruirlo con verificación obligatoria de fuentes primarias fue la primera decisión de diseño fundamental del proyecto de tesis, con consecuencias directas sobre la arquitectura del sistema de importación de datos.
 
 ### 8.2 Investigación — el estado del arte como requerimiento de diseño
 
@@ -731,6 +791,41 @@ Fast Check CL. (2024). *Fast Check CL — Verificación de información polític
 Mala Espina Check. (2024). *Mala Espina Check*. https://malaespinacheck.cl/
 
 Servicio Electoral de Chile (SERVEL). (2024). *Servicio Electoral de Chile*. https://www.servel.cl/
+
+### Documentos académicos del proyecto (fuentes primarias)
+
+Castillo, J., De Lima, P., & Sánchez, A. (2024a). *Desinformación en los procesos electorales* [Presentación académica, Curso de Emprendimiento]. Universidad Técnica Federico Santa María.
+
+Castillo, J., De Lima, P., & Sánchez, A. (2024b). *Desinterés en los procesos electorales* [Presentación académica, Curso de Emprendimiento]. Universidad Técnica Federico Santa María.
+
+Castillo, J. (2026a). *README.es.md — Descripción general del proyecto VotoAFin* [Repositorio GitHub, AGPL-3.0].
+
+Castillo, J. (2026b). *docs/algoritmo-tecnico.md — Referencia técnica del algoritmo de matching* [Repositorio GitHub].
+
+Castillo, J. (2026c). *docs/comparacion-vaas.md — Análisis comparativo con VAAs internacionales* [Repositorio GitHub].
+
+Castillo, J. (2026d). *docs/sprints.md — Historial del proyecto por iteraciones* [Repositorio GitHub].
+
+### Referencias académicas adicionales (bibliografía de la investigación)
+
+Activa Knowledge for Action. (2024). *Fake news y desinformación en Chile y LatAm*. Activa Research.
+
+Fuentes, C. (2024). Cita en: *Desinformación, desinterés y desconfianza: las claves tras el mayor porcentaje de votos nulos desde 1997*. Análisis académico post-electoral, Universidad Diego Portales.
+
+Garzia, D., Marschall, S., Tromborg, M. W., & Albertsen, A. (2026). Voting advice applications: Methodological innovations, behavioural effects, and research perspectives. *Politics and Governance*, *14*, Article 12331. https://doi.org/10.17645/pag.12331
+
+Ipsos Chile. (2024). *Claves Ipsos Informe N°33: Conocimiento electoral elecciones municipales octubre 2024*. Ipsos.
+
+Jara, R. (2024). Cita en: *Antofagasta: Fatiga electoral y voto obligatorio marcan el inicio de la octava elección en cuatro años*. Universidad de Santiago.
+
+Servicio Electoral de Chile (SERVEL). (2024). *Estadísticas de votos nulos y blancos: elecciones municipales 2021 y 2024*. https://www.servel.cl/
+
+Stadelmann-Steffen, I., Rajski, H., & Ruprecht, S. (2022). The role of vote advice application in direct-democratic opinion formation: An experiment from Switzerland. *Acta Politica*, *58*, 792–818. https://doi.org/10.1057/s41269-022-00264-5
+\kinger, E., Maas, J., Talvitie, C., & Dignum, V. (2024). Trustworthiness of voting advice applications in Europe. *Ethics and Information Technology*, *26*, 55. https://doi.org/10.1007/s10676-024-09790-6
+
+Tromborg, M. W., & Albertsen, A. (2023). Candidates, voters, and voting advice applications. *European Political Science Review*, *15*(4), 582–599. https://doi.org/10.1017/S1755773923000103
+
+Velez, Y. R., Green, D. P., & Sevi, S. (2025). Chatbot voting advice applications inform but seldom sway young unaligned voters. *PNAS*, *122*(50), e2515516122. https://doi.org/10.1073/pnas.2515516122
 
 ---
 

@@ -270,7 +270,53 @@
   <p>El problema merece atención por tres razones concurrentes: es tecnológicamente resoluble con herramientas maduras; es socialmente relevante con impacto documentado en la participación electoral (Garzia &amp; Marschall, 2014); y es políticamente neutro cuando el algoritmo es transparente y las posturas verificadas, haciendo posible una herramienta percibida como confiable por votantes de todo el espectro ideológico.</p>
 </div>
 
-<!-- ══════════════════════════════════════ 3. PROPUESTA DE SOLUCIÓN -->
+<!-- ════════════════════════════════════ 2b. ORIGEN Y EVOLUCIÓN -->
+<div class="page">
+  <h1 id="evolucion">2b. Origen y Evolución de la Propuesta</h1>
+
+  <h2>2b.1 Identificación inicial del problema — Curso de Emprendimiento</h2>
+  <p>Este proyecto no tuvo su origen en una decisión de desarrollar una aplicación. Tuvo su origen en una investigación académica realizada en el curso de Emprendimiento de la carrera, cuyo problema de estudio fue la <em>desinformación en los procesos electorales</em> en Chile (Castillo, De Lima y Sánchez, 2024a).</p>
+  <p>La investigación combinó análisis de evidencia secundaria — datos del estudio de Activa Knowledge for Action sobre fake news en Chile y LatAm, el Informe Claves Ipsos N°33 y registros del SERVEL — con una inmersión en terreno con entrevistas cortas aplicadas a <strong>doce personas</strong> en las comunas de <strong>Playa Ancha, Viña del Mar y Quilpué</strong> de la región de Valparaíso.</p>
+
+  <p>Los principales hallazgos cuantitativos de la investigación de Emprendimiento fueron:</p>
+  <table>
+    <thead><tr><th>Indicador</th><th>Dato</th><th>Fuente</th></tr></thead>
+    <tbody>
+      <tr><td>Chilenos que encuentran desinformación electoral todos los días</td><td>52%</td><td>Activa Knowledge for Action</td></tr>
+      <tr><td>Chilenos que creen que la desinformación amenaza la democracia</td><td>71%</td><td>Activa Knowledge for Action</td></tr>
+      <tr><td>Personas que se informan vía redes sociales (entrevistas)</td><td>~83%</td><td>Trabajo de campo (n=12)</td></tr>
+      <tr><td>Personas que usan canales oficiales (entrevistas)</td><td>~25%</td><td>Trabajo de campo (n=12)</td></tr>
+      <tr><td>Entrevistados que conocen fake news electorales</td><td><strong>100%</strong></td><td>Trabajo de campo (n=12)</td></tr>
+      <tr><td>Votantes que se sienten muy informados (municipales 2024)</td><td>21%</td><td>Ipsos Informe N°33</td></tr>
+      <tr><td>Votos nulos alcalde: aumento 2021→2024</td><td>1,93% → 10,8% (+460%)</td><td>SERVEL</td></tr>
+      <tr><td>Votos nulos en elecciones constitucionales</td><td>2.119.506 (16,98%)</td><td>SERVEL</td></tr>
+    </tbody>
+    <tfoot><tr><td colspan="3">Nota. Elaboración propia a partir de Castillo et al. (2024a), Ipsos Chile (2024) y SERVEL (2024).</td></tr></tfoot>
+  </table>
+
+  <p>El académico Claudio Fuentes de la Universidad Diego Portales sintetizó las causas del fenómeno con precisión: los tres factores determinantes del incremento de votos nulos eran la <strong>desinformación</strong>, el <strong>desinterés</strong> y la <strong>desconfianza</strong>. Adicionalmente, el investigador Fernández constató que <em>“la gran batería de elecciones produce fatiga electoral, que se traduce en una disminución del interés por el proceso eleccionario”</em>. La oportunidad identificada fue explícita: diseñar herramientas que permitan a los ciudadanos acceder a información confiable, clara y oportuna sobre elecciones, candidatos y propuestas.</p>
+
+  <h2>2b.2 Primera propuesta de solución — Aplicación gamificada</h2>
+  <p>El segundo trabajo de Emprendimiento (Castillo et al., 2024b) desplazó el foco desde la comprensión del problema hacia el diseño de una propuesta. Su título — <em>“Desinterés en los Procesos Electorales”</em> — reflejó un refinamiento conceptual: el problema no era solo la desinformación activa, sino su combinación con el desinterés estructural del electorado.</p>
+  <p>La hipótesis de solución fue que una aplicación que combinara <strong>educación cívica con gamificación</strong> podría superar la barrera del desinterés. El prototipo construido en Visily AI mostraba: autenticación con RUT y Clave Única; directorio de partidos políticos con logos; preguntas sobre candidatos y elecciones de la región; y un sistema de puntos y recompensas tangibles para motivar la participación. El equipo identificó explícitamente sus limitaciones: uso estacional poco probable de uso diario; dificultad de masificación; y desafíos en la gestión de la imparcialidad.</p>
+
+  <h2>2b.3 El prototipo móvil con deslizamiento — la hipótesis del swipe</h2>
+  <p>En el curso de Desarrollo de Aplicaciones Móviles se materializó la primera versión ejecutable. La hipótesis operativa fue que la barrera de entrada al conocimiento de los candidatos podía reducirse al mínimo mediante una mecánica de deslizamiento lateral (<em>swipe</em>): el votante ve la tarjeta de un candidato y desliza según su reacción inmediata. Rápido, intuitivo, sin fricción.</p>
+  <p>Este prototipo — denominado informalmente <em>“Tinder Electoral”</em> — usaba candidatos ficticios con perfiles básicos. La ejecución reveló dos limitaciones estructurales.</p>
+
+  <h2>2b.4 Limitaciones del enfoque inicial</h2>
+  <p><strong>Limitación algorítmica.</strong> La mecánica de swipe reduce cada respuesta a una decisión binaria. Sin embargo, el cálculo de afinidad programática requiere escala Likert de cinco puntos para capturar la intensidad de las posiciones. El swipe eliminaba precisamente la información que el algoritmo necesita para producir un resultado preciso.</p>
+  <p><strong>Limitación de datos.</strong> Las posturas de los candidatos ficticios habían sido generadas por inferencia ideológica estereotípica, sin verificación contra fuentes primarias. Un sistema que orienta decisiones de voto con datos fabricados no asesora al votante: lo desinfoma con apariencia de rigor algorítmico.</p>
+
+  <h2>2b.5 Reformulación hacia el modelo VAA</h2>
+  <p>Estas limitaciones condujeron a reformular la pregunta de diseño central. La pregunta original había sido <em>¿cómo hacer más entretenido el proceso de conocer candidatos?</em> La nueva pregunta fue: <em>¿cómo ayudar al votante a descubrir su afinidad programática con la mayor precisión posible y la menor carga cognitiva razonable?</em></p>
+  <p>Este desplazamiento produjo el tránsito desde la aplicación de exploración hacia una <em>Voting Advice Application</em> (VAA), apoyado en la investigación del estado del arte. El swipe fue eliminado. El dataset fabricado fue eliminado. El algoritmo cuadrático ponderado, el modelo territorial polimórfico y el indicador de confianza fueron diseñados desde cero.</p>
+
+  <h2>2b.6 Consolidación de la propuesta actual</h2>
+  <p>VotoAFin es el resultado de cuatro etapas académicas sucesivas, cada una de las cuales aportó aprendizajes que la siguiente incorporó. Este proceso histórico no es un detalle biográfico: es la justificación metodológica de la solución. Demuestra que el sistema no fue diseñado a priori sino emergido de evidencia empírica, evidencia de prototipo y evidencia académica sobre VAAs efectivas en el mundo.</p>
+</div>
+
+<!-- ════════════════════════════════════ 3. PROPUESTA DE SOLUCIÓN -->
 <div class="page">
   <h1 id="propuesta">3. Propuesta de Solución</h1>
 
@@ -425,9 +471,12 @@
 <div class="page">
   <h1 id="desarrollo">8. Desarrollo</h1>
 
-  <h2>8.1 Descubrimiento del problema — del prototipo académico al proyecto de tesis</h2>
-  <p>El proyecto tiene su origen en un prototipo desarrollado en el contexto de un ramo de Aplicaciones Móviles. Ese prototipo demostró la viabilidad técnica básica de un sistema de matching para elecciones chilenas, pero también reveló limitaciones críticas: el algoritmo era opaco, las posturas de candidatos habían sido generadas sin verificación contra fuentes primarias, y la arquitectura no era extensible a múltiples procesos electorales.</p>
-  <p>El hallazgo más temprano y significativo fue que el dataset inicial de posturas era inválido: las posiciones asignadas a cada candidato habían sido generadas por inferencia ideológica estereotípica — <em>si un candidato es de derecha, entonces su postura en aborto es X</em> — sin verificación. Esta práctica producía un sistema que podía asesorar a votantes basándose en datos fabricados. La decisión de eliminar completamente ese dataset y reconstruirlo con verificación obligatoria de fuentes primarias fue la primera decisión de diseño fundamental del proyecto, con consecuencias directas en la arquitectura del sistema de importación de datos.</p>
+  <h2>8.1 Descubrimiento del problema — del trabajo de campo al proyecto de tesis</h2>
+  <p>El proceso que culminó en VotoAFin atravesó cuatro etapas académicas sucesivas, cada una de las cuales aportó aprendizajes que determinaron las decisiones de la siguiente.</p>
+  <p><strong>Primera etapa — investigación del problema (Emprendimiento I).</strong> La investigación inicial sobre <em>desinformación en los procesos electorales</em> (Castillo et al., 2024a) estableció la magnitud empírica del problema. Se analizaron fuentes secundarias — datos del estudio Activa Knowledge for Action, el Informe Claves Ipsos N°33 y registros del SERVEL — y se realizaron doce entrevistas de campo en <strong>Playa Ancha, Viña del Mar y Quilpué</strong>. El hallazgo más contundente: el <strong>100% de los entrevistados</strong> había tenido contacto con noticias falsas sobre candidatos electorales, y el 83% se informaba preferentemente por redes sociales en lugar de por canales oficiales. Los datos secundarios revelaron que el 52% del electorado encontraba desinformación electoral todos los días; los votos nulos para alcalde habían aumentado un 460% entre 2021 y 2024; y el académico Claudio Fuentes de la UDP sintetizó las causas como las tres “D”: <strong>desinformación, desinterés y desconfianza</strong>.</p>
+  <p><strong>Segunda etapa — propuesta gamificada (Emprendimiento II).</strong> El segundo trabajo (Castillo et al., 2024b) tradujo los hallazgos en una propuesta de producto: una aplicación con autenticación por Clave Única, preguntas sobre candidatos y elecciones regionales, y un sistema de puntos y recompensas. Un prototipo en Visily AI visualizó la propuesta. El equipo identificó explícitamente sus limitaciones: uso estacional, dificultad de masificación, y desafíos de imparcialidad.</p>
+  <p><strong>Tercera etapa — prototipo móvil con swipe (Aplicaciones Móviles).</strong> La primera versión ejecutable adoptó la mecánica de deslizamiento lateral para reducir la fricción de exploración de candidatos. La ejecución reveló dos limitaciones críticas: la mecánica binaria del swipe era algorítmicamente incompatible con un cálculo de afinidad que requiere escala Likert de cinco puntos; y el dataset de posturas había sido generado por inferencia ideológica sin verificación.</p>
+  <p><strong>Cuarta etapa — reformulación como VAA (tesis).</strong> Esas limitaciones condujeron a reformular la pregunta de diseño: no <em>¿cómo hacer más entretenida la exploración de candidatos?</em> sino <em>¿cómo calcular afinidad programática con la mayor precisión posible?</em> La respuesta fue el modelo VAA con algoritmo cuadrático ponderado, dataset con fuentes primarias obligatorias, y modelo territorial polimórfico.</p>
 
   <h2>8.2 Investigación — el estado del arte como generador de requerimientos</h2>
   <p>La investigación del estado del arte no fue un capítulo académico separado del diseño, sino que generó directamente requerimientos concretos de la solución. El análisis de <em>Wahl-O-Mat</em> identificó el valor de las justificaciones por postura con fuente verificable; se tradujo en el requerimiento de que cada postura incluya justificación textual mínima y URL de fuente primaria, validadas por el importador. El análisis de <em>Smartvote</em> identificó el valor de la cobertura multi-nivel; se tradujo en el requerimiento del modelo territorial polimórfico. La revisión de literatura sobre diseño de cuestionarios (Krosnick &amp; Presser, 2010) respaldó que Likert de cinco puntos con doce a treinta preguntas es el rango óptimo entre resolución y fatiga cognitiva.</p>
