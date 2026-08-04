@@ -1190,8 +1190,9 @@ Seed function-scoped: por cada test que la pide corre `call_command(...)` para:
 2. `seed_preguntas_base`
 3. `seed_presidenciales_2025`
 4. `seed_diputados_2025`
-5. `seed_alcaldes_2024`
-6. `seed_preguntas_por_tipo`
+5. `seed_preguntas_por_tipo`
+
+(`seed_alcaldes_2024` NO esta en el fixture -- el comando no existe aun.)
 
 Es lento (~10s por test) pero garantiza aislamiento. Comentario explícito: se probó `scope='session'` y rompió 28 tests — se descartó.
 
@@ -1209,12 +1210,12 @@ Generador determinístico de candidatos:
 - Listas `NOMBRES_M`, `NOMBRES_F`, `APELLIDOS` (chilenos comunes).
 - Dict `POSTURAS_POR_PARTIDO` con 8 valores 1-5 por cada partido conocido.
 - Diccionarios `DISTRIBUCION_DIPUTADOS` y `DISTRIBUCION_ALCALDES` con pesos.
-- Funciones `elegir_partidos(seed_int, n, distribucion)` y `generar_candidato(seed, idx, partido)` usan `random.Random(seed)` para idempotencia. Consumido por `seed_diputados_2025` y `seed_alcaldes_2024`.
+- Funciones `elegir_partidos(seed_int, n, distribucion)` y `generar_candidato(seed, idx, partido)` usan `random.Random(seed)` para idempotencia. Consumido actualmente por `seed_diputados_2025`. `DISTRIBUCION_ALCALDES` existe preparado para un futuro `seed_alcaldes_2025` aun no implementado.
 
 #### `_preguntas_por_tipo.py` (12.1 KB)
 Exporta:
-- Listas `PREGUNTAS_PRESI_2025`, `PREGUNTAS_DIP_2025`, `PREGUNTAS_ALC_2024` (5 preguntas c/u con texto, eje, explicación, repercusiones).
-- Dict `POSTURAS_ESPECIFICAS[partido][clave]` donde `clave in {"presi","dip","alc"}` → lista de 5 valores. Incluye entry `"Independiente"` como fallback.
+- Listas `PREGUNTAS_PRESI_2025`, `PREGUNTAS_DIP_2025` (5 preguntas c/u con texto, eje, explicacion, repercusiones). No existe `PREGUNTAS_ALC_2024` -- las preguntas de alcaldes aun no estan implementadas.
+- Dict `POSTURAS_ESPECIFICAS[partido][clave]` donde `clave in {"presi","dip"}` → lista de 5 valores. Incluye entry `"Independiente"` como fallback.
 
 ---
 
@@ -1351,26 +1352,21 @@ Reporta resumen final.
 4. Por distrito → `elegir_partidos(distrito.numero, 5, DISTRIBUCION_DIPUTADOS)`.
 5. Por candidato: `Candidato.objects.update_or_create(nombre, apellido, unidad_territorial=ut, defaults={...})` + `add(tipo)` + 8 `PosturaCandidato.update_or_create` (una por cada pregunta base).
 
-#### `seed_alcaldes_2024.py`
-**Help**: `"Crea 1038 alcaldes ficticios (3 por comuna x 346) con posturas por partido."`  
-**Constantes**: `NOMBRE_TIPO="Alcaldes 2024"`, `CANDIDATOS_POR_COMUNA=3`.  
-**Requiere**: `seed_territorio_chile` + `seed_preguntas_base`.
+#### `seed_alcaldes_2024.py` -- NO IMPLEMENTADO
 
-**Optimización bulk** (comentario explicito "cargar todo en memoria y hacer bulk ops"):
-1. Chequea 346 comunas + 8 preguntas base.
-2. `opciones_por_pregunta[(pregunta_id, valor)] = OpcionRespuesta` (única query).
-3. `ut_por_codigo_ine` desde `UnidadTerritorial.nivel="comunal"` (usa `metadata["codigo_ine"]` o parsea del codigo).
-4. Indice `existentes[(nombre, apellido, ut_id)]` para dedup.
-5. Por comuna → `elegir_partidos(int(comuna.codigo), 3, DISTRIBUCION_ALCALDES)`; construye lista `candidatos_nuevos` y `plan_posturas` en memoria.
-6. `Candidato.objects.bulk_create(candidatos_nuevos)`.
-7. Refresca índice + M2M vía `Candidato.tipos_eleccion.through.objects.bulk_create(..., ignore_conflicts=True)`.
-8. `PosturaCandidato.objects.bulk_create(posturas_a_crear, ignore_conflicts=True)`.
+> **Este comando no existe en el repositorio.** Los datos de soporte estan
+> preparados (`DISTRIBUCION_ALCALDES` en `_data_candidatos_ficticios.py`)
+> pero el comando en si nunca fue creado. El diseno planeado era:
+> - ~1038 alcaldes ficticios (3 por comuna x 346 comunas)
+> - `NOMBRE_TIPO="Alcaldes 2024"`, `CANDIDATOS_POR_COMUNA=3`
+> - Bulk operations identicas a `seed_diputados_2025`
+> - Requeriria `seed_territorio_chile` + `seed_preguntas_base`
 
 #### `seed_preguntas_por_tipo.py`
 **Help**: `"Crea preguntas especificas por tipo + genera posturas para todos los candidatos."`  
 **Args**: `--reset`.
 
-Usa `_preguntas_por_tipo` (SETS = 3 tuplas `(nombre_tipo, preguntas, clave)` para Presidencial/Diputados/Alcaldes).
+Usa `_preguntas_por_tipo` (SETS = 2 tuplas `(nombre_tipo, preguntas, clave)` para Presidencial 2025 y Diputados 2025). Alcaldes no esta implementado aun.
 
 **Helper**: `_match_partido(partido_candidato)` — busca por keys de `POSTURAS_ESPECIFICAS` con match parcial case-insensitive, priorizando la key más larga. Si no match → None (usa fallback "Independiente").
 
