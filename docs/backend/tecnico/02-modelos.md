@@ -149,7 +149,7 @@ Una pregunta del cuestionario.
 | `texto` | `TextField` | |
 | `tipo_eleccion` | `FK(TipoEleccion)` CASCADE | |
 | `orden` | `IntegerField` default 0 | orden de aparicion |
-| `eje_tematico` | `CharField(20)` choices | codigo del eje (`ECONOMIA`, `SALUD`, etc.). Choices legacy hardcoded pero flexibles via signal |
+| `eje_tematico` | `CharField(20)` choices | codigo del eje (`ECONOMIA`, `SEGURIDAD`, etc.). Valores validos: ECONOMIA, SOCIEDAD, AMBIENTE, SEGURIDAD, DDHH, INTERNACIONAL, INSTITUCIONAL. Sincronizado via signal con FK `eje` |
 | `eje` | `FK(Eje)` null SET_NULL | FK canonica al modelo `Eje`. Sincronizada via signal con `eje_tematico`. Metadata rica (color, icono) |
 | `explicacion` | `TextField` blank | contexto educativo neutro |
 | `repercusiones` | `JSONField` default dict | `{economico, social, cultural, ambiental, institucional}` con textos breves |
@@ -226,7 +226,7 @@ Catalogo de ejes tematicos. Gestionable desde admin sin migration.
 
 | Campo | Tipo | Notas |
 |---|---|---|
-| `codigo` | `CharField(32)` unique | slug canonico (`ECONOMIA`, `SALUD`). Comparado case-insensitive |
+| `codigo` | `CharField(32)` unique | slug canonico (`ECONOMIA`, `SEGURIDAD`). Valores canonicos: ECONOMIA, SOCIEDAD, AMBIENTE, SEGURIDAD, DDHH, INTERNACIONAL, INSTITUCIONAL |
 | `nombre` | `CharField(64)` | display |
 | `color` | `CharField(7)` default `#666666` | hex, para radar chart |
 | `icono` | `CharField(32)` blank | nombre Ionicons/Lucide, opcional |

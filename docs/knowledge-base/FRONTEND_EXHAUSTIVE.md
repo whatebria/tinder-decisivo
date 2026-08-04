@@ -123,9 +123,11 @@ coverage_score = match_pct × log(1 + n_preguntas_consideradas)
 ```
 
 **Niveles de confianza:**
-- `TENTATIVA`: < 30% cobertura de preguntas
-- `MEDIA`: 30-60% cobertura
-- `ALTA`: > 60% cobertura
+- `TENTATIVA`: n_preguntas_consideradas < 5
+- `MEDIA`: 5 ≤ n_preguntas_consideradas < 10
+- `ALTA`: n_preguntas_consideradas ≥ 10
+
+(Umbrales: `CONFIANZA_UMBRAL_MEDIA = 5`, `CONFIANZA_UMBRAL_ALTA = 10` en `services/matching.py`)
 
 **Affinity Tiers (frontend):**
 | Tier | Rango | Color light | Color dark |
@@ -229,12 +231,13 @@ Home → loadForTipoEleccion() → CuestionarioScreen
 
 **Stacks:**
 ```
-AppNavigator
+AppNavigator (createNativeStackNavigator — flat stack, sin Tab Navigator de React Navigation)
 ├── Onboarding Stack     → se muestra si !hasSeen
-├── Auth Stack           → Login | Register | ForgotPassword
-│   └── initial route controlado por pendingAuthTarget
+├── Auth Stack           → Login | Register | PasswordResetRequest | PasswordResetConfirm
 └── Main Stack           → se muestra si isAuthenticated || isGuest
-    ├── Tab Navigator    → Home | Candidatos | MisGuardados | Configuracion
+    ├── BottomNav/Sidebar (custom organisms, NO React Navigation tabs)
+    │   └── 4 tabs: Home | Candidatos | Comparar | Config
+    └── Screens del stack:
     └── Modal screens    → Cuestionario | Resultados | DetalleCandidato | etc.
 ```
 
@@ -323,13 +326,13 @@ function requiereFiltroTerritorial(nombre: string): boolean {
 - **Objetivo:** Usuario activa/desactiva qué tipos de elección quiere seguir
 - **Pantallas:** `GestionEleccionesScreen`, `HomeScreen`
 - **Reglas:** null = todos activos (primer uso), persistido en SecureStore
-- **Estado de madurez:**  Maduro (BUG-021 pendiente en MisGuardados)
+- **Estado de madurez:**  Maduro (BUG-021 **RESUELTO** 2026-07-30)
 
 ### F-05: Comparación de candidatos
 - **Objetivo:** Comparar posturas de 2+ candidatos lado a lado
 - **Pantallas:** `CompararScreen`
 - **Reglas:** `NivelCoincidencia`: identica (diff=0) | cercana (diff≤2) | opuesta (diff≥3) | solo_uno | ninguno
-- **Estado de madurez:**  BUG-044 (picker lento)
+- **Estado de madurez:**  Maduro (BUG-044 **RESUELTO** 2026-08-02 — FlatList + useMemo)
 
 ### F-06: Favoritos y guardados
 - **Objetivo:** Marcar candidatos de interés para acceso rápido
@@ -346,7 +349,7 @@ function requiereFiltroTerritorial(nombre: string): boolean {
 ### F-08: Perfil de candidato con tabs
 - **Objetivo:** Ver ficha completa: resumen estadístico + posturas + afinidad por eje
 - **Pantallas:** `DetalleCandidatoScreen`, `AfinidadTab`, `ResumenTab`
-- **Estado de madurez:**  UX-067/068/069/070 pendientes (reorganización de tabs)
+- **Estado de madurez:**  UX-068/069/070 **RESUELTOS** 2026-08-02; UX-067 **BLOQUEADO** (ResumenTab oculta, pendiente redisenio)
 
 ### F-09: Coach Marks (tours)
 - **Objetivo:** Onboarding contextual por pantalla, una vez por usuario
@@ -468,7 +471,7 @@ frontend/
 │   ├── content/        → Contenido estático (coachMarks, welcomeTour)
 │   ├── domain/         → Lógica de dominio pura (affinity, dimensiones, eleccion)
 │   ├── hooks/          → Hooks custom cross-cutting
-│   ├── navigation/     → Stack + tab navigators + tipos de rutas
+│   ├── navigation/     → Stack navigator + tab constants (tabs implementados como BottomNav/Sidebar custom)
 │   ├── screens/        → Pantallas + sub-componentes co-localizados
 │   ├── services/       → Lógica de presentación/transformación (matching, cuestionario, comparar, share)
 │   ├── store/          → Estado global Zustand (auth, cuestionario, elections, onboarding, coachmarks, theme)
@@ -594,7 +597,7 @@ Nota: la bottom bar visible en el Main Stack es un componente UI propio
 ## Componentes Críticos
 
 ### AppShell (`templates/AppShell.tsx`)
-Wrapper de pantallas con bottom tab bar. Recibe `active: TabKey | null` para resaltar el tab activo.
+Wrapper de pantallas con bottom tab bar. Recibe `active: AppTab | null` para resaltar el tab activo (`AppTab` = `"home" | "candidatos" | "comparar" | "config"`).
 Todas las pantallas principales pasan por él (excepto modales que usan `ScreenChrome`).
 
 ### ScreenChrome (`templates/ScreenChrome.tsx`)
@@ -620,9 +623,9 @@ Fuera del scroll = siempre visible sin importar cuánto scroll haya.
 Lista de posturas por eje de un candidato. Soporta UX-080 (bookmark de posturas individuales).
 BUG-017: ítems sin justificación no son interactivos (no tienen expand).
 
-### RadarChart (`atoms/` o `molecules/`)
+### RadarChart (`atoms/RadarChart.tsx`)
 SVG radar chart de afinidad por eje temático. Usa react-native-svg.
-`breakdownToChartData()` en `api/endpoints.ts` transforma el payload del backend al formato del chart.
+`breakdownToChartData()` en `api/endpoints.ts` transforma el payload del backend al formato del chart (`Record<string, number>`).
 
 ### BookmarkActions (`molecules/`)
 Par de botones favorito/descartar. Recibe `isFavorito`, `isDescartado`, loading state.
