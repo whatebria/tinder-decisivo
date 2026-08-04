@@ -1,0 +1,40 @@
+Leyendo api_dumps\011_querydata_78991.json...
+Resultados en el response: 2
+
+  [result[0]] descriptor cols: ['candidaturas_202510.nombre_completo']
+  DS[0] ValueDicts keys: ['D0']
+    D0: list(100) first3=['Carlos Antonio Karim Bianchi Chelech', 'Claudia Paola Barrientos Sanchez', 'José Antonio Urrutia Riesco']
+  PH[0].DM0: 1221 filas
+    Schema map: {'G0': 'D0'}
+    G->Col map: {'G0': 'candidaturas_202510.nombre_completo'}
+    -> 1221 filas decodificadas
+    Muestra[0]: {'candidaturas_202510.nombre_completo': 'Carlos Antonio Karim Bianchi Chelech'}
+    Muestra[1]: {'candidaturas_202510.nombre_completo': 'Claudia Paola Barrientos Sanchez'}
+
+  [result[1]] descriptor cols: ['candidaturas_202510.region_nombre', 'candidaturas_202510.territorio_nombre', 'candidaturas_202510.tipo_eleccion', 'simbolos.url_logo', 'candidaturas_202510.partido - sin prefijo', 'candidaturas_202510.Letra - Pacto', 'candidaturas_202510.nvoto_nombre_completo', 'Min(candidaturas_202510.tipo_eleccion)', 'Min(simbolos.url_logo)']
+  DS[0] ValueDicts keys: ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8']
+    D0: list(16) first3=['Del Biobio', 'De La Araucania', 'Del Maule']
+    D1: list(35) first3=['Distrito 20', 'Circunscripción Senatorial 11', 'Circunscripción Senatorial 9']
+    D2: list(2) first3=['Diputado', 'Senador']
+    D3: list(10) first3=['https://recursos-powerbi.s3.us-east-1.amazonaws.com/download/2025_elecciones/imagenes/D20%20-%20SAUL%20GONZALEZ.jpg', 
+    D4: list(24) first3=['Candidatura Independiente', 'Ecologista Verde', 'Acción Humanista']
+    D5: list(5) first3=[' Candidatura Independiente', 'A. Partido Ecologista Verde', 'B. Verdes, Regionalistas y Humanistas']
+    D6: list(100) first3=['112.   Saul Gonzalez Caceres', '35.   Rosa Elizabeth Catrileo Arias', '40.   Juan Francisco Pulgar Castillo']
+    D7: list(2) first3=['Diputado', 'Senador']
+    D8: list(10) first3=['https://recursos-powerbi.s3.us-east-1.amazonaws.com/download/2025_elecciones/imagenes/D20%20-%20SAUL%20GONZALEZ.jpg', 
+  PH[0].DM0: 500 filas
+    Schema map: {'G0': 'D0', 'G1': 'D1', 'G2': 'D2', 'G3': 'D3', 'G4': 'D4', 'G5': 'D5', 'G6': 'D6', 'M0': 'D7', 'M1': 'D8'}
+    G->Col map: {'G0': 'candidaturas_202510.region_nombre', 'G1': 'candidaturas_202510.territorio_nombre', 'G2': 'candidaturas_202510.tipo_eleccion', 'G3': 'simbolos.url_logo', 'G4': 'candidaturas_202510.partido - sin prefijo', 'G5': 'candidaturas_202510.Letra - Pacto', 'G6': 'candidaturas_202510.nvoto_nombre_completo', 'M0': 'Min(candidaturas_202510.tipo_eleccion)', 'M1': 'Min(simbolos.url_logo)'}
+    -> 0 filas decodificadas
+
+Total filas decodificadas: 1221
+Filas unicas: 1221
+
+CSV guardado: candidatos.csv (1221 filas)
+
+Primeras 5:
+  {'candidaturas_202510.nombre_completo': 'Carlos Antonio Karim Bianchi Chelech', 'numero': '', 'candidato': ''}
+  {'candidaturas_202510.nombre_completo': 'Claudia Paola Barrientos Sanchez', 'numero': '', 'candidato': ''}
+  {'candidaturas_202510.nombre_completo': 'José Antonio Urrutia Riesco', 'numero': '', 'candidato': ''}
+  {'candidaturas_202510.nombre_completo': 'Juan Francisco Pulgar Castillo', 'numero': '', 'candidato': ''}
+  {'candidaturas_202510.nombre_completo': 'Rosa Elizabeth Catrileo Arias', 'numero': '', 'candidato': ''}

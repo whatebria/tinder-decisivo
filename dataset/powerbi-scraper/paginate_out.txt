@@ -1,0 +1,53 @@
+SERVEL 2025 - Paginacion via RestartToken
+============================================================
+
+1. Inspeccionando api_dumps\011_querydata_78991.json...
+RT info guardado en rt_info.txt
+RestartToken: [["'D74'", "'74.   Matias Jorge Reyes Vargas'", "'Metropolitana De Santiago'", "2010L", "'Distrito 10'", "'Diputado'", "4L", "'https://recursos-powerbi.s3.us-east-1.amazonaws.com/download/2025_elecciones/imagenes/02%20-%20IZQUIERDA%20ECOLOGISTA%20POPULAR%20ANIMALISTA%20Y%20HUMANISTA.jpg'", "'Independiente Humanista'", "'D'", "'D. Izquierda Ecologista Popular Animalista y Humanista'"]]
+HasAdditionalData: True
+
+result[0].DS[0] keys: ['N', 'PH', 'IC', 'HAD', 'ValueDicts']
+  HAD: True
+result[1].DS[0] keys: ['N', 'PH', 'IC', 'RT', 'ValueDicts']
+  RT type: list
+  RT value: [["'D74'", "'74.   Matias Jorge Reyes Vargas'", "'Metropolitana De Santiago'", "2010L", "'Distrito 10'", "'Diputado'", "4L", "'https://recursos-powerbi.s3.us-east-1.amazonaws.com/download/2025_elecciones/imagenes/02%20-%20IZQUIERDA%20ECOLOGISTA%20POPULAR%20ANIMALISTA%20Y%20HUMANISTA.jpg'", "'Indepen
+
+
+2. Procesando pagina 1 (existente)...
+  [page1_existente] +79 candidatos nuevos (total: 79)
+
+3. Paginando via API directa...
+  Fetching page 2 (RT=presente)...
+    Status: 200  Size: 36,417B
+  [page2] +97 candidatos nuevos (total: 176)
+  Fetching page 3 (RT=presente)...
+    Status: 200  Size: 36,416B
+  [page3] +0 candidatos nuevos (total: 176)
+  No hay mas paginas.
+
+4. Procesando dumps existentes adicionales...
+  [004_querydata_1780.json] +0 candidatos nuevos (total: 176)
+  [005_querydata_4050.json] +0 candidatos nuevos (total: 176)
+  [006_querydata_3236.json] +0 candidatos nuevos (total: 176)
+  [008_querydata_1613.json] +0 candidatos nuevos (total: 176)
+  [009_querydata_1646.json] +0 candidatos nuevos (total: 176)
+  [010_querydata_2660.json] +0 candidatos nuevos (total: 176)
+  [page_02.json] +0 candidatos nuevos (total: 176)
+  [page_03.json] +0 candidatos nuevos (total: 176)
+  [qd_0001_init.json] +0 candidatos nuevos (total: 176)
+  [qd_0002_init.json] +0 candidatos nuevos (total: 176)
+  [qd_0003_init.json] +0 candidatos nuevos (total: 176)
+  [qd_0004_init.json] +0 candidatos nuevos (total: 176)
+  [qd_0005_init.json] +0 candidatos nuevos (total: 176)
+  [qd_0006_init.json] +0 candidatos nuevos (total: 176)
+  [qd_0007_init.json] +0 candidatos nuevos (total: 176)
+  [qd_0008_init.json] +0 candidatos nuevos (total: 176)
+
+Total: 176 / 1221 esperados
+CSV: candidatos.csv
+Muestra (5):
+  {'eleccion': '', 'numero': '53', 'candidato': 'Danahe Rojas Mamani', 'region': 'De Ñuble', 'territorio': 'Distrito 19', 'lista': '', 'partido_candidatura': 'Independiente Liberal de Chile'}
+  {'eleccion': '', 'numero': '55', 'candidato': 'Eduardo Sotomayor Ortiz', 'region': 'De Ñuble', 'territorio': 'Distrito 19', 'lista': 'H. Popular', 'partido_candidatura': 'Federación Regionalista Verde Social'}
+  {'eleccion': '', 'numero': '62', 'candidato': 'Gabriela Carrasco Urquieta', 'region': 'De Ñuble', 'territorio': 'Distrito 19', 'lista': '', 'partido_candidatura': 'Humanista'}
+  {'eleccion': '', 'numero': '60', 'candidato': 'Marcela Hernando Perez', 'region': 'De Ñuble', 'territorio': 'Distrito 19', 'lista': '', 'partido_candidatura': 'Evolución Política'}
+  {'eleccion': '', 'numero': '56', 'candidato': 'Marco Ramo Paez', 'region': 'De Ñuble', 'territorio': 'Distrito 19', 'lista': 'A. Partido Ecologista Verde', 'partido_candidatura': 'Comunista de Chile'}

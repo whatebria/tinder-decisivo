@@ -1,0 +1,18 @@
+Archivos procesados: 18
+Candidatos unicos: 79
+
+Primeros 10:
+  {'eleccion': 'Diputado', 'numero': '67', 'candidato': 'Carlos Antonio Karim Bianchi Chelech', 'region': 'De Magallanes Y De La Antartica Chilena', 'territorio': 'Distrito 28', 'lista': 'Candidatura Independiente', 'partido_candidatura': 'Federación Regionalista Verde Social'}
+  {'eleccion': 'Diputado', 'numero': '68', 'candidato': 'Claudia Paola Barrientos Sanchez', 'region': 'De Magallanes Y De La Antartica Chilena', 'territorio': 'Distrito 28', 'lista': 'Candidatura Independiente', 'partido_candidatura': 'Federación Regionalista Verde Social'}
+  {'eleccion': 'Diputado', 'numero': '77', 'candidato': 'José Antonio Urrutia Riesco', 'region': 'De Magallanes Y De La Antartica Chilena', 'territorio': 'Distrito 28', 'lista': 'D. Izquierda Ecologista Popular Animalista y Humanista', 'partido_candidatura': 'Independiente Federación Regionalista Verde Social'}
+  {'eleccion': 'Diputado', 'numero': '112', 'candidato': 'Saul Gonzalez Caceres', 'region': 'Del Biobio', 'territorio': 'Distrito 20', 'lista': 'Candidatura Independiente', 'partido_candidatura': 'Candidatura Independiente'}
+  {'eleccion': 'Senador', 'numero': '51', 'candidato': 'Alexis Zuñiga Jelvez', 'region': 'De Atacama', 'territorio': 'Circunscripción Senatorial 4', 'lista': 'A. Partido Ecologista Verde', 'partido_candidatura': 'Federación Regionalista Verde Social'}
+  {'eleccion': 'Senador', 'numero': '54', 'candidato': 'Atrix Badilla Hernandez', 'region': 'De Atacama', 'territorio': 'Circunscripción Senatorial 4', 'lista': '', 'partido_candidatura': 'Federación Regionalista Verde Social'}
+  {'eleccion': 'Senador', 'numero': '11', 'candidato': 'Aucan Huilcaman Paillama', 'region': 'De Atacama', 'territorio': 'Circunscripción Senatorial 4', 'lista': '', 'partido_candidatura': 'Federación Regionalista Verde Social'}
+  {'eleccion': 'Senador', 'numero': '54', 'candidato': 'Barbara Lepez Monsalvez', 'region': 'De Atacama', 'territorio': 'Circunscripción Senatorial 4', 'lista': 'B. Verdes, Regionalistas y Humanistas', 'partido_candidatura': 'Federación Regionalista Verde Social'}
+  {'eleccion': 'Senador', 'numero': '67', 'candidato': 'Carlos Antonio Karim Bianchi Chelech', 'region': 'De Atacama', 'territorio': 'Circunscripción Senatorial 4', 'lista': 'C. Unidad por Chile', 'partido_candidatura': 'Federación Regionalista Verde Social'}
+  {'eleccion': 'Senador', 'numero': '55', 'candidato': 'Carolina Monsalves Sanhueza', 'region': 'De Atacama', 'territorio': 'Circunscripción Senatorial 4', 'lista': '', 'partido_candidatura': 'Federación Regionalista Verde Social'}
+
+Distribucion por eleccion:
+  Diputado: 4
+  Senador: 75

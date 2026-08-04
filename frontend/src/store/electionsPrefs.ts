@@ -11,7 +11,7 @@ import { create } from "zustand";
 
 import { secureStorage } from "./secureStorage";
 
-const STORAGE_KEY = "tinder_decisivo_active_elections";
+const STORAGE_KEY = "votoafin_active_elections";
 
 interface ElectionsPrefsState {
   /** Set de tipoIds activados. `null` = no configurado aún (todos activos). */

@@ -1,0 +1,72 @@
+Total DM0 rows: 500
+Sum of R values: 212137
+Max R: 447  Min R (excluding 1): 48
+Rows without R (R defaults to 1): 5
+
+=== PRIMERAS 20 ROWS DM0 COMPLETAS ===
+  [000] C=[0, 0, 0, 0, 0, 0, 0, 0, 0]  R=NO-R  S=True
+  [001] C=[1, 1, 1, 1, 1, 1, 1]  R=48  S=False
+  [002] C=[2, 2, 2, 2, 2]  R=180  S=False
+  [003] C=[3, 3, 0, 3, 3, 0, 3]  R=48  S=False
+  [004] C=[4, 4, 4]  R=183  S=False
+  [005] C=[4, 4, 5, 5, 5]  R=180  S=False
+  [006] C=[1, 1, 1, 6, 1, 1, 6, 1, 6]  R=NO-R  S=False
+  [007] C=[7]  R=447  S=False
+  [008] C=[0, 5, 0, 8, 0]  R=312  S=False
+  [009] C=[5, 6, 9]  R=444  S=False
+  [010] C=[0, 0, 10]  R=444  S=False
+  [011] C=[1, 7, 11]  R=444  S=False
+  [012] C=[8, 12]  R=445  S=False
+  [013] C=[0, 0, 13]  R=444  S=False
+  [014] C=[5, 6, 14]  R=444  S=False
+  [015] C=[1, 7, 15]  R=444  S=False
+  [016] C=[0, 5, 16]  R=444  S=False
+  [017] C=[1, 8, 17]  R=444  S=False
+  [018] C=[7, 18]  R=445  S=False
+  [019] C=[0, 0, 19]  R=444  S=False
+
+=== DISTRIBUCION DE k=len(C) ===
+  k=1: 9 rows
+  k=2: 40 rows
+  k=3: 144 rows
+  k=4: 295 rows
+  k=5: 4 rows
+  k=6: 1 rows
+  k=7: 2 rows
+  k=9: 5 rows
+
+=== CAMBIOS ENTRE CANDIDATOS CONOCIDOS ===
+  Saul Gonzalez -> Rosa Catrileo:
+    Changes (5): {'G0': '0->1', 'G1': '0->1', 'G2': '0->1', 'G3': '0->1', 'G6': '0->1'}
+    Same (2): ['G4', 'G5']
+  Rosa Catrileo -> Juan Pulgar:
+    Changes (4): {'G0': '1->2', 'G1': '1->2', 'G3': '1->2', 'G6': '1->2'}
+    Same (3): ['G2', 'G4', 'G5']
+
+=== TEST FIRST-K vs LAST-K ===
+
+  DM0[0] C=[0, 0, 0, 0, 0, 0, 0, 0, 0]
+    FIRST-K: region=Del Biobio | terr=Distrito 20 | tipo=Diputado | partido=Candidatura Independiente | nombre=112.   Saul Gonzalez Caceres
+    LAST-K:  region=Del Biobio | terr=Distrito 20 | tipo=Diputado | partido=Candidatura Independiente | nombre=112.   Saul Gonzalez Caceres
+
+  DM0[1] C=[1, 1, 1, 1, 1, 1, 1]
+    FIRST-K: region=De La Araucania | terr=Circunscripción Senatorial 11 | tipo=Senador | partido=Ecologista Verde | nombre=35.   Rosa Elizabeth Catrileo Arias
+    LAST-K:  region=De La Araucania | terr=Circunscripción Senatorial 11 | tipo=Senador | partido=Ecologista Verde | nombre=35.   Rosa Elizabeth Catrileo Arias
+
+  DM0[2] C=[2, 2, 2, 2, 2]
+    FIRST-K: region=Del Maule | terr=Circunscripción Senatorial 9 | tipo=OOB(2/2) | partido=Acción Humanista | nombre=35.   Rosa Elizabeth Catrileo Arias
+    LAST-K:  region=De La Araucania | terr=Circunscripción Senatorial 11 | tipo=OOB(2/2) | partido=Acción Humanista | nombre=40.   Juan Francisco Pulgar Castillo
+
+  DM0[3] C=[3, 3, 0, 3, 3, 0, 3]
+    FIRST-K: region=De Magallanes Y De La Antartica Chilena | terr=Distrito 28 | tipo=Diputado | partido=Federación Regionalista Verde Social | nombre=67.   Carlos Antonio Karim Bianchi Chele
+    LAST-K:  region=De Magallanes Y De La Antartica Chilena | terr=Distrito 28 | tipo=Diputado | partido=Federación Regionalista Verde Social | nombre=67.   Carlos Antonio Karim Bianchi Chele
+
+  DM0[4] C=[4, 4, 4]
+    FIRST-K: region=De Los Rios | terr=Distrito 24 | tipo=OOB(4/2) | partido=Federación Regionalista Verde Social | nombre=67.   Carlos Antonio Karim Bianchi Chele
+    LAST-K:  region=De Magallanes Y De La Antartica Chilena | terr=Distrito 28 | tipo=Diputado | partido=Independiente Federación Regionalista Verde Social | nombre=68.   Claudia Paola Barrientos Sanchez
+
+  DM0[5] C=[4, 4, 5, 5, 5]
+    FIRST-K: region=De Los Rios | terr=Distrito 24 | tipo=OOB(5/2) | partido=Independiente Acción Humanista | nombre=67.   Carlos Antonio Karim Bianchi Chele
+    LAST-K:  region=De Magallanes Y De La Antartica Chilena | terr=Distrito 28 | tipo=OOB(4/2) | partido=Independiente Acción Humanista | nombre=77.   José Antonio Urrutia Riesco
+
+Done.

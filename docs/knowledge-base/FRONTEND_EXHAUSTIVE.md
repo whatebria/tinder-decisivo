@@ -37,11 +37,12 @@ con las declaradas por los candidatos para cada elección activa.
 tinder-decisivo/
 ├── Onboarding            → Slides informativos (1 vez por device)
 ├── Auth Stack
-│   ├── Login             → Autenticación con email/password
-│   ├── Register          → Registro de nueva cuenta
-│   └── ForgotPassword    → Recuperación de contraseña
-└── Main Stack (auth + guest)
-    ├── Home              → HUB: hero + elecciones + top match + novedades
+│   ├── Login                 → Autenticación con email/password
+│   ├── Register              → Registro de nueva cuenta
+│   ├── PasswordResetRequest  → Solicitar email de recuperación
+│   └── PasswordResetConfirm  → Ingresar nueva contraseña con token
+└── Main Stack (auth + guest) — flat native stack, sin Tab Navigator
+    ├── Home              → HUB: hero + elecciones + top match
     ├── Cuestionario      → 1 pregunta por vez con peso de importancia
     ├── SubmitDone        → Confirmación post-envío
     ├── Resultados        → Ranking de candidatos con radar por eje
@@ -49,11 +50,14 @@ tinder-decisivo/
     ├── Comparar          → Comparación lado a lado de candidatos
     ├── Candidatos        → Catálogo de candidatos por elección
     ├── MisGuardados      → Favoritos + descartados
+    ├── MisRespuestas     → Ver y editar respuestas ya enviadas
     ├── Perfil            → Datos de usuario + ubicación
     ├── Configuracion     → Tema + tours + danger zone
     ├── GestionElecciones → Activar/desactivar tipos de elección
-    ├── Noticias          → Feed de novedades
     └── DesignSystem      → Catálogo de componentes (solo __DEV__)
+
+Nota: "Noticias" NO es una screen. Las noticias del candidato se muestran
+en NoticiaDetailSheet (bottom sheet molecule) dentro de DetalleCandidatoScreen.
 ```
 
 ---
@@ -539,33 +543,36 @@ Theme           → Design tokens
 | useElectionsPrefsStore | SecureStore | activeIds (null = todos) |
 | useOnboardingStore | SecureStore | hasSeen, pendingAuthTarget (transient) |
 | useCoachMarksStore | SecureStore por userId | seen tours por identidad |
-| useThemeStore | SecureStore | tema preferido |
+| useThemeStore | SecureStore | `mode: "light"|"dark"|"system"`, `effective: "light"|"dark"` resuelto, `setMode()` |
 
 ### Routing
 
 ```
-AppNavigator (Stack)
+AppNavigator (flat NativeStack — sin Tab Navigator)
   ├── Si !hasSeen → OnboardingScreen
   ├── Si !isAuthenticated && !isGuest → Auth Stack
   │     ├── Login (default o según pendingAuthTarget)
   │     ├── Register
-  │     └── ForgotPassword
+  │     ├── PasswordResetRequest
+  │     └── PasswordResetConfirm
   └── Si isAuthenticated || isGuest → Main Stack
-        ├── Tab Navigator
-        │     ├── Home
-        │     ├── Candidatos
-        │     ├── MisGuardados
-        │     └── Configuracion
-        └── Stack screens (modales)
-              ├── Cuestionario
-              ├── Resultados
-              ├── SubmitDone
-              ├── DetalleCandidato
-              ├── Comparar
-              ├── Perfil
-              ├── GestionElecciones
-              ├── Noticias
-              └── DesignSystem (__DEV__ only)
+        ├── Home
+        ├── Candidatos
+        ├── MisGuardados
+        ├── MisRespuestas
+        ├── Configuracion
+        ├── Cuestionario
+        ├── Resultados
+        ├── SubmitDone
+        ├── DetalleCandidato
+        ├── Comparar
+        ├── Perfil
+        ├── GestionElecciones
+        ├── DesignSystem (__DEV__ only)
+        └── OnboardingPreview (__DEV__ only)
+
+Nota: la bottom bar visible en el Main Stack es un componente UI propio
+(BottomNav dentro de AppShell), NO un React Navigation Tab Navigator.
 ```
 
 ### API Layer
@@ -631,22 +638,40 @@ Tiene guard de `mountedAt > lastResetAt` para evitar re-mostrar tours de pantall
 
 ## Hooks Importantes (`api/hooks.ts`)
 
-| Hook | Tipo | Descripción |
+| Hook | Tipo | Descripcion |
 |---|---|---|
-| `useTiposEleccion()` | Query | Tipos de elección (filtra es_base si es el selector normal) |
+| `useTiposEleccion()` | Query | Tipos de eleccion (filtra es_base=true por default) |
 | `usePerfil()` | Query | Email, username, comuna, etc. del usuario |
-| `useMisElecciones()` | Query | Progreso por elección + top_match por cada una |
+| `useMisElecciones()` | Query | Progreso por eleccion + top_match por cada una |
 | `useMatchCandidatos()` | Mutation | Match autenticado (persiste en backend) |
-| `useMatchAnonimo()` | Mutation | Match anónimo (guest, no persiste) |
-| `useFavoritos()` | Query | Lista de candidatos favoritos |
-| `useDescartados()` | Query | Lista de candidatos descartados |
+| `useMatchesQuery(tipoEleccionId)` | Query | Lista de candidatos con match% (usa cache) |
+| `useMatchAnonimo()` | Mutation | Match anonimo (guest, no persiste) |
+| `useMatchDetalle(candidatoId)` | Query | Breakdown pregunta-a-pregunta para DetalleCandidato |
+| `usePreguntas(tipoEleccionId)` | Query | Preguntas pendientes del cuestionario |
+| `useFavoritos(opts?)` | Query | Lista de candidatos favoritos. `opts.enabled` para tab-aware |
+| `useDescartados(opts?)` | Query | Lista de candidatos descartados |
 | `useToggleFavorito()` | Mutation | Agrega/elimina favorito con optimistic update |
 | `useToggleDescartado()` | Mutation | Agrega/elimina descartado con optimistic update |
-| `useReiniciarCuestionario()` | Mutation | Borra respuestas del tipo de elección |
-| `useChangeUsername()` | Mutation | UX-074: cambia username con verificación de password |
-| `useChangeEmail()` | Mutation | UX-074: cambia email con verificación de password |
+| `useReiniciarCuestionario()` | Mutation | Borra respuestas del tipo de eleccion |
+| `useMisRespuestas(tipoEleccionId)` | Query | Respuestas propias por tipo |
+| `useMisRespuestasMultiple(tipoIds)` | Query (parallel) | Respuestas propias para multiples tipos a la vez |
+| `useUpdateRespuesta()` | Mutation | Editar una respuesta ya enviada |
+| `useCandidatos()` | Query | Catalogo completo de candidatos |
+| `useCandidato(id)` | Query | Candidato individual por ID |
+| `usePosturasCandidato(candidatoId, tipoId)` | Query | Posturas de un candidato filtradas por tipo |
+| `usePosturasBookmarks(opts?)` | Query | Posturas guardadas (bookmarks) |
+| `useTogglePosturaBookmark()` | Mutation | Agregar/quitar bookmark de postura |
+| `useCambiarPassword()` | Mutation | Cambiar password con verificacion |
+| `useCambiarUsername()` | Mutation | Cambiar username con verificacion |
+| `useCambiarEmail()` | Mutation | Cambiar email con verificacion |
+| `useEliminarCuenta()` | Mutation | Eliminar cuenta (danger zone) |
+| `useRegiones()` | Query | Lista de regiones de Chile |
+| `useComunas(regionId?, q?)` | Query | Comunas, opcionalmente filtradas por region o texto |
+| `useActualizarComuna()` | Mutation | Actualizar la comuna del perfil del usuario |
+| `useRequestPasswordReset()` | Mutation | Solicitar email de reset |
+| `useConfirmPasswordReset()` | Mutation | Confirmar reset con token + nueva password |
 
-**Patrón TASK-047:** Queries de favoritos/descartados tienen `opts.enabled` para activarse solo cuando el tab está visible → reduce fetches innecesarios.
+**Patron TASK-047:** Queries de favoritos/descartados/bookmarks tienen `opts.enabled` para activarse solo cuando el tab es visible.
 
 ---
 
@@ -664,15 +689,17 @@ Tiene guard de `mountedAt > lastResetAt` para evitar re-mostrar tours de pantall
 -  `__DEV__` warning si recibe valor desconocido
 
 ### `services/cuestionario.ts`
-- `PESOS` → array de {value, label} para los 4 pesos
+- `PESOS` → array de `{value, label, labelLargo}` para los 4 pesos
+- `PESO_LABELS_DISPLAY` → Record<PesoValue, string> indexado por valor (labels largos)
 - `DEFAULT_PESO = 2`
 - `MIN_RESPUESTAS_PARA_RESULTADO = 10`
-- `separarOpciones(opciones)` → {regulares, noSe} (opción "No sé" separada)
+- `separarOpciones(opciones)` → `{regulares, noSe}` (opción "No sé" separada)
 - `debeMostrarPeso(opciones, opcionElegidaId)` → boolean
-- `calcularProgreso(respuestas, preguntas)` → {respondidas, total, ratio}
+- `calcularProgreso(currentIndex, total)` → number (0–100).  **NO** recibe respuestas ni devuelve objeto
 - `puedeEnviar(preguntas, respuestas)` → boolean (valida TODAS las preguntas)
-- `formatSubtitleCuestionario(idx, total)` → "N de M"
-- `esPrimeraPregunta / esUltimaPregunta`
+- `formatSubtitleCuestionario(idx, total, particion?)` → `"N de M · base|extras"`
+- `esUltimaPregunta(currentIndex, total)` → boolean (función, no valor)
+- `esPrimeraPregunta(currentIndex)` → boolean (función, no valor)
 
 ### `services/comparar.ts`
 - `NivelCoincidencia` type: identica | cercana | opuesta | solo_uno | ninguno
@@ -749,7 +776,7 @@ Tiene guard de `mountedAt > lastResetAt` para evitar re-mostrar tours de pantall
 ### `useElectionsPrefsStore`
 ```typescript
 {
-  activeIds: number[] | null,     // SecureStore (null = todos activos)
+  activeIds: number[] | null,     // SecureStore key: votoafin_active_elections (null = todos activos)
   isHydrated: boolean,
   hydrate(), initializeIfNull(), toggle(), activate(), deactivate(), reset()
 }

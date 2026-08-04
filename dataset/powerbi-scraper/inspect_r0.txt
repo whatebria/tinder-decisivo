@@ -1,0 +1,23 @@
+result[0] DM0 rows: 1221
+ValueDicts keys: ['D0']
+  D0: list(100) first3=['Carlos Antonio Karim Bianchi Chelech', 'Claudia Paola Barrientos Sanchez', 'José Antonio Urrutia Riesco']
+
+Primeros 15 rows:
+  [0] {"S": [{"N": "G0", "T": 1, "DN": "D0"}], "G0": 0}
+  [1] {"G0": 1}
+  [2] {"G0": 2}
+  [3] {"G0": 3}
+  [4] {"G0": 4}
+  [5] {"G0": 5}
+  [6] {"G0": 6}
+  [7] {"G0": 7}
+  [8] {"G0": 8}
+  [9] {"G0": 9}
+  [10] {"G0": 10}
+  [11] {"G0": 11}
+  [12] {"G0": 12}
+  [13] {"G0": 13}
+  [14] {"G0": 14}
+
+Key types en first 20 rows:
+  {'G0': 'int'}

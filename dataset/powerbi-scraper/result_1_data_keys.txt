@@ -1,0 +1,19 @@
+result[1] data keys: ['timestamp', 'rootActivityId', 'descriptor', 'metrics', 'fromCache', 'dsr']
+
+dsr keys: ['Version', 'MinorVersion', 'DS']
+DS count: 1
+
+DS[0] keys: ['N', 'PH', 'IC', 'RT', 'ValueDicts']
+  PH count: 1
+  PH[0] keys: ['DM0']
+    DM0: list(500) first3=[{'S': [{'N': 'G0', 'T': 1, 'DN': 'D0'}, {'N': 'G1', 'T': 1, 'DN': 'D1'}, {'N': 'G2', 'T': 1, 'DN': 'D2'}, {'N': 'G3', 'T': 1, 'DN': 'D3'}, {'N': 'G4', 'T': 1, 'DN': 'D4'}, {'N': 'G5', 'T': 1, 'DN': '
+
+descriptor keys: ['Select', 'Expressions', 'Version']
+
+timestamp: '2026-08-02T19:18:43.565Z'
+
+rootActivityId: 'cfcdb7a1-5a2f-4723-9018-19967d2e2f2b'
+
+metrics: {'Version': '1.0.0', 'Events': [{'Id': '8af113bc-6235-4e48-8030-a7cb44efda26', 'Name': 'Execute Semantic Query', 'Component': 'DSE', 'Start': '2026-08-02T19:18:43.5651173Z', 'End': '2026-08-02T19:18:4
+
+fromCache: False

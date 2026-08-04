@@ -1,0 +1,12 @@
+Leyendo api_dumps\011_querydata_78991.json...
+Resultados: 2
+Traceback (most recent call last):
+  File "C:\Users\vn5ai5n\Documents\puppy_workspace\powerbi-scraper\decode_dsr.py", line 214, in <module>
+    main()
+  File "C:\Users\vn5ai5n\Documents\puppy_workspace\powerbi-scraper\decode_dsr.py", line 150, in main
+    names_r0 = decode_r0_simple(r0_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vn5ai5n\Documents\puppy_workspace\powerbi-scraper\decode_dsr.py", line 72, in decode_r0_simple
+    if prev_g0 < len(d0):
+       ^^^^^^^^^^^^^^^^^
+TypeError: '<' not supported between instances of 'str' and 'int'
