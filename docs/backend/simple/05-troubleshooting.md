@@ -34,7 +34,7 @@ cp .env.example .env
 uv run python manage.py migrate
 ```
 
-Deberia mostrar 36 migrations aplicadas.
+Deberia mostrar 42 migrations aplicadas.
 
 ### 4. Sembrar datos
 
@@ -45,7 +45,6 @@ uv run python manage.py seed_territorio_chile
 uv run python manage.py seed_preguntas_base
 uv run python manage.py seed_presidenciales_2025
 uv run python manage.py seed_diputados_2025
-uv run python manage.py seed_alcaldes_2024
 uv run python manage.py seed_preguntas_por_tipo
 ```
 
@@ -101,7 +100,7 @@ uv run python manage.py migrate
 ### El seed tarda muchisimo (>1 min)
 
 - `seed_territorio_chile`: **debe** ser <2 seg.
-- `seed_alcaldes_2024`: **debe** ser <10 seg.
+- `seed_diputados_2025`: **debe** ser <10 seg.
 - Si es mas: reset la DB y reintenta.
   ```bash
   # WARNING: borra todos los datos

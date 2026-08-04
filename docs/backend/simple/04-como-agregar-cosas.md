@@ -26,19 +26,15 @@ se agrego a ultima hora, o el equipo verifico nuevos datos).
 3. Llenar los campos:
    - **Nombre** / **Apellido** / **Partido**: obligatorios.
    - **Bio**: parrafo breve.
-   - **Ciudad**: opcional.
    - **Propuesta electoral**: resumen del programa (parrafo).
    - **Profile picture**: subir foto. Default es una imagen generica.
+   - **Lista electoral**: pacto o lista (ej. "Unidad por Chile"). Opcional.
    - **Tipos eleccion**: elegir uno o mas (ej. "Presidencial 2025"). Se pueden
      marcar varios si el candidato compite en distintos niveles.
-   - **Comuna**: solo para alcaldes.
-   - **Distrito**: solo para diputados.
-   - **Unidad territorial**: setea la unidad polimorfica. Si es alcalde de Nunoa,
-     elegis `[comunal] Nunoa`. Si presidencial, dejas en blanco.
+   - **Unidad territorial**: setea el territorio del candidato. Si es alcalde de
+     Nunoa, elegis `[comunal] Nunoa`. Si es diputado del Distrito 10, elegis
+     `[distrital] D10`. Si es presidencial, dejas en blanco (alcance nacional).
 4. Guardar.
-
-**Importante**: no llenar **comuna** Y **distrito** a la vez. El sistema tiene
-un check que lo previene, pero mejor evitar el error de entrada.
 
 Despues de crear el candidato, ir a la seccion **Posturas Candidato** y crear
 sus posturas para cada pregunta (o correr el comando `seed_preguntas_por_tipo`

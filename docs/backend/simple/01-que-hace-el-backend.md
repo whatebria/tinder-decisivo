@@ -68,7 +68,6 @@ No te muestra candidatos que no puedes votar:
 
 - **Favoritos**: candidatos que te llamaron la atencion.
 - **Descartados**: candidatos que definitivamente no.
-- **Decision final**: tu voto elegido (por tipo de eleccion).
 - **Noticias guardadas**: articulos que quieres leer despues.
 - **Posturas guardadas**: cuando quieres citar la postura X del candidato Y.
 

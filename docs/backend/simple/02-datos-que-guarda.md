@@ -24,8 +24,8 @@ Cosas que existen "en el mundo" y el sistema conoce:
 
 - **~40 Preguntas** politicas sobre temas variados.
 - **5 Opciones de respuesta** por pregunta (Likert: Muy de acuerdo a Muy en desacuerdo).
-- **8 Ejes tematicos** para clasificar preguntas: Economia, Sociedad, Ambiente,
-  Seguridad, DDHH, Internacional, Institucional, Otro.
+- **7 Ejes tematicos** para clasificar preguntas: Economia, Sociedad, Ambiente,
+  Seguridad, DDHH, Internacional, Institucional.
 - **Posturas de candidatos**: cada candidato tiene sus 40 opciones "ya elegidas"
   para las preguntas. En total, ~15000 posturas guardadas.
 
@@ -45,7 +45,6 @@ Cosas que el usuario "marca" en la app:
 
 - **Favoritos**: candidatos guardados.
 - **Descartados**: candidatos ocultados.
-- **Decision final**: el candidato elegido para votar (por tipo de eleccion).
 - **Noticias guardadas**: articulos marcados para leer.
 - **Posturas guardadas**: cuando quiere anotar una postura especifica.
 
@@ -68,7 +67,7 @@ Cosas que el usuario "marca" en la app:
 |---|---:|
 | Regiones + Distritos + Comunas | 390 |
 | Unidades territoriales (polimorfico) | 390 |
-| Ejes | 8 |
+| Ejes | 7 |
 | Tipos de eleccion | 4 |
 | Preguntas | 40 |
 | Opciones de respuesta | 200 |

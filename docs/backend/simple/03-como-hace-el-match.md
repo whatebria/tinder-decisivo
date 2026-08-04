@@ -57,8 +57,8 @@ Ejemplos:
 Cuando respondes una pregunta, tambien indicas **que tan importante es** para ti:
 
 - No me importa
-- Poco importante (default)
-- Importante
+- Poco importante
+- Importante (default en la app)
 - Muy importante ("dealbreaker")
 
 Eso multiplica el peso de esa pregunta en el match:
