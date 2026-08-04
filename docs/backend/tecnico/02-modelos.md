@@ -149,7 +149,7 @@ Una pregunta del cuestionario.
 | `texto` | `TextField` | |
 | `tipo_eleccion` | `FK(TipoEleccion)` CASCADE | |
 | `orden` | `IntegerField` default 0 | orden de aparicion |
-| `eje_tematico` | `CharField(20)` choices | codigo del eje (`ECONOMIA`, `SEGURIDAD`, etc.). Valores validos: ECONOMIA, SOCIEDAD, AMBIENTE, SEGURIDAD, DDHH, INTERNACIONAL, INSTITUCIONAL. Sincronizado via signal con FK `eje` |
+| `eje_tematico` | `CharField(24)` choices | codigo del eje (`ECONOMIA`, `SEGURIDAD`, etc.). Valores validos: ECONOMIA, SOCIEDAD, AMBIENTE, SEGURIDAD, DDHH, INTERNACIONAL, INSTITUCIONAL. Sincronizado via signal con FK `eje` |
 | `eje` | `FK(Eje)` null SET_NULL | FK canonica al modelo `Eje`. Sincronizada via signal con `eje_tematico`. Metadata rica (color, icono) |
 | `explicacion` | `TextField` blank | contexto educativo neutro |
 | `repercusiones` | `JSONField` default dict | `{economico, social, cultural, ambiental, institucional}` con textos breves |

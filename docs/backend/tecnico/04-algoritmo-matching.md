@@ -269,22 +269,22 @@ Sea `C` = candidatos, `P` = preguntas del user, `Q` = posturas por candidato.
 
 - **Filtro territorial**: 1 query + `ancestros()` (walk O(depth) = 4 max).
 - **Prefetch posturas**: 1 query extra en total (no por candidato).
-- **Bucle in-memory**: `O(C * Q)`. Con C=1200 y Q=15 promedio = 18000 ops. Trivial.
+- **Bucle in-memory**: `O(C * Q)`. Con C=148 (dev actual: 8 presi + 140 dip) y Q=15 promedio = ~2200 ops. Trivial. Con C=1200 (target con alcaldes) = 18000 ops, igualmente trivial.
 - **DB writes** (variante auth): 1 `update_or_create` por candidato considerado = hasta `C` upserts.
 
-En dev con 1200 candidatos: <200ms full round-trip.
+En dev con 148 candidatos: <50ms full round-trip.
 
 ---
 
 ## Testing
 
-Tres archivos cubren este modulo:
+Cinco archivos cubren este modulo:
 
+- `test_algoritmo_matching.py` - suite principal de integracion del algoritmo.
 - `test_services_matching.py` - happy paths, edge cases, peso 0/3, es_no_se.
 - `test_matching_territorial.py` - filtro polimorfico, escenario Nunoa/Providencia/D10.
 - `test_match_anonimo.py` - variante guest, fail-safe.
 - `test_match_detalle.py` - endpoint de breakdown pregunta-a-pregunta.
-
 Todos usan la fixture `escenario_territorial` (definida al inicio del archivo) que crea:
 - Comuna Nunoa + Providencia + Distrito 10 (via `seed_chile`).
 - 4 candidatos: presi nacional, alcalde de Nunoa, alcalde de Providencia, diputado D10.

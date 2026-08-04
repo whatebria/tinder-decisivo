@@ -164,7 +164,7 @@ Es idempotente: no falla si la key no existe.
 
 Flujo completo de reset de password (dominio puro, sin HTTP).
 
-### `request_reset(email) -> ResetRequestult`
+### `request_reset(email) -> ResetRequestResult`
 
 Genera token + envia email. Es **idempotente por email**: cada llamada crea
 un token nuevo, los anteriores quedan huerfanos (expiran solos).

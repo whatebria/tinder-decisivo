@@ -59,7 +59,7 @@ Plantilla comentada de variables de entorno. Secciones:
 - **Django core**: `SECRET_KEY` (obligatorio en prod), `DEBUG` (default False), `ALLOWED_HOSTS` (default `127.0.0.1,localhost,10.0.2.2`).
 - **Base de datos**: `DATABASE_URL` opcional. Sin ella, usa SQLite local. Soporta `postgres://`, `mysql://`, `sqlite:///`.
 - **CORS**: `CORS_ALLOWED_ORIGINS` (default `http://localhost:19006,http://localhost:8081`), `CORS_ALLOWED_ORIGIN_REGEXES` opcional. Comentario aclara que "nunca se abre a `*`".
-- **Auth**: `TOKEN_TTL_DAYS` (default 30).
+- **Auth**: `TOKEN_TTL_DAYS` (default 7).
 - **i18n**: `TIME_ZONE=America/Santiago`, `LANGUAGE_CODE=es-cl`.
 - **Email**: `EMAIL_BACKEND` (default console para dev), `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USE_TLS`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `DEFAULT_FROM_EMAIL=no-reply@votoafin.cl`, `PASSWORD_RESET_URL_BASE=http://localhost:8081/reset-password`.
 - **Hardening prod**: `SECURE_SSL_REDIRECT`, `SECURE_HSTS_SECONDS` (comentados por default).
@@ -98,7 +98,7 @@ Configuración de Django. Usa `python-decouple` para leer variables de entorno y
 - **DRF**:
   - `TOKEN_TTL_DAYS` configurable (default 30).
   - `DRF_THROTTLE_DISABLED` opcional (solo para tests E2E).
-  - `DEFAULT_AUTHENTICATION_CLASSES = ["core.authentication.ExpiringTokenAuthentication"]`.
+  - `DEFAULT_AUTHENTICATION_CLASSES = ["core.authentication.CookieTokenAuthentication", "core.authentication.ExpiringTokenAuthentication"]` (cookie primero para web; fallback header para mobile).
   - `DEFAULT_PERMISSION_CLASSES = ["rest_framework.permissions.IsAuthenticated"]`.
   - `DEFAULT_SCHEMA_CLASS = "drf_spectacular.openapi.AutoSchema"`.
   - Throttles: `AnonRateThrottle`, `UserRateThrottle`, `ScopedRateThrottle`.
@@ -657,7 +657,7 @@ Core del algoritmo. In-memory, sin DB writes.
   - Acumula en total y en `breakdown_acc[eje] = [score_acc, peso_acc, count]`.
 - Porcentaje = `(score_total / peso_total * 100).quantize(0.01)` (0.00 si peso_total==0).
 - Breakdown final por eje incluye `porcentaje` (float, 2 decimales) y `preguntas` (int).
-- Ordena por `match_percentage` descendente.
+- Ordena por `coverage_score = match_percentage * log1p(num_preguntas_consideradas)` descendente, con `match_percentage` como desempate. Así candidatos con poca cobertura no flotan arriba artificialmente.
 
 #### `calcular_match(user, tipo_eleccion) -> Optional[list[MatchCandidato]]`
 Variante autenticada, **persiste**:

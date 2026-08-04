@@ -192,7 +192,7 @@ Response 200 (array):
 Lista los tipos de eleccion (Presi 2025, Dip 2025, Alc 2024, base, etc.). **Publico**.
 
 ### `GET /api/v1/candidatos/`
-Lista de candidatos filtrable. **Auth**.
+Lista de candidatos filtrable. **Publico** (AllowAny — soporta modo invitado).
 
 Query params:
 - `?tipo_eleccion=<id>` - filtra por tipo
@@ -203,13 +203,13 @@ Query params:
 Response paginada.
 
 ### `GET /api/v1/candidatos/{id}/`
-Detalle de un candidato. **Auth**. Incluye datos territoriales y contadores basicos.
+Detalle de un candidato. **Publico** (AllowAny). Incluye datos territoriales y contadores basicos.
 
 ### `GET /api/v1/candidatos/{id}/posturas/`
-Devuelve todas las posturas del candidato con la pregunta, opcion elegida y justificacion. **Auth**.
+Devuelve todas las posturas del candidato con la pregunta, opcion elegida y justificacion. **Publico** (AllowAny).
 
 ### `GET /api/v1/candidatos/{id}/noticias/`
-Noticias asociadas al candidato. **Auth**. Paginado.
+Noticias asociadas al candidato. **Publico** (AllowAny). Paginado.
 
 ### `GET /api/v1/candidatos/{id}/match-detalle/`
 Devuelve el breakdown pregunta-a-pregunta del match del user autenticado vs este candidato. **Auth**.
@@ -243,7 +243,7 @@ Response 200:
 Devuelve las preguntas **que el user aun no respondio** (o todas si es guest). **Auth opcional**.
 
 Query params:
-- `?tipo_eleccion=<id>` (default: incluye tipos base + el seleccionado)
+- `?tipo_eleccion_id=<id>` (requerido — devuelve 400 si falta)
 
 Response: lista de preguntas con `opciones_respuesta` embed y `eje` (con color).
 
@@ -347,15 +347,16 @@ Response igual que `match-candidatos/` pero como lista in-memory.
 Feed de noticias. **Auth**. Paginado.
 
 Query params:
-- `?candidato=<id>` - solo noticias que mencionan ese candidato
+- `?candidato_id=<id>` - solo noticias que mencionan ese candidato
 - `?fuente=<texto>`
+- `?dias=<n>` - solo noticias de los ultimos N dias
 - `?q=<texto>` - busqueda titulo/descripcion
 
 ### `POST /api/v1/noticias/`
 Crea una noticia manualmente. **Auth staff** (permission check en la view).
 
 ### `GET /api/v1/noticias/{id}/`
-Detalle de una noticia. **Auth**.
+Detalle de una noticia. **Publico** (AllowAny, mismo patron que la lista).
 
 ---
 
