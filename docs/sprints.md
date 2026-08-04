@@ -353,7 +353,7 @@ Destacados:
 | Servicios frontend (logica pura) | 2 | **4** (matching, cuestionario, share, comparar) |
 | Hooks React Query | 6 | **30** |
 | Migrations | 22 | **42** |
-| Management commands | 5 | **19** |
+| Management commands | 5 | **16** (+ 3 modulos de data `_*.py`) |
 | Archivos de test backend | ~10 | **30** |
 | Issues resueltos (backlog) | 0 | **~230** |
 | Security findings resueltos | 0 | **17/17** |
