@@ -244,7 +244,7 @@ frontend/
 │   │   ├── molecules/            # compuestos (Toast, PreguntaInfoModal, RankingCard...)
 │   │   └── organisms/           # secciones (ErrorBoundary, TopMatchSection...)
 │   ├── navigation/
-│   │   ├── AppNavigator.tsx      # stack + tab navigator
+│   │   ├── AppNavigator.tsx      # native stack, swap auth/main dinamico
 │   │   └── types.ts              # RootStackParamList
 │   ├── screens/                  # 17 pantallas funcionales
 │   │   ├── LoginScreen.tsx
@@ -311,7 +311,7 @@ frontend/
 
 ### Navegacion
 
-Stack + Tab navigator con las siguientes rutas (`RootStackParamList`):
+Native stack navigator puro (`createNativeStackNavigator`). Las tabs del main screen son **componentes de UI custom** (`BottomNav`), no React Navigation tabs. Un solo Stack con swap dinamico entre stacks:
 
 ```
 Publico:

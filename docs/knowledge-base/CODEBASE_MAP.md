@@ -170,7 +170,7 @@ tinder-decisivo/
 
 **Salidas:** estado toggle (guardado/no guardado) + refetch de lista
 
-**Riesgos:** BUG-045 (abierto P1): toggle favorito tarda ~1 seg — falta optimistic update
+**Riesgos:** ~~BUG-045: toggle favorito tarda ~1 seg -- falta optimistic update~~ (RESUELTO 2026-08-02, commit 59d4194)
 
 ---
 
@@ -459,7 +459,7 @@ Encontrada con grep en el codigo, nada inventado:
 | `ResultadosScreen.tsx` | eslint-disable | `react-hooks/exhaustive-deps` deshabilitado — documentado como BUG-032, intencional por ahora |
 | `CandidatoPickerModal.showcase.tsx:26` | eslint-disable | `@typescript-eslint/no-explicit-any` en showcase (menor) |
 | `ErrorBoundary.tsx:31` | eslint-disable | `no-console` (logging de errores en boundary, aceptable) |
-| BUG-045 | Falta optimistic update | Toggle favorito/descartado tarda ~1 seg |
+| BUG-045 | Resuelto | Toggle favorito/descartado tardaba ~1 seg por falta de optimistic update. RESUELTO 2026-08-02 (commit 59d4194) |
 
 **Resuelto:** El TODO de `CuestionarioScreen.tsx:191` (preguntas base vs extras) quedo resuelto via `esTipoBase` en el store.
 

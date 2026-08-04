@@ -77,8 +77,8 @@ descaradamente.
 **Abierto a extension, cerrado a modificacion**.
 
 Ejemplo: agregar un nuevo eje tematico (ej. `EJE_TECNOLOGIA`) al modelo
-`Pregunta` no requiere tocar `calcular_match()`. El algoritmo lee
-`eje_tematico` como string cualquiera y arma el breakdown dinamicamente.
+`Eje` no requiere tocar `calcular_match()`. El algoritmo lee
+`eje_tematico` como referencia FK y arma el breakdown dinamicamente.
 
 Otro ejemplo: agregar un nuevo peso (ej. `PESO_CRITICO=4`) solo requiere
 agregar una entrada al dict `PESO_MULTIPLIERS`. No hay `if/elif` que
@@ -101,8 +101,12 @@ metodos (`get_queryset`, `perform_create`, etc.).
 Ejemplo: en vez de un unico `AbstractBookmarkViewSet` con
 `create + list + retrieve + update + delete`, tenemos
 `_UserScopedCreateListDestroy` que ofrece solo lo que sus consumidores
-necesitan. `DecisionFinalViewSet` en cambio incluye `RetrieveModelMixin`
-porque su UX si necesita GET detalle.
+necesitan (Create, List, Destroy) — un favorito no necesita GET detalle
+individual porque el detalle del candidato vive en `candidatos/<pk>/`.
+
+`MatchCandidatoViewSet` en cambio hereda directamente de
+`viewsets.GenericViewSet` y expone solo las actions custom que necesita
+(`match_candidatos`, `match_anonimo`) — cero metodos CRUD heredados.
 
 ### D — Dependency Inversion Principle
 
@@ -162,8 +166,8 @@ Aplicado:
 - No hay GraphQL — REST alcanza para la complejidad actual.
 
 **Pero cuando SI se aplico y fue error**: agregar el bookmarking
-(favoritos, descartados, decision final) antes de validar que el user
-lo pedia. Deuda ahora — son 3 endpoints que nadie usa todavia.
+(favoritos, descartados, bookmarks de noticias y posturas) antes de validar que el user
+lo pedia. Deuda ahora — son 4 endpoints de bookmarking cuya adopcion no esta validada aun.
 
 ### KISS — Keep It Simple, Stupid
 
@@ -296,14 +300,14 @@ poquitos e2e.
                           /  \    e2e: 0 (no hay tests de UI+API)
                          /____\
                         /      \
-                       / integr \  46 tests (Django DB + DRF APIClient)
+                       / integr \  ~330 tests (Django DB + DRF APIClient)
                       /__________\
                      /            \
-                    /   unitarios  \ 35 tests (funciones puras, sin DB)
+                    /   unitarios  \ ~40 tests (funciones puras, sin DB)
                    /________________\
 ```
 
-**Total**: 81 tests, corren en 19s, 30% son unitarios (target sano).
+Total: **370 tests** (verificado con `uv run pytest --co -q`).
 
 **Convenciones aplicadas**:
 
