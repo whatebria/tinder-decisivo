@@ -1,3 +1,5 @@
+> **DOCUMENTO DESACTUALIZADO** - Foto historica; puede no reflejar el estado actual del codigo. Ver `docs/backend/tecnico/04-algoritmo-matching.md` para la version actualizada.
+
 # Algoritmo de matching — documentacion tecnica
 
 > Explicacion detallada del algoritmo que rankea candidatos segun las respuestas del usuario.

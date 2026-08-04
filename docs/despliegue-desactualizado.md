@@ -1,3 +1,5 @@
+> **DOCUMENTO DESACTUALIZADO** - Foto historica; puede no reflejar el estado actual del codigo.
+
 # Guía de Despliegue a Producción
 
 > Este documento cubre todo lo necesario para llevar la aplicación de

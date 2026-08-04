@@ -1,3 +1,5 @@
+> **DOCUMENTO DESACTUALIZADO** - Foto historica; puede no reflejar el estado actual del codigo. Ver `docs/buenas-practicas.md#12-accesibilidad-y-i18n` para las convenciones actuales.
+
 # Accesibilidad - VotoAFin
 
 > Requisitos WCAG 2.2 Nivel AA por componente y por pantalla.

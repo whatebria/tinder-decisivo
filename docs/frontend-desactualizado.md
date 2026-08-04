@@ -1,3 +1,5 @@
+> **DOCUMENTO DESACTUALIZADO** - Foto historica; puede no reflejar el estado actual del codigo. Ver `docs/knowledge-base/FRONTEND_EXHAUSTIVE.md` y `docs/knowledge-base/CODEBASE_MAP.md` para la version actualizada.
+
 # Documentación técnica del Frontend — VotoAFin
 
 > Referencia técnica completa del cliente móvil/web de la app VotoAFin (repo `servel-main`).

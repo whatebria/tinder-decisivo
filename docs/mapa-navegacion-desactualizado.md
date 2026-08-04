@@ -1,3 +1,5 @@
+> **DOCUMENTO DESACTUALIZADO** - Foto historica; puede no reflejar el estado actual del codigo. Ver `docs/knowledge-base/CODEBASE_MAP.md` para el mapa actualizado.
+
 # Mapa de navegación · VotoAFin
 
 > Referencia canonica del flujo de navegación de la app.

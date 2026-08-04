@@ -1,3 +1,5 @@
+> **DOCUMENTO DESACTUALIZADO** - Foto historica; puede no reflejar el estado actual del codigo. Ver `docs/backend/simple/03-como-hace-el-match.md` para la version actualizada.
+
 # Como funciona VotoAFin — version para todos
 
 > Guia sin tecnicismos. Escrita para tu mama, tu abuelo, tu companera de

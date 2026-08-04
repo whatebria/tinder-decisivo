@@ -1,3 +1,5 @@
+> **DOCUMENTO DESACTUALIZADO** - Foto historica; puede no reflejar el estado actual del codigo. Ver `docs/sprints.md` para el historial actualizado.
+
 # Estado actual de la app
 
 > Foto honesta a fecha 2026-07-25.

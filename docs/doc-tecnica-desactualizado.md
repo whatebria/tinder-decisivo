@@ -1,3 +1,5 @@
+> **DOCUMENTO DESACTUALIZADO** - Foto historica; puede no reflejar el estado actual del codigo. Ver `docs/sistema-tecnico.md` y `docs/backend/tecnico/` para la version actualizada.
+
 # Servel - Documentacion tecnica
 
 **Version**: 0.1.0
