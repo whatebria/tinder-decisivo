@@ -3,7 +3,7 @@
 > **Para quien**: devs que quieren entender la historia del schema o hacer una migration nueva.
 > **Para que sirve**: narrativa cronologica de decisiones importantes.
 
-Al momento de escribir esto: **36 migrations** aplicadas.
+Al momento de escribir esto: **42 migrations** aplicadas.
 
 Ver las 36 archivos completos en `backend/core/migrations/`. Este doc destaca
 las relevantes.
@@ -199,19 +199,49 @@ uv run python manage.py migrate core 0035     # rollback a una anterior
 uv run pytest core/                            # asegurate que los tests pasan
 ```
 
+### `0037_delete_decisionfinal`
+Elimina el modelo `DecisionFinal` del schema. El modelo habia sido planificado
+pero nunca implementado en la aplicacion; la migration lo borra definitivamente.
+
+### `0038_drop_candidato_comuna_distrito`
+Remueve los campos `Candidato.comuna` (FK a `Comuna`) y `Candidato.distrito`
+(FK a `Distrito`). Completa el refactor de territorio polimorfico: el unico
+FK territorial que queda es `unidad_territorial`. Los datos fueron backfilleados
+en `0036`; ahora los campos legacy se eliminan del schema.
+
+### `0039_add_pueblos_originarios_discapacidad_ejes` + `0040_remove_ejes_obsoletos`
+Actualizacion del catalogo de ejes:
+- `0039`: expande los choices de `Pregunta.eje_tematico` con PUEBLOS_ORIGINARIOS y DISCAPACIDAD.
+- `0040`: los elimina del producto junto con OTRO. Las preguntas con esos ejes fueron
+  reasignadas antes (DISCAPACIDAD -> ECONOMIA, PUEBLOS_ORIGINARIOS -> DDHH/SOCIEDAD).
+
+Resultado: **7 ejes canonicos activos**: ECONOMIA, SOCIEDAD, AMBIENTE, SEGURIDAD,
+DDHH, INTERNACIONAL, INSTITUCIONAL.
+
+### `0041_add_lista_electoral_candidato`
+Agrega `Candidato.lista_electoral` (CharField, blank). Permite registrar el pacto
+o lista electoral del candidato (ej. "Unidad por Chile").
+
+### `0042_add_parlid_email_curriculum_fono`
+Agrega 4 campos de datos oficiales a `Candidato`:
+- `parlid`: ID en el sistema del Senado/Camara.
+- `email`: email de contacto oficial.
+- `curriculum_url`: URL al curriculum en senado.cl / camara.cl.
+- `fono`: telefono de contacto oficial.
+
+Todos son `blank=True, default=""`. Se populan via `import_candidatos` o
+`enrich_senadores` management command.
+
 ---
 
 ## Estrategia deprecation
 
-Los campos "viejos" que fueron reemplazados por otros **no se borran** de
-inmediato. Se dejan como deprecated pero funcionales:
+Los campos "viejos" que fueron reemplazados por otros se dejan como deprecated
+hasta que todo el codigo migra, luego se eliminan con una migration.
 
-- `Pregunta.eje_tematico` (string) -> convive con `Pregunta.eje` (FK).
-- `UserProfile.comuna` -> convive con `UserProfile.unidad_territorial`.
-
-**Regla**: se remueven cuando (a) todo el codigo cliente migro al nuevo,
-(b) hay 1 sprint de "quarantine" sin issues, (c) hay una migration que valida
-que ninguno todavia los usa.
+- `Pregunta.eje_tematico` (string) -> convive con `Pregunta.eje` (FK). Aun activo.
+- `Candidato.comuna` y `Candidato.distrito` -> **ya eliminados** en `0038`. El campo
+  canonico es `unidad_territorial` desde `0036`.
 
 ---
 

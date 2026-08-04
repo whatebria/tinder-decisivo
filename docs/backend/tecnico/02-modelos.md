@@ -342,7 +342,7 @@ Todos tienen ordering por su timestamp desc. `DecisionFinal` fue planeado pero N
 | `Distrito` | 28 |
 | `Comuna` | 346 |
 | `UnidadTerritorial` | 391 (1+16+28+346) |
-| `Eje` | 8 canonicos |
+| `Eje` | 7 canonicos (ECONOMIA, SOCIEDAD, AMBIENTE, SEGURIDAD, DDHH, INTERNACIONAL, INSTITUCIONAL) |
 | `TipoEleccion` | 3-4 (Presi, Dip, Alc, base) |
 | `Pregunta` | ~35-40 |
 | `OpcionRespuesta` | ~200 |
