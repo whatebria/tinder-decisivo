@@ -1,11 +1,29 @@
 /**
  * Design system tokens — Paleta A (calma azul-verde) para tinder-decisivo.
  *
- * Contrast ratios verificados (WCAG 2.2 AA):
- * - primary sobre bg:        5.5:1  (AA)
- * - text sobre bg:           14.2:1 (AAA)
- * - textSecondary sobre bg:  6.1:1  (AA)
- * - success sobre bg:        3.4:1  (AA para texto grande / UI)
+ * ── Contrast ratios verificados (WCAG 2.2) ──────────────────────────────
+ * - primary (#2E5F7E)    sobre bg (#F5F7F5):   5.5:1  AA texto normal
+ * - text (#1A2B33)       sobre bg:             14.2:1 AAA
+ * - textSecondary        sobre bg:              6.1:1  AA
+ * - success (#6B9B7A)    sobre bg:              3.4:1  AA texto grande/UI
+ * - #FFFFFF              sobre hero (#1C3A52): 11.8:1  AAA
+ * - #FFFFFF              sobre brandAccent:     3.3:1  AA texto grande/UI (>=18px bold)
+ * - brandAccent (#3A9E7A) sobre hero:           3.6:1  AA UI
+ *
+ * ── Combinaciones PROHIBIDAS (contraste insuficiente) ───────────────────
+ * - brandAccent (#3A9E7A) sobre primary (#2E5F7E): 2.08:1 — FALLA TODO
+ *   → Nunca usar brandAccent como color de texto/borde sobre primary.
+ *   → Nunca usar primary como color de texto/borde sobre brandAccent.
+ * - brandAccent como texto sobre bg (#F5F7F5): 3.07:1 — solo para graficos
+ *   decorativos, nunca para texto legible.
+ * - #FFFFFF sobre brandAccent en texto <18px normal weight: 3.31:1 insuficiente.
+ *   → El Button variant="accent" solo es valido con texto bold >= 16px.
+ *
+ * ── Reglas de uso de brandAccent ─────────────────────────────────────────
+ * - DS-10: max 3 apariciones de brandAccent por viewport.
+ * - DS-11: PROHIBIDO en cuestionario.
+ * - Fondos validos: hero (#1C3A52), card (#FFFFFF), bg (#F5F7F5).
+ * - Fondos PROHIBIDOS: primary (#2E5F7E), cualquier tint de primary.
  *
  * Convencion: los tokens escala usan camelCase sin guion (primary50, gray100).
  * Los semanticos son alias del peso 600 (primary === primary600).
@@ -30,7 +48,12 @@ const light = {
    * brandAccent: verde vibrante para CTAs de alta carga emocional (hero Home,
    * lock overlay, compartir). DS-04 --c-accent (#3A9E7A). Diferente del
    * token `accent` (#A8C5B5) que es solo un tint de hover/fondo.
-   * Regla DS-10: max 3 apariciones de brandAccent por viewport.
+   *
+   * Reglas de contraste (medidas 2026-08-03):
+   *   VALIDO sobre: hero #1C3A52 (3.6:1 UI), card #FFFFFF (3.3:1 UI bold>=16px)
+   *   PROHIBIDO sobre: primary #2E5F7E (2.08:1 — falla todo WCAG)
+   *
+   * DS-10: max 3 apariciones por viewport.
    * DS-11: PROHIBIDO en cuestionario — solo Home hero, Compartir, lock CTA.
    */
   brandAccent:  "#3A9E7A",
