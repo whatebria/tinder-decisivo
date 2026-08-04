@@ -166,6 +166,7 @@ const styles = StyleSheet.create({
   textCol: { flex: 1, gap: spacing.sp2 },
   greeting: { fontSize: 15, fontWeight: "600", color: HERO_TEXT_SUB, lineHeight: 20 },
   headline: { fontSize: 22, fontWeight: "900", color: HERO_TEXT, lineHeight: 27 },
+  tagline: { fontSize: 13, fontWeight: "400", color: HERO_TEXT_SUB, lineHeight: 18 },
   trustRow: { flexDirection: "row", justifyContent: "center", gap: spacing.sp5 },
   trustItem: { flexDirection: "row", alignItems: "center", gap: 5 },
   trustText: { fontSize: 11, fontWeight: "600", color: HERO_TEXT_SUB },
@@ -229,7 +230,10 @@ export function HomeHeroSection({
         <View style={styles.textCol}>
           <Text style={styles.greeting}>{greetingLine}</Text>
           <Text style={styles.headline}>
-            {"Encuentra tu\ncandidato ideal"}
+            {"Encuentra tu candidato ideal"}
+          </Text>
+          <Text style={styles.tagline}>
+            {"Vota desde lo que crees."}
           </Text>
         </View>
         {hasRing ? (
