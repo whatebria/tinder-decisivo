@@ -211,13 +211,13 @@ Token single-use para reset de password.
 #### `Pregunta`
 
 Constantes de eje temático (usadas como choices legacy):
-`EJE_ECONOMIA`, `EJE_SOCIEDAD`, `EJE_AMBIENTE`, `EJE_SEGURIDAD`, `EJE_DDHH`, `EJE_INTERNACIONAL`, `EJE_INSTITUCIONAL`, `EJE_OTRO`. Cada uno mapea a un label legible en `EJES_CHOICES`.
+`EJE_ECONOMIA`, `EJE_SOCIEDAD`, `EJE_AMBIENTE`, `EJE_SEGURIDAD`, `EJE_DDHH`, `EJE_INTERNACIONAL`, `EJE_INSTITUCIONAL`. Cada uno mapea a un label legible en `EJES_CHOICES`.
 
 **Campos**:
 - `texto`: TextField.
 - `tipo_eleccion`: FK a `TipoEleccion`, `related_name="preguntas"`.
 - `orden`: IntegerField default 0.
-- `eje_tematico`: CharField(20) con `choices=EJES_CHOICES`, default `EJE_OTRO`. "Fuente para el match".
+- `eje_tematico`: CharField(24) con `choices=EJES_CHOICES`, default `EJE_INSTITUCIONAL`. "Fuente para el match".
 - `eje`: FK opcional a `Eje`, `on_delete=SET_NULL`, `related_name="preguntas"`. Sincronizada con `eje_tematico` via signal `pre_save`.
 - `explicacion`: TextField blank. "Contexto educativo neutro".
 - `repercusiones`: JSONField (dict) con keys documentadas: `economico`, `social`, `cultural`, `ambiental`, `institucional`.

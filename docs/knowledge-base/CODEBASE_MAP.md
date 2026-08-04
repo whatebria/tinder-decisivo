@@ -233,7 +233,7 @@ Usuario
   +-- [Zustand 5]            ← estado global (auth, cuestionario, onboarding, tema, elections, coachmarks)
   |
   +-- [TanStack React Query 5] ← server state (fetch, cache, mutations)
-  |     hooks en src/api/hooks.ts (28 hooks)
+  |     hooks en src/api/hooks.ts (30 hooks)
   |
   +-- [Axios]                ← cliente HTTP base
   |     src/api/client.ts

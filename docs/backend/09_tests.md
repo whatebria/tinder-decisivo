@@ -1,5 +1,9 @@
 # 9. Tests (`core/test_*.py`)
 
+>  **DOCUMENTO LEGACY** — Cubre 25 archivos de test (estado anterior). Para el
+> estado actualizado (30 archivos, incluyendo test_cookie_auth, test_mi_progreso,
+> test_security_config, etc.) ver [`tecnico/10-tests.md`](tecnico/10-tests.md).
+
 25 archivos de tests con pytest + pytest-django. Convencion: 1 archivo por feature/dominio. Todos usan `@pytest.mark.django_db` explicito o el fixture `db`. Muchos usan `datos_pesados` (seeds pesados via 6 management commands, function-scoped, ~10s) o fixtures locales mas livianas.
 
 Los docstrings de modulo estan bien mantenidos y son la fuente primaria de este resumen.

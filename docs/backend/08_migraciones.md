@@ -1,5 +1,9 @@
 # 8. Migraciones (`core/migrations/`)
 
+>  **DOCUMENTO LEGACY** — Cubre hasta migration 0038. Para el historial completo
+> y actualizado (42 migrations, incluyendo 0037-0042) ver
+> [`tecnico/07-migraciones.md`](tecnico/07-migraciones.md).
+
 39 archivos totales (incluyendo `__init__.py` vacio y el squash). Sqlite es el motor por defecto (`.env.example`), Postgres soportado via `DATABASE_URL`.
 
 ## Squash inicial
