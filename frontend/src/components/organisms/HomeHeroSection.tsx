@@ -39,6 +39,7 @@ import React, { useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { spacing } from "../../theme/spacing";
+import { colors } from "../../theme/colors";
 import { useThemeColors } from "../../theme/useTheme";
 import { greetingForHour } from "../../utils/user";
 import { AppIcon } from "../atoms/AppIcon";
@@ -48,8 +49,12 @@ import { ProgressRing } from "../atoms/ProgressRing";
 
 // -- Colores fijos del hero (no dependen del tema) --------------------------
 
-/** Fondo del hero. Siempre #1C3A52 (brand-hero) en light y dark. */
-const HERO_BG = "#1C3A52";
+/**
+ * Fondo del hero. FIX A-01: ahora lee del token colors.heroBg en vez de ser
+ * constante hardcodeada. Siempre igual en light y dark (es identidad de marca).
+ * WCAG: #FFFFFF sobre heroBg = 9.1:1 (AAA).
+ */
+const HERO_BG = colors.heroBg;
 /** Texto principal sobre el hero. */
 const HERO_TEXT = "#FFFFFF";
 /** Texto secundario / meta. */

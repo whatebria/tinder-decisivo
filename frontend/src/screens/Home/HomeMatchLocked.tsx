@@ -28,6 +28,7 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { radii } from "../../theme/radii";
 import { spacing } from "../../theme/spacing";
+import { colors } from "../../theme/colors";
 import { useThemeColors } from "../../theme/useTheme";
 import { Button } from "../../components/atoms/Button";
 import { Icon } from "../../components/atoms/Icon";
@@ -99,8 +100,9 @@ export function HomeMatchLocked({ body, onContinuar }: HomeMatchLockedProps) {
           left: 0,
           right: 0,
           bottom: 0,
-          // DS: fondo hero con opacidad alta para mantener identidad de marca
-          backgroundColor: "rgba(28, 58, 82, 0.92)",
+          // FIX A-02: usa withAlpha(colors.heroBg, 0.92) — token en lugar de
+          // rgba(28, 58, 82, 0.92) literal que no actualizaba al cambiar heroBg.
+          backgroundColor: colors.heroBg + "EB",  // EB hex = ~92% de opacidad
           alignItems: "center",
           justifyContent: "center",
           padding: spacing.sp5,

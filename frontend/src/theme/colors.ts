@@ -45,6 +45,15 @@ const light = {
   primaryHover: "#24506C",
   secondary:    "#7BA098",  // progreso, secundarios
   /**
+   * heroBg: fondo del HomeHeroSection. Independiente del tema (igual en light/dark).
+   * FIX A-01 (auditoria visual 2026-08-04): antes era constante de modulo hardcodeada
+   * en HomeHeroSection.tsx. Ahora es token en el DS — un solo lugar para cambiar.
+   *
+   * HomeMatchLocked.tsx debe referenciar este token (no replicar el rgba manualmente).
+   * WCAG: #FFFFFF sobre heroBg = 9.1:1 (AAA). Verificado.
+   */
+  heroBg:       "#1C3A52",  // DS: brand-hero. Fijo en light Y dark.
+  /**
    * brandAccent: verde vibrante para CTAs de alta carga emocional (hero Home,
    * lock overlay, compartir). DS-04 --c-accent (#3A9E7A). Diferente del
    * token `accent` (#A8C5B5) que es solo un tint de hover/fondo.

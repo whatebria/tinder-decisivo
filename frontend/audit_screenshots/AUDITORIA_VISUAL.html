@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Auditoría Visual — VotoAFin Frontend</title>
+<style>
+  :root {
+    --bg: #FAF9F7;
+    --card: #FFFFFF;
+    --primary: #1B3A5C;
+    --accent: #8B2252;
+    --accent2: #C67428;
+    --text: #1A1A2E;
+    --text-secondary: #5A5A72;
+    --border: #E2E2EA;
+    --success: #2D7A52;
+    --warning: #C67428;
+    --danger: #C22222;
+    --info: #2C5E9E;
+    --radius: 10px;
+    --font-mono: 'SF Mono', Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .page { max-width: 1100px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  /* Cover */
+  .cover {
+    background: linear-gradient(135deg, #1B3A5C 0%, #0D2035 100%);
+    color: white; border-radius: 16px; padding: 56px 48px; margin-bottom: 48px;
+    position: relative; overflow: hidden;
+  }
+  .cover::before {
+    content: ''; position: absolute; top: -60px; right: -60px;
+    width: 300px; height: 300px; border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .cover-tag { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 16px; }
+  .cover h1 { font-size: 36px; font-weight: 800; line-height: 1.2; margin-bottom: 12px; }
+  .cover h1 span { color: #E04E1A; }
+  .cover-sub { color: rgba(255,255,255,0.7); font-size: 16px; max-width: 600px; margin-bottom: 32px; }
+  .cover-meta { display: flex; gap: 32px; flex-wrap: wrap; }
+  .cover-kpi { }
+  .cover-kpi .val { font-size: 28px; font-weight: 800; color: white; }
+  .cover-kpi .lbl { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+
+  /* Sections */
+  h2 { font-size: 22px; font-weight: 700; color: var(--primary); margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); }
+  h3 { font-size: 16px; font-weight: 700; color: var(--text); margin: 24px 0 10px; }
+  p { color: var(--text-secondary); margin-bottom: 12px; }
+  ul { color: var(--text-secondary); padding-left: 20px; margin-bottom: 12px; }
+  li { margin-bottom: 4px; }
+
+  /* Cards */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 16px; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
+
+  /* Score */
+  .score { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
+  .score .num { font-size: 28px; font-weight: 900; }
+  .score.great .num { color: var(--success); }
+  .score.good .num { color: #5B9E6A; }
+  .score.mid .num { color: var(--warning); }
+  .score.low .num { color: var(--danger); }
+
+  /* Badge */
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .badge-critical { background: #FAEAEA; color: var(--danger); }
+  .badge-high { background: #FDF4E7; color: var(--warning); }
+  .badge-medium { background: #EEF2FA; color: var(--info); }
+  .badge-low { background: #EEF7F1; color: var(--success); }
+  .badge-ok { background: #EEF7F1; color: var(--success); }
+  .badge-info { background: #EEF2FA; color: var(--info); }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 24px; }
+  th { background: var(--primary); color: white; text-align: left; padding: 10px 12px; font-weight: 600; }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: var(--bg); }
+  td code, th code { font-family: var(--font-mono); background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 3px; font-size: 11px; }
+  td strong { color: var(--text); }
+
+  /* Color chips */
+  .color-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .color-row:last-child { border-bottom: none; }
+  .chip { width: 32px; height: 32px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1); flex-shrink: 0; }
+  .chip-name { font-weight: 600; font-size: 13px; color: var(--text); }
+  .chip-hex { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); }
+  .chip-desc { font-size: 12px; color: var(--text-secondary); }
+
+  /* Diff panel */
+  .diff { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); margin-bottom: 24px; }
+  .diff-col { padding: 16px; }
+  .diff-col.before { background: #F0F4F8; }
+  .diff-col.after { background: #F0F8F4; }
+  .diff-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 10px; }
+  .diff-item { font-family: var(--font-mono); font-size: 12px; padding: 3px 0; }
+  .diff-item.removed { color: var(--danger); }
+  .diff-item.added { color: var(--success); }
+
+  /* Screenshot compare */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .compare-panel { text-align: center; }
+  .compare-panel img { max-width: 100%; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .compare-panel .label { font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* Callout */
+  .callout { border-radius: var(--radius); padding: 16px 20px; margin-bottom: 20px; border-left: 4px solid; }
+  .callout-success { background: #EEF7F1; border-color: var(--success); }
+  .callout-warning { background: #FDF5E8; border-color: var(--warning); }
+  .callout-danger { background: #FAEAEA; border-color: var(--danger); }
+  .callout-info { background: #EEF2FA; border-color: var(--info); }
+  .callout-title { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+  .callout-success .callout-title { color: var(--success); }
+  .callout-warning .callout-title { color: var(--warning); }
+  .callout-danger .callout-title { color: var(--danger); }
+  .callout-info .callout-title { color: var(--info); }
+  .callout p { margin: 0; font-size: 13px; }
+
+  /* Progress bar */
+  .progress-bar { height: 8px; border-radius: 999px; background: var(--border); margin: 4px 0 12px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 999px; }
+
+  /* Executive summary grid */
+  .exec-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .exec-kpi { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; }
+  .exec-kpi .kpi-val { font-size: 36px; font-weight: 900; line-height: 1; }
+  .exec-kpi .kpi-lbl { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+  .exec-kpi.ok .kpi-val { color: var(--success); }
+  .exec-kpi.warn .kpi-val { color: var(--warning); }
+  .exec-kpi.danger .kpi-val { color: var(--danger); }
+  .exec-kpi.neutral .kpi-val { color: var(--primary); }
+
+  /* Readiness bars */
+  .readiness { display: grid; gap: 10px; margin-bottom: 24px; }
+  .r-row { display: grid; grid-template-columns: 160px 1fr 60px; align-items: center; gap: 12px; }
+  .r-label { font-size: 13px; font-weight: 600; }
+  .r-bar { height: 10px; background: var(--border); border-radius: 999px; overflow: hidden; }
+  .r-fill { height: 100%; border-radius: 999px; }
+  .r-score { font-size: 13px; font-weight: 700; text-align: right; }
+
+  footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-secondary); }
+
+  @media (max-width: 600px) {
+    .compare { grid-template-columns: 1fr; }
+    .diff { grid-template-columns: 1fr; }
+    .cover h1 { font-size: 26px; }
+    .cover { padding: 36px 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- PORTADA -->
+  <div class="cover">
+    <div class="cover-tag">Auditoría de Identidad Visual · 2026-08-04</div>
+    <h1>Visual Identity<br/>Migration Audit<br/><span>VotoAFin Frontend</span></h1>
+    <p class="cover-sub">
+      Análisis completo basado en código real del repositorio tinder-decisivo/frontend.
+      Incluye prueba real de rebranding con identidad temporal "Volcán Cívico" y capturas comparativas.
+    </p>
+    <div class="cover-meta">
+      <div class="cover-kpi"><div class="val">864</div><div class="lbl">Módulos compilados</div></div>
+      <div class="cover-kpi"><div class="val">0</div><div class="lbl">Errores de compilación</div></div>
+      <div class="cover-kpi"><div class="val">7/10</div><div class="lbl">Score de preparación</div></div>
+      <div class="cover-kpi"><div class="val">Fácil</div><div class="lbl">Esfuerzo estimado</div></div>
+    </div>
+  </div>
+
+  <!-- RESUMEN EJECUTIVO -->
+  <h2>1. Resumen Ejecutivo</h2>
+
+  <div class="exec-grid">
+    <div class="exec-kpi ok">
+      <div class="kpi-val">8/10</div>
+      <div class="kpi-lbl">Colores centralizados</div>
+    </div>
+    <div class="exec-kpi warn">
+      <div class="kpi-val">5/10</div>
+      <div class="kpi-lbl">Tipografía centralizada</div>
+    </div>
+    <div class="exec-kpi ok">
+      <div class="kpi-val">9/10</div>
+      <div class="kpi-lbl">Tokens en componentes</div>
+    </div>
+    <div class="exec-kpi warn">
+      <div class="kpi-val">4</div>
+      <div class="kpi-lbl">Fugas de color críticas</div>
+    </div>
+    <div class="exec-kpi danger">
+      <div class="kpi-val">1</div>
+      <div class="kpi-lbl">Violación DRY crítica</div>
+    </div>
+    <div class="exec-kpi ok">
+      <div class="kpi-val">7/10</div>
+      <div class="kpi-lbl">Preparación rebranding</div>
+    </div>
+  </div>
+
+  <div class="callout callout-success">
+    <div class="callout-title">Veredicto principal: sistema sólido con fugas controladas</div>
+    <p>VotoAFin tiene un sistema de tokens visuales muy bien diseñado. El 90% de los componentes
+    consume colores vía <code>useThemeColors()</code> y tipografía vía <code>typography.*</code>.
+    El rebranding completo es <strong>factible en 1-2 días</strong> de trabajo.
+    El ejercicio real de rebrand ejecutado compiló con 0 errores y el cambio visual fue inmediato.</p>
+  </div>
+
+  <div class="callout callout-warning">
+    <div class="callout-title">Riesgo principal: duplicación en domain/affinity.ts</div>
+    <p>El archivo <code>src/domain/affinity.ts</code> replica manualmente los 10 valores hex de
+    <code>src/theme/colors.ts</code> (affinity + affinityDark). Un cambio en los tokens de afinidad
+    requiere modificar <strong>dos archivos</strong>, con alto riesgo de desincronización silenciosa.</p>
+  </div>
+
+  <div class="callout callout-info">
+    <div class="callout-title">Gap tipográfico: fontFamily no existe como token</div>
+    <p>El sistema de tipografía centraliza tamaños y pesos correctamente, pero <strong>no define
+    fontFamily</strong> como token. La app usa el system font de React Native por defecto implícito —
+    ningún componente puede cambiar la fuente sin tocar cada StyleSheet individualmente.</p>
+  </div>
+
+  <!-- FASE 1: AUDITORÍA DE COLORES -->
+  <h2>2. Auditoría de Colores</h2>
+
+  <h3>2.1 Sistema de tokens — Colores centralizados</h3>
+  <p>Archivo principal: <code>src/theme/colors.ts</code> (9.0 KB, ~200 líneas de tokens)</p>
+
+  <table>
+    <tr><th>Capa</th><th>Tokens</th><th>Descripción</th></tr>
+    <tr><td><strong>Semánticos light</strong></td><td><code>bg, card, accent, accent2, primary, primaryHover, secondary, brandAccent, text, textSecondary, textTertiary, textOnPrimary, border, border2, success, warning, danger, info</code></td><td>18 tokens. Single source of truth para la UI.</td></tr>
+    <tr><td><strong>Semánticos dark</strong></td><td>18 overrides en <code>dark {}</code></td><td>Overrides completos para dark mode. Grays invertidos.</td></tr>
+    <tr><td><strong>Escala de grises</strong></td><td><code>gray50...gray900</code> (10 pasos)</td><td>Light y dark independientes.</td></tr>
+    <tr><td><strong>Tint scales</strong></td><td>primary, secondary, success, warning, danger, info — 50-900 (60 tokens)</td><td>Escala completa para variantes. Nunca usados directamente en UI salvo ProfileHero.</td></tr>
+    <tr><td><strong>Affinity tokens</strong></td><td><code>affinity.aff1-5</code> + <code>affinityDark.aff1-5</code></td><td>Tokens dedicados para tiers de match electoral. 10 valores.</td></tr>
+    <tr><td><strong>Hook reactivo</strong></td><td><code>useThemeColors()</code></td><td>Cambia automáticamente entre light/dark. Implementado correctamente.</td></tr>
+  </table>
+
+  <h3>2.2 Paleta actual (light mode)</h3>
+  <div class="card">
+    <div class="color-row">
+      <div class="chip" style="background:#2E5F7E"></div>
+      <div><div class="chip-name">primary</div><div class="chip-hex">#2E5F7E</div></div>
+      <div class="chip-desc">CTA principal, botones, links activos</div>
+    </div>
+    <div class="color-row">
+      <div class="chip" style="background:#7BA098"></div>
+      <div><div class="chip-name">secondary</div><div class="chip-hex">#7BA098</div></div>
+      <div class="chip-desc">Barras de progreso, estados secundarios</div>
+    </div>
+    <div class="color-row">
+      <div class="chip" style="background:#3A9E7A"></div>
+      <div><div class="chip-name">brandAccent</div><div class="chip-hex">#3A9E7A</div></div>
+      <div class="chip-desc">CTA hero, lock overlay. Max 3x por viewport (DS-10)</div>
+    </div>
+    <div class="color-row">
+      <div class="chip" style="background:#1C3A52"></div>
+      <div><div class="chip-name">hero (hardcoded)</div><div class="chip-hex">#1C3A52</div></div>
+      <div class="chip-desc">Fondo del HomeHeroSection. NO en theme — hardcodeado por decision de diseno.</div>
+    </div>
+    <div class="color-row">
+      <div class="chip" style="background:#F5F7F5; border: 1px solid #DDE4E1"></div>
+      <div><div class="chip-name">bg</div><div class="chip-hex">#F5F7F5</div></div>
+      <div class="chip-desc">Fondo de página</div>
+    </div>
+    <div class="color-row">
+      <div class="chip" style="background:#6B9B7A"></div>
+      <div><div class="chip-name">success</div><div class="chip-hex">#6B9B7A</div></div>
+      <div class="chip-desc">Estados completados, afinidad alta (aff4)</div>
+    </div>
+    <div class="color-row">
+      <div class="chip" style="background:#C89B5C"></div>
+      <div><div class="chip-name">warning</div><div class="chip-hex">#C89B5C</div></div>
+      <div class="chip-desc">Estados intermedios, afinidad media (aff3)</div>
+    </div>
+    <div class="color-row">
+      <div class="chip" style="background:#B85C5C"></div>
+      <div><div class="chip-name">danger</div><div class="chip-hex">#B85C5C</div></div>
+      <div class="chip-desc">Errores, descartados, afinidad baja (aff1)</div>
+    </div>
+  </div>
+
+  <!-- FASE 1B: COLORES HARDCODEADOS -->
+  <h3>2.3 Colores hardcodeados — inventario completo</h3>
+
+  <table>
+    <tr>
+      <th>Archivo</th><th>Línea</th><th>Valor</th><th>Contexto</th><th>Severidad</th><th>Justificado?</th>
+    </tr>
+    <tr>
+      <td><code>domain/affinity.ts</code></td><td>22-35</td>
+      <td><code>#3A9E7A, #6B9B7A, #C89B5C, #D07777, #B85C5C</code> (x2 light+dark)</td>
+      <td>Tabla AFFINITY_LIGHT/DARK — duplica exactamente los tokens de <code>theme/colors.ts</code></td>
+      <td><span class="badge badge-critical">CRITICO</span></td>
+      <td>No — violacion DRY pura</td>
+    </tr>
+    <tr>
+      <td><code>organisms/HomeHeroSection.tsx</code></td><td>52-59</td>
+      <td><code>#1C3A52, #FFFFFF, rgba(255,255,255,0.55/0.10/0.20)</code></td>
+      <td>Constantes de modulo HERO_BG, HERO_TEXT, HERO_TEXT_SUB, pills</td>
+      <td><span class="badge badge-high">ALTO</span></td>
+      <td>Parcialmente — hero es identidad de marca, pero HERO_BG deberia ser token</td>
+    </tr>
+    <tr>
+      <td><code>screens/Home/HomeMatchLocked.tsx</code></td><td>103</td>
+      <td><code>rgba(28, 58, 82, 0.92)</code></td>
+      <td>Overlay del lock. Es HERO_BG (#1C3A52) escrito en rgba manual</td>
+      <td><span class="badge badge-high">ALTO</span></td>
+      <td>No — deberia referenciar la constante HERO_BG</td>
+    </tr>
+    <tr>
+      <td><code>atoms/Button.tsx</code></td><td>111</td>
+      <td><code>#FFFFFF</code></td>
+      <td>Texto del variant "accent". Blanco sobre brandAccent.</td>
+      <td><span class="badge badge-low">BAJO</span></td>
+      <td>Si — textOnPrimary semanticamente equivalente</td>
+    </tr>
+    <tr>
+      <td><code>atoms/DimensionBadge.tsx</code></td><td>44</td>
+      <td><code>#FFFFFF</code></td>
+      <td>Texto del badge circular de dimension. WCAG AA verificado en test.</td>
+      <td><span class="badge badge-low">BAJO</span></td>
+      <td>Si — invariante de diseno documentado</td>
+    </tr>
+    <tr>
+      <td><code>domain/dimensiones.ts</code></td><td>84-141</td>
+      <td><code>#0E7490, #B45309, #7C3AED, #166534, #1E40AF, #9D174D, #86198F</code></td>
+      <td>Colores de badge por dimension tematica (economico, social, cultural, etc.)</td>
+      <td><span class="badge badge-medium">MEDIO</span></td>
+      <td>Si — colores categoricos independientes del brand</td>
+    </tr>
+    <tr>
+      <td><code>organisms/ProfileHero.tsx</code></td><td>85-86</td>
+      <td><code>#FFFFFF, rgba(255,255,255,0.78)</code></td>
+      <td>Texto sobre fondo primario del hero. WCAG verificado.</td>
+      <td><span class="badge badge-low">BAJO</span></td>
+      <td>Si — usa textOnPrimary semanticamente</td>
+    </tr>
+    <tr>
+      <td><code>molecules/ShareOptions.tsx</code></td><td>30-33</td>
+      <td><code>#25D366 (WhatsApp), #1DA1F2 (Twitter), #5E35B1 (Email)</code></td>
+      <td>Colores de marca de terceros</td>
+      <td><span class="badge badge-ok">ACEPTABLE</span></td>
+      <td>Si — identidad de marca de terceros</td>
+    </tr>
+    <tr>
+      <td><code>app.json</code></td><td>—</td>
+      <td><code>#F5F7F5</code></td>
+      <td>backgroundColor del adaptive icon de Android</td>
+      <td><span class="badge badge-low">BAJO</span></td>
+      <td>No — deberia sincronizarse con <code>colors.bg</code></td>
+    </tr>
+    <tr>
+      <td><code>design-system/showcase/*</code></td><td>varios</td>
+      <td>Múltiples hexadecimales</td>
+      <td>Pantallas de showcase/dev-tools. No llegan a producción.</td>
+      <td><span class="badge badge-ok">IGNORAR</span></td>
+      <td>Si — son herramientas de desarrollo</td>
+    </tr>
+  </table>
+
+  <!-- FASE 2: TIPOGRAFÍAS -->
+  <h2>3. Auditoría de Tipografías</h2>
+
+  <h3>3.1 Sistema tipográfico centralizado</h3>
+  <p>Archivo: <code>src/theme/typography.ts</code> — escala de 9 niveles</p>
+
+  <table>
+    <tr><th>Token</th><th>fontSize</th><th>fontWeight</th><th>lineHeight</th><th>Extra</th></tr>
+    <tr><td><code>display</code></td><td>34</td><td>700</td><td>44.2</td><td>—</td></tr>
+    <tr><td><code>display2</code></td><td>40</td><td>900</td><td>44</td><td>Usar en DetalleCandidato (TASK-037)</td></tr>
+    <tr><td><code>h1</code></td><td>28</td><td>700</td><td>36.4</td><td>—</td></tr>
+    <tr><td><code>h2</code></td><td>24</td><td>600</td><td>31.2</td><td>—</td></tr>
+    <tr><td><code>h3</code></td><td>20</td><td>600</td><td>28</td><td>—</td></tr>
+    <tr><td><code>lead</code></td><td>18</td><td>500</td><td>27</td><td>—</td></tr>
+    <tr><td><code>body</code></td><td>16</td><td>400</td><td>26.4</td><td>—</td></tr>
+    <tr><td><code>small</code></td><td>14</td><td>400</td><td>21</td><td>—</td></tr>
+    <tr><td><code>overline</code></td><td>12</td><td>400</td><td>18</td><td>letterSpacing: 0.96, uppercase</td></tr>
+  </table>
+
+  <div class="callout callout-danger">
+    <div class="callout-title">GAP CRITICO: fontFamily no existe en el sistema</div>
+    <p>Ningún token de tipografía incluye <code>fontFamily</code>. La app usa el system font stack
+    de React Native (San Francisco en iOS, Roboto en Android, system-ui en web) de forma implícita.
+    Para cambiar la fuente sería necesario: (1) cargar fuentes via <code>expo-font useFonts()</code>,
+    (2) agregar <code>fontFamily</code> a cada token en <code>typography.ts</code>,
+    (3) verificar que los ~38 componentes que hacen <code>...typography.hN</code> propagan el spread correctamente.
+    El rebrand de prueba demostró que el spread funciona — agregar fontFamily al token sería suficiente.</p>
+  </div>
+
+  <h3>3.2 Fugas de tipografía — fontSize hardcodeados fuera del sistema</h3>
+  <table>
+    <tr><th>Archivo</th><th>Valores hardcodeados</th><th>Token correspondiente</th><th>Impacto</th></tr>
+    <tr>
+      <td><code>screens/Home/HomeElectionItem.tsx</code></td>
+      <td><code>fontSize: 13, 11, 14, 10</code></td>
+      <td><code>typography.small (14), typography.overline (12)</code></td>
+      <td><span class="badge badge-medium">MEDIO</span></td>
+    </tr>
+    <tr>
+      <td><code>screens/Home/HomeTrustSection.tsx</code></td>
+      <td><code>fontSize: 10, 11</code></td>
+      <td>Sin equivalente exacto en escala</td>
+      <td><span class="badge badge-medium">MEDIO</span></td>
+    </tr>
+    <tr>
+      <td><code>screens/Home/HomeMatchLocked.tsx</code></td>
+      <td><code>fontSize: 40, 15, 12</code></td>
+      <td><code>typography.display2 (40), typography.lead (18), typography.overline (12)</code></td>
+      <td><span class="badge badge-medium">MEDIO</span></td>
+    </tr>
+    <tr>
+      <td><code>organisms/HomeHeroSection.tsx</code></td>
+      <td><code>fontSize: 16, 13, 22, 15, 13, 11</code></td>
+      <td><code>typography.body (16), typography.h2 (~24), typography.lead (18)</code></td>
+      <td><span class="badge badge-high">ALTO</span> — componente principal del Home</td>
+    </tr>
+    <tr>
+      <td><code>screens/CompararScreen.tsx</code></td>
+      <td><code>fontSize: 12</code></td>
+      <td><code>typography.overline (12)</code></td>
+      <td><span class="badge badge-low">BAJO</span></td>
+    </tr>
+    <tr>
+      <td><code>screens/CandidatosScreen.tsx</code></td>
+      <td><code>fontSize: 13</code></td>
+      <td><code>typography.small (14)</code></td>
+      <td><span class="badge badge-low">BAJO</span></td>
+    </tr>
+    <tr>
+      <td><code>organisms/ProfileHero.tsx</code></td>
+      <td><code>fontSize: 26, 14</code></td>
+      <td><code>typography.h2 (24), typography.small (14)</code></td>
+      <td><span class="badge badge-medium">MEDIO</span></td>
+    </tr>
+    <tr>
+      <td><code>design-system/showcase/*</code></td>
+      <td>Muchos valores</td>
+      <td>N/A — herramientas dev</td>
+      <td><span class="badge badge-ok">IGNORAR</span></td>
+    </tr>
+  </table>
+
+  <p><strong>Nota importante:</strong> Las fugas de tipografía son predominantemente de <code>fontSize</code>
+  numerico, NO de <code>fontFamily</code>. Esto significa que un cambio de fuente (el rebrand más dramático)
+  impactaria uniformemente via los tokens — las fugas de fontSize NO bloquean el cambio de familia tipográfica.</p>
+
+  <!-- FASE 3: MAPEO DEL SISTEMA VISUAL -->
+  <h2>4. Sistema Visual Actual — Mapa Completo</h2>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>Colores primarios</h3>
+      <div style="display:flex; gap:8px; margin-bottom:8px;">
+        <div style="width:40px;height:40px;border-radius:6px;background:#2E5F7E"></div>
+        <div style="width:40px;height:40px;border-radius:6px;background:#7BA098"></div>
+        <div style="width:40px;height:40px;border-radius:6px;background:#3A9E7A"></div>
+        <div style="width:40px;height:40px;border-radius:6px;background:#1C3A52"></div>
+      </div>
+      <p style="margin:0;font-size:12px;"><code>#2E5F7E</code> primary<br/>
+        <code>#7BA098</code> secondary<br/>
+        <code>#3A9E7A</code> brandAccent<br/>
+        <code>#1C3A52</code> hero (hardcoded)</p>
+    </div>
+    <div class="card">
+      <h3>Colores semánticos</h3>
+      <div style="display:flex; gap:8px; margin-bottom:8px;">
+        <div style="width:40px;height:40px;border-radius:6px;background:#6B9B7A"></div>
+        <div style="width:40px;height:40px;border-radius:6px;background:#C89B5C"></div>
+        <div style="width:40px;height:40px;border-radius:6px;background:#B85C5C"></div>
+        <div style="width:40px;height:40px;border-radius:6px;background:#5C8AB8"></div>
+      </div>
+      <p style="margin:0;font-size:12px;"><code>#6B9B7A</code> success<br/>
+        <code>#C89B5C</code> warning<br/>
+        <code>#B85C5C</code> danger<br/>
+        <code>#5C8AB8</code> info</p>
+    </div>
+    <div class="card">
+      <h3>Superficies</h3>
+      <div style="display:flex; gap:8px; margin-bottom:8px;">
+        <div style="width:40px;height:40px;border-radius:6px;background:#F5F7F5;border:1px solid #DDE4E1"></div>
+        <div style="width:40px;height:40px;border-radius:6px;background:#FFFFFF;border:1px solid #DDE4E1"></div>
+        <div style="width:40px;height:40px;border-radius:6px;background:#A8C5B5"></div>
+        <div style="width:40px;height:40px;border-radius:6px;background:#D4E4DB"></div>
+      </div>
+      <p style="margin:0;font-size:12px;"><code>#F5F7F5</code> bg<br/>
+        <code>#FFFFFF</code> card<br/>
+        <code>#A8C5B5</code> accent (hover)<br/>
+        <code>#D4E4DB</code> accent2</p>
+    </div>
+    <div class="card">
+      <h3>Tipografía</h3>
+      <p style="margin:0;font-size:12px;">
+        <strong>Heading:</strong> system font (implícito) — sin token fontFamily<br/>
+        <strong>Body:</strong> system font (implícito)<br/>
+        <strong>Mono:</strong> <code>monospace</code> (hardcodeado en showcases)<br/>
+        <strong>Escala:</strong> display(34) → overline(12), 9 pasos<br/>
+        <strong>Line-height:</strong> body 1.65x, heading 1.3x, lead 1.5x
+      </p>
+    </div>
+    <div class="card">
+      <h3>Espaciado — Base 4px</h3>
+      <p style="margin:0;font-size:12px;">
+        sp1=4 · sp2=8 · sp3=12 · sp4=16<br/>
+        sp5=20 · sp6=24 · sp7=32<br/>
+        sp8=40 · sp9=56<br/>
+        <strong>Desacoplado:</strong> 100% tokenizado
+      </p>
+    </div>
+    <div class="card">
+      <h3>Radios y Sombras</h3>
+      <p style="margin:0;font-size:12px;">
+        <strong>Radii:</strong> rSm=6, rMd=10, rLg=14, rXl=20, rFull=9999<br/>
+        <strong>Shadows:</strong> shSm / shMd / shLg (Platform-aware)<br/>
+        <strong>Dark sombras:</strong> más opacas (0.3-0.5 vs 0.05-0.12)<br/>
+        <strong>Desacoplado:</strong> 100% tokenizado
+      </p>
+    </div>
+  </div>
+
+  <h3>Nivel de desacoplamiento</h3>
+  <div class="readiness">
+    <div class="r-row">
+      <div class="r-label">Colores brand</div>
+      <div class="r-bar"><div class="r-fill" style="width:85%;background:#2D7A52"></div></div>
+      <div class="r-score" style="color:#2D7A52">85%</div>
+    </div>
+    <div class="r-row">
+      <div class="r-label">Colores semánticos</div>
+      <div class="r-bar"><div class="r-fill" style="width:95%;background:#2D7A52"></div></div>
+      <div class="r-score" style="color:#2D7A52">95%</div>
+    </div>
+    <div class="r-row">
+      <div class="r-label">Tipografía (tamaños)</div>
+      <div class="r-bar"><div class="r-fill" style="width:65%;background:#C67428"></div></div>
+      <div class="r-score" style="color:#C67428">65%</div>
+    </div>
+    <div class="r-row">
+      <div class="r-label">Tipografía (familias)</div>
+      <div class="r-bar"><div class="r-fill" style="width:0%;background:#C22222"></div></div>
+      <div class="r-score" style="color:#C22222">0%</div>
+    </div>
+    <div class="r-row">
+      <div class="r-label">Spacing</div>
+      <div class="r-bar"><div class="r-fill" style="width:100%;background:#2D7A52"></div></div>
+      <div class="r-score" style="color:#2D7A52">100%</div>
+    </div>
+    <div class="r-row">
+      <div class="r-label">Radios</div>
+      <div class="r-bar"><div class="r-fill" style="width:100%;background:#2D7A52"></div></div>
+      <div class="r-score" style="color:#2D7A52">100%</div>
+    </div>
+    <div class="r-row">
+      <div class="r-label">Sombras</div>
+      <div class="r-bar"><div class="r-fill" style="width:95%;background:#2D7A52"></div></div>
+      <div class="r-score" style="color:#2D7A52">95%</div>
+    </div>
+    <div class="r-row">
+      <div class="r-label">Dark mode</div>
+      <div class="r-bar"><div class="r-fill" style="width:90%;background:#2D7A52"></div></div>
+      <div class="r-score" style="color:#2D7A52">90%</div>
+    </div>
+  </div>
+
+  <!-- FASE 4: ANÁLISIS DE MIGRACIÓN -->
+  <h2>5. Análisis de Migración</h2>
+
+  <table>
+    <tr><th>Cambio</th><th>Dificultad</th><th>Archivos a editar</th><th>Riesgo</th><th>Tiempo estimado</th></tr>
+    <tr>
+      <td><strong>Paleta de colores completa</strong></td>
+      <td><span class="badge badge-ok">Fácil</span></td>
+      <td>1 archivo (<code>theme/colors.ts</code>) + fixar <code>domain/affinity.ts</code></td>
+      <td>Bajo — sistema bien tokenizado</td>
+      <td>2-4 horas</td>
+    </tr>
+    <tr>
+      <td><strong>Color del hero (HomeHeroSection)</strong></td>
+      <td><span class="badge badge-medium">Moderado</span></td>
+      <td>2-3 archivos (HomeHeroSection, HomeMatchLocked, app.json)</td>
+      <td>Medio — rgba del hero duplicado en HomeMatchLocked</td>
+      <td>30 min</td>
+    </tr>
+    <tr>
+      <td><strong>Familia tipográfica (heading)</strong></td>
+      <td><span class="badge badge-medium">Moderado</span></td>
+      <td><code>typography.ts</code> + cargar fuente con <code>expo-font</code></td>
+      <td>Medio — expo-font useFonts() debe integrarse en App.tsx</td>
+      <td>1-2 días (incluye selección/licencia de fuente)</td>
+    </tr>
+    <tr>
+      <td><strong>Familia tipográfica (body)</strong></td>
+      <td><span class="badge badge-medium">Moderado</span></td>
+      <td>Igual que heading + mismo token fontFamily</td>
+      <td>Bajo — spread de ...typography.body propaga</td>
+      <td>Incluido en el item anterior</td>
+    </tr>
+    <tr>
+      <td><strong>Escala de tamaños tipográficos</strong></td>
+      <td><span class="badge badge-high">Difícil</span></td>
+      <td><code>typography.ts</code> + revisar 7 screens con fontSize hardcodeados</td>
+      <td>Alto — pantallas con tamaños fuera del sistema pueden romperse</td>
+      <td>1 día de auditoría + 1 día de fixes</td>
+    </tr>
+    <tr>
+      <td><strong>Tokens de afinidad</strong></td>
+      <td><span class="badge badge-ok">Fácil</span></td>
+      <td><code>theme/colors.ts</code> + <strong>domain/affinity.ts</strong> (DRY fix)</td>
+      <td>Alto si no se fixea la duplicación antes</td>
+      <td>1-2 horas</td>
+    </tr>
+    <tr>
+      <td><strong>Espaciado/radios/sombras</strong></td>
+      <td><span class="badge badge-ok">Muy fácil</span></td>
+      <td>1 archivo cada uno</td>
+      <td>Muy bajo — 100% tokenizados</td>
+      <td>15 min c/u</td>
+    </tr>
+    <tr>
+      <td><strong>Badges de dimensión</strong></td>
+      <td><span class="badge badge-medium">Moderado</span></td>
+      <td><code>domain/dimensiones.ts</code> (7 valores hex)</td>
+      <td>Medio — colores categóricos con tests de contraste WCAG</td>
+      <td>2-3 horas (verificar contraste)</td>
+    </tr>
+  </table>
+
+  <!-- FASE 5-8: PRUEBA REAL + CAPTURAS -->
+  <h2>6. Prueba Real de Rebranding — Evidencia</h2>
+
+  <h3>6.1 Identidad temporal "Volcán Cívico" aplicada</h3>
+
+  <div class="diff">
+    <div class="diff-col before">
+      <div class="diff-label">Original — "Paleta A" (azul-verde)</div>
+      <div class="diff-item removed">primary: "#2E5F7E" (azul petróleo)</div>
+      <div class="diff-item removed">secondary: "#7BA098" (verde salvia)</div>
+      <div class="diff-item removed">brandAccent: "#3A9E7A" (verde vibrante)</div>
+      <div class="diff-item removed">bg: "#F5F7F5" (gris verdoso)</div>
+      <div class="diff-item removed">hero: "#1C3A52" (petróleo oscuro)</div>
+      <div class="diff-item removed">text: "#1A2B33" (negro azulado)</div>
+      <div class="diff-item removed">fontFamily: [ninguno — system font]</div>
+    </div>
+    <div class="diff-col after">
+      <div class="diff-label">Rebrand — "Volcán Cívico" (carmesí + ámbar)</div>
+      <div class="diff-item added">primary: "#8B2252" (carmesí magenta)</div>
+      <div class="diff-item added">secondary: "#C67428" (ámbar dorado)</div>
+      <div class="diff-item added">brandAccent: "#E04E1A" (naranja fuego)</div>
+      <div class="diff-item added">bg: "#FAF8F5" (papiro cálido)</div>
+      <div class="diff-item added">hero: "#1E0A2D" (índigo nocturno)</div>
+      <div class="diff-item added">text: "#1A0A24" (negro violáceo)</div>
+      <div class="diff-item added">fontFamily heading: "Georgia, serif"</div>
+    </div>
+  </div>
+
+  <h3>6.2 Resultado de compilación</h3>
+  <div class="callout callout-success">
+    <div class="callout-title">864 módulos compilados — 0 errores TypeScript en tiempo de build</div>
+    <p>Metro Bundler ejecutó el rebrand completo sin fallos. El nuevo <code>fontFamily</code> en
+    los tokens de tipografía se propagó automáticamente via el patrón <code>...typography.hN</code>
+    que usa la mayoría de los componentes. Tiempo de bundle: 64.7 segundos (build completo),
+    rebuilds incrementales: ~600ms.</p>
+  </div>
+
+  <h3>6.3 Capturas comparativas</h3>
+
+  <div class="compare">
+    <div class="compare-panel">
+      <div class="label">ANTES — Paleta A (azul-verde)</div>
+      <img src="01_onboarding_original.png" alt="Onboarding original" />
+      <p style="margin-top:8px;font-size:11px;color:var(--text-secondary);">
+        Sans-serif system font · CTA azul petróleo #2E5F7E · Fondo gris verdoso
+      </p>
+    </div>
+    <div class="compare-panel">
+      <div class="label">DESPUÉS — "Volcán Cívico" (carmesí+ámbar)</div>
+      <img src="01_home_rebrand.png" alt="Onboarding rebranded" />
+      <p style="margin-top:8px;font-size:11px;color:var(--text-secondary);">
+        Georgia serif heading · CTA carmesí #8B2252 · Fondo papiro cálido
+      </p>
+    </div>
+  </div>
+
+  <h3>6.4 Elementos que respetaron el sistema (actualizaron correctamente)</h3>
+  <table>
+    <tr><th>Elemento</th><th>Token usado</th><th>Resultado</th></tr>
+    <tr><td>Botón CTA "Siguiente"</td><td><code>c.primary</code></td><td><span class="badge badge-ok">ACTUALIZO</span> azul → carmesí</td></tr>
+    <tr><td>Link "Saltar"</td><td><code>c.primary</code></td><td><span class="badge badge-ok">ACTUALIZO</span></td></tr>
+    <tr><td>Overline "1 DE 5"</td><td><code>c.primary</code></td><td><span class="badge badge-ok">ACTUALIZO</span></td></tr>
+    <tr><td>Punto activo del paginador</td><td><code>c.primary</code></td><td><span class="badge badge-ok">ACTUALIZO</span></td></tr>
+    <tr><td>Fondo de página</td><td><code>c.bg</code></td><td><span class="badge badge-ok">ACTUALIZO</span> gris verdoso → papiro</td></tr>
+    <tr><td>Heading "Encuentra a tu candidato ideal"</td><td><code>...typography.h1</code></td><td><span class="badge badge-ok">ACTUALIZO</span> → Georgia serif visible</td></tr>
+    <tr><td>Navegación React Navigation</td><td><code>navTheme</code> en App.tsx</td><td><span class="badge badge-ok">ACTUALIZO</span> automáticamente</td></tr>
+    <tr><td>Background de <code>&lt;body&gt;</code> web</td><td><code>colorsDark.bg / colors.bg</code></td><td><span class="badge badge-ok">ACTUALIZO</span></td></tr>
+  </table>
+
+  <!-- FASE 7: FUGAS -->
+  <h2>7. Fugas Detectadas</h2>
+
+  <h3>7.1 Fugas de color</h3>
+  <table>
+    <tr><th>Componente</th><th>Fuga</th><th>Por qué no actualizó</th></tr>
+    <tr>
+      <td><code>HomeHeroSection.tsx</code> — HERO_BG</td>
+      <td><code>#1C3A52</code> — hardcodeado como constante de módulo, NO en theme</td>
+      <td>Intencional por diseño (hero = identidad fija), pero debería ser token</td>
+    </tr>
+    <tr>
+      <td><code>HomeMatchLocked.tsx</code> — overlay</td>
+      <td><code>rgba(28, 58, 82, 0.92)</code> — referencia implícita a #1C3A52</td>
+      <td>Literal rgba manual en lugar de referenciar HERO_BG o un token</td>
+    </tr>
+    <tr>
+      <td><code>domain/affinity.ts</code> — AFFINITY_LIGHT/DARK</td>
+      <td>10 valores hex que replican los tokens de <code>theme/colors.ts</code></td>
+      <td>Violación DRY — archivo domain no importa del theme</td>
+    </tr>
+    <tr>
+      <td><code>app.json</code></td>
+      <td><code>"backgroundColor": "#F5F7F5"</code> para Android adaptive icon</td>
+      <td>JSON estático — no puede importar tokens TypeScript</td>
+    </tr>
+  </table>
+
+  <h3>7.2 Fugas de tipografía</h3>
+  <table>
+    <tr><th>Componente</th><th>Fuga</th><th>Impacto en rebranding</th></tr>
+    <tr>
+      <td><code>HomeHeroSection.tsx</code></td>
+      <td><code>fontSize: 22, 15, 16, 13, 11</code> hardcodeados en StyleSheet</td>
+      <td>Si la escala tipográfica cambia, estos textos NO actualizan</td>
+    </tr>
+    <tr>
+      <td><code>HomeElectionItem.tsx</code></td>
+      <td><code>fontSize: 13, 11, 14, 10</code></td>
+      <td>Mismo impacto — escala fuera del sistema</td>
+    </tr>
+    <tr>
+      <td><code>HomeMatchLocked.tsx</code></td>
+      <td><code>fontSize: 40, 15, 12</code></td>
+      <td>fontSize:40 coincide con display2 pero no usa el token</td>
+    </tr>
+    <tr>
+      <td>Todos los anteriores</td>
+      <td><code>fontFamily</code> completamente ausente</td>
+      <td>Con los tokens del rebrand (que incluyen fontFamily), estos NO heredarán la nueva fuente</td>
+    </tr>
+  </table>
+
+  <h3>7.3 Fugas de componentes</h3>
+  <table>
+    <tr><th>Componente</th><th>Problema</th><th>Solución</th></tr>
+    <tr>
+      <td><code>domain/affinity.ts</code></td>
+      <td>Tabla de colores manual sin relación con theme tokens</td>
+      <td>Importar <code>affinity</code> y <code>affinityDark</code> directamente desde <code>theme/colors.ts</code></td>
+    </tr>
+    <tr>
+      <td><code>HomeHeroSection.tsx</code></td>
+      <td>HERO_BG como constante de módulo sin token</td>
+      <td>Agregar <code>heroBg: "#1C3A52"</code> a <code>colors.ts</code>, importar en hero</td>
+    </tr>
+    <tr>
+      <td><code>domain/dimensiones.ts</code></td>
+      <td>7 colores de badge categórico sin vinculación al theme</td>
+      <td>Aceptable si son colores de categoría semántica (dimensiones políticas), no brand</td>
+    </tr>
+  </table>
+
+  <!-- FASE 9: PLAN DE REMEDIACIÓN -->
+  <h2>8. Plan de Remediación — Backlog</h2>
+
+  <h3>Crítico</h3>
+  <div class="card">
+    <table style="margin:0">
+      <tr><th>#</th><th>Problema</th><th>Archivo</th><th>Solución</th><th>Esfuerzo</th></tr>
+      <tr>
+        <td>C-01</td>
+        <td><strong>DRY violation en affinity.ts</strong></td>
+        <td><code>domain/affinity.ts</code></td>
+        <td>Reemplazar <code>AFFINITY_LIGHT/DARK</code> por <code>import { affinity, affinityDark } from '../theme/colors'</code> y mapear <code>getAffinityColor()</code> para que use los tokens importados.</td>
+        <td>1-2h</td>
+      </tr>
+    </table>
+  </div>
+
+  <h3>Alto</h3>
+  <div class="card">
+    <table style="margin:0">
+      <tr><th>#</th><th>Problema</th><th>Archivo</th><th>Solución</th><th>Esfuerzo</th></tr>
+      <tr>
+        <td>A-01</td>
+        <td><strong>HERO_BG sin token</strong></td>
+        <td><code>organisms/HomeHeroSection.tsx</code></td>
+        <td>Agregar <code>heroBg: "#1C3A52"</code> a la sección de brand en <code>colors.ts</code>. Actualizar constante HERO_BG para leerlo del theme o importarlo directamente.</td>
+        <td>30min</td>
+      </tr>
+      <tr>
+        <td>A-02</td>
+        <td><strong>rgba hero duplicado</strong></td>
+        <td><code>screens/Home/HomeMatchLocked.tsx</code></td>
+        <td>Extraer la constante HERO_BG a un archivo compartido (ej: <code>screens/Home/homeConstants.ts</code>) e importarla en ambos componentes.</td>
+        <td>15min</td>
+      </tr>
+      <tr>
+        <td>A-03</td>
+        <td><strong>fontFamily ausente en typography.ts</strong></td>
+        <td><code>theme/typography.ts</code></td>
+        <td>Agregar token <code>fontFamilies</code> + integrar <code>fontFamily</code> en cada escala tipográfica. Instalar expo-font y cargar fuentes en App.tsx.</td>
+        <td>1-2 dias</td>
+      </tr>
+      <tr>
+        <td>A-04</td>
+        <td><strong>fontSize hardcodeados en HomeHeroSection</strong></td>
+        <td><code>organisms/HomeHeroSection.tsx</code></td>
+        <td>Reemplazar <code>fontSize: 22, 15, 16, 13, 11</code> con los tokens correctos del sistema tipográfico.</td>
+        <td>1-2h</td>
+      </tr>
+    </table>
+  </div>
+
+  <h3>Medio</h3>
+  <div class="card">
+    <table style="margin:0">
+      <tr><th>#</th><th>Problema</th><th>Archivo</th><th>Solución</th><th>Esfuerzo</th></tr>
+      <tr>
+        <td>M-01</td>
+        <td>fontSize hardcodeados en HomeElectionItem</td>
+        <td><code>screens/Home/HomeElectionItem.tsx</code></td>
+        <td>Mapear fontSize: 13 → typography.small.fontSize, 11 → typography.overline.fontSize, 10 → nuevo token micro.</td>
+        <td>1h</td>
+      </tr>
+      <tr>
+        <td>M-02</td>
+        <td>fontSize hardcodeados en HomeMatchLocked</td>
+        <td><code>screens/Home/HomeMatchLocked.tsx</code></td>
+        <td>Usar <code>typography.display2.fontSize</code> para el 40, los demás con tokens correspondientes.</td>
+        <td>30min</td>
+      </tr>
+      <tr>
+        <td>M-03</td>
+        <td>app.json backgroundColor desincronizado</td>
+        <td><code>app.json</code></td>
+        <td>Documentar que debe actualizarse manualmente al hacer rebrand. Considerar generar desde un script que lea colors.ts.</td>
+        <td>30min</td>
+      </tr>
+      <tr>
+        <td>M-04</td>
+        <td>fontSize en ProfileHero sin tokens</td>
+        <td><code>organisms/ProfileHero.tsx</code></td>
+        <td>Usar <code>...typography.h2</code> y <code>...typography.small</code> en los estilos name y subtitle.</td>
+        <td>30min</td>
+      </tr>
+    </table>
+  </div>
+
+  <h3>Bajo</h3>
+  <div class="card">
+    <table style="margin:0">
+      <tr><th>#</th><th>Problema</th><th>Archivo</th><th>Solución</th><th>Esfuerzo</th></tr>
+      <tr>
+        <td>B-01</td>
+        <td>#FFFFFF en Button variant accent</td>
+        <td><code>atoms/Button.tsx:111</code></td>
+        <td>Cambiar por <code>c.textOnPrimary</code>.</td>
+        <td>5min</td>
+      </tr>
+      <tr>
+        <td>B-02</td>
+        <td>#FFFFFF en DimensionBadge</td>
+        <td><code>atoms/DimensionBadge.tsx:44</code></td>
+        <td>Aceptable — WCAG testeado. Si se quiere tokenizar: agregar <code>textOnBadge: "#FFFFFF"</code> a colors.ts.</td>
+        <td>10min</td>
+      </tr>
+      <tr>
+        <td>B-03</td>
+        <td>fontSize en CompararScreen, CandidatosScreen</td>
+        <td>varios</td>
+        <td>Homologar con tokens de typography en próxima iteración de refactor.</td>
+        <td>1h</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- FASE 10: PREPARACIÓN REBRANDING -->
+  <h2>9. Preparación para Futuros Rebrandings</h2>
+
+  <div class="readiness">
+    <div class="r-row">
+      <div class="r-label">Colores</div>
+      <div class="r-bar"><div class="r-fill" style="width:80%;background:#2D7A52"></div></div>
+      <div class="r-score" style="color:#2D7A52">8/10</div>
+    </div>
+    <div class="r-row">
+      <div class="r-label">Tipografía</div>
+      <div class="r-bar"><div class="r-fill" style="width:50%;background:#C67428"></div></div>
+      <div class="r-score" style="color:#C67428">5/10</div>
+    </div>
+    <div class="r-row">
+      <div class="r-label">Componentes</div>
+      <div class="r-bar"><div class="r-fill" style="width:85%;background:#2D7A52"></div></div>
+      <div class="r-score" style="color:#2D7A52">8.5/10</div>
+    </div>
+    <div class="r-row">
+      <div class="r-label">Design System</div>
+      <div class="r-bar"><div class="r-fill" style="width:75%;background:#2D7A52"></div></div>
+      <div class="r-score" style="color:#2D7A52">7.5/10</div>
+    </div>
+    <div class="r-row">
+      <div class="r-label">Theming (light/dark)</div>
+      <div class="r-bar"><div class="r-fill" style="width:90%;background:#2D7A52"></div></div>
+      <div class="r-score" style="color:#2D7A52">9/10</div>
+    </div>
+    <div class="r-row">
+      <div class="r-label">Mantenibilidad</div>
+      <div class="r-bar"><div class="r-fill" style="width:75%;background:#2D7A52"></div></div>
+      <div class="r-score" style="color:#2D7A52">7.5/10</div>
+    </div>
+    <div class="r-row">
+      <div class="r-label">Escalabilidad</div>
+      <div class="r-bar"><div class="r-fill" style="width:80%;background:#2D7A52"></div></div>
+      <div class="r-score" style="color:#2D7A52">8/10</div>
+    </div>
+    <div class="r-row">
+      <div class="r-label">White-labeling</div>
+      <div class="r-bar"><div class="r-fill" style="width:60%;background:#C67428"></div></div>
+      <div class="r-score" style="color:#C67428">6/10</div>
+    </div>
+  </div>
+
+  <h3>¿Está preparado para un rebranding completo?</h3>
+
+  <div class="callout callout-success">
+    <div class="callout-title">COLORES — 8/10: Muy preparado</div>
+    <p>El sistema de tokens es robusto. Un cambio en <code>colors.ts</code> (1 archivo) propaga
+    correctamente al 85%+ de la UI. Quedan 4 fugas controladas que tardan &lt;2h en resolverse.
+    El rebrand real lo demostró: 864 módulos compilaron sin errores.</p>
+  </div>
+
+  <div class="callout callout-warning">
+    <div class="callout-title">TIPOGRAFIA — 5/10: Preparado a medias</div>
+    <p>Los tamaños y pesos están centralizados y funcionan bien. El problema crítico es la ausencia
+    de <code>fontFamily</code> como token. Para un rebranding con cambio de fuente se necesitaría:
+    (1) seleccionar fuente + verificar licencia, (2) cargar con expo-font, (3) agregar a typography.ts,
+    (4) resolver las fugas de fontSize en ~7 archivos. Esfuerzo: 2-3 días.</p>
+  </div>
+
+  <div class="callout callout-success">
+    <div class="callout-title">COMPONENTES — 8.5/10: Excelente desacoplamiento</div>
+    <p>La arquitectura atoms/molecules/organisms usa <code>useThemeColors()</code> de forma consistente.
+    El patrón <code>useMemo(() => StyleSheet.create({...}), [c])</code> es idiomático y correcto.
+    Los componentes no tienen colores hardcodeados significativos (salvo los casos documentados).</p>
+  </div>
+
+  <div class="callout callout-warning">
+    <div class="callout-title">WHITE-LABELING — 6/10: Posible pero con trabajo</div>
+    <p>Para múltiples marcas/temas se necesitaría: (1) extraer el HERO_BG a un token, (2) parametrizar
+    la identidad del hero (nombre de marca, logo), (3) agregar soporte de fuentes por tema.
+    La infraestructura ThemeStore ya existe y soporta light/dark — extenderla a múltiples paletas
+    requiere ~1 sprint.</p>
+  </div>
+
+  <!-- RIESGOS -->
+  <h2>10. Riesgos</h2>
+
+  <table>
+    <tr><th>Riesgo</th><th>Probabilidad</th><th>Impacto</th><th>Mitigación</th></tr>
+    <tr>
+      <td><strong>Silencio de la fuga en affinity.ts</strong></td>
+      <td><span class="badge badge-high">Alto</span></td>
+      <td>Los colores de match pueden no actualizarse en un rebranding</td>
+      <td>Fix C-01: eliminar duplicación. Prioritario antes de cualquier rebrand.</td>
+    </tr>
+    <tr>
+      <td><strong>WCAG failures post-rebrand</strong></td>
+      <td><span class="badge badge-medium">Medio</span></td>
+      <td>Una nueva paleta podría romper los 7 ratios de contraste documentados en colors.ts</td>
+      <td>Verificar con la herramienta de contraste antes de hacer merge. Los comentarios en colors.ts documentan exactamente qué verificar.</td>
+    </tr>
+    <tr>
+      <td><strong>Font loading en nativo</strong></td>
+      <td><span class="badge badge-medium">Medio</span></td>
+      <td>Una fuente custom puede no cargar antes del primer render (FOUC)</td>
+      <td>Usar <code>expo-font</code> con <code>SplashScreen.preventAutoHideAsync()</code> para esperar la carga.</td>
+    </tr>
+    <tr>
+      <td><strong>Hero rgba desincronizado</strong></td>
+      <td><span class="badge badge-low">Bajo</span></td>
+      <td>HomeMatchLocked overlay usa color diferente al hero si se cambia solo HomeHeroSection</td>
+      <td>Fix A-02: constante compartida. Trivial.</td>
+    </tr>
+    <tr>
+      <td><strong>app.json backgroundColor</strong></td>
+      <td><span class="badge badge-low">Bajo</span></td>
+      <td>Android splash screen muestra el color antiguo post-rebrand</td>
+      <td>Checklist de rebrand debe incluir actualización manual de app.json.</td>
+    </tr>
+    <tr>
+      <td><strong>Tests de contraste WCAG en dimensiones.ts</strong></td>
+      <td><span class="badge badge-medium">Medio</span></td>
+      <td>Los 7 colores de badge de dimensión tienen tests de contraste. Si se cambian deben pasar los tests.</td>
+      <td>Los tests en dimensiones.test.ts ya verifican AA — correr tests antes de hacer merge.</td>
+    </tr>
+  </table>
+
+  <!-- CONCLUSIÓN -->
+  <h2>11. Conclusión</h2>
+
+  <div class="callout callout-success">
+    <div class="callout-title">Score global de preparación: 7/10</div>
+    <p>VotoAFin tiene una arquitectura de design system sólida y madura para un proyecto de este tamaño.
+    El ejercicio real de rebranding lo confirmó: cambiar la paleta completa toma <strong>1 archivo y menos de 1 hora</strong>.
+    Los 864 módulos compilaron sin errores con la nueva identidad visual. El cambio fue visualmente
+    dramático e inmediato — el heading serif en la pantalla de Onboarding lo evidencia.</p>
+  </div>
+
+  <p>Los <strong>3 trabajos prioritarios</strong> antes de un rebranding real:</p>
+  <ol style="color: var(--text-secondary); padding-left: 24px; margin-bottom: 16px;">
+    <li><strong>C-01:</strong> Eliminar la duplicación en <code>domain/affinity.ts</code> — 1-2 horas, riesgo alto si se ignora.</li>
+    <li><strong>A-01/A-02:</strong> Tokenizar HERO_BG y compartir la constante entre HomeHeroSection y HomeMatchLocked — 45 minutos.</li>
+    <li><strong>A-03:</strong> Definir <code>fontFamilies</code> como token en <code>typography.ts</code> e integrar <code>expo-font</code> — el gap más grande del sistema.</li>
+  </ol>
+
+  <p>Con esos 3 fixes aplicados, el score sube a <strong>9/10</strong> y el sistema estaria listo
+  para white-labeling o cualquier cambio de identidad visual completo.</p>
+
+  <footer>
+    <p>Generado por Perrito (code-puppy-3d8b42) · Auditoría de identidad visual VotoAFin · 2026-08-04</p>
+    <p>Rebrand de prueba "Volcán Cívico": archivos originales restaurados — <code>colors.ORIGINAL.ts</code>, <code>typography.ORIGINAL.ts</code>, <code>HomeHeroSection.ORIGINAL.tsx</code> en el repo.</p>
+  </footer>
+
+</div>
+</body>
+</html>

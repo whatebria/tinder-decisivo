@@ -4,36 +4,30 @@
  * Convierte un porcentaje de match (0-100) al token de color correcto
  * segun el sistema DS-08 (Affinity Tiers). Funciones puras, sin deps React.
  *
- * Tokens definidos en ds-shared.css:
- *   --c-aff5: #3A9E7A  (81-100%)  verde acento
- *   --c-aff4: #6B9B7A  (61-80%)   verde bosque (success)
- *   --c-aff3: #C89B5C  (41-60%)   mostaza (warning)
- *   --c-aff2: #D07777  (21-40%)   terracota media
- *   --c-aff1: #B85C5C  (0-20%)    terracota (danger)
+ * FIX C-01 (auditoría visual 2026-08-04): eliminada la duplicación DRY.
+ * AFFINITY_LIGHT y AFFINITY_DARK ya no replican hexadecimales aqui.
+ * Se importan directamente desde theme/colors.ts como fuente única de verdad.
  *
- * Dark mode: colores aclarados para contraste sobre bg oscuro.
- * Nota: aff5 light (#3A9E7A) == --c-accent del DS.
+ * ANTES (violacion DRY): este archivo mantenia sus propias tablas de 10 hex
+ * que duplicaban los tokens affinity/affinityDark de theme/colors.ts.
+ * Un cambio en la paleta requeria editar DOS archivos con riesgo de desync.
+ *
+ * AHORA: un cambio en theme/colors.ts propaga automaticamente aqui.
  */
+
+import { affinity, affinityDark } from "../theme/colors";
 
 export type AffinityTier = 1 | 2 | 3 | 4 | 5;
 
-/** Hexadecimales exactos de ds-shared.css — no cambiar sin actualizar el DS. */
-const AFFINITY_LIGHT: Record<AffinityTier, string> = {
-  5: "#3A9E7A",
-  4: "#6B9B7A",
-  3: "#C89B5C",
-  2: "#D07777",
-  1: "#B85C5C",
-};
-
-/** Versiones aclaradas para dark mode (misma proporcion que success/warning/danger dark). */
-const AFFINITY_DARK: Record<AffinityTier, string> = {
-  5: "#5BCEA0",
-  4: "#8FB89A",
-  3: "#D9B378",
-  2: "#D07777",
-  1: "#D07777",
-};
+// Mapa tier numerico → key del token de afinidad.
+// Los tokens usan keys "aff1"-"aff5"; el tier es el numero directamente.
+const TIER_KEY: Record<AffinityTier, keyof typeof affinity> = {
+  5: "aff5",
+  4: "aff4",
+  3: "aff3",
+  2: "aff2",
+  1: "aff1",
+} as const;
 
 /**
  * Retorna el tier (1-5) de afinidad para un porcentaje dado.
@@ -51,11 +45,13 @@ export function getAffinityTier(pct: number): AffinityTier {
 
 /**
  * Retorna el color hex del tier de afinidad para el porcentaje dado.
+ * Lee directamente desde los tokens de theme/colors.ts (single source of truth).
  *
- * @param pct — 0 a 100.
+ * @param pct    — 0 a 100.
  * @param isDark — si true, retorna la variante dark mode.
  */
 export function getAffinityColor(pct: number, isDark = false): string {
   const tier = getAffinityTier(pct);
-  return isDark ? AFFINITY_DARK[tier] : AFFINITY_LIGHT[tier];
+  const key = TIER_KEY[tier];
+  return isDark ? affinityDark[key] : affinity[key];
 }
