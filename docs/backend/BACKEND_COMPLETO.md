@@ -1060,7 +1060,7 @@ Sin `ready()` — los signals se conectan vía decorators `@receiver` al importa
 ### `core/authentication.py`
 
 #### `ExpiringTokenAuthentication(TokenAuthentication)`
-Token de DRF con TTL configurable vía `settings.TOKEN_TTL_DAYS` (default 30).
+Token de DRF con TTL configurable vía `settings.TOKEN_TTL_DAYS` (default 7).
 
 **`authenticate_credentials(key)`**:
 - Llama al `super()`. Toma `token.created`, calcula `expira_en = created + timedelta(days=ttl)`.
@@ -1271,7 +1271,7 @@ Si hay errores o `dry-run` → `transaction.set_rollback(True)`. Muestra los pri
 #### `fetch_noticias.py`
 **Help**: `"Fetch de noticias por candidato desde Google News RSS."`
 
-Constante: `GOOGLE_NEWS_RSS = "https://news.googlom/rss/search?q={query}&hl=es-CL&gl=CL&ceid=CL:es-419"`.
+Constante: `GOOGLE_NEWS_RSS = "https://news.google.com/rss/search?q={query}&hl=es-CL&gl=CL&ceid=CL:es-419"`.
 
 **Args**: `--candidato-id` (default None = todos), `--max=10`, `--extra-keyword="candidato"`, `--dry-run`.
 
@@ -1400,5 +1400,41 @@ Constante `DIMENSIONES = ("economico", "social", "cultural", "ambiental", "insti
 Dict grande `DATA[orden]` con `"explicacion"` (texto largo educativo/neutro) y `"repercusiones"` (dict con 5 dimensiones cada una en texto largo). Cubre 12 preguntas indexadas por `orden`.
 
 **Flujo**: por cada `orden` → `Pregunta.objects.filter(orden=orden)` (puede haber varias en distintos tipos). Valida que las 5 dimensiones estén presentes; si no, error y skip. Setea `p.explicacion` y `p.repercusiones` con `save(update_fields=[...])`. Con `--dry-run` no guarda. Reporta counts + preguntas no encontradas.
+
+---
+
+### Comandos utilitarios / mantenimiento de datos
+
+#### `dedup_preguntas_base.py`
+**Help**: `"Resuelve duplicados de ordenes 1-8 en el tipo de eleccion base."`
+
+Comando one-shot de migración de datos. Solo funciona con `DEBUG=True`.
+
+Classifica duplicados en dos categorías:
+- **REWRITES** (misma pregunta, mejor redacción): migra `RespuestaUsuario` y `PosturaCandidato` de la pregunta vieja a la nueva, luego borra la vieja. Afecta órdenes 1,2,3,4,6.
+- **COLISIONES** (preguntas distintas que colisionaron en el mismo orden por error): renumera la segunda a un orden libre (18, 19, 20). Afecta órdenes 5, 7, 8.
+
+#### `ensure_dev_superuser.py`
+**Help**: `"Crea un superusuario de desarrollo si no existe ninguno."`  
+**Args**: `--reset` (fuerza nueva password).  
+Solo funciona con `DEBUG=True` — lanza error inmediato en producción.
+
+Credenciales por defecto (sobreescribibles vía env):
+- `DJANGO_DEV_SUPERUSER_USERNAME` (default: `admin`)
+- `DJANGO_DEV_SUPERUSER_EMAIL` (default: `admin@localhost`)
+- `DJANGO_DEV_SUPERUSER_PASSWORD` (default: `admin1234`)
+
+#### `seed_posturas_base.py`
+**Help**: `"Genera posturas sinteticas para TODOS los candidatos en las preguntas base."`  
+**Args**: `--update`, `--dry-run`, `--tipo-eleccion <nombre>`.  
+Solo funciona con `DEBUG=True`.
+
+Genera posturas de forma **determinista**: hash de `apellido + pregunta_id` → valor 1..5 (variedad garantizada). Marca cada postura con `justificacion="[SEED-DEBUG] ..."` para distinguirlas de posturas reales. Útil para testing: sin él, candidatos no aparecen en ranking si el user solo respondió preguntas base.
+
+#### `enrich_senadores.py`
+**Help**: `"Enriquece candidatos Senadores 2025 con datos oficiales del Senado."`  
+**Args**: `--csv <ruta>` (default `senadores_senado.csv`), `--dry-run`.
+
+Lee un CSV generado por `scripts/fetch_senado.py` y actualiza campos `parlid`, `email`, `curriculum_url`, `fono` en candidatos existentes. Matching por `apellido_paterno + nombre` (case-insensitive, normaliza espacios). Ambigüedad o no-encontrado → reporta pero no falla.
 
 ---
