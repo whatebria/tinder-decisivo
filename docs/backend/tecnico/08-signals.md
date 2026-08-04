@@ -140,6 +140,31 @@ de Region/Distrito/Comuna no re-crean UT (evitar overhead en seeds idempotentes)
 
 ---
 
+### 5. `TipoEleccion` -> invalidar cache de tipos base
+
+**Archivo**: `models/electoral.py`.
+
+```python
+@receiver(post_save, sender=TipoEleccion)
+@receiver(post_delete, sender=TipoEleccion)
+def _invalidar_cache_tipos_base(sender, instance, **kwargs):
+    from ..services.tipos import invalidar_cache_base_tipo_ids
+    invalidar_cache_base_tipo_ids()
+```
+
+**Que hace**: invalida el cache de `get_base_tipo_ids()` en `services/tipos.py`
+cada vez que un `TipoEleccion` se crea, actualiza o borra.
+
+**Por que**: `get_base_tipo_ids()` cachea por 1h para evitar 1 query por request.
+Sin este signal, un cambio en el admin (ej. marcar un tipo como base) no se
+propagaria hasta que el TTL expire. Con el signal: zero staleness garantizado.
+
+**Trade-off**: se dispara en CUALQUIER save de TipoEleccion, aunque `es_base`
+no haya cambiado. Costo: 1 cache delete. Justificado: TipoEleccion cambia
+una vez cada anios; el overhead es despreciable.
+
+---
+
 ## Signals que NO existen (decision consciente)
 
 ### Candidato -> unidad_territorial (removido)
