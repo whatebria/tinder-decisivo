@@ -14,7 +14,7 @@
 | API | Django REST Framework | >=3.15 |
 | DB dev | SQLite | (built-in) |
 | DB prod (planificada) | PostgreSQL | 15+ |
-| Auth | DRF Token Auth | built-in |
+| Auth | CookieTokenAuth + ExpiringTokenAuth | `core/authentication.py` |
 | CORS | django-cors-headers | >=4.4 |
 | OpenAPI | drf-spectacular | >=0.27 |
 | Media cleanup | django-cleanup | >=9.0 |
@@ -45,7 +45,7 @@ backend/
 |   |-- serializers/        # Serializadores DRF
 |   |-- services/           # Logica de negocio pura (fuera de views)
 |   |-- management/commands/ # 16 mgmt commands (seeds + importers + fetch noticias)
-|   |-- migrations/         # 36 migrations (schema + data)
+|   |-- migrations/         # 42 migrations (schema + data)
 |   |-- admin*.py           # Configuraciones del Django admin
 |   |-- urls.py             # Rutas del API v1
 |   |-- test_*.py           # Tests (pytest, colocacion por archivo)
@@ -89,6 +89,7 @@ Todo se lee del `.env` via `python-decouple`. Ver `.env.example` para el listado
 | `ALLOWED_HOSTS` | `127.0.0.1,localhost` | CSV |
 | `LANGUAGE_CODE` | `es-cl` | App chilena |
 | `TIME_ZONE` | `America/Santiago` | |
+| `TOKEN_TTL_DAYS` | `7` | Dias de vida del token de auth. Configurable via env |
 | `CORS_ALLOWED_ORIGINS` | `""` | CSV. En `DEBUG=True` se ignora y se permite todo |
 | `EMAIL_BACKEND` | `console` | `smtp` en prod |
 | `EMAIL_HOST/PORT/TLS/USER/PASSWORD` | - | Solo prod |
@@ -98,8 +99,7 @@ Todo se lee del `.env` via `python-decouple`. Ver `.env.example` para el listado
 ### Bloques importantes
 
 - **DB**: SQLite en `backend/db.sqlite3`. En prod se cambia a Postgres.
-- **DRF**: auth por defecto = `TokenAuthentication`. Permission por defecto = `IsAuthenticated`.
-  Endpoints publicos usan `permission_classes = [AllowAny]` explicitamente.
+- **DRF**: auth por defecto = `CookieTokenAuthentication` (web) + `ExpiringTokenAuthentication` (mobile, header). Ver `core/authentication.py` y `09-auth-y-perfil.md`.
 - **OpenAPI**: `drf-spectacular` sirve el schema en `/api/v1/schema/` y Swagger UI en `/api/v1/docs/`.
 - **Logging**: nivel `INFO` general, `DEBUG` para el logger `core` cuando `DEBUG=True`.
 - **Media**: `MEDIA_ROOT=backend/media/`, servido en `/media/` solo si `DEBUG=True`.
@@ -148,7 +148,6 @@ uv run python manage.py seed_territorio_chile
 uv run python manage.py seed_preguntas_base
 uv run python manage.py seed_presidenciales_2025
 uv run python manage.py seed_diputados_2025
-uv run python manage.py seed_alcaldes_2024
 uv run python manage.py seed_preguntas_por_tipo
 
 # 5. Crear superuser (opcional, para admin)
@@ -221,6 +220,6 @@ Flujo tipico de una request:
 
 ## Siguiente lectura
 
-- `02-modelos.md` - los 12 modelos y sus relaciones.
+- `02-modelos.md` - los 19 modelos y sus relaciones.
 - `03-api-endpoints.md` - lista completa de endpoints.
 - `05-servicios.md` - que hay en `services/` y por que.

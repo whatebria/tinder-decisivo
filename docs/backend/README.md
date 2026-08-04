@@ -10,8 +10,8 @@ por tema. Hay tres vistas paralelas segun tu audiencia y proposito:
 Para quien quiere una descripcion literal de TODO el codigo (cada archivo, cada campo, cada endpoint) sin narrativa ni interpretacion.
 
 - [`BACKEND_COMPLETO.md`](BACKEND_COMPLETO.md) - Secciones 1-7: config, modelos, serializers, services, views/URLs, admin/auth/apps/pagination/conftest, management commands.
-- [`08_migraciones.md`](08_migraciones.md) - las 38 migraciones + squash.
-- [`09_tests.md`](09_tests.md) - los 25 archivos de test descritos por su docstring.
+- [`08_migraciones.md`](08_migraciones.md) - documento legacy: 38 migraciones (pre-0039). Para el historial actualizado ver `tecnico/07-migraciones.md`.
+- [`09_tests.md`](09_tests.md) - documento legacy: 25 archivos de test descritos. Para el estado actual ver `tecnico/10-tests.md`.
 - [`10_fixtures.md`](10_fixtures.md) - CSVs de fixtures + README de importers.
 - [`11_docs_internos.md`](11_docs_internos.md) - el plan de migracion territorial + drift detectado.
 
@@ -20,12 +20,12 @@ Para quien quiere una descripcion literal de TODO el codigo (cada archivo, cada 
 Para devs, revisores tecnicos, tesis capitulo de implementacion.
 
 1. [`01-arquitectura.md`](tecnico/01-arquitectura.md) - stack, layout, apps, config, como levantar el entorno.
-2. [`02-modelos.md`](tecnico/02-modelos.md) - los 12 modelos de dominio con relaciones, constraints y ejemplos.
+2. [`02-modelos.md`](tecnico/02-modelos.md) - los 19 modelos de dominio con relaciones, constraints y ejemplos.
 3. [`03-api-endpoints.md`](tecnico/03-api-endpoints.md) - todos los endpoints REST con metodo, permisos, payload/response.
 4. [`04-algoritmo-matching.md`](tecnico/04-algoritmo-matching.md) - deep-dive del algoritmo de matching y filtro territorial.
 5. [`05-servicios.md`](tecnico/05-servicios.md) - la capa `services/` (matching, respuestas, password_reset, perfil).
 6. [`06-comandos-seeds.md`](tecnico/06-comandos-seeds.md) - los 16 management commands: que hacen, en que orden.
-7. [`07-migraciones.md`](tecnico/07-migraciones.md) - narrativa de las 36 migrations con las decisiones clave.
+7. [`07-migraciones.md`](tecnico/07-migraciones.md) - narrativa de las 42 migrations con las decisiones clave.
 8. [`08-signals.md`](tecnico/08-signals.md) - todos los `post_save` / `pre_save` y su intencion.
 9. [`09-auth-y-perfil.md`](tecnico/09-auth-y-perfil.md) - token auth, registro, password reset, perfil territorial.
 10. [`10-tests.md`](tecnico/10-tests.md) - estrategia de tests, fixtures, como correrlos.
