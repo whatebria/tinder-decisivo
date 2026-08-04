@@ -51,28 +51,43 @@ Los tests viven **al lado del codigo que testean** (test colocation):
 
 ```
 backend/core/
-|-- conftest.py               # Fixtures compartidas
-|-- test_seeds_ficticios.py   # Verifica conteos y idempotencia de seeds
-|-- test_services_matching.py # Algoritmo (helpers puros + calcular_match)
-|-- test_matching_territorial.py # Filtro territorial polimorfico
-|-- test_match_anonimo.py     # Variante guest
-|-- test_match_detalle.py     # Endpoint breakdown
-|-- test_unidad_territorial.py # Modelo UT (signals, jerarquia, endpoint)
-|-- test_perfil.py            # Perfil (cambio password, etc.)
-|-- test_perfil_territorial.py # Actualizacion comuna, sync UT
-|-- test_password_reset.py    # Flujo completo reset
-|-- test_editar_respuestas.py # Service editar_respuesta
-|-- test_reiniciar.py         # Service reiniciar_cuestionario
-|-- test_ejes.py              # Modelo Eje + endpoint
-|-- test_preguntas_por_tipo.py # Endpoint preguntas + tipos base
-|-- test_bookmarks.py         # Bookmarking ViewSets
-|-- test_noticias.py          # Endpoints noticias
-|-- tests.py                  # Auth (registro, login, endpoints protegidos)
-`-- ... (~33 archivos test_*.py)
+|-- conftest.py                    # Fixtures compartidas
+|-- test_algoritmo_matching.py     # Algoritmo de matching (helpers puros + calcular_match)
+|-- test_bookmarks_contenido.py    # Bookmarking ViewSets (favoritos, descartados, posturas, noticias)
+|-- test_candidato_detail_territorial.py  # Detalle de candidato con filtro territorial
+|-- test_candidato_posturas.py     # Endpoint posturas de candidato
+|-- test_candidato_territorial.py  # Filtrado territorial en listado de candidatos
+|-- test_cookie_auth.py            # Auth via cookie httpOnly (TASK-003)
+|-- test_editar_respuestas.py      # Service editar_respuesta
+|-- test_eje_refactor.py           # Modelo Eje + endpoint + signal sync
+|-- test_importers.py              # Management commands de importacion CSV
+|-- test_match_anonimo.py          # Variante guest (match anonimo)
+|-- test_match_detalle.py          # Endpoint breakdown pregunta-a-pregunta
+|-- test_matching_territorial.py   # Filtro territorial polimorfico
+|-- test_mi_progreso.py            # Endpoint GET /api/v1/mi-progreso/
+|-- test_noticias.py               # Endpoints noticias (CRUD)
+|-- test_noticias_feed.py          # Feed de noticias con filtros
+|-- test_noticias_filtros.py       # Filtros del feed de noticias
+|-- test_password_reset.py         # Flujo completo reset de password
+|-- test_perfil.py                 # Perfil (cambio password/username/email, eliminar cuenta)
+|-- test_perfil_territorial.py     # Actualizacion de comuna, sync con UT
+|-- test_preguntas_base.py         # Tipos base + preguntas transversales
+|-- test_preguntas_por_tipo.py     # Endpoint preguntas + tipos base
+|-- test_presidenciales_2025.py    # Seed presidenciales: conteos y posturas
+|-- test_registro.py               # Registro de usuario
+|-- test_reiniciar.py              # Service reiniciar_cuestionario
+|-- test_security_config.py        # Configuracion de seguridad (CORS, cookies, headers)
+|-- test_seeds_ficticios.py        # Verifica conteos y idempotencia de seeds
+|-- test_services_matching.py      # Helpers puros del algoritmo
+|-- test_services_tipos.py         # Cache de tipos base (get_base_tipo_ids)
+|-- test_territorio.py             # Modelos Region/Distrito/Comuna
+`-- test_unidad_territorial.py     # Modelo UT (signals, jerarquia, endpoint)
 
 backend/api/
-`-- test_meta.py              # Valida que el schema OpenAPI se genera OK
+`-- test_meta.py                   # Valida que el schema OpenAPI se genera OK
 ```
+
+**Total: 30 archivos de test en `core/` + 1 en `api/`.**
 
 ---
 
