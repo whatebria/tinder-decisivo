@@ -7,7 +7,7 @@
 
 ## Vista general
 
-Son **12 modelos** (mas `auth.User` y `auth.Token` de Django). Organizados en
+Son **19 modelos** (mas `auth.User` y `auth.Token` de Django). Organizados en
 `core/models/` con **un archivo por bounded context**:
 
 | Archivo | Modelo(s) | Domino |
@@ -108,6 +108,9 @@ Relaciones:
 - `candidatos` (M2M reverse desde `Candidato.tipos_eleccion`)
 - `preguntas` (1:N reverse desde `Pregunta.tipo_eleccion`)
 
+Signal `post_save` / `post_delete`: invalida el cache de `get_base_tipo_ids()` en `services/tipos.py`
+cada vez que un `TipoEleccion` cambia (TTL 1h). Ver `08-signals.md`.
+
 ### 2. `Candidato` (`electoral.py`)
 
 Un candidato registrado, con propuesta electoral y datos personales.
@@ -117,22 +120,25 @@ Un candidato registrado, con propuesta electoral y datos personales.
 | `nombre` | `CharField(100)` | |
 | `apellido` | `CharField(100)` blank | |
 | `partido` | `CharField(200)` | |
-| `bio` | `TextField` null | |
+| `bio` | `TextField` blank/null | |
 | `ciudad` | `CharField(100)` blank | |
 | `propuesta_electoral` | `TextField` | resumen de propuesta |
+| `lista_electoral` | `CharField(200)` blank | Pacto o lista electoral (ej. "Unidad por Chile") |
+| `parlid` | `CharField(20)` blank | ID oficial en sistema del Senado/Camara |
+| `email` | `EmailField` blank | Email de contacto oficial |
+| `curriculum_url` | `URLField` blank | URL al curriculum en senado.cl o camara.cl |
+| `fono` | `CharField(50)` blank | Telefono de contacto oficial |
 | `profile_picture` | `ImageField` | default `assets/default.avif`, upload_to `profiles/` |
 | `tipos_eleccion` | `M2M(TipoEleccion)` | un candidato puede competir en varios tipos |
-| `comuna` | `FK(Comuna)` null PROTECT | usado por alcaldes |
-| `distrito` | `FK(Distrito)` null PROTECT | usado por diputados |
-| `unidad_territorial` | `FK(UnidadTerritorial)` null PROTECT | **nuevo, canonico**. Reemplaza comuna/distrito |
+| `unidad_territorial` | `FK(UnidadTerritorial)` null PROTECT | **canonico**. Alcaldes=nivel comunal, Diputados=distrital, Senadores=regional |
 
 Constraints:
-- `CheckConstraint`: NO puede tener `comuna` Y `distrito` seteados a la vez.
-- `clean()` valida lo mismo con mensaje amigable para admin/forms.
+- `CheckConstraint`: removido (junto con los FK legacy `comuna`/`distrito`).
+- `clean()` no aplica restricciones territoriales — la validacion es por seed/importer.
 
-Property: `alcance_territorial` -> `"nacional" | "distrital" | "comunal"`.
+Property: `alcance_territorial` -> lee `unidad_territorial.nivel`: `"nacional" | "comunal" | "distrital" | "regional" | "provincial"`.
 
-**Nota**: `comuna` y `distrito` son deprecated en favor de `unidad_territorial`, pero siguen soportados para retrocompat. Ver [`../simple/03-como-hace-el-match.md`](../simple/03-como-hace-el-match.md) para la logica de matching territorial.
+**Nota**: `comuna` y `distrito` FK fueron **removidos** del modelo. `unidad_territorial` es el unico FK territorial. Los seeds e importers setean el FK explicitamente.
 
 ### 3. `Pregunta` (`cuestionario.py`)
 
@@ -315,17 +321,16 @@ Classmethod: `default_expires_at()`.
 
 ### 14. Bookmarking (`user_data.py`)
 
-Cinco modelos M2M-through-like para tracking de usuario:
+Cuatro modelos M2M-through-like para tracking de usuario:
 
-| Modelo | Relacion | Descripcion |
-|---|---|---|
-| `CandidatoFavorito` | `(user, candidato)` unique | favoritos del usuario |
-| `CandidatoDescartado` | `(user, candidato)` unique | descartados del usuario |
-| `DecisionFinal` | `(user, tipo_eleccion)` unique | candidato elegido finalmente por tipo de eleccion |
-| `NoticiaBookmark` | `(user, noticia)` unique | noticias guardadas |
-| `PosturaBookmark` | `(user, postura_candidato)` unique | posturas guardadas como cita |
+| Modelo | Relacion | Timestamp | Descripcion |
+|---|---|---|---|
+| `CandidatoFavorito` | `(user, candidato)` unique | `fecha_agregado` | favoritos del usuario |
+| `CandidatoDescartado` | `(user, candidato)` unique | `fecha_descartado` | descartados del usuario |
+| `NoticiaBookmark` | `(user, noticia)` unique | `fecha_agregado` | noticias guardadas |
+| `PosturaBookmark` | `(user, postura_candidato)` unique | `fecha_agregado` | posturas guardadas como cita |
 
-Todos tienen `fecha_agregado` auto_now_add y ordering `-fecha_agregado`.
+Todos tienen ordering por su timestamp desc. `DecisionFinal` fue planeado pero NO existe en el modelo actual.
 
 ---
 
