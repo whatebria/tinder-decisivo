@@ -229,7 +229,7 @@ export function HomeHeroSection({
         <View style={styles.textCol}>
           <Text style={styles.greeting}>{greetingLine}</Text>
           <Text style={styles.headline}>
-            {"Con quien votas\nrealmente?"}
+            {"Encuentra tu\ncandidato ideal"}
           </Text>
         </View>
         {hasRing ? (
