@@ -7,23 +7,39 @@
 
 ## Modelo de auth
 
-Usamos **DRF Token Authentication** built-in. No JWT (no lo necesitamos: la app
-es mobile-first y los tokens de DRF no expiran, lo que simplifica el estado).
+**TASK-003**: implementacion dual. Clases en `core/authentication.py`:
+
+- **`ExpiringTokenAuthentication`**: Token DRF + TTL configurable via `TOKEN_TTL_DAYS`
+  (default 7 dias, configurable via env). Reemplaza el `TokenAuthentication` built-in
+  sin TTL. Al expirar, el token se borra y se devuelve 401.
+- **`CookieTokenAuthentication`**: lee el token desde la cookie httpOnly `auth_token`.
+  Reutiliza la logica de expiracion de `ExpiringTokenAuthentication`. Si no hay cookie,
+  devuelve `None` y DRF cae al siguiente backend (el de header).
 
 Configuracion (`api/settings.py`):
 
 ```python
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.TokenAuthentication",
+        # Web: cookie httpOnly (TASK-003). Mobile: Authorization: Token header.
+        "core.authentication.CookieTokenAuthentication",
+        "core.authentication.ExpiringTokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
 }
+TOKEN_TTL_DAYS = 7  # configurable via env
 ```
 
 Endpoints publicos usan `permission_classes = [AllowAny]` explicito en la view.
+
+**Flujo dual**:
+- **Browser (web)**: login devuelve cookie httpOnly `auth_token` (via `set_auth_cookie`).
+  DRF la lee automaticamente en cada request via `CookieTokenAuthentication`.
+  JavaScript nunca toca el token (proteccion XSS). Cookie `SameSite=Lax` mitiga CSRF.
+- **Mobile nativo**: login devuelve `{token}` en el body JSON. El cliente lo guarda
+  en SecureStore y lo envia como `Authorization: Token <token>` en cada request.
 
 ---
 
@@ -71,14 +87,15 @@ class CustomAuthToken(ObtainAuthToken):
 ```
 
 **Body**: `{username, password}`
-**Response**: `{token, user_id, username}`
+**Response**: `{token, user_id, username}` + cookie httpOnly `auth_token` con TTL `TOKEN_TTL_DAYS`.
 **Errores**: `400` credenciales invalidas (mensaje generico para no filtrar info).
 
 **Notas**:
-- **Token no expira**. Vive hasta que el user lo revoque (o admin lo borre).
-- `get_or_create` evita generar tokens duplicados: si el user ya tiene uno, se reusa.
-- Para "cerrar sesion" -> el frontend simplemente descarta el token localmente.
-  Opcionalmente, borrar el token de la DB (endpoint no expuesto en este MVP).
+- **Token expira** en `TOKEN_TTL_DAYS` dias (default 7). Al expirar, `ExpiringTokenAuthentication`
+  devuelve 401 y el token se borra de DB. El user debe hacer login de nuevo.
+- `get_or_create` evita generar tokens duplicados: si el user ya tiene uno activo, se reusa.
+- **Para cerrar sesion**: `POST /api/v1/logout/`. Invalida el token DRF y limpia la cookie httpOnly.
+  Ver `03-api-endpoints.md`.
 
 ---
 
@@ -193,6 +210,18 @@ Valida:
 - Password nueva distinta de la actual.
 
 Delega en `services/perfil.py::cambiar_password`.
+
+#### `POST /api/v1/perfil/username/`
+Cambia el username del user autenticado. Requiere password actual para confirmar.
+
+Body: `{"username": "nuevo", "password_actual": "..."}`.
+Delega en `services/perfil.py::cambiar_username`. Valida unicidad del nuevo username.
+
+#### `POST /api/v1/perfil/email/`
+Cambia el email del user autenticado. Requiere password actual para confirmar.
+
+Body: `{"email": "nuevo@example.cl", "password_actual": "..."}`.
+Delega en `services/perfil.py::cambiar_email`. Valida formato y unicidad.
 
 ### Por que existe UserProfile (vs custom User model)
 
