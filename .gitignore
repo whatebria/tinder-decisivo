@@ -12,6 +12,17 @@ pip-delete-this-directory.txt
 .coverage
 htmlcov/
 
+# Dataset / scrapers (archivos grandes no relevantes para el repositorio principal)
+dataset/powerbi-scraper/api_dumps/
+dataset/powerbi-scraper/api_dumps_v8/
+dataset/powerbi-scraper/req_dumps/
+dataset/powerbi-scraper/route_dumps/
+dataset/powerbi-scraper/screenshots/
+dataset/powerbi-scraper/*.json
+dataset/powerbi-scraper/*.bin
+dataset/powerbi-scraper/*.csv
+dataset/powerbi-scraper/*.txt
+
 # Django
 *.sqlite3
 *.sqlite3-journal

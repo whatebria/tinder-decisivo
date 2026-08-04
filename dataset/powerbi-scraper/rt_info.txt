@@ -1,8 +1,0 @@
-RestartToken: [["'D74'", "'74.   Matias Jorge Reyes Vargas'", "'Metropolitana De Santiago'", "2010L", "'Distrito 10'", "'Diputado'", "4L", "'https://recursos-powerbi.s3.us-east-1.amazonaws.com/download/2025_elecciones/imagenes/02%20-%20IZQUIERDA%20ECOLOGISTA%20POPULAR%20ANIMALISTA%20Y%20HUMANISTA.jpg'", "'Independiente Humanista'", "'D'", "'D. Izquierda Ecologista Popular Animalista y Humanista'"]]
-HasAdditionalData: True
-
-result[0].DS[0] keys: ['N', 'PH', 'IC', 'HAD', 'ValueDicts']
-  HAD: True
-result[1].DS[0] keys: ['N', 'PH', 'IC', 'RT', 'ValueDicts']
-  RT type: list
-  RT value: [["'D74'", "'74.   Matias Jorge Reyes Vargas'", "'Metropolitana De Santiago'", "2010L", "'Distrito 10'", "'Diputado'", "4L", "'https://recursos-powerbi.s3.us-east-1.amazonaws.com/download/2025_elecciones/imagenes/02%20-%20IZQUIERDA%20ECOLOGISTA%20POPULAR%20ANIMALISTA%20Y%20HUMANISTA.jpg'", "'Indepen
