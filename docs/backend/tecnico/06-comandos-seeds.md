@@ -49,18 +49,7 @@ plausible por distrito (`DISTRIBUCION_DIPUTADOS` en `_data_candidatos_ficticios.
 Posturas por partido (no por candidato individual): asume que todos los diputados
 de un mismo partido tienen posturas identicas. Simplificacion para MVP.
 
-Idempotente por `(nombre, apellido, distrito)`.
-
-#### `seed_alcaldes_2024`
-Crea `TipoEleccion` "Alcaldes 2024" + **1038 alcaldes ficticios** (3 por comuna x 346).
-
-Igual que diputados: sinteticos, posturas por partido. Usa `bulk_create` para
-performance (fresh seed en ~8s, idempotente en ~2s).
-
-**Nota importante**: `bulk_create` NO dispara signals. El seed setea
-`unidad_territorial` explicitamente durante el bulk (indice por codigo comuna).
-
-Idempotente por `(nombre, apellido, comuna)`.
+Idempotente por `(nombre, apellido, partido)`.
 
 #### `seed_parlamentaria`
 Legacy: crea data de ejemplo para una eleccion Parlamentaria 2025 (mixto senadores +
@@ -103,6 +92,31 @@ Importa posturas de **Requiere `justificacion` y `fuente_url` no
 vacias** para trazabilidad (no aceptamos posturas sin fuente).
 
 Idempotente por `(candidato, pregunta)`.
+
+#### `seed_posturas_base`
+Genera posturas sinteticas en preguntas base para todos los candidatos existentes.
+Solo para entornos `DEBUG=True`. Usa `bulk_create` con `ignore_conflicts`.
+
+Utilidad: en dev, permite que el match funcione desde el inicio sin cargar posturas reales.
+
+### Utilidades y mantenimiento
+
+#### `ensure_dev_superuser`
+Crea un superusuario de desarrollo predefinido (solo si `DEBUG=True`). Util en setup inicial
+local para acceder al admin sin crear el user manualmente.
+
+#### `dedup_preguntas_base`
+Corrige ordenes duplicados en preguntas base: migra rewrites y renumera colisiones.
+Uso puntual cuando se detectan duplicados tras edicion manual de seeds.
+
+#### `enrich_senadores`
+Enriquece candidatos tipo senador con datos oficiales: `parlid`, `email`,
+`curriculum_url`, `fono`. Lee desde CSV exportado del sitio del Senado.
+
+#### `limpiar_tokens_viejos`
+Borra `Token` de auth DRF con `created` anterior al TTL configurado.
+Diseñado para correr como cronjob periodico. Mantiene la tabla limpia
+sin afectar sessions activas.
 
 ### Tareas periodicas
 
@@ -176,7 +190,7 @@ Los seeds de gran volumen usan patron **"index in memory + bulk_create"**:
 # Despues: 3 SELECT + 1 bulk_create + 1 bulk_create = 5 queries
 ```
 
-Detalle en `seed_alcaldes_2024.py` y `seed_preguntas_por_tipo.py`.
+Detalle en `seed_preguntas_por_tipo.py` y seeds de candidatos.
 
 Cuando `bulk_create` bypassa signals, los FKs derivados
 (ej. `Candidato.unidad_territorial`) se pre-indexan y setean **explicitamente**
