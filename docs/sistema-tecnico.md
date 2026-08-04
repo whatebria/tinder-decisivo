@@ -54,59 +54,65 @@ backend/
 │   ├── urls.py                   # incluye core.urls bajo /api/v1/
 │   └── wsgi.py
 ├── core/                         # Unica app funcional
-│   ├── models.py                 # 11 modelos
-│   ├── views.py                  # views + viewsets + algoritmo matching
-│   ├── serializers.py            # DRF serializers
+│   ├── models/                   # 19 modelos en submodulos por dominio
+│   │   ├── electoral.py          # TipoEleccion, Candidato, Eje
+│   │   ├── cuestionario.py       # Pregunta, OpcionRespuesta, PosturaCandidato
+│   │   ├── user_data.py          # RespuestaUsuario, MatchCandidato, bookmarks
+│   │   ├── territorio.py         # Region, Distrito, Comuna, UnidadTerritorial
+│   │   ├── perfil.py             # UserProfile
+│   │   ├── noticias.py           # Noticia, NoticiaBookmark
+│   │   └── __init__.py           # re-exports
+│   ├── views/                    # Views DRF en submodulos
+│   ├── services/                 # Logica de negocio (matching, perfil, reset)
+│   ├── serializers/              # DRF serializers
+│   ├── authentication.py         # CookieTokenAuth + ExpiringTokenAuth
 │   ├── urls.py                   # rutas /api/v1/*
-│   ├── admin.py                  # registro admin de todos los modelos
-│   ├── management/commands/      # 5 comandos idempotentes
-│   │   ├── import_preguntas.py
-│   │   ├── import_candidatos.py
-│   │   ├── import_posturas.py
-│   │   ├── fetch_noticias.py
-│   │   └── seed_explicaciones_preguntas.py
-│   └── migrations/               # 22 migrations
-├── fixtures/
-│   ├── candidatos_ejemplo.csv
-│   ├── preguntas_ejemplo.csv
-│   ├── posturas_template.csv
-│   ├── posturas_draft_verificar.csv    # 72 filas draft
-│   └── README.md                 # fuentes aceptables / no aceptables
-├── media/                        # ImageField uploads (gitignored)
-├── tests/                        # 46 tests
+│   ├── admin.py
+│   ├── management/commands/      # 16 comandos (seeds + importers + utilities)
+│   └── migrations/               # 42 migrations
+├── media/
 ├── .env.example
 ├── manage.py
-└── pyproject.toml                # gestionado por uv
+└── pyproject.toml
 ```
 
-### Modelos (11 en total)
+### Modelos (19 en total)
+
+> Detalle completo en [`backend/tecnico/02-modelos.md`](backend/tecnico/02-modelos.md).
 
 Agrupados por dominio:
 
 **Catalogo electoral**:
-- `TipoEleccion` — Presidencial, Parlamentaria, Regional, Municipal
-- `Candidato` — nombre, apellido, partido, propuesta, foto, M2M con `TipoEleccion`
-- `Pregunta` — texto, eje, orden, `explicacion`, `repercusiones` (5 dims)
-- `OpcionRespuesta` — texto, valor Likert (1-5), `es_no_se` flag
+- `TipoEleccion` — Presidencial, Diputados, etc.
+- `Eje` — categoria tematica (7 canonicos: ECONOMIA, SOCIEDAD, AMBIENTE, SEGURIDAD, DDHH, INTERNACIONAL, INSTITUCIONAL)
+- `Candidato` — nombre, apellido, partido, foto, lista_electoral, parlid, unidad_territorial (FK)
+- `Pregunta` — texto, eje (FK), orden, explicacion, repercusiones
+- `OpcionRespuesta` — texto, valor Likert (1-5), es_no_se flag
 
 **Interaccion del usuario**:
 - `RespuestaUsuario` — user + pregunta + opcion elegida + peso (0-3)
 - `PosturaCandidato` — candidato + pregunta + opcion + justificacion + fuente_url
-- `MatchCandidato` — user + candidato + porcentaje + breakdown + confianza
+- `MatchCandidato` — user + candidato + porcentaje + breakdown_por_eje + confianza
 
 **Bookmarking**:
 - `CandidatoFavorito`
 - `CandidatoDescartado`
-- `DecisionFinal` — user + tipo_eleccion + candidato final (unique_together)
+- `NoticiaBookmark`
+- `PosturaBookmark`
 
-**Contenido asociado**:
-- `Noticia` — titulo, url, fuente, M2M con `Candidato`
+**Territorio**:
+- `Region`, `Distrito`, `Comuna` (catalogo INE)
+- `UnidadTerritorial` — abstraccion polimorfica (nacional/regional/distrital/comunal)
+
+**Perfil y contenido**:
+- `UserProfile` — OneToOne con User, comarca + unidad_territorial
+- `Noticia` — titulo, url, fuente, M2M con Candidato
+- `PasswordResetToken`
 
 **Constraints clave**:
-- `unique_together` en `RespuestaUsuario(user, pregunta)`: un usuario responde una pregunta una sola vez
-- `unique_together` en `MatchCandidato(user, candidato)`: un match por par
-- `unique_together` en `PosturaCandidato(candidato, pregunta)`: una postura por par
-- `UniqueConstraint` condicional en `Noticia.url` cuando no es vacio
+- `unique(user, pregunta)` en RespuestaUsuario
+- `unique(user, candidato)` en MatchCandidato
+- `unique(candidato, pregunta)` en PosturaCandidato
 
 ### Endpoints REST v1
 
@@ -128,52 +134,41 @@ Base: `/api/v1/`
 | GET/PUT/DELETE | `noticias/<pk>/` | mixed | Detalle/edicion |
 | CRUD | `candidatos-favoritos/` | Token | Favoritos del user |
 | CRUD | `descartados/` | Token | Descartados del user |
-| CRUD | `decision-final/` | Token | Decision final (1 por tipo eleccion) |
+
+> **Nota**: ver listado completo y actualizado en [`backend/tecnico/03-api-endpoints.md`](backend/tecnico/03-api-endpoints.md).
 
 **Schema OpenAPI**: disponible en `/api/schema/` (yaml) y `/api/schema/swagger-ui/`.
 
 ### Auth flow
 
-1. `POST /api/v1/register/` con `{username, email, password}` → `{token, user_id, email}` (crea usuario + token en la misma transaccion)
-2. `POST /api/v1/login/` con `{username, password}` → `{token, user_id, email}`
-3. Todos los endpoints `Token` esperan header `Authorization: Token <valor>`
+**TASK-003**: autenticacion dual web/mobile.
 
-**Notas**:
-- El token es persistente (no expira automaticamente)
-- No hay refresh token — approach mobile-friendly, simple
-- Frontend guarda el token en `expo-secure-store` (mobile) o `localStorage` (web via `secureStorage.ts` con fallback)
+1. `POST /api/v1/register/` con `{username, email, password}` → `{token, user_id, username}` + cookie httpOnly `auth_token`
+2. `POST /api/v1/login/` con `{username, password}` → `{token, user_id, username}` + cookie httpOnly `auth_token`
+3. `POST /api/v1/logout/` → invalida token + limpia cookie
 
-### Management commands (5)
+**Web** (Expo Web / browser): `CookieTokenAuthentication` lee la cookie httpOnly automaticamente. JS nunca toca el token. `SameSite=Lax` mitiga CSRF.
 
-Todos son **idempotentes** y aceptan `--dry-run`:
+**Mobile** (Expo nativo): `ExpiringTokenAuthentication` via `Authorization: Token <valor>`. Token guardado en `expo-secure-store`.
 
-| Comando | Fuente | Uso |
-|---------|--------|-----|
-| `import_preguntas <csv>` | CSV con texto/eje/orden | Crea/actualiza preguntas + opciones Likert |
-| `import_candidatos <csv>` | CSV con nombre/apellido/partido | Crea/actualiza candidatos |
-| `import_posturas <csv>` | CSV con candidato/pregunta/valor/justificacion/fuente_url | Valida: min 20 chars justificacion, URL con http(s), valor 1-5 |
-| `fetch_noticias` | Google News RSS | Trae noticias por candidato con dedup por URL |
-| `seed_explicaciones_preguntas` | Hardcoded en el propio comando | Popula `explicacion` + `repercusiones` de las 12 seed |
+**Expiracion**: `TOKEN_TTL_DAYS` (default 7, configurable via env). Al expirar, el backend devuelve 401 y borra el token. El cliente debe re-autenticar.
 
-### Configuracion
+### Management commands (16)
 
-Variables de entorno en `.env` (ver `.env.example`):
+Todos idempotentes. Ver detalle en [`backend/tecnico/06-comandos-seeds.md`](backend/tecnico/06-comandos-seeds.md).
 
-| Variable | Requerida | Default | Notas |
-|----------|-----------|---------|-------|
-| `SECRET_KEY` | si | — | 50+ chars random |
-| `DEBUG` | no | `False` | En True: CORS abierto, error pages |
-| `ALLOWED_HOSTS` | no | `127.0.0.1,localhost` | Coma separada |
-| `CORS_ALLOWED_ORIGINS` | no | vacia | Con `DEBUG=True` no aplica |
+**Seeds**: `seed_territorio_chile`, `seed_presidenciales_2025`, `seed_diputados_2025`, `seed_parlamentaria`, `seed_preguntas_base`, `seed_preguntas_por_tipo`, `seed_posturas_base`, `seed_explicaciones_preguntas`
 
-**CORS**: en `DEBUG=True` se usa `CORS_ALLOW_ALL_ORIGINS=True` (conveniencia dev, Expo mobile no manda `Origin` header).
+**Importers**: `import_candidatos`, `import_preguntas`, `import_posturas`
+
+**Utilities**: `ensure_dev_superuser`, `dedup_preguntas_base`, `enrich_senadores`, `limpiar_tokens_viejos`, `fetch_noticias`
 
 ### Tests
 
 - **Framework**: pytest + pytest-django
-- **Cobertura**: 46 tests
-- **Areas cubiertas**: auth, CRUD basico, algoritmo matching (edge cases + happy paths), permisos por endpoint
-- **Corrida**: `cd backend && uv run pytest -q` (~17s)
+- **Archivos**: 30 archivos `test_*.py` en `core/` + `test_meta.py` en `api/`
+- **Corrida**: `cd backend && uv run pytest -q`
+- **Estrategia**: services testeados directamente (sin APIClient); endpoints testeados con APIClient para wiring
 
 ### Zonas conocidas por mejorar
 
