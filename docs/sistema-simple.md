@@ -108,7 +108,6 @@ Sus tareas:
   respuestas con las posturas de los candidatos
 - **Favoritos y descartados**: si marcaste algun candidato como favorito
   o lo eliminaste
-- **Decision final**: si al final elegiste uno
 - **Noticias**: articulos de prensa asociados a cada candidato
 
 Todo esto vive en una base de datos (una especie de Excel super

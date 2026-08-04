@@ -497,10 +497,9 @@ Roy).
 
 ### Autenticacion
 - **Passwords hasheados con PBKDF2** (default de Django, no plaintext).
-- **Token DRF persistente** (no expira automaticamente — deuda
-  conocida para v1.0).
-- **HTTPS obligatorio en prod** — `SESSION_COOKIE_SECURE=True`,
-  `SECURE_SSL_REDIRECT=True` en settings de prod.
+- **Token DRF con expiracion**: `ExpiringTokenAuthentication` con TTL configurable (`TOKEN_TTL_DAYS`, default 7 dias). Token vencido = 401 + borrado de DB.
+- **Cookie httpOnly en web (TASK-003)**: `CookieTokenAuthentication` envia el token en cookie `SameSite=Lax; httpOnly; Secure`. JS nunca toca el token; CSRF mitigado via SameSite.
+- **HTTPS obligatorio en prod** — `SESSION_COOKIE_SECURE=True`, `SECURE_SSL_REDIRECT=True` en settings de prod.
 
 ### Autorizacion
 - **DRF Permission classes** en cada view sensible.
