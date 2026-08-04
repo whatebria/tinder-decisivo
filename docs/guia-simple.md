@@ -29,8 +29,7 @@ Hay tres tipos de personas involucradas:
    - Beto Diaz - 62%
    - Cami Rojas - 34%
 6. Puede **marcar candidatos como favoritos** (los que le gustaron) o **descartarlos** (los que ni loco).
-7. Cuando ya decidio, marca su **decision final** (a quien va a votar). Puede cambiarla despues.
-8. Mientras tanto, puede leer un **feed de noticias** electorales que publica el admin. Y en el perfil de cada candidato ve las **noticias recientes** en las que se lo menciona (se traen automaticamente de Google News: La Tercera, Emol, Meganoticias, Teletrece, etc.).
+7. Mientras tanto, puede leer un **feed de noticias** electorales que publica el admin. Y en el perfil de cada candidato ve las **noticias recientes** en las que se lo menciona (se traen automaticamente de Google News: La Tercera, Emol, Meganoticias, Teletrece, etc.).
 
 ## Como funciona el "match" (el calculo magico)
 
