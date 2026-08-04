@@ -684,9 +684,9 @@ Tiene guard de `mountedAt > lastResetAt` para evitar re-mostrar tours de pantall
 - `getConfianzaBadgeVariant(confianza)` → variant del Badge
 - `isConfianzaTentativa(confianza)` → boolean
 - `getLikertColor(valor)` → color para valor Likert 1-5
-- `confianzaToTier(confianza)` → MatchTier
+- `confianzaToTier(confianza)` → ConfianzaTier (`"high"` | `"mid"` | `"low"`)
 - `sortByMatchDesc(results)` → ordena por match_percentage DESC
--  `__DEV__` warning si recibe valor desconocido
+- `formatMatchPercentage(pct)` → string (e.g. `"87%"`)
 
 ### `services/cuestionario.ts`
 - `PESOS` → array de `{value, label, labelLargo}` para los 4 pesos
@@ -720,10 +720,10 @@ Tiene guard de `mountedAt > lastResetAt` para evitar re-mostrar tours de pantall
 - Colores light/dark por tier
 
 ### `domain/dimensiones.ts`
-- `DimensionKey` type: 7 valores (ECONOMIA, TERRITORIO, MEDIO_AMBIENTE, INSTITUCIONAL, SEGURIDAD, DERECHOS_SOCIALES, IGUALDAD)
+- `DimensionKey` type: 7 valores (`"economico"` | `"social"` | `"cultural"` | `"ambiental"` | `"institucional"` | `"pueblos_originarios"` | `"discapacidad"`)
 - `DIMENSIONES` catalog: badge/text/border colors por tema light/dark
-- `EJE_LABELS` → mapa ejeBackend → label legible
-- `EJE_TO_DIMENSION_KEY` → 4 mapeados, 4 `null` (sin mapping aún)
+- `EJE_LABELS` → mapa ejeBackend (ECONOMIA, SOCIEDAD…) → label legible
+- `EJE_TO_DIMENSION_KEY` → 4 mapeados (ECONOMIA, SOCIEDAD, AMBIENTE, INSTITUCIONAL), 4 `null` (SEGURIDAD, DDHH, INTERNACIONAL, OTRO)
 - `getDimensionColorsForEje(eje, isDark)` → colores o null
 
 ### `domain/eleccion.ts`
@@ -835,8 +835,8 @@ Home → "Ver perfil" en MatchSummaryCard
   └── navigate("DetalleCandidato", {
         candidatoId, breakdown, matchPct, confianza
       })
-        ├── AfinidadTab (breakdown_por_eje como RadarChart)
-        └── ResumenTab (estadísticas)
+        ├── AfinidadTab (breakdown_por_eje como RadarChart) — tab por defecto si hay match
+        └── ResumenTab (estadísticas) — oculta temporalmente (UX-070 resuelto; pendiente rediseño)
 ```
 
 ### Flujo: Resultados → Guardar/Descartar

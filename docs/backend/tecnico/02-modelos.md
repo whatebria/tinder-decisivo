@@ -21,7 +21,7 @@ Son **19 modelos** (mas `auth.User` y `auth.Token` de Django). Organizados en
 | `perfil.py` | `UserProfile` | Perfil extendido del usuario (comuna) |
 | `territorio.py` | `Region`, `Distrito`, `Comuna` | Division politica-administrativa chilena |
 | `unidad_territorial.py` | `UnidadTerritorial` | Modelo polimorfico jerarquico de territorio |
-| `user_data.py` | `CandidatoFavorito`, `CandidatoDescartado`, `DecisionFinal`, `NoticiaBookmark`, `PosturaBookmark` | Bookmarking del usuario |
+| `user_data.py` | `CandidatoFavorito`, `CandidatoDescartado`, `NoticiaBookmark`, `PosturaBookmark` | Bookmarking del usuario |
 
 Todos re-exportados desde `core/models/__init__.py` para que
 `from core.models import Candidato` funcione.
@@ -343,11 +343,11 @@ Todos tienen ordering por su timestamp desc. `DecisionFinal` fue planeado pero N
 | `Comuna` | 346 |
 | `UnidadTerritorial` | 391 (1+16+28+346) |
 | `Eje` | 7 canonicos (ECONOMIA, SOCIEDAD, AMBIENTE, SEGURIDAD, DDHH, INTERNACIONAL, INSTITUCIONAL) |
-| `TipoEleccion` | 3-4 (Presi, Dip, Alc, base) |
-| `Pregunta` | ~35-40 |
-| `OpcionRespuesta` | ~200 |
-| `Candidato` | ~1200 (8 presi + 140 dip + 1038 alc) |
-| `PosturaCandidato` | ~15000+ |
+| `TipoEleccion` | 3 (base, Presi 2025, Dip 2025) — Alcaldes 2024 NO implementado |
+| `Pregunta` | ~24 (8 base + 5 presi + 5 dip + 6 parlamentaria) |
+| `OpcionRespuesta` | ~120-130 |
+| `Candidato` | ~148 (8 presi + 140 dip) — seed alcaldes pendiente |
+| `PosturaCandidato` | variable segun posturas importadas via `import_posturas.py` |
 
 ---
 
