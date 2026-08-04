@@ -13,8 +13,9 @@ Ejemplo local: `http://127.0.0.1:8010/api/v1/candidatos/`.
 
 ## Autenticacion
 
-- **Auth default**: Token Auth de DRF. Header: `Authorization: Token <token>`.
-- **Obtener el token**: `POST /api/v1/login/` con credenciales.
+- **Auth nativo (iOS/Android)**: Token Auth de DRF. Header: `Authorization: Token <token>`.
+- **Auth web (TASK-003)**: Cookie httpOnly `auth_token` seteada por el backend en login. El navegador la envia automaticamente; el frontend web no la toca nunca.
+- **Obtener el token**: `POST /api/v1/login/` con credenciales. Devuelve `{token}` en el body (para nativo) Y setea la cookie (para web) en el mismo response.
 - **Endpoints publicos** (sin auth): explicitamente `AllowAny`. Listados abajo.
 
 Documentacion interactiva del API disponible en:
@@ -54,7 +55,13 @@ Response 201:
 **Publico**. Devuelve token para el usuario existente.
 
 Body: `{"username": "...", "password": "..."}`
-Response 200: `{"token": "abc123..."}`
+Response 200: `{"token": "abc123...", "user_id": 42}` + cookie httpOnly `auth_token` (TASK-003).
+
+### `POST /api/v1/logout/`
+**Auth**. Invalida el token DRF del user y limpia la cookie httpOnly.
+
+Body: vacío.
+Response 200: `{"detail": "Sesion cerrada."}`
 
 ### `POST /api/v1/password-reset/request/`
 **Publico**. Dispara envio de email con link de reset (si el user existe). Siempre responde 200 (para no filtrar existencia de emails).
@@ -92,6 +99,18 @@ Response 200:
 **Auth**. Cambia el password del user autenticado.
 
 Body: `{"password_actual": "...", "password_nuevo": "..."}`
+
+### `POST /api/v1/perfil/username/`
+**Auth**. Cambia el username del user autenticado.
+
+Body: `{"username": "nuevo_username", "password_actual": "..."}`
+Response 200: `{"username": "nuevo_username"}`
+
+### `POST /api/v1/perfil/email/`
+**Auth**. Cambia el email del user autenticado.
+
+Body: `{"email": "nuevo@example.cl", "password_actual": "..."}`
+Response 200: `{"email": "nuevo@example.cl"}`
 
 ### `PATCH /api/v1/perfil/comuna/`
 **Auth**. Actualiza (o limpia) la comuna del user.
@@ -256,6 +275,32 @@ Body: `{"opcion_id": 22, "peso": 3}`
 
 ## Match
 
+### `GET /api/v1/mi-progreso/`
+**Auth**. Endpoint agregador del Home HUB. Devuelve en 1 request el estado de cuestionario + top match por cada tipo de eleccion no-base.
+
+Response 200 (array, 1 item por tipo no-base):
+```json
+[
+  {
+    "tipo_eleccion_id": 5,
+    "tipo_eleccion_nombre": "Alcaldes 2024",
+    "total_preguntas": 22,
+    "respondidas": 22,
+    "completa": true,
+    "top_match": {
+      "candidato": {"id": 42, "nombre": "Ana", ...},
+      "match_percentage": "78.50",
+      "preguntas_consideradas": 15,
+      "confianza": "alta",
+      "confianza_display": "Alta",
+      "breakdown_por_eje": {"ECONOMIA": {"porcentaje": 82.5, "preguntas": 5}}
+    }
+  }
+]
+```
+
+Nota: `top_match` puede ser `null` si el cuestionario esta completo pero el user aun no ejecuto el match (matching es perezoso al llegar a ResultadosScreen). `total_preguntas` incluye las preguntas base transversales.
+
 ### `POST /api/v1/match-candidatos/`
 Calcula (y persiste) el match del user autenticado contra todos los candidatos del tipo de eleccion. **Auth**.
 
@@ -317,7 +362,7 @@ Detalle de una noticia. **Auth**.
 ## Bookmarking (router)
 
 Los siguientes endpoints estan bajo un DRF `DefaultRouter`, expuestos como
-ViewSets con las 5 acciones estandar (list, create, retrieve, update, destroy).
+ViewSets con acciones estandar (list, create, retrieve, destroy).
 
 ### `/api/v1/candidatos-favoritos/`
 CRUD de favoritos del user. Auto-scoped al user autenticado.
@@ -325,21 +370,19 @@ CRUD de favoritos del user. Auto-scoped al user autenticado.
 ### `/api/v1/descartados/`
 CRUD de candidatos descartados por el user.
 
-### `/api/v1/decision-final/`
-CRUD de la decision final por tipo de eleccion.
-
 ### `/api/v1/noticias-guardadas/`
 CRUD de noticias marcadas por el user.
 
 ### `/api/v1/posturas-guardadas/`
 CRUD de posturas guardadas como cita por el user.
 
-Todos aceptan `POST { "candidato_id": 42 }` (o `noticia_id`, `postura_id`,
-`candidato_elegido_id + tipo_eleccion_id` segun corresponda) y devuelven
-la entidad creada.
+Todos aceptan `POST { "candidato_id": 42 }` (o `noticia_id`, `postura_id`
+segun corresponda) y devuelven la entidad creada.
 
 Unique constraints garantizan idempotencia: un mismo user no puede favoritear
 al mismo candidato dos veces.
+
+Nota: `/api/v1/decision-final/` NO existe. El modelo `DecisionFinal` fue planeado pero nunca implementado.
 
 ---
 
