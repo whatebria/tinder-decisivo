@@ -253,46 +253,139 @@ Sin cache, sin retry, sin dedup. Cada navegacion re-fetcheaba todo.
 | Preguntas seed | 12 |
 | Candidatos seed | 6 |
 | Posturas seed | 72 (draft, pending verification) |
-| Textos educativos seed | 72 (12 × 6) |
+| Textos educativos seed | 72 (12 x 6) |
 | Migrations | 22 |
 | Management commands | 5 |
 | Idiomas del README | 2 (en / es) |
 
 ---
 
-## Backlog de proximos sprints
+## Sesiones post-Sprint 8 (2026-07-30 a 2026-08-04)
 
-**Sprint 9 — Verificacion de posturas**
-- Revisar cada una de las 72 posturas contra fuentes primarias
-- Empezar por las 14 marcadas `ALTA` (deberian ser rapidas de confirmar)
-- Publicar changelog publico de posturas verificadas
+A partir de la Sesion A el formato cambia: en lugar de sprints con
+objetivo unico se realizaron sesiones de alta densidad que procesaron
+el backlog de issues en paralelo. Referencia completa en
+`match-private/issues/README.md`.
 
-**Sprint 10 — Preguntas actualizadas 2025-2026**
-- Algunas de las 12 preguntas son contexto 2021-2023 (nueva Constitucion post-Convencion 2022)
-- Revisar y agregar preguntas de coyuntura actual
+### Sesion A -- Seguridad + UX batch 1 (2026-07-30)
 
-**Sprint 11 — Internationalizacion (i18n)**
-- Integrar `react-i18next`
-- Extraer todos los strings hardcoded
-- Preparar para Mapuzugun / Aymara / ingles (v1.0 del roadmap)
+Resuelto: todos los security findings (F1-F18), TASK-001 a 070, BUG-001 a 033,
+UX-001 a 056, REFACTOR-001 a 005.
 
-**Sprint 12 — Tests unitarios frontend**
-- Jest + React Native Testing Library
-- Testear `services/` primero (funciones puras, easy win)
-- Testear hooks con `@testing-library/react-hooks`
-- Testear screens principales
+Destacados:
+- **TASK-003**: auth web migrada a cookie httpOnly (`CookieTokenAuthentication`,
+  `SameSite=Lax`, `TOKEN_TTL_DAYS=7`). Token ya no vive en localStorage.
+- **TASK-009/018**: sistema de colores de afinidad (5 tiers, paleta aff1-aff5)
+  implementado en matches, candidatos y comparar.
+- **TASK-060/061/062**: co-localizacion de componentes screen-especificos
+  (`screens/Home/`, `screens/Onboarding/`).
+- **REFACTOR-005**: `PerfilScreen` y `ConfiguracionScreen` unificadas en un
+  flujo coherente con `MisDatosScreen`.
+- **BUG-015**: contraste WCAG AA en `ProfileHero` dark mode (ratio era 2.2:1).
+- **BUG-021**: filtro de elecciones en `MisGuardados` funcionando.
+- Todos los security findings HIGH/MED resueltos (ver FINDINGS.md).
 
-**Sprint 13 — Deploy**
-- Backend: AI Innovation Lab (Django on Kubernetes o similar)
-- Frontend web: build de Expo + hosting estatico
-- Dominio: `tinder-decisivo.cl` (~$8.000 CLP/año en NIC.cl)
-- CI/CD con GitHub Actions
+### Sesion B -- Features + datos + branding (2026-07-31)
 
-**Sprint 14 — Explicabilidad de matches**
-- Mostrar en Resultados que preguntas hicieron subir/bajar el match
-- Simulador "cambia tu respuesta" para ver sensibilidad
-- Share card PNG del match
+Destacados:
+- Seed de diputados 2025 + candidatos presidenciales con posturas reales.
+- Icono de app redisenyado (radar chart + checkmark).
+- Onboarding redisenyado: slides 2/3/4 con demos interactivos reales (UX-009/010/011).
+- Design system actualizado a paleta VotoAFin completa (5 tiers afinidad,
+  dark mode revisado).
+
+### Sesion C -- Refactor arquitectura masivo (2026-08-01)
+
+Destacados:
+- `TASK-066`: migracion de `useMemo`-styles a `StyleSheet.create` modulo-level
+  en todos los componentes (commit 744e2ff, 50+ archivos).
+- `PRODUCT-001`: flujo oficial de preguntas base definido (`MIN_PREGUNTAS=10`,
+  boton de resultados parciales oculto durante base, documentado).
+- Backend: migraciones 0039-0042 (lista electoral, campos candidatos,
+  ejes actualizados a 7).
+- 30 archivos de test backend (370 tests totales).
+
+### Sesion D -- UX improvements + dark mode (2026-08-02)
+
+Destacados:
+- **BUG-035/036/037/038**: flujo cuestionario-resultados corregido en edge
+  cases (calcular matches, error mid-flow, modal de comuna).
+- **BUG-042**: `POST /match-candidatos/` 500 error con WAL mode SQLite +
+  timeout atomico (commit 78c0837).
+- **BUG-039**: mutex favorito/descartado (un candidato no puede estar en ambos).
+- **BUG-045**: optimistic update en toggle favorito/descartado (commit 59d4194).
+- **UX-059/060**: DetalleCandidato con tab propia "Por que este match";
+  filtro partido colapsable.
+- **UX-074**: endpoints `PATCH /perfil/username/` y `/perfil/email/` +
+  `CambiarDatoModal` (commit b33ac8d).
+- **UX-080**: `BookmarkButton` en `CandidatoPosturas` para guardar posturas
+  (commit 110f998).
+- **UX-081 a 085**: `ResultadosScreen` redisenyada (jerarquia, filtros
+  Chip+BottomSheet, toast Deshacer descartados) (commit ef882f0).
+
+### Sesion E -- Rebrand + UX final (2026-08-03)
+
+Destacados:
+- Rebrand completo: nombre del producto consolidado como **VotoAFin**.
+- `RadarChart` con etiquetas title-case, sin texto cortado (UX-061).
+
+### Sesion F -- Auditoria documental (2026-08-04)
+
+Destacados:
+- Auditoria cruzada de todos los archivos `docs/` (37 docs, 21 commits).
+- Banners de deprecacion en 8 docs legacy (`*-desactualizado.md`).
+- `buenas-practicas.md`, `backend/tecnico/01-arquitectura.md`,
+  `backend/BACKEND_COMPLETO.md`, `knowledge-base/CODEBASE_MAP.md`
+  corregidos contra el codigo real.
 
 ---
 
-_Ultima actualizacion: 2026-07-25 (post sprint 7)._
+## Metricas acumuladas al final de las sesiones A-F
+
+| Metrica | Sprint 8 (base) | Sesiones A-F |
+|---|---:|---:|
+| Commits en `main` | 2 | **212** |
+| Tests backend | 46 | **370** |
+| Endpoints REST v1 | 11 | **~31** |
+| Modelos Django | 8 | **19** |
+| Screens frontend | 7 | **17** |
+| Componentes UI reutilizables | 7 | **~89** (30 atoms + 40 mol + 19 org) |
+| Servicios frontend (logica pura) | 2 | **4** (matching, cuestionario, share, comparar) |
+| Hooks React Query | 6 | **30** |
+| Migrations | 22 | **42** |
+| Management commands | 5 | **19** |
+| Archivos de test backend | ~10 | **30** |
+| Issues resueltos (backlog) | 0 | **~230** |
+| Security findings resueltos | 0 | **17/17** |
+| Docs auditados y corregidos | 0 | **37** |
+
+---
+
+## Backlog de proximos sprints
+
+**Sprint 9 - Verificacion de posturas**
+- Revisar cada postura contra fuentes primarias.
+- Priorizar las marcadas con confianza ALTA (validacion rapida).
+- Publicar changelog publico de posturas verificadas.
+
+**Sprint 10 - Tests unitarios frontend**
+- Jest + React Native Testing Library.
+- Testear `services/` primero (funciones puras, easy win).
+- Testear hooks con `@testing-library/react-hooks`.
+
+**Sprint 11 - Deploy**
+- Backend: contenedor Docker + PostgreSQL en Fly.io o Railway.
+- Frontend web: build Expo + hosting estatico.
+- CI/CD con GitHub Actions.
+
+**Sprint 12 - Explicabilidad de matches**
+- Tab "Por que este match" (UX-059 resuelto, ampliar con simulador).
+- Simulador "cambia tu respuesta" interactivo.
+
+**Sprint 13 - Internationalizacion (i18n)**
+- Extraer strings hardcoded del frontend.
+- Preparar para ingles y eventual Mapuzugun.
+
+---
+
+_Ultima actualizacion: 2026-08-04 (post sesiones A-F)._

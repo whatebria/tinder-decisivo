@@ -14,7 +14,7 @@ uv run python manage.py <comando> [args]
 
 O con `--help`:
 ```bash
-uv run python manage.py seed_alcaldes_2024 --help
+uv run python manage.py seed_presidenciales_2025 --help
 ```
 
 ---
@@ -80,7 +80,7 @@ Sirve para dar contexto educativo al usuario ("por que se pregunta esto",
 ### Importers (bulk import desde CSV)
 
 #### `import_candidatos <archivo.csv>`
-Importa candidatSV. Idempotente por `(nombre, apellido, partido)`.
+Importa candidatos desde CSV. Idempotente por `(nombre, apellido, partido)`.
 Uso: subir candidatos reales verificados.
 
 #### `import_preguntas <archivo.csv>`
@@ -141,7 +141,6 @@ uv run python manage.py seed_preguntas_base
 # 3. Candidatos (en orden de dependencia con TipoEleccion)
 uv run python manage.py seed_presidenciales_2025
 uv run python manage.py seed_diputados_2025
-uv run python manage.py seed_alcaldes_2024
 
 # 4. Preguntas por tipo + posturas de todos los candidatos
 uv run python manage.py seed_preguntas_por_tipo

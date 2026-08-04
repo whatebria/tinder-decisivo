@@ -78,13 +78,13 @@ def _sincronizar_pregunta_eje(sender, instance, **kwargs):
     if instance.eje_id is not None:
         # FK setea el string
         if instance.eje.codigo.upper() != (instance.eje_tematico or "").upper():
-            instance.eje_tematico = inse.codigo
+            instance.eje_tematico = instance.eje.codigo
     elif instance.eje_tematico:
         # String busca/crea el FK (case-insensitive)
         eje_obj = Eje.objects.filter(codigo__iexact=instance.eje_tematico).first()
         if eje_obj is None:
             eje_obj = Eje.objects.create(
-          digo=instance.eje_tematico.upper(),
+                codigo=instance.eje_tematico.upper(),
                 nombre=instance.eje_tematico.capitalize(),
             )
         instance.eje = eje_obj

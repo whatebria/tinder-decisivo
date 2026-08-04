@@ -45,7 +45,7 @@ Idempotencia: clave `(nombre, apellido, partido)`.
 |---|---|---|
 | `texto` | si | Enunciado |
 | `tipo_eleccion` | si | Nombre del TipoEleccion (auto-crea) |
-| `eje_tematico` | si | Uno de: `ECONOMIA`, `SOCIEDAD`, `AMBIENTE`, `SEGURIDAD`, `DDHH`, `INTERNACIONAL`, `INSTITUCIONAL`, `OTRO` |
+| `eje_tematico` | si | Uno de: `ECONOMIA`, `SOCIEDAD`, `AMBIENTE`, `SEGURIDAD`, `DDHH`, `INTERNACIONAL`, `INSTITUCIONAL` |
 | `orden` | no | Default 0 |
 
 ### `posturas.csv`
