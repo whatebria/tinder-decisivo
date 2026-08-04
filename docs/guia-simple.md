@@ -1,3 +1,8 @@
+> **DOCUMENTO DESACTUALIZADO** - Escrito cuando el proyecto se llamaba "Servel" y tenia una
+> mecanica de swipe. El producto se renombro a **VotoAFin** y el flujo cambio a cuestionario
+> por preguntas con escala Likert + pesos de importancia. Para la guia actualizada ver
+> [`sistema-simple.md`](sistema-simple.md).
+
 # Servel - Guia para humanos
 
 > Version explicada como si no supieras nada de codigo. Si sos dev, mejor lee la version tecnica.

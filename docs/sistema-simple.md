@@ -52,15 +52,16 @@ Sus tareas:
 - **Traducir los datos** en algo visual (barras de progreso, radar,
   colores segun el porcentaje de match)
 
-**VotoAFin tiene 7 pantallas principales**:
+**VotoAFin tiene 17 pantallas funcionales** (para todos los casos de uso). Las principales son:
 
-1. **Login** — para entrar con tu usuario
-2. **Registrarse** — si aun no tienes cuenta
-3. **Home** — donde eliges que eleccion (por ahora solo Presidencial)
-4. **Cuestionario** — las 12 preguntas de una en una
-5. **Enviado** — pantalla intermedia de "listo"
-6. **Resultados** — ranking de candidatos con su porcentaje
-7. **Detalle de candidato** — perfil, radar de afinidad, noticias
+1. **Onboarding** — introduccion en primera visita (solo se ve una vez)
+2. **Login / Registrarse / Recuperar clave** — para entrar con tu usuario
+3. **Home** — donde eliges que eleccion (Presidencial 2025, Diputados 2025, etc.)
+4. **Cuestionario** — preguntas de a una, con escala de acuerdo y peso de importancia
+5. **Enviado** — pantalla intermedia de confirmacion
+6. **Resultados** — ranking de candidatos con su porcentaje de afinidad
+7. **Detalle de candidato** — perfil, radar de afinidad por eje, noticias
+8. **Mis Guardados / Mis Respuestas / Perfil / Configuracion** — paneles secundarios
 
 Y ademas hay componentes reutilizables (botones, inputs, notificaciones,
 el modal con el "?" que explica cada pregunta) que se usan en varias
