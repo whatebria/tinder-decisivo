@@ -51,13 +51,18 @@ Es **cuadratico** intencional: castigar mas los desacuerdos totales que los parc
 | Peso declarado | Codigo | Multiplicador |
 |---|---:|---:|
 | No me importa | 0 | 0.5x |
-| Poco importante (default) | 1 | 1.0x |
-| Importante | 2 | 1.5x |
+| Poco importante | 1 | 1.0x |
+| Importante (default UX) | 2 | 1.5x |
 | Muy importante (dealbreaker) | 3 | 2.0x |
 
 Notar que **"No me importa" NO es cero**: la pregunta sigue contando la mitad. Justificacion:
 si el user dice "no me importa" pero contesto algo, esa senal sigue teniendo valor. Poner 0
 haria que responder "no me importa" fuera equivalente a `es_no_se`, y no queremos eso.
+
+**Default UX vs default modelo**: el frontend envia siempre `peso=2` (Importante) al crear
+una respuesta (`DEFAULT_PESO = 2` en `services/cuestionario.ts`). El modelo backend tiene
+`default=PESO_POCO (1)` como fallback a nivel DB — en la practica nunca se usa porque el
+frontend siempre envia el peso explicitamente.
 
 ### Confianza por # de preguntas respondidas (`confianza_por_n`)
 
@@ -182,10 +187,31 @@ Al final:
 match_percentage = (score_total / peso_total * 100).quantize(Decimal("0.01"))
 ```
 
-### Paso 4: sort desc por porcentaje y devolver
+### Paso 4: sort por coverage_score y devolver
 
-Los resultados se ordenan **descendente** por `match_percentage`. El frontend
-suele mostrar los top 3.
+Los resultados se ordenan **descendente** por `coverage_score`, con `match_percentage` como desempate secundario:
+
+```python
+resultados.sort(
+    key=lambda r: (
+        float(r["match_percentage"]) * math.log1p(r["num_preguntas_consideradas"]),
+        float(r["match_percentage"]),
+    ),
+    reverse=True,
+)
+```
+
+**Por que no ordenar por `match_percentage` directo?** Un candidato con 1 pregunta de overlap perfecta (100% raw) superaria a uno con 12 preguntas al 93%. El usuario veria primero al candidato del que casi no sabemos nada.
+
+**`coverage_score = match_percentage * log(1 + n)`**: penaliza candidatos con poca cobertura sin distorsionar el porcentaje visible. Ejemplos:
+
+| n (overlap) | match% | coverage_score |
+|---:|---:|---:|
+| 1 | 100% | 69.3 |
+| 2 | 93% | 102.3 |
+| 12 | 93% | 238.5 |
+
+El `coverage_score` es **interno**: no se serializa ni se muestra al usuario. La incertidumbre se comunica via el campo `confianza` y el banner de ResultadosScreen cuando `confianza == "tentativa"`.
 
 ---
 
