@@ -55,12 +55,16 @@ backend/
 │   └── wsgi.py
 ├── core/                         # Unica app funcional
 │   ├── models/                   # 19 modelos en submodulos por dominio
-│   │   ├── electoral.py          # TipoEleccion, Candidato, Eje
-│   │   ├── cuestionario.py       # Pregunta, OpcionRespuesta, PosturaCandidato
-│   │   ├── user_data.py          # RespuestaUsuario, MatchCandidato, bookmarks
-│   │   ├── territorio.py         # Region, Distrito, Comuna, UnidadTerritorial
+│   │   ├── electoral.py          # TipoEleccion, Candidato
+│   │   ├── eje.py                # Eje (catalogo de ejes tematicos)
+│   │   ├── cuestionario.py       # Pregunta, OpcionRespuesta, RespuestaUsuario
+│   │   ├── matching.py           # PosturaCandidato, MatchCandidato
+│   │   ├── user_data.py          # CandidatoFavorito, CandidatoDescartado, NoticiaBookmark, PosturaBookmark
+│   │   ├── content.py            # Noticia
+│   │   ├── auth.py               # PasswordResetToken
+│   │   ├── territorio.py         # Region, Distrito, Comuna
+│   │   ├── unidad_territorial.py # UnidadTerritorial
 │   │   ├── perfil.py             # UserProfile
-│   │   ├── noticias.py           # Noticia, NoticiaBookmark
 │   │   └── __init__.py           # re-exports
 │   ├── views/                    # Views DRF en submodulos
 │   ├── services/                 # Logica de negocio (matching, perfil, reset)
@@ -118,24 +122,44 @@ Agrupados por dominio:
 
 Base: `/api/v1/`
 
+> **Esta tabla es un resumen parcial. Ver catalogo completo en
+> [`backend/tecnico/03-api-endpoints.md`](backend/tecnico/03-api-endpoints.md).**
+
 | Verbo | Ruta | Auth | Descripcion |
 |-------|------|------|-------------|
 | POST | `register/` | publico | Crea usuario + devuelve token |
 | POST | `login/` | publico | Devuelve token + user_id + email |
+| POST | `logout/` | Token | Invalida token y limpia cookie |
+| POST | `password-reset/request/` | publico | Envia email de reset |
+| POST | `password-reset/confirm/` | publico | Confirma reset con token |
+| GET/PATCH | `perfil/` | Token | Datos del user autenticado |
+| POST | `perfil/cambiar-password/` | Token | Cambia password |
+| POST | `perfil/username/` | Token | Cambia username |
+| POST | `perfil/email/` | Token | Cambia email |
+| PATCH | `perfil/comuna/` | Token | Actualiza comuna |
 | GET | `tipos-eleccion/` | Token | Lista tipos disponibles |
 | GET | `candidatos/` | Token | Lista candidatos (query `?tipo_eleccion_id=`) |
-| GET | `candidatos/<pk>/` | Token | Detalle con posturas embebidas |
+| GET | `candidatos/<pk>/` | Token | Detalle del candidato |
+| GET | `candidatos/<id>/posturas/` | Token | Posturas del candidato (endpoint separado) |
 | GET | `candidatos/<id>/noticias/` | Token | Noticias del candidato |
-| GET | `preguntas/` | Token | Preguntas del cuestionario (`?tipo_eleccion_id=`) |
-| POST | `respuestas/` | Token | Bulk submit de respuestas del cuestionario |
-| POST | `match-candidatos/` | Token | Recomputa y devuelve matches (ver `algoritmo-tecnico.md`) |
-| GET | `noticias/` | publico | Lista noticias |
-| POST | `noticias/` | admin | Crea noticia |
-| GET/PUT/DELETE | `noticias/<pk>/` | mixed | Detalle/edicion |
+| GET | `candidatos/<id>/match-detalle/` | Token | Breakdown pregunta-a-pregunta del match |
+| GET | `preguntas/` | Token | Preguntas del cuestionario |
+| POST | `respuestas/` | Token | Bulk submit de respuestas |
+| POST | `respuestas/reiniciar/` | Token | Borra todas las respuestas del user |
+| GET | `respuestas/mias/` | Token | Respuestas del user |
+| PATCH | `respuestas/mias/<pk>/` | Token | Edita una respuesta |
+| GET | `mi-progreso/` | Token | HUB: progreso + top match por tipo |
+| POST | `match-candidatos/` | Token | Calcula matches para un tipo de eleccion |
+| POST | `match-anonimo/` | publico | Calcula matches sin persistir |
+| GET | `ejes/` | publico | Lista ejes tematicos |
+| GET | `regiones/` | publico | Lista regiones |
+| GET | `comunas/` | publico | Lista comunas |
+| GET | `unidades-territoriales/` | publico | Lista UTs jerarquicas |
+| GET | `noticias/` | Token | Lista noticias |
 | CRUD | `candidatos-favoritos/` | Token | Favoritos del user |
 | CRUD | `descartados/` | Token | Descartados del user |
-
-> **Nota**: ver listado completo y actualizado en [`backend/tecnico/03-api-endpoints.md`](backend/tecnico/03-api-endpoints.md).
+| CRUD | `noticias-guardadas/` | Token | Noticias guardadas |
+| CRUD | `posturas-guardadas/` | Token | Posturas guardadas |
 
 **Schema OpenAPI**: disponible en `/api/schema/` (yaml) y `/api/schema/swagger-ui/`.
 
@@ -201,6 +225,9 @@ Todos idempotentes. Ver detalle en [`backend/tecnico/06-comandos-seeds.md`](back
 
 ### Estructura de carpetas
 
+> **Nota**: esta es una vista resumida. Ver estructura completa y actualizada en
+> [`knowledge-base/FRONTEND_EXHAUSTIVE.md`](knowledge-base/FRONTEND_EXHAUSTIVE.md).
+
 ```
 frontend/
 ├── App.tsx                       # root con providers
@@ -209,29 +236,34 @@ frontend/
 │   ├── api/                      # capa de comunicacion con backend
 │   │   ├── client.ts             # axios instance + interceptors
 │   │   ├── config.ts             # BASE_URL segun plataforma
-│   │   ├── endpoints.ts          # funciones tipadas (login, listCandidatos, ...)
-│   │   ├── hooks.ts              # 6 hooks de React Query
+│   │   ├── endpoints.ts          # funciones tipadas (1 por endpoint)
+│   │   ├── hooks.ts              # 30 hooks de React Query / mutations
 │   │   └── queryClient.ts        # QueryClient + queryKeys
-│   ├── components/               # UI reutilizable (7)
-│   │   ├── ErrorBoundary.tsx
-│   │   ├── FormInput.tsx
-│   │   ├── PreguntaInfoModal.tsx # modal educativo con 5 dimensiones
-│   │   ├── PrimaryButton.tsx     # variants: primary / success / danger
-│   │   ├── RadarChart.tsx        # SVG puro
-│   │   ├── SelectableButton.tsx  # chip toggleable
-│   │   ├── TextButton.tsx        # link-style
-│   │   └── Toast.tsx             # sistema de toasts (Provider + useToast)
+│   ├── components/               # UI reutilizable (89+ archivos)
+│   │   ├── atoms/                # primitivos (Button, Input, Badge, RadarChart...)
+│   │   ├── molecules/            # compuestos (Toast, PreguntaInfoModal, RankingCard...)
+│   │   └── organisms/           # secciones (ErrorBoundary, TopMatchSection...)
 │   ├── navigation/
-│   │   ├── AppNavigator.tsx      # stack navigator
+│   │   ├── AppNavigator.tsx      # stack + tab navigator
 │   │   └── types.ts              # RootStackParamList
-│   ├── screens/                  # 7 pantallas
+│   ├── screens/                  # 17 pantallas funcionales
 │   │   ├── LoginScreen.tsx
 │   │   ├── RegisterScreen.tsx
-│   │   ├── HomeScreen.tsx        # elige tipo eleccion
+│   │   ├── OnboardingScreen.tsx
+│   │   ├── HomeScreen.tsx
 │   │   ├── CuestionarioScreen.tsx
 │   │   ├── SubmitDoneScreen.tsx
-│   │   ├── ResultadosScreen.tsx  # ranking + tiers
-│   │   └── DetalleCandidatoScreen.tsx  # radar + noticias
+│   │   ├── ResultadosScreen.tsx
+│   │   ├── DetalleCandidatoScreen.tsx
+│   │   ├── CandidatosScreen.tsx
+│   │   ├── CompararScreen.tsx
+│   │   ├── ConfiguracionScreen.tsx
+│   │   ├── GestionEleccionesScreen.tsx
+│   │   ├── MisGuardadosScreen.tsx
+│   │   ├── MisRespuestasScreen.tsx
+│   │   ├── PerfilScreen.tsx
+│   │   ├── PasswordResetRequestScreen.tsx
+│   │   └── PasswordResetConfirmScreen.tsx
 │   ├── services/                 # logica pura (testeable sin React)
 │   │   ├── matching.ts           # tiers, colores, badges, sort
 │   │   └── cuestionario.ts       # PESOS, separacion opciones, progreso
@@ -255,7 +287,7 @@ frontend/
 - `config.ts`: `BASE_URL` cambia segun plataforma. En web usa `localhost:8010`, en Android emulator `10.0.2.2:8010`, en device fisico requiere IP LAN
 - `client.ts`: axios instance con interceptor que agrega `Authorization: Token X` automaticamente
 - `endpoints.ts`: 1 funcion por endpoint, tipadas usando `Schemas` de `types/api.ts`
-- `hooks.ts`: React Query wrappers sobre los endpoints (6 hooks)
+- `hooks.ts`: React Query wrappers sobre los endpoints (**30 hooks** — queries, mutations y bulk ops)
 - `queryClient.ts`: defaults (`staleTime: 60s`, `retry: 1`, `refetchOnWindowFocus: false`) + `queryKeys` centralizados
 
 **`services/` (logica pura)**
@@ -279,49 +311,62 @@ frontend/
 
 ### Navegacion
 
-Stack navigator con las siguientes rutas (`RootStackParamList`):
+Stack + Tab navigator con las siguientes rutas (`RootStackParamList`):
 
 ```
-Login → Register            (publico)
-      ↓
-    Home                    (autenticado)
-      ↓
-    Cuestionario            (recibe tipo_eleccion_id)
-      ↓
-    SubmitDone
-      ↓
-    Resultados              (recibe tipo_eleccion_id)
-      ↓
-    DetalleCandidato        (recibe candidato_id)
+Publico:
+  Login → Register
+       → OnboardingScreen
+       → PasswordResetRequest → PasswordResetConfirm
+
+Autenticado (stack):
+  Home (top-level)             # elige eleccion + top match
+    ↓
+  Cuestionario                  # responde preguntas
+    ↓
+  SubmitDone                    # confirmacion
+    ↓
+  Resultados                    # ranking de candidatos
+    ↓
+  DetalleCandidato              # radar + noticias + afinidad
+  Candidatos                    # browse sin cuestionario
+  Comparar                      # comparacion lado a lado
+  GestionElecciones             # admin de tipos de eleccion
+  MisGuardados                  # favoritos + posturas guardadas
+  MisRespuestas                 # historial de cuestionarios
+  Perfil → Configuracion        # cuenta + preferencias
 ```
 
 Gate de auth: `App.tsx` decide root screen segun `useAuthStore().token`.
 
 ### Componentes reutilizables
 
-| Componente | Uso | Notas |
-|------------|-----|-------|
-| `PrimaryButton` | CTAs principales | variants: primary / success / danger, loading state |
-| `SelectableButton` | Chips toggleables | Likert options + peso selector + filtros |
-| `TextButton` | Link-style | Volver, Cancelar |
-| `FormInput` | Text inputs | placeholder, secureTextEntry, keyboardType |
-| `Toast` (via `useToast`) | Notificaciones no-modal | success/error/info, auto-dismiss 4s |
-| `ErrorBoundary` | Catch de errores render | fallback UI con boton reset |
-| `RadarChart` | Grafico eje x afinidad | SVG puro, no libs externas |
-| `PreguntaInfoModal` | Modal educativo | 5 dimensiones con acento de color |
+> Ver catalogo completo en [`knowledge-base/FRONTEND_EXHAUSTIVE.md`](knowledge-base/FRONTEND_EXHAUSTIVE.md).
 
-### React Query hooks
+Organizados por nivel de abstraccion:
 
-Todos definidos en `src/api/hooks.ts`:
+| Nivel | Carpeta | Ejemplos |
+|-------|---------|----------|
+| Atoms | `components/atoms/` | `Button`, `Badge`, `Input`, `Label`, `RadarChart`, `Chip` |
+| Molecules | `components/molecules/` | `Toast`, `PreguntaInfoModal`, `RankingCard`, `RankingRow`, `CandidatoCard` |
+| Organisms | `components/organisms/` | `ErrorBoundary`, `TopMatchSection`, `DetalleCandidatoHeader` |
 
-| Hook | Tipo | Query key |
-|------|------|-----------|
-| `useTiposEleccion()` | query | `['tipos-eleccion']` |
-| `usePreguntas(tipoId)` | query | `['preguntas', tipoId]` |
-| `useCandidatos(tipoId)` | query | `['candidatos', tipoId]` |
-| `useCandidato(id)` | query | `['candidato', id]` |
-| `useNoticiasCandidato(id)` | query | `['noticias', 'candidato', id]` |
-| `useMatchCandidatos()` | mutation | invalidates `['matches']` on success |
+### React Query hooks (30)
+
+Todos definidos en `src/api/hooks.ts`. Ver lista completa en `FRONTEND_EXHAUSTIVE.md`. Ejemplos representativos:
+
+| Hook | Tipo |
+|------|---------|
+| `useTiposEleccion()` | query |
+| `usePreguntas(tipoId)` | query |
+| `useCandidatos(tipoId)` | query |
+| `useCandidato(id)` | query |
+| `useMatchCandidatos()` | mutation |
+| `useSubmitAnswers()` | mutation |
+| `usePerfil()` | query |
+| `useMiProgreso()` | query |
+| `useFavoritos()` | query |
+| `useDescartados()` | query |
 
 ### Types auto-generados
 
