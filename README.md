@@ -85,8 +85,11 @@ We picked boring, proven tools that get out of the way:
 
 ### Prerequisites
 
-- **Python 3.10+** with [uv](https://github.com/astral-sh/uv)
-- **Node.js 20.19.4+** (older versions warn but may work)
+- **Python 3.10+** managed with [uv](https://github.com/astral-sh/uv)
+- **Node.js LTS v24.19.0+** — standardized in user profile (`%LOCALAPPDATA%\Programs\nodejs`). On Windows, install without UAC elevation:
+  ```powershell
+  winget install OpenJS.NodeJS.LTS --scope user --accept-source-agreements --accept-package-agreements
+  ```
 - **Git**
 
 ### Backend
@@ -94,9 +97,11 @@ We picked boring, proven tools that get out of the way:
 ```bash
 cd backend
 uv venv
-uv sync
+uv cache clean
+uv sync --upgrade --default-index https://pypi.org/simple
 cp .env.example .env                        # generate a SECRET_KEY and paste it
 uv run python manage.py migrate
+uv run python manage.py check
 uv run python manage.py createsuperuser
 
 # Seed data (idempotent, safe to re-run)
@@ -114,13 +119,38 @@ Backend is now on http://localhost:8010. Admin at http://localhost:8010/admin/.
 
 ```bash
 cd frontend
-npm install --legacy-peer-deps
+# Delete lockfile if node_modules is missing or came from a corporate registry:
+Remove-Item package-lock.json -ErrorAction SilentlyContinue   # PowerShell
+# rm package-lock.json                                         # bash/zsh
+
+# Refresh PATH in active PowerShell terminal if node/npm/npx are not recognized:
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+
+# Install from public npm registry
+npm install --legacy-peer-deps --registry=https://registry.npmjs.org/
+
+# Sync Expo environment types (generates expo-env.d.ts)
+npx expo customize tsconfig.json
+
+# Verify — must exit 0 with zero type errors
+npx tsc --noEmit
+
+# Start dev bundler
 npx expo start --web --port 8081
 ```
 
 Open http://localhost:8081. First bundle takes 40-60s.
 
 For iOS/Android: scan the QR with the Expo Go app, or press `i` / `a` in the terminal.
+
+### Troubleshooting
+
+- **`CommandNotFoundException` for `node`, `npm`, or `npx` in PowerShell**:
+  Run `$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")` in your active PowerShell terminal or open a new terminal session.
+- **DNS / Package Resolution error (`os error 11001`)**:
+  Purge contaminated corporate lockfiles and sync directly against public indexes:
+  - Backend: `uv cache clean && uv sync --upgrade --default-index https://pypi.org/simple`
+  - Frontend: `Remove-Item package-lock.json -ErrorAction SilentlyContinue && npm install --legacy-peer-deps --registry=https://registry.npmjs.org/`
 
 ### Environment variables
 
@@ -185,12 +215,9 @@ Please open an issue first for large changes. See the [`docs/`](docs/) folder fo
 - [`sprints.md`](docs/sprints.md) — full project history by sprint
 - [`sistema-tecnico.md`](docs/sistema-tecnico.md) — backend + frontend architecture reference
 - [`sistema-simple.md`](docs/sistema-simple.md) — same architecture in plain language
-- [`algoritmo-tecnico.md`](docs/algoritmo-tecnico.md) — matching algorithm reference (formulas, API, complexity)
-- [`algoritmo-simple.md`](docs/algoritmo-simple.md) — same algorithm without math, for non-technical readers
+- [`algoritmo-tecnico.md`](docs/algoritmo-tecnico-desactualizado.md) — matching algorithm reference (formulas, API, complexity)
 - [`comparacion-vaas.md`](docs/comparacion-vaas.md) — competitive analysis vs Wahl-O-Mat, StemWijzer, Smartvote and 6 others
 - [`buenas-practicas.md`](docs/buenas-practicas.md) — SOLID, DRY, Clean Architecture, 12-Factor, testing pyramid and other principles applied
-- [`estado-actual.md`](docs/estado-actual.md) — honest snapshot: features shipped, gaps to publish, modularity + scalability assessment
-- [`doc-tecnica.md`](docs/doc-tecnica.md) — legacy system-wide architecture doc (pre-refactor)
 
 ## Status
 

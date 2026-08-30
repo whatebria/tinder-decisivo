@@ -22,8 +22,7 @@ PALABRAS_CARGADAS = {
 todas_preguntas = []
 ejes_esperados = {
     "ECONOMIA", "SOCIEDAD", "AMBIENTE", "SEGURIDAD", "DDHH",
-    "INTERNACIONAL", "INSTITUCIONAL", "OTRO",
-    "PUEBLOS_ORIGINARIOS", "DISCAPACIDAD",
+    "INTERNACIONAL", "INSTITUCIONAL"
 }
 
 print(f"{'Archivo':<40} {'Filas':>6} {'Tipo':<25} {'OK':>4}")

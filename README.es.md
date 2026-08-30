@@ -83,10 +83,13 @@ Elegimos herramientas aburridas y probadas que se corren del camino:
 
 ## Como arrancar (dev)
 
-### Requisitos
+##### Requisitos
 
-- **Python 3.10+** con [uv](https://github.com/astral-sh/uv)
-- **Node.js 20.19.4+** (versiones mas viejas avisan pero pueden andar)
+- **Python 3.10+** administrado con [uv](https://github.com/astral-sh/uv)
+- **Node.js LTS v24.19.0+** — estandarizado en perfil de usuario (`%LOCALAPPDATA%\Programs\nodejs`). En Windows instalar sin elevacion UAC:
+  ```powershell
+  winget install OpenJS.NodeJS.LTS --scope user --accept-source-agreements --accept-package-agreements
+  ```
 - **Git**
 
 ### Backend
@@ -94,9 +97,11 @@ Elegimos herramientas aburridas y probadas que se corren del camino:
 ```bash
 cd backend
 uv venv
-uv sync
+uv cache clean
+uv sync --upgrade --default-index https://pypi.org/simple
 cp .env.example .env                        # genera un SECRET_KEY y pegalo
 uv run python manage.py migrate
+uv run python manage.py check
 uv run python manage.py createsuperuser
 
 # Seed de datos (idempotente, seguro re-correr)
@@ -114,13 +119,38 @@ Backend en http://localhost:8010. Admin en http://localhost:8010/admin/.
 
 ```bash
 cd frontend
-npm install --legacy-peer-deps
+# Si node_modules no existe o fue instalado desde un registry corporativo, borrar el lockfile:
+Remove-Item package-lock.json -ErrorAction SilentlyContinue   # PowerShell
+# rm package-lock.json                                         # bash/zsh
+
+# Recargar variables de entorno en PowerShell para la sesion activa si node/npm/npx no son reconocidos:
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+
+# Instalar desde el registry publico de npm
+npm install --legacy-peer-deps --registry=https://registry.npmjs.org/
+
+# Sincronizar tipos de entorno de Expo (genera expo-env.d.ts)
+npx expo customize tsconfig.json
+
+# Verificar — debe salir con 0 errores de tipos
+npx tsc --noEmit
+
+# Arrancar el bundler
 npx expo start --web --port 8081
 ```
 
 Abre http://localhost:8081. El primer bundle toma 40-60s.
 
 Para iOS/Android: escanea el QR con la app Expo Go, o presiona `i` / `a` en la terminal.
+
+### Solucion de problemas (Troubleshooting)
+
+- **`CommandNotFoundException` para `node`, `npm`, o `npx` en PowerShell**:
+  Ejecuta `$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")` en tu terminal activa de PowerShell o abre una nueva terminal.
+- **Error de DNS / Resolucion de paquetes (`os error 11001`)**:
+  Purga lockfiles corporativos contaminados y sincroniza contra repositorios publicos:
+  - Backend: `uv cache clean && uv sync --upgrade --default-index https://pypi.org/simple`
+  - Frontend: `Remove-Item package-lock.json -ErrorAction SilentlyContinue && npm install --legacy-peer-deps --registry=https://registry.npmjs.org/`
 
 ### Variables de entorno
 
@@ -185,11 +215,8 @@ Por favor abrir un issue primero para cambios grandes. Ver la carpeta [`docs/`](
 - [`sprints.md`](docs/sprints.md) — historial completo del proyecto por sprints
 - [`sistema-tecnico.md`](docs/sistema-tecnico.md) — referencia de arquitectura backend + frontend
 - [`sistema-simple.md`](docs/sistema-simple.md) — la misma arquitectura en lenguaje simple
-- [`algoritmo-tecnico.md`](docs/algoritmo-tecnico.md) — referencia del algoritmo de matching (formulas, API, complejidad)
-- [`algoritmo-simple.md`](docs/algoritmo-simple.md) — el mismo algoritmo sin matematica, para publico no tecnico
 - [`comparacion-vaas.md`](docs/comparacion-vaas.md) — analisis comparativo vs Wahl-O-Mat, StemWijzer, Smartvote y 6 otros VAAs
 - [`buenas-practicas.md`](docs/buenas-practicas.md) — SOLID, DRY, Clean Architecture, 12-Factor, testing pyramid y otros principios aplicados
-- [`estado-actual.md`](docs/estado-actual.md) — foto honesta: features listas, gaps para publicar, evaluacion de modularidad + escalabilidad
 - [`doc-tecnica.md`](docs/doc-tecnica.md) — doc legacy con arquitectura del sistema completo (pre-refactor)
 
 ## Estado

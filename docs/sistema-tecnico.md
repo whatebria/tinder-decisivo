@@ -222,6 +222,7 @@ Todos idempotentes. Ver detalle en [`backend/tecnico/06-comandos-seeds.md`](back
 | expo-secure-store | 57 | Token storage nativo |
 | react-native-svg | 15 | RadarChart |
 | openapi-typescript | 7.13 | Types desde el backend |
+| Node.js | LTS v24.19.0+ | Runtime de tooling (npm, npx, Metro bundler) |
 
 ### Estructura de carpetas
 
@@ -397,6 +398,37 @@ Un solo codebase → 3 targets:
 - **Imports agrupados**: React → RN → Tamagui → local
 - **Español** en textos visibles y comentarios de UX; ingles en identificadores de codigo
 
+### Configuracion canonica de TypeScript (`frontend/tsconfig.json`)
+
+Esta es la estructura canonica para Expo SDK 57 con tipado estricto:
+
+```json
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "types": ["jest", "node"]
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js",
+    "scripts/lib/__fixtures__"
+  ]
+}
+```
+
+**Notas**:
+- `expo/tsconfig.base` existe en `node_modules/expo/tsconfig.base.json` — requiere que `expo` este instalado.
+- Los fixtures de dev (`scripts/lib/__fixtures__`) se excluyen explicitamente para evitar errores de compilacion de showcases que referencian componentes de test.
+- `expo-env.d.ts` se genera automaticamente con `npx expo customize tsconfig.json`.
+- El alias `@/*` mapea a `./src/*` y requiere que `baseUrl` no este seteado (ya lo provee `expo/tsconfig.base`).
+
 ---
 
 ## Integracion backend ↔ frontend
@@ -447,16 +479,79 @@ Cambio en modelo backend → cambio en schema → cambio en types frontend:
 ```bash
 # Terminal 1 — backend
 cd backend
+uv sync --default-index https://pypi.org/simple   # primera vez o tras clonar
+uv run python manage.py migrate
 uv run python manage.py runserver 0.0.0.0:8010
 
-# Terminal 2 — frontend
+# Terminal 2 — frontend (primera vez o tras clonar)
 cd frontend
-npx expo start --web --port 8081
+# Borrar lockfile previo si es necesario (ej: vino de un registro corporativo)
+Remove-Item package-lock.json -ErrorAction SilentlyContinue  # PowerShell
+npm install --legacy-peer-deps --registry=https://registry.npmjs.org/
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+npx expo customize tsconfig.json   # genera expo-env.d.ts
+npx tsc --noEmit                   # DEBE salir con 0 errores
+npx expo start --web --port 8081 -c
+
+# Terminal 2 — frontend (arranques siguientes)
+cd frontend
+npx expo start --web --port 8081 -c
 ```
+
+### Paridad del motor React 19 y Bloque Overrides
+
+En Expo SDK 57 con React 19, `react` y `react-dom` requieren paridad estricta de version.
+- `dependencies`: `react` y `react-dom` deben fijarse exactamente en `"19.2.3"` (sin comodines de rango `^` o `~`).
+- `overrides`: bloque obligatorio en `frontend/package.json` para forzar paridad `19.2.3` en dependencias transitivas del árbol de Expo:
+  ```json
+  "overrides": {
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  }
+  ```
 
 ### Debug tips
 
+**Error "Incompatible React versions" (`react-dom@19.2.8` vs `react@19.2.3`)**:
+Ocurre si `react-dom` tiene un rango como `"^19.2.3"`. Se soluciona fijando `"19.2.3"` en `dependencies` y `overrides`, ejecutando `npm install --legacy-peer-deps` y reiniciando Metro bundler con la bandera `-c` (`--clear`).
+
+**Necesidad de purga de caché (`-c` / `--clear`) en Metro**:
+Al alterar el grafo de dependencias en `package.json` o cambiar la resolución de módulos en `node_modules`, la caché de transformación de Metro puede conservar artefactos anteriores. Usar siempre `npx expo start --web --port 8081 -c`.
+
 **Frontend blank en web**: chequear que el bundle termino (mira consola de Metro). Primer bundle: 40-60s.
+
+**`File 'expo/tsconfig.base' not found` en tsconfig.json**: `node_modules/expo` no existe o esta corrupto.
+Solucion:
+```powershell
+Remove-Item package-lock.json -ErrorAction SilentlyContinue
+npm install --legacy-peer-deps --registry=https://registry.npmjs.org/
+npx expo customize tsconfig.json
+```
+
+**`npm` / `node` / `npx` no reconocido en Windows**:
+Node.js LTS (v24.19.0+ / v20.x+) estandarizado en perfil de usuario (`%LOCALAPPDATA%\Programs\nodejs`).
+Instalar sin UAC en Windows:
+```powershell
+winget install OpenJS.NodeJS.LTS --scope user --accept-source-agreements --accept-package-agreements
+# Recargar variables de entorno en la sesion activa de PowerShell:
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+```
+
+**`npm install` intenta descargar desde `artifacts.walmart.com` (OS error 11001)**:
+El `package-lock.json` del repo fue generado en una red corporativa con un registry privado.
+Solucion:
+```powershell
+Remove-Item frontend\package-lock.json -Force
+cd frontend
+npm install --legacy-peer-deps --registry=https://registry.npmjs.org/
+```
+
+**`uv sync` falla con DNS error apuntando a `pypi.ci.artifacts.walmart.com`**:
+El `uv.lock` tiene URLs de un registry privado. Regenerar:
+```bash
+uv cache clean
+uv sync --upgrade --default-index https://pypi.org/simple
+```
 
 **"Networking has been disabled"** en Metro: es un warning por proxy corporativo — el bundle igual funciona en offline mode.
 
@@ -495,4 +590,4 @@ Todavia no implementado. Approach recomendado:
 
 ---
 
-_Ultima revision: 2026-07-25 (post sprint 7)._
+_Ultima revision: 2026-08-30 (post sprint 9 — fix entorno dev frontend/backend)._

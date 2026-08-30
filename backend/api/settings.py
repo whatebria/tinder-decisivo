@@ -20,7 +20,7 @@ SECRET_KEY = config("SECRET_KEY")
 DEBUG = config("DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS",
-    default="127.0.0.1,localhost",
+    default="127.0.0.1, localhost",
     cast=Csv(),
 )
 
@@ -269,6 +269,11 @@ REST_FRAMEWORK = {
 # ------------------------------------------------------------
 # OpenAPI schema (drf-spectacular)
 # ------------------------------------------------------------
+# NOTA: Se usan versiones CDN fijas (no @latest) para evitar regressions
+# silenciosas. Swagger UI 5.18.2 es la ultima version 5.x sin el bug de
+# `isFeatureEnabled` (TypeError en consola del navegador al arrancar la UI).
+# Al actualizar, probar en incognito antes de pinear la nueva version.
+# Issue upstream: https://github.com/swagger-api/swagger-ui/issues/9736
 SPECTACULAR_SETTINGS = {
     "TITLE": "VotoAFin API",
     "DESCRIPTION": (
@@ -279,6 +284,10 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
     "SCHEMA_PATH_PREFIX": r"/api/v1",
+    # Pinear version exacta de Swagger UI y ReDoc en CDN.
+    # Evita que @latest rompa la UI cuando hay breaking changes en el bundle.
+    "SWAGGER_UI_DIST": "https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.18.2",
+    "REDOC_DIST": "https://cdn.jsdelivr.net/npm/redoc@2.1.5",
 }
 
 

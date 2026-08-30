@@ -21,11 +21,12 @@
 7. [Testing pyramid](#7-testing-pyramid)
 8. [Convenciones Django especificas](#8-convenciones-django-especificas)
 9. [Convenciones React / RN especificas](#9-convenciones-react--rn-especificas)
-10. [Git y commits](#10-git-y-commits)
-11. [Documentacion](#11-documentacion)
-12. [Accesibilidad y i18n](#12-accesibilidad-y-i18n)
-13. [Seguridad basica](#13-seguridad-basica)
-14. [Lo que NO se sigue todavia](#14-lo-que-no-se-sigue-todavia)
+10. [TypeScript strict y gobernanza de tipos](#10-typescript-strict-y-gobernanza-de-tipos)
+11. [Git y commits](#11-git-y-commits)
+12. [Documentacion](#12-documentacion)
+13. [Accesibilidad y i18n](#13-accesibilidad-y-i18n)
+14. [Seguridad basica](#14-seguridad-basica)
+15. [Lo que NO se sigue todavia](#15-lo-que-no-se-sigue-todavia)
 
 ---
 
@@ -414,7 +415,104 @@ Roy).
 
 ---
 
-## 10. Git y commits
+## 10. TypeScript strict y gobernanza de tipos
+
+> Referencia: https://www.typescriptlang.org/tsconfig#strict
+>
+> "strict: true" activa un conjunto de flags que eliminan clases enteras de bugs en tiempo de compilacion.
+
+### Por que strict=true es innegociable en este proyecto
+
+- **Sin `any` implicito**: TypeScript fuerza tipar toda variable. Los errores de shape del backend se detectan en compilacion, no en runtime.
+- **`strictNullChecks`**: evita el clasico `Cannot read property of undefined`. Cada posible `null | undefined` debe manejarse explicitamente.
+- **Contratos autogenerados**: `src/types/api.ts` se genera desde el schema OpenAPI del backend. `strict` garantiza que el frontend sea fiel al contrato.
+
+### Configuracion canonica (`frontend/tsconfig.json`)
+
+```json
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": { "@/*": ["./src/*"] },
+    "types": ["jest", "node"]
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js",
+    "scripts/lib/__fixtures__"
+  ]
+}
+```
+
+**Razon de cada decision**:
+- `expo/tsconfig.base`: preset oficial de Expo que configura `jsx`, `moduleResolution` y `lib` correctamente para RN + web.
+- `scripts/lib/__fixtures__`: excluido explicitamente porque los showcase files de dev referencian componentes que no existen en el bundle de produccion y causarian errores de compilacion.
+- `@/*`: alias que mapea a `./src/*`. Evita rutas relativas largas (`../../..`) en imports.
+
+### Invariante de CI / pre-commit
+
+```bash
+npm run typecheck   # equivale a: npx tsc --noEmit
+```
+
+Must exit 0. **Si tsc esta rojo, no commitear.** El error casi siempre es efecto colateral del cambio que acabas de hacer, aunque el archivo rojo no sea el que tocaste.
+
+### Gobernanza de entorno (dependencias de tipos)
+
+### Gobernanza de dependencias y paridad de React 19 Engine
+
+En React 19 / Expo SDK 57, los paquetes `react` y `react-dom` requieren **paridad estricta de versión** (`19.2.3` exacta, sin rangos `^` o `~`).
+
+1. **Paridad de versión exacta**:
+   ```json
+   "dependencies": {
+     "react": "19.2.3",
+     "react-dom": "19.2.3"
+   }
+   ```
+2. **Bloque `overrides` obligatorio**:
+   Para forzar paridad `19.2.3` en dependencias transitivas del árbol de Expo y evitar drift como `react-dom@19.2.8`:
+   ```json
+   "overrides": {
+     "react": "19.2.3",
+     "react-dom": "19.2.3"
+   }
+   ```
+3. **Purga de caché en Metro Bundler (`-c` / `--clear`)**:
+   Cualquier modificación al grafo de dependencias o archivo `package.json` requiere iniciar el bundler limpiando la caché de transformación:
+   ```bash
+   npx expo start --web --port 8081 -c
+   ```
+
+Protocolo de recuperacion de entorno:
+
+```powershell
+# 1. Borrar lockfile previo (si aplica)
+Remove-Item package-lock.json -ErrorAction SilentlyContinue
+
+# 2. Reinstalar desde registry publico
+npm install --legacy-peer-deps --registry=https://registry.npmjs.org/
+
+# 3. Sincronizar variables de entorno en la sesion activa de PowerShell
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+
+# 4. Regenerar tipos de entorno de Expo
+npx expo customize tsconfig.json
+
+# 5. Verificar tipado
+npx tsc --noEmit
+
+# 6. Arrancar bundler
+npx expo start --web --port 8081
+```
+
+---
+
+## 11. Git y commits
 
 > Conventional Commits — https://www.conventionalcommits.org/es/v1.0.0/
 
@@ -598,6 +696,6 @@ Honestidad: no todo esta implementado. Estos son los gaps identificados:
 
 ---
 
-_Version 1.0 — 2026-07-25._
-_Este documento se actualiza cada vez que adoptamos o abandonamos una
-practica. Ultima revision de gaps: post-refactor de backend._
+_Version 1.1 — 2026-08-30._
+_Actualizado post sprint 9: agregada seccion 10 sobre TypeScript strict y gobernanza de tipos._
+_Este documento se actualiza cada vez que adoptamos o abandonamos una practica._

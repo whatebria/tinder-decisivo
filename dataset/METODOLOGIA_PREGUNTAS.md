@@ -140,15 +140,6 @@ Una pregunta valida **debe** cumplir:
 
 ## 5. Distribucion por eje tematico
 
-El sistema Servel usa 10 ejes: los 8 originales (`ECONOMIA`, `SOCIEDAD`,
-`AMBIENTE`, `SEGURIDAD`, `DDHH`, `INTERNACIONAL`, `INSTITUCIONAL`,
-`OTRO`) mas 2 agregados en el dataset (`PUEBLOS_ORIGINARIOS`,
-`DISCAPACIDAD`). Los dos ultimos no estan en el `EJES_CHOICES` del
-modelo Django — el signal `Eje` los auto-crea al importar (ver README
-seccion "Nota sobre backend").
-
-Cada cuestionario cubre **al menos 6 de los 10 ejes**. Se aceptan
-ausencias donde el cargo no tiene competencia:
 
 - `Alcaldes 2024` no tiene `INTERNACIONAL` porque los alcaldes chilenos
   no manejan politica exterior.
@@ -239,9 +230,7 @@ que aplica a un scope no necesariamente aplica a otro.
   previsional, escanos reservados o limite de reeleccion, para
   medir la coherencia del candidato entre camaras. El verbo cambia
   (Diputados `aprueba` / Senado `revisa y aprueba/rechaza`).
-- **Restriccion tematica**: sin `OTRO` (los 7 ejes restantes cubren
-  el scope; agregar una pregunta artificial en `OTRO` diluiria la
-  coherencia).
+
 
 ### 6.5. `Alcaldes 2024`
 
