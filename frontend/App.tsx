@@ -4,7 +4,19 @@
  * Wraps:
  * - SafeAreaProvider (necesario para react-navigation)
  * - NavigationContainer (react-navigation)
- * - Hydrata auth + onboarding + theme stores desde storage al arrancar.
+ * - Hydrata stores desde storage al arrancar.
+ *
+ * ## Estrategia de hidratación (perf)
+ * El gate `ready` solo espera stores críticos para el primer render:
+ *   auth + onboarding + theme.
+ * CoachMarks se hidrata en paralelo con identity=null y se re-hidrata
+ * cuando cambia la identidad, pero NO bloquea el LCP. Esto elimina la
+ * cadena secuencial auth→coachMarks que causaba ~5 s de Element Render
+ * Delay en el LCP.
+ *
+ * Si necesitas agregar un store al gate `ready`, asegúrate de que:
+ *   1. Sea visible/necesario en el primer frame.
+ *   2. No dependa de otro store (evitar cadenas secuenciales).
  *
  * Nota: Tamagui fue removido — la app usa el design system nativo
  * (atoms/molecules propios + tokens en src/theme/). Ver commit de purga.
@@ -58,18 +70,20 @@ export default function App() {
   const themeHydrated = useThemeStore((s) => s.isHydrated);
   const effective = useThemeStore((s) => s.effective);
 
+  // Hidratación paralela: todos los stores críticos arrancan al mismo tiempo.
+  // CoachMarks también arranca aquí con identity=null (guest) para no quedar
+  // bloqueado esperando auth — se re-hidrata en el efecto de identidad.
   useEffect(() => {
     hydrateAuth();
     hydrateOnboarding();
     hydrateElections();
     hydrateTheme();
-  }, [hydrateAuth, hydrateOnboarding, hydrateElections, hydrateTheme]);
+    hydrateCoachMarks(null); // arranque paralelo; se corrige con identidad real abajo
+  }, [hydrateAuth, hydrateOnboarding, hydrateElections, hydrateTheme, hydrateCoachMarks]);
 
-  // Coach marks: persistidos por identidad (userId autenticado o "guest").
-  // Esperamos a que auth termine de hidratar para saber si hay userId, y
-  // cargamos la lista de tours vistos de esa identidad. Cada cambio de
-  // identidad (login, logout, entrar/salir de guest) re-hidrata desde la
-  // key correspondiente. Ver src/store/coachMarks.ts.
+  // Re-hidrata coach marks cuando la identidad cambia (login / logout / guest).
+  // Solo corre una vez que auth terminó de leer storage; evita una re-hidratación
+  // innecesaria sobre null si el usuario ya tiene sesión activa.
   useEffect(() => {
     if (!authHydrated) return;
     hydrateCoachMarks(authToken ? authUserId : null);
@@ -127,8 +141,10 @@ export default function App() {
     };
   }, [effective]);
 
-  const ready =
-    authHydrated && onboardingHydrated && themeHydrated && coachMarksHydrated;
+  // Solo stores visibles en el primer frame bloquean el render.
+  // coachMarksHydrated queda excluido: los tours se muestran levemente
+  // después del primer paint sin impactar el LCP (no son críticos).
+  const ready = authHydrated && onboardingHydrated && themeHydrated;
   const loadingBg = effective === "dark" ? colorsDark.bg : colors.bg;
 
   return (

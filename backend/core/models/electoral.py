@@ -79,7 +79,12 @@ class Candidato(models.Model):
         default="",
         help_text="Teléfono de contacto oficial.",
     )
-    profile_picture = models.ImageField(default="assets/default.avif", upload_to="profiles/")
+    profile_picture = models.ImageField(
+        upload_to="profiles/",
+        null=True,
+        blank=True,
+        help_text="Foto de perfil del candidato. Nulo = sin foto (el frontend muestra iniciales).",
+    )
     tipos_eleccion = models.ManyToManyField(TipoEleccion, related_name="candidatos")
 
     # Scope territorial polimorfico. Nulo = candidato nacional (ej. Presidencial).
