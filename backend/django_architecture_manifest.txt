@@ -1,0 +1,932 @@
+================================================================================
+DJANGO ARCHITECTURE MANIFEST: VOTING ADVICE APPLICATION (VAA - TINDER DECISIVO)
+SENIOR ARCHITECT & CODE ANALYST EXHAUSTIVE TECHNICAL DOCUMENTATION
+================================================================================
+
+================================================================================
+1. ROOT CONFIG & ENTRY POINTS
+================================================================================
+
+[manage.py]
+- Finalidad General: Punto de entrada principal de la CLI de Django para ejecucion de comandos administrativos, servidor de desarrollo y migraciones de base de datos.
+- Rol Arquitectural Django: CLI / Entry Point Management.
+- Inventario de Clases/Funciones:
+  * Function: main()
+- Detalle por Funcion/Metodo:
+  * main():
+    - Proposito especifico: Establecer el modulo de configuracion por defecto ('api.settings') y delegar la ejecucion de la linea de comandos al orquestador de Django (`execute_from_command_line`).
+    - Logica operacional y efectos colaterales: I/O de terminal y lectura de argumentos sys.argv. Si Django no esta instalado en el entorno de ejecucion, captura el `ImportError` y emite una excepcion explicativa.
+    - Impacto en la arquitectura: Desacoplado de la logica de negocio; actua exclusivamente como bootstrapping del framework Django.
+
+[check_pres.py]
+- Finalidad General: Script auxiliar CLI para inspeccion rapida en memoria y consola de candidatos a la eleccion presidencial.
+- Rol Arquitectural Django: CLI / Maintenance Script.
+- Inventario de Clases/Funciones:
+  * (Bloque ejecutable a nivel de modulo sin clases ni funciones)
+- Detalle por Funcion/Metodo:
+  * Module Level Execution:
+    - Proposito especifico: Consultar la base de datos ORM filtrando candidatos presidenciales y mostrando sus datos y conteo de posturas cargadas.
+    - Logica operacional y efectos colaterales: Realiza lecturas directas a la base de datos (SELECT en Candidato y PosturaCandidato) y emite salida formateada por stdout.
+    - Impacto en la arquitectura: Script utilitario sin dependencias inversas en la aplicacion.
+
+[api/asgi.py]
+- Finalidad General: Punto de entrada para servidores de aplicaciones asincronas compatibles con la especificacion ASGI (ej. Daphne, Uvicorn).
+- Rol Arquitectural Django: Infrastructure / Gateway Interface.
+- Inventario de Clases/Funciones:
+  * (Inicializacion de aplicacion ASGI a nivel de modulo)
+- Detalle por Funcion/Metodo:
+  * get_asgi_application():
+    - Proposito especifico: Configurar la variable de entorno 'DJANGO_SETTINGS_MODULE' y retornar la instancia de la aplicacion ASGI lista para manejar peticiones HTTP/WebSocket asincronas.
+    - Logica operacional y efectos colaterales: Inicializa los registros de Django y el cargador de apps. Sin efectos secundarios I/O directos durante la definicion.
+    - Impacto en la arquitectura: Desacopla el servidor HTTP/ASGI de las visiones y capas internas del sistema VAA.
+
+[api/wsgi.py]
+- Finalidad General: Punto de entrada para servidores web WSGI tradicionales (ej. Gunicorn, uWSGI, Apache mod_wsgi).
+- Rol Arquitectural Django: Infrastructure / Gateway Interface.
+- Inventario de Clases/Funciones:
+  * (Inicializacion de aplicacion WSGI a nivel de modulo)
+- Detalle por Funcion/Metodo:
+  * get_wsgi_application():
+    - Proposito especifico: Definir 'DJANGO_SETTINGS_MODULE' como 'api.settings' e instanciar la aplicacion callable WSGI estandar de Django.
+    - Logica operacional y efectos colaterales: Carga la configuracion de la aplicacion de manera sincrona.
+    - Impacto en la arquitectura: Punto de conexion primario para despliegues de produccion sincronos detras de proxies inversos (Nginx/Cloudflare).
+
+[api/settings.py]
+- Finalidad General: Archivo monolitico de configuracion centralizada de la aplicacion Django, definiendo middleware, seguridad, ORM, autenticacion DRF, CORS, CSP y variables de entorno.
+- Rol Arquitectural Django: Infrastructure / Central Configuration System.
+- Inventario de Clases/Funciones:
+  * Constantes y configuraciones a nivel de modulo: SECRET_KEY, DEBUG, ALLOWED_HOSTS, INSTALLED_APPS, MIDDLEWARE, DATABASES, REST_FRAMEWORK, CORS_ALLOWED_ORIGINS, CORS_ALLOWED_ORIGIN_REGEXES, CSP_*, etc.
+- Detalle por Funcion/Metodo:
+  * Evaluacion de Variables de Entorno (decouple.config):
+    - Proposito especifico: Cargar dinamicamente credenciales de DB (PostgreSQL/SQLite), llaves secretas, configuraciones de correo SMTP y banderas de seguridad segun el entorno (desarrollo/produccion).
+    - Logica operacional y efectos colaterales: Lee variables desde `.env` o variables del sistema operativo. Configura la llamada a `check_cors_regexes` para validar patrones de CORS hostiles.
+    - Impacto en la arquitectura: Nucleo de control de todas las dependencias del proyecto. Define el comportamiento global de DRF, autenticacion por tokens/cookies y la cadena de middlewares.
+
+[api/urls.py]
+- Finalidad General: Enrutador URL raiz del proyecto backend que expone endpoints administrativos, endpoints de salud (healthcheck) e incluye el enrutador del modulo core.
+- Rol Arquitectural Django: Routing / Root URL Dispatcher.
+- Inventario de Clases/Funciones:
+  * `urlpatterns` (lista de rutas a nivel de modulo)
+- Detalle por Funcion/Metodo:
+  * Enrutamiento de URLs (`path`, `include`):
+    - Proposito especifico: Mapear `/admin/` (dinamico mediante `DJANGO_ADMIN_URL`), `/health/` y `/api/v1/` a sus respectivas vistas y submodulos de URLs.
+    - Logica operacional y efectos colaterales: Despacha las peticiones HTTP entrantes a la capa de presentacion segun la URI consultada.
+    - Impacto en la arquitectura: Centraliza la jerarquia de rutas del sistema y desacopla la version de la API (`/api/v1/`).
+
+[api/views.py]
+- Finalidad General: Implementacion del controlador de monitoreo de disponibilidad del servicio (Health Check).
+- Rol Arquitectural Django: Presentation / System Diagnostics API.
+- Inventario de Clases/Funciones:
+  * Function: health_check(request)
+- Detalle por Funcion/Metodo:
+  * health_check(request):
+    - Proposito especifico: Proporcionar un endpoint liviano `/health/` para balanceadores de carga y sondas de liveness de Kubernetes/Cloud Run.
+    - Logica operacional y efectos colaterales: Ejecuta una consulta simple de verificacion en la base de datos (`connection.ensure_connection()`) y retorna JSON `{"status": "ok", "db": True}` con codigo 200 OK (o 500 si la DB no responde).
+    - Impacto en la arquitectura: Proporciona observabilidad de infraestructura sin cargar componentes pesados del dominio.
+
+[api/cors_security.py]
+- Finalidad General: Modulo de auditoria y hardening de reglas de validacion CORS para prevenir configuraciones peligrosas o vulnerabilidades por origenes comodin/maliciosos (F7 audit).
+- Rol Arquitectural Django: Infrastructure / Security Guard.
+- Inventario de Clases/Funciones:
+  * Function: check_cors_regexes(regexes, debug=False)
+- Detalle por Funcion/Metodo:
+  * check_cors_regexes(regexes, *, debug=False):
+    - Proposito especifico: Compilar y testear las expresiones regulares de origenes permitidos en CORS contra una lista de dominios hostiles conocidos.
+    - Logica operacional y efectos colaterales: Si un regex falla la compilacion o hace match con dominios maliciosos en entorno de produccion (`DEBUG=False`), eleva inmediatamente `ImproperlyConfigured` impidiendo el arranque inseguro del servidor. En `DEBUG=True` emite un WARNING de seguridad.
+    - Impacto en la arquitectura: Previene ataques de Cross-Origin Resource Sharing indebidos antes de que la aplicacion empiece a recibir trafico.
+
+[api/middleware.py]
+- Finalidad General: Custom middleware para inyeccion de encabezados de seguridad Content-Security-Policy (CSP) alineado con estandares OWASP ASVS V14.4.3.
+- Rol Arquitectural Django: Presentation / Security Middleware.
+- Inventario de Clases/Funciones:
+  * Class: ContentSecurityPolicyMiddleware
+- Detalle por Funcion/Metodo:
+  * ContentSecurityPolicyMiddleware.__init__(get_response):
+    - Proposito especifico: Inicializar el middleware en la pila de ejecucion de Django recibiendo el callable `get_response`.
+    - Logica operacional y efectos colaterales: Guarda la referencia del siguiente middleware o vista.
+    - Impacto en la arquitectura: Requisito estandar de la canalizacion de middleware de Django.
+  * ContentSecurityPolicyMiddleware.__call__(request):
+    - Proposito especifico: Interceptar la respuesta HTTP y adjuntar las directivas CSP correspondientes segun la ruta solicitada.
+    - Logica operacional y efectos colaterales: Evalua la URI de la peticion. Si coincide con la ruta del Django Admin (`DJANGO_ADMIN_URL`), inyecta `CSP_ADMIN` (permitiendo 'unsafe-inline' para scripts administrativos). Para cualquier otra ruta de la API JSON, inyecta `CSP_API` (`default-src 'none'`).
+    - Impacto en la arquitectura: Protege a los clientes web contra Cross-Site Scripting (XSS) y Clickjacking sin requerir librerias externas pesadas.
+
+[core/admin.py]
+- Finalidad General: Panel de administracion Django principal para la gestion de entidades de catalogo electoral, preguntas de la VAA, respuestas y actividad del usuario.
+- Rol Arquitectural Django: Admin / Presentation Layer.
+- Inventario de Clases/Funciones:
+  * Class: OpcionRespuestaInline(admin.TabularInline)
+  * Class: PreguntaInline(admin.TabularInline)
+  * Class: TipoEleccionAdmin(admin.ModelAdmin)
+  * Class: CandidatoAdmin(admin.ModelAdmin)
+  * Class: PreguntaAdmin(admin.ModelAdmin)
+  * Class: OpcionRespuestaAdmin(admin.ModelAdmin)
+  * Class: PosturaCandidatoAdmin(admin.ModelAdmin)
+  * Class: RespuestaUsuarioAdmin(admin.ModelAdmin)
+  * Class: CandidatoFavoritoAdmin(admin.ModelAdmin)
+  * Class: CandidatoDescartadoAdmin(admin.ModelAdmin)
+  * Class: NoticiaAdmin(admin.ModelAdmin)
+  * Class: NoticiaBookmarkAdmin(admin.ModelAdmin)
+  * Class: PosturaBookmarkAdmin(admin.ModelAdmin)
+- Detalle por Funcion/Metodo:
+  * TipoEleccionAdmin.num_preguntas(obj) / num_candidatos(obj):
+    - Proposito especifico: Calcular y mostrar metricas agregadas en la lista de tipos de eleccion.
+    - Logica operacional y efectos colaterales: Realiza conteos sobre las relaciones ORM relativas a preguntas y candidatos asociados.
+    - Impacto en la arquitectura: Proporciona visibilidad operativa al administrador del sistema.
+  * CandidatoAdmin.cobertura_bar(obj):
+    - Proposito especifico: Renderizar visualmente en HTML una barra de progreso indicando el porcentaje de posturas respondidas por el candidato frente al total de preguntas de su tipo de eleccion.
+    - Logica operacional y efectos colaterales: Calcula `(posturas_cargadas / preguntas_disponibles) * 100` y genera codigo HTML seguro con `format_html`.
+    - Impacto en la arquitectura: Facilita el monitoreo administrativo de la calidad de datos de los candidatos.
+  * PreguntaAdmin.crear_opciones_estandar(request, queryset):
+    - Proposito especifico: Accion masiva de administracion para generar automaticamente las 5 opciones estandar de Likert (Muy en desacuerdo a Muy de acuerdo) en preguntas seleccionadas.
+    - Logica operacional y efectos colaterales: Invoca `crear_opciones_acuerdo_desacuerdo(pregunta)` en una transaccion de base de datos para cada objeto seleccionado.
+    - Impacto en la arquitectura: Automatiza el aprovisionamiento de opciones de cuestionario invocando helpers del dominio.
+
+[core/admin_eje.py]
+- Finalidad General: Configuracion del Django Admin para la gestion del catalogo de Ejes Politicos tematicos (dimensiones del brújula politica).
+- Rol Arquitectural Django: Admin / Presentation Layer.
+- Inventario de Clases/Funciones:
+  * Class: EjeAdmin(admin.ModelAdmin)
+- Detalle por Funcion/Metodo:
+  * EjeAdmin.num_preguntas(obj):
+    - Proposito especifico: Retornar la cantidad de preguntas del cuestionario vinculadas a determinado eje politico.
+    - Logica operacional y efectos colaterales: Ejecuta consulta `obj.preguntas.count()` e implementa optimizaciones de queryset mediante `get_queryset` anotado.
+    - Impacto en la arquitectura: Ofrece metricas de distribucion de preguntas por eje tematico.
+
+[core/admin_territorio.py]
+- Finalidad General: Administracion en el panel de Django de los modelos de division politica administrativa tradicional (Region, Distrito, Comuna) y del perfil ampliado de usuario.
+- Rol Arquitectural Django: Admin / Presentation Layer.
+- Inventario de Clases/Funciones:
+  * Class: RegionAdmin(admin.ModelAdmin)
+  * Class: DistritoAdmin(admin.ModelAdmin)
+  * Class: ComunaAdmin(admin.ModelAdmin)
+  * Class: UserProfileAdmin(admin.ModelAdmin)
+- Detalle por Funcion/Metodo:
+  * RegionAdmin.num_comunas(obj) / DistritoAdmin.num_comunas(obj):
+    - Proposito especifico: Calcular el total de comunas pertenecientes a la region o distrito.
+    - Logica operacional y efectos colaterales: Consultas de agregacion sobre la jerarquia territorial.
+    - Impacto en la arquitectura: Herramienta de auditoria geografica interna.
+  * UserProfileAdmin.get_region(obj):
+    - Proposito especifico: Resolver y mostrar en la tabla de UserProfile la region a la que pertenece la comuna asociada al usuario.
+    - Logica operacional y efectos colaterales: Navegacion de relaciones ORM `obj.comuna.distrito.region.nombre`.
+    - Impacto en la arquitectura: Mejora la inspeccion de datos territoriales de los usuarios registrados.
+
+[core/admin_unidad_territorial.py]
+- Finalidad General: Panel de administracion para el catalogo unificado y polimorfico de `UnidadTerritorial`.
+- Rol Arquitectural Django: Admin / Presentation Layer.
+- Inventario de Clases/Funciones:
+  * Class: UnidadTerritorialAdmin(admin.ModelAdmin)
+- Detalle por Funcion/Metodo:
+  * UnidadTerritorialAdmin.num_candidatos(obj):
+    - Proposito especifico: Mostrar cuantos candidatos estan adscritos a una UnidadTerritorial especifica (nacional, regional, distrital o comunal).
+    - Logica operacional y efectos colaterales: Realiza un conteo ORM sobre la relacion inversa con `Candidato`.
+    - Impacto en la arquitectura: Permite auditar la correcta asignacion de candidatos a la abstraccion territorial unificada.
+
+[core/apps.py]
+- Finalidad General: Configuracion de la aplicacion principal 'core' e inicializacion de registradores de eventos y senales (signals).
+- Rol Arquitectural Django: AppConfig / Infrastructure.
+- Inventario de Clases/Funciones:
+  * Class: CoreConfig(AppConfig)
+- Detalle por Funcion/Metodo:
+  * CoreConfig.ready():
+    - Proposito especifico: Metodo del ciclo de vida de Django invocado al completar la carga de la aplicacion.
+    - Logica operacional y efectos colaterales: Importa explicitamente el modulo de signals o fuerza el registro de los receivers decorados con `@receiver` en los modelos (`_sincronizar_perfil_ut`, `_upsert_ut_*`, etc.).
+    - Impacto en la arquitectura: Asegura la consistencia en el registro de observadores de eventos entre modelos y servicios.
+
+[core/authentication.py]
+- Finalidad General: Handlers de autenticacion personalizados para Django REST Framework con soporte para tokens expirables y autenticacion basada en cookies HttpOnly seguras (F1 audit).
+- Rol Arquitectural Django: Infrastructure / Auth Layer.
+- Inventario de Clases/Funciones:
+  * Class: ExpiringTokenAuthentication(TokenAuthentication)
+  * Class: CookieTokenAuthentication(ExpiringTokenAuthentication)
+  * Function: set_auth_cookie(response, token_key)
+  * Function: clear_auth_cookie(response)
+- Detalle por Funcion/Metodo:
+  * ExpiringTokenAuthentication.authenticate_credentials(key):
+    - Proposito especifico: Verificar si un token existe en DB y si no ha superado la ventana de expiracion fija (24 horas).
+    - Logica operacional y efectos colaterales: Consulta `Token.objects.get(key=key)`. Compara `token.created` con la hora actual. Si transcurrieron mas de 24 horas, elimina el token de la DB y lanza `AuthenticationFailed("Token expirado")`.
+    - Impacto en la arquitectura: Revoca tokens obsoletos automaticamente en el punto de acceso, forzando re-autenticacion.
+  * CookieTokenAuthentication.authenticate(request):
+    - Proposito especifico: Extraer el token de autenticacion desde el encabezado `Authorization: Token ...` o, en su defecto, desde la cookie segura `auth_token`.
+    - Logica operacional y efectos colaterales: Si la cookie o el header estan presentes, delega la validacion a `authenticate_credentials`.
+    - Impacto en la arquitectura: Permite que clientes SPA/Next.js utilicen cookies HttpOnly (protegidas contra XSS) sin romper compatibilidad con llamadas API que usan headers HTTP.
+  * set_auth_cookie(response, token_key) / clear_auth_cookie(response):
+    - Proposito especifico: Configurar o limpiar la cookie de sesion autenticada en las respuestas HTTP de Django.
+    - Logica operacional y efectos colaterales: Aplica directivas `httponly=True`, `samesite='Lax'`, `secure=not DEBUG`, y `max_age=86400` en la cookie `auth_token`.
+    - Impacto en la arquitectura: Centraliza la emision y destruccion segura de credenciales en la capa de transporte HTTP.
+
+[core/pagination.py]
+- Finalidad General: Definicion del contrato de paginacion estandar utilizado en todos los endpoints de listas de la API.
+- Rol Arquitectural Django: Infrastructure / Pagination Contract.
+- Inventario de Clases/Funciones:
+  * Class: StandardResultsSetPagination(PageNumberPagination)
+- Detalle por Funcion/Metodo:
+  * StandardResultsSetPagination:
+    - Proposito especifico: Configurar el tamano de pagina por defecto (`page_size = 20`), tamano maximo (`max_page_size = 100`) y el parametro de consulta (`page_size_query_param = 'page_size'`).
+    - Logica operacional y efectos colaterales: Fragmenta las respuestas JSON de listas largas limitando el consumo de memoria en el servidor y ancho de banda en el cliente.
+    - Impacto en la arquitectura: Garantiza un contrato uniforme de respuesta paginada (`count`, `next`, `previous`, `results`) en la API REST.
+
+[core/urls.py]
+- Finalidad General: Definicion del mapa de rutas del modulo `core`, registrando routers de ViewSets REST y rutas explicitas de APIViews.
+- Rol Arquitectural Django: Routing / Module URL Dispatcher.
+- Inventario de Clases/Funciones:
+  * `router` (DefaultRouter) y `urlpatterns` (lista de rutas a nivel de modulo)
+- Detalle por Funcion/Metodo:
+  * Mapeo de Endpoints:
+    - Proposito especifico: Registrar los ViewSets (`bookmark-favoritos`, `bookmark-descartados`, `noticias-bookmark`, `posturas-bookmark`, `match-candidatos`) y exponer vistas directas (`auth/register/`, `cuestionario/submit/`, `cuestionario/editar-respuesta/`, `perfil/`, `territorio/regiones/`, etc.).
+    - Logica operacional y efectos colaterales: Enruta peticiones HTTP entrantes a sus controladores correspondientes.
+    - Impacto en la arquitectura: Expone la interfaz publica RESTful v1 del dominio VAA.
+
+================================================================================
+2. APPLICATION & SERVICES LAYER
+================================================================================
+
+[core/services/matching.py]
+- Finalidad General: Nucleo algoritmico y matematico para el calculo de similitud vectorial y porcentaje de match entre el perfil de respuestas del usuario y los candidatos electorales.
+- Rol Arquitectural Django: Service / Application Layer (Algorithmic Core).
+- Inventario de Clases/Funciones:
+  * Class: ScoreCandidato
+  * Function: _tipo_ids_con_base(tipo_eleccion_id)
+  * Function: _filtrar_candidatos_por_territorio(candidatos_qs, user)
+  * Function: score_pregunta(resp_user, resp_cand, peso_user)
+  * Function: confianza_por_n(n_coincidentes)
+  * Function: _calcular_scores(...)
+  * Function: calcular_match(user, tipo_eleccion_id)
+  * Function: calcular_match_detalle(user, candidato_id)
+  * Function: calcular_match_anonimo(respuestas_payload, tipo_eleccion_id, comuna_id)
+- Detalle por Funcion/Metodo:
+  * ScoreCandidato (Dataclass):
+    - Proposito especifico: Contenedor inmutable para los resultados del calculo por candidato: `candidato`, `porcentaje`, `confianza`, `preguntas_coincidentes`, `detalles`.
+    - Logica operacional y efectos colaterales: Objeto de valor en memoria.
+    - Impacto en la arquitectura: Desacopla la logica matematica de la persistencia ORM.
+  * _tipo_ids_con_base(tipo_eleccion_id):
+    - Proposito especifico: Resolver que tipos de eleccion deben incluirse en el calculo (si la eleccion actual hereda preguntas del tipo base o viceversa).
+    - Logica operacional y efectos colaterales: Utiliza `get_base_tipo_ids()` cacheado para evitar queries repetitivas.
+    - Impacto en la arquitectura: Optimiza la resolucion del alcance de preguntas aplicables.
+  * _filtrar_candidatos_por_territorio(candidatos_qs, user):
+    - Proposito especifico: Aplicar el filtro espacial a la lista de candidatos segun la UnidadTerritorial de la comuna del usuario.
+    - Logica operacional y efectos colaterales: Obtiene la comuna del `UserProfile` del usuario, resuelve sus ancestros territoriales (comuna -> distrito -> region -> nacional) y filtra el queryset con `unidad_territorial__in=ut_ids`.
+    - Impacto en la arquitectura: Garantiza que un usuario en Nunoa solo vea candidatos que compitan en su territorio especifico o a nivel nacional.
+  * score_pregunta(resp_user, resp_cand, peso_user):
+    - Proposito especifico: Calcular la afinidad numerica entre la opcion elegida por el usuario y la postura del candidato para una pregunta dada, ajustada por el ponderador del usuario.
+    - Logica operacional y efectos colaterales: Mapea los valores de las opciones (1 a 5). Calcula la distancia `diff = abs(v_user - v_cand)`. Aplica matriz de puntos (distancia 0 -> 100%, 1 -> 75%, 2 -> 50%, 3 -> 25%, 4 -> 0%) y multiplica por el peso configurado por el usuario (0 a 3).
+    - Impacto en la arquitectura: Funcion pura sin efectos secundarios, altamente testeable.
+  * confianza_por_n(n_coincidentes):
+    - Proposito especifico: Determinar un indicador de confianza estadistica del porcentaje de match en funcion de cuantas preguntas respondio el usuario en comun con el candidato.
+    - Logica operacional y efectos colaterales: Mapea intervalos de `n_coincidentes` (ej. <3 -> 'baja', 3-7 -> 'media', >7 -> 'alta').
+    - Impacto en la arquitectura: Enriquece la respuesta de la API para comunicar la solidez del resultado.
+  * _calcular_scores(user_resp_map, user_pesos_map, candidatos_qs, tipo_eleccion_id):
+    - Proposito especifico: Iterar vectorializadamente sobre todos los candidatos elegibles, contrastar sus posturas registradas contra las respuestas del usuario y estructurar una lista de `ScoreCandidato`.
+    - Logica operacional y efectos colaterales: Realiza lecturas eficientes con `prefetch_related('posturas')` eliminando problemas N+1.
+    - Impacto en la arquitectura: Motor de procesamiento en memoria desacoplado de HTTP REST.
+  * calcular_match(user, tipo_eleccion_id):
+    - Proposito especifico: Orquestar el calculo completo para un usuario registrado y persistir/actualizar los resultados en el modelo `MatchCandidato`.
+    - Logica operacional y efectos colaterales: Lee `RespuestaUsuario` del usuario, invoca `_calcular_scores` y ejecuta `update_or_create` en bloque dentro de una transaccion (`transaction.atomic`) sobre `MatchCandidato`. Retorna los modelos creados/actualizados.
+    - Impacto en la arquitectura: Mantiene la persistencia de matches siempre sincronizada con la base de datos.
+  * calcular_match_detalle(user, candidato_id):
+    - Proposito especifico: Retornar el desglose pregunta por pregunta de la afinidad entre el usuario y un candidato en particular.
+    - Logica operacional y efectos colaterales: Compara las respuestas del usuario con las posturas del candidato especifico y construye el desglose con explicaciones y citas.
+    - Impacto en la arquitectura: Utilizado por la vista de detalle de match.
+  * calcular_match_anonimo(respuestas_payload, tipo_eleccion_id, comuna_id):
+    - Proposito especifico: Permitir que usuarios no registrados (visitantes anonimos) ejecuten el test y obtengan su ranking de match sin guardar datos en la DB.
+    - Logica operacional y efectos colaterales: Procesa un diccionario en memoria con las respuestas recibidas en el payload JSON. Filtra candidatos por `comuna_id` si se provee. Cero escrituras en DB.
+    - Impacto en la arquitectura: Endpoint de alto rendimiento orientado a la adquisicion de usuarios.
+
+[core/services/password_reset.py]
+- Finalidad General: Servicio de dominio para el ciclo de vida completo de recuperacion segura de contrasena via tokens temporales y despacho de emails.
+- Rol Arquitectural Django: Service / Application Layer (Security & Auth Domain).
+- Inventario de Clases/Funciones:
+  * Class: ResetRequestResult
+  * Class: ResetError(Exception)
+  * Function: request_reset(email)
+  * Function: confirm_reset(token_string, new_password)
+  * Function: _invalidate_pending_tokens(user)
+  * Function: _create_token(user)
+  * Function: _build_reset_link(raw_token)
+  * Function: _send_reset_email(user, reset_link)
+- Detalle por Funcion/Metodo:
+  * request_reset(email):
+    - Proposito especifico: Solicitar el restablecimiento de clave para una direccion de correo dada.
+    - Logica operacional y efectos colaterales: Busca el usuario por email. Para prevenir enumeracion de usuarios, si el email no existe retorna exito generico sin revelar la inexistencia. Si existe, invalida tokens previos (`_invalidate_pending_tokens`), genera un nuevo token criptografico de 64 caracteres hex (`_create_token`), construye la URL (`_build_reset_link`) y dispara un correo transaccional (`_send_reset_email`).
+    - Impacto en la arquitectura: Encapsula la logica de seguridad y prevencion de fuga de informacion.
+  * confirm_reset(token_string, new_password):
+    - Proposito especifico: Consumir el token y actualizar la clave del usuario.
+    - Logica operacional y efectos colaterales: Busca el `PasswordResetToken` por su hash SHA-256 (`token_hash`). Verifica que no este usado (`is_used`) ni expirado (`is_expired`). En una transaccion atomica, llama a `user.set_password(new_password)`, marca el token como usado `is_used=True` y revoca los tokens DRF existentes para forzar re-inicio de sesion.
+    - Impacto en la arquitectura: Garantiza la atomicidad y la invalidez inmediata de credenciales comprometidas.
+
+[core/services/perfil.py]
+- Finalidad General: Gestion de transiciones de estado del perfil de usuario (actualizacion de comuna, cambio de contrasena, modificacion de username/email y eliminacion de cuenta).
+- Rol Arquitectural Django: Service / Application Layer (Profile Domain).
+- Inventario de Clases/Funciones:
+  * Class: PerfilError(Exception)
+  * Class: ActualizarComunaResult
+  * Function: cambiar_password(user, old_password, new_password)
+  * Function: eliminar_cuenta(user, password)
+  * Function: cambiar_username(user, new_username)
+  * Function: cambiar_email(user, new_email)
+  * Function: actualizar_comuna(user, comuna_id)
+- Detalle por Funcion/Metodo:
+  * cambiar_password(user, old_password, new_password):
+    - Proposito especifico: Cambiar la contrasena del usuario verificando la clave anterior.
+    - Logica operacional y efectos colaterales: Valida `user.check_password(old_password)`. Si es correcta, ejecuta `set_password` y guarda el usuario.
+    - Impacto en la arquitectura: Mantiene las reglas de validacion de credenciales dentro del servicio de dominio.
+  * eliminar_cuenta(user, password):
+    - Proposito especifico: Borrar permanentemente la cuenta del usuario previa confirmacion de clave.
+    - Logica operacional y efectos colaterales: Revisa la contrasena. Si coincide, ejecuta `user.delete()` lo cual borra en cascada su `UserProfile`, `RespuestaUsuario`, `MatchCandidato` y bookmarks.
+    - Impacto en la arquitectura: Garantiza la implementacion del derecho al olvido (GDPR/Ley de Proteccion de Datos).
+  * actualizar_comuna(user, comuna_id):
+    - Proposito especifico: Cambiar la ubicacion geografica del usuario y recalcular de inmediato sus matches.
+    - Logica operacional y efectos colaterales: Actualiza `user.profile.comuna_id`. El signal `_sincronizar_perfil_ut` actualiza `unidad_territorial`. Posteriormente invalida los `MatchCandidato` obsoletos del usuario para que se adapten a su nuevo territorio.
+    - Impacto en la arquitectura: Mantiene la coherencia territorial entre el perfil del usuario y los resultados de matching.
+
+[core/services/respuestas.py]
+- Finalidad General: Procesamiento, edicion individual y reinicio masivo del cuestionario de respuestas del usuario.
+- Rol Arquitectural Django: Service / Application Layer (Questionnaire Domain).
+- Inventario de Clases/Funciones:
+  * Class: ReiniciarResult
+  * Class: ReiniciarError(Exception)
+  * Class: EditarRespuestaError(Exception)
+  * Class: EditarRespuestaResult
+  * Function: editar_respuesta(user, respuesta_id, opcion_id, peso)
+  * Function: reiniciar_cuestionario(user, tipo_eleccion_id=None)
+- Detalle por Funcion/Metodo:
+  * editar_respuesta(user, respuesta_id, opcion_id, peso):
+    - Proposito especifico: Modificar la opcion elegida o el peso de una respuesta previa y recalcular inline los matches afectados.
+    - Logica operacional y efectos colaterales: Actualiza `RespuestaUsuario`. Recalcula de inmediato (`calcular_match`) los `MatchCandidato` del usuario para la eleccion correspondiente mediante `UPDATE` directo (evitando fragmentacion B-tree en SQLite).
+    - Impacto en la arquitectura: Proporciona respuestas inmediatas y consistentes al usuario al cambiar una postura individual.
+  * reiniciar_cuestionario(user, tipo_eleccion_id=None):
+    - Proposito especifico: Borrar todas las respuestas del usuario (o las de un tipo de eleccion especifico) y eliminar sus matches generados.
+    - Logica operacional y efectos colaterales: Ejecuta `DELETE` sobre `RespuestaUsuario` y `MatchCandidato` dentro de un bloque `transaction.atomic()`. Retorna `ReiniciarResult` con la cuenta de registros eliminados.
+    - Impacto en la arquitectura: Permite al usuario volver a responder el cuestionario desde cero limpiando el estado persistido.
+
+[core/services/tipos.py]
+- Finalidad General: Capa de almacenamiento en cache para la consulta recurrente de tipos de eleccion base.
+- Rol Arquitectural Django: Service / Cache Optimization Layer.
+- Inventario de Clases/Funciones:
+  * Function: get_base_tipo_ids()
+  * Function: invalidar_cache_base_tipo_ids()
+- Detalle por Funcion/Metodo:
+  * get_base_tipo_ids():
+    - Proposito especifico: Obtener la lista de IDs de `TipoEleccion` que tienen `es_base=True`, utilizando Django Cache.
+    - Logica operacional y efectos colaterales: Intenta leer la clave `"matching:base_tipo_ids:v1"`. En caso de cache miss, ejecuta `TipoEleccion.objects.filter(es_base=True).values_list('id', flat=True)`, guarda en cache por 1 hora y retorna los IDs.
+    - Impacto en la arquitectura: Elimina 1 consulta repetitiva a la DB por cada request de cuestionario o matching.
+  * invalidar_cache_base_tipo_ids():
+    - Proposito especifico: Purgar la clave de cache cuando se modifica un `TipoEleccion`.
+    - Logica operacional y efectos colaterales: Invoca `cache.delete(...)`. Es llamado desde los signals de `TipoEleccion`.
+    - Impacto en la arquitectura: Garantiza cero inconsistencia de cache ante cambios en la base de datos de elecciones.
+
+================================================================================
+3. DOMAIN MODELS LAYER
+================================================================================
+
+[core/models/auth.py]
+- Finalidad General: Entidades de persistencia asociadas a la autenticacion y recuperacion de credenciales.
+- Rol Arquitectural Django: Domain Model / Authentication.
+- Inventario de Clases/Funciones:
+  * Class: PasswordResetToken(models.Model)
+- Detalle por Funcion/Metodo:
+  * PasswordResetToken:
+    - Proposito especifico: Almacenar tokens criptograficos SHA-256 para el flujo de restablecimiento de contrasena.
+    - Campos relevantes: `user` (FK User), `token_hash` (CharField unique), `created_at`, `expires_at`, `is_used` (BooleanField).
+    - Metodos:
+      * `default_expires_at()`: Retorna fecha actual + 2 horas.
+      * `is_expired()`: Compara `timezone.now() > self.expires_at`.
+      * `is_valid()`: Retorna `not self.is_used and not self.is_expired()`.
+    - Logica operacional y efectos colaterales: Persiste la vida util del token y su estado de consumo.
+    - Impacto en la arquitectura: Base del servicio de recuperacion de contrasenas (`password_reset.py`).
+
+[core/models/content.py]
+- Finalidad General: Modelo del sistema de noticias y cobertura editorial asociada a candidatos politicos.
+- Rol Arquitectural Django: Domain Model / Editorial Content.
+- Inventario de Clases/Funciones:
+  * Class: Noticia(models.Model)
+- Detalle por Funcion/Metodo:
+  * Noticia:
+    - Proposito especifico: Almacenar articulos periodisticos, titulares, resumenes, medio emisor, URL de origen y candidatos mencionados.
+    - Campos relevantes: `titulo`, `resumen`, `url`, `medio`, `fecha_publicacion`, `candidatos_mencionados` (ManyToManyField Candidato).
+    - Metodos: `__str__()` retorna el titulo.
+    - Logica operacional y efectos colaterales: Soporta indexacion por fecha de publicacion y relacion M2M con candidatos.
+    - Impacto en la arquitectura: Consumido por los servicios de noticias y por el modulo de bookmarks.
+
+[core/models/cuestionario.py]
+- Finalidad General: Entidades fundamentales del cuestionario de la VAA: Preguntas, Opciones de Respuesta y Respuestas brindadas por los Usuarios.
+- Rol Arquitectural Django: Domain Model / Core VAA Questionnaire.
+- Inventario de Clases/Funciones:
+  * Class: Pregunta(models.Model)
+  * Class: OpcionRespuesta(models.Model)
+  * Class: RespuestaUsuario(models.Model)
+  * Function: crear_opciones_acuerdo_desacuerdo(pregunta)
+  * Function: _sincronizar_pregunta_eje(sender, instance, **kwargs)
+- Detalle por Funcion/Metodo:
+  * Pregunta:
+    - Proposito especifico: Representar una afirmacion politica sobre la cual usuarios y candidatos expresan su postura.
+    - Campos: `texto`, `explicacion`, `repercusiones`, `eje` (FK Eje), `tipo_eleccion` (FK TipoEleccion), `orden`.
+  * OpcionRespuesta:
+    - Proposito especifico: Opcion seleccionable para una pregunta (ej. "Muy de acuerdo", "En desacuerdo"), con su valor numerico escalar (1 a 5).
+    - Constraint: `unique_together = ('pregunta', 'valor')`.
+  * RespuestaUsuario:
+    - Proposito especifico: Registro de la opcion elegida por un usuario registrado para una pregunta especifica, junto con el peso asignado (0-3).
+    - Constraint: `unique_together = ('user', 'pregunta')`.
+  * crear_opciones_acuerdo_desacuerdo(pregunta):
+    - Proposito especifico: Helper que inserta en la DB las 5 opciones clasicas de la escala Likert (valores 1 a 5) para una pregunta recien creada.
+  * _sincronizar_pregunta_eje:
+    - Proposito especifico: Signal post-save en Pregunta para mantener la coherencia con la tabla Eje.
+
+[core/models/eje.py]
+- Finalidad General: Definicion de los Ejes Politicos tematicos (dimensiones del brújula politica, ej. Economia, Derechos Sociales, Seguridad).
+- Rol Arquitectural Django: Domain Model / Political Compass Axes.
+- Inventario de Clases/Funciones:
+  * Class: Eje(models.Model)
+- Detalle por Funcion/Metodo:
+  * Eje:
+    - Proposito especifico: Categorizar las preguntas bajo ejes tematicos canonicos para analisis radiales y de perfil politico.
+    - Campos: `slug` (unique), `nombre`, `descripcion`, `icono`.
+    - Impacto en la arquitectura: Permite agrupar resultados de matching por tematica.
+
+[core/models/electoral.py]
+- Finalidad General: Entidades relativas al contexto electoral: Tipo de Eleccion, Candidatos y Listas/Pactos Electorales.
+- Rol Arquitectural Django: Domain Model / Electoral Domain.
+- Inventario de Clases/Funciones:
+  * Class: TipoEleccion(models.Model)
+  * Class: Candidato(models.Model)
+  * Function: _invalidar_cache_tipos_base(sender, instance, **kwargs)
+- Detalle por Funcion/Metodo:
+  * TipoEleccion:
+    - Proposito especifico: Definir la contienda electoral (ej. Presidencial 2025, Diputados, Senadores, Alcaldes).
+    - Campos: `nombre`, `slug` (unique), `es_base` (BooleanField), `anio` (IntegerField).
+  * Candidato:
+    - Proposito especifico: Representar a un postulante politico con su informacion personal, partido, lista electoral y asignacion territorial.
+    - Campos: `nombre`, `apellido`, `partido`, `pacto`, `lista_electoral`, `tipo_eleccion` (FK), `unidad_territorial` (FK UnidadTerritorial), `profile_picture`, `biografia`, `web_site`, `email`, `fono`, `curriculum_url`.
+    - Metodos: `alcance_territorial()` retorna la descripcion de su cobertura.
+  * _invalidar_cache_tipos_base:
+    - Proposito especifico: Signal post-save/post-delete que invoca `invalidar_cache_base_tipo_ids()` al modificar un `TipoEleccion`.
+
+[core/models/matching.py]
+- Finalidad General: Entidades de persistencia de posturas de candidatos y resultados calculados de coincidencia (Match).
+- Rol Arquitectural Django: Domain Model / Matching & Candidate Stances.
+- Inventario de Clases/Funciones:
+  * Class: PosturaCandidato(models.Model)
+  * Class: MatchCandidato(models.Model)
+- Detalle por Funcion/Metodo:
+  * PosturaCandidato:
+    - Proposito especifico: Registrar la posicion de un candidato frente a una pregunta especifica del cuestionario.
+    - Campos: `candidato` (FK), `pregunta` (FK), `opcion` (FK OpcionRespuesta), `explicacion`, `fuente_url`.
+    - Constraint: `unique_together = ('candidato', 'pregunta')`.
+  * MatchCandidato:
+    - Proposito especifico: Almacenar la puntuacion calculada de afinidad entre un usuario y un candidato para un tipo de eleccion.
+    - Campos: `user` (FK), `candidato` (FK), `tipo_eleccion` (FK), `porcentaje` (FloatField 0-100), `confianza` (CharField), `preguntas_coincidentes` (IntegerField), `fecha_calculo` (DateTimeField).
+    - Constraint: `unique_together = ('user', 'candidato', 'tipo_eleccion')`.
+
+[core/models/perfil.py]
+- Finalidad General: Extension del perfil del usuario (`UserProfile`) para asociar datos territoriales y demograficos al usuario de Django.
+- Rol Arquitectural Django: Domain Model / User Profile Extension.
+- Inventario de Clases/Funciones:
+  * Class: UserProfile(models.Model)
+  * Function: crear_profile_al_registrar_user(sender, instance, created, **kwargs)
+  * Function: _sincronizar_perfil_ut(sender, instance, **kwargs)
+- Detalle por Funcion/Metodo:
+  * UserProfile:
+    - Proposito especifico: Extender `django.contrib.auth.models.User` mediante una relacion 1-a-1.
+    - Campos: `user` (OneToOneField), `comuna` (FK Comuna), `unidad_territorial` (FK UnidadTerritorial), `fecha_nacimiento`, `genero`.
+  * crear_profile_al_registrar_user:
+    - Proposito especifico: Signal post_save sobre User que crea automaticamente el `UserProfile` cuando se registra un usuario nuevo.
+  * _sincronizar_perfil_ut:
+    - Proposito especifico: Signal pre_save sobre UserProfile que actualiza automaticamente `unidad_territorial` apuntando a la `UnidadTerritorial` comunal derivada de `instance.comuna`.
+
+[core/models/territorio.py]
+- Finalidad General: Estructura geografica tradicional jerarquica de Chile: Region, Distrito Electoral y Comuna.
+- Rol Arquitectural Django: Domain Model / Legacy Geographic Hierarchy.
+- Inventario de Clases/Funciones:
+  * Class: Region(models.Model)
+  * Class: Distrito(models.Model)
+  * Class: Comuna(models.Model)
+  * Function: _upsert_ut_region
+  * Function: _upsert_ut_distrito
+  * Function: _upsert_ut_comuna
+- Detalle por Funcion/Metodo:
+  * Region, Distrito, Comuna:
+    - Proposito especifico: Modelar la division politico-administrativa del pais.
+  * Signals _upsert_ut_*:
+    - Proposito especifico: Escuchar la creacion de Regiones, Distritos o Comunas e insertar automaticamente la fila equivalente en la tabla polimorfica `UnidadTerritorial`.
+
+[core/models/unidad_territorial.py]
+- Finalidad General: Abstraccion polimorfica y unificada del territorio electoral (Nacional, Regional, Provincial, Distrital, Comunal).
+- Rol Arquitectural Django: Domain Model / Polymorphic Territorial Catalog.
+- Inventario de Clases/Funciones:
+  * Class: UnidadTerritorial(models.Model)
+- Detalle por Funcion/Metodo:
+  * UnidadTerritorial:
+    - Proposito especifico: Permitir que cualquier candidatura se vincule a una unica FK `unidad_territorial` independiente del nivel de la eleccion.
+    - Metodos:
+      * `ancestros()`: Recorre recursivamente hacia arriba el puntero `padre` (ej. Comuna Nunoa -> Distrito 10 -> Region Metropolitana -> Nacional). Retorna lista de instancias padre.
+      * `descendientes_ids()`: Recorre con pila/stack recursivo todos los hijos de nivel inferior y retorna sus IDs.
+
+[core/models/user_data.py]
+- Finalidad General: Registros de interaccion y marcadores del usuario: Candidatos Favoritos, Candidatos Descartados, Bookmarks de Noticias y Bookmarks de Posturas.
+- Rol Arquitectural Django: Domain Model / User Activity & Bookmarks.
+- Inventario de Clases/Funciones:
+  * Class: CandidatoFavorito(models.Model)
+  * Class: CandidatoDescartado(models.Model)
+  * Class: NoticiaBookmark(models.Model)
+  * Class: PosturaBookmark(models.Model)
+- Detalle por Funcion/Metodo:
+  * CandidatoFavorito / CandidatoDescartado:
+    - Proposito especifico: Guardar preferencias explicitas del usuario sobre candidatos (listas blancas/negras).
+  * NoticiaBookmark / PosturaBookmark:
+    - Proposito especifico: Permitir al usuario guardar noticias para leer mas tarde o guardar declaraciones/citas especificas de candidatos.
+
+================================================================================
+4. INFRASTRUCTURE & REPOSITORIES
+================================================================================
+
+[core/authentication.py]
+- Finalidad General: Implementacion del mecanismo de transporte y validacion de credenciales por Token DRF expirable y Cookies de sesion HttpOnly.
+- Rol Arquitectural Django: Infrastructure / Authentication & Security Handler.
+- Inventario de Clases/Funciones:
+  * Class: ExpiringTokenAuthentication
+  * Class: CookieTokenAuthentication
+  * Function: set_auth_cookie
+  * Function: clear_auth_cookie
+- Detalle por Funcion/Metodo:
+  * (Detallado extensamente en la Seccion 1). Garantiza la expiracion de tokens tras 24 horas y permite la inyeccion transparente de tokens a traves de encabezados HTTP o cookies encriptadas de forma segura.
+
+[Gestion de QuerySets y Agregaciones ORM (En Modelos y Vistas)]
+- Finalidad General: Consultas optimizadas a base de datos mediante select_related, prefetch_related, y agregaciones raw/ORM.
+- Rol Arquitectural Django: Infrastructure / Data Access Layer.
+- Inventario de Clases/Funciones:
+  * Patrones de optimizacion distribuidos en `views/` y `services/` (ej. `prefetch_related('posturas__opcion', 'posturas__pregunta')`, `select_related('candidato', 'tipo_eleccion')`).
+- Detalle por Funcion/Metodo:
+  * Prevencion de N+1 Queries:
+    - Proposito especifico: Reducir drasticamente la latencia en calculos de matching e serializacion de catalogos.
+    - Logica operacional: Carga en memoria en 1 o 2 consultas relacionales conjuntos de datos complejos de posturas y preguntas.
+
+================================================================================
+5. PRESENTATION & VIEWS (API & ROOT)
+================================================================================
+
+[core/views/auth.py]
+- Finalidad General: Controladores API REST para registro de usuarios, login con generacion de token/cookie, logout y solicitud/confirmacion de restablecimiento de contrasena.
+- Rol Arquitectural Django: Presentation / API Views (Auth Domain).
+- Inventario de Clases/Funciones:
+  * Class: RegisterUserView(generics.CreateAPIView)
+  * Class: CustomAuthToken(ObtainAuthToken)
+  * Class: LogoutView(APIView)
+  * Class: PasswordResetRequestView(APIView)
+  * Class: PasswordResetConfirmView(APIView)
+- Detalle por Funcion/Metodo:
+  * RegisterUserView:
+    - Proposito especifico: Endpoint `POST /api/v1/auth/register/` para alta de usuarios. Retorna usuario y asigna cookie de autenticacion.
+  * CustomAuthToken.post(request):
+    - Proposito especifico: Endpoint `POST /api/v1/auth/login/`. Valida credenciales, genera/recupera `Token`, invoca `set_auth_cookie` y retorna token + datos del usuario.
+  * LogoutView.post(request):
+    - Proposito especifico: Endpoint `POST /api/v1/auth/logout/`. Elimina el token de la DB y llama a `clear_auth_cookie`.
+  * PasswordResetRequestView.post(request) / PasswordResetConfirmView.post(request):
+    - Proposito especifico: Consumir los servicios de `password_reset.py` delegando la validacion de payloads y emision de respuestas HTTP estandarizadas.
+
+[core/views/bookmarking.py]
+- Finalidad General: API ViewSets para la gestion CRUD de marcadores personales (candidatos favoritos, descartados, noticias y posturas).
+- Rol Arquitectural Django: Presentation / API ViewSets (User Interaction).
+- Inventario de Clases/Funciones:
+  * Class: _UserScopedCreateListDestroy(viewsets.ModelViewSet)
+  * Class: CandidatoFavoritoViewSet
+  * Class: CandidatoDescartadoViewSet
+  * Class: NoticiaBookmarkViewSet
+  * Class: PosturaBookmarkViewSet
+- Detalle por Funcion/Metodo:
+  * _UserScopedCreateListDestroy:
+    - Proposito especifico: Clase base interna que restringe el QuerySet exclusivamente a los objetos pertenecientes al usuario autenticado (`request.user`) e inyecta `user=request.user` al guardar.
+
+[core/views/catalog.py]
+- Finalidad General: Endpoint de consulta publica del catalogo electoral: Tipos de eleccion, lista de candidatos, detalle de candidato y posturas asociadas.
+- Rol Arquitectural Django: Presentation / API Views (Catalog Domain).
+- Inventario de Clases/Funciones:
+  * Class: TipoEleccionListView(generics.ListAPIView)
+  * Class: CandidatoListView(generics.ListAPIView)
+  * Class: CandidatoDetailView(generics.RetrieveAPIView)
+  * Class: CandidatoPosturasView(generics.ListAPIView)
+- Detalle por Funcion/Metodo:
+  * CandidatoListView:
+    - Proposito especifico: Listar candidatos filtrando por `tipo_eleccion` y por la `UnidadTerritorial` del usuario o parametro explicito.
+  * CandidatoPosturasView.get_queryset():
+    - Proposito especifico: Retornar las posturas de un candidato especifico optimizadas con `select_related('pregunta', 'opcion')`.
+
+[core/views/cuestionario.py]
+- Finalidad General: Controladores para obtener preguntas pendientes, enviar respuestas masivas, consultar respuestas previas, editar una respuesta y reiniciar el cuestionario.
+- Rol Arquitectural Django: Presentation / API Views (Questionnaire Domain).
+- Inventario de Clases/Funciones:
+  * Class: PreguntasPendientesView(APIView)
+  * Class: SubmitUserAnswersView(APIView)
+  * Class: ReiniciarCuestionarioView(APIView)
+  * Class: MisRespuestasListView(APIView)
+  * Class: EditarRespuestaView(APIView)
+- Detalle por Funcion/Metodo:
+  * SubmitUserAnswersView.post(request):
+    - Proposito especifico: Recibir lote de respuestas de usuario, validarlas, guardarlas en DB y disparar el calculo de matches en una unica transaccion HTTP.
+  * EditarRespuestaView.patch(request):
+    - Proposito especifico: Actualizar una respuesta individual invocando `respuestas.editar_respuesta(...)`.
+
+[core/views/eje.py]
+- Finalidad General: Endpoint de lectura de los ejes politicos canonicos de la aplicacion.
+- Rol Arquitectural Django: Presentation / API Views.
+- Inventario de Clases/Funciones:
+  * Class: EjeListView(generics.ListAPIView)
+- Detalle por Funcion/Metodo:
+  * EjeListView.get_queryset():
+    - Proposito especifico: Listar todos los ejes tematicos ordenados por nombre.
+
+[core/views/errors.py]
+- Finalidad General: Handlers globales de error HTTP 404 (Not Found) y 500 (Internal Server Error) para la API REST.
+- Rol Arquitectural Django: Presentation / Custom Error Handlers.
+- Inventario de Clases/Funciones:
+  * Function: handler_404(request, exception=None)
+  * Function: handler_500(request)
+- Detalle por Funcion/Metodo:
+  * handler_404 / handler_500:
+    - Proposito especifico: Interceptar excepciones no capturadas o rutas inexistentes y responder con un esquema JSON estandarizado `{"detail": "...", "code": 404/500}` en lugar de paginas HTML por defecto.
+
+[core/views/matching.py]
+- Finalidad General: Controladores para el calculo y consulta de afines electorales (matches registrados y match anonimo para visitantes).
+- Rol Arquitectural Django: Presentation / API ViewSet & Views (Matching).
+- Inventario de Clases/Funciones:
+  * Class: MatchCandidatoViewSet(viewsets.ReadOnlyModelViewSet)
+  * Class: CandidatoMatchDetalleView(APIView)
+- Detalle por Funcion/Metodo:
+  * MatchCandidatoViewSet.match_anonimo(request):
+    - Proposito especifico: Endpoint `POST /api/v1/match-candidatos/anonimo/`. Recibe payload con respuestas en memoria de un visitante anonimo y retorna la matriz de match sin requerir autenticacion.
+  * CandidatoMatchDetalleView.get(request, candidato_id):
+    - Proposito especifico: Retornar el desglose comparativo punto por punto entre el usuario logueado y determinado candidato.
+
+[core/views/mi_progreso.py]
+- Finalidad General: Dashboard de progreso del usuario: porcentaje del cuestionario completado, candidato top match actual y metricas de avance por tipo de eleccion.
+- Rol Arquitectural Django: Presentation / Analytics View.
+- Inventario de Clases/Funciones:
+  * Class: MiProgresoView(APIView)
+- Detalle por Funcion/Metodo:
+  * MiProgresoView.get(request):
+    - Proposito especifico: Calcular el total de preguntas respondidas vs totales para cada tipo de eleccion y estructurar la vista de resumen de progreso.
+
+[core/views/noticias.py]
+- Finalidad General: Endpoints de feed periodistico, detalle de noticia y noticias relevantes por candidato.
+- Rol Arquitectural Django: Presentation / API Views (News Domain).
+- Inventario de Clases/Funciones:
+  * Class: NoticiaListCreateView(generics.ListCreateAPIView)
+  * Class: NoticiaDetailView(generics.RetrieveUpdateDestroyAPIView)
+  * Class: CandidatoNoticiasView(generics.ListAPIView)
+- Detalle por Funcion/Metodo:
+  * NoticiaListCreateView:
+    - Proposito especifico: Listar noticias con paginacion estandar o permitir la creacion de noticias a usuarios administradores.
+
+[core/views/perfil.py]
+- Finalidad General: Endpoints para consulta y edicion del perfil del usuario (cambio de clave, cambio de comuna, actualizacion de username/email y eliminacion de cuenta).
+- Rol Arquitectural Django: Presentation / API Views (Profile Domain).
+- Inventario de Clases/Funciones:
+  * Class: PerfilView(APIView)
+  * Class: CambiarPasswordView(APIView)
+  * Class: ActualizarComunaView(APIView)
+  * Class: CambiarUsernameView(APIView)
+  * Class: CambiarEmailView(APIView)
+- Detalle por Funcion/Metodo:
+  * Consumen directamente los metodos encapsulados en `services/perfil.py` asegurando la separacion entre capa HTTP y reglas de negocio.
+
+[core/views/territorio.py]
+- Finalidad General: API de consulta de la division territorial: Lista de Regiones y Comunas de una region.
+- Rol Arquitectural Django: Presentation / API Views (Territory Catalog).
+- Inventario de Clases/Funciones:
+  * Class: RegionListView(generics.ListAPIView)
+  * Class: ComunaListView(generics.ListAPIView)
+
+[core/views/unidad_territorial.py]
+- Finalidad General: Endpoint de consulta del catalogo polimorfico de `UnidadTerritorial`.
+- Rol Arquitectural Django: Presentation / API Views.
+- Inventario de Clases/Funciones:
+  * Class: UnidadTerritorialListView(generics.ListAPIView)
+
+================================================================================
+6. SERIALIZERS LAYER
+================================================================================
+
+[core/serializers/auth.py]
+- Finalidad General: Serializadores REST Framework para registro, login y restablecimiento de contrasena.
+- Rol Arquitectural Django: Serializers / DTO & Validation Layer.
+- Inventario de Clases/Funciones:
+  * Class: UserSerializer(serializers.ModelSerializer)
+  * Class: PasswordResetRequestSerializer(serializers.Serializer)
+  * Class: PasswordResetConfirmSerializer(serializers.Serializer)
+- Detalle por Funcion/Metodo:
+  * UserSerializer.create(validated_data):
+    - Proposito especifico: Crear una instancia de `User` aplicando hash seguro de contrasena (`User.objects.create_user`).
+
+[core/serializers/bookmarking.py]
+- Finalidad General: Serializadores para la manipulacion de marcadores de candidatos, noticias y posturas.
+- Rol Arquitectural Django: Serializers / Validation & Serialization Layer.
+- Inventario de Clases/Funciones:
+  * Class: UniqueUserBookmarkMixin
+  * Class: CandidatoFavoritoSerializer
+  * Class: CandidatoDescartadoSerializer
+  * Class: NoticiaBookmarkSerializer
+  * Class: PosturaBookmarkSerializer
+- Detalle por Funcion/Metodo:
+  * UniqueUserBookmarkMixin.validate(data):
+    - Proposito especifico: Prevenir que el usuario marque como favorito y descartado al mismo candidato simultaneamente.
+
+[core/serializers/catalog.py]
+- Finalidad General: Transformacion de objetos de catalogo (Ejes, Tipos de Eleccion, Preguntas, Opciones y Candidatos) a payloads JSON.
+- Rol Arquitectural Django: Serializers / Presentation Data Formatting.
+- Inventario de Clases/Funciones:
+  * Class: EjeSerializer
+  * Class: TipoEleccionSerializer
+  * Class: OpcionRespuestaSerializer
+  * Class: PreguntaSerializer
+  * Class: CandidatoSerializer
+- Detalle por Funcion/Metodo:
+  * CandidatoSerializer:
+    - Proposito especifico: Serializar datos completos de un candidato resolviendo su comuna, distrito y region formateados para la UI.
+
+[core/serializers/cuestionario.py]
+- Finalidad General: Deserializacion y validacion de respuestas enviadas por los usuarios y serializacion de respuestas guardadas.
+- Rol Arquitectural Django: Serializers / Input Validation Layer.
+- Inventario de Clases/Funciones:
+  * Class: RespuestaUsuarioCreateSerializer
+  * Class: RespuestaUsuarioReadSerializer
+  * Class: OpcionSimpleSerializer
+  * Class: MisRespuestasItemSerializer
+  * Class: EditarRespuestaSerializer
+
+[core/serializers/matching.py]
+- Finalidad General: Serializacion de resultados de matching (MatchCandidato) y posturas de candidatos.
+- Rol Arquitectural Django: Serializers / Presentation Layer.
+- Inventario de Clases/Funciones:
+  * Class: PosturaCandidatoSerializer
+  * Class: MatchCandidatoResultSerializer
+  * Class: AnonMatchResultSerializer
+
+[core/serializers/noticias.py]
+- Finalidad General: Formateo de articulos periodisticos y candidatos mecionados para consumo en el cliente web.
+- Rol Arquitectural Django: Serializers / Presentation Layer.
+- Inventario de Clases/Funciones:
+  * Class: CandidatoMencionadoSerializer
+  * Class: NoticiaSerializer
+
+[core/serializers/perfil.py]
+- Finalidad General: Serializacion de datos de perfil del usuario, cambio de comuna, cambio de contrasena, modificacion de username y correo.
+- Rol Arquitectural Django: Serializers / DTO Layer.
+- Inventario de Clases/Funciones:
+  * Class: ContadoresSerializer
+  * Class: ComunaInlineSerializer
+  * Class: PerfilSerializer
+  * Class: ActualizarComunaSerializer
+  * Class: CambiarPasswordSerializer
+  * Class: EliminarCuentaSerializer
+  * Class: CambiarUsernameSerializer
+  * Class: CambiarEmailSerializer
+
+[core/serializers/unidad_territorial.py]
+- Finalidad General: Serializador para la entidad polimorfica `UnidadTerritorial`.
+- Rol Arquitectural Django: Serializers / Presentation Layer.
+- Inventario de Clases/Funciones:
+  * Class: UnidadTerritorialSerializer
+
+================================================================================
+7. MANAGEMENT COMMANDS & FIXTURES
+================================================================================
+
+[core/management/commands/dedup_preguntas_base.py]
+- Finalidad General: Comando ETL para la deduplicacion de preguntas base en la base de datos eliminando colisiones o duplicados.
+- Rol Arquitectural Django: CLI / Management Command (ETL Data Clean up).
+- Inventario de Clases/Funciones:
+  * Class: Command(BaseCommand)
+- Detalle por Funcion/Metodo:
+  * Command.handle(*args, **options): Recorre preguntas base, detecta colisiones de texto o slug, reasigna respuestas/posturas asociadas a la pregunta canonica y elimina los duplicados en una transaccion.
+
+[core/management/commands/enrich_senadores.py]
+- Finalidad General: Comando CLI para enriquecer los metadatos de los candidatos al senado con datos biograficos y fotos.
+- Rol Arquitectural Django: CLI / Management Command (Data Enrichment).
+- Inventario de Clases/Funciones:
+  * Class: Command(BaseCommand)
+
+[core/management/commands/ensure_dev_superuser.py]
+- Finalidad General: Provisionamiento automatico de un usuario administrador (superuser) para entornos de desarrollo y staging.
+- Rol Arquitectural Django: CLI / Management Command (DevOps Seeding).
+- Inventario de Clases/Funciones:
+  * Class: Command(BaseCommand)
+- Detalle por Funcion/Metodo:
+  * Command.handle(*args, **options): Verifica la existencia del superusuario dev; si no existe, lo crea con credenciales por defecto desde variables de entorno.
+
+[core/management/commands/fetch_noticias.py]
+- Finalidad General: Crawler/Fetcher de noticias periodisticas para actualizar automaticamente el feed de noticias asociado a los candidatos.
+- Rol Arquitectural Django: CLI / Management Command (External Ingestion).
+- Inventario de Clases/Funciones:
+  * Class: Command(BaseCommand)
+
+[core/management/commands/import_candidatos.py]
+- Finalidad General: Importador masivo de datos de candidatos desde archivos CSV/JSON a la base de datos.
+- Rol Arquitectural Django: CLI / Management Command (ETL Import).
+- Inventario de Clases/Funciones:
+  * Class: Command(BaseCommand)
+
+[core/management/commands/import_posturas.py]
+- Finalidad General: Importador masivo de posturas politicas de los candidatos frente a las preguntas del cuestionario.
+- Rol Arquitectural Django: CLI / Management Command (ETL Import).
+- Inventario de Clases/Funciones:
+  * Class: Command(BaseCommand)
+
+[core/management/commands/import_preguntas.py]
+- Finalidad General: Importador de preguntas del cuestionario asociando sus respectivos ejes tematicos y tipos de eleccion.
+- Rol Arquitectural Django: CLI / Management Command (ETL Import).
+- Inventario de Clases/Funciones:
+  * Class: Command(BaseCommand)
+
+[core/management/commands/limpiar_tokens_viejos.py]
+- Finalidad General: Tarea programada de mantenimiento para purgar tokens de autenticacion y de restablecimiento de contrasena expirados de la base de datos.
+- Rol Arquitectural Django: CLI / Maintenance Command.
+- Inventario de Clases/Funciones:
+  * Class: Command(BaseCommand)
+- Detalle por Funcion/Metodo:
+  * Command.handle(*args, **options): Elimina registros de `Token` con antiguedad mayor a 24 horas y `PasswordResetToken` expirados o usados.
+
+[core/management/commands/seed_diputados_2025.py]
+- Finalidad General: Sembrado inicial de candidatos a la Camara de Diputadas y Diputados para las elecciones 2025.
+- Rol Arquitectural Django: CLI / Seeder Command.
+- Inventario de Clases/Funciones:
+  * Class: Command(BaseCommand)
+
+[core/management/commands/seed_explicaciones_preguntas.py]
+- Finalidad General: Carga de explicaciones contextuales y repercusiones asociadas a las preguntas del cuestionario.
+- Rol Arquitectural Django: CLI / Seeder Command.
+- Inventario de Clases/Funciones:
+  * Class: Command(BaseCommand)
+
+[core/management/commands/seed_parlamentaria.py]
+- Finalidad General: Sembrado general de elecciones parlamentarias (Diputados y Senadores).
+- Rol Arquitectural Django: CLI / Seeder Command.
+- Inventario de Clases/Funciones:
+  * Class: Command(BaseCommand)
+
+[core/management/commands/seed_posturas_base.py]
+- Finalidad General: Sembrado deterministico de posturas base para candidatos en cuestionarios de prueba.
+- Rol Arquitectural Django: CLI / Seeder Command.
+- Inventario de Clases/Funciones:
+  * Class: Command(BaseCommand)
+
+[core/management/commands/seed_preguntas_base.py]
+- Finalidad General: Poblado del catalogo de preguntas transversales (base) del cuestionario VAA.
+- Rol Arquitectural Django: CLI / Seeder Command.
+- Inventario de Clases/Funciones:
+  * Class: Command(BaseCommand)
+
+[core/management/commands/seed_preguntas_por_tipo.py]
+- Finalidad General: Poblado de preguntas especificas asignadas a tipos de eleccion concretos.
+- Rol Arquitectural Django: CLI / Seeder Command.
+- Inventario de Clases/Funciones:
+  * Class: Command(BaseCommand)
+
+[core/management/commands/seed_presidenciales_2025.py]
+- Finalidad General: Sembrado completo de candidatos presidenciales 2025, partidos y sus posturas oficiales.
+- Rol Arquitectural Django: CLI / Seeder Command.
+- Inventario de Clases/Funciones:
+  * Class: Command(BaseCommand)
+
+[core/management/commands/seed_territorio_chile.py]
+- Finalidad General: Sembrado de la estructura territorial completa de Chile (Regiones, Distritos y Comunas) e insercion en la tabla de `UnidadTerritorial`.
+- Rol Arquitectural Django: CLI / Seeder Command.
+- Inventario de Clases/Funciones:
+  * Class: Command(BaseCommand)
+
+[core/management/commands/_data_candidatos_ficticios.py]
+- Finalidad General: Fixture y generador auxiliar de datos de prueba para candidatos sinteticos en entornos de desarrollo.
+- Rol Arquitectural Django: Helper / Data Fixtures.
+- Inventario de Clases/Funciones:
+  * Function: generar_candidato()
+  * Function: elegir_partidos()
+
+[core/management/commands/_data_chile.py]
+- Finalidad General: Diccionario estatico de datos geograficos oficiales de Chile (codigos INE, regiones, distritos y comunas).
+- Rol Arquitectural Django: Helper / Constant Data Fixtures.
+- Inventario de Clases/Funciones:
+  * Estructuras de datos estaticas `REGIONES`, `COMUNAS_POR_DISTRITO`, etc.
+
+[core/management/commands/_preguntas_por_tipo.py]
+- Finalidad General: Mapeo constante de textos de preguntas categorizadas por tipo de eleccion.
+- Rol Arquitectural Django: Helper / Constant Data Fixtures.
+
+================================================================================
+8. MIGRATIONS & SCHEMA EVOLUTION
+================================================================================
+
+[core/migrations/0001_initial.py a 0043_alter_candidato_profile_picture.py]
+- Finalidad General: Secuencia evolutiva de control de versiones del esquema de base de datos relacional del proyecto.
+- Rol Arquitectural Django: Database Schema Migration Sequence.
+- Inventario de Migraciones Principales:
+  * 0001_initial / 0001_squashed: Creacion de tablas base de usuarios y perfiles.
+  * 0012_candidato_opcionrespuesta_pregunta_tipoeleccion: Creacion de entidades del dominio electoral y cuestionarios VAA.
+  * 0015_matchcandidato: Creacion de la tabla de persistencia de afinidad y puntuacion.
+  * 0023_passwordresettoken: Adicion de tabla de tokens de recuperacion de clave de 64 caracteres.
+  * 0024_noticiabookmark_posturabookmark: Tablas de interaccion y guardado de contenidos por usuario.
+  * 0026_region_distrito_comuna: Creacion de jerarquia geografica tradicional de Chile.
+  * 0029_userprofile / 0030_backfill_userprofile: Migracion e integracion de perfiles de usuario.
+  * 0033_eje_pregunta_eje / 0034_seed_ejes_canonicos: Introduccion de ejes politicos y dimensiones del brújula politica.
+  * 0035_unidadterritorial_... / 0036_materializar_unidad_territorial: Refactorizacion arquitectural principal hacia el modelo polimorfico de `UnidadTerritorial`.
+  * 0038_drop_candidato_comuna_distrito: Eliminacion de columnas obsoletas en Candidato a favor de `unidad_territorial_id`.
+  * 0041_add_lista_electoral_candidato / 0042_add_parlid_email_curriculum_fono: Enriquecimiento de campos de contacto y metadatos de candidatos.
+  * 0043_alter_candidato_profile_picture: Ajuste final de almacenamiento de imagenes de perfil.
+- Detalle por Migracion:
+  * Refleja la evolucion ordenada desde el MVP inicial monolitico hasta la arquitectura DDD desacoplada por capas con abstraccion territorial unificada.
