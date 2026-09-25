@@ -11,7 +11,7 @@
  * Esto es smoke test del comparador.
  */
 
-import { test, expect } from "@playwright/test";
+import { test, expect, Page } from "@playwright/test";
 
 import {
   dismissCoachMarks,
@@ -20,7 +20,7 @@ import {
   vRole,
 } from "../helpers/ui";
 
-async function goToComparar(page) {
+async function goToComparar(page: Page) {
   const tab = vRole(page, "tab", { name: "Comparar" });
   for (let i = 0; i < 5; i++) {
     await dismissCoachMarks(page);

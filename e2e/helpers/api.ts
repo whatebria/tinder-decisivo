@@ -7,7 +7,7 @@
 import { request, type APIRequestContext } from "@playwright/test";
 import type { TestUser } from "./users";
 
-export const BACKEND_URL = "http://localhost:8010";
+export const BACKEND_URL = "http://localhost:8000";
 
 /**
  * Crea un contexto de request desnudo (sin auth). Cada helper puede pedir el

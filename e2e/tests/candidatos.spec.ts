@@ -10,7 +10,7 @@
  * simplemente `{name}, {partido}` cuando no hay match.
  */
 
-import { test, expect } from "@playwright/test";
+import { test, expect, Page } from "@playwright/test";
 
 import {
   dismissCoachMarks,
@@ -20,7 +20,7 @@ import {
   vRole,
 } from "../helpers/ui";
 
-async function goToCandidatos(page) {
+async function goToCandidatos(page: Page) {
   const tab = vRole(page, "tab", { name: "Candidatos" });
   for (let i = 0; i < 5; i++) {
     await dismissCoachMarks(page);

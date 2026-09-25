@@ -17,9 +17,9 @@ import { Platform } from "react-native";
 // XHR desde `localhost` — son sitios distintos a pesar de resolverse igual.
 // Ref: BUG-005 (glitch post-login: 401 en mi-progreso y perfil).
 const DEFAULT_BASE = Platform.select({
-  android: "http://10.0.2.2:8010/api/v1",
-  ios: "http://127.0.0.1:8010/api/v1",
-  default: "http://localhost:8010/api/v1", // web: localhost == same-site con frontend
+  android: "http://10.0.2.2:8000/api/v1",
+  ios: "http://172.20.10.7:8000/api/v1",
+  default: "http://localhost:8000/api/v1", // web: localhost == same-site con frontend
 });
 
 export const API_BASE_URL =
