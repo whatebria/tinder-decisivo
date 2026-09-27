@@ -45,7 +45,7 @@ Elegimos herramientas aburridas y probadas que se corren del camino:
 | **Auth** | DRF Token Auth | Simple, sin sesion, mobile-friendly |
 | **DB** | SQLite (dev) / PostgreSQL (prod) | Cero config en dev, estandar en prod |
 | **Contrato API** | OpenAPI 3.1 via drf-spectacular | Autogenera tipos TypeScript para el frontend |
-| **Frontend** | Expo SDK 57 + React Native + Tamagui | Un codebase para web + iOS + Android |
+| **Frontend** | Expo SDK 57 + React Native | Un codebase para web + iOS + Android |
 | **Data fetching** | TanStack Query v5 | Cache, retry, dedup de fabrica |
 | **Estado** | Zustand | Mas simple que Redux, sin boilerplate |
 | **Tipos** | TypeScript strict + OpenAPI codegen | Contrato backend = verdad frontend |
@@ -56,7 +56,7 @@ Elegimos herramientas aburridas y probadas que se corren del camino:
                  +------------------+          +---------------------+
                  |  Expo Web / iOS  | <------> |  API REST Django    |
                  |  React Native    |  HTTPS   |  Token auth         |
-                 |  UI Tamagui      |          |  DRF + spectacular  |
+                 |  DS Nativo RN    |          |  DRF + spectacular  |
                  +------------------+          +---------------------+
                           |                             |
                           v                             v
